@@ -3,47 +3,158 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DS FIELD</title>
+  <title> 100% Real Google Drive</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #121212;
-      color: white;
-      text-align: center;
+    * {
       margin: 0;
-      padding: 40px;
+      padding: 0;
+      box-sizing: border-box;
     }
+    body {
+      height: 100vh;
+      display: flex;
+      font-family: 'Segoe UI', sans-serif;
+      background: #0e0e0e;
+      color: white;
+    }
+
+    /* Left (Games) panel */
+    .left {
+      flex: 1;
+      background: linear-gradient(135deg, #121212, #1e1e1e);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      transition: 0.3s;
+      cursor: pointer;
+    }
+    .left:hover {
+      background: linear-gradient(135deg, #00bfff, #008cff);
+    }
+
+    /* Right (Request) panel */
+    .right {
+      flex: 1;
+      background: linear-gradient(135deg, #1e1e1e, #121212);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      transition: 0.3s;
+      cursor: pointer;
+    }
+    .right:hover {
+      background: linear-gradient(135deg, #ff4081, #ff0040);
+    }
+
     h1 {
+      font-size: 3rem;
+      margin-bottom: 10px;
+    }
+    p {
+      font-size: 1.2rem;
+      opacity: 0.8;
+    }
+
+    /* Game menu overlay */
+    .menu {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.9);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      z-index: 10;
+    }
+    .menu h2 {
+      font-size: 2rem;
+      margin-bottom: 20px;
       color: #00bfff;
     }
     .games {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
       gap: 20px;
-      margin-top: 30px;
+      width: 80%;
+      max-width: 800px;
     }
-    a {
-      text-decoration: none;
+    .games a {
       background: #1e1e1e;
       border: 1px solid #333;
-      padding: 20px;
       border-radius: 12px;
+      padding: 20px;
       color: #00ffea;
+      text-decoration: none;
+      text-align: center;
       transition: 0.2s;
     }
-    a:hover {
+    .games a:hover {
       background: #00bfff;
       color: black;
+    }
+    .close-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: #ff0040;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+    .close-btn:hover {
+      background: #ff3366;
     }
   </style>
 </head>
 <body>
-  <h1>DS FIELD 🎮</h1>
-  <div class="games">
-    <a href="games/flappy.html">Flappy Bird</a>
-    <a href="games/tetris.html">Tetris</a>
-    <a href="games/2048.html">2048</a>
-    <a href="games/pacman.html">Pac-Man</a>
+
+  <div class="left" id="openGames">
+    <h1>🎮 Games</h1>
+    <p>Click to open the game menu</p>
   </div>
+
+  <div class="right" id="openRequest">
+    <h1>📩 Request</h1>
+    <p>Submit a new game idea</p>
+  </div>
+
+  <!-- Game Menu Overlay -->
+  <div class="menu" id="gameMenu">
+    <button class="close-btn" id="closeMenu">✖ Close</button>
+    <h2>Available Games</h2>
+    <div class="games">
+      <a href="games/flappy.html">Flappy Bird</a>
+      <a href="#">2048</a>
+      <a href="#">Tetris</a>
+      <a href="#">Pac-Man</a>
+    </div>
+  </div>
+
+  <script>
+    const openGames = document.getElementById('openGames');
+    const gameMenu = document.getElementById('gameMenu');
+    const closeMenu = document.getElementById('closeMenu');
+    const openRequest = document.getElementById('openRequest');
+
+    openGames.addEventListener('click', () => {
+      gameMenu.style.display = 'flex';
+    });
+    closeMenu.addEventListener('click', () => {
+      gameMenu.style.display = 'none';
+    });
+    openRequest.addEventListener('click', () => {
+      alert('Request tab coming soon!');
+    });
+  </script>
 </body>
 </html>
