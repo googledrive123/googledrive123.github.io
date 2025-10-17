@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VXMP Games</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #121212;
+      color: white;
+      text-align: center;
+      margin: 0;
+      padding: 40px;
+    }
+    h1 {
+      color: #00bfff;
+    }
+    .games {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+    a {
+      text-decoration: none;
+      background: #1e1e1e;
+      border: 1px solid #333;
+      padding: 20px;
+      border-radius: 12px;
+      color: #00ffea;
+      transition: 0.2s;
+    }
+    a:hover {
+      background: #00bfff;
+      color: black;
+    }
+  </style>
+</head>
+<body>
+  <h1>VXMP Game Hub 🎮</h1>
+  <div class="games">
+    <a href="games/flappy.html">Flappy Bird</a>
+    <a href="games/tetris.html">Tetris</a>
+    <a href="games/2048.html">2048</a>
+    <a href="games/pacman.html">Pac-Man</a>
+  </div>
+</body>
+</html>
