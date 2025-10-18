@@ -17,7 +17,6 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
     }
 
     h1 {
@@ -26,22 +25,12 @@
       text-align: center;
     }
 
-    #gameWrapper {
+    #gameFrame {
+      border: none;
       width: 80vw;
       height: 75vh;
       border-radius: 12px;
-      overflow: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    #gameFrame {
-      width: 100%;
-      height: 100%;
-      border: none;
-      transform-origin: top left;
-      transition: transform 0.3s;
+      transition: all 0.3s;
     }
 
     .controls {
@@ -72,9 +61,7 @@
 
 <h1>DS Stuff — Flappy Bird 🐤</h1>
 
-<div id="gameWrapper">
-  <iframe id="gameFrame" src="https://funhtml5games.com?embed=flappy"></iframe>
-</div>
+<iframe id="gameFrame" src="https://funhtml5games.com?embed=flappy"></iframe>
 
 <div class="controls">
   <button id="fullscreenBtn">⛶ Full Screen</button>
@@ -82,26 +69,35 @@
 </div>
 
 <script>
-  const wrapper = document.getElementById('gameWrapper');
   const iframe = document.getElementById('gameFrame');
   const btn = document.getElementById('fullscreenBtn');
 
-  let fullscreen = false;
-
   btn.addEventListener('click', () => {
-    fullscreen = !fullscreen;
-
-    if (fullscreen) {
-      // Get screen ratios
-      const scaleX = window.innerWidth / wrapper.offsetWidth;
-      const scaleY = window.innerHeight / wrapper.offsetHeight;
-      const scale = Math.min(scaleX, scaleY); // maintain aspect ratio
-
-      iframe.style.transform = `scale(${scale})`;
-      wrapper.style.width = wrapper.offsetWidth + 'px';
-      wrapper.style.height = wrapper.offsetHeight + 'px';
+    if (!document.fullscreenElement) {
+      // Make iframe fullscreen
+      iframe.requestFullscreen({ navigationUI: "hide" }).then(() => {
+        // After entering fullscreen, resize to fill the screen
+        iframe.style.width = window.innerWidth + 'px';
+        iframe.style.height = window.innerHeight + 'px';
+        iframe.style.borderRadius = '0';
+      }).catch(err => {
+        alert(`Error enabling fullscreen: ${err.message}`);
+      });
     } else {
-      iframe.style.transform = 'scale(1)';
+      document.exitFullscreen().then(() => {
+        // Reset iframe size
+        iframe.style.width = '80vw';
+        iframe.style.height = '75vh';
+        iframe.style.borderRadius = '12px';
+      });
+    }
+  });
+
+  // Optional: resize dynamically if user changes screen while in fullscreen
+  window.addEventListener('resize', () => {
+    if (document.fullscreenElement) {
+      iframe.style.width = window.innerWidth + 'px';
+      iframe.style.height = window.innerHeight + 'px';
     }
   });
 </script>
