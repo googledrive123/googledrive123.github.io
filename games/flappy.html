@@ -6,17 +6,23 @@
   <title>Google Drive</title>
   <link rel="icon" type="image/png" href="https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_48dp.png">
   <style>
-    body {
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
       background: #222;
-      color: white;
-      text-align: center;
       font-family: Arial, sans-serif;
-      margin-top: 50px;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
 
     h1 {
       color: #00bfff;
-      margin-bottom: 25px;
+      margin-bottom: 20px;
+      text-align: center;
     }
 
     iframe {
@@ -24,10 +30,12 @@
       width: 80vw;
       height: 75vh;
       border-radius: 12px;
+      max-width: 100%;
+      max-height: 100%;
     }
 
     .controls {
-      margin-top: 20px;
+      margin-top: 15px;
     }
 
     button, a {
@@ -52,6 +60,13 @@
     a {
       display: inline-block;
     }
+
+    /* Fullscreen iframe styles */
+    :fullscreen #gameFrame {
+      width: 100vw;
+      height: 100vh;
+      border-radius: 0;
+    }
   </style>
 </head>
 <body>
@@ -65,16 +80,25 @@
   </div>
 
   <script>
+    const frame = document.getElementById('gameFrame');
+
     function toggleFullscreen() {
-      const frame = document.getElementById('gameFrame');
       if (!document.fullscreenElement) {
-        frame.requestFullscreen().catch(err => {
+        frame.requestFullscreen({ navigationUI: "hide" }).catch(err => {
           alert(`Error enabling fullscreen: ${err.message}`);
         });
       } else {
         document.exitFullscreen();
       }
     }
+
+    // Optional: make iframe resize dynamically when browser resizes
+    window.addEventListener('resize', () => {
+      if (!document.fullscreenElement) {
+        frame.style.width = window.innerWidth * 0.8 + 'px';
+        frame.style.height = window.innerHeight * 0.75 + 'px';
+      }
+    });
   </script>
 </body>
 </html>
