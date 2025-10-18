@@ -17,6 +17,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      overflow: hidden;
     }
 
     h1 {
@@ -25,12 +26,12 @@
       text-align: center;
     }
 
-    #gameFrame {
+    iframe {
       border: none;
+      border-radius: 12px;
       width: 80vw;
       height: 75vh;
-      border-radius: 12px;
-      transition: all 0.3s;
+      transition: all 0.3s ease;
     }
 
     .controls {
@@ -41,66 +42,51 @@
       background: #333;
       border: 1px solid #444;
       color: #00bfff;
-      text-decoration: none;
-      font-size: 1rem;
-      border-radius: 8px;
       padding: 10px 20px;
       margin: 5px;
+      border-radius: 8px;
       cursor: pointer;
-      transition: 0.2s ease;
+      text-decoration: none;
+      transition: 0.2s;
     }
 
     button:hover, a:hover {
       background: #00bfff;
       color: #111;
-      transform: scale(1.05);
+    }
+
+    /* Fullscreen iframe styling */
+    :fullscreen iframe {
+      width: 100vw !important;
+      height: 100vh !important;
+      border-radius: 0 !important;
     }
   </style>
 </head>
 <body>
 
-<h1>DS Stuff — Flappy Bird 🐤</h1>
+  <h1>DS Stuff — Flappy Bird 🐤</h1>
 
-<iframe id="gameFrame" src="https://funhtml5games.com?embed=flappy"></iframe>
+  <!-- Load your self-hosted Flappy Bird -->
+  <iframe id="gameFrame" src="games/flappy/"></iframe>
 
-<div class="controls">
-  <button id="fullscreenBtn">⛶ Full Screen</button>
-  <a href="../games.html">← Back to Menu</a>
-</div>
+  <div class="controls">
+    <button id="fullscreenBtn">⛶ Full Screen</button>
+    <a href="../games.html">← Back to Menu</a>
+  </div>
 
-<script>
-  const iframe = document.getElementById('gameFrame');
-  const btn = document.getElementById('fullscreenBtn');
+  <script>
+    const iframe = document.getElementById('gameFrame');
+    const btn = document.getElementById('fullscreenBtn');
 
-  btn.addEventListener('click', () => {
-    if (!document.fullscreenElement) {
-      // Make iframe fullscreen
-      iframe.requestFullscreen({ navigationUI: "hide" }).then(() => {
-        // After entering fullscreen, resize to fill the screen
-        iframe.style.width = window.innerWidth + 'px';
-        iframe.style.height = window.innerHeight + 'px';
-        iframe.style.borderRadius = '0';
-      }).catch(err => {
-        alert(`Error enabling fullscreen: ${err.message}`);
-      });
-    } else {
-      document.exitFullscreen().then(() => {
-        // Reset iframe size
-        iframe.style.width = '80vw';
-        iframe.style.height = '75vh';
-        iframe.style.borderRadius = '12px';
-      });
-    }
-  });
-
-  // Optional: resize dynamically if user changes screen while in fullscreen
-  window.addEventListener('resize', () => {
-    if (document.fullscreenElement) {
-      iframe.style.width = window.innerWidth + 'px';
-      iframe.style.height = window.innerHeight + 'px';
-    }
-  });
-</script>
+    btn.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        iframe.requestFullscreen().catch(err => alert(err.message));
+      } else {
+        document.exitFullscreen();
+      }
+    });
+  </script>
 
 </body>
 </html>
