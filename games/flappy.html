@@ -3,32 +3,78 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Flappy Bird</title>
+  <title>Google Drive</title>
+  <link rel="icon" type="image/png" href="https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_48dp.png">
   <style>
     body {
       background: #222;
       color: white;
       text-align: center;
-      font-family: Arial;
+      font-family: Arial, sans-serif;
       margin-top: 50px;
     }
+
+    h1 {
+      color: #00bfff;
+      margin-bottom: 25px;
+    }
+
     iframe {
       border: none;
       width: 80vw;
-      height: 80vh;
+      height: 75vh;
       border-radius: 12px;
     }
-    a {
+
+    .controls {
+      margin-top: 20px;
+    }
+
+    button, a {
+      background: #333;
+      border: 1px solid #444;
       color: #00bfff;
       text-decoration: none;
-      display: block;
-      margin-top: 20px;
+      font-size: 1rem;
+      border-radius: 8px;
+      padding: 10px 20px;
+      margin: 5px;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    button:hover, a:hover {
+      background: #00bfff;
+      color: #111;
+      transform: scale(1.05);
+    }
+
+    a {
+      display: inline-block;
     }
   </style>
 </head>
 <body>
-  <h1>Flappy Bird 🐤</h1>
-  <iframe src="https://funhtml5games.com?embed=flappy" style="width:800px;height:520px;border:none;" frameborder="0" scrolling="no"></iframe>
-  <a href="../index.html">← Back to Home</a>
+  <h1>DS Stuff — Flappy Bird 🐤</h1>
+  
+  <iframe id="gameFrame" src="https://funhtml5games.com?embed=flappy" frameborder="0" scrolling="no"></iframe>
+
+  <div class="controls">
+    <button onclick="toggleFullscreen()">⛶ Full Screen</button>
+    <a href="../games.html">← Back to Menu</a>
+  </div>
+
+  <script>
+    function toggleFullscreen() {
+      const frame = document.getElementById('gameFrame');
+      if (!document.fullscreenElement) {
+        frame.requestFullscreen().catch(err => {
+          alert(`Error enabling fullscreen: ${err.message}`);
+        });
+      } else {
+        document.exitFullscreen();
+      }
+    }
+  </script>
 </body>
 </html>
