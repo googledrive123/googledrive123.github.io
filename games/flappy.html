@@ -16,22 +16,25 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
     }
 
     h1 {
       color: #00bfff;
-      margin-bottom: 20px;
+      margin: 20px 0;
       text-align: center;
     }
 
-    iframe {
-      border: none;
+    #gameContainer {
       width: 80vw;
       height: 75vh;
       border-radius: 12px;
-      max-width: 100%;
-      max-height: 100%;
+      overflow: hidden;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
     }
 
     .controls {
@@ -56,23 +59,14 @@
       color: #111;
       transform: scale(1.05);
     }
-
-    a {
-      display: inline-block;
-    }
-
-    /* Fullscreen iframe styles */
-    :fullscreen #gameFrame {
-      width: 100vw;
-      height: 100vh;
-      border-radius: 0;
-    }
   </style>
 </head>
 <body>
   <h1>DS Stuff — Flappy Bird 🐤</h1>
-  
-  <iframe id="gameFrame" src="https://funhtml5games.com?embed=flappy" frameborder="0" scrolling="no"></iframe>
+
+  <div id="gameContainer">
+    <iframe src="https://funhtml5games.com?embed=flappy" scrolling="no"></iframe>
+  </div>
 
   <div class="controls">
     <button onclick="toggleFullscreen()">⛶ Full Screen</button>
@@ -80,25 +74,17 @@
   </div>
 
   <script>
-    const frame = document.getElementById('gameFrame');
+    const container = document.getElementById('gameContainer');
 
     function toggleFullscreen() {
       if (!document.fullscreenElement) {
-        frame.requestFullscreen({ navigationUI: "hide" }).catch(err => {
+        container.requestFullscreen({ navigationUI: "hide" }).catch(err => {
           alert(`Error enabling fullscreen: ${err.message}`);
         });
       } else {
         document.exitFullscreen();
       }
     }
-
-    // Optional: make iframe resize dynamically when browser resizes
-    window.addEventListener('resize', () => {
-      if (!document.fullscreenElement) {
-        frame.style.width = window.innerWidth * 0.8 + 'px';
-        frame.style.height = window.innerHeight * 0.75 + 'px';
-      }
-    });
   </script>
 </body>
 </html>
