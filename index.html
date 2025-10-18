@@ -3,158 +3,71 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title> Google Drive</title>
+  <title>GoogleDrive123 Hub</title>
   <style>
-    * {
+    body {
       margin: 0;
       padding: 0;
-      box-sizing: border-box;
-    }
-    body {
       height: 100vh;
-      display: flex;
-      font-family: 'Segoe UI', sans-serif;
       background: #0e0e0e;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', sans-serif;
       color: white;
-    }
-
-    /* Left (Games) panel */
-    .left {
-      flex: 1;
-      background: linear-gradient(135deg, #121212, #1e1e1e);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      transition: 0.3s;
-      cursor: pointer;
-    }
-    .left:hover {
-      background: linear-gradient(135deg, #00bfff, #008cff);
-    }
-
-    /* Right (Request) panel */
-    .right {
-      flex: 1;
-      background: linear-gradient(135deg, #1e1e1e, #121212);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      transition: 0.3s;
-      cursor: pointer;
-    }
-    .right:hover {
-      background: linear-gradient(135deg, #ff4081, #ff0040);
     }
 
     h1 {
+      color: #00bfff;
+      margin-bottom: 40px;
       font-size: 3rem;
-      margin-bottom: 10px;
-    }
-    p {
-      font-size: 1.2rem;
-      opacity: 0.8;
     }
 
-    /* Game menu overlay */
     .menu {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.9);
-      display: none;
+      display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      z-index: 10;
-    }
-    .menu h2 {
-      font-size: 2rem;
-      margin-bottom: 20px;
-      color: #00bfff;
-    }
-    .games {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 20px;
+      gap: 25px;
       width: 80%;
-      max-width: 800px;
+      max-width: 500px;
     }
-    .games a {
-      background: #1e1e1e;
+
+    .box {
+      background: #1a1a1a;
       border: 1px solid #333;
-      border-radius: 12px;
-      padding: 20px;
-      color: #00ffea;
-      text-decoration: none;
+      border-radius: 15px;
       text-align: center;
-      transition: 0.2s;
+      padding: 40px 0;
+      font-size: 1.8rem;
+      color: #00ffea;
+      cursor: pointer;
+      transition: 0.25s ease;
     }
-    .games a:hover {
+
+    .box:hover {
       background: #00bfff;
       color: black;
+      transform: scale(1.05);
     }
-    .close-btn {
+
+    footer {
       position: absolute;
-      top: 20px;
-      right: 20px;
-      background: #ff0040;
-      border: none;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: 0.2s;
-    }
-    .close-btn:hover {
-      background: #ff3366;
+      bottom: 10px;
+      font-size: 0.9rem;
+      color: #555;
     }
   </style>
 </head>
 <body>
 
-  <div class="left" id="openGames">
-    <h1>🎮 Games</h1>
-    <p>Click to open the game menu</p>
+  <h1>GoogleDrive123 Hub 🎮</h1>
+
+  <div class="menu">
+    <div class="box" onclick="window.location.href='games.html'">🎮 Games</div>
+    <div class="box" onclick="alert('Request page coming soon!')">📩 Request</div>
   </div>
 
-  <div class="right" id="openRequest">
-    <h1>📩 Request</h1>
-    <p>Submit a new game idea</p>
-  </div>
+  <footer>© 2025 GoogleDrive123</footer>
 
-  <!-- Game Menu Overlay -->
-  <div class="menu" id="gameMenu">
-    <button class="close-btn" id="closeMenu">✖ Close</button>
-    <h2>Available Games</h2>
-    <div class="games">
-      <a href="games/flappy.html">Flappy Bird</a>
-      <a href="#">2048</a>
-      <a href="#">Tetris</a>
-      <a href="#">Pac-Man</a>
-    </div>
-  </div>
-
-  <script>
-    const openGames = document.getElementById('openGames');
-    const gameMenu = document.getElementById('gameMenu');
-    const closeMenu = document.getElementById('closeMenu');
-    const openRequest = document.getElementById('openRequest');
-
-    openGames.addEventListener('click', () => {
-      gameMenu.style.display = 'flex';
-    });
-    closeMenu.addEventListener('click', () => {
-      gameMenu.style.display = 'none';
-    });
-    openRequest.addEventListener('click', () => {
-      alert('Request tab coming soon!');
-    });
-  </script>
 </body>
 </html>
