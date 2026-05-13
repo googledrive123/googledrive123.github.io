@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Untitled Document - Google Docs</title>
+    <script src="nostalgist.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #121212;
+            color: #ffffff;
+        }
+
+        h1 {
+            color: #00ff99;
+        }
+
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #1e88e5;
+            color: white;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background-color: #1565c0;
+            transform: scale(1.05);
+        }
+
+        #button-container {
+            margin-top: 20px;
+        }
+
+        .loading {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #00ff99;
+            display: none;
+        }
+    </style>
+<script src="/js/mimicry.js"></script>
+</head>
+
+<body>
+    <h1>Pokemon Leaf Emulator</h1>
+    <div id="button-container">
+        <button onclick="initializeEmulator()">Launch Emulator</button>
+    </div>
+    <div>Unblockable Edition</div>
+
+    <div class="loading" id="loading">Loading...</div>
+
+    <script>
+        async function initializeEmulator() {
+            const loadingElement = document.getElementById('loading');
+            try {
+                loadingElement.style.display = 'block';
+
+                await Nostalgist.gba(window.location.href + 'ga.gba');
+
+                loadingElement.style.display = 'none';
+            } catch (error) {
+                console.error('Error initializing emulator:', error);
+                alert(`Something went wrong while launching the emulator. Details: ${error.message}`);
+                loadingElement.style.display = 'none'; 
+            }
+        }
+    </script>
+</body>
+
+</html>
