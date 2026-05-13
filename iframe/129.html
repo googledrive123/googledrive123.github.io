@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en-us">
 
 <head>
@@ -69,7 +69,8 @@
                     fetchPart(0);
                 });
             }
-            var parts = ["Build/V0.1.wasm.part1", "Build/V0.1.wasm.part2"];
+            /* RAW_BASE: https://raw.githubusercontent.com/freebuisness/assets/main/129/ */
+            var parts = ["https://raw.githubusercontent.com/freebuisness/assets/main/129/Build/V0.1.wasm.part1", "https://raw.githubusercontent.com/freebuisness/assets/main/129/Build/V0.1.wasm.part2"];
             Promise.all([
                 mergeFiles(parts)
             ]).then(([mergedUrl]) => {

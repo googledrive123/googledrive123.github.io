@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en-us">
 
 <head>
@@ -93,10 +93,12 @@
               });
           }
       
+          const RAW_BASE = 'https://raw.githubusercontent.com/genizy/web-port/main/';
+      
           function getParts(file, start, end) {
               let parts = [];
               for (let i = start; i <= end; i++) {
-                  parts.push(file + ".part" + i);
+                  parts.push(RAW_BASE + file + ".part" + i);
               }
               return parts;
           }
