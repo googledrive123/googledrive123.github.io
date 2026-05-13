@@ -1,0 +1,67 @@
+<!-- Ultimate Game Stash file--> 
+<!-- For the regularly updating doc go to https://docs.google.com/document/d/1_FmH3BlSBQI7FGgAQL59-ZPe8eCxs35wel6JUyVaG8Q/ -->
+<html>
+<base href="https://rawcdn.githack.com/bubbls/UGS-Assets/df3f505bea1fcfbe3f7e0e64c384e9ec15b47ee1/crazy%20cars/">
+<head>
+  <meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover' />
+  <meta charset='utf-8'>
+  <link rel="stylesheet" type="text/css" href="styles.css">
+  <link rel="manifest" href="manifest.json">
+  <style>#sidebarad1,
+#sidebarad2 {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 160px;
+  height: 600px;
+  padding: 0;
+  margin: 0;
+  z-index: 999999;
+}
+#sidebarad1 {
+  left: 0;
+}
+#sidebarad2 {
+  right: 0;
+}
+.sidebar-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 22px;
+  height: 22px;
+  line-height: 22px;
+  text-align: center;
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  user-select: none;
+  z-index: 10;
+}
+.sidebar-frame {
+  width: 160px;
+  height: 600px;
+  border: none;
+  display: block;
+}
+</style>
+  <title>Crazy Cars! Unblocked</title>
+  <script src="patch/poki-sdk.js"></script>
+  <script src="playcanvas-stable.min.js"></script>
+  <script src="settings__.js"></script>
+</head>
+
+<body style="overflow:hidden;">
+  <script src="modules__.js"></script>
+  <script src="start__.js"></script>
+  <script src="loading__.js"></script>
+<div id="sidebarad1">
+  <div class="sidebar-close" onclick="this.parentElement.style.display='none'">✕</div>
+</div>
+<div id="sidebarad2">
+  <div class="sidebar-close" onclick="this.parentElement.style.display='none'">✕</div>
+</div>
+</body>
+
+</html>

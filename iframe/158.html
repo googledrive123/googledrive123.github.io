@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  
+  
+  <base href="https://cdn.jsdelivr.net/gh/bubbls/youtube-playables@main/pac-man-superfast/">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pac-Man</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/bubbls/youtube-playables@main/ytgame.js" nonce="4SS15ZFD1b0bgRbR8_s_Dg"></script>
+  <style>
+    @font-face {
+      font-family: 'Lexend Deca';
+      src: url('./assets/LexendDeca-Bold-hdGRfA0S.ttf') format("truetype");
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+
+    }
+
+    html,
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100vw;
+      height: 100vh;
+      background-color: black;
+      overflow: hidden;
+    }
+
+    body {
+      background-image: url("./assets/game_bg-Dx7B24VA.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    #pixiDiv {
+      display: flex;
+      justify-content: center;
+      background-color: black;
+      overflow: hidden;
+    }
+  #sidebarad1,
+#sidebarad2 {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 160px;
+  height: 600px;
+  padding: 0;
+  margin: 0;
+  z-index: 999999;
+}
+#sidebarad1 {
+  left: 0;
+}
+#sidebarad2 {
+  right: 0;
+}
+.sidebar-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 22px;
+  height: 22px;
+  line-height: 22px;
+  text-align: center;
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  user-select: none;
+  z-index: 10;
+}
+.sidebar-frame {
+  width: 160px;
+  height: 600px;
+  border: none;
+  display: block;
+}
+</style>
+  <script type="module" crossorigin src="./assets/main-DYEgUXZA.js" nonce="4SS15ZFD1b0bgRbR8_s_Dg"></script>
+</head>
+
+<body>
+  <div id="pixiDiv"></div>
+<div id="sidebarad1">
+  <div class="sidebar-close" onclick="this.parentElement.style.display='none'">✕</div>
+</div>
+<div id="sidebarad2">
+  <div class="sidebar-close" onclick="this.parentElement.style.display='none'">✕</div>
+</div>
+</body>
+
+</html>

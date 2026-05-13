@@ -1,0 +1,62 @@
+<!DOCTYPE html> 
+<html lang="en">
+   <head>
+      <meta charset="utf-8" />
+      <meta http-equiv="x-ua-compatible" content="ie=edge">
+      <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no" />
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/bodrumkat/hardes1@main/assets/css/app.css" type="text/css" />
+      <title>winter</title>
+   <style>
+#sidebarad1,
+#sidebarad2 {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 160px;
+  height: 600px;
+  padding: 0;
+  margin: 0;
+  z-index: 999999;
+}
+#sidebarad1 {
+  left: 0;
+}
+#sidebarad2 {
+  right: 0;
+}
+.sidebar-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 22px;
+  height: 22px;
+  line-height: 22px;
+  text-align: center;
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  user-select: none;
+  z-index: 10;
+}
+.sidebar-frame {
+  width: 160px;
+  height: 600px;
+  border: none;
+  display: block;
+}
+</style>
+</head>
+   <body>
+      <div id="content"></div>
+      <div id="orientation"></div>
+      <div id="loader">Loading ...</div>
+      <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/bodrumkat/hardes1@main/assets/box2dweb/nape.min.js"> var nape = "nape.min.js"; </script> <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/bodrumkat/hardes1@main/assets/box2dweb/nape-debug-draw.min.js"></script> <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/bodrumkat/hardes1@main/assets/box2dweb/jquery-3.1.1.min.js"></script> <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/bodrumkat/hardes1@main/assets/box2dweb/easeljs-0.8.2.combined.js"></script> <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/bodrumkat/hardes1@main/assets/box2dweb/bluebird.min.js"></script> <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/bodrumkat/hardes1@main/motox3m4.min.js?691008a15c637df4dcc4"></script>
+   <div id="sidebarad1">
+  <div class="sidebar-close" onclick="this.parentElement.style.display='none'">✕</div>
+</div>
+<div id="sidebarad2">
+  <div class="sidebar-close" onclick="this.parentElement.style.display='none'">✕</div>
+</div>
+</body>
+</html>

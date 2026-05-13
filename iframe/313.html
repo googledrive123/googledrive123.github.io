@@ -1,0 +1,80 @@
+<html class="no-js"> <!--<![endif]-->
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="">
+    <meta name="viewport" content="user-scalable=no">
+    <script>
+        window.addEventListener("load", function () {
+            function onTouchPreventDefault(event) {
+                event.preventDefault();
+            }
+            document.addEventListener("touchmove", onTouchPreventDefault, false);
+            document.addEventListener("touchstart", onTouchPreventDefault, false);
+        }, false);
+    </script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/yrgen73/mineSW@24b48ecbfb5331be54fca85c1bf743389ce3195b/css/normalize.css" type="text/css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/yrgen73/mineSW@24b48ecbfb5331be54fca85c1bf743389ce3195b/css/game.css" type="text/css">
+<style>
+#sidebarad1,
+#sidebarad2 {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 160px;
+  height: 600px;
+  padding: 0;
+  margin: 0;
+  z-index: 999999;
+}
+#sidebarad1 {
+  left: 0;
+}
+#sidebarad2 {
+  right: 0;
+}
+.sidebar-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 22px;
+  height: 22px;
+  line-height: 22px;
+  text-align: center;
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  user-select: none;
+  z-index: 10;
+}
+.sidebar-frame {
+  width: 160px;
+  height: 600px;
+  border: none;
+  display: block;
+}
+</style>
+</head>
+
+<body style="background-color: #000000">
+    <div id="wrongRotation">
+        <img src="https://cdn.jsdelivr.net/gh/yrgen73/mineSW@24b48ecbfb5331be54fca85c1bf743389ce3195b/assets/img_480/rotate_screen.png" alt="" />
+    </div>
+    <div id="game">
+        <script src="https://cdn.jsdelivr.net/gh/yrgen73/mineSW@24b48ecbfb5331be54fca85c1bf743389ce3195b/js/ms.js"></script>
+    </div>
+    <div class="font_preload" style="opacity: 0">
+        <span style="font-family: 'gameFont', 'Arial', normal;"></span>
+    </div>
+    <div id="ads"></div>
+<div id="sidebarad1">
+  <div class="sidebar-close" onclick="this.parentElement.style.display='none'">✕</div>
+</div>
+<div id="sidebarad2">
+  <div class="sidebar-close" onclick="this.parentElement.style.display='none'">✕</div>
+</div>
+</body>
+
+</html>

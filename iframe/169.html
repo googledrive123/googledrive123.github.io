@@ -1,0 +1,80 @@
+<!DOCTYPE HTML> 
+<html>
+  <head>
+    
+    
+    
+    <meta charset='utf8'>
+    <style> html, body { margin: 0; padding: 0; overflow: hidden; height: 100%; } #ruffle { width: 100%; height: 100%; } #sidebarad1,
+#sidebarad2 {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 160px;
+  height: 600px;
+  padding: 0;
+  margin: 0;
+  z-index: 999999;
+}
+#sidebarad1 {
+  left: 0;
+}
+#sidebarad2 {
+  right: 0;
+}
+.sidebar-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 22px;
+  height: 22px;
+  line-height: 22px;
+  text-align: center;
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  user-select: none;
+  z-index: 10;
+}
+.sidebar-frame {
+  width: 160px;
+  height: 600px;
+  border: none;
+  display: block;
+}
+</style>
+  </head>
+  <body>
+    <div id='ruffle'></div>
+    <script src='https://unpkg.com/@ruffle-rs/ruffle'></script> <script>  var swfobject = {};
+swfobject.embedSWF = function (url, containerId) {
+  var ruffle = window.RufflePlayer.newest();
+  var container = document.getElementById(containerId);
+  var player = ruffle.createPlayer();
+  container.appendChild(player);
+  if (url) {
+    player.load({
+      url: url
+    });
+  } else {
+    console.error("No SWF file specified in the URL parameters.");
+  }
+  const resizePlayer = () => {
+    container.style.width = window.innerWidth + 'px';
+    container.style.height = window.innerHeight + 'px';
+    player.style.width = '100%';
+    player.style.height = '100%';
+  };
+  resizePlayer();
+  window.addEventListener('resize', resizePlayer);
+};
+swfobject.embedSWF("https://cdn.jsdelivr.net/gh/illusionTBA/React-Ruffle@f37551ff7c55cc61002445a0f1e334742f6832e4/public/swf/Bloxors.swf", 'ruffle'); </script> 
+  <div id="sidebarad1">
+  <div class="sidebar-close" onclick="this.parentElement.style.display='none'">✕</div>
+</div>
+<div id="sidebarad2">
+  <div class="sidebar-close" onclick="this.parentElement.style.display='none'">✕</div>
+</div>
+</body>
+</html>

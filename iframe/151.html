@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    
+    
+    
+    <base href="https://cdn.jsdelivr.net/gh/bubbls/youtube-playables@main/chess-classic/">
+    <meta charset="UTF-8" />
+    <meta name="viewport"
+        content="width=device-width,height=device-height,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+    <title>Chess Classic</title>
+    <link rel="stylesheet" href="assets/css/styles.css" nonce="l8W__iZ7xgOF2sxYxPrsbQ">
+
+    <script src="https://cdn.jsdelivr.net/gh/bubbls/youtube-playables@main/ytgame.js" nonce="l8W__iZ7xgOF2sxYxPrsbQ"></script>
+    <script nonce="l8W__iZ7xgOF2sxYxPrsbQ">ytgame.game.firstFrameReady();</script>
+
+    <!-- ---------------- API Snippet ---------------- -->
+    <script nonce="l8W__iZ7xgOF2sxYxPrsbQ">
+        window.famobi_gameID = "chess-classic"; // the actual GAMEID is added to the final version by Famobi
+        window.famobi_gameJS = [
+            "vendors.bundle.js",
+            "main.bundle.js"
+        ];
+        (function (document, url, fgJS, firstJS) {
+            fgJS = document.createElement('script');
+            firstJS = document.getElementsByTagName('script')[0];
+            fgJS.src = url + "";
+            firstJS.parentNode.insertBefore(fgJS, firstJS);
+        })(document, 'html5games/gameapi/v1.js');         
+    </script>
+
+    <!-- ---------------- API Snippet end ------------- -->
+    
+<style>
+#sidebarad1,
+#sidebarad2 {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 160px;
+  height: 600px;
+  padding: 0;
+  margin: 0;
+  z-index: 999999;
+}
+#sidebarad1 {
+  left: 0;
+}
+#sidebarad2 {
+  right: 0;
+}
+.sidebar-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 22px;
+  height: 22px;
+  line-height: 22px;
+  text-align: center;
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  user-select: none;
+  z-index: 10;
+}
+.sidebar-frame {
+  width: 160px;
+  height: 600px;
+  border: none;
+  display: block;
+}
+</style>
+</head>
+
+<body>
+    <div id="preloader">
+        <div id="loading-text"></div>
+        <div class="lds-default">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </div>
+    <div id="game-container"></div>
+<div id="sidebarad1">
+  <div class="sidebar-close" onclick="this.parentElement.style.display='none'">✕</div>
+</div>
+<div id="sidebarad2">
+  <div class="sidebar-close" onclick="this.parentElement.style.display='none'">✕</div>
+</div>
+</body>
+
+</html>
