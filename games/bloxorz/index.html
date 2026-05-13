@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Untitled Document - Google Docs</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            background-color: #f3f4f6;
+            color: #333;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #game {
+            border: 2px solid #ccc;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button:active {
+            background-color: #004080;
+        }
+    </style>
+<script src="/js/mimicry.js"></script>
+</head>
+<body>
+    <embed id="game" src="bloxorz.swf" height="600px" width="800px" allowfullscreen="true" />
+    <button onclick="toggleFullscreen()">Go Fullscreen</button>
+
+    <script>
+        function toggleFullscreen() {
+            const embed = document.getElementById("game");
+
+            if (embed.requestFullscreen) {
+                embed.requestFullscreen();
+            } else if (embed.webkitRequestFullscreen) {
+                embed.webkitRequestFullscreen();
+            } else if (embed.msRequestFullscreen) {
+                embed.msRequestFullscreen();
+            }
+        }
+    </script>
+</body>
+</html>

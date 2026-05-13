@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WACZ Playback</title>
+</head>
+<body>
+    <h1>WACZ Playback Example Using ReplayWebPage</h1>
+    <script src="https://cdn.jsdelivr.net/gh/ReplayWebPage/replay-webpage@latest/replay.js"></script>
+    <div id="playback" style="width: 100%; height: 100vh;"></div>
+    <script>
+        function loadWACZ() {
+            const player = new ReplayWebPage({
+                container: document.getElementById('playback'),
+                url: './path/to/your.wacz', // Update with the actual path to your WACZ file
+            });
+            player.play();
+        }
+        loadWACZ();
+    </script>
+</body>
+</html>
