@@ -1798,14 +1798,14 @@ const GAMES = [
   {id:'xx142-b2.exe',name:'XX142-B2.exe',cat:'action'},
   {id:'zombocalypse',name:'Zombocalypse',cat:'action'},
   // ── Games from genizy CDN (load via external iframe) ──
-  {id:'ovo-2',name:'OvO 2',cat:'platformer',src:'/iframe/2.html'},
-  {id:'tall-man-run',name:'Tall Man Run',cat:'action',src:'/iframe/20.html'},
-  {id:'ninja-vs-evilcorp',name:'Ninja vs EvilCorp',cat:'action',src:'/iframe/101.html'},
-  {id:'toss-the-turtle',name:'Toss the Turtle',cat:'action',src:'/iframe/110.html'},
-  {id:'people-playground',name:'People Playground',cat:'simulation',src:'/iframe/194.html'},
-  {id:'ultrakill',name:'ULTRAKILL',cat:'action',src:'/iframe/196.html'},
-  {id:'speed-stars',name:'Speed Stars',cat:'action',src:'/iframe/266-a.html'},
-  {id:'vena',name:'Vena',cat:'action',src:'/iframe/838.html'},
+  {id:'ovo-2',name:'OvO 2',cat:'platformer'},
+  {id:'tall-man-run',name:'Tall Man Run',cat:'action'},
+  {id:'ninja-vs-evilcorp',name:'Ninja vs EvilCorp',cat:'action'},
+  {id:'toss-the-turtle',name:'Toss the Turtle',cat:'action'},
+  {id:'people-playground',name:'People Playground',cat:'simulation'},
+  {id:'ultrakill',name:'ULTRAKILL',cat:'action'},
+  {id:'speed-stars',name:'Speed Stars',cat:'action'},
+  {id:'vena',name:'Vena',cat:'action'},
 ];
 
 // ───── Particle background (drifting dots) ─────
@@ -2440,7 +2440,7 @@ function openGame(g) {
   gameOverlay.classList.add('show');
   document.body.style.overflow = 'hidden';
   setTimeout(() => {
-    gameFrame.src = g.src || ('games/' + g.id + '/');
+    gameFrame.src = 'games/' + g.id + '/';
   }, 60);
 }
 function closeGame() {
@@ -2604,10 +2604,6 @@ document.addEventListener('keydown', (e) => {
 });
 
 render();
-
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js');
-}
 </script>
 </body>
 </html>

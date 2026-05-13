@@ -1,0 +1,2969 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="CybriaTech">
+<title>Untitled Document - Google Docs</title>
+<meta name="keywords"
+    content="games, unblocked games, video games, unity, webgl, swf, html5, cybriagames, cybriagames sequel, emulators, sggame">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
+<link rel="icon" href="https://ssl.gstatic.com/docs/doclist/images/mediatype/icon_1_document_x16.png">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+<script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
+<script src="mimicry.js"></script>
+<!-- Import Google fonts first, outside of the style tag -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --primary-color: #0a0e17;
+        --secondary-color: #1a1f2c;
+        --accent-color: #5644ff;
+        --text-color: #ffffff;
+        --button-hover: #7366ff;
+        --highlight-color: #ff4656;
+        --gray-dark: rgba(26, 31, 44, 0.8);
+        --gray-light: rgba(56, 56, 56, 0.8);
+        --modal-background: rgba(10, 14, 23, 0.95);
+    }
+    
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: var(--primary-color);
+        color: var(--text-color);
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+    }
+    
+    /* Header Styling */
+    .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 2rem;
+        background-color: var(--secondary-color);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+    }
+    
+    .home-link {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        color: var(--text-color);
+        font-weight: bold;
+        font-size: 1.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .home-link:hover {
+        color: var(--accent-color);
+    }
+    
+    /* Settings Button */
+    .settings-button {
+        background: transparent;
+        border: none;
+        color: var(--text-color);
+        font-size: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .settings-button:hover {
+        color: var(--accent-color);
+    }
+    
+    /* Settings Modal */
+    #settingsModal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .settings-modal-content {
+        background-color: var(--secondary-color);
+        border-radius: 12px;
+        width: 90%;
+        max-width: 700px;
+        padding: 2rem;
+        position: relative;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .close-modal {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        font-size: 1.5rem;
+        color: var(--text-color);
+        cursor: pointer;
+        transition: color 0.3s;
+    }
+    
+    .close-modal:hover {
+        color: var(--highlight-color);
+    }
+    
+    .settings-section {
+        margin-bottom: 2rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 1.5rem;
+    }
+    
+    .settings-section h3 {
+        font-size: 1.3rem;
+        margin-bottom: 0.5rem;
+        color: var(--accent-color);
+    }
+    
+    .settings-options {
+        margin-top: 1.5rem;
+    }
+    
+    /* Rename Options Grid */
+    .rename-options {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .rename-option {
+        background-color: #2a2f3c;
+        border-radius: 8px;
+        padding: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    
+    .rename-option:hover {
+        background-color: #3a4155;
+        transform: translateY(-3px);
+    }
+    
+    .rename-option.active {
+        border: 2px solid var(--highlight-color);
+        background-color: rgba(255, 70, 86, 0.1);
+    }
+    
+    .rename-option-icon {
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .rename-option-title {
+        font-weight: bold;
+        margin-bottom: 0.3rem;
+    }
+    
+    .rename-option-subtitle {
+        font-size: 0.75rem;
+        opacity: 0.7;
+    }
+    
+    /* Toggle Switch Styles */
+    .settings-toggle {
+        margin-bottom: 1.5rem;
+    }
+    
+    .toggle-label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 24px;
+    }
+    
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #333;
+        transition: .4s;
+        border-radius: 34px;
+    }
+    
+    .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 16px;
+        width: 16px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+    
+    input:checked + .toggle-slider {
+        background-color: var(--accent-color);
+    }
+    
+    input:checked + .toggle-slider:before {
+        transform: translateX(26px);
+    }
+    
+    .toggle-desc {
+        font-size: 0.8rem;
+        opacity: 0.7;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Panic Key Setting Styles */
+    .panic-key-setting {
+        margin-top: 1rem;
+    }
+    
+    #panicKeyInput {
+        background-color: var(--primary-color);
+        color: var(--text-color);
+        border: 1px solid var(--accent-color);
+        border-radius: 4px;
+        padding: 0.5rem;
+        margin: 0.5rem 0;
+        width: 50px;
+        text-align: center;
+        font-size: 1.2rem;
+    }
+    
+    .setting-note {
+        font-size: 0.8rem;
+        opacity: 0.7;
+        margin-top: 0.3rem;
+    }
+    
+    .setting-warning {
+        font-size: 0.8rem;
+        color: var(--highlight-color);
+        margin-top: 0.3rem;
+    }
+    
+    /* Save Button Styles */
+    .close-settings {
+        background-color: var(--highlight-color);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.8rem 1.5rem;
+        margin-top: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: bold;
+        width: 100%;
+    }
+    
+    .close-settings:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 10px rgba(255, 70, 86, 0.3);
+    }
+    
+    /* Email Customization */
+    .email-customization {
+        margin-top: 1rem;
+        padding: 1rem;
+        background-color: var(--primary-color);
+        border-radius: 8px;
+    }
+    
+    .email-input-group {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .email-input {
+        background-color: var(--secondary-color);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 0.5rem;
+        color: white;
+        border-radius: 4px;
+    }
+    
+    .email-input-group span {
+        margin: 0 0.5rem;
+    }
+    
+    .apply-email {
+        background-color: var(--accent-color);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-left: 0.5rem;
+    }
+    
+    .apply-email:hover {
+        background-color: var(--button-hover);
+    }
+    
+    /* Search Bar */
+    .search-container {
+        display: flex;
+        justify-content: center;
+        margin: 2rem auto;
+        width: 100%;
+        max-width: 600px;
+        position: relative;
+        z-index: 10;
+    }
+    
+    .search-bar {
+        width: 100%;
+        font-size: 1.1rem;
+        padding: 0.8rem 1.2rem;
+        border-radius: 8px;
+        border: 2px solid var(--accent-color);
+        background-color: var(--secondary-color);
+        color: white;
+        outline: none;
+        transition: all 0.3s ease;
+    }
+    
+    .search-bar:focus {
+        box-shadow: 0 0 0 3px rgba(86, 68, 255, 0.3);
+    }
+    
+    .search-enter {
+        position: absolute;
+        right: 0.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        color: var(--accent-color);
+        font-size: 1.2rem;
+        cursor: pointer;
+        padding: 0.5rem;
+    }
+    
+    /* Games Grid */
+    main {
+        padding: 0 2rem 2rem;
+        position: relative;
+        z-index: 2;
+    }
+    
+    #games {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1.2rem;
+        justify-content: center;
+        width: 100%;
+        margin: 0 auto;
+    }
+    
+    .game {
+        background-color: var(--secondary-color);
+        border-radius: 10px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 1.2rem;
+        min-height: 100px;
+        position: relative;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .game:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(86, 68, 255, 0.3);
+        background-color: var(--button-hover);
+    }
+    
+    .game-title {
+        font-weight: 600;
+        font-size: 1rem;
+        margin: 0;
+        width: 100%;
+    }
+    
+    /* Special Game Categories */
+    .popular::before {
+    content: ""; /* Remove "POPULAR" text */
+    display: none; /* Hide the ribbon completely */
+    }
+
+    .new::before {
+    content: ""; /* Remove "NEW" text */
+    display: none; /* Hide the ribbon completely */
+    }
+
+    .flash::before {
+    content: ""; /* Remove "FLASH" text */
+    display: none; /* Hide the ribbon completely */
+    }
+    
+    /* Gradient Text Styling - Higher specificity */
+    #games .game .game-title {
+        background: linear-gradient(90deg, #5644ff, #9f44ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        color: transparent; /* Fallback */
+        font-weight: bold;
+    }
+    
+    /* Section Headers */
+    .section-header {
+        width: 100%;
+        text-align: center;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 2rem 0 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--accent-color);
+        grid-column: 1 / -1;
+        color: var(--text-color);
+    }
+
+    /* Starred Games */
+    #starred-games-section {
+        margin-bottom: 1.5rem;
+    }
+
+    #starred-games-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1.2rem;
+        justify-content: center;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    #starred-games-empty {
+        text-align: center;
+        opacity: 0.7;
+        margin-top: 0.5rem;
+    }
+
+    .game-star-btn {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 28px;
+        height: 28px;
+        border: none;
+        border-radius: 50%;
+        background: rgba(10, 14, 23, 0.7);
+        color: #ffd54a;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 5;
+        transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .game-star-btn:hover {
+        transform: scale(1.1);
+        background: rgba(10, 14, 23, 0.9);
+    }
+
+    .game-star-btn.filled {
+        color: #ffc107;
+    }
+
+    @media (max-width: 768px) {
+        #starred-games-grid {
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        #starred-games-grid {
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        }
+    }
+    
+    /* Request/Support Button */
+    .request-button {
+        grid-column: span 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        padding: 1.2rem;
+        font-size: 1.2rem;
+        font-weight: 600;
+        background: linear-gradient(90deg, #5644ff, #9f44ff);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        text-decoration: none;
+    }
+    
+    .request-button:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(86, 68, 255, 0.3);
+    }
+    
+    /* Particles Background */
+    #particles-js {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        background-color: transparent;
+        z-index: 1;
+    }
+    
+    /* Responsive Styles */
+    @media (max-width: 768px) {
+        .header {
+            padding: 0.8rem 1rem;
+        }
+        
+        .search-container {
+            width: 90%;
+        }
+        
+        main {
+            padding: 0 1rem 1rem;
+        }
+        
+        #games {
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        #games {
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        }
+        
+        .game {
+            padding: 1rem;
+            min-height: 80px;
+        }
+        
+        .game-title {
+            font-size: 0.9rem;
+        }
+    }
+    
+    /* Keep the existing gradient text in normal state */
+    #games .game .game-title {
+        background: linear-gradient(90deg, #5644ff, #9f44ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        color: transparent; /* Fallback */
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+
+    /* Just change the text color on hover, but keep the gradient */
+    #games .game:hover .game-title {
+        -webkit-text-fill-color: white; /* Plain white text on hover */
+        color: white; /* Fallback */
+    }
+
+    /* Domain change popup */
+    .update-popup-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(10, 14, 23, 0.78);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1200;
+        padding: 1rem;
+        box-sizing: border-box;
+    }
+
+    .update-popup-overlay.visible {
+        display: flex;
+    }
+
+    .update-popup {
+        width: 100%;
+        max-width: 520px;
+        background: linear-gradient(160deg, #1a1f2c 0%, #22293a 100%);
+        border: 2px solid var(--accent-color);
+        border-radius: 14px;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+        color: var(--text-color);
+        overflow: hidden;
+    }
+
+    .update-popup-header {
+        background: linear-gradient(90deg, #5644ff, #9f44ff);
+        color: #fff;
+        padding: 0.9rem 1rem;
+        font-size: 1.2rem;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .update-popup-close {
+        background: transparent;
+        border: none;
+        color: #fff;
+        font-size: 1.4rem;
+        line-height: 1;
+        cursor: pointer;
+    }
+
+    .update-popup-content {
+        padding: 1.2rem 1rem 1rem;
+        text-align: left;
+    }
+
+    .update-popup-subtitle {
+        margin: 0 0 0.7rem 0;
+        opacity: 0.9;
+        font-weight: 600;
+    }
+
+    .update-popup-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 0.4rem;
+    }
+
+    .update-popup-list li {
+        font-size: 1rem;
+    }
+
+    .update-popup-actions {
+        padding: 0 1rem 1rem;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .update-popup-btn {
+        background: var(--highlight-color);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 0.6rem 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        text-decoration: none;
+    }
+</style>
+<script src="/js/mimicry.js"></script>
+</head>
+
+<body>
+<div class="header">
+    <a href="/" class="home-link">
+        <i class="fas fa-home mr-2"></i>
+        ㅤHome
+    </a>
+    <a href="/settings" class="home-link">
+        <i class="fas fa-cog"></i>
+        ㅤSettings
+    </a>
+</div>
+
+<div class="search-container">
+    <input type="text" class="search-bar" placeholder="Search for games...">
+    <button class="search-enter"><i class="fas fa-search"></i></button>
+</div>
+
+<main>
+    <div id="games">
+        <!-- Regular Games Section -->
+        <div class="section-header">Games</div>
+        
+        <div class="game" onclick="window.location.href='https://forms.gle/H82qpse4WCmVJs7K8'">
+            <div class="game-title">Requests/Feedback</div>
+        </div>
+
+<div class="game" onclick="window.location.href='1on1soccer'">
+            <div class="game-title">1-on-1 Soccer</div>
+        </div>
+
+<div class="game" onclick="window.location.href='1v1lol'">
+            <div class="game-title">1v1.lol</div>
+        </div>
+
+<div class="game" onclick="window.location.href='1v1space'">
+            <div class="game-title">1v1 Space</div>
+        </div>
+
+
+<div class="game popular" onclick="window.location.href='2048'">
+            <div class="game-title">2048</div>
+        </div>
+
+<div class="game popular" onclick="window.location.href='2048-multitask'">
+            <div class="game-title">2048 Multitask</div>
+        </div>
+
+<div class="game popular" onclick="window.location.href='9007199254740992'">
+            <div class="game-title">9007199254740992</div>
+        </div>
+
+<div class="game" onclick="window.location.href='2drocketleague'">
+            <div class="game-title">2d Rocket League</div>
+        </div>
+
+<div class="game" onclick="window.location.href='60sburgerrun'">
+            <div class="game-title">60s Burger Run</div>
+        </div>
+
+<div class="game" onclick="window.location.href='8ball'">
+            <div class="game-title">8 Ball</div>
+        </div>
+
+<div class="game" onclick="window.location.href='achieveunlocked'">
+            <div class="game-title">Achievement Unlocked</div>
+        </div>
+
+<div class="game" onclick="window.location.href='achieveunlocked2'">
+            <div class="game-title">Achievement Unlocked 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='a-dance-of-fire-and-ice'">
+            <div class="game-title">A Dance of Fire and Ice</div>
+        </div>
+
+<div class="game" onclick="window.location.href='adarkroom'">
+            <div class="game-title">A Dark Room</div>
+        </div>
+
+<div class="game" onclick="window.location.href='adrenalinechallenge2'">
+            <div class="game-title">Adrenaline Challenge 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='adventure-capitalist'">
+            <div class="game-title">Adventure Capitalist</div>
+        </div>
+
+<div class="game" onclick="window.location.href='adventure-drivers'">
+            <div class="game-title">Adventure Drivers</div>
+        </div>
+
+<div class="game" onclick="window.location.href='ageofwar'">
+            <div class="game-title">Age of War</div>
+        </div>
+
+<div class="game" onclick="window.location.href='ages-of-conflict'">
+            <div class="game-title">Ages of Conflict</div>
+        </div>
+<div class="game" onclick="window.location.href='alienhominid'">
+            <div class="game-title">Alien Hominid</div>
+        </div>
+
+<div class="game" onclick="window.location.href='align-4'">
+            <div class="game-title">Align 4</div>
+        </div>
+
+<div class="game" onclick="window.location.href='amazing-rope-police'">
+            <div class="game-title">Amazing Rope Police</div>
+        </div>
+
+<div class="game" onclick="window.location.href='amidst-the-clouds'">
+            <div class="game-title">Amidst the Clouds</div>
+        </div>
+
+<div class="game" onclick="window.location.href='amongus'">
+            <div class="game-title">Among Us</div>
+        </div>
+
+<div class="game" onclick="window.location.href='angry-sharks'">
+            <div class="game-title">Angry Sharks</div>
+        </div>
+
+<div class="game" onclick="window.location.href='aquapark-slides'">
+            <div class="game-title">Aquapark Slides</div>
+        </div>
+
+<div class="game" onclick="window.location.href='astray'">
+            <div class="game-title">Astray</div>
+        </div>
+
+<div class="game" onclick="window.location.href='avalanche'">
+            <div class="game-title">Avalanche</div>
+        </div>
+
+<div class="game" onclick="window.location.href='awesometanks'">
+            <div class="game-title">Awesome Tanks</div>
+        </div>
+
+<div class="game" onclick="window.location.href='awesometanks2'">
+            <div class="game-title">Awesome Tanks 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='backrooms'">
+            <div class="game-title">Backrooms</div>
+        </div>
+
+<div class="game" onclick="window.location.href='badicecream'">
+            <div class="game-title">Bad Ice Cream</div>
+        </div>
+
+<div class="game" onclick="window.location.href='badicecream2'">
+            <div class="game-title">Bad Ice Cream 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='badicecream3'">
+            <div class="game-title">Bad Ice Cream 3</div>
+        </div>
+
+<div class="game" onclick="window.location.href='badpiggies'">
+            <div class="game-title">Bad Piggies</div>
+        </div>
+
+<div class="game" onclick="window.location.href='badtimesimulator'">
+            <div class="game-title">Bad Time Simulator</div>
+        </div>
+
+<div class="game" onclick="window.location.href='baldis-basics'">
+            <div class="game-title">Baldi's Basics</div>
+        </div>
+
+<div class="game" onclick="window.location.href='ballisticchickens'">
+            <div class="game-title">Ballistic Chickens</div>
+        </div>
+
+<div class="game popular" onclick="window.location.href='basket-random'">
+            <div class="game-title">Basket Random</div>
+        </div>
+
+<div class="game popular" onclick="window.location.href='basketball-stars'">
+            <div class="game-title">Basketball Stars</div>
+        </div>
+
+<div class="game" onclick="window.location.href='basketbros'">
+            <div class="game-title">Basketbros</div>
+        </div>
+
+<div class="game" onclick="window.location.href='btts'">
+            <div class="game-title">Big Tower Tiny Square</div>
+        </div>
+
+<div class="game" onclick="window.location.href='big-ice-tower-tiny-square-2'">
+            <div class="game-title">Big Ice Tower Tiny Square 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='big-neon-tower'">
+            <div class="game-title">Big Neon Tower Tiny Square</div>
+        </div>
+
+<div class="game" onclick="window.location.href='bit-planes'">
+            <div class="game-title">Bit Planes</div>
+        </div>
+
+<div class="game" onclick="window.location.href='bitlife'">
+            <div class="game-title">Bitlife</div>
+        </div>
+
+<div class="game" onclick="window.location.href='black-hole-square'">
+            <div class="game-title">Black Hole Square</div>
+        </div>
+
+<div class="game" onclick="window.location.href='bloodtournament'">
+            <div class="game-title">Blood Tournament</div>
+        </div>
+
+<div class="game" onclick="window.location.href='bloxorz'">
+            <div class="game-title">Bloxorz</div>
+        </div>
+
+<div class="game" onclick="window.location.href='btd'">
+            <div class="game-title">Bloons Tower Defense</div>
+        </div>
+
+<div class="game" onclick="window.location.href='btd2'">
+            <div class="game-title">Bloons Tower Defense 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='btd3'">
+            <div class="game-title">Bloons Tower Defense 3</div>
+        </div>
+
+<div class="game" onclick="window.location.href='btd4'">
+            <div class="game-title">Bloons Tower Defense 4</div>
+        </div>
+
+<div class="game" onclick="window.location.href='btd5'">
+            <div class="game-title">Bloons Tower Defense 5</div>
+        </div>
+
+<div class="game" onclick="window.location.href='btd6'">
+            <div class="game-title">Bloons Tower Defense 6</div>
+        </div>
+
+<div class="game" onclick="window.location.href='bobtherobber2'">
+            <div class="game-title">Bob The Robber 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='bottle-flip-3d'">
+            <div class="game-title">Bottle Flip 3D</div>
+        </div>
+
+<div class="game" onclick="window.location.href='bounce-back'">
+            <div class="game-title">Bounce Back</div>
+        </div>
+
+<div class="game" onclick="window.location.href='boxingphysics2'">
+            <div class="game-title">Boxing Physics 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='boxing-random'">
+            <div class="game-title">Boxing Random</div>
+        </div>
+
+<div class="game" onclick="window.location.href='breakingthebank'">
+            <div class="game-title">Breaking the Bank</div>
+        </div>
+
+<div class="game" onclick="window.location.href='browserkiller'">
+            <div class="game-title">Browser Killer</div>
+        </div>
+
+<div class="game" onclick="window.location.href='bubbleshooter'">
+            <div class="game-title">Bubble Shooter</div>
+        </div>
+
+<div class="game" onclick="window.location.href='bubble-tower-3d'">
+            <div class="game-title">Bubble Tower 3D</div>
+        </div>
+
+<div class="game" onclick="window.location.href='burgerandfrights'">
+            <div class="game-title">Burger and Frights</div>
+        </div>
+
+<div class="game" onclick="window.location.href='burritobison'">
+            <div class="game-title">Burrito Bison</div>
+        </div>
+
+<div class="game" onclick="window.location.href='candy-crush'">
+            <div class="game-title">Candy Crush</div>
+        </div>
+
+<div class="game" onclick="window.location.href='celeste'">
+            <div class="game-title">Celeste</div>
+        </div>
+
+<div class="game" onclick="window.location.href='cell-machine'">
+            <div class="game-title">Cell Machine</div>
+        </div>
+
+<div class="game" onclick="window.location.href='championisland'">
+            <div class="game-title">Champion Island</div>
+        </div>
+
+<div class="game" onclick="window.location.href='chess'">
+            <div class="game-title">Chess</div>
+        </div>
+
+<div class="game" onclick="window.location.href='chibiknight'">
+            <div class="game-title">Chibi Knight</div>
+        </div>
+
+<div class="game popular" onclick="window.location.href='chrome-dino'">
+            <div class="game-title">Chrome Dino</div>
+        </div>
+
+<div class="game" onclick="window.location.href='circloo'">
+            <div class="game-title">Circloo</div>
+        </div>
+
+<div class="game" onclick="window.location.href='civiballs'">
+            <div class="game-title">Civiballs</div>
+        </div>
+
+<div class="game" onclick="window.location.href='civiballs-2'">
+            <div class="game-title">Civiballs 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='clickerheroes'">
+            <div class="game-title">Clicker Heroes</div>
+        </div>
+
+<div class="game" onclick="window.location.href='cluster-rush'">
+            <div class="game-title">Cluster Rush</div>
+        </div>
+
+<div class="game" onclick="window.location.href='colorswitch'">
+            <div class="game-title">Color Switch</div>
+        </div>
+
+<div class="game" onclick="window.location.href='commodoreclicker'">
+            <div class="game-title">Commodore Clicker</div>
+        </div>
+
+<div class="game" onclick="window.location.href='cookieclicker'">
+            <div class="game-title">Cookie Clicker</div>
+        </div>
+
+<div class="game" onclick="window.location.href='craftmine'">
+            <div class="game-title">Craftmine</div>
+        </div>
+
+<div class="game" onclick="window.location.href='crossyroad'">
+            <div class="game-title">Crossy Road</div>
+        </div>
+
+<div class="game" onclick="window.location.href='csgoclicker'">
+            <div class="game-title">CSGO Clicker</div>
+        </div>
+
+<div class="game" onclick="window.location.href='ctr'">
+            <div class="game-title">CTR</div>
+        </div>
+
+<div class="game" onclick="window.location.href='ctr-holiday'">
+            <div class="game-title">CTR Holiday</div>
+        </div>
+
+<div class="game" onclick="window.location.href='ctr-tr'">
+            <div class="game-title">CTR Time Travel</div>
+        </div>
+
+<div class="game" onclick="window.location.href='cubefield'">
+            <div class="game-title">Cube Field</div>
+        </div>
+
+<div class="game" onclick="window.location.href='dadish'">
+            <div class="game-title">Dadish</div>
+        </div>
+
+<div class="game" onclick="window.location.href='dadish2'">
+            <div class="game-title">Dadish 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='dadish3'">
+            <div class="game-title">Dadish 3</div>
+        </div>
+
+<div class="game" onclick="window.location.href='dante'">
+            <div class="game-title">Dante</div>
+        </div>
+
+<div class="game" onclick="window.location.href='deal'">
+            <div class="game-title">Deal or No Deal</div>
+        </div>
+
+<div class="game" onclick="window.location.href='death-run-3d'">
+            <div class="game-title">Death Run 3D</div>
+        </div>
+
+<div class="game" onclick="window.location.href='dogeminer'">
+            <div class="game-title">Doge Miner</div>
+        </div>
+
+<div class="game" onclick="window.location.href='doodlejump'">
+            <div class="game-title">Doodle Jump</div>
+        </div>
+
+<div class="game" onclick="window.location.href='doom'">
+            <div class="game-title">Doom</div>
+        </div>
+
+<div class="game" onclick="window.location.href='dragonballdevolution'">
+            <div class="game-title">Dragonball Devolution</div>
+        </div>
+
+<div class="game" onclick="window.location.href='draw-the-hill'">
+            <div class="game-title">Draw The Hill</div>
+        </div>
+
+<div class="game" onclick="window.location.href='drift-boss'">
+            <div class="game-title">Drift Boss</div>
+        </div>
+
+<div class="game" onclick="window.location.href='drifthunters'">
+            <div class="game-title">Drift Hunters</div>
+        </div>
+
+<div class="game" onclick="window.location.href='drivemad'">
+            <div class="game-title">Drive Mad</div>
+        </div>
+
+<div class="game" onclick="window.location.href='ducklife1'">
+            <div class="game-title">Duck Life 1</div>
+        </div>
+
+<div class="game" onclick="window.location.href='ducklife2'">
+            <div class="game-title">Duck Life 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='ducklife3'">
+            <div class="game-title">Duck Life 3</div>
+        </div>
+
+<div class="game" onclick="window.location.href='ducklife4'">
+            <div class="game-title">Duck Life 4</div>
+        </div>
+
+<div class="game" onclick="window.location.href='ducklife5'">
+            <div class="game-title">Duck Life 5</div>
+        </div>
+
+<div class="game" onclick="window.location.href='ducklife6'">
+            <div class="game-title">Duck Life 6</div>
+        </div>
+
+<div class="game" onclick="window.location.href='edgenotfound'">
+            <div class="game-title">Edge Not Found</div>
+        </div>
+
+<div class="game" onclick="window.location.href='emulatorjs'">
+            <div class="game-title">Emulator JS</div>
+        </div>
+
+<div class="game" onclick="window.location.href='emulators'">
+            <div class="game-title">Emulators</div>
+        </div>
+
+<div class="game" onclick="window.location.href='escapingtheprison'">
+            <div class="game-title">Escaping the Prison</div>
+        </div>
+
+<div class="game" onclick="window.location.href='evilglitch'">
+            <div class="game-title">Evil Glitch</div>
+        </div>
+
+<div class="game" onclick="window.location.href='factoryballs'">
+            <div class="game-title">Factory Balls</div>
+        </div>
+
+<div class="game" onclick="window.location.href='factoryballsforever'">
+            <div class="game-title">Factory Balls Forever</div>
+        </div>
+
+<div class="game" onclick="window.location.href='fancypantsadventures'">
+            <div class="game-title">Fancypants Adventures</div>
+        </div>
+
+<div class="game" onclick="window.location.href='fancypantsadventures2'">
+            <div class="game-title">Fancypants Adventures 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='fbwg'">
+            <div class="game-title">Fireboy and Watergirl</div>
+        </div>
+
+<div class="game" onclick="window.location.href='fbwg2'">
+            <div class="game-title">Fireboy and Watergirl 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='fbwg3'">
+            <div class="game-title">Fireboy and Watergirl 3</div>
+        </div>
+
+<div class="game" onclick="window.location.href='fbwg4'">
+            <div class="game-title">Fireboy and Watergirl 4</div>
+        </div>
+
+<div class="game popular" onclick="window.location.href='flappybird'">
+            <div class="game-title">Flappy Bird</div>
+        </div>
+
+<div class="game" onclick="window.location.href='flappyplane'">
+            <div class="game-title">Flappy Plane</div>
+        </div>
+
+<div class="game" onclick="window.location.href='flappySquidward'">
+            <div class="game-title">Flappy Squidward</div>
+        </div>
+
+<div class="game" onclick="window.location.href='flash'">
+            <div class="game-title">Flash PLayer Emulator</div>
+        </div>
+
+<div class="game" onclick="window.location.href='fleeingthecomplex'">
+            <div class="game-title">Fleeing the Complex</div>
+        </div>
+
+<div class="game" onclick="window.location.href='flippyfish'">
+            <div class="game-title">Flippy Fish</div>
+        </div>
+
+<div class="game" onclick="window.location.href='fluidsim'">
+            <div class="game-title">Fluidsim</div>
+        </div>
+
+<div class="game" onclick="window.location.href='fnaf'">
+            <div class="game-title">FNAF</div>
+        </div>
+
+<div class="game" onclick="window.location.href='fnaf2'">
+            <div class="game-title">FNAF 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='fnaf3'">
+            <div class="game-title">FNAF 3</div>
+        </div>
+
+<div class="game" onclick="window.location.href='fnaf4'">
+            <div class="game-title">FNAF 4</div>
+        </div>
+
+<div class="game" onclick="window.location.href='fivenightsatepsteins'">
+            <div class="game-title">Five Nights at Epstein's</div>
+        </div>
+
+<div class="game" onclick="window.location.href='fridaynightfunkin'">
+            <div class="game-title">Friday Night Funkin</div>
+        </div>
+
+<div class="game" onclick="window.location.href='friendlyfire'">
+            <div class="game-title">Friendly Fire</div>
+        </div>
+
+<div class="game" onclick="window.location.href='fruitninja'">
+            <div class="game-title">Fruit Ninja</div>
+        </div>
+
+<div class="game" onclick="window.location.href='full-screen-mario'">
+            <div class="game-title">Full Screen Mario</div>
+        </div>
+
+<div class="game" onclick="window.location.href='funnyballgame'">
+            <div class="game-title">Funny Ball Game</div>
+        </div>
+
+<div class="game" onclick="window.location.href='funnymadracing'">
+            <div class="game-title">Funny Mad Racing</div>
+        </div>
+
+<div class="game" onclick="window.location.href='funnyshooter'">
+            <div class="game-title">Funny Shooter</div>
+        </div>
+
+<div class="game" onclick="window.location.href='funnyshooter2'">
+            <div class="game-title">Funny Shooter 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='game-inside'">
+            <div class="game-title">Game Inside</div>
+        </div>
+
+<div class="game" onclick="window.location.href='gamemaker'">
+            <div class="game-title">Game Maker</div>
+        </div>
+
+<div class="game" onclick="window.location.href='gba'">
+            <div class="game-title">GBA Emulator</div>
+        </div>
+
+<div class="game" onclick="window.location.href='real-geometry-dash'">
+            <div class="game-title">Geometry Dash</div>
+        </div>
+
+
+<div class="game" onclick="window.location.href='geometrydash'">
+            <div class="game-title">Geometry Dash (Scratch)</div>
+        </div>
+
+<div class="game" onclick="window.location.href='geometryrash'">
+            <div class="game-title">Geometry Rash</div>
+        </div>
+
+<div class="game" onclick="window.location.href='getawayshooter'">
+            <div class="game-title">Getaway Shooter</div>
+        </div>
+
+<div class="game" onclick="window.location.href='getaway-shootout'">
+            <div class="game-title">Getaway Shootout</div>
+        </div>
+
+<div class="game" onclick="window.location.href='golddiggerfrvr'">
+            <div class="game-title">Gold Digger FRVR</div>
+        </div>
+
+<div class="game popular" onclick="window.location.href='google-snake'">
+            <div class="game-title">Google Snake</div>
+        </div>
+
+<div class="game" onclick="window.location.href='google-solitaire'">
+            <div class="game-title">Google Solitaire</div>
+        </div>
+
+<div class="game" onclick="window.location.href='guiltygear'">
+            <div class="game-title">Guilty Gear</div>
+        </div>
+
+<div class="game" onclick="window.location.href='gunmayhem'">
+            <div class="game-title">Gun Mayhem</div>
+        </div>
+
+<div class="game" onclick="window.location.href='gunmayhem2'">
+            <div class="game-title">Gun Mayhem 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='gunmayhemredux'">
+            <div class="game-title">Gun Mayhem Redux</div>
+        </div>
+
+<div class="game" onclick="window.location.href='halloween2016'">
+            <div class="game-title">Halloween 2016</div>
+        </div>
+
+<div class="game" onclick="window.location.href='happywheels'">
+            <div class="game-title">Happywheels</div>
+        </div>
+
+<div class="game" onclick="window.location.href='helixjump'">
+            <div class="game-title">Helix Jump</div>
+        </div>
+
+<div class="game" onclick="window.location.href='hexgl'">
+            <div class="game-title">Hex GL</div>
+        </div>
+
+<div class="game" onclick="window.location.href='hextris'">
+            <div class="game-title">Hextris</div>
+        </div>
+
+<div class="game" onclick="window.location.href='hillclimbracing2'">
+            <div class="game-title">Hill Climb Racing 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='holeio'">
+            <div class="game-title">Hole.io</div>
+        </div>
+
+<div class="game" onclick="window.location.href='ice-dodo'">
+            <div class="game-title">Ice Dodo</div>
+        </div>
+
+<div class="game" onclick="window.location.href='icy-purple-head-2'">
+            <div class="game-title">Icy Purple Head 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='icy-purple-head-3'">
+            <div class="game-title">Icy Purple Head 3</div>
+        </div>
+
+<div class="game" onclick="window.location.href='iwbtc'">
+            <div class="game-title">I Wanna Be Thy Copy</div>
+        </div>
+
+<div class="game" onclick="window.location.href='idlebreakout'">
+            <div class="game-title">Idle Breakout</div>
+        </div>
+
+<div class="game" onclick="window.location.href='infiltratingtheairship'">
+            <div class="game-title">Infiltrating the Airship</div>
+        </div>
+
+<div class="game" onclick="window.location.href='jacksmith'">
+            <div class="game-title">Jacksmith</div>
+        </div>
+
+<div class="game" onclick="window.location.href='jetpackjoyride'">
+            <div class="game-title">Jetpack Joyride</div>
+        </div>
+
+<div class="game" onclick="window.location.href='justfalllol'">
+            <div class="game-title">JustFall.lol</div>
+        </div>
+
+<div class="game" onclick="window.location.href='knifehit'">
+            <div class="game-title">Knife Hit</div>
+        </div>
+
+<div class="game" onclick="window.location.href='lasthorizon'">
+            <div class="game-title">Last Horizon</div>
+        </div>
+
+<div class="game" onclick="window.location.href='lazyjump3d'">
+            <div class="game-title">Lazy Jump 3D</div>
+        </div>
+
+<div class="game" onclick="window.location.href='learntofly'">
+            <div class="game-title">Learn to Fly</div>
+        </div>
+
+<div class="game" onclick="window.location.href='learntofly2'">
+            <div class="game-title">Learn to Fly 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='learntoflyidle'">
+            <div class="game-title">Learn to Fly Idle</div>
+        </div>
+
+<div class="game" onclick="window.location.href='linerider'">
+            <div class="game-title">Line Rider</div>
+        </div>
+
+<div class="game" onclick="window.location.href='littlealchemy'">
+            <div class="game-title">Little Alchemy</div>
+        </div>
+
+<div class="game" onclick="window.location.href='lowsadventures2'">
+            <div class="game-title">Lows Adventures 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='madalincars'">
+            <div class="game-title">Madalin Stunt Cars</div>
+        </div>
+
+<div class="game" onclick="window.location.href='mario'">
+            <div class="game-title">Mario</div>
+        </div>
+
+<div class="game" onclick="window.location.href='mindustry'">
+            <div class="game-title">Mindustry</div>
+        </div>
+
+<div class="game" onclick="window.location.href='minecraft'">
+            <div class="game-title">Minecraft</div>
+        </div>
+
+<div class="game" onclick="window.location.href='mc-classic'">
+            <div class="game-title">Minecraft Classic</div>
+        </div>
+
+<div class="game" onclick="window.location.href='minecraft-tower-defence-2'">
+            <div class="game-title">Minecraft Tower Defense 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='minekhan'">
+            <div class="game-title">Minekhan</div>
+        </div>
+
+<div class="game" onclick="window.location.href='minesweeper'">
+            <div class="game-title">Minesweeper</div>
+        </div>
+
+<div class="game" onclick="window.location.href='monkey-mart'">
+            <div class="game-title">Monkey Mart</div>
+        </div>
+
+<div class="game" onclick="window.location.href='monstertracks'">
+            <div class="game-title">Monster Tracks</div>
+        </div>
+
+<div class="game" onclick="window.location.href='motox3m'">
+            <div class="game-title">Moto X3M</div>
+        </div>
+
+<div class="game" onclick="window.location.href='motox3m-pool'">
+            <div class="game-title">Moto X3M Pool</div>
+        </div>
+
+<div class="game" onclick="window.location.href='motox3m-spooky'">
+            <div class="game-title">Moto X3M Spooky</div>
+        </div>
+
+<div class="game" onclick="window.location.href='motox3m-winter'">
+            <div class="game-title">Moto X3M Winter</div>
+        </div>
+
+<div class="game" onclick="window.location.href='ngon'">
+            <div class="game-title">Ngon</div>
+        </div>
+
+<div class="game" onclick="window.location.href='nutsim'">
+            <div class="game-title">Nut Simulator</div>
+        </div>
+
+<div class="game" onclick="window.location.href='offlineparadise'">
+            <div class="game-title">Offline Paradise</div>
+        </div>
+
+<div class="game" onclick="window.location.href='osu'">
+            <div class="game-title">Osu</div>
+        </div>
+
+<div class="game" onclick="window.location.href='osumania'">
+            <div class="game-title">Osu Mania</div>
+        </div>
+
+<div class="game" onclick="window.location.href='ovo'">
+            <div class="game-title">Ovo</div>
+        </div>
+
+<div class="game" onclick="window.location.href='pacman'">
+            <div class="game-title">Pacman</div>
+        </div>
+
+<div class="game" onclick="window.location.href='pandemic'">
+            <div class="game-title">Pandemic</div>
+        </div>
+
+<div class="game" onclick="window.location.href='pandemic2'">
+            <div class="game-title">Pandemic 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='papa-louie-2'">
+            <div class="game-title">Papa Louie 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='papa-louie-3'">
+            <div class="game-title">Papa Louie 3</div>
+        </div>
+
+<div class="game" onclick="window.location.href='papasburgeria'">
+            <div class="game-title">Papas Burgeria</div>
+        </div>
+
+<div class="game" onclick="window.location.href='papasfreezeria'">
+            <div class="game-title">Papas Freezeria</div>
+        </div>
+
+<div class="game" onclick="window.location.href='papaspizzeria'">
+            <div class="game-title">Papas Pizzeria</div>
+        </div>
+
+<div class="game" onclick="window.location.href='papas-wingeria'">
+            <div class="game-title">Papas Wingeria</div>
+        </div>
+
+<div class="game" onclick="window.location.href='paperio'">
+            <div class="game-title">Paper.io</div>
+        </div>
+
+<div class="game" onclick="window.location.href='paperio2'">
+            <div class="game-title">Paper.io 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='parking-fury'">
+            <div class="game-title">Parking Fury</div>
+        </div>
+
+<div class="game" onclick="window.location.href='parking-fury-2'">
+            <div class="game-title">Parking Fury 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='parking-fury-3-main'">
+            <div class="game-title">Parking Fury 3</div>
+        </div>
+
+<div class="game" onclick="window.location.href='perfect-circle'">
+            <div class="game-title">Perfect Circle</div>
+        </div>
+
+<div class="game" onclick="window.location.href='pizzatower'">
+            <div class="game-title">Pizza Tower</div>
+        </div>
+
+<div class="game" onclick="window.location.href='pokemon-emerald'">
+            <div class="game-title">Pokemon Emerald</div>
+        </div>
+
+<div class="game" onclick="window.location.href='pokemon-fire'">
+            <div class="game-title">Pokemon Fire</div>
+        </div>
+
+<div class="game" onclick="window.location.href='pokemon-leaf'">
+            <div class="game-title">Pokemon Leaf</div>
+        </div>
+
+<div class="game" onclick="window.location.href='polytrack'">
+            <div class="game-title">Polytrack</div>
+        </div>
+
+<div class="game" onclick="window.location.href='pool'">
+            <div class="game-title">Pool</div>
+        </div>
+
+<div class="game" onclick="window.location.href='poom'">
+            <div class="game-title">Poom</div>
+        </div>
+
+<div class="game" onclick="window.location.href='pushback'">
+            <div class="game-title">Pushback</div>
+        </div>
+
+<div class="game" onclick="window.location.href='redball3'">
+            <div class="game-title">Redball 3</div>
+        </div>
+
+<div class="game" onclick="window.location.href='redball4'">
+            <div class="game-title">Redball 4</div>
+        </div>
+
+<div class="game" onclick="window.location.href='redball4vol2'">
+            <div class="game-title">Redball 4 Vol 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='redball4vol3'">
+            <div class="game-title">Redball 4 Vol 3</div>
+        </div>
+
+<div class="game popular" onclick="window.location.href='retro-bowl'">
+            <div class="game-title">Retro Bowl</div>
+        </div>
+
+<div class="game" onclick="window.location.href='retro-bowl-exploit'">
+            <div class="game-title">Retro Bowl Exploit</div>
+        </div>
+
+
+<div class="game" onclick="window.location.href='retrobowlcollege'">
+            <div class="game-title">Retrobowl College</div>
+        </div>
+
+<div class="game" onclick="window.location.href='riddleschool'">
+            <div class="game-title">Riddleschool</div>
+        </div>
+
+<div class="game" onclick="window.location.href='riddleschool2'">
+            <div class="game-title">Riddleschool 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='riddleschool3'">
+            <div class="game-title">Riddleschool 3</div>
+        </div>
+
+<div class="game" onclick="window.location.href='riddleschool4'">
+            <div class="game-title">Riddleschool 4</div>
+        </div>
+
+<div class="game" onclick="window.location.href='riddleschool5'">
+            <div class="game-title">Riddleschool 5</div>
+        </div>
+
+<div class="game" onclick="window.location.href='riddleschooltransfer'">
+            <div class="game-title">Riddleschool Transfer</div>
+        </div>
+
+<div class="game" onclick="window.location.href='riddleschooltransfer2'">
+            <div class="game-title">Riddleschool Transfer 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='risehigher'">
+            <div class="game-title">Rise Higher</div>
+        </div>
+
+<div class="game" onclick="window.location.href='rocketleague'">
+            <div class="game-title">Rocket League</div>
+        </div>
+
+<div class="game" onclick="window.location.href='rooftop-snipers'">
+            <div class="game-title">Rooftop Snipers</div>
+        </div>
+
+<div class="game" onclick="window.location.href='rooftopsnipers2'">
+            <div class="game-title">Rooftop Snipers 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='ruffle'">
+            <div class="game-title">Ruffle Emulator</div>
+        </div>
+
+<div class="game" onclick="window.location.href='run'">
+            <div class="game-title">Run</div>
+        </div>
+
+<div class="game" onclick="window.location.href='run2'">
+            <div class="game-title">Run 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='run3'">
+            <div class="game-title">Run 3</div>
+        </div>
+
+<div class="game" onclick="window.location.href='russiancardriver'">
+            <div class="game-title">Russian Car Driver</div>
+        </div>
+
+<div class="game" onclick="window.location.href='sand'">
+            <div class="game-title">Sand</div>
+        </div>
+
+<div class="game" onclick="window.location.href='sand-game'">
+            <div class="game-title">Sand Game</div>
+        </div>
+
+<div class="game" onclick="window.location.href='sandtrix'">
+            <div class="game-title">Sandtrix</div>
+        </div>
+
+<div class="game" onclick="window.location.href='sans-fight'">
+            <div class="game-title">Sans Fight</div>
+        </div>
+
+<div class="game" onclick="window.location.href='scrapmetal3'">
+            <div class="game-title">Scrap Metal 3</div>
+        </div>
+
+<div class="game" onclick="window.location.href='skibiditoilet'">
+            <div class="game-title">Skibidi Toilet</div>
+        </div>
+
+<div class="game" onclick="window.location.href='skibiditoiletattack'">
+            <div class="game-title">Skibidi Toilet Attack</div>
+        </div>
+
+<div class="game" onclick="window.location.href='skills'">
+            <div class="game-title">Skills</div>
+        </div>
+
+<div class="game popular" onclick="window.location.href='slope'">
+            <div class="game-title">Slope</div>
+        </div>
+
+<div class="game" onclick="window.location.href='slope2'">
+            <div class="game-title">Slope 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='slope-ball'">
+            <div class="game-title">Slope Ball</div>
+        </div>
+
+<div class="game" onclick="window.location.href='snake'">
+            <div class="game-title">Snake</div>
+        </div>
+
+<div class="game" onclick="window.location.href='snow'">
+            <div class="game-title">Snow</div>
+        </div>
+
+<div class="game" onclick="window.location.href='snowrider3d'">
+            <div class="game-title">Snow Rider 3D</div>
+        </div>
+
+<div class="game" onclick="window.location.href='soccer-random'">
+            <div class="game-title">Soccer Random</div>
+        </div>
+
+<div class="game" onclick="window.location.href='soldier-legend'">
+            <div class="game-title">Soldier Legend</div>
+        </div>
+
+<div class="game" onclick="window.location.href='solitaire'">
+            <div class="game-title">Solitaire</div>
+        </div>
+
+<div class="game" onclick="window.location.href='fancy-solitaire'">
+            <div class="game-title">Solitaire (Fancy)</div>
+        </div>
+
+<div class="game" onclick="window.location.href='sort-the-court'">
+            <div class="game-title">Sort the Court</div>
+        </div>
+
+<div class="game" onclick="window.location.href='soundboard'">
+            <div class="game-title">Soundboard</div>
+        </div>
+
+<div class="game" onclick="window.location.href='space'">
+            <div class="game-title">Space</div>
+        </div>
+
+<div class="game" onclick="window.location.href='spankthemonkey'">
+            <div class="game-title">Spank The Monkey</div>
+        </div>
+
+<div class="game" onclick="window.location.href='sprinter'">
+            <div class="game-title">Sprinter</div>
+        </div>
+
+<div class="game" onclick="window.location.href='stack'">
+            <div class="game-title">Stack</div>
+        </div>
+
+<div class="game" onclick="window.location.href='stealingthediamond'">
+            <div class="game-title">Stealing The Diamond</div>
+        </div>
+
+<div class="game" onclick="window.location.href='stickslasher'">
+            <div class="game-title">Stick Slasher</div>
+        </div>
+
+<div class="game" onclick="window.location.href='stickmanboost'">
+            <div class="game-title">Stickman Boost</div>
+        </div>
+
+<div class="game" onclick="window.location.href='stickmanclimb'">
+            <div class="game-title">Stickman Climb</div>
+        </div>
+
+<div class="game" onclick="window.location.href='stickmangolf'">
+            <div class="game-title">Stickman Golf</div>
+        </div>
+
+<div class="game" onclick="window.location.href='stickman-hook'">
+            <div class="game-title">Stickman Hook</div>
+        </div>
+
+<div class="game popular" onclick="window.location.href='subway-surfers'">
+            <div class="game-title">Subway Surfers</div>
+        </div>
+
+<div class="game" onclick="window.location.href='subway-surfers-ny'">
+            <div class="game-title">Subway Surfers New York</div>
+        </div>
+
+<div class="game" onclick="window.location.href='supermario64'">
+            <div class="game-title">Super Mario 64</div>
+        </div>
+
+<div class="game" onclick="window.location.href='supermeatboy'">
+            <div class="game-title">Super Meat Boy</div>
+        </div>
+
+<div class="game" onclick="window.location.href='supersmashbros'">
+            <div class="game-title">Super Smash Bros</div>
+        </div>
+
+<div class="game" onclick="window.location.href='supersmashflash'">
+            <div class="game-title">Super Smash Flash</div>
+        </div>
+
+<div class="game" onclick="window.location.href='superhot'">
+            <div class="game-title">Superhot</div>
+        </div>
+
+<div class="game" onclick="window.location.href='swerve'">
+            <div class="game-title">Swerve</div>
+        </div>
+
+<div class="game" onclick="window.location.href='tabs'">
+            <div class="game-title">TABS</div>
+        </div>
+
+<div class="game" onclick="window.location.href='tank-trouble-2'">
+            <div class="game-title">Tank Trouble 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='tanuki-sunset'">
+            <div class="game-title">Tanuki Sunset</div>
+        </div>
+
+<div class="game" onclick="window.location.href='templerun2'">
+            <div class="game-title">Temple Run 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='territorial.io'">
+            <div class="game-title">Territorial.io</div>
+        </div>
+
+<div class="game" onclick="window.location.href='tetra-legends'">
+            <div class="game-title">Tetra Legends</div>
+        </div>
+
+<div class="game" onclick="window.location.href='tetris'">
+            <div class="game-title">Tetris</div>
+        </div>
+
+<div class="game" onclick="window.location.href='thefinalearth2'">
+            <div class="game-title">The Final Earth 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='theimpossiblegame'">
+            <div class="game-title">The Impossible Game</div>
+        </div>
+
+<div class="game" onclick="window.location.href='theimpossiblequiz'">
+            <div class="game-title">The Impossible Quiz</div>
+        </div>
+
+<div class="game" onclick="window.location.href='there-is-no-game'">
+            <div class="game-title">There Is No Game</div>
+        </div>
+
+<div class="game" onclick="window.location.href='thirtydollarwebsite'">
+            <div class="game-title">Thirty Dollar Website</div>
+        </div>
+
+<div class="game" onclick="window.location.href='thisistheonlylevel'">
+            <div class="game-title">This Is The Only Level</div>
+        </div>
+
+<div class="game" onclick="window.location.href='thisistheonlylevel2'">
+            <div class="game-title">This Is The Only Level 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='timeshooter1'">
+            <div class="game-title">Time Shooter 1</div>
+        </div>
+
+<div class="game" onclick="window.location.href='timeshooter2'">
+            <div class="game-title">Time Shooter 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='timeshooter3'">
+            <div class="game-title">Time Shooter 3</div>
+        </div>
+
+<div class="game" onclick="window.location.href='tinyfishing'">
+            <div class="game-title">Tiny Fishing</div>
+        </div>
+
+<div class="game" onclick="window.location.href='townscaper'">
+            <div class="game-title">Townscaper</div>
+        </div>
+
+<div class="game" onclick="window.location.href='tron'">
+            <div class="game-title">Tron</div>
+        </div>
+
+<div class="game" onclick="window.location.href='tu46'">
+            <div class="game-title">TU-46</div>
+        </div>
+
+<div class="game" onclick="window.location.href='tu95'">
+            <div class="game-title">TU-95</div>
+        </div>
+
+<div class="game" onclick="window.location.href='tube-jumpers'">
+            <div class="game-title">Tube Jumpers</div>
+        </div>
+
+<div class="game" onclick="window.location.href='tunnelrush'">
+            <div class="game-title">Tunnel Rush</div>
+        </div>
+
+<div class="game" onclick="window.location.href='universal-paperclips'">
+            <div class="game-title">Universal Paperclips</div>
+        </div>
+
+<div class="game" onclick="window.location.href='vex'">
+            <div class="game-title">Vex</div>
+        </div>
+
+<div class="game" onclick="window.location.href='vex2'">
+            <div class="game-title">Vex 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='vex3'">
+            <div class="game-title">Vex 3</div>
+        </div>
+
+<div class="game" onclick="window.location.href='vex4'">
+            <div class="game-title">Vex 4</div>
+        </div>
+
+<div class="game" onclick="window.location.href='vex5'">
+            <div class="game-title">Vex 5</div>
+        </div>
+
+<div class="game" onclick="window.location.href='vex6'">
+            <div class="game-title">Vex 6</div>
+        </div>
+
+<div class="game" onclick="window.location.href='vex7'">
+            <div class="game-title">Vex 7</div>
+        </div>
+
+<div class="game" onclick="window.location.href='volley-random'">
+            <div class="game-title">Volley Random</div>
+        </div>
+
+<div class="game" onclick="window.location.href='wallsmash'">
+            <div class="game-title">Wall Smash</div>
+        </div>
+
+<div class="game" onclick="window.location.href='watermelongame'">
+            <div class="game-title">Watermelon Game</div>
+        </div>
+
+<div class="game" onclick="window.location.href='wbwwb'">
+            <div class="game-title">We Become What We Behold</div>
+        </div>
+
+<div class="game" onclick="window.location.href='weavesilk'">
+            <div class="game-title">Weavesilk</div>
+        </div>
+
+<div class="game" onclick="window.location.href='win11'">
+            <div class="game-title">Windows 11 Simulator</div>
+        </div>
+
+<div class="game" onclick="window.location.href='xp'">
+            <div class="game-title">Windows XP Simulator</div>
+        </div>
+
+<div class="game" onclick="window.location.href='winter-falling'">
+            <div class="game-title">Winter Falling</div>
+        </div>
+
+<div class="game" onclick="window.location.href='wordle'">
+            <div class="game-title">Wordle</div>
+        </div>
+
+<div class="game" onclick="window.location.href='wordlebot'">
+            <div class="game-title">Wordle Bot</div>
+        </div>
+
+<div class="game" onclick="window.location.href='worlds-hardest-game'">
+            <div class="game-title">World's Hardest Game</div>
+        </div>
+
+<div class="game" onclick="window.location.href='worldhardestgame2'">
+            <div class="game-title">World's Hardest Game 2</div>
+        </div>
+
+<div class="game" onclick="window.location.href='xx142-b2.exe'">
+            <div class="game-title">xx142-b2.exe</div>
+        </div>
+
+<div class="game" onclick="window.location.href='zombocalypse'">
+            <div class="game-title">Zombocalypse</div>
+        </div>
+    </div>
+</main>
+
+<div id="particles-js"></div>
+
+<!-- Settings Modal -->
+<div id="settingsModal" class="settings-modal" style="display: none;">
+    <div class="settings-modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>Settings</h2>
+        
+        <!-- Tab Cloaking Section -->
+        <div class="settings-section">
+            <h3>Tab Cloaking</h3>
+            <p>Change how this page appears in your browser</p>
+            
+            <div class="settings-options">
+                <div class="rename-options">
+                    <div class="rename-option active" data-type="gdocs" data-title="Untitled document - Google Docs" data-icon="https://ssl.gstatic.com/docs/documents/images/kix-favicon-2023q4.ico">
+                        <div class="rename-option-icon">??</div>
+                        <div class="rename-option-details">
+                            <div class="rename-option-title">Google Docs</div>
+                            <div class="rename-option-subtitle">Document editor</div>
+                        </div>
+                    </div>
+                    
+                    <div class="rename-option" data-type="gmail" data-title="Inbox - example@gmail.com - Gmail" data-icon="https://ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico">
+                        <div class="rename-option-icon">??</div>
+                        <div class="rename-option-details">
+                            <div class="rename-option-title">Gmail</div>
+                            <div class="rename-option-subtitle">Email service</div>
+                        </div>
+                    </div>
+                    
+                    <div class="rename-option" data-type="gdrive" data-title="My Drive - Google Drive" data-icon="https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png">
+                        <div class="rename-option-icon">??</div>
+                        <div class="rename-option-details">
+                            <div class="rename-option-title">Google Drive</div>
+                            <div class="rename-option-subtitle">File storage</div>
+                        </div>
+                    </div>
+                    
+                    <div class="rename-option" data-type="desmos" data-title="Desmos | Graphing Calculator" data-icon="https://www.desmos.com/assets/img/apps/graphing/favicon.ico">
+                        <div class="rename-option-icon">??</div>
+                        <div class="rename-option-details">
+                            <div class="rename-option-title">Desmos</div>
+                            <div class="rename-option-subtitle">Graphing calculator</div>
+                        </div>
+                    </div>
+                    
+                    <div class="rename-option" data-type="gsheets" data-title="Untitled spreadsheet - Google Sheets" data-icon="https://ssl.gstatic.com/docs/spreadsheets/favicon3.ico">
+                        <div class="rename-option-icon">??</div>
+                        <div class="rename-option-details">
+                            <div class="rename-option-title">Google Sheets</div>
+                            <div class="rename-option-subtitle">Spreadsheet editor</div>
+                        </div>
+                    </div>
+                    
+                    <div class="rename-option" data-type="gslides" data-title="Untitled presentation - Google Slides" data-icon="https://ssl.gstatic.com/docs/presentations/images/favicon5.ico">
+                        <div class="rename-option-icon">???</div>
+                        <div class="rename-option-details">
+                            <div class="rename-option-title">Google Slides</div>
+                            <div class="rename-option-subtitle">Presentation editor</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Email Customization Section (hidden by default) -->
+            <div class="email-customization" id="emailCustomization" style="display: none;">
+                <div class="email-input-group">
+                    <input type="text" id="username" placeholder="username" class="email-input">
+                    <span>@</span>
+                    <input type="text" id="domain" placeholder="gmail.com" class="email-input">
+                    <button class="apply-email">Apply</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Security Settings Section -->
+        <div class="settings-section">
+            <h3>Security Settings</h3>
+            
+            <div class="settings-toggle">
+                <label class="toggle-label">
+                    <span>Require verification to close tab</span>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="verificationToggle">
+                        <span class="toggle-slider"></span>
+                    </div>
+                </label>
+                <div class="toggle-desc">Prevents tab from being closed without verification</div>
+            </div>
+            
+            <div class="settings-toggle">
+                <label class="toggle-label">
+                    <span>Panic Button</span>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="panicButtonToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </div>
+                </label>
+                <div class="toggle-desc">Instantly redirects to your chosen site when pressed</div>
+            </div>
+            
+            <div class="panic-key-setting">
+                <label for="panicKeyInput">Panic Key:</label>
+                <input type="text" id="panicKeyInput" value="[" maxlength="1">
+                <div class="setting-note">Press this key to instantly redirect to your configured panic URL</div>
+                <div class="setting-warning">?? Use an uncommon key to avoid accidental activation</div>
+            </div>
+        </div>
+        
+        <button class="close-settings">Close</button>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<script>
+    // Initialize particles background
+    particlesJS('particles-js', {
+        particles: {
+            number: { value: 80, density: { enable: true, value_area: 800 } },
+            color: { value: '#ffffff' },
+            shape: { type: 'circle', stroke: { width: 0, color: '#000000' }, polygon: { nb_sides: 5 } },
+            opacity: { value: 0.5, random: false, anim: { enable: false, speed: 1, opacity_min: 0.1, sync: false } },
+            size: { value: 3, random: true, anim: { enable: false, speed: 40, size_min: 0.1, sync: false } },
+            line_linked: { enable: true, distance: 150, color: '#ffffff', opacity: 0.4, width: 1 },
+            move: { enable: true, speed: 6, direction: 'none', random: false, straight: false, out_mode: 'out', bounce: false, attract: { enable: false, rotateX: 600, rotateY: 1200 } }
+        },
+        interactivity: {
+            detect_on: 'canvas',
+            events: { onhover: { enable: true, mode: 'repulse' }, onclick: { enable: true, mode: 'push' }, resize: true },
+            modes: { grab: { distance: 400, line_linked: { opacity: 1 } }, bubble: { distance: 400, size: 40, duration: 2, opacity: 8, speed: 3 }, repulse: { distance: 200, duration: 0.4 }, push: { particles_nb: 4 }, remove: { particles_nb: 2 } }
+        },
+        retina_detect: true
+    });
+
+    // Search functionality
+    document.querySelector('.search-bar').addEventListener('input', function() {
+        search();
+    });
+
+    document.querySelector('.search-enter').addEventListener('click', function() {
+        search();
+    });
+
+    function search() {
+        const searchTerm = document.querySelector('.search-bar').value.toLowerCase();
+        const games = document.querySelectorAll('.game');
+        const sections = document.querySelectorAll('.section-header');
+        const requestButton = document.querySelector('.request-button');
+
+        // Always show sections and request button during search
+        sections.forEach(section => {
+            section.style.display = 'block';
+        });
+        
+        if (requestButton) {
+            requestButton.style.display = 'flex';
+        }
+
+        games.forEach(function(game) {
+            const gameTitle = game.querySelector('.game-title').textContent.toLowerCase();
+            
+            if (searchTerm === '' || gameTitle.includes(searchTerm)) {
+                game.style.display = 'flex';
+            } else {
+                game.style.display = 'none';
+            }
+        });
+    }
+</script>
+<script>
+    // Normalize legacy onclick game links to new structure.
+    // Converts relative hrefs like "1/8ball" or "4/cookie-clicker" to "8ball" or "cookie-clicker"
+    // Leaves absolute URLs and root-relative paths unchanged.
+    document.addEventListener('DOMContentLoaded', function () {
+        const games = document.querySelectorAll('#games .game');
+        games.forEach(game => {
+            const onclick = game.getAttribute('onclick');
+            if (!onclick) return;
+
+            const match = onclick.match(/window\.location\.href\s*=\s*['"]([^'"]+)['"]/);
+            if (!match) return;
+            let url = match[1];
+
+            // Preserve absolute, protocol-relative, root-relative, and anchor URLs
+            if (/^(https?:)?\/\//i.test(url) || url.startsWith('/') || url.startsWith('#')) return;
+
+            // Strip a leading numeric folder (e.g., '1/8ball' -> '8ball')
+            const normalized = url.replace(/^[0-9]+\/(.+)$/, '$1');
+            if (normalized !== url) {
+                const newOnclick = onclick.replace(url, normalized);
+                game.setAttribute('onclick', newOnclick);
+            }
+
+            // Also normalize any anchor inside the game tile
+            const anchor = game.querySelector('a');
+            if (anchor && anchor.getAttribute('href')) {
+                const ahref = anchor.getAttribute('href');
+                if (!/^(https?:)?\/\//i.test(ahref) && !ahref.startsWith('/') && !ahref.startsWith('#')) {
+                    const newHref = ahref.replace(/^[0-9]+\/(.+)$/, '$1');
+                    if (newHref !== ahref) anchor.setAttribute('href', newHref);
+                }
+            }
+        });
+    });
+</script>
+
+<script>
+    // Make sure the openSettings function is defined globally
+    function openSettings() {
+        console.log("Settings button clicked");
+        var modal = document.getElementById('settingsModal');
+        if (modal) {
+            modal.style.display = 'flex';
+            loadSavedSettings();
+        } else {
+            console.error("Settings modal not found");
+        }
+    }
+    
+    // Initialize particles background
+    particlesJS('particles-js', {
+        particles: {
+            number: { value: 80, density: { enable: true, value_area: 800 } },
+            color: { value: '#ffffff' },
+            shape: { type: 'circle', stroke: { width: 0, color: '#000000' }, polygon: { nb_sides: 5 } },
+            opacity: { value: 0.5, random: false, anim: { enable: false, speed: 1, opacity_min: 0.1, sync: false } },
+            size: { value: 3, random: true, anim: { enable: false, speed: 40, size_min: 0.1, sync: false } },
+            line_linked: { enable: true, distance: 150, color: '#ffffff', opacity: 0.4, width: 1 },
+            move: { enable: true, speed: 6, direction: 'none', random: false, straight: false, out_mode: 'out', bounce: false, attract: { enable: false, rotateX: 600, rotateY: 1200 } }
+        },
+        interactivity: {
+            detect_on: 'canvas',
+            events: { onhover: { enable: true, mode: 'repulse' }, onclick: { enable: true, mode: 'push' }, resize: true },
+            modes: { grab: { distance: 400, line_linked: { opacity: 1 } }, bubble: { distance: 400, size: 40, duration: 2, opacity: 8, speed: 3 }, repulse: { distance: 200, duration: 0.4 }, push: { particles_nb: 4 }, remove: { particles_nb: 2 } }
+        },
+        retina_detect: true
+    });
+
+    // Search functionality
+    document.querySelector('.search-bar').addEventListener('input', function() {
+        search();
+    });
+
+    document.querySelector('.search-enter').addEventListener('click', function() {
+        search();
+    });
+
+    function search() {
+        const searchTerm = document.querySelector('.search-bar').value.toLowerCase();
+        const games = document.querySelectorAll('.game');
+        const sections = document.querySelectorAll('.section-header');
+        const requestButton = document.querySelector('.request-button');
+
+        // Always show sections and request button during search
+        sections.forEach(section => {
+            section.style.display = 'block';
+        });
+        
+        if (requestButton) {
+            requestButton.style.display = 'flex';
+        }
+
+        games.forEach(function(game) {
+            const gameTitle = game.querySelector('.game-title').textContent.toLowerCase();
+            
+            if (searchTerm === '' || gameTitle.includes(searchTerm)) {
+                game.style.display = 'flex';
+            } else {
+                game.style.display = 'none';
+            }
+        });
+    }
+    
+    // Settings Modal Functionality
+    // Add immediate self-executing function to set up event listeners right away
+    (function() {
+        // Get the settings button and modal
+        const settingsBtn = document.getElementById('settingsBtn');
+        const settingsModal = document.getElementById('settingsModal');
+        const closeModalBtn = document.querySelector('.close-modal');
+        const closeSettingsBtn = document.querySelector('.close-settings');
+        
+        // Add event listener to settings button
+        if (settingsBtn) {
+            settingsBtn.addEventListener('click', function() {
+                console.log('Settings button clicked');
+                if (settingsModal) {
+                    settingsModal.style.display = 'flex';
+                    loadSavedSettings();
+                } else {
+                    console.error('Settings modal not found');
+                }
+            });
+        } else {
+            console.error('Settings button not found');
+        }
+        
+        // Close settings modal
+        if (closeModalBtn) {
+            closeModalBtn.addEventListener('click', function() {
+                settingsModal.style.display = 'none';
+            });
+        }
+        
+        // Save settings and close
+        if (closeSettingsBtn) {
+            closeSettingsBtn.addEventListener('click', function() {
+                saveAllSettings();
+                settingsModal.style.display = 'none';
+            });
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === settingsModal) {
+                settingsModal.style.display = 'none';
+            }
+        });
+        
+        // Apply any saved mimicry settings immediately
+        applySavedMimicry();
+    })();
+    
+    // Also keep the DOMContentLoaded event for other setup
+    document.addEventListener('DOMContentLoaded', function() {
+        // Setup rename options
+        const renameOptions = document.querySelectorAll('.rename-option');
+        renameOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                renameOptions.forEach(opt => opt.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Show/hide email customization for Gmail
+                const emailCustomization = document.getElementById('emailCustomization');
+                if (emailCustomization) {
+                    emailCustomization.style.display = this.dataset.type === 'gmail' ? 'block' : 'none';
+                }
+                
+                // Auto-save when option is selected
+                savePageStyle();
+            });
+        });
+        
+        // Setup email customization
+        const applyEmailBtn = document.querySelector('.apply-email');
+        if (applyEmailBtn) {
+            applyEmailBtn.addEventListener('click', function() {
+                applyCustomEmail();
+            });
+        }
+        
+        // Check if Gmail is selected on load
+        const activeOption = document.querySelector('.rename-option.active');
+        if (activeOption && activeOption.dataset.type === 'gmail') {
+            const emailCustomization = document.getElementById('emailCustomization');
+            if (emailCustomization) {
+                emailCustomization.style.display = 'block';
+            }
+        }
+    });
+    
+    function loadSavedSettings() {
+        // Tab cloaking settings
+        const savedType = localStorage.getItem('pageMimicType');
+        
+        if (savedType) {
+            const options = document.querySelectorAll('.rename-option');
+            options.forEach(opt => {
+                if (opt.dataset.type === savedType) {
+                    opt.classList.add('active');
+                } else {
+                    opt.classList.remove('active');
+                }
+            });
+            
+            // Show/hide email customization if Gmail is selected
+            const emailCustomization = document.getElementById('emailCustomization');
+            if (emailCustomization) {
+                emailCustomization.style.display = savedType === 'gmail' ? 'block' : 'none';
+            }
+        }
+        
+        // Security settings
+        const verificationToggle = document.getElementById('verificationToggle');
+        const panicButtonToggle = document.getElementById('panicButtonToggle');
+        const panicKeyInput = document.getElementById('panicKeyInput');
+        
+        if (verificationToggle) {
+            verificationToggle.checked = localStorage.getItem('verificationEnabled') === 'true';
+        }
+        
+        if (panicButtonToggle) {
+            panicButtonToggle.checked = localStorage.getItem('panicEnabled') !== 'false'; // Default to true
+        }
+        
+        if (panicKeyInput) {
+            panicKeyInput.value = localStorage.getItem('panicKey') || '[';
+        }
+        
+        // Email customization settings
+        const usernameInput = document.getElementById('username');
+        const domainInput = document.getElementById('domain');
+        
+        if (usernameInput && domainInput) {
+            usernameInput.value = localStorage.getItem('emailUsername') || '';
+            domainInput.value = localStorage.getItem('emailDomain') || 'gmail.com';
+        }
+    }
+    
+    function savePageStyle() {
+        const selectedOption = document.querySelector('.rename-option.active');
+        if (selectedOption) {
+            const pageType = selectedOption.dataset.type;
+            let pageTitle = selectedOption.dataset.title;
+            const pageIcon = selectedOption.dataset.icon;
+            
+            // If this is a Gmail type and we have a custom email, use it
+            if (pageType === 'gmail') {
+                const username = localStorage.getItem('emailUsername');
+                const domain = localStorage.getItem('emailDomain');
+                
+                if (username && domain) {
+                    pageTitle = `Inbox - ${username}@${domain} - Gmail`;
+                }
+            }
+            
+            // Save preferences to localStorage
+            localStorage.setItem('pageMimicType', pageType);
+            localStorage.setItem('pageMimicTitle', pageTitle);
+            localStorage.setItem('pageMimicIcon', pageIcon);
+            
+            // Apply changes immediately
+            document.title = pageTitle;
+            const favicon = document.querySelector('link[rel="icon"]');
+            if (favicon) {
+                favicon.href = pageIcon;
+            } else {
+                // Create favicon if it doesn't exist
+                const newFavicon = document.createElement('link');
+                newFavicon.rel = 'icon';
+                newFavicon.href = pageIcon;
+                document.head.appendChild(newFavicon);
+            }
+        }
+    }
+    
+    function applyCustomEmail() {
+        const usernameInput = document.getElementById('username');
+        const domainInput = document.getElementById('domain');
+        
+        if (usernameInput && domainInput) {
+            const username = usernameInput.value.trim();
+            const domain = domainInput.value.trim() || 'gmail.com';
+            
+            // Save to localStorage
+            localStorage.setItem('emailUsername', username);
+            localStorage.setItem('emailDomain', domain);
+            
+            // If Gmail is currently selected, update the title immediately
+            const selectedOption = document.querySelector('.rename-option.active');
+            if (selectedOption && selectedOption.dataset.type === 'gmail') {
+                const newTitle = `Inbox - ${username}@${domain} - Gmail`;
+                document.title = newTitle;
+                localStorage.setItem('pageMimicTitle', newTitle);
+            }
+            
+            // Show brief feedback
+            const applyButton = document.querySelector('.apply-email');
+            if (applyButton) {
+                const originalText = applyButton.textContent;
+                applyButton.textContent = 'Saved!';
+                applyButton.style.backgroundColor = '#4CAF50'; // Green
+                
+                // Reset after a short delay
+                setTimeout(() => {
+                    applyButton.textContent = originalText;
+                    applyButton.style.backgroundColor = '';
+                }, 1500);
+            }
+        }
+    }
+    
+    function saveSecuritySettings() {
+        const verificationToggle = document.getElementById('verificationToggle');
+        const panicButtonToggle = document.getElementById('panicButtonToggle');
+        const panicKeyInput = document.getElementById('panicKeyInput');
+        
+        if (verificationToggle) {
+            localStorage.setItem('verificationEnabled', verificationToggle.checked);
+        }
+        
+        if (panicButtonToggle) {
+            localStorage.setItem('panicEnabled', panicButtonToggle.checked);
+        }
+        
+        if (panicKeyInput && panicKeyInput.value) {
+            localStorage.setItem('panicKey', panicKeyInput.value);
+        }
+        
+        // Reinitialize security features with new settings
+        initSecurityFeatures();
+    }
+    
+    function saveAllSettings() {
+        savePageStyle();
+        saveSecuritySettings();
+    }
+    
+    function applySavedMimicry() {
+        // Check if there's a saved style and apply it
+        const savedTitle = localStorage.getItem('pageMimicTitle');
+        const savedIcon = localStorage.getItem('pageMimicIcon');
+        
+        // Apply saved title if available
+        if (savedTitle) {
+            document.title = savedTitle;
+        }
+        
+        // Apply saved favicon if available
+        if (savedIcon) {
+            const favicon = document.querySelector('link[rel="icon"]');
+            if (favicon) {
+                favicon.href = savedIcon;
+            } else {
+                // Create favicon if it doesn't exist
+                const newFavicon = document.createElement('link');
+                newFavicon.rel = 'icon';
+                newFavicon.href = savedIcon;
+                document.head.appendChild(newFavicon);
+            }
+        }
+        
+        // Initialize security features
+        initSecurityFeatures();
+    }
+    
+    function initSecurityFeatures() {
+        // Initialize panic key
+        initPanicKey();
+        
+        // Initialize tab close prevention
+        initTabClosePrevention();
+    }
+    
+    function initPanicKey() {
+        // Remove any existing event listener to prevent duplicates
+        document.removeEventListener('keydown', handlePanicKey);
+        
+        // Only add listener if panic button is enabled
+        const panicEnabled = localStorage.getItem('panicEnabled') !== 'false'; // Default to true
+        if (panicEnabled) {
+            document.addEventListener('keydown', handlePanicKey);
+        }
+    }
+
+    function getPanicRedirectUrl() {
+        const savedRedirectUrl = (localStorage.getItem('panicRedirectUrl') || '').trim();
+        if (!savedRedirectUrl) {
+            return 'https://www.google.com';
+        }
+
+        if (/^https?:\/\//i.test(savedRedirectUrl)) {
+            return savedRedirectUrl;
+        }
+
+        return `https://${savedRedirectUrl}`;
+    }
+    
+    function handlePanicKey(event) {
+        const panicKey = localStorage.getItem('panicKey') || '[';
+        if (event.key === panicKey) {
+            // Set a flag that this is a panic activation so verification can be bypassed
+            sessionStorage.setItem('panicActivation', 'true');
+            
+            // Redirect to the configured panic URL immediately
+            window.location.href = getPanicRedirectUrl();
+        }
+    }
+    
+    function initTabClosePrevention() {
+        const verificationEnabled = localStorage.getItem('verificationEnabled') === 'true';
+        
+        // Remove any existing event listener
+        window.onbeforeunload = null;
+        
+        if (verificationEnabled) {
+            window.onbeforeunload = function(e) {
+                // Check if this is a panic button activation
+                const isPanicActivation = sessionStorage.getItem('panicActivation') === 'true';
+                if (isPanicActivation) {
+                    // Clear the flag and allow the navigation
+                    sessionStorage.removeItem('panicActivation');
+                    return undefined;
+                }
+                
+                // Otherwise show the confirmation dialog
+                return "Are you sure you want to leave this page?";
+            };
+        }
+    }
+</script>
+<script>
+    (function() {
+        const STARRED_STORAGE_KEY = 'sggamesStarredGames';
+
+        function safeParseStarredGames() {
+            try {
+                const raw = localStorage.getItem(STARRED_STORAGE_KEY);
+                const parsed = JSON.parse(raw || '[]');
+                return new Set(Array.isArray(parsed) ? parsed : []);
+            } catch (error) {
+                return new Set();
+            }
+        }
+
+        function saveStarredGames(starredSet) {
+            localStorage.setItem(STARRED_STORAGE_KEY, JSON.stringify(Array.from(starredSet)));
+        }
+
+        function extractGameHref(gameCard) {
+            const onclick = gameCard.getAttribute('onclick') || '';
+            const onclickMatch = onclick.match(/window\.location\.href\s*=\s*['"]([^'"]+)['"]/);
+            if (onclickMatch && onclickMatch[1]) {
+                return onclickMatch[1];
+            }
+
+            const anchor = gameCard.querySelector('a[href]');
+            if (anchor) {
+                return anchor.getAttribute('href');
+            }
+
+            return '';
+        }
+
+        function getGameTitle(gameCard) {
+            const titleElement = gameCard.querySelector('.game-title');
+            return titleElement ? titleElement.textContent.trim() : '';
+        }
+
+        function getGameKey(gameCard) {
+            const href = extractGameHref(gameCard);
+            if (href) {
+                return `href:${href}`;
+            }
+            return `title:${getGameTitle(gameCard).toLowerCase()}`;
+        }
+
+        function updateStarButton(button, isStarred) {
+            button.classList.toggle('filled', isStarred);
+            button.innerHTML = isStarred
+                ? '<i class="fas fa-star" aria-hidden="true"></i>'
+                : '<i class="far fa-star" aria-hidden="true"></i>';
+            button.setAttribute('aria-pressed', isStarred ? 'true' : 'false');
+            button.setAttribute('title', isStarred ? 'Unstar game' : 'Star game');
+        }
+
+        function applyStarStateToCards(gameKey, isStarred) {
+            document.querySelectorAll('.game[data-game-key]').forEach(card => {
+                if (card.dataset.gameKey === gameKey) {
+                    const button = card.querySelector('.game-star-btn');
+                    if (button) {
+                        updateStarButton(button, isStarred);
+                    }
+                }
+            });
+        }
+
+        function createStarButton(gameKey, starredSet, onToggle) {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'game-star-btn';
+            button.dataset.gameKey = gameKey;
+            button.setAttribute('aria-label', 'Toggle starred game');
+            updateStarButton(button, starredSet.has(gameKey));
+
+            button.addEventListener('click', function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                onToggle(gameKey);
+            });
+
+            return button;
+        }
+
+        function buildStarredSection() {
+            const main = document.querySelector('main');
+            const gamesGrid = document.getElementById('games');
+            if (!main || !gamesGrid) {
+                return null;
+            }
+
+            let section = document.getElementById('starred-games-section');
+            if (section) {
+                return section;
+            }
+
+            section = document.createElement('div');
+            section.id = 'starred-games-section';
+            section.innerHTML = `
+                <div class="section-header">Starred Games</div>
+                <div id="starred-games-grid"></div>
+                <div id="starred-games-empty">Star games to keep your favorites here.</div>
+            `;
+            main.insertBefore(section, gamesGrid);
+            return section;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const allMainGameCards = Array.from(document.querySelectorAll('#games > .game'));
+            if (!allMainGameCards.length) {
+                return;
+            }
+
+            const starredSet = safeParseStarredGames();
+            const gamesByKey = new Map();
+            const starredSection = buildStarredSection();
+            if (!starredSection) {
+                return;
+            }
+
+            const starredGrid = starredSection.querySelector('#starred-games-grid');
+            const emptyState = starredSection.querySelector('#starred-games-empty');
+
+            function renderStarredCards() {
+                starredGrid.innerHTML = '';
+
+                allMainGameCards.forEach(mainCard => {
+                    const gameKey = mainCard.dataset.gameKey;
+                    if (!gameKey || !starredSet.has(gameKey)) {
+                        return;
+                    }
+
+                    const sourceData = gamesByKey.get(gameKey);
+                    if (!sourceData) {
+                        return;
+                    }
+
+                    const starredCard = document.createElement('div');
+                    starredCard.className = 'game';
+                    starredCard.dataset.gameKey = gameKey;
+
+                    const onclick = sourceData.onclick;
+                    if (onclick) {
+                        starredCard.setAttribute('onclick', onclick);
+                    }
+
+                    const title = document.createElement('div');
+                    title.className = 'game-title';
+                    title.textContent = sourceData.title;
+                    starredCard.appendChild(title);
+
+                    const starButton = createStarButton(gameKey, starredSet, toggleGameStar);
+                    starredCard.appendChild(starButton);
+                    starredGrid.appendChild(starredCard);
+                });
+
+                const hasStarredGames = starredGrid.children.length > 0;
+                emptyState.style.display = hasStarredGames ? 'none' : 'block';
+            }
+
+            function toggleGameStar(gameKey) {
+                if (starredSet.has(gameKey)) {
+                    starredSet.delete(gameKey);
+                } else {
+                    starredSet.add(gameKey);
+                }
+
+                saveStarredGames(starredSet);
+                const isNowStarred = starredSet.has(gameKey);
+                applyStarStateToCards(gameKey, isNowStarred);
+                renderStarredCards();
+            }
+
+            allMainGameCards.forEach(card => {
+                const gameKey = getGameKey(card);
+                const title = getGameTitle(card);
+                const onclick = card.getAttribute('onclick') || '';
+
+                card.dataset.gameKey = gameKey;
+                gamesByKey.set(gameKey, { title: title, onclick: onclick });
+
+                const existingStar = card.querySelector('.game-star-btn');
+                if (existingStar) {
+                    existingStar.remove();
+                }
+
+                const starButton = createStarButton(gameKey, starredSet, toggleGameStar);
+                card.appendChild(starButton);
+            });
+
+            renderStarredCards();
+        });
+    })();
+
+    const SURVEY_POPUP_STORAGE_KEY = 'sggamesSeenSurveyPopup';
+    const DOMAIN_CHANGE_POPUP_STORAGE_KEY = 'sggamesSeenDomainChangePopupGames';
+
+    document.addEventListener('DOMContentLoaded', function setupSurveyPopup() {
+        const overlay = document.getElementById('surveyPopupOverlay');
+        const actionLink = document.getElementById('surveyPopupActionLink');
+        if (!overlay) {
+            return;
+        }
+
+        function showPopup() {
+            overlay.classList.add('visible');
+            overlay.setAttribute('aria-hidden', 'false');
+        }
+
+        if (localStorage.getItem(SURVEY_POPUP_STORAGE_KEY) !== 'true') {
+            showPopup();
+        }
+
+        function closePopupAndRemember() {
+            overlay.classList.remove('visible');
+            overlay.setAttribute('aria-hidden', 'true');
+        }
+
+        if (actionLink) {
+            actionLink.addEventListener('click', function() {
+                localStorage.setItem(SURVEY_POPUP_STORAGE_KEY, 'true');
+                closePopupAndRemember();
+            });
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function setupDomainChangePopup() {
+        const overlay = document.getElementById('domainChangePopupOverlay');
+        const closeX = document.getElementById('domainChangePopupCloseX');
+        const closeBtn = document.getElementById('domainChangePopupCloseBtn');
+        if (!overlay) {
+            return;
+        }
+
+        function showPopup() {
+            overlay.classList.add('visible');
+            overlay.setAttribute('aria-hidden', 'false');
+        }
+
+        if (
+            localStorage.getItem(SURVEY_POPUP_STORAGE_KEY) === 'true' &&
+            localStorage.getItem(DOMAIN_CHANGE_POPUP_STORAGE_KEY) !== 'true'
+        ) {
+            showPopup();
+        }
+
+        function closePopupAndRemember() {
+            localStorage.setItem(DOMAIN_CHANGE_POPUP_STORAGE_KEY, 'true');
+            overlay.classList.remove('visible');
+            overlay.setAttribute('aria-hidden', 'true');
+        }
+
+        if (closeX) {
+            closeX.addEventListener('click', closePopupAndRemember);
+        }
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closePopupAndRemember);
+        }
+
+        overlay.addEventListener('click', function(event) {
+            if (event.target === overlay) {
+                closePopupAndRemember();
+            }
+        });
+    });
+</script>
+
+    <div id="surveyPopupOverlay" class="update-popup-overlay" aria-hidden="true">
+        <div class="update-popup" role="dialog" aria-modal="true" aria-labelledby="surveyPopupTitle">
+            <div class="update-popup-header">
+                <span id="surveyPopupTitle">Quick Favor</span>
+            </div>
+            <div class="update-popup-content">
+                <p class="update-popup-subtitle">Would you mind filling out this short form?</p>
+                <ul class="update-popup-list">
+                    <li>I&apos;d really appreciate your feedback.</li>
+                    <li>It helps improve the site and the games page.</li>
+                </ul>
+            </div>
+            <div class="update-popup-actions">
+                <a
+                    id="surveyPopupActionLink"
+                    class="update-popup-btn"
+                    href="https://forms.gle/WttELRmPbpUzDWJ68"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    Open Survey
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div id="domainChangePopupOverlay" class="update-popup-overlay" aria-hidden="true">
+        <div class="update-popup" role="dialog" aria-modal="true" aria-labelledby="domainChangePopupTitle">
+            <div class="update-popup-header">
+                <span id="domainChangePopupTitle">Important: Domain Change</span>
+                <button id="domainChangePopupCloseX" class="update-popup-close" type="button" aria-label="Close domain change popup">&times;</button>
+            </div>
+            <div class="update-popup-content">
+                <p class="update-popup-subtitle">Notice:</p>
+                <ul class="update-popup-list">
+                    <li>Our current domain <strong>googledocs1234.github.io</strong> is being blocked.</li>
+                    <li>Please visit our new domain: <strong>googledocs123456.github.io</strong></li>
+                    <li>All games and features are available at the new site.</li>
+                </ul>
+            </div>
+            <div class="update-popup-actions">
+                <button id="domainChangePopupCloseBtn" class="update-popup-btn" type="button">Got it</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+
+
