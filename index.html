@@ -3108,7 +3108,7 @@ function openGame(g) {
   gameOverlay.classList.add('show');
   document.body.style.overflow = 'hidden';
   setTimeout(() => {
-    gameFrame.src = 'games/' + g.id + '/';
+    gameFrame.src = g.src || ('games/' + g.id + '/');
   }, 60);
 }
 function closeGame() {
