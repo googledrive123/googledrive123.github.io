@@ -1095,6 +1095,166 @@
     @media (max-width: 420px) {
       .grid { grid-template-columns: repeat(2, 1fr); }
     }
+
+    /* ───────────── GAME IFRAME OVERLAY ───────────── */
+    .game-overlay {
+      position: fixed; inset: 0; z-index: 500;
+      background: var(--bg);
+      display: none;
+      flex-direction: column;
+    }
+    .game-overlay.show { display: flex; }
+    .game-bar {
+      height: 48px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0 1rem;
+      flex-shrink: 0;
+    }
+    .game-bar-back {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.82rem;
+      padding: 0.35rem 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .game-bar-back:hover { border-color: var(--accent); color: var(--accent); }
+    .game-bar-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .game-bar-fs {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 0.78rem;
+      padding: 0.35rem 0.85rem;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .game-bar-fs:hover { border-color: var(--border-strong); color: var(--text); }
+    .game-frame-wrap { flex: 1; position: relative; overflow: hidden; }
+    #gameFrame { width: 100%; height: 100%; border: 0; }
+    .game-loader {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 1rem;
+      background: var(--bg);
+      transition: opacity 0.5s;
+      pointer-events: none;
+    }
+    .game-loader.hidden { opacity: 0; }
+    .game-loader-spinner {
+      width: 40px; height: 40px;
+      border: 2px solid var(--border-strong);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .game-loader-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem; letter-spacing: 0.22em;
+      text-transform: uppercase; color: var(--muted);
+    }
+
+    /* ───────────── SETTINGS MODAL ───────────── */
+    .settings-box {
+      width: min(500px, 94vw);
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: 22px;
+      padding: 1.75rem;
+      position: relative;
+      box-shadow: 0 30px 100px rgba(0,0,0,0.7);
+      animation: rollIn 0.3s cubic-bezier(0.2,0.8,0.2,1);
+      max-height: 88vh;
+      overflow-y: auto;
+    }
+    .settings-head {
+      display: flex; align-items: center; gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+    .settings-head h3 { font-size: 1.2rem; font-weight: 600; letter-spacing: -0.02em; flex: 1; }
+    .settings-section { margin-bottom: 1.4rem; }
+    .settings-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.63rem; letter-spacing: 0.24em;
+      text-transform: uppercase; color: var(--muted);
+      margin-bottom: 0.6rem;
+    }
+    .cloak-presets {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem;
+      margin-bottom: 0.6rem;
+    }
+    .cloak-preset {
+      display: flex; align-items: center; gap: 0.55rem;
+      padding: 0.6rem 0.8rem;
+      border: 1px solid var(--border); border-radius: 10px;
+      background: transparent; color: var(--text);
+      cursor: pointer; font-family: inherit;
+      font-size: 0.84rem; font-weight: 500;
+      transition: background 0.15s, border-color 0.15s;
+      text-align: left;
+    }
+    .cloak-preset:hover { background: rgba(255,255,255,0.04); border-color: var(--border-strong); }
+    .cloak-preset.active { border-color: var(--accent); background: rgba(255,59,59,0.07); color: var(--accent); }
+    .cloak-preset img { width: 16px; height: 16px; object-fit: contain; }
+    .cloak-custom-row { display: flex; gap: 0.45rem; margin-bottom: 0.45rem; }
+    .settings-input {
+      flex: 1; padding: 0.6rem 0.85rem;
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 10px; color: var(--text);
+      font-size: 0.88rem; font-family: inherit;
+      outline: none; transition: border-color 0.15s;
+    }
+    .settings-input:focus { border-color: var(--accent); }
+    .settings-input::placeholder { color: var(--muted-2); }
+    .settings-apply {
+      padding: 0.6rem 1.1rem;
+      background: var(--accent); color: #fff;
+      border: 0; border-radius: 10px;
+      font-family: inherit; font-size: 0.85rem; font-weight: 600;
+      cursor: pointer; white-space: nowrap;
+      transition: opacity 0.15s;
+    }
+    .settings-apply:hover { opacity: 0.85; }
+    .cloak-reset {
+      background: transparent; border: 1px solid var(--border);
+      border-radius: 10px; color: var(--muted);
+      font-family: inherit; font-size: 0.82rem;
+      padding: 0.5rem 0.9rem;
+      cursor: pointer; margin-top: 0.2rem;
+      transition: border-color 0.15s, color 0.15s;
+      width: 100%;
+    }
+    .cloak-reset:hover { border-color: var(--border-strong); color: var(--text); }
+    .settings-btn {
+      background: transparent; border: 1px solid var(--border);
+      border-radius: 50%; color: var(--muted);
+      width: 34px; height: 34px;
+      display: grid; place-items: center;
+      cursor: pointer; flex-shrink: 0;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .settings-btn:hover { border-color: var(--border-strong); color: var(--text); }
   </style>
 </head>
 <body>
@@ -1119,6 +1279,9 @@
 <section id="welcome">
   <div class="welcome-top">
     <span class="brand"><span class="dot"></span>GAMEVAULT</span>
+    <button class="settings-btn" id="settingsBtnWelcome" title="Settings" aria-label="Settings">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
     <div class="bell" id="bellWelcome" aria-live="polite">
       <span class="date-lbl"><span class="lbl">today · </span><span class="val" data-bell="date">—</span></span>
       <span class="sep"></span>
@@ -1197,6 +1360,9 @@
       <input type="text" id="search" placeholder="Search the vault…" autocomplete="off" spellcheck="false">
       <span class="kbd-hint">/</span>
     </div>
+    <button class="settings-btn" id="settingsBtnBrowse" title="Settings" aria-label="Settings">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
     <div class="bell" id="bellHeader" aria-live="polite">
       <span class="date-lbl"><span class="val" data-bell="date">—</span></span>
       <span class="sep"></span>
@@ -1251,6 +1417,67 @@
     </div>
   </main>
 </section>
+
+<!-- ─────────────────── GAME IFRAME ─────────────────── -->
+<div class="game-overlay" id="gameOverlay">
+  <div class="game-bar">
+    <button class="game-bar-back" id="gameBack">← Back</button>
+    <span class="game-bar-title" id="gameTitle"></span>
+    <button class="game-bar-fs" id="gameFullscreen">⛶ Fullscreen</button>
+  </div>
+  <div class="game-frame-wrap">
+    <iframe id="gameFrame" allowfullscreen allow="autoplay; fullscreen *; gamepad *;"></iframe>
+    <div class="game-loader" id="gameLoader">
+      <div class="game-loader-spinner"></div>
+      <div class="game-loader-text">Loading game…</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────── SETTINGS MODAL ─────────────────── -->
+<div class="roll-overlay" id="settingsOverlay" role="dialog" aria-label="Settings">
+  <div class="settings-box">
+    <button class="roll-close" id="settingsClose" aria-label="Close">✕</button>
+    <div class="settings-head">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <h3>Settings</h3>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-label">Tab Cloak — disguise this tab</div>
+      <div class="cloak-presets" id="cloakPresets">
+        <button class="cloak-preset" data-id="docs" data-title="Untitled document - Google Docs" data-icon="https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico">
+          <img src="https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico" alt=""> Google Docs
+        </button>
+        <button class="cloak-preset" data-id="drive" data-title="My Drive - Google Drive" data-icon="https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png">
+          <img src="https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png" alt=""> Google Drive
+        </button>
+        <button class="cloak-preset" data-id="classroom" data-title="Home - Google Classroom" data-icon="https://ssl.gstatic.com/classroom/favicon.png">
+          <img src="https://ssl.gstatic.com/classroom/favicon.png" alt=""> Classroom
+        </button>
+        <button class="cloak-preset" data-id="khan" data-title="Khan Academy | Free Online Courses" data-icon="https://cdn.kastatic.org/images/favicon.ico">
+          <img src="https://cdn.kastatic.org/images/favicon.ico" alt=""> Khan Academy
+        </button>
+        <button class="cloak-preset" data-id="canvas" data-title="Dashboard | Canvas" data-icon="https://du11hjcvx0uqb.cloudfront.net/dist/images/favicon-e10d657a73.ico">
+          <img src="https://du11hjcvx0uqb.cloudfront.net/dist/images/favicon-e10d657a73.ico" alt=""> Canvas
+        </button>
+        <button class="cloak-preset" data-id="schoology" data-title="Schoology" data-icon="https://asset-cdn.schoology.com/sites/all/themes/schoology_theme/favicon.ico">
+          <img src="https://asset-cdn.schoology.com/sites/all/themes/schoology_theme/favicon.ico" alt=""> Schoology
+        </button>
+      </div>
+      <div class="settings-label" style="margin-top:0.9rem">Custom tab name</div>
+      <div class="cloak-custom-row">
+        <input class="settings-input" id="cloakCustomTitle" placeholder="Tab title…" maxlength="120" autocomplete="off">
+        <button class="settings-apply" id="cloakApplyCustom">Apply</button>
+      </div>
+      <div class="settings-label" style="margin-top:0.65rem">Custom favicon URL (optional)</div>
+      <div class="cloak-custom-row">
+        <input class="settings-input" id="cloakCustomIcon" placeholder="https://example.com/favicon.ico" autocomplete="off">
+      </div>
+      <button class="cloak-reset" id="cloakReset">Reset to default (GameVault)</button>
+    </div>
+  </div>
+</div>
 
 <script>
 const CATS = ['All','Action','Arcade','Platformer','Puzzle','Racing','Sports','Strategy','Idle','Simulation','Horror','Rhythm','Multiplayer','RPG'];
@@ -2044,8 +2271,12 @@ function makeTile(g, opts = {}) {
   a.style.setProperty('--bx', p.x + '%');
   a.style.setProperty('--by', p.y + '%');
 
-  // Track recent on click
-  a.addEventListener('click', () => addRecent(g.id));
+  // Open game in iframe overlay
+  a.addEventListener('click', (e) => {
+    e.preventDefault();
+    addRecent(g.id);
+    openGame(g);
+  });
 
   if (opts.featured) {
     const flabel = document.createElement('div');
@@ -2153,6 +2384,130 @@ function render() {
   // Featured tile removed — just render the list straight
   list.forEach(g => grid.appendChild(makeTile(g)));
 }
+
+// ───── Game iframe ─────
+const gameOverlay  = document.getElementById('gameOverlay');
+const gameFrame    = document.getElementById('gameFrame');
+const gameTitle    = document.getElementById('gameTitle');
+const gameLoader   = document.getElementById('gameLoader');
+const gameBack     = document.getElementById('gameBack');
+const gameFS       = document.getElementById('gameFullscreen');
+
+function openGame(g) {
+  gameTitle.textContent = g.name;
+  gameLoader.classList.remove('hidden');
+  gameFrame.src = '';
+  gameOverlay.classList.add('show');
+  document.body.style.overflow = 'hidden';
+  // small delay so overlay renders before heavy iframe starts
+  setTimeout(() => {
+    gameFrame.src = 'games/' + g.id + '/';
+  }, 60);
+}
+function closeGame() {
+  gameOverlay.classList.remove('show');
+  gameFrame.src = '';
+  document.body.style.overflow = '';
+}
+gameFrame.addEventListener('load', () => {
+  gameLoader.classList.add('hidden');
+});
+gameBack.addEventListener('click', closeGame);
+gameFS.addEventListener('click', () => {
+  const el = gameFrame;
+  if (el.requestFullscreen) el.requestFullscreen();
+  else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && gameOverlay.classList.contains('show')) closeGame();
+});
+
+// ───── Tab Cloak ─────
+const CLOAK_KEY = 'gv.cloak.v1';
+const DEFAULT_TITLE = 'GameVault';
+const originalFavicon = (() => {
+  const el = document.querySelector("link[rel~='icon']");
+  return el ? el.href : '';
+})();
+
+function getFaviconEl() {
+  let el = document.querySelector("link[rel~='icon']");
+  if (!el) {
+    el = document.createElement('link');
+    el.rel = 'icon';
+    document.head.appendChild(el);
+  }
+  return el;
+}
+function applyCloak(title, icon) {
+  document.title = title || DEFAULT_TITLE;
+  const el = getFaviconEl();
+  el.href = icon || originalFavicon || '';
+}
+function loadCloak() {
+  try { return JSON.parse(localStorage.getItem(CLOAK_KEY)); } catch { return null; }
+}
+function saveCloak(data) {
+  try { localStorage.setItem(CLOAK_KEY, JSON.stringify(data)); } catch {}
+}
+function clearCloak() {
+  try { localStorage.removeItem(CLOAK_KEY); } catch {}
+}
+
+const savedCloak = loadCloak();
+if (savedCloak) applyCloak(savedCloak.title, savedCloak.icon);
+
+function openSettings() {
+  settingsOverlay.classList.add('show');
+  // Reflect current active preset
+  const c = loadCloak();
+  document.querySelectorAll('.cloak-preset').forEach(btn => {
+    btn.classList.toggle('active', !!(c && c.presetId === btn.dataset.id));
+  });
+  if (c && !c.presetId) {
+    document.getElementById('cloakCustomTitle').value = c.title || '';
+    document.getElementById('cloakCustomIcon').value = c.icon || '';
+  }
+}
+function closeSettings() { settingsOverlay.classList.remove('show'); }
+
+const settingsOverlay = document.getElementById('settingsOverlay');
+document.getElementById('settingsClose').addEventListener('click', closeSettings);
+settingsOverlay.addEventListener('click', (e) => { if (e.target === settingsOverlay) closeSettings(); });
+document.getElementById('settingsBtnWelcome').addEventListener('click', openSettings);
+document.getElementById('settingsBtnBrowse').addEventListener('click', openSettings);
+
+document.querySelectorAll('.cloak-preset').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const data = { presetId: btn.dataset.id, title: btn.dataset.title, icon: btn.dataset.icon };
+    saveCloak(data);
+    applyCloak(data.title, data.icon);
+    document.querySelectorAll('.cloak-preset').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+document.getElementById('cloakApplyCustom').addEventListener('click', () => {
+  const title = document.getElementById('cloakCustomTitle').value.trim();
+  const icon  = document.getElementById('cloakCustomIcon').value.trim();
+  if (!title) return;
+  const data = { title, icon };
+  saveCloak(data);
+  applyCloak(title, icon);
+  document.querySelectorAll('.cloak-preset').forEach(b => b.classList.remove('active'));
+});
+
+document.getElementById('cloakReset').addEventListener('click', () => {
+  clearCloak();
+  applyCloak(DEFAULT_TITLE, originalFavicon);
+  document.querySelectorAll('.cloak-preset').forEach(b => b.classList.remove('active'));
+  document.getElementById('cloakCustomTitle').value = '';
+  document.getElementById('cloakCustomIcon').value = '';
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && settingsOverlay.classList.contains('show')) closeSettings();
+});
 
 buildCatBar();
 const searchInput = document.getElementById('search');
