@@ -50,6 +50,7 @@
       transform-origin: center top;
       animation: gridScroll 12s linear infinite;
       mask-image: linear-gradient(to bottom, transparent 0%, black 25%, black 80%, transparent 100%);
+      will-change: background-position;
     }
     @keyframes gridScroll {
       from { background-position: 0 0; }
@@ -945,6 +946,7 @@
     }
     .search-wrap.focused .kbd-hint,
     .search-wrap.has-value .kbd-hint { opacity: 0; }
+    .load-sentinel { height: 1px; }
     .tile {
       position: relative;
       aspect-ratio: 4 / 3;
@@ -956,6 +958,7 @@
       isolation: isolate;
       background: var(--surface);
       border: 1px solid var(--border);
+      contain: layout style;
       transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
                   box-shadow 0.25s,
                   border-color 0.2s;
@@ -3111,6 +3114,38 @@ function makeTile(g, opts = {}) {
   return a;
 }
 
+const PAGE = 60;
+let renderList = [];
+let renderOffset = 0;
+let scrollObserver = null;
+
+function appendPage() {
+  const grid = document.getElementById('grid');
+  const batch = renderList.slice(renderOffset, renderOffset + PAGE);
+  const frag = document.createDocumentFragment();
+  batch.forEach(g => frag.appendChild(makeTile(g)));
+  renderOffset += batch.length;
+
+  // Remove old sentinel if present
+  const old = grid.querySelector('.load-sentinel');
+  if (old) old.remove();
+
+  grid.appendChild(frag);
+
+  if (renderOffset < renderList.length) {
+    const sentinel = document.createElement('div');
+    sentinel.className = 'load-sentinel';
+    grid.appendChild(sentinel);
+    if (scrollObserver) scrollObserver.disconnect();
+    scrollObserver = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) appendPage();
+    }, { rootMargin: '200px' });
+    scrollObserver.observe(sentinel);
+  } else {
+    if (scrollObserver) { scrollObserver.disconnect(); scrollObserver = null; }
+  }
+}
+
 function render() {
   const grid = document.getElementById('grid');
   const label = document.getElementById('countLabel');
@@ -3128,7 +3163,8 @@ function render() {
     const searchOk = !q || g.name.toLowerCase().includes(q) || g.id.toLowerCase().includes(q);
     return catOk && searchOk;
   });
-  const list = sortGames(filtered);
+  renderList = sortGames(filtered);
+  renderOffset = 0;
 
   const isDefaultView = activeCat === 'All' && !q;
 
@@ -3166,10 +3202,11 @@ function render() {
 
   // ─── All games ───
   heading.textContent = isDefaultView ? 'All games' : (activeCat === 'All' ? 'Results' : activeCat);
-  label.textContent = list.length;
+  label.textContent = renderList.length;
   grid.innerHTML = '';
+  if (scrollObserver) { scrollObserver.disconnect(); scrollObserver = null; }
 
-  if (!list.length) {
+  if (!renderList.length) {
     const e = document.createElement('div');
     e.className = 'empty';
     e.innerHTML = '<div class="big">Nothing matches</div>Try a different search or category.';
@@ -3177,8 +3214,7 @@ function render() {
     return;
   }
 
-  // Featured tile removed — just render the list straight
-  list.forEach(g => grid.appendChild(makeTile(g)));
+  appendPage();
 }
 
 // ───── Game iframe ─────
