@@ -1,7 +1,7 @@
-﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8"><script>(function(){var r=sessionStorage.getItem('gv.redirect');if(r){sessionStorage.removeItem('gv.redirect');history.replaceState(null,null,r);}})();</script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GameVault</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1148,6 +1148,23 @@
       transition: border-color 0.15s, color 0.15s;
     }
     .game-bar-fs:hover { border-color: var(--border-strong); color: var(--text); }
+    .game-bar-newtab {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 0.78rem;
+      padding: 0.35rem 0.85rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: border-color 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+    .game-bar-newtab:hover { border-color: var(--border-strong); color: var(--text); }
+    .bell-game { font-size: 0.65rem; letter-spacing: 0.12em; backdrop-filter: none; padding: 0.3rem 0.7rem; }
+    .bell-game .sep { height: 10px; }
+
     .game-frame-wrap { flex: 1; position: relative; overflow: hidden; }
     #gameFrame { width: 100%; height: 100%; border: 0; }
     .game-loader {
@@ -1278,6 +1295,7 @@
 <section id="welcome">
   <div class="welcome-top">
     <span class="brand"><span class="dot"></span>GAMEVAULT</span>
+    <div style="display:flex;align-items:center;gap:0.75rem;">
     <button class="settings-btn" id="settingsBtnWelcome" title="Settings" aria-label="Settings">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </button>
@@ -1290,6 +1308,7 @@
       <span class="sep"></span>
       <span><span class="lbl">ends</span> <span class="val" data-bell="endsAt">—</span></span>
       <span class="bell-progress" data-bell="progress"></span>
+    </div>
     </div>
   </div>
 
@@ -1422,7 +1441,16 @@
   <div class="game-bar">
     <button class="game-bar-back" id="gameBack">← Back</button>
     <span class="game-bar-title" id="gameTitle"></span>
-    <button class="game-bar-fs" id="gameFullscreen">⛶ Fullscreen</button>
+
+    <div class="bell bell-game" id="bellGame" aria-live="polite">
+      <span class="period" data-bell="period">&#8212;</span>
+      <span class="sep"></span>
+      <span class="clock" data-bell="clock">&#8212;&#8212;:&#8212;&#8212;</span>
+      <span class="sep"></span>
+      <span><span class="lbl">ends</span> <span class="val" data-bell="endsAt">&#8212;</span></span>
+      <span class="bell-progress" data-bell="progress"></span>
+    </div>
+    <a class="game-bar-newtab" id="gameNewTab" href="#" target="_blank" rel="noopener">&#8599; New Tab</a>    <button class="game-bar-fs" id="gameFullscreen">⛶ Fullscreen</button>
   </div>
   <div class="game-frame-wrap">
     <iframe id="gameFrame" allowfullscreen allow="autoplay; fullscreen *; gamepad *;"></iframe>
@@ -2845,19 +2873,19 @@ function showBrowse() {
   document.getElementById('welcome').classList.add('hidden');
   document.getElementById('browse').classList.add('visible');
   window.scrollTo(0, 0);
-  history.replaceState(null, '', '#browse');
+  history.pushState({page:'browse'}, '', '/games');
 }
 function showWelcome() {
   document.getElementById('welcome').classList.remove('hidden');
   document.getElementById('browse').classList.remove('visible');
   window.scrollTo(0, 0);
-  history.replaceState(null, '', '#');
+  history.pushState({page:'welcome'}, '', '/');
 }
 
 document.getElementById('enterBtn').addEventListener('click', showBrowse);
 document.getElementById('logoBtn').addEventListener('click', showWelcome);
 
-if (location.hash === '#browse') showBrowse();
+(function initRoute(){var p=location.pathname;if(p==='/games'||p==='/games/'){document.getElementById('welcome').classList.add('hidden');document.getElementById('browse').classList.add('visible');}else if(p.startsWith('/games/')){var id=p.slice(7).replace(/\/$/,'');document.getElementById('welcome').classList.add('hidden');document.getElementById('browse').classList.add('visible');var g=GAMES.find(function(x){return x.id===id;});if(g)setTimeout(function(){openGame(g);},100);}})();
 
 // ───── Slot-machine random roll ─────
 const rollOverlay = document.getElementById('rollOverlay');
@@ -3208,13 +3236,16 @@ const gameTitle    = document.getElementById('gameTitle');
 const gameLoader   = document.getElementById('gameLoader');
 const gameBack     = document.getElementById('gameBack');
 const gameFS       = document.getElementById('gameFullscreen');
+const gameNewTab   = document.getElementById('gameNewTab');
 
 function openGame(g) {
   gameTitle.textContent = g.name;
+  gameNewTab.href = g.src || ('games/' + g.id + '/');
   gameLoader.classList.remove('hidden');
   gameFrame.src = '';
   gameOverlay.classList.add('show');
   document.body.style.overflow = 'hidden';
+  history.pushState({page:'game',gameId:g.id}, '', '/games/' + g.id);
   setTimeout(() => {
     gameFrame.src = g.src || ('games/' + g.id + '/');
   }, 60);
@@ -3223,6 +3254,9 @@ function closeGame() {
   gameOverlay.classList.remove('show');
   gameFrame.src = '';
   document.body.style.overflow = '';
+  if (location.pathname.startsWith('/games/')) {
+    history.pushState({page:'browse'}, '', '/games');
+  }
 }
 gameFrame.addEventListener('load', () => {
   gameLoader.classList.add('hidden');
@@ -3237,6 +3271,32 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && gameOverlay.classList.contains('show')) closeGame();
 });
 
+
+// ─── Popstate (back/forward) ───
+window.addEventListener('popstate', function() {
+  var p = location.pathname;
+  if (p === '/' || p === '') {
+    document.getElementById('welcome').classList.remove('hidden');
+    document.getElementById('browse').classList.remove('visible');
+    if (gameOverlay.classList.contains('show')) { gameOverlay.classList.remove('show'); gameFrame.src = ''; document.body.style.overflow = ''; }
+  } else if (p === '/games' || p === '/games/') {
+    document.getElementById('welcome').classList.add('hidden');
+    document.getElementById('browse').classList.add('visible');
+    if (gameOverlay.classList.contains('show')) { gameOverlay.classList.remove('show'); gameFrame.src = ''; document.body.style.overflow = ''; }
+  } else if (p.startsWith('/games/')) {
+    var id = p.slice(7).replace(/\/$/, '');
+    var g = GAMES.find(function(x){return x.id===id;});
+    if (g && !gameOverlay.classList.contains('show')) {
+      gameTitle.textContent = g.name;
+      gameNewTab.href = g.src || ('games/' + g.id + '/');
+      gameLoader.classList.remove('hidden');
+      gameFrame.src = '';
+      gameOverlay.classList.add('show');
+      document.body.style.overflow = 'hidden';
+      setTimeout(function(){gameFrame.src = g.src || ('games/' + g.id + '/');}, 60);
+    }
+  }
+});
 // ───── Tab Cloak ─────
 const CLOAK_KEY = 'gv.cloak.v1';
 const DEFAULT_TITLE = 'GameVault';
