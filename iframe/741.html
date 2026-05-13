@@ -13,7 +13,7 @@
     <script>
       window.gameconfig = {
         name: "Resident Evil",
-        url: "https://cdn.jsdelivr.net/gh/Stinkalistic/UGS@main/ROMs/re1/Resident Evil (USA).chd",
+        url: "https://raw.githubusercontent.com/Stinkalistic/UGS/main/ROMs/re1/Resident Evil (USA).chd",
         core: "psx",
         min: 1,
         max: 16,
@@ -113,11 +113,11 @@
           EJS_gameName = window.gameconfig.name;
           EJS_color = "#0064ff";
           EJS_startOnLoaded = true;
-          EJS_pathtodata = "https://cdn.jsdelivr.net/gh/genizy/emu@master/";
+          EJS_pathtodata = "https://raw.githubusercontent.com/genizy/emu/master/";
           EJS_gameUrl = gameUrl;
           const script = document.createElement("script");
           script.src =
-            "https://cdn.jsdelivr.net/gh/genizy/emu@master/loader.js";
+            "https://raw.githubusercontent.com/genizy/emu/master/loader.js";
           document.body.appendChild(script);
         })
         .catch((error) => {
