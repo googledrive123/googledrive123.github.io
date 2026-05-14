@@ -3484,6 +3484,7 @@ function openGame(g) {
   }, 60);
 }
 function closeGame() {
+  if (window._trackClose) window._trackClose();
   gameOverlay.classList.remove('show');
   gameFrame.src = '';
   document.body.style.overflow = '';
@@ -3511,11 +3512,11 @@ window.addEventListener('popstate', function() {
   if (p === '/' || p === '') {
     document.getElementById('welcome').classList.remove('hidden');
     document.getElementById('browse').classList.remove('visible');
-    if (gameOverlay.classList.contains('show')) { gameOverlay.classList.remove('show'); gameFrame.src = ''; document.body.style.overflow = ''; }
+    if (gameOverlay.classList.contains('show')) { if (window._trackClose) window._trackClose(); gameOverlay.classList.remove('show'); gameFrame.src = ''; document.body.style.overflow = ''; }
   } else if (p === '/games' || p === '/games/') {
     document.getElementById('welcome').classList.add('hidden');
     document.getElementById('browse').classList.add('visible');
-    if (gameOverlay.classList.contains('show')) { gameOverlay.classList.remove('show'); gameFrame.src = ''; document.body.style.overflow = ''; }
+    if (gameOverlay.classList.contains('show')) { if (window._trackClose) window._trackClose(); gameOverlay.classList.remove('show'); gameFrame.src = ''; document.body.style.overflow = ''; }
   } else if (p.startsWith('/games/')) {
     var id = p.slice(7).replace(/\/$/, '');
     var g = GAMES.find(function(x){return x.id===id;});
@@ -3995,49 +3996,39 @@ function renderTopGames(top3) {
 
 // ─── Playtime tracking ───
 function trackGameOpen(g) {
-  activeSession = { gameId: g.id, startedAt: new Date().toISOString(), supaId: null };
+  activeSession = { gameId: g.id, startedAt: new Date().toISOString() };
   if (currentUser) {
     sb.from('play_sessions').insert({
       user_id: currentUser.id,
       game_id: g.id,
       started_at: activeSession.startedAt
-    }).select('id').single().then(({ data }) => {
-      if (activeSession) activeSession.supaId = data?.id;
     });
   }
 }
-function trackGameClose() {
+
+// Exposed globally so outer-scope closeGame() and popstate handler can call it directly
+window._trackClose = function() {
   if (!activeSession) return;
+  const { gameId, startedAt } = activeSession;
   const endedAt = new Date().toISOString();
-  const startedAt = activeSession.startedAt;
   const durationSecs = Math.round((new Date(endedAt) - new Date(startedAt)) / 1000);
-  // Always save locally
-  addLocalSession({ gameId: activeSession.gameId, startedAt, endedAt, durationSecs });
-  // Also update Supabase row if signed in
-  if (currentUser && activeSession.supaId) {
-    sb.from('play_sessions').update({ ended_at: endedAt }).eq('id', activeSession.supaId).then(() => {});
-  } else if (currentUser && !activeSession.supaId) {
-    // Insert never completed or failed — insert the completed row now
-    sb.from('play_sessions').insert({
-      user_id: currentUser.id,
-      game_id: activeSession.gameId,
-      started_at: startedAt,
-      ended_at: endedAt
-    }).then(() => {});
-  }
   activeSession = null;
-}
+  addLocalSession({ gameId, startedAt, endedAt, durationSecs });
+  if (!currentUser) return;
+  // Match by (user_id, game_id, started_at) — avoids supaId race condition
+  sb.from('play_sessions')
+    .update({ ended_at: endedAt })
+    .eq('user_id', currentUser.id)
+    .eq('game_id', gameId)
+    .eq('started_at', startedAt)
+    .is('ended_at', null);
+};
 
 // Patch openGame so all callers (card clicks, roll, initRoute) get tracking
 const _origOpenGame = openGame;
 window.openGame = function(g) { _origOpenGame(g); trackGameOpen(g); };
 
-// Wire close tracking directly (back button listener captured original ref, patch won't reach it)
-gameBack.addEventListener('click', () => { if (activeSession) trackGameClose(); });
-window.addEventListener('popstate', () => {
-  if (activeSession && gameOverlay.classList.contains('show')) trackGameClose();
-});
-window.addEventListener('beforeunload', () => { if (activeSession) trackGameClose(); });
+window.addEventListener('beforeunload', () => { if (window._trackClose) window._trackClose(); });
 
 });
 </script>
