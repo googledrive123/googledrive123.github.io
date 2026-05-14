@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"><script>(function(){var r=sessionStorage.getItem('gv.redirect');if(r){sessionStorage.removeItem('gv.redirect');history.replaceState(null,null,r);}})();</script>
@@ -3794,8 +3794,11 @@ document.getElementById('suSubmit').addEventListener('click', async () => {
   const { data, error } = await sb.auth.signUp({ email: username + '@gamevault.app', password: pw });
   if (error) { errEl.textContent = error.message.includes('already') ? 'Username already taken.' : error.message; return; }
   if (data.user) {
-    await sb.from('profiles').upsert({ id: data.user.id, username });
     data.user._username = username;
+    // Update username in profiles once session is ready (trigger creates the row)
+    sb.auth.getSession().then(async ({ data: { session } }) => {
+      if (session) await sb.from('profiles').update({ username }).eq('id', data.user.id);
+    });
   }
   closeAuth();
 });
