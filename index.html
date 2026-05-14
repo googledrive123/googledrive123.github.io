@@ -1263,6 +1263,12 @@
       width: 100%;
     }
     .cloak-reset:hover { border-color: var(--border-strong); color: var(--text); }
+    .url-cloak-btn {
+      background: var(--accent); color: #fff; border: none; border-radius: 10px;
+      padding: 0.6rem 1.1rem; cursor: pointer; font-size: 0.82rem; font-weight: 600;
+      width: 100%; margin-bottom: 0.4rem; transition: opacity 0.15s;
+    }
+    .url-cloak-btn:hover { opacity: 0.85; }
     .settings-btn {
       background: transparent; border: 1px solid var(--border);
       border-radius: 50%; color: var(--muted);
@@ -1705,6 +1711,12 @@
         <input class="settings-input" id="cloakCustomIcon" placeholder="https://example.com/favicon.ico" autocomplete="off">
       </div>
       <button class="cloak-reset" id="cloakReset">Reset to default (GameVault)</button>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-label">URL Cloak — hide in about:blank</div>
+      <button class="url-cloak-btn" id="aboutBlankBtn">Open with cloaked URL</button>
+      <div style="font-size:0.72rem;color:var(--muted);line-height:1.4">Opens this site in a new tab showing <code style="background:rgba(255,255,255,0.08);padding:0 3px;border-radius:3px">about:blank</code> in the address bar. Allow pop-ups if prompted.</div>
     </div>
   </div>
 </div>
@@ -3581,6 +3593,20 @@ document.getElementById('cloakReset').addEventListener('click', () => {
   document.querySelectorAll('.cloak-preset').forEach(b => b.classList.remove('active'));
   document.getElementById('cloakCustomTitle').value = '';
   document.getElementById('cloakCustomIcon').value = '';
+});
+
+document.getElementById('aboutBlankBtn').addEventListener('click', () => {
+  const w = window.open('about:blank', '_blank');
+  if (!w) { alert('Allow pop-ups to use URL cloaking.'); return; }
+  const c = loadCloak();
+  const title = (c && c.title) || DEFAULT_TITLE;
+  w.document.write(
+    '<!DOCTYPE html><html><head><title>' + title + '</title>' +
+    '<style>*{margin:0;padding:0}html,body{width:100%;height:100%;overflow:hidden}' +
+    'iframe{display:block;width:100%;height:100%;border:none}</style>' +
+    '</head><body><iframe src="' + location.origin + '/"></iframe></body></html>'
+  );
+  w.document.close();
 });
 
 document.addEventListener('keydown', (e) => {
