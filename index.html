@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"><script>(function(){var r=sessionStorage.getItem('gv.redirect');if(r){sessionStorage.removeItem('gv.redirect');history.replaceState(null,null,r);}})();</script>
@@ -3734,23 +3734,28 @@ window.switchAuthTab = function(tab) {
 };
 
 document.getElementById('siSubmit').addEventListener('click', async () => {
-  const email = document.getElementById('siEmail').value.trim();
+  const username = document.getElementById('siUsername').value.trim().toLowerCase();
   const pw = document.getElementById('siPassword').value;
   const errEl = document.getElementById('authError');
-  if (!email || !pw) { errEl.textContent = 'Fill in all fields.'; return; }
+  if (!username || !pw) { errEl.textContent = 'Fill in all fields.'; return; }
+  const email = username + '@gamevault.app';
   const { error } = await sb.auth.signInWithPassword({ email, password: pw });
-  if (error) { errEl.textContent = error.message; } else { closeAuth(); }
+  if (error) { errEl.textContent = 'Invalid username or password.'; } else { closeAuth(); }
 });
 
 document.getElementById('suSubmit').addEventListener('click', async () => {
-  const username = document.getElementById('suUsername').value.trim();
-  const email = document.getElementById('suEmail').value.trim();
+  const username = document.getElementById('suUsername').value.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
   const pw = document.getElementById('suPassword').value;
   const errEl = document.getElementById('authError');
-  if (!username || !email || !pw) { errEl.textContent = 'Fill in all fields.'; return; }
+  if (!username || !pw) { errEl.textContent = 'Fill in all fields.'; return; }
+  if (username.length < 3) { errEl.textContent = 'Username must be at least 3 characters.'; return; }
   if (pw.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; return; }
+  const email = username + '@gamevault.app';
   const { data, error } = await sb.auth.signUp({ email, password: pw });
-  if (error) { errEl.textContent = error.message; return; }
+  if (error) {
+    errEl.textContent = error.message.includes('already') ? 'Username already taken.' : error.message;
+    return;
+  }
   if (data.user) {
     await sb.from('profiles').upsert({ id: data.user.id, username });
     data.user._username = username;
@@ -3775,7 +3780,7 @@ async function openProfile() {
   const name = signed ? (currentUser._username || currentUser.email.split('@')[0]) : 'Guest';
 
   document.getElementById('profileName').textContent = name;
-  document.getElementById('profileEmail').textContent = signed ? currentUser.email : 'Not signed in';
+  document.getElementById('profileEmail').style.display = 'none';
   document.getElementById('profileSignout').style.display = signed ? '' : 'none';
   document.getElementById('profileSigninBtn').style.display = signed ? 'none' : '';
   document.getElementById('profileEditSection').style.display = signed ? '' : 'none';
@@ -3911,13 +3916,12 @@ window.addEventListener('beforeunload', () => { if (activeSessionId) trackGameCl
     </div>
     <div class="auth-error" id="authError"></div>
     <div id="authSigninForm">
-      <div class="auth-field"><label>Email</label><input class="auth-input" id="siEmail" type="email" placeholder="you@example.com" autocomplete="email"></div>
+      <div class="auth-field"><label>Username</label><input class="auth-input" id="siUsername" type="text" placeholder="Your username" autocomplete="username"></div>
       <div class="auth-field"><label>Password</label><input class="auth-input" id="siPassword" type="password" placeholder="Password" autocomplete="current-password"></div>
       <button class="auth-submit" id="siSubmit">Sign In</button>
     </div>
     <div id="authSignupForm" style="display:none">
-      <div class="auth-field"><label>Username</label><input class="auth-input" id="suUsername" type="text" placeholder="gamertag" autocomplete="username"></div>
-      <div class="auth-field"><label>Email</label><input class="auth-input" id="suEmail" type="email" placeholder="you@example.com" autocomplete="email"></div>
+      <div class="auth-field"><label>Username</label><input class="auth-input" id="suUsername" type="text" placeholder="Choose a username" autocomplete="username"></div>
       <div class="auth-field"><label>Password</label><input class="auth-input" id="suPassword" type="password" placeholder="At least 6 characters" autocomplete="new-password"></div>
       <button class="auth-submit" id="suSubmit">Create Account</button>
     </div>
@@ -3939,7 +3943,7 @@ window.addEventListener('beforeunload', () => { if (activeSessionId) trackGameCl
       </div>
       <div>
         <div class="profile-name" id="profileName">Guest</div>
-        <div class="profile-email" id="profileEmail">Not signed in</div>
+        <div class="profile-email" id="profileEmail" style="display:none"></div>
       </div>
     </div>
 
