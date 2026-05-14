@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"><script>(function(){var r=sessionStorage.getItem('gv.redirect');if(r){sessionStorage.removeItem('gv.redirect');history.replaceState(null,null,r);}})();</script>
@@ -3647,7 +3647,7 @@ render();
 // ═══════════════════════════════════════════════════════
 // GAMEVAULT AUTH + PROFILE SYSTEM
 // ═══════════════════════════════════════════════════════
-(function() {
+document.addEventListener('DOMContentLoaded', function() {
 const SUPA_URL = 'https://dxwjxzmlezfyursysays.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
 const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
@@ -3944,7 +3944,7 @@ if (typeof closeGame !== 'undefined') {
 }
 window.addEventListener('beforeunload', () => { if (activeSession) trackGameClose(); });
 
-})();
+});
 </script>
 
 <!-- ══════════════ AUTH MODAL ══════════════ -->
