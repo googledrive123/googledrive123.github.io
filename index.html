@@ -3772,8 +3772,7 @@ async function uploadLocalSessions() {
     user_id: currentUser.id,
     game_id: s.gameId,
     started_at: s.startedAt,
-    ended_at: s.endedAt,
-    duration_seconds: s.durationSecs
+    ended_at: s.endedAt
   }));
   await sb.from('play_sessions').insert(rows);
   saveLocalSessions([]);
@@ -3916,11 +3915,15 @@ async function renderStats() {
   document.getElementById('statTime').textContent = '…';
   document.getElementById('statPeriods').textContent = '…';
   document.getElementById('statTopPeriod').textContent = '…';
-  const { data: sessions } = await sb.from('play_sessions')
-    .select('game_id, started_at, ended_at, duration_seconds')
-    .eq('user_id', currentUser.id)
-    .not('ended_at', 'is', null);
-  computeAndShowStats(sessions || []);
+  try {
+    const { data: sessions, error } = await sb.from('play_sessions')
+      .select('game_id, started_at, ended_at, duration_seconds')
+      .eq('user_id', currentUser.id)
+      .not('ended_at', 'is', null);
+    computeAndShowStats(error ? [] : (sessions || []));
+  } catch(e) {
+    computeAndShowStats([]);
+  }
 }
 
 // ─── Stats from localStorage (guest) ───
@@ -3929,7 +3932,7 @@ function renderLocalStats() {
     game_id: s.gameId,
     started_at: s.startedAt,
     ended_at: s.endedAt,
-    duration_seconds: s.durationSecs
+    duration_seconds: s.durationSecs  // local only, not sent to Supabase
   }));
   computeAndShowStats(sessions);
 }
@@ -4012,15 +4015,14 @@ function trackGameClose() {
   addLocalSession({ gameId: activeSession.gameId, startedAt, endedAt, durationSecs });
   // Also update Supabase row if signed in
   if (currentUser && activeSession.supaId) {
-    sb.from('play_sessions').update({ ended_at: endedAt, duration_seconds: durationSecs }).eq('id', activeSession.supaId).then(() => {});
+    sb.from('play_sessions').update({ ended_at: endedAt }).eq('id', activeSession.supaId).then(() => {});
   } else if (currentUser && !activeSession.supaId) {
     // Insert never completed or failed — insert the completed row now
     sb.from('play_sessions').insert({
       user_id: currentUser.id,
       game_id: activeSession.gameId,
       started_at: startedAt,
-      ended_at: endedAt,
-      duration_seconds: durationSecs
+      ended_at: endedAt
     }).then(() => {});
   }
   activeSession = null;
