@@ -4023,7 +4023,11 @@ function trackGameClose() {
   activeSession = null;
 }
 
-// Wire tracking directly to the back button and popstate (patch approach missed the captured reference)
+// Patch openGame so all callers (card clicks, roll, initRoute) get tracking
+const _origOpenGame = openGame;
+window.openGame = function(g) { _origOpenGame(g); trackGameOpen(g); };
+
+// Wire close tracking directly (back button listener captured original ref, patch won't reach it)
 gameBack.addEventListener('click', () => { if (activeSession) trackGameClose(); });
 window.addEventListener('popstate', () => {
   if (activeSession && gameOverlay.classList.contains('show')) trackGameClose();
