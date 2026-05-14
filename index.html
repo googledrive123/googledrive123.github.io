@@ -1071,6 +1071,53 @@
     }
     .tile:hover .tile-corner { opacity: 1; }
 
+    /* ── Tile thumbnails ── */
+    .tile-letter {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 5rem;
+      font-weight: 900;
+      letter-spacing: -0.06em;
+      color: rgba(255,255,255,0.09);
+      z-index: 0;
+      pointer-events: none;
+      user-select: none;
+    }
+    .tile-thumb {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 1;
+      overflow: hidden;
+      border-radius: inherit;
+    }
+    .tile-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.4s cubic-bezier(0.2,0.8,0.2,1);
+    }
+    .tile:hover .tile-thumb img { transform: scale(1.05); }
+    .tile-thumb::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(to top,
+        rgba(4,4,8,0.92) 0%,
+        rgba(4,4,8,0.55) 52%,
+        rgba(4,4,8,0.18) 100%
+      );
+      pointer-events: none;
+    }
+    /* Stack tile content above thumbnail */
+    .tile-cat { z-index: 2; }
+    .tile-name { z-index: 2; }
+    .tile-play { z-index: 2; }
+    .tile-corner { z-index: 2; }
+
     /* ───────────── Empty state ───────────── */
     .empty {
       grid-column: 1/-1;
@@ -2846,6 +2893,158 @@ const GAMES = [
   {id:'world-box',name:'World Box',cat:'action',src:'/iframe/174.html'},
 ];
 
+// ───── Game thumbnails ─────
+const THUMBS = {
+  '1on1soccer':              '/games/1on1soccer/logo.jpg',
+  '1v1lol':                  '/games/1v1lol/logo.png',
+  '1v1space':                '/games/1v1space/splash.png',
+  '2048':                    '/games/2048/meta/apple-touch-icon.png',
+  '2048-multitask':          '/games/2048-multitask/splash.png',
+  '8ball':                   '/games/8ball/assets/img/splash.png',
+  'a-dance-of-fire-and-ice': '/games/a-dance-of-fire-and-ice/splash.png',
+  'achieveunlocked':         '/games/achieveunlocked/icon.png',
+  'achieveunlocked2':        '/games/achieveunlocked2/icon.png',
+  'adofai':                  '/games/adofai/icon.png',
+  'adventure-capitalist':    '/games/adventure-capitalist/logo.webp',
+  'adventure-drivers':       '/games/adventure-drivers/splash.png',
+  'ages-of-conflict':        '/games/ages-of-conflict/splash.jpg',
+  'amazing-rope-police':     '/games/amazing-rope-police/splash.jpeg',
+  'amidst-the-clouds':       '/games/amidst-the-clouds/splash.png',
+  'angry-sharks':            '/games/angry-sharks/assets/img/splash.png',
+  'aquapark-slides':         '/games/aquapark-slides/splash.png',
+  'astray':                  '/games/astray/splash.png',
+  'avalanche':               '/games/avalanche/icon.png',
+  'backrooms':               '/games/backrooms/img/splash.jpg',
+  'baldis-basics':           '/games/baldis-basics/splash.png',
+  'ballisticchickens':       '/games/ballisticchickens/logo.png',
+  'basket-bros':             '/games/basket-bros/icon.png',
+  'big-tower-tiny-square':   '/games/big-tower-tiny-square/splash.png',
+  'bitlife':                 '/games/bitlife/splash.png',
+  'black-hole-square':       '/games/black-hole-square/icon.png',
+  'bobtherobber2':           '/games/bobtherobber2/splash.jpeg',
+  'bounce-back':             '/games/bounce-back/screenshot.png',
+  'boxingphysics2':          '/games/boxingphysics2/icon.png',
+  'btd':                     '/games/btd/logo.webp',
+  'btd2':                    '/games/btd2/logo.webp',
+  'btd3':                    '/games/btd3/icon.png',
+  'btd4':                    '/games/btd4/logo.jpg',
+  'btd5':                    '/games/btd5/logo.jpg',
+  'btd6':                    '/games/btd5/logo.jpg',
+  'bubble-tower-3d':         '/games/bubble-tower-3d/html5games/images/logo.png',
+  'burgerandfrights':        '/games/burgerandfrights/icon.png',
+  'burritobison':            '/games/burritobison/Build/logo.png',
+  'celeste':                 '/games/celeste/icon.png',
+  'cell-machine':            '/games/cell-machine/img/icon.png',
+  'championisland':          '/games/championisland/icon.png',
+  'chess':                   '/games/chess/icon.png',
+  'chibiknight':             '/games/chibiknight/icon.png',
+  'circloo':                 '/games/circloo/icon.png',
+  'cluster-rush':            '/games/cluster-rush/splash.png',
+  'cookie-clicker':          '/games/cookieclicker/img/icon.png',
+  'ctr':                     '/games/ctr/logo.png',
+  'ctr-tr':                  '/games/ctr-tr/logo.png',
+  'cuttherope':              '/games/cuttherope/icon.png',
+  'dadish3':                 '/games/dadish3/splash.png',
+  'dino':                    '/games/dino/icon.png',
+  'doodle-jump':             '/games/doodlejump/icon.png',
+  'drift-boss':              '/games/drift-boss/icon.png',
+  'drifthunters':            '/games/drifthunters/icon.png',
+  'drivemad':                '/games/drivemad/webapp/cover.jpg',
+  'ducklife4':               '/games/ducklife4/icon.png',
+  'emulatorjs':              '/games/emulatorjs/logo.png',
+  'fbwg':                    '/games/fireboywatergirl/icon.png',
+  'fbwg2':                   '/games/fireboywatergirl/icon.png',
+  'fbwg3':                   '/games/fireboywatergirl3/icon.png',
+  'fbwg4':                   '/games/fireboywatergirl3/icon.png',
+  'flappybird':              '/games/flappybird/icon.png',
+  'flappyplane':             '/games/flappyplane/assets/thumb.png',
+  'flippyfish':              '/games/flippyfish/icon.png',
+  'fluidsim':                '/games/fluidsim/icon.png',
+  'fnaf':                    '/games/fnaf/splash.jpg',
+  'fnaf2':                   '/games/fnaf2/project/splash.webp',
+  'fnaf3':                   '/games/fnaf3/project/splash.webp',
+  'fnaf4':                   '/games/fnaf4/project/splash.webp',
+  'fridaynightfunkin':       '/games/fridaynightfunkin/assets/images/logo.png',
+  'friendlyfire':            '/games/friendlyfire/assets/images/logo.png',
+  'funnyshooter':            '/games/funnyshooter/icon.jpeg',
+  'geometrydash':            '/games/geometrydash/icon.png',
+  'gunmayhem':               '/games/gunmayhem/icon.png',
+  'gunmayhem2':              '/games/gunmayhem2/icon.png',
+  'gunmayhemredux':          '/games/gunmayhemredux/icon.png',
+  'happywheels':             '/games/happywheels/Untitled.jpeg',
+  'ice-dodo':                '/games/ice-dodo/assets/icons/icon.png',
+  'iwbtc':                   '/games/iwbtc/icon.png',
+  'jetpackjoyride':          '/games/jetpackjoyride/logo.jpeg',
+  'justfalllol':             '/games/justfalllol/splash.jpg',
+  'knifehit':                '/games/knifehit/icon.png',
+  'lazyjump3d':              '/games/lazyjump3d/icon.png',
+  'learntofly':              '/games/learntofly/icon.png',
+  'learntofly2':             '/games/learntofly2/logo.jpg',
+  'learntoflyidle':          '/games/learntoflyidle/icon.jpg',
+  'littlealchemy':           '/games/littlealchemy/images/screenshot.png',
+  'lowsadventures2':         '/games/lowsadventures2/icon.png',
+  'madalincars':             '/games/madalincars/icon.png',
+  'mario':                   '/games/mario/icon.png',
+  'mindustry':               '/games/mindustry/assets/sprites/icon.png',
+  'monstertracks':           '/games/monstertracks/webapp/cover.jpg',
+  'motox3m':                 '/games/motox3m/splash.jpg',
+  'motox3m-pool':            '/games/motox3m-pool/splash.jpg',
+  'motox3m-spooky':          '/games/motox3m-spooky/splash.jpeg',
+  'nutsim':                  '/games/nutsim/images/icon.png',
+  'offlineparadise':         '/games/offlineparadise/icon.png',
+  'osu':                     '/games/osu/icon.png',
+  'pacman':                  '/games/pacman/favicon.png',
+  'paperio':                 '/games/paperio/icon.png',
+  'paperio2':                '/games/paperio2/images/logo.png',
+  'retro-bowl':              '/games/retro-bowl/html5game/splash.png',
+  'retrobowlcollege':        '/games/retrobowlcollege/html5game/splash.png',
+  'riddleschool2':           '/games/riddleschool2/icon.png',
+  'risehigher':              '/games/risehigher/media/graphics/games/ui/cover.png',
+  'rocketleague':            '/games/rocketleague/splash.webp',
+  'rooftop-snipers':         '/games/rooftop-snipers/img/thumb.png',
+  'rooftopsnipers2':         '/games/rooftopsnipers2/icon.png',
+  'run':                     '/games/run/icon.jpeg',
+  'run2':                    '/games/run2/icon.jpg',
+  'run3':                    '/games/run3/icon.jpeg',
+  'sand':                    '/games/sand/icon.png',
+  'scrapmetal3':             '/games/scrapmetal3/img/splash.png',
+  'skibiditoilet':           '/games/skibiditoilet/logo.png',
+  'skibiditoiletattack':     '/games/skibiditoiletattack/logo.png',
+  'slope-ball':              '/games/slope-ball/splash.png',
+  'slope2':                  '/games/slope2/slope-2-logo.png',
+  'sm64':                    '/games/supermario64/icon.png',
+  'soldier-legend':          '/games/soldier-legend/images/splash.jpeg',
+  'sort-the-court':          '/games/sort-the-court/img/splash.png',
+  'sprinter':                '/games/sprinter/icon.jpeg',
+  'stack':                   '/games/stack/icon.png',
+  'stickman-hook':           '/games/stickman-hook/icon.jpg',
+  'stickmangolf':            '/games/stickmangolf/media/graphics/splash/desktop/cover.jpg',
+  'subway-surfers':          '/games/subway-surfers/img/splash.jpg',
+  'supermeatboy':            '/games/supermeatboy/icon.png',
+  'supersmashbros':          '/games/supersmashbros/logo.jpg',
+  'tanuki-sunset':           '/games/tanuki-sunset/img/cover.png',
+  'temple-run-2':            '/games/temple-run-2/img/cover.png',
+  'tetris':                  '/games/tetris/icon.png',
+  'there-is-no-game':        '/games/there-is-no-game/images/splash.png',
+  'thisistheonlylevel':      '/games/thisistheonlylevel/logo.png',
+  'thisistheonlylevel2':     '/games/thisistheonlylevel2/icon.png',
+  'timeshooter1':            '/games/timeshooter1/logo.png',
+  'timeshooter3':            '/games/timeshooter3/logo.png',
+  'townscaper':              '/games/townscaper/img/cover.jpg',
+  'tron':                    '/games/tron/icon.png',
+  'tube-jumpers':            '/games/tube-jumpers/img/icon.jpg',
+  'vex':                     '/games/vex/icon.png',
+  'vex2':                    '/games/vex2/icon.png',
+  'vex6':                    '/games/vex6/assets/icon.png',
+  'vex7':                    '/games/vex7/assets/icon.png',
+  'wallsmash':               '/games/wallsmash/icon.png',
+  'wbwwb':                   '/games/wbwwb/sprites/postcredits/logo.png',
+  'weavesilk':               '/games/weavesilk/icon.png',
+  'wordle':                  '/games/wordle/img/og_1200x630.png',
+  'worlds-hardest-game':     '/games/worldshardestgame/icon.png',
+  'xx142-b2.exe':            '/games/xx142-b2.exe/icon.png',
+};
+
 // ───── Particle background (drifting dots) ─────
 (function particles() {
   const canvas = document.getElementById('particles');
@@ -3320,6 +3519,27 @@ function makeTile(g, opts = {}) {
     openGame(g);
   });
   if (g.src) a.setAttribute('data-external', '1');
+
+  // Faded first-letter backdrop (shows when no thumbnail image is available)
+  const letter = document.createElement('div');
+  letter.className = 'tile-letter';
+  letter.textContent = g.name.charAt(0).toUpperCase();
+  a.appendChild(letter);
+
+  // Thumbnail image (covers the letter backdrop when it loads)
+  const thumbUrl = THUMBS[g.id];
+  if (thumbUrl) {
+    const thumb = document.createElement('div');
+    thumb.className = 'tile-thumb';
+    const img = document.createElement('img');
+    img.src = thumbUrl;
+    img.alt = '';
+    img.loading = 'lazy';
+    img.decoding = 'async';
+    img.onerror = () => thumb.remove();
+    thumb.appendChild(img);
+    a.appendChild(thumb);
+  }
 
   if (opts.featured) {
     const flabel = document.createElement('div');
