@@ -1465,7 +1465,18 @@
       cursor: pointer; transition: background 0.15s, border-color 0.15s;
     }
     .profile-signout:hover { background: rgba(255,59,59,0.08); border-color: var(--accent); }
-    .profile-msg { font-size: 0.75rem; color: var(--muted); margin-top: 0.5rem; min-height: 1rem; }  </style>
+    .profile-msg { font-size: 0.75rem; color: var(--muted); margin-top: 0.5rem; min-height: 1rem; }
+    .top-game-row {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.45rem 0; border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+    }
+    .top-game-row:last-child { border-bottom: none; }
+    .top-game-rank { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--muted); width: 1rem; flex-shrink: 0; }
+    .top-game-name { flex: 1; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .top-game-time { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--muted); flex-shrink: 0; }
+    .stat-empty { font-size: 0.8rem; color: var(--muted); text-align: center; padding: 0.5rem 0; }
+  </style>
 </head>
 <body>
 
@@ -3754,7 +3765,8 @@ async function uploadLocalSessions() {
     user_id: currentUser.id,
     game_id: s.gameId,
     started_at: s.startedAt,
-    ended_at: s.endedAt
+    ended_at: s.endedAt,
+    duration_seconds: s.durationSecs
   }));
   await sb.from('play_sessions').insert(rows);
   saveLocalSessions([]);
@@ -3763,17 +3775,17 @@ async function uploadLocalSessions() {
 // ─── Auth state ───
 sb.auth.onAuthStateChange(async (event, session) => {
   currentUser = session?.user ?? null;
+  updateUserUI();
   if (currentUser) {
     await loadUsername();
     await uploadLocalSessions();
-  } else {
-    updateUserUI();
   }
   if (document.getElementById('profileOverlay').classList.contains('show')) openProfile();
 });
 sb.auth.getSession().then(({ data: { session } }) => {
   currentUser = session?.user ?? null;
-  if (currentUser) loadUsername(); else updateUserUI();
+  updateUserUI();
+  if (currentUser) loadUsername();
 });
 
 // ─── User button → always open profile ───
@@ -3898,7 +3910,7 @@ async function renderStats() {
   document.getElementById('statPeriods').textContent = '…';
   document.getElementById('statTopPeriod').textContent = '…';
   const { data: sessions } = await sb.from('play_sessions')
-    .select('started_at, duration_seconds')
+    .select('game_id, started_at, ended_at, duration_seconds')
     .eq('user_id', currentUser.id)
     .not('ended_at', 'is', null);
   computeAndShowStats(sessions || []);
@@ -3907,24 +3919,35 @@ async function renderStats() {
 // ─── Stats from localStorage (guest) ───
 function renderLocalStats() {
   const sessions = localSessions().filter(s => s.endedAt).map(s => ({
+    game_id: s.gameId,
     started_at: s.startedAt,
+    ended_at: s.endedAt,
     duration_seconds: s.durationSecs
   }));
   computeAndShowStats(sessions);
 }
 
 function computeAndShowStats(sessions) {
-  if (!sessions.length) {
+  // Use duration_seconds if stored, otherwise compute from timestamps
+  const withDur = sessions.map(s => ({
+    ...s,
+    duration_seconds: s.duration_seconds != null
+      ? s.duration_seconds
+      : (s.ended_at ? Math.round((new Date(s.ended_at) - new Date(s.started_at)) / 1000) : 0)
+  }));
+
+  if (!withDur.length) {
     document.getElementById('statTime').textContent = '0s';
     document.getElementById('statPeriods').textContent = '0';
     document.getElementById('statTopPeriod').textContent = '—';
+    renderTopGames([]);
     return;
   }
-  const totalSec = sessions.reduce((s, r) => s + (r.duration_seconds || 0), 0);
+  const totalSec = withDur.reduce((s, r) => s + (r.duration_seconds || 0), 0);
   document.getElementById('statTime').textContent = secsToHMS(totalSec);
   document.getElementById('statPeriods').textContent = (totalSec / PERIOD_SECS).toFixed(1);
   const counts = {};
-  sessions.forEach(s => {
+  withDur.forEach(s => {
     try {
       const state = getBellState(new Date(s.started_at));
       const p = state.periodName || 'Outside school';
@@ -3933,6 +3956,31 @@ function computeAndShowStats(sessions) {
   });
   const top = Object.entries(counts).sort((a,b) => b[1]-a[1])[0];
   document.getElementById('statTopPeriod').textContent = top ? top[0] : '—';
+
+  // Top 3 games by total playtime
+  const gameTimes = {};
+  withDur.forEach(s => {
+    if (s.game_id) gameTimes[s.game_id] = (gameTimes[s.game_id] || 0) + (s.duration_seconds || 0);
+  });
+  const top3 = Object.entries(gameTimes).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  renderTopGames(top3);
+}
+
+function renderTopGames(top3) {
+  const el = document.getElementById('statTopGames');
+  const sec = document.getElementById('topGamesSection');
+  if (!el || !sec) return;
+  if (!top3.length) { sec.style.display = 'none'; return; }
+  sec.style.display = '';
+  el.innerHTML = top3.map(([gid, secs], i) => {
+    const game = (typeof GAMES !== 'undefined') ? GAMES.find(g => g.id === gid) : null;
+    const name = game ? game.name : gid;
+    return '<div class="top-game-row">' +
+      '<span class="top-game-rank">' + (i + 1) + '</span>' +
+      '<span class="top-game-name">' + name + '</span>' +
+      '<span class="top-game-time">' + secsToHMS(secs) + '</span>' +
+      '</div>';
+  }).join('');
 }
 
 // ─── Playtime tracking ───
@@ -3957,20 +4005,25 @@ function trackGameClose() {
   addLocalSession({ gameId: activeSession.gameId, startedAt, endedAt, durationSecs });
   // Also update Supabase row if signed in
   if (currentUser && activeSession.supaId) {
-    sb.from('play_sessions').update({ ended_at: endedAt }).eq('id', activeSession.supaId).then(() => {});
+    sb.from('play_sessions').update({ ended_at: endedAt, duration_seconds: durationSecs }).eq('id', activeSession.supaId).then(() => {});
+  } else if (currentUser && !activeSession.supaId) {
+    // Insert never completed or failed — insert the completed row now
+    sb.from('play_sessions').insert({
+      user_id: currentUser.id,
+      game_id: activeSession.gameId,
+      started_at: startedAt,
+      ended_at: endedAt,
+      duration_seconds: durationSecs
+    }).then(() => {});
   }
   activeSession = null;
 }
 
-// Patch openGame / closeGame
-if (typeof openGame !== 'undefined') {
-  const origOG = openGame;
-  window.openGame = function(g) { origOG(g); trackGameOpen(g); };
-}
-if (typeof closeGame !== 'undefined') {
-  const origCG = closeGame;
-  window.closeGame = function() { origCG(); trackGameClose(); };
-}
+// Wire tracking directly to the back button and popstate (patch approach missed the captured reference)
+gameBack.addEventListener('click', () => { if (activeSession) trackGameClose(); });
+window.addEventListener('popstate', () => {
+  if (activeSession && gameOverlay.classList.contains('show')) trackGameClose();
+});
 window.addEventListener('beforeunload', () => { if (activeSession) trackGameClose(); });
 
 });
@@ -4053,6 +4106,11 @@ window.addEventListener('beforeunload', () => { if (activeSession) trackGameClos
           <div class="stat-card-lbl">Most Active</div>
         </div>
       </div>
+    </div>
+
+    <div class="profile-section" id="topGamesSection" style="display:none">
+      <div class="profile-section-label">Top 3 Games</div>
+      <div id="statTopGames"></div>
     </div>
 
     <button class="profile-signout" id="profileSignout" style="display:none">Sign Out</button>
