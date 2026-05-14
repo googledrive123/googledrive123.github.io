@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"><script>(function(){var r=sessionStorage.getItem('gv.redirect');if(r){sessionStorage.removeItem('gv.redirect');history.replaceState(null,null,r);}})();</script>
@@ -3652,47 +3652,66 @@ const SUPA_URL = 'https://dxwjxzmlezfyursysays.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
 const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
 
-let currentUser = null;
-let activeSessionId = null;
-let activeSessionGame = null;
+const PERIOD_SECS = 50 * 60;
+const LS_SESSIONS = 'gv.sessions';
 
-// ── Helpers ──
+let currentUser = null;
+let activeSession = null; // { id (supabase row id or null), gameId, startedAt }
+
+// ─── Local session storage (guests + signed-in backup) ───
+function localSessions() {
+  try { return JSON.parse(localStorage.getItem(LS_SESSIONS) || '[]'); } catch(e) { return []; }
+}
+function saveLocalSessions(arr) {
+  try { localStorage.setItem(LS_SESSIONS, JSON.stringify(arr)); } catch(e) {}
+}
+function addLocalSession(sess) {
+  const arr = localSessions();
+  arr.push(sess);
+  saveLocalSessions(arr);
+}
+
+// ─── Helpers ───
 function secsToHMS(s) {
   s = Math.max(0, Math.floor(s));
   const h = Math.floor(s / 3600);
   const m = Math.floor((s % 3600) / 60);
   const sec = s % 60;
-  return (h > 0 ? h + 'h ' : '') + (m > 0 || h > 0 ? m + 'm ' : '') + sec + 's';
+  if (h > 0) return h + 'h ' + m + 'm ' + sec + 's';
+  if (m > 0) return m + 'm ' + sec + 's';
+  return sec + 's';
 }
 function initials(name) {
   if (!name) return '?';
-  return name.split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  return name.split(/[\s_]+/).map(w => w[0]).join('').toUpperCase().slice(0, 2);
+}
+function userName() {
+  if (!currentUser) return 'Guest';
+  return currentUser._username || currentUser.email.split('@')[0];
 }
 
-// ── Update all user buttons ──
+// ─── Update all user buttons ───
 function updateUserUI() {
   const signed = !!currentUser;
-  const name = signed ? (currentUser._username || currentUser.email.split('@')[0]) : 'Guest';
-  const init = signed ? initials(name) : null;
-
-  ['Welcome', 'Header'].forEach(loc => {
+  const name = userName();
+  ['Welcome','Header'].forEach(loc => {
     const btn = document.getElementById('userBtn' + loc);
-    const avatar = document.getElementById('userAvatar' + loc);
-    const label = document.getElementById('userLabel' + loc);
+    const av  = document.getElementById('userAvatar' + loc);
+    const lbl = document.getElementById('userLabel' + loc);
     if (!btn) return;
     btn.classList.toggle('signed-in', signed);
     if (signed) {
-      avatar.classList.remove('guest');
-      avatar.textContent = init;
+      av.classList.remove('guest');
+      av.textContent = initials(name);
     } else {
-      avatar.classList.add('guest');
-      avatar.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
+      av.classList.add('guest');
+      av.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
     }
-    label.textContent = signed ? name : 'Guest';
+    lbl.textContent = name;
   });
 }
 
-// ── Load username from profiles table ──
+// ─── Load username ───
 async function loadUsername() {
   if (!currentUser) return;
   const { data } = await sb.from('profiles').select('username').eq('id', currentUser.id).single();
@@ -3700,21 +3719,44 @@ async function loadUsername() {
   updateUserUI();
 }
 
-// ── Auth state listener ──
+// ─── Upload local sessions to Supabase after sign-in ───
+async function uploadLocalSessions() {
+  if (!currentUser) return;
+  const arr = localSessions().filter(s => s.endedAt);
+  if (!arr.length) return;
+  const rows = arr.map(s => ({
+    user_id: currentUser.id,
+    game_id: s.gameId,
+    started_at: s.startedAt,
+    ended_at: s.endedAt
+  }));
+  await sb.from('play_sessions').insert(rows);
+  saveLocalSessions([]);
+}
+
+// ─── Auth state ───
 sb.auth.onAuthStateChange(async (event, session) => {
   currentUser = session?.user ?? null;
   if (currentUser) {
     await loadUsername();
+    await uploadLocalSessions();
   } else {
     updateUserUI();
   }
+  if (document.getElementById('profileOverlay').classList.contains('show')) openProfile();
 });
 sb.auth.getSession().then(({ data: { session } }) => {
   currentUser = session?.user ?? null;
   if (currentUser) loadUsername(); else updateUserUI();
 });
 
-// ── Auth modal ──
+// ─── User button → always open profile ───
+['userBtnWelcome','userBtnHeader'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('click', openProfile);
+});
+
+// ─── Auth modal ───
 const authOverlay = document.getElementById('authOverlay');
 function openAuth(tab) {
   authOverlay.classList.add('show');
@@ -3738,8 +3780,7 @@ document.getElementById('siSubmit').addEventListener('click', async () => {
   const pw = document.getElementById('siPassword').value;
   const errEl = document.getElementById('authError');
   if (!username || !pw) { errEl.textContent = 'Fill in all fields.'; return; }
-  const email = username + '@gamevault.app';
-  const { error } = await sb.auth.signInWithPassword({ email, password: pw });
+  const { error } = await sb.auth.signInWithPassword({ email: username + '@gamevault.app', password: pw });
   if (error) { errEl.textContent = 'Invalid username or password.'; } else { closeAuth(); }
 });
 
@@ -3750,12 +3791,8 @@ document.getElementById('suSubmit').addEventListener('click', async () => {
   if (!username || !pw) { errEl.textContent = 'Fill in all fields.'; return; }
   if (username.length < 3) { errEl.textContent = 'Username must be at least 3 characters.'; return; }
   if (pw.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; return; }
-  const email = username + '@gamevault.app';
-  const { data, error } = await sb.auth.signUp({ email, password: pw });
-  if (error) {
-    errEl.textContent = error.message.includes('already') ? 'Username already taken.' : error.message;
-    return;
-  }
+  const { data, error } = await sb.auth.signUp({ email: username + '@gamevault.app', password: pw });
+  if (error) { errEl.textContent = error.message.includes('already') ? 'Username already taken.' : error.message; return; }
   if (data.user) {
     await sb.from('profiles').upsert({ id: data.user.id, username });
     data.user._username = username;
@@ -3763,42 +3800,36 @@ document.getElementById('suSubmit').addEventListener('click', async () => {
   closeAuth();
 });
 
-document.getElementById('authGuestBtn').addEventListener('click', closeAuth);
+// guest button removed
 
-['userBtnWelcome','userBtnHeader'].forEach(id => {
-  const el = document.getElementById(id);
-  if (el) el.addEventListener('click', () => {
-    if (currentUser) openProfile(); else openAuth('signin');
-  });
-});
-
-// ── Profile panel ──
+// ─── Profile panel ───
 const profileOverlay = document.getElementById('profileOverlay');
 async function openProfile() {
   profileOverlay.classList.add('show');
   const signed = !!currentUser;
-  const name = signed ? (currentUser._username || currentUser.email.split('@')[0]) : 'Guest';
+  const name = userName();
+  const av = document.getElementById('profileAvatarLg');
 
   document.getElementById('profileName').textContent = name;
   document.getElementById('profileEmail').style.display = 'none';
   document.getElementById('profileSignout').style.display = signed ? '' : 'none';
   document.getElementById('profileSigninBtn').style.display = signed ? 'none' : '';
   document.getElementById('profileEditSection').style.display = signed ? '' : 'none';
-  const avatarLg = document.getElementById('profileAvatarLg');
+
   if (signed) {
-    avatarLg.textContent = initials(name);
+    av.textContent = initials(name);
     document.getElementById('profileUsernameInput').value = name;
     document.getElementById('profilePwSection').style.display = '';
+    await renderStats();
   } else {
-    avatarLg.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
+    av.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
+    renderLocalStats();
   }
-
-  // Load stats
-  if (signed) await renderStats();
 }
 
 function closeProfile() { profileOverlay.classList.remove('show'); }
 document.getElementById('profileBackdrop').addEventListener('click', closeProfile);
+
 document.getElementById('profileSignout').addEventListener('click', async () => {
   await sb.auth.signOut();
   closeProfile();
@@ -3813,7 +3844,7 @@ document.getElementById('profileSaveBtn').addEventListener('click', async () => 
   const username = document.getElementById('profileUsernameInput').value.trim();
   const pw = document.getElementById('profilePwInput').value;
   msgEl.textContent = '';
-  if (username) {
+  if (username && username !== userName()) {
     const { error } = await sb.from('profiles').upsert({ id: currentUser.id, username });
     if (error) { msgEl.textContent = 'Error saving username.'; return; }
     currentUser._username = username;
@@ -3824,7 +3855,7 @@ document.getElementById('profileSaveBtn').addEventListener('click', async () => 
   if (pw) {
     if (pw.length < 6) { msgEl.textContent = 'Password must be at least 6 characters.'; return; }
     const { error } = await sb.auth.updateUser({ password: pw });
-    if (error) { msgEl.textContent = 'Error updating password: ' + error.message; return; }
+    if (error) { msgEl.textContent = 'Error: ' + error.message; return; }
     document.getElementById('profilePwInput').value = '';
   }
   msgEl.style.color = '#4ade80';
@@ -3832,32 +3863,42 @@ document.getElementById('profileSaveBtn').addEventListener('click', async () => 
   setTimeout(() => { msgEl.textContent = ''; msgEl.style.color = ''; }, 2000);
 });
 
-// ── Stats ──
-const PERIOD_SECS = 50 * 60; // 50 minutes per period
-
+// ─── Stats from Supabase (signed-in) ───
 async function renderStats() {
+  document.getElementById('statTime').textContent = '…';
+  document.getElementById('statPeriods').textContent = '…';
+  document.getElementById('statTopPeriod').textContent = '…';
   const { data: sessions } = await sb.from('play_sessions')
     .select('started_at, duration_seconds')
     .eq('user_id', currentUser.id)
     .not('ended_at', 'is', null);
+  computeAndShowStats(sessions || []);
+}
 
-  if (!sessions || !sessions.length) {
+// ─── Stats from localStorage (guest) ───
+function renderLocalStats() {
+  const sessions = localSessions().filter(s => s.endedAt).map(s => ({
+    started_at: s.startedAt,
+    duration_seconds: s.durationSecs
+  }));
+  computeAndShowStats(sessions);
+}
+
+function computeAndShowStats(sessions) {
+  if (!sessions.length) {
     document.getElementById('statTime').textContent = '0s';
     document.getElementById('statPeriods').textContent = '0';
     document.getElementById('statTopPeriod').textContent = '—';
     return;
   }
-
   const totalSec = sessions.reduce((s, r) => s + (r.duration_seconds || 0), 0);
   document.getElementById('statTime').textContent = secsToHMS(totalSec);
   document.getElementById('statPeriods').textContent = (totalSec / PERIOD_SECS).toFixed(1);
-
-  // Most active period
   const counts = {};
   sessions.forEach(s => {
     try {
       const state = getBellState(new Date(s.started_at));
-      const p = state.periodName || 'Outside';
+      const p = state.periodName || 'Outside school';
       counts[p] = (counts[p] || 0) + 1;
     } catch(e) {}
   });
@@ -3865,33 +3906,34 @@ async function renderStats() {
   document.getElementById('statTopPeriod').textContent = top ? top[0] : '—';
 }
 
-// ── Playtime tracking (hooked into openGame/closeGame) ──
-const _origOpen = window._gvOpenGame;
-async function trackGameOpen(g) {
-  if (!currentUser) return;
-  try {
-    const { data } = await sb.from('play_sessions').insert({
+// ─── Playtime tracking ───
+function trackGameOpen(g) {
+  activeSession = { gameId: g.id, startedAt: new Date().toISOString(), supaId: null };
+  if (currentUser) {
+    sb.from('play_sessions').insert({
       user_id: currentUser.id,
       game_id: g.id,
-      started_at: new Date().toISOString()
-    }).select('id').single();
-    activeSessionId = data?.id;
-    activeSessionGame = g.id;
-  } catch(e) {}
+      started_at: activeSession.startedAt
+    }).select('id').single().then(({ data }) => {
+      if (activeSession) activeSession.supaId = data?.id;
+    });
+  }
 }
-async function trackGameClose() {
-  if (!currentUser || !activeSessionId) return;
-  try {
-    await sb.from('play_sessions').update({ ended_at: new Date().toISOString() })
-      .eq('id', activeSessionId);
-  } catch(e) {}
-  activeSessionId = null;
-  activeSessionGame = null;
+function trackGameClose() {
+  if (!activeSession) return;
+  const endedAt = new Date().toISOString();
+  const startedAt = activeSession.startedAt;
+  const durationSecs = Math.round((new Date(endedAt) - new Date(startedAt)) / 1000);
+  // Always save locally
+  addLocalSession({ gameId: activeSession.gameId, startedAt, endedAt, durationSecs });
+  // Also update Supabase row if signed in
+  if (currentUser && activeSession.supaId) {
+    sb.from('play_sessions').update({ ended_at: endedAt }).eq('id', activeSession.supaId).then(() => {});
+  }
+  activeSession = null;
 }
 
-// Patch openGame and closeGame
-const _origOpenGame = window.openGame;
-const _origCloseGame = window.closeGame;
+// Patch openGame / closeGame
 if (typeof openGame !== 'undefined') {
   const origOG = openGame;
   window.openGame = function(g) { origOG(g); trackGameOpen(g); };
@@ -3900,8 +3942,7 @@ if (typeof closeGame !== 'undefined') {
   const origCG = closeGame;
   window.closeGame = function() { origCG(); trackGameClose(); };
 }
-// Also track page unload
-window.addEventListener('beforeunload', () => { if (activeSessionId) trackGameClose(); });
+window.addEventListener('beforeunload', () => { if (activeSession) trackGameClose(); });
 
 })();
 </script>
@@ -3925,11 +3966,8 @@ window.addEventListener('beforeunload', () => { if (activeSessionId) trackGameCl
       <div class="auth-field"><label>Password</label><input class="auth-input" id="suPassword" type="password" placeholder="At least 6 characters" autocomplete="new-password"></div>
       <button class="auth-submit" id="suSubmit">Create Account</button>
     </div>
-    <div class="auth-divider">or</div>
-    <button class="auth-guest" id="authGuestBtn">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:0.4rem;vertical-align:middle"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-      Continue as Guest
-    </button>
+
+
   </div>
 </div>
 
