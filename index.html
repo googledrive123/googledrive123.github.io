@@ -3469,14 +3469,15 @@ const gameNewTab   = document.getElementById('gameNewTab');
 
 function openGame(g) {
   gameTitle.textContent = g.name;
-  gameNewTab.href = g.src || ('games/' + g.id + '/');
+  const gameSrc = g.src || ('/games/' + g.id + '/');
+  gameNewTab.href = gameSrc;
   gameLoader.classList.remove('hidden');
   gameFrame.src = '';
   gameOverlay.classList.add('show');
   document.body.style.overflow = 'hidden';
   history.pushState({page:'game',gameId:g.id}, '', '/games/' + g.id);
   setTimeout(() => {
-    gameFrame.src = g.src || ('games/' + g.id + '/');
+    gameFrame.src = gameSrc;
   }, 60);
 }
 function closeGame() {
