@@ -176,13 +176,16 @@
 
     /* ───────────── WELCOME ───────────── */
     #welcome {
-      min-height: 100vh;
+      height: 100vh;
+      max-height: 100vh;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       padding: 2rem;
       position: relative;
+      box-sizing: border-box;
     }
     #welcome.hidden { display: none; }
 
