@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"><script>(function(){var r=sessionStorage.getItem('gv.redirect');if(r){sessionStorage.removeItem('gv.redirect');history.replaceState(null,null,r);}})();</script>
@@ -6,6 +6,7 @@
   <title>GameVault</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -1271,7 +1272,194 @@
       transition: border-color 0.15s, color 0.15s;
     }
     .settings-btn:hover { border-color: var(--border-strong); color: var(--text); }
-  </style>
+
+    /* ══════════════ USER / AUTH SYSTEM ══════════════ */
+    .user-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      color: var(--muted);
+      cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 0.45rem;
+      padding: 0.35rem 0.75rem 0.35rem 0.45rem;
+      font-family: inherit; font-size: 0.78rem; font-weight: 500;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      white-space: nowrap;
+    }
+    .user-btn:hover { border-color: var(--border-strong); color: var(--text); }
+    .user-btn.signed-in { border-color: var(--border-strong); color: var(--text); }
+    .user-avatar {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--surface-2); border: 1px solid var(--border-strong);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 0;
+      flex-shrink: 0; color: var(--text);
+    }
+    .user-avatar.guest { border-style: dashed; color: var(--muted); }
+
+    /* Auth overlay */
+    .auth-overlay {
+      position: fixed; inset: 0; z-index: 2000;
+      display: none; align-items: center; justify-content: center;
+      background: rgba(8,8,10,0.88);
+      backdrop-filter: blur(14px);
+      animation: fadeIn 0.2s ease;
+    }
+    .auth-overlay.show { display: flex; }
+    .auth-box {
+      width: min(420px, 94vw);
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: 22px;
+      padding: 2rem 1.75rem 1.75rem;
+      position: relative;
+      box-shadow: 0 30px 100px rgba(0,0,0,0.7);
+      animation: rollIn 0.3s cubic-bezier(0.2,0.8,0.2,1);
+    }
+    .auth-close {
+      position: absolute; top: 1rem; right: 1rem;
+      background: transparent; border: none; color: var(--muted);
+      cursor: pointer; font-size: 1.1rem; line-height: 1;
+      padding: 0.25rem 0.5rem; border-radius: 6px;
+      transition: color 0.15s;
+    }
+    .auth-close:hover { color: var(--text); }
+    .auth-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+    .auth-tab {
+      flex: 1; background: transparent;
+      border: 1px solid var(--border); border-radius: 100px;
+      color: var(--muted); font-family: inherit; font-size: 0.82rem;
+      font-weight: 600; padding: 0.5rem; cursor: pointer;
+      transition: all 0.15s;
+    }
+    .auth-tab.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+    .auth-field { margin-bottom: 0.85rem; }
+    .auth-field label {
+      display: block; font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 0.4rem;
+    }
+    .auth-input {
+      width: 100%; padding: 0.65rem 0.9rem;
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 10px; color: var(--text); font-family: inherit;
+      font-size: 0.9rem; outline: none;
+      transition: border-color 0.15s;
+    }
+    .auth-input:focus { border-color: var(--accent); }
+    .auth-submit {
+      width: 100%; padding: 0.75rem; margin-top: 0.5rem;
+      background: var(--text); color: var(--bg);
+      border: none; border-radius: 100px;
+      font-family: inherit; font-size: 0.92rem; font-weight: 700;
+      cursor: pointer; transition: opacity 0.15s;
+    }
+    .auth-submit:hover { opacity: 0.88; }
+    .auth-divider {
+      text-align: center; margin: 1rem 0;
+      font-size: 0.72rem; color: var(--muted-2);
+      font-family: 'JetBrains Mono', monospace; letter-spacing: 0.15em;
+    }
+    .auth-guest {
+      width: 100%; padding: 0.65rem;
+      background: transparent; border: 1px solid var(--border);
+      border-radius: 100px; color: var(--muted);
+      font-family: inherit; font-size: 0.85rem; font-weight: 500;
+      cursor: pointer; transition: border-color 0.15s, color 0.15s;
+    }
+    .auth-guest:hover { border-color: var(--border-strong); color: var(--text); }
+    .auth-error {
+      font-size: 0.78rem; color: var(--accent);
+      margin-bottom: 0.75rem; min-height: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Profile panel */
+    .profile-overlay {
+      position: fixed; inset: 0; z-index: 2000;
+      display: none; align-items: flex-start; justify-content: flex-end;
+      padding: 4.5rem 1.25rem 0;
+    }
+    .profile-overlay.show { display: flex; }
+    .profile-backdrop {
+      position: fixed; inset: 0; z-index: -1;
+    }
+    .profile-panel {
+      width: min(340px, 96vw);
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: 18px;
+      padding: 1.5rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+      animation: rollIn 0.25s cubic-bezier(0.2,0.8,0.2,1);
+      max-height: calc(100vh - 6rem);
+      overflow-y: auto;
+    }
+    .profile-head {
+      display: flex; align-items: center; gap: 0.85rem;
+      margin-bottom: 1.25rem;
+    }
+    .profile-avatar-lg {
+      width: 42px; height: 42px; border-radius: 50%;
+      background: var(--surface-2); border: 1px solid var(--border-strong);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; font-weight: 700; flex-shrink: 0;
+    }
+    .profile-name { font-weight: 600; font-size: 1rem; }
+    .profile-email { font-size: 0.72rem; color: var(--muted); margin-top: 0.1rem; word-break: break-all; }
+    .profile-section { margin-bottom: 1.25rem; }
+    .profile-section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--muted-2); margin-bottom: 0.6rem;
+    }
+    .profile-field { margin-bottom: 0.6rem; }
+    .profile-field label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--muted); display: block; margin-bottom: 0.3rem;
+    }
+    .profile-input {
+      width: 100%; padding: 0.5rem 0.75rem;
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text); font-family: inherit;
+      font-size: 0.85rem; outline: none; transition: border-color 0.15s;
+    }
+    .profile-input:focus { border-color: var(--accent); }
+    .profile-save {
+      padding: 0.45rem 1rem; background: var(--text); color: var(--bg);
+      border: none; border-radius: 100px; font-family: inherit;
+      font-size: 0.8rem; font-weight: 700; cursor: pointer;
+      transition: opacity 0.15s; margin-top: 0.4rem;
+    }
+    .profile-save:hover { opacity: 0.85; }
+    .stat-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+    .stat-card {
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 0.75rem;
+    }
+    .stat-card.full { grid-column: 1 / -1; }
+    .stat-card-icon { color: var(--muted); margin-bottom: 0.35rem; }
+    .stat-card-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1rem; font-weight: 700; color: var(--text);
+      letter-spacing: -0.02em;
+    }
+    .stat-card-lbl {
+      font-size: 0.62rem; color: var(--muted); margin-top: 0.1rem;
+      text-transform: uppercase; letter-spacing: 0.15em;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .profile-signout {
+      width: 100%; padding: 0.55rem; margin-top: 0.5rem;
+      background: transparent; border: 1px solid rgba(255,59,59,0.3);
+      border-radius: 100px; color: var(--accent);
+      font-family: inherit; font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; transition: background 0.15s, border-color 0.15s;
+    }
+    .profile-signout:hover { background: rgba(255,59,59,0.08); border-color: var(--accent); }
+    .profile-msg { font-size: 0.75rem; color: var(--muted); margin-top: 0.5rem; min-height: 1rem; }  </style>
 </head>
 <body>
 
@@ -1296,6 +1484,12 @@
   <div class="welcome-top">
     <span class="brand"><span class="dot"></span>GAMEVAULT</span>
     <div style="display:flex;align-items:center;gap:0.75rem;">
+      <button class="user-btn" id="userBtnWelcome" aria-label="Profile">
+        <span class="user-avatar guest" id="userAvatarWelcome">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        </span>
+        <span id="userLabelWelcome">Guest</span>
+      </button>
     <button class="settings-btn" id="settingsBtnWelcome" title="Settings" aria-label="Settings">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </button>
@@ -1394,6 +1588,12 @@
       <span><span class="lbl">ends</span> <span class="val" data-bell="endsAt">—</span></span>
       <span class="bell-progress" data-bell="progress"></span>
     </div>
+    <button class="user-btn" id="userBtnHeader" aria-label="Profile">
+      <span class="user-avatar guest" id="userAvatarHeader">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      </span>
+      <span id="userLabelHeader">Guest</span>
+    </button>
   </header>
 
   <div class="cat-bar" id="catBar">
@@ -3443,6 +3643,350 @@ document.addEventListener('keydown', (e) => {
 });
 
 render();
+
+// ═══════════════════════════════════════════════════════
+// GAMEVAULT AUTH + PROFILE SYSTEM
+// ═══════════════════════════════════════════════════════
+(function() {
+const SUPA_URL = 'https://dxwjxzmlezfyursysays.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
+const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+let currentUser = null;
+let activeSessionId = null;
+let activeSessionGame = null;
+
+// ── Helpers ──
+function secsToHMS(s) {
+  s = Math.max(0, Math.floor(s));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  return (h > 0 ? h + 'h ' : '') + (m > 0 || h > 0 ? m + 'm ' : '') + sec + 's';
+}
+function initials(name) {
+  if (!name) return '?';
+  return name.split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0, 2);
+}
+
+// ── Update all user buttons ──
+function updateUserUI() {
+  const signed = !!currentUser;
+  const name = signed ? (currentUser._username || currentUser.email.split('@')[0]) : 'Guest';
+  const init = signed ? initials(name) : null;
+
+  ['Welcome', 'Header'].forEach(loc => {
+    const btn = document.getElementById('userBtn' + loc);
+    const avatar = document.getElementById('userAvatar' + loc);
+    const label = document.getElementById('userLabel' + loc);
+    if (!btn) return;
+    btn.classList.toggle('signed-in', signed);
+    if (signed) {
+      avatar.classList.remove('guest');
+      avatar.textContent = init;
+    } else {
+      avatar.classList.add('guest');
+      avatar.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
+    }
+    label.textContent = signed ? name : 'Guest';
+  });
+}
+
+// ── Load username from profiles table ──
+async function loadUsername() {
+  if (!currentUser) return;
+  const { data } = await sb.from('profiles').select('username').eq('id', currentUser.id).single();
+  if (data?.username) currentUser._username = data.username;
+  updateUserUI();
+}
+
+// ── Auth state listener ──
+sb.auth.onAuthStateChange(async (event, session) => {
+  currentUser = session?.user ?? null;
+  if (currentUser) {
+    await loadUsername();
+  } else {
+    updateUserUI();
+  }
+});
+sb.auth.getSession().then(({ data: { session } }) => {
+  currentUser = session?.user ?? null;
+  if (currentUser) loadUsername(); else updateUserUI();
+});
+
+// ── Auth modal ──
+const authOverlay = document.getElementById('authOverlay');
+function openAuth(tab) {
+  authOverlay.classList.add('show');
+  switchAuthTab(tab || 'signin');
+  document.getElementById('authError').textContent = '';
+}
+function closeAuth() { authOverlay.classList.remove('show'); }
+document.getElementById('authClose').addEventListener('click', closeAuth);
+authOverlay.addEventListener('click', e => { if (e.target === authOverlay) closeAuth(); });
+
+window.switchAuthTab = function(tab) {
+  document.getElementById('authSigninForm').style.display = tab === 'signin' ? '' : 'none';
+  document.getElementById('authSignupForm').style.display = tab === 'signup' ? '' : 'none';
+  document.getElementById('authTabSignin').classList.toggle('active', tab === 'signin');
+  document.getElementById('authTabSignup').classList.toggle('active', tab === 'signup');
+  document.getElementById('authError').textContent = '';
+};
+
+document.getElementById('siSubmit').addEventListener('click', async () => {
+  const email = document.getElementById('siEmail').value.trim();
+  const pw = document.getElementById('siPassword').value;
+  const errEl = document.getElementById('authError');
+  if (!email || !pw) { errEl.textContent = 'Fill in all fields.'; return; }
+  const { error } = await sb.auth.signInWithPassword({ email, password: pw });
+  if (error) { errEl.textContent = error.message; } else { closeAuth(); }
+});
+
+document.getElementById('suSubmit').addEventListener('click', async () => {
+  const username = document.getElementById('suUsername').value.trim();
+  const email = document.getElementById('suEmail').value.trim();
+  const pw = document.getElementById('suPassword').value;
+  const errEl = document.getElementById('authError');
+  if (!username || !email || !pw) { errEl.textContent = 'Fill in all fields.'; return; }
+  if (pw.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; return; }
+  const { data, error } = await sb.auth.signUp({ email, password: pw });
+  if (error) { errEl.textContent = error.message; return; }
+  if (data.user) {
+    await sb.from('profiles').upsert({ id: data.user.id, username });
+    data.user._username = username;
+  }
+  closeAuth();
+});
+
+document.getElementById('authGuestBtn').addEventListener('click', closeAuth);
+
+['userBtnWelcome','userBtnHeader'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('click', () => {
+    if (currentUser) openProfile(); else openAuth('signin');
+  });
+});
+
+// ── Profile panel ──
+const profileOverlay = document.getElementById('profileOverlay');
+async function openProfile() {
+  profileOverlay.classList.add('show');
+  const signed = !!currentUser;
+  const name = signed ? (currentUser._username || currentUser.email.split('@')[0]) : 'Guest';
+
+  document.getElementById('profileName').textContent = name;
+  document.getElementById('profileEmail').textContent = signed ? currentUser.email : 'Not signed in';
+  document.getElementById('profileSignout').style.display = signed ? '' : 'none';
+  document.getElementById('profileSigninBtn').style.display = signed ? 'none' : '';
+  document.getElementById('profileEditSection').style.display = signed ? '' : 'none';
+  const avatarLg = document.getElementById('profileAvatarLg');
+  if (signed) {
+    avatarLg.textContent = initials(name);
+    document.getElementById('profileUsernameInput').value = name;
+    document.getElementById('profilePwSection').style.display = '';
+  } else {
+    avatarLg.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
+  }
+
+  // Load stats
+  if (signed) await renderStats();
+}
+
+function closeProfile() { profileOverlay.classList.remove('show'); }
+document.getElementById('profileBackdrop').addEventListener('click', closeProfile);
+document.getElementById('profileSignout').addEventListener('click', async () => {
+  await sb.auth.signOut();
+  closeProfile();
+});
+document.getElementById('profileSigninBtn').addEventListener('click', () => {
+  closeProfile(); openAuth('signin');
+});
+
+document.getElementById('profileSaveBtn').addEventListener('click', async () => {
+  if (!currentUser) return;
+  const msgEl = document.getElementById('profileMsg');
+  const username = document.getElementById('profileUsernameInput').value.trim();
+  const pw = document.getElementById('profilePwInput').value;
+  msgEl.textContent = '';
+  if (username) {
+    const { error } = await sb.from('profiles').upsert({ id: currentUser.id, username });
+    if (error) { msgEl.textContent = 'Error saving username.'; return; }
+    currentUser._username = username;
+    updateUserUI();
+    document.getElementById('profileName').textContent = username;
+    document.getElementById('profileAvatarLg').textContent = initials(username);
+  }
+  if (pw) {
+    if (pw.length < 6) { msgEl.textContent = 'Password must be at least 6 characters.'; return; }
+    const { error } = await sb.auth.updateUser({ password: pw });
+    if (error) { msgEl.textContent = 'Error updating password: ' + error.message; return; }
+    document.getElementById('profilePwInput').value = '';
+  }
+  msgEl.style.color = '#4ade80';
+  msgEl.textContent = 'Saved!';
+  setTimeout(() => { msgEl.textContent = ''; msgEl.style.color = ''; }, 2000);
+});
+
+// ── Stats ──
+const PERIOD_SECS = 50 * 60; // 50 minutes per period
+
+async function renderStats() {
+  const { data: sessions } = await sb.from('play_sessions')
+    .select('started_at, duration_seconds')
+    .eq('user_id', currentUser.id)
+    .not('ended_at', 'is', null);
+
+  if (!sessions || !sessions.length) {
+    document.getElementById('statTime').textContent = '0s';
+    document.getElementById('statPeriods').textContent = '0';
+    document.getElementById('statTopPeriod').textContent = '—';
+    return;
+  }
+
+  const totalSec = sessions.reduce((s, r) => s + (r.duration_seconds || 0), 0);
+  document.getElementById('statTime').textContent = secsToHMS(totalSec);
+  document.getElementById('statPeriods').textContent = (totalSec / PERIOD_SECS).toFixed(1);
+
+  // Most active period
+  const counts = {};
+  sessions.forEach(s => {
+    try {
+      const state = getBellState(new Date(s.started_at));
+      const p = state.periodName || 'Outside';
+      counts[p] = (counts[p] || 0) + 1;
+    } catch(e) {}
+  });
+  const top = Object.entries(counts).sort((a,b) => b[1]-a[1])[0];
+  document.getElementById('statTopPeriod').textContent = top ? top[0] : '—';
+}
+
+// ── Playtime tracking (hooked into openGame/closeGame) ──
+const _origOpen = window._gvOpenGame;
+async function trackGameOpen(g) {
+  if (!currentUser) return;
+  try {
+    const { data } = await sb.from('play_sessions').insert({
+      user_id: currentUser.id,
+      game_id: g.id,
+      started_at: new Date().toISOString()
+    }).select('id').single();
+    activeSessionId = data?.id;
+    activeSessionGame = g.id;
+  } catch(e) {}
+}
+async function trackGameClose() {
+  if (!currentUser || !activeSessionId) return;
+  try {
+    await sb.from('play_sessions').update({ ended_at: new Date().toISOString() })
+      .eq('id', activeSessionId);
+  } catch(e) {}
+  activeSessionId = null;
+  activeSessionGame = null;
+}
+
+// Patch openGame and closeGame
+const _origOpenGame = window.openGame;
+const _origCloseGame = window.closeGame;
+if (typeof openGame !== 'undefined') {
+  const origOG = openGame;
+  window.openGame = function(g) { origOG(g); trackGameOpen(g); };
+}
+if (typeof closeGame !== 'undefined') {
+  const origCG = closeGame;
+  window.closeGame = function() { origCG(); trackGameClose(); };
+}
+// Also track page unload
+window.addEventListener('beforeunload', () => { if (activeSessionId) trackGameClose(); });
+
+})();
 </script>
+
+<!-- ══════════════ AUTH MODAL ══════════════ -->
+<div class="auth-overlay" id="authOverlay" role="dialog" aria-label="Sign in">
+  <div class="auth-box">
+    <button class="auth-close" id="authClose" aria-label="Close">&#10005;</button>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="authTabSignin" onclick="switchAuthTab('signin')">Sign In</button>
+      <button class="auth-tab" id="authTabSignup" onclick="switchAuthTab('signup')">Sign Up</button>
+    </div>
+    <div class="auth-error" id="authError"></div>
+    <div id="authSigninForm">
+      <div class="auth-field"><label>Email</label><input class="auth-input" id="siEmail" type="email" placeholder="you@example.com" autocomplete="email"></div>
+      <div class="auth-field"><label>Password</label><input class="auth-input" id="siPassword" type="password" placeholder="Password" autocomplete="current-password"></div>
+      <button class="auth-submit" id="siSubmit">Sign In</button>
+    </div>
+    <div id="authSignupForm" style="display:none">
+      <div class="auth-field"><label>Username</label><input class="auth-input" id="suUsername" type="text" placeholder="gamertag" autocomplete="username"></div>
+      <div class="auth-field"><label>Email</label><input class="auth-input" id="suEmail" type="email" placeholder="you@example.com" autocomplete="email"></div>
+      <div class="auth-field"><label>Password</label><input class="auth-input" id="suPassword" type="password" placeholder="At least 6 characters" autocomplete="new-password"></div>
+      <button class="auth-submit" id="suSubmit">Create Account</button>
+    </div>
+    <div class="auth-divider">or</div>
+    <button class="auth-guest" id="authGuestBtn">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:0.4rem;vertical-align:middle"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      Continue as Guest
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════ PROFILE PANEL ══════════════ -->
+<div class="profile-overlay" id="profileOverlay">
+  <div class="profile-backdrop" id="profileBackdrop"></div>
+  <div class="profile-panel" id="profilePanel">
+    <div class="profile-head">
+      <div class="profile-avatar-lg" id="profileAvatarLg">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      </div>
+      <div>
+        <div class="profile-name" id="profileName">Guest</div>
+        <div class="profile-email" id="profileEmail">Not signed in</div>
+      </div>
+    </div>
+
+    <div class="profile-section" id="profileEditSection">
+      <div class="profile-section-label">Account</div>
+      <div class="profile-field">
+        <label>Username</label>
+        <input class="profile-input" id="profileUsernameInput" type="text" placeholder="Username">
+      </div>
+      <div class="profile-field" id="profilePwSection" style="display:none">
+        <label>New Password</label>
+        <input class="profile-input" id="profilePwInput" type="password" placeholder="Leave blank to keep current">
+      </div>
+      <button class="profile-save" id="profileSaveBtn">Save</button>
+      <div class="profile-msg" id="profileMsg"></div>
+    </div>
+
+    <div class="profile-section">
+      <div class="profile-section-label">Playtime Stats</div>
+      <div class="stat-cards" id="statCards">
+        <div class="stat-card full">
+          <div class="stat-card-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 12"/></svg>
+          </div>
+          <div class="stat-card-val" id="statTime">—</div>
+          <div class="stat-card-lbl">Total Playtime</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+          </div>
+          <div class="stat-card-val" id="statPeriods">—</div>
+          <div class="stat-card-lbl">Periods Played</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div class="stat-card-val" id="statTopPeriod">—</div>
+          <div class="stat-card-lbl">Most Active</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="profile-signout" id="profileSignout" style="display:none">Sign Out</button>
+    <button class="auth-submit" id="profileSigninBtn" style="margin-top:0.5rem">Sign In / Sign Up</button>
+  </div>
+</div>
 </body>
 </html>
