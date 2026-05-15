@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Search</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #0f0f13;
+      color: #e8e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+    }
+
+    .logo {
+      font-size: 2.2rem;
+      font-weight: 700;
+      letter-spacing: -1px;
+      color: #fff;
+      opacity: 0.9;
+    }
+
+    .logo span {
+      color: #6c8fff;
+    }
+
+    .search-wrapper {
+      display: flex;
+      align-items: center;
+      background: #1a1a24;
+      border: 1px solid #2a2a3a;
+      border-radius: 14px;
+      width: min(560px, 92vw);
+      padding: 4px 4px 4px 18px;
+      transition: border-color 0.2s;
+    }
+
+    .search-wrapper:focus-within {
+      border-color: #6c8fff;
+    }
+
+    #search-input {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      color: #e8e8f0;
+      font-size: 1rem;
+      padding: 10px 0;
+      caret-color: #6c8fff;
+    }
+
+    #search-input::placeholder {
+      color: #4a4a6a;
+    }
+
+    #go-btn {
+      background: #6c8fff;
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 10px 22px;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      white-space: nowrap;
+    }
+
+    #go-btn:hover {
+      background: #8aa3ff;
+    }
+
+    #go-btn:active {
+      transform: scale(0.97);
+    }
+
+    .hint {
+      font-size: 0.78rem;
+      color: #3a3a5a;
+    }
+
+    #status {
+      font-size: 0.82rem;
+      color: #6c8fff;
+      min-height: 1.2em;
+    }
+
+    #status.error {
+      color: #ff6c6c;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="logo">go<span>.</span></div>
+
+  <div class="search-wrapper">
+    <input
+      id="search-input"
+      type="text"
+      placeholder="Search or enter a URL..."
+      autocomplete="off"
+      spellcheck="false"
+      autofocus
+    />
+    <button id="go-btn">Go</button>
+  </div>
+
+  <div id="status"></div>
+  <div class="hint">type a url like youtube.com or search anything</div>
+
+  <!-- Ultraviolet bundle — see README note below -->
+  <script src="/proxy/uv/uv.bundle.js"></script>
+  <script src="/proxy/uv/uv.config.js"></script>
+
+  <script>
+    const input  = document.getElementById('search-input');
+    const btn    = document.getElementById('go-btn');
+    const status = document.getElementById('status');
+
+    // Register the UV service worker once
+    async function registerSW() {
+      if (!navigator.serviceWorker) {
+        setStatus('Service workers not supported in this browser.', true);
+        return false;
+      }
+      try {
+        await navigator.serviceWorker.register('/proxy/uv/uv.sw.js', {
+          scope: '/proxy/service/',
+        });
+        return true;
+      } catch (e) {
+        setStatus('SW registration failed: ' + e.message, true);
+        return false;
+      }
+    }
+
+    function setStatus(msg, isError = false) {
+      status.textContent = msg;
+      status.className = isError ? 'error' : '';
+    }
+
+    function resolveURL(raw) {
+      raw = raw.trim();
+      // Looks like a URL already?
+      const hasProto = /^https?:\/\//i.test(raw);
+      const looksLikeDomain = /^[a-z0-9-]+(\.[a-z]{2,})/i.test(raw) && !raw.includes(' ');
+      if (hasProto) return raw;
+      if (looksLikeDomain) return 'https://' + raw;
+      // Treat as a Google search
+      return 'https://www.google.com/search?q=' + encodeURIComponent(raw);
+    }
+
+    async function navigate() {
+      const raw = input.value.trim();
+      if (!raw) return;
+
+      setStatus('connecting...');
+      const ok = await registerSW();
+      if (!ok) return;
+
+      const url = resolveURL(raw);
+      setStatus('');
+
+      // UV encodes the destination URL and redirects through the service worker scope
+      const encoded = __uv$config.encodeUrl(url);
+      window.location.href = __uv$config.prefix + encoded;
+    }
+
+    btn.addEventListener('click', navigate);
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') navigate();
+    });
+
+    // Warm up SW on load so first search is instant
+    registerSW().then(ok => {
+      if (ok) setStatus('ready');
+      setTimeout(() => { if (status.textContent === 'ready') status.textContent = ''; }, 1500);
+    });
+  </script>
+</body>
+</html>
