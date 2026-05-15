@@ -121,16 +121,17 @@
   <div id="status"></div>
   <div class="hint">type a url like youtube.com or search anything</div>
 
-  <!-- Ultraviolet bundle — see README note below -->
-  <script src="/proxy/uv/uv.bundle.js"></script>
-  <script src="/proxy/uv/uv.config.js"></script>
-
   <script>
     const input  = document.getElementById('search-input');
     const btn    = document.getElementById('go-btn');
     const status = document.getElementById('status');
 
-    // Register the UV service worker once
+    // Must match encode() in uv.sw.js
+    function encode(url) {
+      return btoa(unescape(encodeURIComponent(url)))
+        .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    }
+
     async function registerSW() {
       if (!navigator.serviceWorker) {
         setStatus('Service workers not supported in this browser.', true);
@@ -154,37 +155,26 @@
 
     function resolveURL(raw) {
       raw = raw.trim();
-      // Looks like a URL already?
       const hasProto = /^https?:\/\//i.test(raw);
       const looksLikeDomain = /^[a-z0-9-]+(\.[a-z]{2,})/i.test(raw) && !raw.includes(' ');
       if (hasProto) return raw;
       if (looksLikeDomain) return 'https://' + raw;
-      // Treat as a Google search
       return 'https://www.google.com/search?q=' + encodeURIComponent(raw);
     }
 
     async function navigate() {
       const raw = input.value.trim();
       if (!raw) return;
-
       setStatus('connecting...');
       const ok = await registerSW();
       if (!ok) return;
-
-      const url = resolveURL(raw);
       setStatus('');
-
-      // UV encodes the destination URL and redirects through the service worker scope
-      const encoded = __uv$config.encodeUrl(url);
-      window.location.href = __uv$config.prefix + encoded;
+      window.location.href = '/proxy/service/' + encode(resolveURL(raw));
     }
 
     btn.addEventListener('click', navigate);
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') navigate();
-    });
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') navigate(); });
 
-    // Warm up SW on load so first search is instant
     registerSW().then(ok => {
       if (ok) setStatus('ready');
       setTimeout(() => { if (status.textContent === 'ready') status.textContent = ''; }, 1500);
