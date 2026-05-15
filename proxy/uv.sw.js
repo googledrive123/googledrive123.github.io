@@ -304,6 +304,10 @@ function storeCookies(hostname, setCookieHeader) {
   cookieStore.set(hostname, [...existing.values()].join('; '));
 }
 
+// ── Lifecycle — force immediate activation on update ────────────────────────
+self.addEventListener('install',  ()  => self.skipWaiting());
+self.addEventListener('activate', (e) => e.waitUntil(clients.claim()));
+
 // ── Fetch handler ───────────────────────────────────────────────────────────
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
