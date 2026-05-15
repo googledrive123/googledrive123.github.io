@@ -344,24 +344,25 @@ async function proxyFetch(targetURL, req) {
     let status, ct, responseText, responseBody, setCookieHeader;
 
     if (BACKEND_MODE === 'gas') {
-      // Google Apps Script mode — sends JSON body, receives JSON envelope
-      const gasPayload = JSON.stringify({
-        target:      targetURL,
-        method:      req.method,
-        accept:      req.headers.get('accept')          || '*/*',
-        acceptLang:  req.headers.get('accept-language') || 'en-US,en;q=0.9',
-        contentType: req.headers.get('content-type')    || '',
-        cookie:      stored,
-        body:        (req.method !== 'GET' && req.method !== 'HEAD')
-                       ? await req.text()
-                       : null,
-      });
+      // Google Apps Script mode — GAS does a 302 redirect on POST which browsers
+      // convert to GET (per HTTP spec), losing the body. So we always use GET and
+      // pass everything as URL params. POST bodies are base64-encoded as a param.
+      const gasURL = new URL(CORS_BACKEND);
+      gasURL.searchParams.set('target', targetURL);
+      gasURL.searchParams.set('method', req.method);
+      gasURL.searchParams.set('accept', req.headers.get('accept') || '*/*');
+      gasURL.searchParams.set('al',     req.headers.get('accept-language') || 'en-US,en;q=0.9');
+      if (stored) gasURL.searchParams.set('cookie', stored);
+      const reqCT = req.headers.get('content-type') || '';
+      if (reqCT) gasURL.searchParams.set('ct', reqCT);
 
-      const gasRes = await fetch(CORS_BACKEND, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    gasPayload,
-      });
+      const hasBody = req.method !== 'GET' && req.method !== 'HEAD';
+      if (hasBody) {
+        const bodyText = await req.text();
+        if (bodyText) gasURL.searchParams.set('body', btoa(unescape(encodeURIComponent(bodyText))));
+      }
+
+      const gasRes = await fetch(gasURL.href, { redirect: 'follow' });
 
       // GAS always returns HTTP 200 with a JSON envelope
       const envelope = await gasRes.json();
