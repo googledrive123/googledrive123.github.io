@@ -137,7 +137,7 @@
         return false;
       }
       try {
-        await navigator.serviceWorker.register('/proxy/uv/uv.sw.js', {
+        await navigator.serviceWorker.register('/proxy/uv.sw.js', {
           scope: '/proxy/service/',
         });
         return true;
