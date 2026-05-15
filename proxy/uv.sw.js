@@ -152,6 +152,25 @@ function runtimeScript(base) {
     }catch(err){}
   },true);
 
+  // ── WebSocket proxy ──────────────────────────────────────────────────────
+  var _WS = window.WebSocket;
+  var _wsBackend = '${CORS_BACKEND}'.replace(/^https?/,'wss').replace(/https?/,'wss').replace(/\/$/,'');
+  // _wsBackend ends up as wss://googledrive123.gogledriven123.workers.dev
+  window.WebSocket = function(url, protocols) {
+    try {
+      var proxied = _wsBackend + '?target=' + encodeURIComponent(url);
+      var ws = protocols ? new _WS(proxied, protocols) : new _WS(proxied);
+      return ws;
+    } catch(e) {
+      return protocols ? new _WS(url, protocols) : new _WS(url);
+    }
+  };
+  window.WebSocket.prototype  = _WS.prototype;
+  window.WebSocket.CONNECTING = _WS.CONNECTING;
+  window.WebSocket.OPEN       = _WS.OPEN;
+  window.WebSocket.CLOSING    = _WS.CLOSING;
+  window.WebSocket.CLOSED     = _WS.CLOSED;
+
   var _push=history.pushState.bind(history);
   history.pushState=function(s,t,url){
     try{if(url&&url!=='#'&&!url.startsWith(_P))url=_toP(url);}catch(e){}
