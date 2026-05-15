@@ -5,7 +5,7 @@ self.__uv$config = {
   handler: '/proxy/uv/uv.handler.js',
   bundle: '/proxy/uv/uv.bundle.js',
   config: '/proxy/uv/uv.config.js',
-  sw: '/proxy/uv/uv.sw.js',
+  sw: '/proxy/uv.sw.js',
   // Public bare server — swap this out with your own Render/Railway deployment for better reliability
   bare: 'https://uv.holyubofficial.net/',
 };
