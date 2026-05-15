@@ -1,7 +1,39 @@
 /*  proxy/uv.sw.js  —  self-contained service worker proxy  */
 
-const PROXY_PREFIX  = '/proxy/service/';
-const CORS_BACKEND  = 'https://googledrive123.gogledriven123.workers.dev/';
+const PROXY_PREFIX = '/proxy/service/';
+
+// ── Backend config ───────────────────────────────────────────────────────────
+//
+// BACKEND_MODE controls how the SW talks to the backend:
+//   'headers' → CF Worker / Vercel / Netlify / Deno  (sends x-target header)
+//   'gas'     → Google Apps Script                   (sends JSON body, unwraps envelope)
+//
+// CORS_BACKEND is the URL. Keep the trailing slash for 'headers' mode.
+// For 'gas' mode use the exact script.google.com URL with no trailing slash.
+//
+// ── Option A: Cloudflare Worker (may be blocked on school wifi) ──────────────
+//   const BACKEND_MODE = 'headers';
+//   const CORS_BACKEND = 'https://googledrive123.gogledriven123.workers.dev/';
+//
+// ── Option B: Cloudflare Pages  (*.pages.dev — often unblocked) ─────────────
+//   const BACKEND_MODE = 'headers';
+//   const CORS_BACKEND = 'https://YOUR-PROJECT.pages.dev/';
+//
+// ── Option C: Vercel            (*.vercel.app) ───────────────────────────────
+//   const BACKEND_MODE = 'headers';
+//   const CORS_BACKEND = 'https://YOUR-PROJECT.vercel.app/api/proxy/';
+//
+// ── Option D: Netlify           (*.netlify.app) ──────────────────────────────
+//   const BACKEND_MODE = 'headers';
+//   const CORS_BACKEND = 'https://YOUR-PROJECT.netlify.app/';
+//
+// ── Option E: Google Apps Script (UNBLOCKABLE on school Chromebooks) ─────────
+//   const BACKEND_MODE = 'gas';
+//   const CORS_BACKEND = 'https://script.google.com/macros/s/YOUR_ID/exec';
+//   Deploy: see proxy/backends/google-apps-script/Code.gs for instructions
+//
+const BACKEND_MODE = 'gas';
+const CORS_BACKEND = 'https://script.google.com/macros/s/AKfycbzkilZkUNHLdVDsKZgLKUIKpXv27jMCixzJxBGfjm5kba2iw0mmr0b7UX4xdJYATIUc/exec';
 
 // Hostnames whose assets the SW fetches directly (not through the Worker).
 const DIRECT_CDN_HOSTS = [
@@ -302,65 +334,111 @@ async function proxyFetch(targetURL, req) {
     let targetHost;
     try { targetHost = new URL(targetURL).hostname; } catch {}
 
-    const headers = new Headers({
-      'x-target': targetURL,
-      'x-method': req.method,
-    });
-    for (const h of ['accept', 'accept-language', 'content-type', 'range']) {
-      if (req.headers.has(h)) headers.set(h, req.headers.get(h));
-    }
     const stored = targetHost ? getCookies(targetHost) : '';
-    if (stored) headers.set('cookie', stored);
 
-    const upstream = await fetch(CORS_BACKEND, {
-      method: 'POST',
-      headers,
-      body: req.method !== 'GET' && req.method !== 'HEAD' ? req.body : undefined,
-    });
+    // ── Call backend ──────────────────────────────────────────────────────────
+    let status, ct, responseText, responseBody, setCookieHeader;
 
-    if (targetHost) {
-      const sc = upstream.headers.get('set-cookie');
-      if (sc) storeCookies(targetHost, sc);
+    if (BACKEND_MODE === 'gas') {
+      // Google Apps Script mode — sends JSON body, receives JSON envelope
+      const gasPayload = JSON.stringify({
+        target:      targetURL,
+        method:      req.method,
+        accept:      req.headers.get('accept')          || '*/*',
+        acceptLang:  req.headers.get('accept-language') || 'en-US,en;q=0.9',
+        contentType: req.headers.get('content-type')    || '',
+        cookie:      stored,
+        body:        (req.method !== 'GET' && req.method !== 'HEAD')
+                       ? await req.text()
+                       : null,
+      });
+
+      const gasRes = await fetch(CORS_BACKEND, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    gasPayload,
+      });
+
+      // GAS always returns HTTP 200 with a JSON envelope
+      const envelope = await gasRes.json();
+      status = envelope.status || 200;
+      ct     = envelope.contentType || 'application/octet-stream';
+      setCookieHeader = envelope.setCookie || null;
+
+      if (envelope.encoding === 'base64') {
+        // Binary content — decode base64 back to bytes
+        const binary = atob(envelope.body);
+        const bytes  = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        responseBody = bytes.buffer;
+      } else {
+        responseText = envelope.body || '';
+      }
+
+    } else {
+      // Standard 'headers' mode — CF Worker / Vercel / Netlify / Deno
+      const headers = new Headers({
+        'x-target': targetURL,
+        'x-method': req.method,
+      });
+      for (const h of ['accept', 'accept-language', 'content-type', 'range']) {
+        if (req.headers.has(h)) headers.set(h, req.headers.get(h));
+      }
+      if (stored) headers.set('cookie', stored);
+
+      const upstream = await fetch(CORS_BACKEND, {
+        method:  'POST',
+        headers,
+        body:    req.method !== 'GET' && req.method !== 'HEAD' ? req.body : undefined,
+      });
+
+      status          = upstream.status;
+      ct              = upstream.headers.get('content-type') || '';
+      setCookieHeader = upstream.headers.get('set-cookie');
+
+      // 413 = backend choked on a huge file — fall back to direct fetch
+      if (status === 413) {
+        try {
+          const direct = await fetch(targetURL);
+          return new Response(direct.body, {
+            status:  direct.status,
+            headers: { 'Content-Type': direct.headers.get('content-type') || 'application/javascript' },
+          });
+        } catch { /* fall through */ }
+      }
+
+      responseText = ct.includes('text/') || ct.includes('javascript') || ct.includes('json')
+        ? await upstream.text()
+        : null;
+      responseBody = responseText === null ? await upstream.arrayBuffer() : null;
     }
 
-    const ct = upstream.headers.get('content-type') || '';
+    // Store any new cookies from either backend
+    if (targetHost && setCookieHeader) storeCookies(targetHost, setCookieHeader);
+
+    // ── Rewrite and return ────────────────────────────────────────────────────
 
     if (ct.includes('text/html')) {
-      let text = await upstream.text();
+      let text = responseText ?? new TextDecoder().decode(responseBody);
       text = rewriteHTML(text, targetURL);
       const rt = runtimeScript(targetURL);
-      // Use a function replacement to prevent $ sequences in rt from being
-      // interpreted as special replacement patterns (e.g. $& $' $`)
       text = text.includes('</head>')
         ? text.replace('</head>', () => rt + '</head>')
         : rt + text;
       return new Response(text, {
-        status: upstream.status,
+        status,
         headers: { 'Content-Type': 'text/html; charset=utf-8' },
       });
     }
 
     if (ct.includes('text/css')) {
-      const text = rewriteCSS(await upstream.text(), targetURL);
-      return new Response(text, {
-        status: upstream.status,
-        headers: { 'Content-Type': ct },
-      });
+      const text = rewriteCSS(responseText ?? new TextDecoder().decode(responseBody), targetURL);
+      return new Response(text, { status, headers: { 'Content-Type': ct } });
     }
 
-    // 413 = Worker choked on a huge file — fall back to direct fetch
-    if (upstream.status === 413) {
-      try {
-        const direct = await fetch(targetURL);
-        return new Response(direct.body, {
-          status: direct.status,
-          headers: { 'Content-Type': direct.headers.get('content-type') || 'application/javascript' },
-        });
-      } catch { /* fall through to normal response */ }
-    }
-
-    return new Response(upstream.body, {
-      status: upstream.status,
+    // Everything else — pass through as-is
+    return new Response(responseBody ?? responseText, {
+      status,
       headers: { 'Content-Type': ct || 'application/octet-stream' },
     });
 
