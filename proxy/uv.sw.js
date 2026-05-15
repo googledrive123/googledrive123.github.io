@@ -4,7 +4,6 @@ const PROXY_PREFIX  = '/proxy/service/';
 const CORS_BACKEND  = 'https://googledrive123.gogledriven123.workers.dev/';
 
 // Hostnames whose assets the SW fetches directly (not through the Worker).
-// These CDNs allow cross-origin fetches and aren't blocked by school filters.
 const DIRECT_CDN_HOSTS = [
   'cdn.discordapp.com',
   'cdn.prod.website-files.com',
@@ -19,12 +18,10 @@ const DIRECT_CDN_HOSTS = [
   'scontent.cdninstagram.com',
 ];
 
-// File extensions that are safe to fetch directly (images, fonts, media)
+// File extensions safe to fetch directly (images, fonts, media)
 const DIRECT_EXT = /\.(webp|png|jpg|jpeg|gif|avif|mp4|webm|m4a|mp3|ogg)(\?.*)?$/i;
 
-// Discord hosts its own fonts/icons at discord.com/assets/ — fetch these directly
-// since they're static and the Worker chokes on large JS bundles from the same path.
-// Note: .js files from discord.com/assets/ still go through the Worker (needed for rewriting).
+// Discord hosts fonts/icons at discord.com/assets/ — fetch these directly
 const DISCORD_DIRECT_EXT = /\.(woff2?|ttf|eot|otf|svg|ico|png|jpg|webp|gif)(\?.*)?$/i;
 
 function shouldFetchDirect(url) {
@@ -32,7 +29,6 @@ function shouldFetchDirect(url) {
     const u = new URL(url);
     if (DIRECT_CDN_HOSTS.some(h => u.hostname === h || u.hostname.endsWith('.' + h))) return true;
     if (DIRECT_EXT.test(u.pathname)) return true;
-    // Discord self-hosted fonts/icons — direct to avoid 413/403 on large bundles
     if ((u.hostname === 'discord.com' || u.hostname.endsWith('.discord.com'))
         && u.pathname.startsWith('/assets/')
         && DISCORD_DIRECT_EXT.test(u.pathname)) return true;
@@ -58,6 +54,9 @@ function toProxyURL(url) {
 
 // ── HTML / CSS rewriters ────────────────────────────────────────────────────
 function rewriteHTML(html, base) {
+  // Strip <base> tags — they hijack URL resolution and send everything to the wrong origin
+  html = html.replace(/<base\b[^>]*>/gi, '');
+
   html = html.replace(
     /\b(src|href|action|data-src|data-href)=(["'])([^"']*?)\2/gi,
     (m, attr, q, url) => {
@@ -65,7 +64,6 @@ function rewriteHTML(html, base) {
       if (url.startsWith(PROXY_PREFIX)) return m;
       try {
         const abs = new URL(url, base).href;
-        // Let direct-CDN assets load without proxy
         if (shouldFetchDirect(abs)) return m;
         return `${attr}=${q}${toProxyURL(abs)}${q}`;
       } catch { return m; }
@@ -107,7 +105,6 @@ function runtimeScript(base) {
   var _toP=function(u){
     try{
       var abs=new URL(u,'${base}').href;
-      // skip direct CDN assets
       var directHosts=${JSON.stringify(DIRECT_CDN_HOSTS)};
       try{ var h=new URL(abs).hostname; if(directHosts.some(function(d){return h===d||h.endsWith('.'+d);})) return u; }catch(e){}
       if(/\\.(webp|png|jpg|jpeg|gif|svg|ico|avif|mp4|webm|m4a|mp3|ogg|woff2?|ttf|eot|otf)(\\?.*)?$/i.test(new URL(abs).pathname)) return u;
@@ -115,18 +112,85 @@ function runtimeScript(base) {
     }catch(e){return u;}
   };
 
+  // XHR proxy
   var _xopen=XMLHttpRequest.prototype.open;
   XMLHttpRequest.prototype.open=function(m,url){
     try{if(typeof url==='string'&&!/^(data:|blob:|javascript:)/.test(url)&&!url.startsWith(_P))url=_toP(url);}catch(e){}
     return _xopen.apply(this,[m,url].concat([].slice.call(arguments,2)));
   };
 
+  // fetch proxy
   var _fetch=window.fetch;
   window.fetch=function(input,opts){
-    try{if(typeof input==='string'&&!/^(data:|blob:|javascript:)/.test(input)&&!input.startsWith(_P))input=_toP(input);}catch(e){}
+    try{
+      if(typeof input==='string'&&!/^(data:|blob:|javascript:)/.test(input)&&!input.startsWith(_P))input=_toP(input);
+      else if(input&&typeof input==='object'&&input.url){
+        var _ru=_toP(input.url);
+        if(_ru!==input.url) input=new Request(_ru,input);
+      }
+    }catch(e){}
     return _fetch.call(this,input,opts);
   };
 
+  // Intercept script.src setter — catches webpack chunk loading and dynamic script injection
+  try{
+    var _ssd=Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype,'src');
+    if(_ssd&&_ssd.set){
+      var _sss=_ssd.set;
+      Object.defineProperty(HTMLScriptElement.prototype,'src',{
+        get:_ssd.get,
+        set:function(v){
+          try{if(typeof v==='string'&&v&&!/^(data:|blob:|javascript:)/.test(v)&&!v.startsWith(_P))v=_toP(v);}catch(e){}
+          _sss.call(this,v);
+        },
+        configurable:true
+      });
+    }
+  }catch(e){}
+
+  // Intercept link.href setter — catches dynamic stylesheet injection
+  try{
+    var _lhd=Object.getOwnPropertyDescriptor(HTMLLinkElement.prototype,'href');
+    if(_lhd&&_lhd.set){
+      var _lhs=_lhd.set;
+      Object.defineProperty(HTMLLinkElement.prototype,'href',{
+        get:_lhd.get,
+        set:function(v){
+          try{
+            var rel=(this.getAttribute('rel')||'').toLowerCase();
+            if(typeof v==='string'&&v&&!/^(data:|blob:|javascript:)/.test(v)&&!v.startsWith(_P)&&rel!=='canonical')v=_toP(v);
+          }catch(e){}
+          _lhs.call(this,v);
+        },
+        configurable:true
+      });
+    }
+  }catch(e){}
+
+  // Intercept location.assign and location.replace
+  try{
+    var _la=location.assign.bind(location);
+    var _lr=location.replace.bind(location);
+    location.assign=function(url){
+      try{if(typeof url==='string'&&!/^(data:|blob:|javascript:|#)/.test(url)&&!url.startsWith(_P))url=_toP(url);}catch(e){}
+      _la(url);
+    };
+    location.replace=function(url){
+      try{if(typeof url==='string'&&!/^(data:|blob:|javascript:|#)/.test(url)&&!url.startsWith(_P))url=_toP(url);}catch(e){}
+      _lr(url);
+    };
+  }catch(e){}
+
+  // Intercept window.open
+  try{
+    var _wo=window.open;
+    window.open=function(url,t,f){
+      try{if(typeof url==='string'&&url&&!/^(data:|blob:|javascript:)/.test(url)&&!url.startsWith(_P))url=_toP(url);}catch(e){}
+      return _wo.call(window,url,t,f);
+    };
+  }catch(e){}
+
+  // Click handler — catches <a href> navigations
   document.addEventListener('click',function(e){
     var a=e.target.closest('a[href]');
     if(!a)return;
@@ -140,6 +204,7 @@ function runtimeScript(base) {
     }catch(err){}
   },true);
 
+  // Form submit handler
   document.addEventListener('submit',function(e){
     var f=e.target;
     var action=f.action||'${base}';
@@ -155,7 +220,6 @@ function runtimeScript(base) {
   // ── WebSocket proxy ──────────────────────────────────────────────────────
   var _WS = window.WebSocket;
   var _wsBackend = '${CORS_BACKEND}'.replace(/^https?/,'wss').replace(/https?/,'wss').replace(/\/$/,'');
-  // _wsBackend ends up as wss://googledrive123.gogledriven123.workers.dev
   window.WebSocket = function(url, protocols) {
     try {
       var proxied = _wsBackend + '?target=' + encodeURIComponent(url);
@@ -171,6 +235,7 @@ function runtimeScript(base) {
   window.WebSocket.CLOSING    = _WS.CLOSING;
   window.WebSocket.CLOSED     = _WS.CLOSED;
 
+  // history.pushState / replaceState
   var _push=history.pushState.bind(history);
   history.pushState=function(s,t,url){
     try{if(url&&url!=='#'&&!url.startsWith(_P))url=_toP(url);}catch(e){}
@@ -193,14 +258,12 @@ function getCookies(hostname) {
 
 function storeCookies(hostname, setCookieHeader) {
   if (!setCookieHeader) return;
-  // Parse and merge cookies (basic — handles name=value pairs)
   const existing = new Map();
   const current = cookieStore.get(hostname) || '';
   for (const part of current.split(';').map(s => s.trim()).filter(Boolean)) {
     const [k] = part.split('=');
     existing.set(k.trim(), part);
   }
-  // set-cookie can be multiple values joined by comma in some fetch impls
   for (const cookie of setCookieHeader.split(/,(?=[^;]+=[^;]*)/)) {
     const nameVal = cookie.split(';')[0].trim();
     const [k] = nameVal.split('=');
@@ -239,7 +302,6 @@ async function proxyFetch(targetURL, req) {
     let targetHost;
     try { targetHost = new URL(targetURL).hostname; } catch {}
 
-    // Pass target + original method via headers — avoids URL length/encoding issues
     const headers = new Headers({
       'x-target': targetURL,
       'x-method': req.method,
@@ -256,7 +318,6 @@ async function proxyFetch(targetURL, req) {
       body: req.method !== 'GET' && req.method !== 'HEAD' ? req.body : undefined,
     });
 
-    // Store any new cookies the site set
     if (targetHost) {
       const sc = upstream.headers.get('set-cookie');
       if (sc) storeCookies(targetHost, sc);
@@ -268,7 +329,11 @@ async function proxyFetch(targetURL, req) {
       let text = await upstream.text();
       text = rewriteHTML(text, targetURL);
       const rt = runtimeScript(targetURL);
-      text = text.includes('</head>') ? text.replace('</head>', rt + '</head>') : rt + text;
+      // Use a function replacement to prevent $ sequences in rt from being
+      // interpreted as special replacement patterns (e.g. $& $' $`)
+      text = text.includes('</head>')
+        ? text.replace('</head>', () => rt + '</head>')
+        : rt + text;
       return new Response(text, {
         status: upstream.status,
         headers: { 'Content-Type': 'text/html; charset=utf-8' },
@@ -283,7 +348,7 @@ async function proxyFetch(targetURL, req) {
       });
     }
 
-    // 413 = Worker choked on a huge file — fall back to direct fetch (SW has no CORS restriction)
+    // 413 = Worker choked on a huge file — fall back to direct fetch
     if (upstream.status === 413) {
       try {
         const direct = await fetch(targetURL);
@@ -291,7 +356,7 @@ async function proxyFetch(targetURL, req) {
           status: direct.status,
           headers: { 'Content-Type': direct.headers.get('content-type') || 'application/javascript' },
         });
-      } catch { /* fall through to normal response if direct also fails */ }
+      } catch { /* fall through to normal response */ }
     }
 
     return new Response(upstream.body, {

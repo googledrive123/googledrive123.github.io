@@ -129,7 +129,20 @@
     }
     #url-wrap:focus-within { border-color: #5577ff; }
 
-    #url-icon { color: #444466; font-size: 12px; flex-shrink: 0; }
+    /* URL bar protocol badge — text-based, zero emoji */
+    #url-icon {
+      flex-shrink: 0;
+      font-size: 9px;
+      font-weight: 700;
+      font-family: 'Courier New', monospace;
+      padding: 1px 4px;
+      border-radius: 3px;
+      letter-spacing: 0.03em;
+      transition: color 0.15s, background 0.15s;
+    }
+    #url-icon.secure   { color: #4caf50; background: rgba(76,175,80,0.12); }
+    #url-icon.insecure { color: #ff9800; background: rgba(255,152,0,0.12); }
+    #url-icon.blank    { color: #444466; background: none; }
 
     #url-bar {
       flex: 1;
@@ -175,7 +188,7 @@
     }
     .proxy-frame.active { display: block; }
 
-    /* ── Home page (shown when no URL) ───────────────── */
+    /* ── Home page ───────────────────────────────────── */
     #home-page {
       position: absolute;
       inset: 0;
@@ -185,6 +198,7 @@
       justify-content: center;
       gap: 20px;
       background: #0f0f18;
+      z-index: 5; /* sits above iframes when visible */
     }
     #home-page.hidden { display: none; }
 
@@ -248,7 +262,20 @@
       min-width: 70px;
     }
     .shortcut:hover { background: #1a1a2a; color: #e8e8f0; border-color: #5577ff; }
-    .shortcut-icon { font-size: 18px; margin-bottom: 4px; }
+
+    /* Shortcut icon — styled text badge, no emoji */
+    .shortcut-icon {
+      font-size: 11px;
+      font-weight: 800;
+      font-family: 'Courier New', monospace;
+      letter-spacing: -0.5px;
+      color: #5577ff;
+      margin-bottom: 5px;
+      background: rgba(85,119,255,0.1);
+      border-radius: 4px;
+      padding: 2px 5px;
+      display: inline-block;
+    }
 
     /* ── Status bar ──────────────────────────────────── */
     #statusbar {
@@ -272,7 +299,7 @@
   <button id="new-tab-btn" title="New tab">+</button>
 </div>
 
-<!-- Nav bar -->
+<!-- Nav bar — always visible -->
 <div id="nav-bar">
   <button class="nav-btn" id="btn-back"    title="Back">&#8592;</button>
   <button class="nav-btn" id="btn-forward" title="Forward">&#8594;</button>
@@ -280,7 +307,7 @@
   <button class="nav-btn" id="btn-home"    title="New tab">&#8962;</button>
 
   <div id="url-wrap">
-    <span id="url-icon">🔒</span>
+    <span id="url-icon" class="blank">www</span>
     <input id="url-bar" type="text" placeholder="Search or enter a URL…"
            autocomplete="off" autocorrect="off" spellcheck="false" />
   </div>
@@ -299,22 +326,22 @@
     </div>
     <div class="home-shortcuts">
       <div class="shortcut" data-url="https://youtube.com">
-        <div class="shortcut-icon">▶</div>YouTube
+        <div class="shortcut-icon">YT</div>YouTube
       </div>
       <div class="shortcut" data-url="https://discord.com">
-        <div class="shortcut-icon">💬</div>Discord
+        <div class="shortcut-icon">DC</div>Discord
       </div>
       <div class="shortcut" data-url="https://instagram.com">
-        <div class="shortcut-icon">📸</div>Instagram
+        <div class="shortcut-icon">IG</div>Instagram
       </div>
       <div class="shortcut" data-url="https://twitter.com">
-        <div class="shortcut-icon">🐦</div>Twitter
+        <div class="shortcut-icon">TW</div>Twitter
       </div>
       <div class="shortcut" data-url="https://reddit.com">
-        <div class="shortcut-icon">🤖</div>Reddit
+        <div class="shortcut-icon">RD</div>Reddit
       </div>
       <div class="shortcut" data-url="https://duckduckgo.com">
-        <div class="shortcut-icon">🔍</div>Search
+        <div class="shortcut-icon">GO</div>Search
       </div>
     </div>
   </div>
@@ -385,7 +412,6 @@ function mkTab(url = null) {
   const frame = document.createElement('iframe');
   frame.className = 'proxy-frame';
   frame.allow = 'fullscreen';
-  // sandbox keeps things safe but allows scripts + same-origin access
   frame.setAttribute('sandbox', 'allow-forms allow-scripts allow-same-origin allow-popups allow-modals allow-downloads');
   document.getElementById('frame-area').appendChild(frame);
 
@@ -411,7 +437,15 @@ function closeTab(id) {
 
 function activateTab(id) {
   activeId = id;
-  tabs.forEach(t => t.frame.classList.toggle('active', t.id === id));
+  const tab = tabs.find(t => t.id === id);
+  const isBlank = !tab || !tab.url;
+
+  // Only make the frame active (visible) if this tab has loaded a URL
+  tabs.forEach(t => t.frame.classList.toggle('active', t.id === id && !isBlank));
+
+  // Show home page for blank tabs, hide it when a page is loaded
+  document.getElementById('home-page').classList.toggle('hidden', !isBlank);
+
   renderTabs();
   syncNavBar();
 }
@@ -457,18 +491,37 @@ async function navigate(rawUrl, tabId = activeId) {
   tab.title = getDomain(url);
   tab.frame.src = toProxyURL(url);
 
-  document.getElementById('home-page').classList.add('hidden');
+  // Only update the UI if this is the currently active tab
+  if (tabId === activeId) {
+    tab.frame.classList.add('active');  // ensure frame is visible
+    document.getElementById('home-page').classList.add('hidden');
+    syncNavBar();
+  }
+
   renderTabs();
-  if (tabId === activeId) syncNavBar();
 }
 
 function syncNavBar() {
-  const tab = getActive();
+  const tab     = getActive();
   const urlBar  = document.getElementById('url-bar');
   const urlIcon = document.getElementById('url-icon');
-  if (!tab) { urlBar.value = ''; return; }
-  urlBar.value = tab.url || '';
-  urlIcon.textContent = tab.url?.startsWith('https') ? '🔒' : tab.url ? '⚠' : '🔍';
+
+  if (!tab || !tab.url) {
+    urlBar.value = '';
+    urlIcon.textContent = 'www';
+    urlIcon.className   = 'blank';
+    return;
+  }
+
+  urlBar.value = tab.url;
+
+  if (tab.url.startsWith('https')) {
+    urlIcon.textContent = 'https';
+    urlIcon.className   = 'secure';
+  } else {
+    urlIcon.textContent = 'http';
+    urlIcon.className   = 'insecure';
+  }
 }
 
 function onFrameLoad(tabId) {
@@ -516,9 +569,11 @@ document.getElementById('btn-refresh').onclick = () => {
 document.getElementById('btn-home').onclick = () => {
   const t = getActive();
   if (!t) return;
-  t.url = ''; t.title = 'New Tab'; t.frame.src = 'about:blank';
+  t.url = ''; t.title = 'New Tab';
+  t.frame.src = 'about:blank';
+  t.frame.classList.remove('active');  // hide frame, let home page show through
   document.getElementById('home-page').classList.remove('hidden');
-  document.getElementById('url-bar').value = '';
+  syncNavBar();
   renderTabs();
 };
 document.getElementById('new-tab-btn').onclick = () => mkTab();
@@ -539,7 +594,7 @@ document.querySelectorAll('.shortcut').forEach(el => {
 
 // ── Boot ────────────────────────────────────────────────────────────────────
 ensureSW().then(ok => setStatus(ok ? '' : 'service worker unavailable', ok ? '' : 'error'));
-mkTab(); // open one blank tab
+mkTab(); // open one blank tab → shows home page
 </script>
 </body>
 </html>
