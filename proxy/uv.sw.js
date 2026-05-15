@@ -1,10 +1,16 @@
 /*  proxy/uv.sw.js
     Self-contained service worker proxy.
     No external bundle needed — zero dependencies.
-    Uses corsproxy.io to bypass CORS restrictions.
+
+    BACKEND: set CORS_BACKEND to your Cloudflare Worker URL.
+    Format:  https://your-worker.your-subdomain.workers.dev/
+    The worker receives the full target URL appended to the path:
+      https://your-worker.workers.dev/https://example.com/page
 */
 
 const PROXY_PREFIX = '/proxy/service/';
+
+const CORS_BACKEND = 'https://googledrive123.gogledriven123.workers.dev/';
 
 // ── URL codec (URL-safe base64) ────────────────────────────────────────────
 function encode(url) {
@@ -130,7 +136,8 @@ self.addEventListener('fetch', (event) => {
 
 async function proxyFetch(targetURL, req) {
   try {
-    const corsProxy = 'https://corsproxy.io/?' + encodeURIComponent(targetURL);
+    // Worker receives target as path: /https%3A%2F%2Fexample.com
+    const corsProxy = CORS_BACKEND + encodeURIComponent(targetURL);
 
     const headers = new Headers();
     for (const h of ['accept', 'accept-language', 'content-type']) {
