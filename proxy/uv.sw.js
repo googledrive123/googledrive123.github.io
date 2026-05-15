@@ -117,13 +117,13 @@ function runtimeScript(base) {
 
   var _xopen=XMLHttpRequest.prototype.open;
   XMLHttpRequest.prototype.open=function(m,url){
-    try{if(typeof url==='string'&&!/^(data:|blob:|javascript:|\\/)/.test(url))url=_toP(url);}catch(e){}
+    try{if(typeof url==='string'&&!/^(data:|blob:|javascript:)/.test(url)&&!url.startsWith(_P))url=_toP(url);}catch(e){}
     return _xopen.apply(this,[m,url].concat([].slice.call(arguments,2)));
   };
 
   var _fetch=window.fetch;
   window.fetch=function(input,opts){
-    try{if(typeof input==='string'&&!/^(data:|blob:|javascript:|\\/)/.test(input))input=_toP(input);}catch(e){}
+    try{if(typeof input==='string'&&!/^(data:|blob:|javascript:)/.test(input)&&!input.startsWith(_P))input=_toP(input);}catch(e){}
     return _fetch.call(this,input,opts);
   };
 
@@ -154,8 +154,13 @@ function runtimeScript(base) {
 
   var _push=history.pushState.bind(history);
   history.pushState=function(s,t,url){
-    try{if(url&&!/^(#|\\/)/.test(url))url=_toP(url);}catch(e){}
+    try{if(url&&url!=='#'&&!url.startsWith(_P))url=_toP(url);}catch(e){}
     return _push(s,t,url);
+  };
+  var _replace=history.replaceState.bind(history);
+  history.replaceState=function(s,t,url){
+    try{if(url&&url!=='#'&&!url.startsWith(_P))url=_toP(url);}catch(e){}
+    return _replace(s,t,url);
   };
 })();<\/script>`;
 }
@@ -257,6 +262,17 @@ async function proxyFetch(targetURL, req) {
         status: upstream.status,
         headers: { 'Content-Type': ct },
       });
+    }
+
+    // 413 = Worker choked on a huge file — fall back to direct fetch (SW has no CORS restriction)
+    if (upstream.status === 413) {
+      try {
+        const direct = await fetch(targetURL);
+        return new Response(direct.body, {
+          status: direct.status,
+          headers: { 'Content-Type': direct.headers.get('content-type') || 'application/javascript' },
+        });
+      } catch { /* fall through to normal response if direct also fails */ }
     }
 
     return new Response(upstream.body, {
