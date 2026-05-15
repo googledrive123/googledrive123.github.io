@@ -3,8 +3,8 @@
 const PROXY_PREFIX  = '/proxy/service/';
 const CORS_BACKEND  = 'https://googledrive123.gogledriven123.workers.dev/';
 
-// CDN hostnames whose assets load fine directly (not blocked by school filters)
-// Routing them through the worker causes 403s and 413s — skip the proxy for these.
+// Hostnames whose assets the SW fetches directly (not through the Worker).
+// These CDNs allow cross-origin fetches and aren't blocked by school filters.
 const DIRECT_CDN_HOSTS = [
   'cdn.discordapp.com',
   'cdn.prod.website-files.com',
@@ -17,17 +17,25 @@ const DIRECT_CDN_HOSTS = [
   'abs.twimg.com',
   'video.twimg.com',
   'scontent.cdninstagram.com',
-  'instagram.fxxx1-1.fna.fbcdn.net',
 ];
 
-// File extensions that are never blocked — images, fonts, audio, video
-const DIRECT_EXT = /\.(webp|png|jpg|jpeg|gif|svg|ico|avif|mp4|webm|m4a|mp3|ogg|woff2?|ttf|eot|otf)(\?.*)?$/i;
+// File extensions that are safe to fetch directly (images, fonts, media)
+const DIRECT_EXT = /\.(webp|png|jpg|jpeg|gif|avif|mp4|webm|m4a|mp3|ogg)(\?.*)?$/i;
+
+// Discord hosts its own fonts/icons at discord.com/assets/ — fetch these directly
+// since they're static and the Worker chokes on large JS bundles from the same path.
+// Note: .js files from discord.com/assets/ still go through the Worker (needed for rewriting).
+const DISCORD_DIRECT_EXT = /\.(woff2?|ttf|eot|otf|svg|ico|png|jpg|webp|gif)(\?.*)?$/i;
 
 function shouldFetchDirect(url) {
   try {
     const u = new URL(url);
     if (DIRECT_CDN_HOSTS.some(h => u.hostname === h || u.hostname.endsWith('.' + h))) return true;
     if (DIRECT_EXT.test(u.pathname)) return true;
+    // Discord self-hosted fonts/icons — direct to avoid 413/403 on large bundles
+    if ((u.hostname === 'discord.com' || u.hostname.endsWith('.discord.com'))
+        && u.pathname.startsWith('/assets/')
+        && DISCORD_DIRECT_EXT.test(u.pathname)) return true;
   } catch { /* ignore */ }
   return false;
 }
@@ -152,6 +160,31 @@ function runtimeScript(base) {
 })();<\/script>`;
 }
 
+// ── Cookie store (per hostname) ─────────────────────────────────────────────
+const cookieStore = new Map(); // hostname → cookie string
+
+function getCookies(hostname) {
+  return cookieStore.get(hostname) || '';
+}
+
+function storeCookies(hostname, setCookieHeader) {
+  if (!setCookieHeader) return;
+  // Parse and merge cookies (basic — handles name=value pairs)
+  const existing = new Map();
+  const current = cookieStore.get(hostname) || '';
+  for (const part of current.split(';').map(s => s.trim()).filter(Boolean)) {
+    const [k] = part.split('=');
+    existing.set(k.trim(), part);
+  }
+  // set-cookie can be multiple values joined by comma in some fetch impls
+  for (const cookie of setCookieHeader.split(/,(?=[^;]+=[^;]*)/)) {
+    const nameVal = cookie.split(';')[0].trim();
+    const [k] = nameVal.split('=');
+    existing.set(k.trim(), nameVal);
+  }
+  cookieStore.set(hostname, [...existing.values()].join('; '));
+}
+
 // ── Fetch handler ───────────────────────────────────────────────────────────
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
@@ -179,18 +212,31 @@ async function proxyFetch(targetURL, req) {
       });
     }
 
-    const corsProxy = CORS_BACKEND + encodeURIComponent(targetURL);
+    let targetHost;
+    try { targetHost = new URL(targetURL).hostname; } catch {}
 
-    const headers = new Headers();
-    for (const h of ['accept', 'accept-language', 'content-type']) {
+    // Pass target + original method via headers — avoids URL length/encoding issues
+    const headers = new Headers({
+      'x-target': targetURL,
+      'x-method': req.method,
+    });
+    for (const h of ['accept', 'accept-language', 'content-type', 'range']) {
       if (req.headers.has(h)) headers.set(h, req.headers.get(h));
     }
+    const stored = targetHost ? getCookies(targetHost) : '';
+    if (stored) headers.set('cookie', stored);
 
-    const upstream = await fetch(corsProxy, {
-      method: req.method,
+    const upstream = await fetch(CORS_BACKEND, {
+      method: 'POST',
       headers,
       body: req.method !== 'GET' && req.method !== 'HEAD' ? req.body : undefined,
     });
+
+    // Store any new cookies the site set
+    if (targetHost) {
+      const sc = upstream.headers.get('set-cookie');
+      if (sc) storeCookies(targetHost, sc);
+    }
 
     const ct = upstream.headers.get('content-type') || '';
 
