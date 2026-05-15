@@ -3,182 +3,543 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Search</title>
+  <title>Browser</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    body {
-      background: #0f0f13;
+    html, body {
+      height: 100%;
+      background: #0a0a0f;
       color: #e8e8f0;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      min-height: 100vh;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 24px;
     }
 
-    .logo {
-      font-size: 2.2rem;
-      font-weight: 700;
-      letter-spacing: -1px;
-      color: #fff;
-      opacity: 0.9;
+    /* ── Tab bar ─────────────────────────────────────── */
+    #tab-bar {
+      display: flex;
+      align-items: flex-end;
+      height: 38px;
+      background: #070710;
+      padding: 0 6px;
+      gap: 2px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      flex-shrink: 0;
     }
+    #tab-bar::-webkit-scrollbar { display: none; }
 
-    .logo span {
-      color: #6c8fff;
-    }
-
-    .search-wrapper {
+    .tab {
       display: flex;
       align-items: center;
-      background: #1a1a24;
-      border: 1px solid #2a2a3a;
-      border-radius: 14px;
-      width: min(560px, 92vw);
-      padding: 4px 4px 4px 18px;
-      transition: border-color 0.2s;
+      gap: 7px;
+      background: #141420;
+      border-radius: 8px 8px 0 0;
+      padding: 0 10px 0 12px;
+      height: 30px;
+      cursor: pointer;
+      font-size: 12px;
+      color: #666688;
+      min-width: 90px;
+      max-width: 180px;
+      flex-shrink: 0;
+      user-select: none;
+      transition: background 0.1s, color 0.1s;
+      white-space: nowrap;
+    }
+    .tab:hover { background: #1a1a2a; color: #aaaacc; }
+    .tab.active { background: #0f0f18; color: #e8e8f0; }
+
+    .tab-title { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+
+    .tab-close {
+      flex-shrink: 0;
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      color: #444466;
+      transition: background 0.1s, color 0.1s;
+    }
+    .tab-close:hover { background: #ff4444; color: #fff; }
+
+    #new-tab-btn {
+      flex-shrink: 0;
+      background: none;
+      border: none;
+      color: #444466;
+      font-size: 20px;
+      width: 30px;
+      height: 30px;
+      border-radius: 8px 8px 0 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.1s, background 0.1s;
+      align-self: flex-end;
+    }
+    #new-tab-btn:hover { color: #e8e8f0; background: #1a1a2a; }
+
+    /* ── Nav bar ─────────────────────────────────────── */
+    #nav-bar {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 10px;
+      background: #0f0f18;
+      border-bottom: 1px solid #1a1a28;
+      flex-shrink: 0;
     }
 
-    .search-wrapper:focus-within {
-      border-color: #6c8fff;
+    .nav-btn {
+      flex-shrink: 0;
+      background: none;
+      border: none;
+      color: #555577;
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.1s, background 0.1s;
     }
+    .nav-btn:hover { color: #e8e8f0; background: #1a1a2a; }
+    .nav-btn:disabled { opacity: 0.25; pointer-events: none; }
 
-    #search-input {
+    #url-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      background: #141420;
+      border: 1px solid #1e1e30;
+      border-radius: 8px;
+      padding: 0 10px;
+      height: 28px;
+      gap: 6px;
+      transition: border-color 0.15s;
+    }
+    #url-wrap:focus-within { border-color: #5577ff; }
+
+    #url-icon { color: #444466; font-size: 12px; flex-shrink: 0; }
+
+    #url-bar {
       flex: 1;
       background: none;
       border: none;
       outline: none;
       color: #e8e8f0;
-      font-size: 1rem;
-      padding: 10px 0;
+      font-size: 12.5px;
       caret-color: #6c8fff;
     }
-
-    #search-input::placeholder {
-      color: #4a4a6a;
-    }
+    #url-bar::placeholder { color: #333355; }
 
     #go-btn {
-      background: #6c8fff;
+      flex-shrink: 0;
+      background: #5577ff;
       border: none;
-      border-radius: 10px;
+      border-radius: 6px;
       color: #fff;
-      font-size: 0.9rem;
+      font-size: 12px;
       font-weight: 600;
-      padding: 10px 22px;
+      padding: 0 12px;
+      height: 22px;
       cursor: pointer;
-      transition: background 0.15s, transform 0.1s;
-      white-space: nowrap;
+      transition: background 0.1s;
+    }
+    #go-btn:hover { background: #7799ff; }
+
+    /* ── Frame area ──────────────────────────────────── */
+    #frame-area {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
     }
 
-    #go-btn:hover {
-      background: #8aa3ff;
+    .proxy-frame {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: none;
+      background: #fff;
+    }
+    .proxy-frame.active { display: block; }
+
+    /* ── Home page (shown when no URL) ───────────────── */
+    #home-page {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      background: #0f0f18;
+    }
+    #home-page.hidden { display: none; }
+
+    .home-logo { font-size: 2rem; font-weight: 700; color: #e8e8f0; letter-spacing: -1px; }
+    .home-logo span { color: #5577ff; }
+
+    .home-search {
+      display: flex;
+      align-items: center;
+      background: #141420;
+      border: 1px solid #1e1e30;
+      border-radius: 12px;
+      width: min(520px, 90vw);
+      padding: 4px 4px 4px 16px;
+      gap: 6px;
+    }
+    .home-search:focus-within { border-color: #5577ff; }
+
+    #home-input {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      color: #e8e8f0;
+      font-size: 14px;
+      padding: 8px 0;
+      caret-color: #5577ff;
+    }
+    #home-input::placeholder { color: #333355; }
+
+    #home-go {
+      background: #5577ff;
+      border: none;
+      border-radius: 9px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 18px;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    #home-go:hover { background: #7799ff; }
+
+    .home-shortcuts {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
     }
 
-    #go-btn:active {
-      transform: scale(0.97);
+    .shortcut {
+      background: #141420;
+      border: 1px solid #1e1e30;
+      border-radius: 10px;
+      padding: 10px 16px;
+      cursor: pointer;
+      font-size: 12px;
+      color: #666688;
+      transition: all 0.1s;
+      text-align: center;
+      min-width: 70px;
     }
+    .shortcut:hover { background: #1a1a2a; color: #e8e8f0; border-color: #5577ff; }
+    .shortcut-icon { font-size: 18px; margin-bottom: 4px; }
 
-    .hint {
-      font-size: 0.78rem;
-      color: #3a3a5a;
+    /* ── Status bar ──────────────────────────────────── */
+    #statusbar {
+      height: 18px;
+      background: #070710;
+      padding: 0 10px;
+      font-size: 10px;
+      color: #333355;
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
     }
-
-    #status {
-      font-size: 0.82rem;
-      color: #6c8fff;
-      min-height: 1.2em;
-    }
-
-    #status.error {
-      color: #ff6c6c;
-    }
+    #statusbar.loading { color: #5577ff; }
+    #statusbar.error   { color: #ff5555; }
   </style>
 </head>
 <body>
 
-  <div class="logo">go<span>.</span></div>
+<!-- Tab bar -->
+<div id="tab-bar">
+  <button id="new-tab-btn" title="New tab">+</button>
+</div>
 
-  <div class="search-wrapper">
-    <input
-      id="search-input"
-      type="text"
-      placeholder="Search or enter a URL..."
-      autocomplete="off"
-      spellcheck="false"
-      autofocus
-    />
-    <button id="go-btn">Go</button>
+<!-- Nav bar -->
+<div id="nav-bar">
+  <button class="nav-btn" id="btn-back"    title="Back">&#8592;</button>
+  <button class="nav-btn" id="btn-forward" title="Forward">&#8594;</button>
+  <button class="nav-btn" id="btn-refresh" title="Refresh">&#8635;</button>
+  <button class="nav-btn" id="btn-home"    title="New tab">&#8962;</button>
+
+  <div id="url-wrap">
+    <span id="url-icon">🔒</span>
+    <input id="url-bar" type="text" placeholder="Search or enter a URL…"
+           autocomplete="off" autocorrect="off" spellcheck="false" />
   </div>
 
-  <div id="status"></div>
-  <div class="hint">type a url like youtube.com or search anything</div>
+  <button id="go-btn">Go</button>
+</div>
 
-  <script>
-    const input  = document.getElementById('search-input');
-    const btn    = document.getElementById('go-btn');
-    const status = document.getElementById('status');
+<!-- Frames + home -->
+<div id="frame-area">
+  <div id="home-page">
+    <div class="home-logo">go<span>.</span></div>
+    <div class="home-search">
+      <input id="home-input" type="text" placeholder="Search or enter a URL…"
+             autocomplete="off" spellcheck="false" autofocus />
+      <button id="home-go">Go</button>
+    </div>
+    <div class="home-shortcuts">
+      <div class="shortcut" data-url="https://youtube.com">
+        <div class="shortcut-icon">▶</div>YouTube
+      </div>
+      <div class="shortcut" data-url="https://discord.com">
+        <div class="shortcut-icon">💬</div>Discord
+      </div>
+      <div class="shortcut" data-url="https://instagram.com">
+        <div class="shortcut-icon">📸</div>Instagram
+      </div>
+      <div class="shortcut" data-url="https://twitter.com">
+        <div class="shortcut-icon">🐦</div>Twitter
+      </div>
+      <div class="shortcut" data-url="https://reddit.com">
+        <div class="shortcut-icon">🤖</div>Reddit
+      </div>
+      <div class="shortcut" data-url="https://duckduckgo.com">
+        <div class="shortcut-icon">🔍</div>Search
+      </div>
+    </div>
+  </div>
+</div>
 
-    // Must match encode() in uv.sw.js
-    function encode(url) {
-      return btoa(unescape(encodeURIComponent(url)))
-        .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-    }
+<!-- Status bar -->
+<div id="statusbar">ready</div>
 
-    async function registerSW() {
-      if (!navigator.serviceWorker) {
-        setStatus('Service workers not supported in this browser.', true);
-        return false;
+<script>
+// ── Codec (must match uv.sw.js) ─────────────────────────────────────────────
+function encode(url) {
+  return btoa(unescape(encodeURIComponent(url)))
+    .replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+}
+function decode(str) {
+  str = str.replace(/-/g,'+').replace(/_/g,'/');
+  while (str.length % 4) str += '=';
+  try { return decodeURIComponent(escape(atob(str))); } catch { return atob(str); }
+}
+
+function toProxyURL(url)  { return '/proxy/service/' + encode(url); }
+function fromProxyURL(p)  {
+  const m = p.match(/\/proxy\/service\/([^?#]*)/);
+  if (!m) return null;
+  try { return decode(m[1]); } catch { return null; }
+}
+
+function resolveURL(raw) {
+  raw = raw.trim();
+  if (!raw) return null;
+  if (/^https?:\/\//i.test(raw)) return raw;
+  if (/^[a-z0-9-]+(\.[a-z]{2,})/i.test(raw) && !raw.includes(' ')) return 'https://' + raw;
+  return 'https://duckduckgo.com/?q=' + encodeURIComponent(raw);
+}
+
+function getDomain(url) {
+  try { return new URL(url).hostname.replace(/^www\./,''); } catch { return url.slice(0,24); }
+}
+
+// ── Service Worker ──────────────────────────────────────────────────────────
+let swReady = false;
+async function ensureSW() {
+  if (swReady) return true;
+  if (!navigator.serviceWorker) { setStatus('SW not supported', 'error'); return false; }
+  try {
+    await navigator.serviceWorker.register('/proxy/uv.sw.js', { scope: '/proxy/service/' });
+    swReady = true;
+    return true;
+  } catch(e) { setStatus('SW error: ' + e.message, 'error'); return false; }
+}
+
+// ── Status bar ──────────────────────────────────────────────────────────────
+let statusTimer;
+function setStatus(msg, type = '') {
+  const s = document.getElementById('statusbar');
+  s.textContent = msg;
+  s.className = type;
+  clearTimeout(statusTimer);
+  if (msg && !type) statusTimer = setTimeout(() => { s.textContent = ''; s.className = ''; }, 2500);
+}
+
+// ── Tabs ────────────────────────────────────────────────────────────────────
+let tabs = [];
+let activeId = null;
+
+function mkTab(url = null) {
+  const id = Date.now() + Math.random();
+  const frame = document.createElement('iframe');
+  frame.className = 'proxy-frame';
+  frame.allow = 'fullscreen';
+  // sandbox keeps things safe but allows scripts + same-origin access
+  frame.setAttribute('sandbox', 'allow-forms allow-scripts allow-same-origin allow-popups allow-modals allow-downloads');
+  document.getElementById('frame-area').appendChild(frame);
+
+  frame.addEventListener('load', () => onFrameLoad(id));
+
+  const tab = { id, url: url || '', title: url ? getDomain(url) : 'New Tab', frame };
+  tabs.push(tab);
+  renderTabs();
+  activateTab(id);
+  if (url) navigate(url, id);
+  return id;
+}
+
+function closeTab(id) {
+  const idx = tabs.findIndex(t => t.id === id);
+  if (idx < 0) return;
+  tabs[idx].frame.remove();
+  tabs.splice(idx, 1);
+  if (!tabs.length) { mkTab(); return; }
+  if (activeId === id) activateTab(tabs[Math.max(0, idx - 1)].id);
+  renderTabs();
+}
+
+function activateTab(id) {
+  activeId = id;
+  tabs.forEach(t => t.frame.classList.toggle('active', t.id === id));
+  renderTabs();
+  syncNavBar();
+}
+
+function getActive() { return tabs.find(t => t.id === activeId) || null; }
+
+function renderTabs() {
+  const bar  = document.getElementById('tab-bar');
+  const btn  = document.getElementById('new-tab-btn');
+  bar.querySelectorAll('.tab').forEach(el => el.remove());
+
+  for (const tab of tabs) {
+    const el = document.createElement('div');
+    el.className = 'tab' + (tab.id === activeId ? ' active' : '');
+    el.innerHTML =
+      `<span class="tab-title">${tab.title}</span>` +
+      `<span class="tab-close" data-id="${tab.id}">×</span>`;
+    el.addEventListener('mousedown', e => {
+      if (e.target.classList.contains('tab-close')) {
+        e.stopPropagation();
+        closeTab(tab.id);
+      } else {
+        activateTab(tab.id);
       }
-      try {
-        await navigator.serviceWorker.register('/proxy/uv.sw.js', {
-          scope: '/proxy/service/',
-        });
-        return true;
-      } catch (e) {
-        setStatus('SW registration failed: ' + e.message, true);
-        return false;
-      }
-    }
-
-    function setStatus(msg, isError = false) {
-      status.textContent = msg;
-      status.className = isError ? 'error' : '';
-    }
-
-    function resolveURL(raw) {
-      raw = raw.trim();
-      const hasProto = /^https?:\/\//i.test(raw);
-      const looksLikeDomain = /^[a-z0-9-]+(\.[a-z]{2,})/i.test(raw) && !raw.includes(' ');
-      if (hasProto) return raw;
-      if (looksLikeDomain) return 'https://' + raw;
-      return 'https://duckduckgo.com/?q=' + encodeURIComponent(raw);
-    }
-
-    async function navigate() {
-      const raw = input.value.trim();
-      if (!raw) return;
-      setStatus('connecting...');
-      const ok = await registerSW();
-      if (!ok) return;
-      setStatus('');
-      window.location.href = '/proxy/service/' + encode(resolveURL(raw));
-    }
-
-    btn.addEventListener('click', navigate);
-    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') navigate(); });
-
-    registerSW().then(ok => {
-      if (ok) setStatus('ready');
-      setTimeout(() => { if (status.textContent === 'ready') status.textContent = ''; }, 1500);
     });
-  </script>
+    bar.insertBefore(el, btn);
+  }
+}
+
+// ── Navigation ──────────────────────────────────────────────────────────────
+async function navigate(rawUrl, tabId = activeId) {
+  const url = resolveURL(rawUrl);
+  if (!url) return;
+
+  setStatus('loading…', 'loading');
+  const ok = await ensureSW();
+  if (!ok) return;
+
+  const tab = tabs.find(t => t.id === tabId);
+  if (!tab) return;
+
+  tab.url   = url;
+  tab.title = getDomain(url);
+  tab.frame.src = toProxyURL(url);
+
+  document.getElementById('home-page').classList.add('hidden');
+  renderTabs();
+  if (tabId === activeId) syncNavBar();
+}
+
+function syncNavBar() {
+  const tab = getActive();
+  const urlBar  = document.getElementById('url-bar');
+  const urlIcon = document.getElementById('url-icon');
+  if (!tab) { urlBar.value = ''; return; }
+  urlBar.value = tab.url || '';
+  urlIcon.textContent = tab.url?.startsWith('https') ? '🔒' : tab.url ? '⚠' : '🔍';
+}
+
+function onFrameLoad(tabId) {
+  const tab = tabs.find(t => t.id === tabId);
+  if (!tab) return;
+  setStatus('');
+
+  try {
+    const title = tab.frame.contentDocument?.title;
+    if (title && title !== 'about:blank') { tab.title = title; renderTabs(); }
+  } catch {}
+}
+
+// Poll iframe location for SPA navigations (pushState doesn't fire load)
+setInterval(() => {
+  const tab = getActive();
+  if (!tab?.frame?.contentWindow) return;
+  try {
+    const href = tab.frame.contentWindow.location.href;
+    const real = fromProxyURL(href);
+    if (real && real !== tab.url) {
+      tab.url   = real;
+      tab.title = getDomain(real);
+      renderTabs();
+      syncNavBar();
+    }
+  } catch {}
+}, 600);
+
+// ── Nav bar wiring ──────────────────────────────────────────────────────────
+document.getElementById('btn-back').onclick = () => {
+  const t = getActive();
+  if (t) try { t.frame.contentWindow.history.back(); } catch {}
+};
+document.getElementById('btn-forward').onclick = () => {
+  const t = getActive();
+  if (t) try { t.frame.contentWindow.history.forward(); } catch {}
+};
+document.getElementById('btn-refresh').onclick = () => {
+  const t = getActive();
+  if (!t) return;
+  try { t.frame.contentWindow.location.reload(); }
+  catch { t.frame.src = t.frame.src; }
+};
+document.getElementById('btn-home').onclick = () => {
+  const t = getActive();
+  if (!t) return;
+  t.url = ''; t.title = 'New Tab'; t.frame.src = 'about:blank';
+  document.getElementById('home-page').classList.remove('hidden');
+  document.getElementById('url-bar').value = '';
+  renderTabs();
+};
+document.getElementById('new-tab-btn').onclick = () => mkTab();
+
+const urlBar = document.getElementById('url-bar');
+urlBar.addEventListener('keydown', e => { if (e.key === 'Enter') navigate(urlBar.value); });
+urlBar.addEventListener('focus',   ()  => urlBar.select());
+document.getElementById('go-btn').onclick = () => navigate(urlBar.value);
+
+// ── Home page wiring ────────────────────────────────────────────────────────
+const homeInput = document.getElementById('home-input');
+document.getElementById('home-go').onclick = () => navigate(homeInput.value);
+homeInput.addEventListener('keydown', e => { if (e.key === 'Enter') navigate(homeInput.value); });
+
+document.querySelectorAll('.shortcut').forEach(el => {
+  el.addEventListener('click', () => navigate(el.dataset.url));
+});
+
+// ── Boot ────────────────────────────────────────────────────────────────────
+ensureSW().then(ok => setStatus(ok ? '' : 'service worker unavailable', ok ? '' : 'error'));
+mkTab(); // open one blank tab
+</script>
 </body>
 </html>
