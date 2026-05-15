@@ -159,7 +159,7 @@
       const looksLikeDomain = /^[a-z0-9-]+(\.[a-z]{2,})/i.test(raw) && !raw.includes(' ');
       if (hasProto) return raw;
       if (looksLikeDomain) return 'https://' + raw;
-      return 'https://www.google.com/search?q=' + encodeURIComponent(raw);
+      return 'https://duckduckgo.com/?q=' + encodeURIComponent(raw);
     }
 
     async function navigate() {
