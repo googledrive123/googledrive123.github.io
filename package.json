@@ -1,0 +1,12 @@
+{
+  "name": "gamevault",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "serve . -p 8080 -s",
+    "start": "serve . -p 8080 -s"
+  },
+  "devDependencies": {
+    "serve": "^14.2.4"
+  }
+}
