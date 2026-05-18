@@ -5701,19 +5701,21 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
   const secBrowse  = document.getElementById('browse');
   const secMovies  = document.getElementById('movies');
 
-  function showSection() {
+  function showSection(silent) {
     secWelcome.classList.add('hidden');
     secBrowse.classList.remove('visible');
     secMovies.classList.add('visible');
     window.scrollTo(0, 0);
+    if (!silent) history.pushState({page: currentMode}, '', '/' + currentMode);
     if (currentMode === 'movies' && !moviesLoaded) { loadAllMovieRows(); moviesLoaded = true; }
     if (currentMode === 'tv'     && !tvLoaded)     { loadAllTVRows();    tvLoaded    = true; }
   }
 
-  function hideSection() {
+  function hideSection(silent) {
     secMovies.classList.remove('visible');
     secWelcome.classList.remove('hidden');
     window.scrollTo(0, 0);
+    if (!silent) history.pushState({page:'welcome'}, '', '/');
   }
 
   document.getElementById('moviesBtn').addEventListener('click', showSection);
@@ -5726,7 +5728,7 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
   document.getElementById('modeMovies').addEventListener('click', () => switchMode('movies'));
   document.getElementById('modeTV').addEventListener('click',     () => switchMode('tv'));
 
-  function switchMode(mode) {
+  function switchMode(mode, silent) {
     currentMode = mode;
     document.getElementById('modeMovies').classList.toggle('active', mode === 'movies');
     document.getElementById('modeTV').classList.toggle('active',     mode === 'tv');
@@ -5737,6 +5739,7 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
     document.getElementById('movieSearchResults').style.display = 'none';
     document.getElementById('tvSearchResults').style.display    = 'none';
     document.getElementById('moviesSearch').value = '';
+    if (!silent) history.pushState({page: mode}, '', '/' + mode);
     if (mode === 'movies' && !moviesLoaded) { loadAllMovieRows(); moviesLoaded = true; }
     if (mode === 'tv'     && !tvLoaded)     { loadAllTVRows();    tvLoaded    = true; }
   }
@@ -5863,9 +5866,10 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
 
   // ── Movie player ──
   async function openMoviePlayer(movie) {
-    playerTitle.textContent = movie.title;
-    playerYear.textContent  = movie.year;
+    playerTitle.textContent = movie.title || 'Loading…';
+    playerYear.textContent  = movie.year  || '';
     playerFrame.innerHTML   = `<iframe src="${EMBED_MOVIE}${movie.id}" frameborder="0" allowfullscreen></iframe>`;
+    history.pushState({page:'movie', id: movie.id}, '', '/movie/' + movie.id);
 
     const posterSrc = movie.poster
       ? `<img class="movie-detail-poster" src="${IMG_BASE}w342${movie.poster}" alt="${movie.title}">`
@@ -5902,8 +5906,9 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
   let tvState = { id: null, season: 1, episode: 1, seasons: [] };
 
   async function openTVPlayer(show) {
-    playerTitle.textContent = show.title;
-    playerYear.textContent  = show.year;
+    playerTitle.textContent = show.title || 'Loading…';
+    playerYear.textContent  = show.year  || '';
+    history.pushState({page:'tv-show', id: show.id}, '', '/tv/' + show.id);
 
     const posterSrc = show.poster
       ? `<img class="movie-detail-poster" src="${IMG_BASE}w342${show.poster}" alt="${show.title}">`
@@ -5989,13 +5994,14 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
   }
 
   // ── Close ──
-  function closeMoviePlayer() {
+  function closeMoviePlayer(silent) {
     overlay.classList.remove('visible');
     setTimeout(() => {
       overlay.classList.remove('open');
       playerFrame.innerHTML = '';
       document.body.style.overflow = '';
     }, 200);
+    if (!silent) history.pushState({page: currentMode}, '', '/' + currentMode);
   }
 
   document.getElementById('moviePlayerBack').addEventListener('click', closeMoviePlayer);
@@ -6023,6 +6029,47 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
     loadAllTVRows(currentTVGenre);
     document.getElementById('tvSearchResults').style.display = 'none';
   });
+
+  // ── Popstate ──
+  window.addEventListener('popstate', function() {
+    const p = location.pathname;
+    if (p === '/movie' || p === '/movie/') {
+      showSection(true); switchMode('movies', true);
+      closeMoviePlayer(true);
+    } else if (p.startsWith('/movie/')) {
+      const id = p.slice(7).replace(/\/$/, '');
+      showSection(true); switchMode('movies', true);
+      openMoviePlayer({id});
+    } else if (p === '/tv' || p === '/tv/') {
+      showSection(true); switchMode('tv', true);
+      closeMoviePlayer(true);
+    } else if (p.startsWith('/tv/')) {
+      const id = p.slice(4).replace(/\/$/, '');
+      showSection(true); switchMode('tv', true);
+      openTVPlayer({id});
+    } else if (p === '/' || p === '') {
+      hideSection(true);
+      closeMoviePlayer(true);
+    }
+  });
+
+  // ── Init route ──
+  (function() {
+    const p = location.pathname;
+    if (p === '/movie' || p === '/movie/') {
+      showSection(true); switchMode('movies', true);
+    } else if (p.startsWith('/movie/')) {
+      const id = p.slice(7).replace(/\/$/, '');
+      showSection(true); switchMode('movies', true);
+      setTimeout(() => openMoviePlayer({id}), 100);
+    } else if (p === '/tv' || p === '/tv/') {
+      showSection(true); switchMode('tv', true);
+    } else if (p.startsWith('/tv/')) {
+      const id = p.slice(4).replace(/\/$/, '');
+      showSection(true); switchMode('tv', true);
+      setTimeout(() => openTVPlayer({id}), 100);
+    }
+  })();
 
   // ── Search ──
   document.getElementById('moviesSearch').addEventListener('input', e => {
