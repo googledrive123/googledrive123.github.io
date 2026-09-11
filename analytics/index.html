@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>GameVault Analytics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --bg: #08080a; --surface: #121216; --surface-2: #1a1a20;
+    --border: rgba(255,255,255,0.07); --border-strong: rgba(255,255,255,0.16);
+    --text: #f4f4f6; --muted: #8a8a96; --muted-2: #54545e; --accent: #ff3b3b;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+    --good: #199e70; --bad: #e66767;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { color-scheme: dark; }
+  body { font-family: 'Space Grotesk', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 0 20px 60px; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  a { color: var(--text); }
+  h1 { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.01em; }
+  h1 span { color: var(--accent); }
+  h2 { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+  h2 small { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--muted-2); }
+
+  /* top bar */
+  .top { position: sticky; top: 0; z-index: 10; background: rgba(8,8,10,0.92); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); margin: 0 -20px 24px; padding: 12px 20px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+  .top .grow { flex: 1; }
+  .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .seg button { background: transparent; border: 0; color: var(--muted); font: inherit; font-size: 0.78rem; font-weight: 500; padding: 7px 11px; cursor: pointer; border-right: 1px solid var(--border); }
+  .seg button:last-child { border-right: 0; }
+  .seg button.active { background: var(--surface-2); color: var(--text); }
+  .btn { background: var(--surface); border: 1px solid var(--border); color: var(--text); font: inherit; font-size: 0.78rem; font-weight: 500; padding: 7px 12px; border-radius: 8px; cursor: pointer; }
+  .btn:hover { border-color: var(--border-strong); }
+  .btn.ghost { color: var(--muted); }
+  .btn.danger { color: var(--accent); }
+  .status { font-size: 0.74rem; color: var(--muted); }
+  .status .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--good); margin-right: 6px; vertical-align: middle; }
+  .status .dot.off { background: var(--muted-2); }
+  label.toggle { font-size: 0.74rem; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+
+  /* login */
+  .login { max-width: 420px; margin: 80px auto; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 28px; }
+  .login p { color: var(--muted); font-size: 0.85rem; margin: 8px 0 18px; line-height: 1.5; }
+  .login input { width: 100%; background: var(--bg); border: 1px solid var(--border-strong); color: var(--text); font: inherit; font-family: 'JetBrains Mono', monospace; padding: 10px 12px; border-radius: 8px; margin-bottom: 12px; }
+  .login .err { color: var(--accent); font-size: 0.8rem; margin-top: 10px; min-height: 1em; }
+
+  /* layout */
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(12, 1fr); }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; min-width: 0; }
+  .span-12 { grid-column: span 12; } .span-8 { grid-column: span 8; } .span-6 { grid-column: span 6; } .span-4 { grid-column: span 4; } .span-3 { grid-column: span 3; }
+  @media (max-width: 1100px) { .span-8, .span-6, .span-4, .span-3 { grid-column: span 6; } }
+  @media (max-width: 640px) { .span-8, .span-6, .span-4, .span-3 { grid-column: span 12; } body { padding: 0 16px 40px; } .top { margin: 0 -16px 20px; padding: 10px 16px; } }
+  section { margin-bottom: 28px; }
+
+  /* kpi tiles */
+  .kpis { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+  .kpi .l { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .kpi .v { font-family: 'JetBrains Mono', monospace; font-size: 1.45rem; font-weight: 600; letter-spacing: -0.02em; line-height: 1; }
+  .kpi .s { font-size: 0.72rem; color: var(--muted-2); margin-top: 8px; }
+  .kpi.live .v { color: var(--good); }
+
+  /* charts */
+  .chart-wrap { position: relative; height: 260px; }
+  .chart-wrap.short { height: 190px; }
+  .legend { display: flex; gap: 14px; font-size: 0.72rem; color: var(--muted); margin-bottom: 8px; flex-wrap: wrap; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+
+  /* ranked bars */
+  .ranked { display: flex; flex-direction: column; gap: 6px; }
+  .row { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 10px; align-items: center; font-size: 0.8rem; }
+  .row .rk { color: var(--muted-2); font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; text-align: right; }
+  .row .nm { position: relative; padding: 5px 8px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-radius: 4px; }
+  .row .nm::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: var(--w, 0%); background: var(--s1); opacity: 0.22; border-radius: 4px; }
+  .row .nm span { position: relative; }
+  .row .nm .sub { color: var(--muted-2); font-size: 0.7rem; margin-left: 6px; }
+  .row .val { font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--muted); white-space: nowrap; }
+  .row .val b { color: var(--text); font-weight: 500; }
+  .empty { color: var(--muted-2); font-size: 0.8rem; padding: 10px 0; }
+
+  /* tables */
+  .tbl-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+  th { text-align: left; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); font-weight: 600; padding: 6px 8px; border-bottom: 1px solid var(--border); white-space: nowrap; cursor: pointer; user-select: none; }
+  th.num, td.num { text-align: right; font-family: 'JetBrains Mono', monospace; }
+  th.sorted { color: var(--text); }
+  td { padding: 7px 8px; border-bottom: 1px solid var(--border); white-space: nowrap; max-width: 320px; overflow: hidden; text-overflow: ellipsis; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  td .muted { color: var(--muted-2); }
+  .pill { display: inline-block; font-size: 0.66rem; padding: 2px 7px; border-radius: 999px; border: 1px solid var(--border-strong); color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .pill.g { border-color: rgba(25,158,112,0.5); color: #6fd3ad; }
+  .pill.r { border-color: rgba(230,103,103,0.5); color: #f08a8a; }
+  .pill.b { border-color: rgba(57,135,229,0.5); color: #8ab8f2; }
+  .pill.o { border-color: rgba(217,89,38,0.5); color: #f0a07a; }
+
+  .heat { display: grid; grid-template-columns: 34px repeat(24, 1fr); gap: 3px; font-size: 0.62rem; color: var(--muted-2); }
+  .heat .c { aspect-ratio: 1; border-radius: 2px; background: var(--s1); min-width: 0; }
+  .heat .h { text-align: center; }
+  .heat .d { display: flex; align-items: center; }
+  .footer { font-size: 0.72rem; color: var(--muted-2); margin-top: 30px; line-height: 1.6; }
+  .footer code { font-family: 'JetBrains Mono', monospace; color: var(--muted); }
+  .hidden { display: none !important; }
+  .tabs { display: flex; gap: 6px; margin-left: auto; }
+  .tabs button { background: transparent; border: 1px solid var(--border); color: var(--muted); font: inherit; font-size: 0.68rem; padding: 3px 8px; border-radius: 6px; cursor: pointer; }
+  .tabs button.active { color: var(--text); border-color: var(--border-strong); }
+</style>
+</head>
+<body>
+
+<div class="top">
+  <h1>Game<span>Vault</span> Analytics</h1>
+  <div class="status" id="status"><span class="dot off"></span>Not connected</div>
+  <div class="grow"></div>
+  <div class="seg" id="rangeSeg">
+    <button data-range="today">Today</button>
+    <button data-range="24h" class="active">24h</button>
+    <button data-range="7d">7d</button>
+    <button data-range="30d">30d</button>
+    <button data-range="90d">90d</button>
+  </div>
+  <label class="toggle"><input type="checkbox" id="autoRefresh" checked> Auto-refresh 60s</label>
+  <label class="toggle" title="Stop counting this browser's visits to the site"><input type="checkbox" id="excludeMe"> Exclude this browser</label>
+  <button class="btn ghost" id="exportBtn">Export CSV</button>
+  <button class="btn ghost" id="refreshBtn">Refresh</button>
+  <button class="btn ghost" id="logoutBtn">Sign out</button>
+</div>
+
+<div class="login" id="login">
+  <h1>Analytics <span>login</span></h1>
+  <p>Enter the dashboard secret. It is checked server-side; the raw event data is not readable without it.</p>
+  <input type="password" id="secretInput" placeholder="secret" autocomplete="current-password">
+  <button class="btn" id="loginBtn">Open dashboard</button>
+  <div class="err" id="loginErr"></div>
+</div>
+
+<div id="dash" class="hidden">
+
+  <section>
+    <h2>Right now <small>last 5 minutes · updates with refresh</small></h2>
+    <div class="kpis">
+      <div class="kpi live"><div class="l">Visitors online</div><div class="v" id="liveVisitors">–</div><div class="s" id="liveSub">–</div></div>
+      <div class="kpi live"><div class="l">Playing now</div><div class="v" id="livePlaying">–</div><div class="s" id="livePlayingSub">–</div></div>
+      <div class="kpi"><div class="l">Last event</div><div class="v" id="lastEventAgo" style="font-size:1.1rem">–</div><div class="s" id="lastEventWhat">–</div></div>
+      <div class="kpi"><div class="l">Events today</div><div class="v" id="todayEvents">–</div><div class="s" id="todayVisitors">–</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Overview <small id="rangeLabel"></small></h2>
+    <div class="kpis" id="kpis"></div>
+  </section>
+
+  <section class="grid">
+    <div class="card span-8">
+      <h2>Activity over time <small id="bucketLabel"></small></h2>
+      <div class="legend"><span><i style="background:var(--s1)"></i>Clicks</span><span><i style="background:var(--s2)"></i>Unique visitors</span><span><i style="background:var(--s3)"></i>Game plays</span></div>
+      <div class="chart-wrap"><canvas id="chActivity"></canvas></div>
+    </div>
+    <div class="card span-4">
+      <h2>Visitors: new vs returning</h2>
+      <div class="legend"><span><i style="background:var(--s1)"></i>Returning</span><span><i style="background:var(--s3)"></i>New</span></div>
+      <div class="chart-wrap"><canvas id="chNewRet"></canvas></div>
+    </div>
+    <div class="card span-6">
+      <h2>Clicks by hour of day <small>your local time</small></h2>
+      <div class="chart-wrap short"><canvas id="chHour"></canvas></div>
+    </div>
+    <div class="card span-6">
+      <h2>Clicks by day of week</h2>
+      <div class="chart-wrap short"><canvas id="chDow"></canvas></div>
+    </div>
+    <div class="card span-12">
+      <h2>Heatmap · day × hour <small>clicks, local time</small></h2>
+      <div class="heat" id="heat"></div>
+    </div>
+  </section>
+
+  <section class="grid">
+    <div class="card span-12">
+      <h2>Top games <small>click a column to sort</small><div class="tabs" id="gameTabs"><button data-n="25" class="active">Top 25</button><button data-n="100">Top 100</button><button data-n="9999">All</button></div></h2>
+      <div class="tbl-wrap"><table id="gamesTable"></table></div>
+    </div>
+    <div class="card span-4">
+      <h2>Plays by category</h2>
+      <div class="ranked" id="rkCats"></div>
+    </div>
+    <div class="card span-4">
+      <h2>How games get opened</h2>
+      <div class="ranked" id="rkSource"></div>
+    </div>
+    <div class="card span-4">
+      <h2>Most starred</h2>
+      <div class="ranked" id="rkStars"></div>
+    </div>
+    <div class="card span-6">
+      <h2>Longest average play <small>≥ 3 plays</small></h2>
+      <div class="ranked" id="rkLongest"></div>
+    </div>
+    <div class="card span-6">
+      <h2>Quickest bounces <small>games closed under 20s most often</small></h2>
+      <div class="ranked" id="rkBounce"></div>
+    </div>
+  </section>
+
+  <section class="grid">
+    <div class="card span-6">
+      <h2>Top movies</h2>
+      <div class="ranked" id="rkMovies"></div>
+    </div>
+    <div class="card span-6">
+      <h2>Top TV shows</h2>
+      <div class="ranked" id="rkTV"></div>
+    </div>
+    <div class="card span-6">
+      <h2>Top searches</h2>
+      <div class="ranked" id="rkSearch"></div>
+    </div>
+    <div class="card span-6">
+      <h2>Searches with zero results <small>games people want but you don't have</small></h2>
+      <div class="ranked" id="rkSearchZero"></div>
+    </div>
+    <div class="card span-6">
+      <h2>Category filter clicks</h2>
+      <div class="ranked" id="rkCatClicks"></div>
+    </div>
+    <div class="card span-6">
+      <h2>Movie / TV genre clicks</h2>
+      <div class="ranked" id="rkGenre"></div>
+    </div>
+  </section>
+
+  <section class="grid">
+    <div class="card span-3"><h2>Browsers</h2><div class="ranked" id="rkBrowser"></div></div>
+    <div class="card span-3"><h2>Operating systems</h2><div class="ranked" id="rkOS"></div></div>
+    <div class="card span-3"><h2>Device type</h2><div class="ranked" id="rkDevice"></div></div>
+    <div class="card span-3"><h2>Screen sizes</h2><div class="ranked" id="rkScreen"></div></div>
+    <div class="card span-3"><h2>Languages</h2><div class="ranked" id="rkLang"></div></div>
+    <div class="card span-3"><h2>Time zones</h2><div class="ranked" id="rkTz"></div></div>
+    <div class="card span-3"><h2>Referrers</h2><div class="ranked" id="rkRef"></div></div>
+    <div class="card span-3"><h2>UTM / ref sources</h2><div class="ranked" id="rkUtm"></div></div>
+    <div class="card span-4"><h2>Landing pages</h2><div class="ranked" id="rkLanding"></div></div>
+    <div class="card span-4"><h2>Pages / routes viewed</h2><div class="ranked" id="rkPaths"></div></div>
+    <div class="card span-4"><h2>Event types</h2><div class="ranked" id="rkEvents"></div></div>
+  </section>
+
+  <section class="grid">
+    <div class="card span-4">
+      <h2>Session length</h2>
+      <div class="chart-wrap short"><canvas id="chSessLen"></canvas></div>
+    </div>
+    <div class="card span-4">
+      <h2>Play length per game session</h2>
+      <div class="chart-wrap short"><canvas id="chPlayLen"></canvas></div>
+    </div>
+    <div class="card span-4">
+      <h2>Visits per visitor <small>loyalty</small></h2>
+      <div class="chart-wrap short"><canvas id="chLoyal"></canvas></div>
+    </div>
+    <div class="card span-4"><h2>Cloak presets used</h2><div class="ranked" id="rkCloak"></div></div>
+    <div class="card span-4"><h2>Connection type</h2><div class="ranked" id="rkConn"></div></div>
+    <div class="card span-4"><h2>Other actions</h2><div class="ranked" id="rkActions"></div></div>
+  </section>
+
+  <section class="grid">
+    <div class="card span-6">
+      <h2>Performance</h2>
+      <div class="kpis" id="perfKpis"></div>
+      <h2 style="margin-top:16px">Slowest games to load <small>avg ms, ≥ 2 loads</small></h2>
+      <div class="ranked" id="rkSlow"></div>
+    </div>
+    <div class="card span-6">
+      <h2>JavaScript errors</h2>
+      <div class="ranked" id="rkErrors"></div>
+    </div>
+  </section>
+
+  <section class="grid">
+    <div class="card span-12">
+      <h2>Top visitors <small>by clicks in range</small></h2>
+      <div class="tbl-wrap"><table id="visitorsTable"></table></div>
+    </div>
+    <div class="card span-12">
+      <h2>Live feed <small>latest 150 events</small></h2>
+      <div class="tbl-wrap"><table id="feedTable"></table></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>All time <small id="allTimeSince"></small></h2>
+    <div class="kpis" id="allKpis"></div>
+    <div class="grid" style="margin-top:16px">
+      <div class="card span-8">
+        <h2>Daily history</h2>
+        <div class="legend"><span><i style="background:var(--s1)"></i>Events</span><span><i style="background:var(--s2)"></i>Visitors</span><span><i style="background:var(--s3)"></i>Plays</span></div>
+        <div class="chart-wrap"><canvas id="chAllDaily"></canvas></div>
+      </div>
+      <div class="card span-4">
+        <h2>All-time top games</h2>
+        <div class="ranked" id="rkAllGames"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer">
+    Data source: Supabase table <code>analytics_events</code>, written by <code>/js/analytics.js</code>. Clicks = every user interaction (game opens, searches, filters, buttons); page views, pings and close events are counted separately.
+    Sessions expire after 30 minutes idle. Times shown in your browser's time zone. Rows loaded for this range: <span id="rowCount" class="mono">0</span>.
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var SUPA_URL = 'https://dxwjxzmlezfyursysays.supabase.co';
+  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
+  var SECRET_KEY = 'gv.analytics.secret';
+
+  // Events that count as user interactions ("clicks")
+  var PASSIVE = { pageview: 1, nav: 1, ping: 1, hidden: 1, visible: 1, session_end: 1, error: 1, game_load: 1, game_close: 1, movie_close: 1, tv_close: 1, _test: 1 };
+  var NICE = { game_open: 'Opened game', game_close: 'Closed game', game_load: 'Game loaded', game_fullscreen: 'Fullscreen', game_newtab: 'Open in new tab', movie_play: 'Played movie', tv_play: 'Played TV', movie_close: 'Closed movie', tv_close: 'Closed TV', search: 'Searched', category: 'Category filter', genre: 'Genre filter', sort: 'Sort changed', roll: 'Random roll', star: 'Starred', enter: 'Entered vault', news_open: 'Opened news', movies_enter: 'Entered movies', profile_open: 'Opened profile', mode_movies: 'Tab: Movies', mode_tv: 'Tab: TV', cloak: 'Tab cloak', auth_signin: 'Signed in', pageview: 'Page view', nav: 'Navigated', ping: 'Heartbeat', hidden: 'Tab hidden', visible: 'Tab visible', session_end: 'Left site', error: 'JS error' };
+
+  var $ = function (id) { return document.getElementById(id); };
+  var state = { secret: null, range: '24h', rows: [], overview: null, gameSort: { key: 'plays', dir: -1 }, gameN: 25, timer: null };
+  var charts = {};
+
+  // ── helpers ──
+  function fmt(n) { return (n == null || isNaN(n)) ? '–' : Math.round(n).toLocaleString(); }
+  function pct(a, b) { return b ? Math.round(100 * a / b) + '%' : '–'; }
+  function dur(s) {
+    s = Math.max(0, Math.round(s || 0));
+    var h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+    if (h) return h + 'h ' + m + 'm';
+    if (m) return m + 'm ' + sec + 's';
+    return sec + 's';
+  }
+  function ago(d) {
+    var s = Math.round((Date.now() - d) / 1000);
+    if (s < 60) return s + 's ago';
+    if (s < 3600) return Math.floor(s / 60) + 'm ago';
+    if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+    return Math.floor(s / 86400) + 'd ago';
+  }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function avg(arr) { return arr.length ? arr.reduce(function (a, b) { return a + b; }, 0) / arr.length : 0; }
+  function median(arr) { if (!arr.length) return 0; var a = arr.slice().sort(function (x, y) { return x - y; }); return a[Math.floor(a.length / 2)]; }
+  function counter() { var m = Object.create(null); return { add: function (k, n) { if (k == null || k === '') k = '(none)'; m[k] = (m[k] || 0) + (n == null ? 1 : n); }, top: function (n) { return Object.keys(m).map(function (k) { return [k, m[k]]; }).sort(function (a, b) { return b[1] - a[1]; }).slice(0, n || 9999); }, get: function (k) { return m[k] || 0; }, size: function () { return Object.keys(m).length; } }; }
+  function uniq(rows, key) { var s = Object.create(null); rows.forEach(function (r) { if (r[key]) s[r[key]] = 1; }); return Object.keys(s).length; }
+  function shortId(id) { return id ? id.slice(0, 8) : '–'; }
+
+  function rangeBounds() {
+    var to = new Date(Date.now() + 60000), from;
+    var r = state.range;
+    if (r === 'today') { from = new Date(); from.setHours(0, 0, 0, 0); }
+    else if (r === '24h') from = new Date(Date.now() - 864e5);
+    else if (r === '7d') from = new Date(Date.now() - 7 * 864e5);
+    else if (r === '30d') from = new Date(Date.now() - 30 * 864e5);
+    else from = new Date(Date.now() - 90 * 864e5);
+    return { from: from, to: to };
+  }
+
+  // ── API ──
+  function rpc(fn, body) {
+    return fetch(SUPA_URL + '/rest/v1/rpc/' + fn, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: SUPA_KEY, Authorization: 'Bearer ' + SUPA_KEY },
+      body: JSON.stringify(body)
+    }).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+  }
+  function fetchAll(from, to) {
+    var out = [], after = 0;
+    function page() {
+      return rpc('analytics_fetch', { p_secret: state.secret, p_from: from.toISOString(), p_to: to.toISOString(), p_after_id: after, p_limit: 20000 })
+        .then(function (rows) {
+          rows.forEach(function (r) { r.t = new Date(r.ts); r.tms = r.t.getTime(); });
+          out = out.concat(rows);
+          if (rows.length === 20000 && out.length < 400000) { after = rows[rows.length - 1].id; return page(); }
+          return out;
+        });
+    }
+    return page();
+  }
+
+  // ── charts ──
+  Chart.defaults.color = '#8a8a96';
+  Chart.defaults.font.family = "'JetBrains Mono', monospace";
+  Chart.defaults.font.size = 10;
+  Chart.defaults.borderColor = 'rgba(255,255,255,0.07)';
+  var css = getComputedStyle(document.documentElement);
+  var C = { s1: css.getPropertyValue('--s1').trim(), s2: css.getPropertyValue('--s2').trim(), s3: css.getPropertyValue('--s3').trim(), s4: css.getPropertyValue('--s4').trim() };
+  var baseOpts = { responsive: true, maintainAspectRatio: false, animation: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1a1a20', borderColor: 'rgba(255,255,255,0.16)', borderWidth: 1, titleColor: '#f4f4f6', bodyColor: '#c9c9d2', padding: 10 } }, scales: { x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 12 } }, y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { precision: 0 }, border: { display: false } } } };
+  function chart(id, cfg) {
+    if (charts[id]) charts[id].destroy();
+    charts[id] = new Chart($(id).getContext('2d'), cfg);
+  }
+  function bar(color) { return { backgroundColor: color, borderRadius: 4, borderSkipped: 'bottom', maxBarThickness: 24 }; }
+  function line(color) { return { borderColor: color, backgroundColor: color, borderWidth: 2, pointRadius: 0, pointHoverRadius: 5, pointHoverBorderWidth: 2, pointHoverBorderColor: '#121216', tension: 0.25 }; }
+
+  // ── rendering primitives ──
+  function ranked(id, pairs, opts) {
+    opts = opts || {};
+    var el = $(id);
+    if (!pairs.length) { el.innerHTML = '<div class="empty">No data yet</div>'; return; }
+    var max = Math.max.apply(null, pairs.map(function (p) { return p[1]; }));
+    var total = pairs.reduce(function (a, p) { return a + p[1]; }, 0);
+    el.innerHTML = pairs.map(function (p, i) {
+      var val = opts.fmt ? opts.fmt(p[1], p) : fmt(p[1]);
+      var share = opts.share === false ? '' : ' <span>' + pct(p[1], total) + '</span>';
+      var sub = p[2] ? '<span class="sub">' + esc(p[2]) + '</span>' : '';
+      return '<div class="row"><div class="rk">' + (i + 1) + '</div><div class="nm" style="--w:' + (100 * p[1] / max) + '%"><span>' + esc(p[0]) + '</span>' + sub + '</div><div class="val"><b>' + val + '</b>' + share + '</div></div>';
+    }).join('');
+  }
+  function kpiTiles(id, tiles) {
+    $(id).innerHTML = tiles.map(function (t) { return '<div class="kpi"><div class="l" title="' + esc(t[0]) + '">' + esc(t[0]) + '</div><div class="v">' + t[1] + '</div><div class="s">' + (t[2] || '') + '</div></div>'; }).join('');
+  }
+  function table(id, cols, rows, sort, onSort) {
+    var h = '<thead><tr>' + cols.map(function (c) { return '<th class="' + (c.num ? 'num' : '') + (sort && sort.key === c.key ? ' sorted' : '') + '" data-key="' + c.key + '">' + c.label + (sort && sort.key === c.key ? (sort.dir < 0 ? ' ↓' : ' ↑') : '') + '</th>'; }).join('') + '</tr></thead>';
+    var b = '<tbody>' + (rows.length ? rows.map(function (r) { return '<tr>' + cols.map(function (c) { return '<td class="' + (c.num ? 'num' : '') + '">' + (c.render ? c.render(r) : esc(r[c.key])) + '</td>'; }).join('') + '</tr>'; }).join('') : '<tr><td colspan="' + cols.length + '" class="empty">No data yet</td></tr>') + '</tbody>';
+    var t = $(id); t.innerHTML = h + b;
+    if (onSort) t.querySelectorAll('th').forEach(function (th) { th.addEventListener('click', function () { onSort(th.dataset.key); }); });
+  }
+
+  // ── main render ──
+  function render() {
+    var rows = state.rows;
+    var b = rangeBounds();
+    var clicks = rows.filter(function (r) { return !PASSIVE[r.event]; });
+    var pageviews = rows.filter(function (r) { return r.event === 'pageview'; });
+    var opens = rows.filter(function (r) { return r.event === 'game_open'; });
+    var closes = rows.filter(function (r) { return r.event === 'game_close' && r.value != null; });
+    var visitors = uniq(rows, 'visitor_id');
+    var sessions = uniq(rows, 'session_id');
+    $('rowCount').textContent = fmt(rows.length);
+    $('rangeLabel').textContent = b.from.toLocaleString() + ' → now';
+
+    // ── live ──
+    var now = Date.now();
+    var live = rows.filter(function (r) { return now - r.tms < 5 * 60000; });
+    var liveVis = uniq(live, 'visitor_id');
+    $('liveVisitors').textContent = fmt(liveVis);
+    $('liveSub').textContent = fmt(uniq(rows.filter(function (r) { return now - r.tms < 30 * 60000; }), 'visitor_id')) + ' in last 30 min';
+    // playing now: last game event per visitor in the last 10 min is an open/load/ping-with-game
+    var lastGame = Object.create(null);
+    rows.forEach(function (r) { if (now - r.tms < 10 * 60000 && (r.event === 'game_open' || r.event === 'game_close' || (r.event === 'ping' && r.game_id) || r.event === 'session_end')) lastGame[r.visitor_id] = r; });
+    var playing = Object.keys(lastGame).map(function (v) { return lastGame[v]; }).filter(function (r) { return r.event === 'game_open' || r.event === 'ping'; });
+    $('livePlaying').textContent = fmt(playing.length);
+    var pc = counter(); playing.forEach(function (r) { pc.add(r.item_title || r.game_id); });
+    $('livePlayingSub').textContent = pc.top(3).map(function (p) { return p[0] + (p[1] > 1 ? ' ×' + p[1] : ''); }).join(', ') || 'nobody in a game';
+    var last = rows[rows.length - 1];
+    $('lastEventAgo').textContent = last ? ago(last.tms) : '–';
+    $('lastEventWhat').textContent = last ? (NICE[last.event] || last.event) + (last.item_title ? ': ' + last.item_title : '') : 'no events in range';
+    var dayStart = new Date(); dayStart.setHours(0, 0, 0, 0);
+    var todayRows = rows.filter(function (r) { return r.tms >= dayStart.getTime(); });
+    $('todayEvents').textContent = fmt(todayRows.filter(function (r) { return !PASSIVE[r.event]; }).length) ;
+    $('todayVisitors').textContent = fmt(uniq(todayRows, 'visitor_id')) + ' visitors today' + (state.range === 'today' || state.range === '24h' ? '' : '');
+
+    // ── sessions ──
+    var sess = Object.create(null);
+    rows.forEach(function (r) {
+      var s = sess[r.session_id] || (sess[r.session_id] = { first: r.tms, last: r.tms, clicks: 0, events: 0, pages: Object.create(null), visitor: r.visitor_id, dur: 0, plays: 0 });
+      if (r.tms < s.first) s.first = r.tms; if (r.tms > s.last) s.last = r.tms;
+      s.events++; if (!PASSIVE[r.event]) s.clicks++; if (r.path) s.pages[r.path] = 1; if (r.event === 'game_open') s.plays++;
+      if ((r.event === 'session_end' || r.event === 'ping' || r.event === 'hidden') && r.value > s.dur) s.dur = r.value;
+    });
+    var sessList = Object.keys(sess).map(function (k) { return sess[k]; });
+    sessList.forEach(function (s) { s.len = Math.max(s.dur, (s.last - s.first) / 1000); });
+    var bounced = sessList.filter(function (s) { return s.clicks <= 1 && s.plays === 0; }).length;
+    var newVisitors = uniq(rows.filter(function (r) { return r.is_new; }), 'visitor_id');
+    var signedIn = uniq(rows.filter(function (r) { return r.user_id; }), 'user_id');
+    var playSecs = closes.reduce(function (a, r) { return a + r.value; }, 0);
+    var errors = rows.filter(function (r) { return r.event === 'error'; }).length;
+
+    kpiTiles('kpis', [
+      ['Clicks', fmt(clicks.length), 'all interactions'],
+      ['Page views', fmt(pageviews.length + rows.filter(function (r) { return r.event === 'nav'; }).length), fmt(pageviews.length) + ' full loads'],
+      ['Unique visitors', fmt(visitors), fmt(newVisitors) + ' new · ' + fmt(visitors - newVisitors) + ' returning'],
+      ['Sessions', fmt(sessions), (visitors ? (sessions / visitors).toFixed(1) : '–') + ' per visitor'],
+      ['Game plays', fmt(opens.length), fmt(uniq(opens, 'game_id')) + ' different games'],
+      ['Unique players', fmt(uniq(opens, 'visitor_id')), pct(uniq(opens, 'visitor_id'), visitors) + ' of visitors'],
+      ['Total play time', dur(playSecs), 'avg ' + dur(avg(closes.map(function (r) { return r.value; }))) + ' per play'],
+      ['Avg session', dur(avg(sessList.map(function (s) { return s.len; }))), 'median ' + dur(median(sessList.map(function (s) { return s.len; })))],
+      ['Clicks / session', sessList.length ? (clicks.length / sessList.length).toFixed(1) : '–', 'events ' + (sessList.length ? (rows.length / sessList.length).toFixed(1) : '–')],
+      ['Bounce rate', pct(bounced, sessions), fmt(bounced) + ' sessions, ≤1 click'],
+      ['Plays / visitor', visitors ? (opens.length / visitors).toFixed(2) : '–', ''],
+      ['Signed-in users', fmt(signedIn), pct(signedIn, visitors) + ' of visitors'],
+      ['Movies / TV plays', fmt(rows.filter(function (r) { return r.event === 'movie_play'; }).length + rows.filter(function (r) { return r.event === 'tv_play'; }).length), ''],
+      ['Searches', fmt(rows.filter(function (r) { return r.event === 'search'; }).length), ''],
+      ['Random rolls', fmt(rows.filter(function (r) { return r.event === 'roll'; }).length), ''],
+      ['JS errors', fmt(errors), errors ? '<span style="color:var(--bad)">check below</span>' : '']
+    ]);
+
+    // ── activity over time ──
+    var spanMs = b.to - b.from;
+    var hourly = spanMs <= 8 * 864e5;
+    var bucketMs = hourly ? 3600e3 : 864e5;
+    $('bucketLabel').textContent = hourly ? 'per hour' : 'per day';
+    var start = new Date(b.from); if (hourly) start.setMinutes(0, 0, 0); else start.setHours(0, 0, 0, 0);
+    var nb = Math.ceil((b.to - start) / bucketMs);
+    var labels = [], bc = [], bv = [], bp = [];
+    var bvSets = [];
+    for (var i = 0; i < nb; i++) { var d = new Date(start.getTime() + i * bucketMs); labels.push(hourly ? d.toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric' }) : d.toLocaleDateString([], { month: 'short', day: 'numeric' })); bc.push(0); bp.push(0); bvSets.push(Object.create(null)); }
+    rows.forEach(function (r) {
+      var i = Math.floor((r.tms - start) / bucketMs); if (i < 0 || i >= nb) return;
+      if (!PASSIVE[r.event]) bc[i]++;
+      if (r.event === 'game_open') bp[i]++;
+      bvSets[i][r.visitor_id] = 1;
+    });
+    bv = bvSets.map(function (s) { return Object.keys(s).length; });
+    chart('chActivity', { type: 'bar', data: { labels: labels, datasets: [
+      Object.assign({ label: 'Clicks', data: bc }, bar(C.s1)),
+      Object.assign({ label: 'Unique visitors', data: bv, type: 'line' }, line(C.s2)),
+      Object.assign({ label: 'Game plays', data: bp, type: 'line' }, line(C.s3))
+    ] }, options: baseOpts });
+
+    // new vs returning per bucket (coarser: by day)
+    var dayLabels = [], dNew = [], dRet = [];
+    var dStart = new Date(b.from); dStart.setHours(0, 0, 0, 0);
+    var nd = Math.ceil((b.to - dStart) / 864e5);
+    var dSets = [];
+    for (var j = 0; j < nd; j++) { dayLabels.push(new Date(dStart.getTime() + j * 864e5).toLocaleDateString([], { month: 'short', day: 'numeric' })); dSets.push({ n: Object.create(null), r: Object.create(null) }); }
+    rows.forEach(function (r) { var i = Math.floor((r.tms - dStart) / 864e5); if (i < 0 || i >= nd) return; (r.is_new ? dSets[i].n : dSets[i].r)[r.visitor_id] = 1; });
+    dSets.forEach(function (s) { var n = Object.keys(s.n).length; dNew.push(n); dRet.push(Object.keys(s.r).filter(function (v) { return !s.n[v]; }).length); });
+    chart('chNewRet', { type: 'bar', data: { labels: dayLabels, datasets: [Object.assign({ label: 'Returning', data: dRet, stack: 'a' }, bar(C.s1)), Object.assign({ label: 'New', data: dNew, stack: 'a' }, bar(C.s3))] }, options: Object.assign({}, baseOpts, { scales: { x: { stacked: true, grid: { display: false }, ticks: { maxTicksLimit: 8, maxRotation: 0 } }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0 }, border: { display: false } } } }) });
+
+    // hour of day / day of week / heatmap
+    var hours = new Array(24).fill(0), dows = new Array(7).fill(0), heat = [];
+    for (var d7 = 0; d7 < 7; d7++) heat.push(new Array(24).fill(0));
+    clicks.forEach(function (r) { var h = r.t.getHours(), w = r.t.getDay(); hours[h]++; dows[w]++; heat[w][h]++; });
+    var hLabels = []; for (var h = 0; h < 24; h++) hLabels.push(h === 0 ? '12am' : h < 12 ? h + 'am' : h === 12 ? '12pm' : (h - 12) + 'pm');
+    chart('chHour', { type: 'bar', data: { labels: hLabels, datasets: [Object.assign({ label: 'Clicks', data: hours }, bar(C.s1))] }, options: Object.assign({}, baseOpts, { scales: Object.assign({}, baseOpts.scales, { x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 24 } } }) }) });
+    var DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    chart('chDow', { type: 'bar', data: { labels: DOW, datasets: [Object.assign({ label: 'Clicks', data: dows }, bar(C.s1))] }, options: baseOpts });
+    var hmax = Math.max(1, Math.max.apply(null, heat.map(function (r) { return Math.max.apply(null, r); })));
+    var hh = '<div></div>' + hLabels.map(function (l, i) { return '<div class="h">' + (i % 3 === 0 ? l.replace('am', 'a').replace('pm', 'p') : '') + '</div>'; }).join('');
+    for (var w = 0; w < 7; w++) { hh += '<div class="d">' + DOW[w] + '</div>' + heat[w].map(function (v, hIdx) { return '<div class="c" title="' + DOW[w] + ' ' + hLabels[hIdx] + ': ' + v + ' clicks" style="opacity:' + (v ? 0.15 + 0.85 * v / hmax : 0.04) + '"></div>'; }).join(''); }
+    $('heat').innerHTML = hh;
+
+    // ── games ──
+    var games = Object.create(null);
+    function G(id, title) { return games[id] || (games[id] = { id: id, name: title || id, plays: 0, players: Object.create(null), secs: 0, closes: 0, loads: [], fs: 0, newtab: 0, stars: 0, unstars: 0, short: 0, cat: null, sources: counter(), last: 0 }); }
+    rows.forEach(function (r) {
+      if (!r.game_id) return;
+      var g = G(r.game_id, r.item_title);
+      if (r.item_title && g.name === g.id) g.name = r.item_title;
+      if (r.event === 'game_open') { g.plays++; g.players[r.visitor_id] = 1; if (r.meta && r.meta.cat) g.cat = r.meta.cat; if (r.meta && r.meta.source) g.sources.add(r.meta.source); if (r.tms > g.last) g.last = r.tms; }
+      else if (r.event === 'game_close' && r.value != null) { g.secs += r.value; g.closes++; if (r.value < 20) g.short++; if (r.meta && r.meta.cat) g.cat = r.meta.cat; }
+      else if (r.event === 'game_load' && r.value != null) g.loads.push(r.value);
+      else if (r.event === 'game_fullscreen') g.fs++;
+      else if (r.event === 'game_newtab') g.newtab++;
+      else if (r.event === 'star') { if (r.value === 1) g.stars++; else g.unstars++; }
+    });
+    var gameList = Object.keys(games).map(function (k) { var g = games[k]; g.nplayers = Object.keys(g.players).length; g.avg = g.closes ? g.secs / g.closes : 0; g.load = g.loads.length ? avg(g.loads) : null; g.bounce = g.closes ? g.short / g.closes : 0; return g; }).filter(function (g) { return g.plays || g.secs || g.stars; });
+    renderGamesTable(gameList);
+
+    var cc = counter(); gameList.forEach(function (g) { cc.add(g.cat ? g.cat.charAt(0).toUpperCase() + g.cat.slice(1) : 'Unknown', g.plays); });
+    ranked('rkCats', cc.top(14));
+    var sc = counter(); opens.forEach(function (r) { sc.add(r.meta && r.meta.source ? { browse: 'Browsing the grid', search: 'From search', roll: 'Random roll', direct_link: 'Direct link / refresh' }[r.meta.source] || r.meta.source : 'Unknown'); });
+    ranked('rkSource', sc.top(6));
+    ranked('rkStars', gameList.filter(function (g) { return g.stars; }).sort(function (a, b) { return b.stars - a.stars; }).slice(0, 10).map(function (g) { return [g.name, g.stars, g.unstars ? g.unstars + ' unstarred' : '']; }), { share: false });
+    ranked('rkLongest', gameList.filter(function (g) { return g.closes >= 3; }).sort(function (a, b) { return b.avg - a.avg; }).slice(0, 10).map(function (g) { return [g.name, g.avg, g.closes + ' plays']; }), { fmt: dur, share: false });
+    ranked('rkBounce', gameList.filter(function (g) { return g.closes >= 3 && g.short; }).sort(function (a, b) { return b.bounce - a.bounce || b.short - a.short; }).slice(0, 10).map(function (g) { return [g.name, Math.round(100 * g.bounce), g.short + ' of ' + g.closes + ' plays']; }), { fmt: function (v) { return v + '%'; }, share: false });
+
+    // ── media ──
+    var mv = Object.create(null), tv = Object.create(null);
+    rows.forEach(function (r) {
+      if (r.event === 'movie_play' || r.event === 'movie_close') { var m = mv[r.item_id] || (mv[r.item_id] = { t: r.item_title || r.item_id, n: 0, s: 0 }); if (r.event === 'movie_play') m.n++; else m.s += r.value || 0; if (r.item_title) m.t = r.item_title; }
+      if (r.event === 'tv_play' || r.event === 'tv_close') { var x = tv[r.item_id] || (tv[r.item_id] = { t: r.item_title || r.item_id, n: 0, s: 0, eps: Object.create(null) }); if (r.event === 'tv_play') { x.n++; if (r.meta) x.eps['S' + r.meta.season + 'E' + r.meta.episode] = 1; } else x.s += r.value || 0; if (r.item_title) x.t = r.item_title; }
+    });
+    ranked('rkMovies', Object.keys(mv).map(function (k) { return [mv[k].t, mv[k].n, 'watched ' + dur(mv[k].s)]; }).sort(function (a, b) { return b[1] - a[1]; }).slice(0, 12), { share: false });
+    ranked('rkTV', Object.keys(tv).map(function (k) { return [tv[k].t, tv[k].n, Object.keys(tv[k].eps).length + ' episodes · ' + dur(tv[k].s)]; }).sort(function (a, b) { return b[1] - a[1]; }).slice(0, 12), { share: false });
+
+    // ── searches ──
+    var sq = counter(), sqRes = Object.create(null), sz = counter();
+    rows.forEach(function (r) {
+      if (r.event !== 'search' || !r.item_title) return;
+      var q = r.item_title.toLowerCase();
+      sq.add(q); if (r.value != null) sqRes[q] = r.value;
+      if (r.value === 0) sz.add(q);
+    });
+    ranked('rkSearch', sq.top(15).map(function (p) { return [p[0], p[1], sqRes[p[0]] != null ? sqRes[p[0]] + ' results' : '']; }), { share: false });
+    ranked('rkSearchZero', sz.top(15), { share: false });
+    var cf = counter(), gf = counter();
+    rows.forEach(function (r) { if (r.event === 'category') cf.add(r.item_title); if (r.event === 'genre') gf.add((r.meta && r.meta.section === 'tv' ? 'TV · ' : 'Movies · ') + r.item_title); });
+    ranked('rkCatClicks', cf.top(14)); ranked('rkGenre', gf.top(14));
+
+    // ── audience (one count per visitor, using their latest row) ──
+    var lastByVisitor = Object.create(null);
+    rows.forEach(function (r) { lastByVisitor[r.visitor_id] = r; });
+    var vis = Object.keys(lastByVisitor).map(function (k) { return lastByVisitor[k]; });
+    function rk(id, key, n) { var c = counter(); vis.forEach(function (r) { c.add(r[key]); }); ranked(id, c.top(n || 8)); }
+    rk('rkBrowser', 'browser'); rk('rkOS', 'os'); rk('rkDevice', 'device'); rk('rkScreen', 'screen'); rk('rkLang', 'lang'); rk('rkTz', 'tz', 10);
+    var rc = counter(), uc = counter(), lc = counter(), pc2 = counter(), ec = counter(), connc = counter(), cloak = counter(), act = counter();
+    pageviews.forEach(function (r) { rc.add(r.referrer || '(direct / none)'); uc.add(r.utm_source ? r.utm_source + (r.utm_medium ? ' / ' + r.utm_medium : '') : '(none)'); lc.add(r.meta && r.meta.landing ? r.meta.landing : r.path); if (r.meta && r.meta.conn) connc.add(r.meta.conn); });
+    rows.forEach(function (r) { if (r.event === 'pageview' || r.event === 'nav') pc2.add(r.path); ec.add(NICE[r.event] || r.event); if (r.event === 'cloak') cloak.add(r.item_title); if (['enter', 'news_open', 'movies_enter', 'profile_open', 'mode_movies', 'mode_tv', 'roll', 'sort', 'auth_signin', 'game_fullscreen', 'game_newtab'].indexOf(r.event) !== -1) act.add(NICE[r.event] || r.event); });
+    ranked('rkRef', rc.top(10)); ranked('rkUtm', uc.top(10)); ranked('rkLanding', lc.top(10)); ranked('rkPaths', pc2.top(12)); ranked('rkEvents', ec.top(30)); ranked('rkConn', connc.top(6)); ranked('rkCloak', cloak.top(8)); ranked('rkActions', act.top(12));
+
+    // ── engagement histograms ──
+    function hist(id, values, edges, labels, unit) {
+      var counts = new Array(labels.length).fill(0);
+      values.forEach(function (v) { var i = 0; while (i < edges.length && v >= edges[i]) i++; counts[i]++; });
+      chart(id, { type: 'bar', data: { labels: labels, datasets: [Object.assign({ label: unit, data: counts }, bar(C.s1))] }, options: baseOpts });
+    }
+    hist('chSessLen', sessList.map(function (s) { return s.len; }), [30, 60, 180, 600, 1800, 3600], ['<30s', '30s-1m', '1-3m', '3-10m', '10-30m', '30-60m', '1h+'], 'Sessions');
+    hist('chPlayLen', closes.map(function (r) { return r.value; }), [20, 60, 180, 600, 1800, 3600], ['<20s', '20s-1m', '1-3m', '3-10m', '10-30m', '30-60m', '1h+'], 'Plays');
+    var visitsBy = Object.create(null); pageviews.forEach(function (r) { if (r.meta && r.meta.visits) visitsBy[r.visitor_id] = Math.max(visitsBy[r.visitor_id] || 0, r.meta.visits); });
+    hist('chLoyal', Object.keys(visitsBy).map(function (k) { return visitsBy[k]; }), [2, 3, 5, 10, 25], ['1 visit', '2', '3-4', '5-9', '10-24', '25+'], 'Visitors');
+
+    // ── performance / errors ──
+    var loadMs = pageviews.map(function (r) { return r.meta && r.meta.load_ms; }).filter(function (v) { return v > 0; });
+    var ttfb = pageviews.map(function (r) { return r.meta && r.meta.ttfb_ms; }).filter(function (v) { return v > 0; });
+    var gload = rows.filter(function (r) { return r.event === 'game_load' && r.value > 0; }).map(function (r) { return r.value; });
+    var cpu = vis.map(function (r) { return null; });
+    kpiTiles('perfKpis', [
+      ['Page load (median)', fmt(median(loadMs)) + '<small style="font-size:.7rem"> ms</small>', 'avg ' + fmt(avg(loadMs)) + ' ms'],
+      ['TTFB (median)', fmt(median(ttfb)) + '<small style="font-size:.7rem"> ms</small>', ''],
+      ['Game load (median)', fmt(median(gload)) + '<small style="font-size:.7rem"> ms</small>', 'avg ' + fmt(avg(gload)) + ' ms · ' + fmt(gload.length) + ' loads'],
+      ['Save-data / slow', fmt(pageviews.filter(function (r) { return r.meta && (r.meta.save_data || r.meta.conn === '2g' || r.meta.conn === 'slow-2g'); }).length), 'page views']
+    ]);
+    ranked('rkSlow', gameList.filter(function (g) { return g.loads.length >= 2; }).sort(function (a, b) { return b.load - a.load; }).slice(0, 8).map(function (g) { return [g.name, Math.round(g.load), g.loads.length + ' loads']; }), { fmt: function (v) { return v + ' ms'; }, share: false });
+    var errc = counter(), errMeta = Object.create(null);
+    rows.forEach(function (r) { if (r.event === 'error') { errc.add(r.item_title); errMeta[r.item_title] = r.meta; } });
+    ranked('rkErrors', errc.top(10).map(function (p) { var m = errMeta[p[0]] || {}; return [p[0], p[1], (m.src ? m.src + (m.line ? ':' + m.line : '') : '') + (m.game ? ' · in ' + m.game : '')]; }), { share: false });
+
+    // ── visitors table ──
+    var vmap = Object.create(null);
+    rows.forEach(function (r) {
+      var v = vmap[r.visitor_id] || (vmap[r.visitor_id] = { id: r.visitor_id, first: r.tms, last: r.tms, clicks: 0, sessions: Object.create(null), plays: 0, games: counter(), secs: 0, user: null, browser: r.browser, os: r.os, device: r.device, tz: r.tz, isNew: false, visits: 0, ref: null });
+      if (r.tms < v.first) v.first = r.tms; if (r.tms > v.last) v.last = r.tms;
+      if (!PASSIVE[r.event]) v.clicks++; v.sessions[r.session_id] = 1;
+      if (r.event === 'game_open') { v.plays++; v.games.add(r.item_title || r.game_id); }
+      if (r.event === 'game_close') v.secs += r.value || 0;
+      if (r.user_id) v.user = r.user_id; if (r.is_new) v.isNew = true; if (r.meta && r.meta.visits) v.visits = Math.max(v.visits, r.meta.visits);
+      if (r.referrer) v.ref = r.referrer;
+      v.browser = r.browser || v.browser; v.os = r.os || v.os; v.device = r.device || v.device;
+    });
+    var vlist = Object.keys(vmap).map(function (k) { var v = vmap[k]; v.nsess = Object.keys(v.sessions).length; v.fav = (v.games.top(1)[0] || [''])[0]; return v; }).sort(function (a, b) { return b.clicks - a.clicks; }).slice(0, 50);
+    table('visitorsTable', [
+      { key: 'id', label: 'Visitor', render: function (v) { return '<span class="mono">' + shortId(v.id) + '</span>' + (v.user ? ' <span class="pill b">signed in</span>' : '') + (v.isNew ? ' <span class="pill g">new</span>' : ''); } },
+      { key: 'last', label: 'Last seen', render: function (v) { return ago(v.last); } },
+      { key: 'first', label: 'First seen (range)', render: function (v) { return new Date(v.first).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); } },
+      { key: 'clicks', label: 'Clicks', num: true, render: function (v) { return fmt(v.clicks); } },
+      { key: 'nsess', label: 'Sessions', num: true, render: function (v) { return fmt(v.nsess); } },
+      { key: 'visits', label: 'Lifetime visits', num: true, render: function (v) { return fmt(v.visits); } },
+      { key: 'plays', label: 'Plays', num: true, render: function (v) { return fmt(v.plays); } },
+      { key: 'secs', label: 'Play time', num: true, render: function (v) { return dur(v.secs); } },
+      { key: 'fav', label: 'Favorite game' },
+      { key: 'env', label: 'Device', render: function (v) { return esc((v.browser || '?') + ' · ' + (v.os || '?') + ' · ' + (v.device || '?')); } },
+      { key: 'tz', label: 'Time zone' },
+      { key: 'ref', label: 'Referrer', render: function (v) { return esc(v.ref || '–'); } }
+    ], vlist);
+
+    // ── feed ──
+    var feed = rows.slice(-150).reverse();
+    table('feedTable', [
+      { key: 'ts', label: 'Time', render: function (r) { return r.t.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' }) + ' <span class="muted">' + r.t.toLocaleDateString([], { month: 'short', day: 'numeric' }) + '</span>'; } },
+      { key: 'visitor_id', label: 'Visitor', render: function (r) { return '<span class="mono">' + shortId(r.visitor_id) + '</span>' + (r.user_id ? ' <span class="pill b">user</span>' : ''); } },
+      { key: 'event', label: 'Event', render: function (r) { var cls = r.event === 'error' ? 'r' : r.event === 'game_open' ? 'g' : (r.event === 'movie_play' || r.event === 'tv_play') ? 'o' : ''; return '<span class="pill ' + cls + '">' + esc(NICE[r.event] || r.event) + '</span>'; } },
+      { key: 'detail', label: 'Detail', render: function (r) {
+        var d = r.item_title || r.game_id || r.item_id || '';
+        if (r.event === 'game_close' || r.event === 'movie_close' || r.event === 'tv_close') d += ' · ' + dur(r.value);
+        else if (r.event === 'game_load') d += ' · ' + fmt(r.value) + ' ms';
+        else if (r.event === 'search') d += ' · ' + (r.value != null ? r.value + ' results' : (r.meta && r.meta.section) || '');
+        else if (r.event === 'ping' || r.event === 'session_end' || r.event === 'hidden') d = 'on site ' + dur(r.value) + (r.game_id ? ' · playing ' + r.game_id : '');
+        else if (r.event === 'tv_play' && r.meta) d += ' · S' + r.meta.season + 'E' + r.meta.episode;
+        else if (r.event === 'pageview' && r.meta) d = (r.meta.landing || r.path) + (r.referrer ? ' ← ' + r.referrer : '') + (r.meta.new_session ? ' · new session' : '');
+        else if (r.event === 'nav') d = r.path;
+        else if (r.event === 'game_open' && r.meta && r.meta.source) d += ' · via ' + r.meta.source;
+        return esc(d);
+      } },
+      { key: 'env', label: 'Device', render: function (r) { return esc((r.browser || '?') + ' · ' + (r.os || '?') + ' · ' + (r.viewport || '')); } },
+      { key: 'path', label: 'Path' }
+    ], feed);
+  }
+
+  function renderGamesTable(gameList) {
+    var s = state.gameSort;
+    var list = gameList.slice().sort(function (a, b) { var x = a[s.key], y = b[s.key]; if (typeof x === 'string') return s.dir * x.localeCompare(y); return s.dir * ((x || 0) - (y || 0)); }).slice(0, state.gameN);
+    var totalPlays = gameList.reduce(function (a, g) { return a + g.plays; }, 0);
+    var maxPlays = Math.max.apply(null, gameList.map(function (g) { return g.plays; }).concat([1]));
+    table('gamesTable', [
+      { key: 'rank', label: '#', render: function (g) { return '<span class="muted">' + (list.indexOf(g) + 1) + '</span>'; } },
+      { key: 'name', label: 'Game', render: function (g) { return '<div class="nm" style="--w:' + (100 * g.plays / maxPlays) + '%;padding:3px 6px;margin:-3px 0"><span>' + esc(g.name) + '</span></div>'; } },
+      { key: 'cat', label: 'Category', render: function (g) { return g.cat ? '<span class="pill">' + esc(g.cat) + '</span>' : ''; } },
+      { key: 'plays', label: 'Plays', num: true, render: function (g) { return '<b>' + fmt(g.plays) + '</b> <span class="muted">' + pct(g.plays, totalPlays) + '</span>'; } },
+      { key: 'nplayers', label: 'Players', num: true, render: function (g) { return fmt(g.nplayers); } },
+      { key: 'secs', label: 'Play time', num: true, render: function (g) { return dur(g.secs); } },
+      { key: 'avg', label: 'Avg / play', num: true, render: function (g) { return g.closes ? dur(g.avg) : '–'; } },
+      { key: 'bounce', label: '<20s', num: true, render: function (g) { return g.closes ? pct(g.short, g.closes) : '–'; } },
+      { key: 'load', label: 'Load', num: true, render: function (g) { return g.load != null ? fmt(g.load) + ' ms' : '–'; } },
+      { key: 'fs', label: 'Fullscr.', num: true, render: function (g) { return fmt(g.fs); } },
+      { key: 'newtab', label: 'New tab', num: true, render: function (g) { return fmt(g.newtab); } },
+      { key: 'stars', label: 'Stars', num: true, render: function (g) { return fmt(g.stars); } },
+      { key: 'last', label: 'Last played', render: function (g) { return g.last ? ago(g.last) : '–'; } }
+    ], list, s, function (key) {
+      if (key === 'rank') return;
+      if (state.gameSort.key === key) state.gameSort.dir *= -1; else state.gameSort = { key: key, dir: key === 'name' || key === 'cat' ? 1 : -1 };
+      renderGamesTable(gameList);
+    });
+  }
+
+  function renderOverview(o) {
+    if (!o) return;
+    $('allTimeSince').textContent = o.first_ts ? 'since ' + new Date(o.first_ts).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+    kpiTiles('allKpis', [
+      ['Total events', fmt(o.events), ''],
+      ['Page views', fmt(o.pageviews), ''],
+      ['Unique visitors', fmt(o.visitors), ''],
+      ['Sessions', fmt(o.sessions), ''],
+      ['Game plays', fmt(o.plays), ''],
+      ['Total play time', dur(o.play_secs), ''],
+      ['Signed-in users', fmt(o.users), '']
+    ]);
+    var daily = o.daily || [];
+    chart('chAllDaily', { type: 'bar', data: { labels: daily.map(function (d) { return new Date(d.day).toLocaleDateString([], { month: 'short', day: 'numeric' }); }), datasets: [
+      Object.assign({ label: 'Events', data: daily.map(function (d) { return d.events; }) }, bar(C.s1)),
+      Object.assign({ label: 'Visitors', data: daily.map(function (d) { return d.visitors; }), type: 'line' }, line(C.s2)),
+      Object.assign({ label: 'Plays', data: daily.map(function (d) { return d.plays; }), type: 'line' }, line(C.s3))
+    ] }, options: baseOpts });
+    ranked('rkAllGames', (o.top_games || []).filter(function (g) { return g.plays; }).slice(0, 15).map(function (g) { return [g.name || g.game_id, g.plays, g.players + ' players · ' + dur(g.secs)]; }), { share: false });
+  }
+
+  // ── load ──
+  var loading = false;
+  function load() {
+    if (loading || !state.secret) return;
+    loading = true;
+    var b = rangeBounds();
+    $('status').innerHTML = '<span class="dot"></span>Loading…';
+    Promise.all([fetchAll(b.from, b.to), rpc('analytics_overview', { p_secret: state.secret })]).then(function (res) {
+      state.rows = res[0]; state.overview = res[1];
+      render(); renderOverview(res[1]);
+      $('status').innerHTML = '<span class="dot"></span>Updated ' + new Date().toLocaleTimeString();
+    }).catch(function (e) {
+      $('status').innerHTML = '<span class="dot off"></span>Error: ' + esc(e.message);
+    }).then(function () { loading = false; });
+  }
+
+  function exportCSV() {
+    var cols = ['id', 'ts', 'event', 'visitor_id', 'session_id', 'user_id', 'path', 'referrer', 'game_id', 'item_id', 'item_title', 'value', 'browser', 'os', 'device', 'screen', 'viewport', 'lang', 'tz', 'utm_source', 'utm_medium', 'utm_campaign', 'is_new', 'meta'];
+    var lines = [cols.join(',')].concat(state.rows.map(function (r) { return cols.map(function (c) { var v = r[c]; if (v == null) return ''; if (typeof v === 'object') v = JSON.stringify(v); v = String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(','); }));
+    var blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'gamevault-analytics-' + state.range + '-' + new Date().toISOString().slice(0, 10) + '.csv'; a.click();
+  }
+
+  // ── auth / wiring ──
+  function showDash() { $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); load(); setTimer(); }
+  function setTimer() { clearInterval(state.timer); if ($('autoRefresh').checked) state.timer = setInterval(load, 60000); }
+  function tryLogin(secret, remember) {
+    $('loginErr').textContent = '';
+    rpc('analytics_check', { p_secret: secret }).then(function (ok) {
+      if (ok === true) { state.secret = secret; if (remember) try { localStorage.setItem(SECRET_KEY, secret); } catch (e) {} showDash(); }
+      else { $('loginErr').textContent = 'Wrong secret.'; try { localStorage.removeItem(SECRET_KEY); } catch (e) {} }
+    }).catch(function (e) { $('loginErr').textContent = 'Could not reach Supabase: ' + e.message; });
+  }
+  $('loginBtn').addEventListener('click', function () { tryLogin($('secretInput').value.trim(), true); });
+  $('secretInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') tryLogin($('secretInput').value.trim(), true); });
+  $('logoutBtn').addEventListener('click', function () { try { localStorage.removeItem(SECRET_KEY); } catch (e) {} location.reload(); });
+  $('refreshBtn').addEventListener('click', load);
+  $('exportBtn').addEventListener('click', exportCSV);
+  $('autoRefresh').addEventListener('change', setTimer);
+  $('rangeSeg').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; state.range = b.dataset.range; $('rangeSeg').querySelectorAll('button').forEach(function (x) { x.classList.toggle('active', x === b); }); load(); });
+  $('gameTabs').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; state.gameN = +b.dataset.n; $('gameTabs').querySelectorAll('button').forEach(function (x) { x.classList.toggle('active', x === b); }); render(); });
+  try { $('excludeMe').checked = localStorage.getItem('gv.noanalytics') === '1'; } catch (e) {}
+  $('excludeMe').addEventListener('change', function () { try { if ($('excludeMe').checked) localStorage.setItem('gv.noanalytics', '1'); else localStorage.removeItem('gv.noanalytics'); } catch (e) {} });
+
+  var saved = null; try { saved = localStorage.getItem(SECRET_KEY); } catch (e) {}
+  var qs = new URLSearchParams(location.search).get('key');
+  if (qs) { history.replaceState(null, '', location.pathname); tryLogin(qs, true); }
+  else if (saved) tryLogin(saved, false);
+})();
+</script>
+</body>
+</html>
