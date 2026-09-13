@@ -630,6 +630,96 @@
     .news-badge.progress { color: #ffd066; border-color: rgba(255,208,102,0.35); background: rgba(255,208,102,0.05); }
     .news-badge.soon     { color: var(--muted); border-color: var(--border-strong); }
 
+    /* ───── Suggest / feedback popup ───── */
+    .sugg-box {
+      width: min(500px, 92vw);
+      max-height: 88vh;
+      overflow-y: auto;
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: 22px;
+      padding: 1.9rem 1.75rem 1.5rem;
+      position: relative;
+      box-shadow: 0 30px 100px rgba(0,0,0,0.7);
+      animation: rollIn 0.3s cubic-bezier(0.2,0.8,0.2,1);
+    }
+    .sugg-box::-webkit-scrollbar { width: 6px; }
+    .sugg-box::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+    .sugg-kicker {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .sugg-box h3 {
+      font-size: 2.1rem;
+      font-weight: 700;
+      letter-spacing: -0.045em;
+      line-height: 1;
+      margin-bottom: 0.6rem;
+    }
+    .sugg-box h3 .red { color: var(--accent); }
+    .sugg-lede {
+      font-size: 0.95rem;
+      color: var(--muted);
+      line-height: 1.55;
+      margin-bottom: 1.2rem;
+    }
+    .sugg-lede b { color: var(--text); font-weight: 600; }
+    .sugg-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      margin-bottom: 1.4rem;
+    }
+    .sugg-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.62rem 0.8rem;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.015);
+      font-size: 0.875rem;
+      line-height: 1.35;
+      color: var(--text);
+    }
+    .sugg-row .tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.56rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      flex-shrink: 0;
+      width: 46px;
+    }
+    .sugg-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .sugg-actions .btn {
+      flex: 1 1 160px;
+      justify-content: center;
+      text-decoration: none;
+      padding: 0.85rem 1.2rem;
+    }
+    .sugg-foot {
+      margin-top: 0.95rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      color: var(--muted-2);
+      text-align: center;
+    }
+    @media (max-width: 480px) {
+      .sugg-box { padding: 1.5rem 1.2rem 1.2rem; }
+      .sugg-box h3 { font-size: 1.7rem; }
+      .sugg-row .tag { width: auto; }
+    }
+
     /* ───────────── BROWSE ───────────── */
     #browse { display: none; }
     #browse.visible { display: block; }
