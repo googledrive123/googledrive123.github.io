@@ -4840,6 +4840,63 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && newsOverlay.classList.contains('show')) closeNews();
 });
 
+// ───── Suggestion popup ─────
+const suggOverlay = document.getElementById('suggOverlay');
+const SUGG_KEY = 'gv.sugg.v1';
+const SUGG_DELAY = 3000;
+
+function suggState() {
+  try { return JSON.parse(localStorage.getItem(SUGG_KEY) || 'null'); } catch { return null; }
+}
+function setSuggState(status, days) {
+  try {
+    localStorage.setItem(SUGG_KEY, JSON.stringify({
+      status: status,
+      until: days ? Date.now() + days * 86400000 : null
+    }));
+  } catch {}
+}
+function suggAllowed() {
+  const st = suggState();
+  if (!st) return true;
+  if (st.status === 'done') return false;
+  return !st.until || Date.now() > st.until;
+}
+function openSugg() {
+  suggOverlay.classList.add('show');
+  try { window.GVA && GVA.track('suggest_open'); } catch {}
+}
+function closeSugg(reason, days) {
+  if (!suggOverlay.classList.contains('show')) return;
+  suggOverlay.classList.remove('show');
+  setSuggState(reason, days);
+  try { window.GVA && GVA.track('suggest_close', { item_title: reason }); } catch {}
+}
+window.openSuggest = openSugg;
+
+document.getElementById('suggClose').addEventListener('click', () => closeSugg('closed', 3));
+document.getElementById('suggLater').addEventListener('click', () => closeSugg('later', 7));
+document.getElementById('suggGo').addEventListener('click', () => {
+  try { window.GVA && GVA.track('suggest_click'); } catch {}
+  setSuggState('done', 0);
+  suggOverlay.classList.remove('show');
+});
+suggOverlay.addEventListener('click', (e) => { if (e.target === suggOverlay) closeSugg('closed', 3); });
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeSugg('closed', 3);
+});
+
+(function scheduleSugg(){
+  let framed = false;
+  try { framed = window.self !== window.top; } catch { framed = true; }
+  if (framed || !suggAllowed()) return;
+  setTimeout(() => {
+    if (!suggAllowed()) return;
+    if (document.querySelector('.roll-overlay.show, .game-overlay.show, .auth-overlay.show, .profile-overlay.show, .movie-overlay.open')) return;
+    openSugg();
+  }, SUGG_DELAY);
+})();
+
 function showBrowse() {
   document.getElementById('welcome').classList.add('hidden');
   document.getElementById('browse').classList.add('visible');
