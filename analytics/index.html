@@ -364,20 +364,26 @@
 
   // ── API ──
   function rpc(fn, body) {
-    return fetch(SUPA_URL + '/rest/v1/rpc/' + fn, {
+    var opts = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', apikey: SUPA_KEY, Authorization: 'Bearer ' + SUPA_KEY },
       body: JSON.stringify(body)
-    }).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+    };
+    // A request that never settles would leave `loading` stuck and stop auto-refresh for good.
+    try { if (AbortSignal && AbortSignal.timeout) opts.signal = AbortSignal.timeout(45000); } catch (e) {}
+    return fetch(SUPA_URL + '/rest/v1/rpc/' + fn, opts).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
   }
+  // Supabase's PostgREST caps every response at 1000 rows (db-max-rows), whatever
+  // p_limit says, so page in 1000s and keep going while a page comes back full.
+  var PAGE = 1000;
   function fetchAll(from, to) {
     var out = [], after = 0;
     function page() {
-      return rpc('analytics_fetch', { p_secret: state.secret, p_from: from.toISOString(), p_to: to.toISOString(), p_after_id: after, p_limit: 20000 })
+      return rpc('analytics_fetch', { p_secret: state.secret, p_from: from.toISOString(), p_to: to.toISOString(), p_after_id: after, p_limit: PAGE })
         .then(function (rows) {
           rows.forEach(function (r) { r.t = new Date(r.ts); r.tms = r.t.getTime(); });
           out = out.concat(rows);
-          if (rows.length === 20000 && out.length < 400000) { after = rows[rows.length - 1].id; return page(); }
+          if (rows.length >= PAGE && out.length < 400000) { after = rows[rows.length - 1].id; return page(); }
           return out;
         });
     }
