@@ -1,9 +1,23 @@
 <!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"><title>GameVault</title></head>
-<script>
-  // GitHub Pages SPA redirect: store the path then bounce to root
-  sessionStorage.setItem('gv.redirect', location.pathname + location.search);
-</script>
-<meta http-equiv="refresh" content="0;URL='/'">
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>GameVault</title>
+  <link rel="icon" href="/favicon.svg">
+  <script>
+  // GitHub Pages serves this file for anything it cannot find on disk, which is
+  // both how the app's deep links survive a refresh and how a genuine typo
+  // arrives. Routes the app owns bounce to the root and get replayed there;
+  // everything else is a real miss and goes to the 404 page.
+  (function () {
+    var path = location.pathname + location.search;
+    var spa = /^\/(games(\/|$)|movie(\/|$)|tv(\/|$))/.test(location.pathname);
+    try {
+      sessionStorage.setItem(spa ? 'gv.redirect' : 'gv.missing', path);
+    } catch (e) {}
+    location.replace(spa ? '/' : '/404/');
+  })();
+  </script>
+</head>
+<body></body>
 </html>

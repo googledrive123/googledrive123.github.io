@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy · GameVault</title>
+  <meta name="description" content="What GameVault stores and where.">
+  <link rel="icon" href="/favicon.svg">
+  <!-- Blocking on purpose: the cloak has to land before the first paint. -->
+  <script src="/js/mimicry.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/site.css">
+  <script src="/js/analytics.js" defer></script>
+  <script src="/js/site.js" defer></script>
+</head>
+<body>
+<main class="page">
+  <div class="page-kicker">privacy</div>
+  <h1>Privacy Policy</h1>
+  <p class="lede">Written against what the code actually does, not a template.</p>
+  <h2>1. Saved in your browser only</h2>
+  <p>Most of what GameVault remembers never leaves your device. It lives in your browser's
+  local storage under keys beginning with <code>gv.</code> and is readable only by this site:</p>
+  <ul>
+    <li><code>gv.starred.v1</code> — the games you have starred.</li>
+    <li><code>gv.recent.v1</code> — the last handful of games you opened.</li>
+    <li><code>gv.pinnedcats.v1</code> — categories you pinned to the front of the bar.</li>
+    <li><code>gv.cloak.v1</code> — the tab disguise you picked, if any.</li>
+    <li><code>gv.sessions</code> — play sessions recorded while signed out.</li>
+    <li><code>gv.sugg.v1</code> — whether you have dismissed the suggestion popup.</li>
+    <li><code>panicKey</code>, <code>panicRedirectUrl</code>, <code>verificationEnabled</code> —
+    your panic key and close-confirmation settings.</li>
+  </ul>
+  <p>Clearing your browser data clears all of it. There is no copy kept anywhere else unless
+  you sign in.</p>
+
+  <h2>2. Accounts</h2>
+  <p>Signing in is optional. The whole site works without one.</p>
+  <p>If you do create one, you pick a username and a password. No email address is asked for
+  or stored — the account is registered internally as
+  <code>yourname@gamevault.app</code>, an address that does not exist and cannot receive mail.
+  Accounts are held by <a href="https://supabase.com/privacy" target="_blank" rel="noopener">Supabase</a>,
+  which stores the username and a hashed password.</p>
+  <p>While signed in, each game you open is recorded as a play session — the game, when you
+  started, when you stopped. That is what the playtime numbers on your profile are built from.</p>
+
+  <h2>3. Site analytics</h2>
+  <p>GameVault counts usage so the owner can tell which games are worth keeping. This runs
+  first-party, in <code>js/analytics.js</code>, writing to the same Supabase project. It records:</p>
+  <ul>
+    <li>A random visitor and session identifier. Not your name, not your IP address.</li>
+    <li>Page views, route changes and which games, movies or shows were opened.</li>
+    <li>Searches typed into the site, including ones that returned nothing.</li>
+    <li>Browser, operating system, device type, screen and window size, language, time zone.</li>
+    <li>Page load timing, and JavaScript errors, so breakage gets noticed.</li>
+  </ul>
+  <p>Pages under <code>/games/</code> additionally load Google Analytics
+  (<code>G-KRH3X9QS3M</code>), which is subject to
+  <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's privacy policy</a>.</p>
+
+  <h2>4. Turning analytics off</h2>
+  <p>Open your browser console on this site and run:</p>
+  <p><code>localStorage.setItem('gv.noanalytics', '1')</code></p>
+  <p>The first-party tracker then stops sending anything, permanently, on this browser.
+  Nothing else about the site changes.</p>
+
+  <h2>5. Third parties</h2>
+  <p>GameVault does not sell or share data. It does load things from other people's servers,
+  and those servers see the request:</p>
+  <ul>
+    <li>Games served from another host, shown in a frame.</li>
+    <li>Thumbnail images from public image CDNs.</li>
+    <li>Fonts from Google Fonts.</li>
+    <li>Movie and TV metadata from TMDB, with playback embedded from a third-party player.</li>
+    <li>Supabase, for accounts and analytics.</li>
+  </ul>
+  <p>What those services do with a request is governed by their own policies, not this one.</p>
+
+  <h2>6. Under 13</h2>
+  <p>GameVault is not aimed at children under 13 and does not knowingly hold their data.
+  If an account needs removing, ask through the <a href="/legal/contact/">contact form</a>.</p>
+
+  <h2>7. Deleting your data</h2>
+  <p>Clear your browser storage for everything local. For an account and its play history,
+  ask through the <a href="/legal/contact/">contact form</a> and it gets deleted.</p>
+
+  <h2>8. Changes</h2>
+  <p>If this policy changes, the date below changes with it.</p>
+  <p class="panel-note">Last updated: 16 September 2026</p>
+</main>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Requests · GameVault</title>
+  <meta name="description" content="Which requested games are added, in progress, or not happening.">
+  <link rel="icon" href="/favicon.svg">
+  <!-- Blocking on purpose: the cloak has to land before the first paint. -->
+  <script src="/js/mimicry.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/site.css">
+  <script src="/js/analytics.js" defer></script>
+  <script src="/js/site.js" defer></script>
+  <style>
+    .status-legend { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.25rem; }
+    .status-empty { color: var(--muted-2); font-size: 0.85rem; padding: 1rem 0; }
+  </style>
+</head>
+<body>
+<main class="page">
+  <div class="page-kicker">requests</div>
+  <h1>Requests board</h1>
+  <p class="lede">What people have asked for and where each one stands.</p>
+  <div class="panel">
+    <div class="panel-label">Ask for something</div>
+    <p>Every request on this board came through the suggestion form. Yours will land here too.</p>
+    <div class="btn-row">
+      <a class="btn btn-primary" href="https://forms.gle/iGM2FSKVatxgAsSp7" target="_blank" rel="noopener">Request a game →</a>
+    </div>
+  </div>
+
+  <div class="status-legend">
+    <span class="badge added">Added</span>
+    <span class="badge progress">In progress</span>
+    <span class="badge soon">Soon</span>
+    <span class="badge denied">Not happening</span>
+  </div>
+
+  <div class="table-wrap">
+    <table class="gv">
+      <thead><tr><th>Request</th><th>Status</th><th>Notes</th></tr></thead>
+      <tbody id="requestRows">
+        <tr><td colspan="3" class="status-empty">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="panel-note">"Not happening" almost always means there is no web build to embed —
+  it is not a judgement on the game.</p>
+
+<script>
+(function () {
+  var LABELS = { added: 'Added', progress: 'In progress', soon: 'Soon', denied: 'Not happening' };
+
+  function row(cells) {
+    var tr = document.createElement('tr');
+    cells.forEach(function (c) { tr.appendChild(c); });
+    return tr;
+  }
+  function td(text, cls) {
+    var el = document.createElement('td');
+    if (cls) el.className = cls;
+    if (text) el.textContent = text;
+    return el;
+  }
+  function message(text) {
+    var cell = td(text, 'status-empty');
+    cell.colSpan = 3;
+    return row([cell]);
+  }
+
+  var body = document.getElementById('requestRows');
+
+  fetch('/requests.json', { cache: 'no-cache' })
+    .then(function (r) {
+      if (!r.ok) throw new Error('requests.json returned ' + r.status);
+      return r.json();
+    })
+    .then(function (data) {
+      var list = (data && data.requests) || [];
+      body.innerHTML = '';
+      if (!list.length) {
+        body.appendChild(message('Nothing requested yet. Be the first.'));
+        return;
+      }
+      list.forEach(function (item) {
+        var status = td('');
+        var badge = document.createElement('span');
+        var key = LABELS[item.status] ? item.status : 'soon';
+        badge.className = 'badge ' + key;
+        badge.textContent = LABELS[key];
+        status.appendChild(badge);
+        body.appendChild(row([td(item.name), status, td(item.note || '')]));
+      });
+    })
+    .catch(function (err) {
+      console.error(err);
+      body.innerHTML = '';
+      body.appendChild(message('Could not load the board. Refresh to try again.'));
+    });
+})();
+</script>
+</main>
+</body>
+</html>
