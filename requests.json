@@ -1,0 +1,13 @@
+{
+  "note": "Edit this file to update the requests board at /status/. status must be one of: added, progress, soon, denied.",
+  "requests": [
+    { "name": "PolyTrack", "status": "added", "note": "Live in Racing." },
+    { "name": "Steal a Brainrot", "status": "added", "note": "Live in Action." },
+    { "name": "Hollow Knight: Silksong", "status": "added", "note": "Loads from an external host, so it can be slow." },
+    { "name": "Geometry Dash (full version)", "status": "progress", "note": "Working build, still fighting the save file." },
+    { "name": "Roblox", "status": "denied", "note": "Needs a native client. Nothing to embed." },
+    { "name": "Fortnite", "status": "denied", "note": "Same reason as Roblox." },
+    { "name": "More FNAF spin-offs", "status": "soon", "note": "Sources found, not packaged yet." },
+    { "name": "A music / soundboard page", "status": "soon", "note": "Planned after the schedule page settles." }
+  ]
+}
