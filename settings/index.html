@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings · GameVault</title>
+  <meta name="description" content="Tab disguise, panic key and privacy controls for GameVault.">
+  <link rel="icon" href="/favicon.svg">
+  <!-- Blocking on purpose: the cloak has to land before the first paint. -->
+  <script src="/js/mimicry.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/site.css">
+  <script src="/js/analytics.js" defer></script>
+  <script src="/js/site.js" defer></script>
+  <style>
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+      gap: 0.5rem;
+    }
+    .preset {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.6rem 0.75rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font: inherit; font-size: 0.82rem;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .preset:hover { background: rgba(255,255,255,0.04); border-color: var(--border-strong); color: var(--text); }
+    .preset.active { border-color: var(--accent); background: rgba(255,59,59,0.07); color: var(--accent); }
+    .preset img { width: 16px; height: 16px; object-fit: contain; flex-shrink: 0; }
+    .email-block { display: none; margin-top: 0.9rem; }
+    .email-block.show { display: block; }
+    .at { color: var(--muted-2); font-size: 0.85rem; }
+    .key-field { max-width: 66px; text-align: center; font-family: 'JetBrains Mono', monospace; }
+    .saved-flash {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem; color: #5ce08a;
+      margin-left: 0.6rem; opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .saved-flash.show { opacity: 1; }
+    .preview {
+      display: flex; align-items: center; gap: 0.55rem;
+      margin-top: 0.9rem; padding: 0.55rem 0.8rem;
+      border-radius: 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      font-size: 0.82rem;
+    }
+    .preview img { width: 15px; height: 15px; object-fit: contain; }
+    .preview .who { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  </style>
+</head>
+<body>
+<main class="page">
+  <div class="page-kicker">settings</div>
+  <h1>Settings</h1>
+  <p class="lede">Everything here is stored in your browser and nowhere else.</p>
+  <div class="panel">
+    <div class="panel-label">Tab disguise</div>
+    <p class="panel-note" style="margin-top:0">Changes the name and icon in your tab bar. It applies
+    everywhere on GameVault, including while a game is open.</p>
+    <div class="preset-grid" id="presetGrid" style="margin-top:0.9rem"></div>
+
+    <div class="email-block" id="emailBlock">
+      <div class="panel-label" style="margin-top:0.9rem">Inbox address for the Gmail disguise</div>
+      <div class="field-row">
+        <input class="field" id="emailUser" placeholder="username" autocomplete="off">
+        <span class="at">@</span>
+        <input class="field" id="emailDomain" placeholder="gmail.com" autocomplete="off">
+        <button class="btn" id="emailApply" type="button">Apply</button>
+      </div>
+    </div>
+
+    <div class="panel-label" style="margin-top:1.1rem">Or write your own</div>
+    <div class="field-row">
+      <input class="field" id="customTitle" placeholder="Tab title…" maxlength="120" autocomplete="off">
+      <button class="btn" id="customApply" type="button">Apply</button>
+    </div>
+    <div class="field-row" style="margin-top:0.5rem">
+      <input class="field" id="customIcon" placeholder="Favicon URL (optional)" autocomplete="off">
+    </div>
+
+    <div class="preview">
+      <img id="previewIcon" src="/favicon.svg" alt="">
+      <span class="who" id="previewTitle">GameVault</span>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" id="resetCloak" type="button">Back to GameVault</button>
+      <span class="saved-flash" id="cloakFlash">saved</span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-label">Panic key</div>
+    <div class="toggle-row">
+      <div>
+        <div class="label">Panic key enabled</div>
+        <div class="desc">One keypress leaves the site immediately, from any page.</div>
+      </div>
+      <label class="switch"><input type="checkbox" id="panicEnabled"><span class="track"></span></label>
+    </div>
+    <div class="field-row" style="margin-top:0.6rem">
+      <input class="field key-field" id="panicKey" maxlength="1" aria-label="Panic key" autocomplete="off">
+      <input class="field" id="panicUrl" placeholder="https://classroom.google.com" aria-label="Panic destination" autocomplete="off">
+    </div>
+    <p class="panel-note">Choose a key you never type by accident — <code>[</code> and <code>\</code>
+    work well. It is ignored while your cursor is in a text box, so searching still works.</p>
+
+    <div class="toggle-row">
+      <div>
+        <div class="label">Confirm before the tab closes</div>
+        <div class="desc">Your browser asks first, so a stray Ctrl+W does not end the run.
+        The panic key skips this on purpose.</div>
+      </div>
+      <label class="switch"><input type="checkbox" id="confirmClose"><span class="track"></span></label>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-label">Hide the address too</div>
+    <p class="panel-note" style="margin-top:0">Opens GameVault in a fresh tab whose address bar
+    reads <code>about:blank</code>. Allow pop-ups if your browser blocks it.</p>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="aboutBlank" type="button">Open in about:blank</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-label">Proxy for the in-page browser</div>
+    <p class="panel-note" style="margin-top:0">Used by <a href="/unblocker/">the browser page</a>.
+    Change it if the default stops responding.</p>
+    <div class="field-row" style="margin-top:0.75rem">
+      <input class="field" id="proxyInput" spellcheck="false" autocomplete="off" aria-label="Proxy endpoint">
+      <button class="btn" id="proxySave" type="button">Save</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-label">Analytics</div>
+    <div class="toggle-row">
+      <div>
+        <div class="label">Count my visits</div>
+        <div class="desc">Anonymous usage counts that decide which games stay. Turning this off
+        stops all of it on this browser. Nothing else changes.</div>
+      </div>
+      <label class="switch"><input type="checkbox" id="analyticsOn"><span class="track"></span></label>
+    </div>
+    <p class="panel-note">Details in the <a href="/legal/privacy-policy/">privacy policy</a>.</p>
+  </div>
+
+<script>
+(function () {
+  var cloak = window.GV.cloak;
+  var security = window.GV.security;
+  var PROXY_KEY = 'gv.proxy';
+  var DEFAULT_PROXY = 'https://prx2new-dylan-25-xjv9zmqstfkgroh8bwpcednylau63h7281.nettspend.live/?rurl=';
+
+  function ls(key, fallback) {
+    try { var v = localStorage.getItem(key); return v === null ? fallback : v; }
+    catch (e) { return fallback; }
+  }
+
+  var flash = document.getElementById('cloakFlash');
+  var flashTimer = null;
+  function saved() {
+    flash.classList.add('show');
+    clearTimeout(flashTimer);
+    flashTimer = setTimeout(function () { flash.classList.remove('show'); }, 1400);
+  }
+
+  function paintState() {
+    var c = cloak.current();
+    document.querySelectorAll('.preset').forEach(function (b) {
+      b.classList.toggle('active', !!(c && c.presetId === b.dataset.id));
+    });
+    document.getElementById('emailBlock').classList.toggle('show', !!(c && c.presetId === 'gmail'));
+    document.getElementById('previewTitle').textContent = document.title;
+    var icon = document.querySelector("link[rel~='icon']");
+    document.getElementById('previewIcon').src = (icon && icon.href) || '/favicon.svg';
+  }
+
+  var grid = document.getElementById('presetGrid');
+  cloak.PRESETS.forEach(function (p) {
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'preset';
+    btn.dataset.id = p.id;
+    var img = document.createElement('img');
+    img.src = p.icon;
+    img.alt = '';
+    // A dead favicon should cost the icon, not the whole row.
+    img.onerror = function () { img.remove(); };
+    btn.append(img, document.createTextNode(p.label));
+    btn.addEventListener('click', function () {
+      cloak.setPreset(p.id);
+      paintState();
+      saved();
+    });
+    grid.appendChild(btn);
+  });
+
+  var mail = cloak.savedEmail();
+  document.getElementById('emailUser').value = mail.user;
+  document.getElementById('emailDomain').value = mail.domain;
+  document.getElementById('emailApply').addEventListener('click', function () {
+    cloak.setEmail(document.getElementById('emailUser').value,
+                   document.getElementById('emailDomain').value);
+    paintState();
+    saved();
+  });
+
+  var existing = cloak.current();
+  if (existing && !existing.presetId) {
+    document.getElementById('customTitle').value = existing.title || '';
+    document.getElementById('customIcon').value = existing.icon || '';
+  }
+  document.getElementById('customApply').addEventListener('click', function () {
+    var title = document.getElementById('customTitle').value.trim();
+    if (!title) return;
+    cloak.setCustom(title, document.getElementById('customIcon').value.trim());
+    paintState();
+    saved();
+  });
+
+  document.getElementById('resetCloak').addEventListener('click', function () {
+    cloak.reset();
+    document.getElementById('customTitle').value = '';
+    document.getElementById('customIcon').value = '';
+    paintState();
+    saved();
+  });
+
+  var panicEnabled = document.getElementById('panicEnabled');
+  var panicKey = document.getElementById('panicKey');
+  var panicUrl = document.getElementById('panicUrl');
+  var confirmClose = document.getElementById('confirmClose');
+
+  panicEnabled.checked = security.enabled();
+  panicKey.value = security.key();
+  panicUrl.value = security.url();
+  confirmClose.checked = security.confirmClose();
+
+  panicEnabled.addEventListener('change', function () { security.setEnabled(panicEnabled.checked); });
+  panicKey.addEventListener('input', function () { if (panicKey.value) security.setKey(panicKey.value); });
+  panicUrl.addEventListener('change', function () {
+    security.setUrl(panicUrl.value);
+    panicUrl.value = security.url();
+  });
+  confirmClose.addEventListener('change', function () { security.setConfirmClose(confirmClose.checked); });
+
+  document.getElementById('aboutBlank').addEventListener('click', function () {
+    var w = window.open('about:blank', '_blank');
+    if (!w) { alert('Allow pop-ups to use this.'); return; }
+    var c = cloak.current();
+    var title = (c && c.title) || 'GameVault';
+    w.document.write(
+      '<!DOCTYPE html><html><head><title>' + title + '</title>' +
+      '<style>*{margin:0;padding:0}html,body{width:100%;height:100%;overflow:hidden}' +
+      'iframe{display:block;width:100%;height:100%;border:none}</style>' +
+      '</head><body><iframe src="' + location.origin + '/"></iframe></body></html>'
+    );
+    w.document.close();
+  });
+
+  var proxyInput = document.getElementById('proxyInput');
+  proxyInput.value = ls(PROXY_KEY, DEFAULT_PROXY);
+  document.getElementById('proxySave').addEventListener('click', function () {
+    var v = proxyInput.value.trim();
+    try {
+      if (!v || v === DEFAULT_PROXY) localStorage.removeItem(PROXY_KEY);
+      else localStorage.setItem(PROXY_KEY, v);
+    } catch (e) {}
+    saved();
+  });
+
+  var analyticsOn = document.getElementById('analyticsOn');
+  analyticsOn.checked = ls('gv.noanalytics', '') !== '1';
+  analyticsOn.addEventListener('change', function () {
+    try {
+      if (analyticsOn.checked) localStorage.removeItem('gv.noanalytics');
+      else localStorage.setItem('gv.noanalytics', '1');
+    } catch (e) {}
+  });
+
+  paintState();
+})();
+</script>
+</main>
+</body>
+</html>

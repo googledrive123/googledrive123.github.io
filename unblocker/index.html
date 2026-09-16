@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browser · GameVault</title>
+  <meta name="description" content="An address bar and a frame, for the pages the games are not on.">
+  <link rel="icon" href="/favicon.svg">
+  <!-- Blocking on purpose: the cloak has to land before the first paint. -->
+  <script src="/js/mimicry.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/site.css">
+  <script src="/js/analytics.js" defer></script>
+  <script src="/js/site.js" defer></script>
+  <style>
+    .browser-shell { margin-top: 1.25rem; }
+    .browser-bar {
+      display: flex; gap: 0.5rem; align-items: center;
+      padding: 0.6rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px 14px 0 0;
+      border-bottom: 0;
+    }
+    .browser-bar .field { flex: 1; min-width: 0; }
+    .icon-btn {
+      display: grid; place-items: center;
+      width: 36px; height: 36px;
+      flex-shrink: 0;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .icon-btn:hover { color: var(--text); border-color: var(--border-strong); }
+    .icon-btn svg { width: 16px; height: 16px; }
+    .browser-frame {
+      width: 100%;
+      height: min(70vh, 720px);
+      border: 1px solid var(--border);
+      border-radius: 0 0 14px 14px;
+      background: #000;
+      display: block;
+    }
+    .browser-status {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted-2);
+      margin-top: 0.6rem;
+      min-height: 1.2em;
+    }
+    .browser-status.warn { color: #f0c04a; }
+    .shortcut-row { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.75rem; }
+    .shortcut {
+      padding: 0.35rem 0.75rem;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font: inherit; font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .shortcut:hover { color: var(--text); border-color: var(--border-strong); }
+  </style>
+</head>
+<body>
+<main class="page">
+  <div class="page-kicker">browser</div>
+  <h1>In-page browser</h1>
+  <p class="lede">Load another site inside this one. Point it at a proxy you trust.</p>
+  <div class="browser-shell">
+    <div class="browser-bar">
+      <button class="icon-btn" id="browserGo" type="button" title="Go" aria-label="Go">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      </button>
+      <input class="field" id="browserUrl" type="text" spellcheck="false" autocomplete="off"
+             placeholder="Type a site or a search…" aria-label="Address">
+      <button class="icon-btn" id="browserReload" type="button" title="Reload" aria-label="Reload">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+      </button>
+      <button class="icon-btn" id="browserFull" type="button" title="Fullscreen" aria-label="Fullscreen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+      </button>
+    </div>
+    <iframe class="browser-frame" id="browserFrame" src="about:blank"
+            title="Embedded browser" referrerpolicy="no-referrer"></iframe>
+    <div class="browser-status" id="browserStatus"></div>
+    <div class="shortcut-row" id="browserShortcuts"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-label">Proxy endpoint</div>
+    <p class="panel-note" style="margin-top:0">Pages load through a third-party proxy. That proxy is
+    somebody else's server — when it goes down, this page goes with it. Paste a different one here
+    and everything keeps working, no redeploy needed. The endpoint should end where the target URL
+    gets appended, for example <code>https://example.com/?url=</code>.</p>
+    <div class="field-row" style="margin-top:0.75rem">
+      <input class="field" id="proxyInput" spellcheck="false" autocomplete="off" aria-label="Proxy endpoint">
+      <button class="btn" id="proxySave" type="button">Save</button>
+      <button class="btn" id="proxyReset" type="button">Default</button>
+    </div>
+  </div>
+
+  <h2>Worth knowing</h2>
+  <ul>
+    <li>Sites that refuse to be framed will still refuse. A proxy helps with most of them, not all.</li>
+    <li>Do not sign in to anything that matters through a proxy you do not run. Whoever owns it
+    sees the traffic.</li>
+    <li>Your panic key works here too. Set it in <a href="/settings/">Settings</a>.</li>
+  </ul>
+
+<script>
+(function () {
+  var PROXY_KEY = 'gv.proxy';
+  var DEFAULT_PROXY = 'https://prx2new-dylan-25-xjv9zmqstfkgroh8bwpcednylau63h7281.nettspend.live/?rurl=';
+  var SHORTCUTS = [
+    { label: 'Google',      url: 'https://www.google.com' },
+    { label: 'Wikipedia',   url: 'https://www.wikipedia.org' },
+    { label: 'CoolMath',    url: 'https://www.coolmathgames.com' },
+    { label: 'CrazyGames',  url: 'https://www.crazygames.com' },
+    { label: 'YouTube',     url: 'https://www.youtube.com' }
+  ];
+
+  var frame = document.getElementById('browserFrame');
+  var url = document.getElementById('browserUrl');
+  var status = document.getElementById('browserStatus');
+  var proxyInput = document.getElementById('proxyInput');
+
+  function readProxy() {
+    try { return localStorage.getItem(PROXY_KEY) || DEFAULT_PROXY; }
+    catch (e) { return DEFAULT_PROXY; }
+  }
+  function writeProxy(v) {
+    try { v ? localStorage.setItem(PROXY_KEY, v) : localStorage.removeItem(PROXY_KEY); }
+    catch (e) {}
+  }
+
+  function say(text, warn) {
+    status.textContent = text;
+    status.classList.toggle('warn', !!warn);
+  }
+
+  // Anything without a dot is treated as a search, the way an address bar does.
+  function normalize(input) {
+    var v = (input || '').trim();
+    if (!v) return '';
+    if (/^https?:\/\//i.test(v)) return v;
+    if (!/\./.test(v) || /\s/.test(v)) {
+      return 'https://www.google.com/search?q=' + encodeURIComponent(v);
+    }
+    return 'https://' + v;
+  }
+
+  function go(target) {
+    var dest = normalize(target !== undefined ? target : url.value);
+    if (!dest) return;
+    url.value = dest;
+    frame.src = readProxy() + encodeURIComponent(dest);
+    say('loading ' + dest.replace(/^https?:\/\//, '') + ' …');
+  }
+
+  frame.addEventListener('load', function () {
+    if (frame.src === 'about:blank') return;
+    say('loaded · if the frame is blank the site refused to be embedded', false);
+  });
+
+  document.getElementById('browserGo').addEventListener('click', function () { go(); });
+  document.getElementById('browserReload').addEventListener('click', function () {
+    if (frame.src !== 'about:blank') frame.src = frame.src;
+  });
+  url.addEventListener('keydown', function (e) { if (e.key === 'Enter') go(); });
+
+  document.getElementById('browserFull').addEventListener('click', function () {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else if (frame.requestFullscreen) frame.requestFullscreen().catch(function () {
+      say('fullscreen was blocked by the browser', true);
+    });
+  });
+
+  var shortcuts = document.getElementById('browserShortcuts');
+  SHORTCUTS.forEach(function (s) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'shortcut';
+    b.textContent = s.label;
+    b.addEventListener('click', function () { go(s.url); });
+    shortcuts.appendChild(b);
+  });
+
+  proxyInput.value = readProxy();
+  document.getElementById('proxySave').addEventListener('click', function () {
+    var v = proxyInput.value.trim();
+    writeProxy(v === DEFAULT_PROXY ? '' : v);
+    say('proxy saved');
+  });
+  document.getElementById('proxyReset').addEventListener('click', function () {
+    writeProxy('');
+    proxyInput.value = DEFAULT_PROXY;
+    say('proxy reset to the default');
+  });
+
+  say('type an address and press Enter');
+})();
+</script>
+</main>
+</body>
+</html>

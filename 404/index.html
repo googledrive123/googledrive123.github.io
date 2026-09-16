@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Not found · GameVault</title>
+  <meta name="description" content="That page does not exist on GameVault.">
+  <link rel="icon" href="/favicon.svg">
+  <!-- Blocking on purpose: the cloak has to land before the first paint. -->
+  <script src="/js/mimicry.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/site.css">
+  <script src="/js/analytics.js" defer></script>
+  <script src="/js/site.js" defer></script>
+  <style>
+    .missing-path {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--accent);
+      word-break: break-all;
+    }
+    .nf-results { margin-top: 0.9rem; display: grid; gap: 0.4rem; }
+    .nf-hit {
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+      padding: 0.6rem 0.85rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.88rem;
+      transition: all 0.15s;
+    }
+    .nf-hit:hover { border-color: var(--border-strong); background: rgba(255,255,255,0.03); }
+    .nf-hit .cat {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--muted-2);
+      flex-shrink: 0;
+    }
+    .nf-note { color: var(--muted-2); font-size: 0.82rem; padding: 0.5rem 0; }
+  </style>
+</head>
+<body>
+<main class="page">
+  <div class="page-kicker">404</div>
+  <h1>Dead end</h1>
+  <p class="lede" id="missingLine">That address does not go anywhere.</p>
+
+  <div class="panel">
+    <div class="panel-label">Find it instead</div>
+    <input class="field" id="nfSearch" placeholder="Search the vault…" autocomplete="off" aria-label="Search games">
+    <div class="nf-results" id="nfResults"><div class="nf-note">Loading the catalog…</div></div>
+    <div class="btn-row">
+      <a class="btn btn-primary" href="/">Back to GameVault</a>
+      <button class="btn" id="nfRandom" type="button">Play something random</button>
+      <a class="btn" href="/status/">Request it</a>
+    </div>
+  </div>
+
+<script>
+(function () {
+  var search = document.getElementById('nfSearch');
+  var results = document.getElementById('nfResults');
+  var games = [];
+
+  try {
+    var missing = sessionStorage.getItem('gv.missing');
+    if (missing) {
+      sessionStorage.removeItem('gv.missing');
+      var line = document.getElementById('missingLine');
+      line.textContent = 'Nothing lives at ';
+      var code = document.createElement('span');
+      code.className = 'missing-path';
+      code.textContent = missing;
+      line.appendChild(code);
+      // A missing game deep link is the likeliest way to land here, so seed the
+      // search with the slug that failed.
+      var slug = missing.replace(/^\/games\//, '').replace(/[\/?#].*$/, '');
+      if (slug && slug !== missing) search.value = slug.replace(/-/g, ' ');
+    }
+  } catch (e) {}
+
+  function note(text) {
+    results.innerHTML = '';
+    var d = document.createElement('div');
+    d.className = 'nf-note';
+    d.textContent = text;
+    results.appendChild(d);
+  }
+
+  function show(list) {
+    results.innerHTML = '';
+    if (!list.length) { note('No match. Try fewer letters, or request it below.'); return; }
+    list.slice(0, 8).forEach(function (g) {
+      var a = document.createElement('a');
+      a.className = 'nf-hit';
+      a.href = '/games/' + g.id;
+      var name = document.createElement('span');
+      name.textContent = g.name;
+      var cat = document.createElement('span');
+      cat.className = 'cat';
+      cat.textContent = g.categories[0];
+      a.append(name, cat);
+      results.appendChild(a);
+    });
+  }
+
+  function run() {
+    var q = search.value.trim().toLowerCase();
+    var loose = q.replace(/[^a-z0-9]+/g, '');
+    if (!q) { show(games.slice(0, 6)); return; }
+    show(games.filter(function (g) {
+      return g.name.toLowerCase().includes(q)
+          || g.id.toLowerCase().includes(q)
+          || (loose && g.id.replace(/[^a-z0-9]+/g, '').includes(loose))
+          || (loose && g.name.toLowerCase().replace(/[^a-z0-9]+/g, '').includes(loose));
+    }));
+  }
+
+  fetch('/games.json', { cache: 'no-cache' })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      // Most played first, so the fallback suggestions are ones people want.
+      games = data.games.slice().sort(function (a, b) { return a.ranking - b.ranking; });
+      run();
+      search.addEventListener('input', run);
+      search.focus();
+    })
+    .catch(function () { note('Could not load the catalog. Head back to the homepage.'); });
+
+  document.getElementById('nfRandom').addEventListener('click', function () {
+    if (!games.length) { location.href = '/'; return; }
+    location.href = '/games/' + games[Math.floor(Math.random() * games.length)].id;
+  });
+})();
+</script>
+</main>
+</body>
+</html>

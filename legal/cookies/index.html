@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cookies · GameVault</title>
+  <meta name="description" content="What GameVault stores in your browser.">
+  <link rel="icon" href="/favicon.svg">
+  <!-- Blocking on purpose: the cloak has to land before the first paint. -->
+  <script src="/js/mimicry.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/site.css">
+  <script src="/js/analytics.js" defer></script>
+  <script src="/js/site.js" defer></script>
+</head>
+<body>
+<main class="page">
+  <div class="page-kicker">cookies</div>
+  <h1>Cookies and local storage</h1>
+  <p class="lede">GameVault sets no advertising cookies, because there are no ads.</p>
+  <h2>What this site actually uses</h2>
+  <p>GameVault does not set tracking cookies of its own. It uses your browser's
+  <strong>local storage</strong> and <strong>session storage</strong>, which are similar but
+  stay on your device and are never attached to outgoing requests.</p>
+
+  <div class="table-wrap">
+    <table class="gv">
+      <thead><tr><th>Key</th><th>Where</th><th>What it is for</th></tr></thead>
+      <tbody>
+        <tr><td>gv.starred.v1</td><td>Local storage</td><td>Games you starred</td></tr>
+        <tr><td>gv.recent.v1</td><td>Local storage</td><td>Recently played, for the Continue row</td></tr>
+        <tr><td>gv.pinnedcats.v1</td><td>Local storage</td><td>Categories pinned to the front of the bar</td></tr>
+        <tr><td>gv.cloak.v1</td><td>Local storage</td><td>Your chosen tab disguise</td></tr>
+        <tr><td>gv.cloak.asked.v1</td><td>Local storage</td><td>Remembers you were asked about disguises once</td></tr>
+        <tr><td>gv.sessions</td><td>Local storage</td><td>Play sessions recorded while signed out</td></tr>
+        <tr><td>gv.sugg.v1</td><td>Local storage</td><td>Whether the suggestion popup was dismissed</td></tr>
+        <tr><td>gv.proxy</td><td>Local storage</td><td>Which proxy the in-page browser uses</td></tr>
+        <tr><td>gv.schedule.classes.v1</td><td>Local storage</td><td>Class names you typed into the schedule</td></tr>
+        <tr><td>gv.noanalytics</td><td>Local storage</td><td>Set to 1 to switch analytics off</td></tr>
+        <tr><td>panicKey, panicRedirectUrl, panicEnabled, verificationEnabled</td><td>Local storage</td><td>Panic key and close-confirmation settings</td></tr>
+        <tr><td>gv.redirect</td><td>Session storage</td><td>Holds a deep link for a moment while the page loads</td></tr>
+        <tr><td>panicActivation</td><td>Session storage</td><td>Stops the close prompt firing during a panic exit</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Signed-in accounts</h2>
+  <p>Signing in stores a Supabase session token in your browser so you stay signed in. Signing
+  out removes it.</p>
+
+  <h2>Other people's cookies</h2>
+  <p>Games loaded from other hosts, the movie player, and Google Fonts may set their own
+  storage or cookies inside their own frames. That is outside this site's control. Pages under
+  <code>/games/</code> also load Google Analytics, which sets its own cookies.</p>
+
+  <h2>Clearing it</h2>
+  <p>Clearing site data for this domain in your browser settings removes everything above.
+  You will lose your starred games, your recents and your settings — nothing else.</p>
+  <p class="panel-note">Last updated: 16 September 2026 · See also the <a href="/legal/privacy-policy/">Privacy Policy</a>.</p>
+</main>
+</body>
+</html>
