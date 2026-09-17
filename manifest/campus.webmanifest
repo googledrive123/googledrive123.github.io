@@ -1,0 +1,31 @@
+{
+  "id": "/?app=campus",
+  "name": "Infinite Campus",
+  "short_name": "Campus",
+  "start_url": "/?app=campus",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#1b3d6d",
+  "theme_color": "#1b3d6d",
+  "icons": [
+    {
+      "src": "/icons/campus-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/campus-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/campus-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

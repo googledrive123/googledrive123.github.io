@@ -1,0 +1,31 @@
+{
+  "id": "/?app=khan",
+  "name": "Khan Academy",
+  "short_name": "Khan Academy",
+  "start_url": "/?app=khan",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#14bf96",
+  "theme_color": "#14bf96",
+  "icons": [
+    {
+      "src": "/icons/khan-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/khan-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/khan-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

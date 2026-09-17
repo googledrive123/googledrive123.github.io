@@ -1,0 +1,31 @@
+{
+  "id": "/?app=formative",
+  "name": "Formative",
+  "short_name": "Formative",
+  "start_url": "/?app=formative",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#6a3fbf",
+  "theme_color": "#6a3fbf",
+  "icons": [
+    {
+      "src": "/icons/formative-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/formative-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/formative-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
