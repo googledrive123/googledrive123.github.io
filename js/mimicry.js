@@ -21,21 +21,21 @@
   /* Disguises. `custom: 'email'` means the title is built from the saved
      username/domain instead of being fixed. */
   var PRESETS = [
-    { id: 'docs',      label: 'Google Docs',       title: 'Untitled document - Google Docs',              icon: 'https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico' },
-    { id: 'drive',     label: 'Google Drive',      title: 'My Drive - Google Drive',                      icon: 'https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png' },
-    { id: 'sheets',    label: 'Google Sheets',     title: 'Untitled spreadsheet - Google Sheets',         icon: 'https://ssl.gstatic.com/docs/spreadsheets/favicon3.ico' },
-    { id: 'slides',    label: 'Google Slides',     title: 'Untitled presentation - Google Slides',        icon: 'https://ssl.gstatic.com/docs/presentations/images/favicon5.ico' },
-    { id: 'gmail',     label: 'Gmail',             title: 'Inbox - Gmail',                                icon: 'https://ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico', custom: 'email' },
+    { id: 'docs',      label: 'Google Docs',       title: 'Untitled document - Google Docs',              icon: 'https://ssl.gstatic.com/docs/documents/images/kix-favicon9.ico' },
+    { id: 'drive',     label: 'Google Drive',      title: 'My Drive - Google Drive',                      icon: 'https://www.gstatic.com/images/branding/productlogos/drive_2026/v1/web-96dp/logo_drive_2026_color_1x_web_96dp.png' },
+    { id: 'sheets',    label: 'Google Sheets',     title: 'Untitled spreadsheet - Google Sheets',         icon: 'https://ssl.gstatic.com/docs/spreadsheets/favicon4.ico' },
+    { id: 'slides',    label: 'Google Slides',     title: 'Untitled presentation - Google Slides',        icon: 'https://ssl.gstatic.com/docs/presentations/images/favicon7.ico' },
+    { id: 'gmail',     label: 'Gmail',             title: 'Inbox - Gmail',                                icon: 'https://www.gstatic.com/images/branding/productlogos/gmail_2026/v1/web-96dp/logo_gmail_2026_color_1x_web_96dp.png', custom: 'email' },
     { id: 'classroom', label: 'Classroom',         title: 'Home - Google Classroom',                      icon: 'https://ssl.gstatic.com/classroom/favicon.png' },
-    { id: 'google',    label: 'Google',            title: 'Google',                                       icon: 'https://www.google.com/favicon.ico' },
+    { id: 'google',    label: 'Google',            title: 'Google',                                       icon: '/icons/google-192.png' },
     { id: 'khan',      label: 'Khan Academy',      title: 'Khan Academy | Free Online Courses',           icon: 'https://cdn.kastatic.org/images/favicon.ico' },
     { id: 'canvas',    label: 'Canvas',            title: 'Dashboard | Canvas',                           icon: 'https://du11hjcvx0uqb.cloudfront.net/dist/images/favicon-e10d657a73.ico' },
     { id: 'schoology', label: 'Schoology',         title: 'Schoology',                                    icon: 'https://asset-cdn.schoology.com/sites/all/themes/schoology_theme/favicon.ico' },
     { id: 'desmos',    label: 'Desmos',            title: 'Desmos | Graphing Calculator',                 icon: 'https://www.desmos.com/assets/img/apps/graphing/favicon.ico' },
     { id: 'campus',    label: 'Infinite Campus',   title: 'Infinite Campus',                              icon: 'https://www.infinitecampus.com/favicon.ico' },
-    { id: 'formative', label: 'Formative',         title: 'Formative',                                    icon: 'https://www.formative.com/favicon.ico' },
-    { id: 'clever',    label: 'Clever',            title: 'Clever | Portal',                              icon: 'https://clever.com/favicon.ico' },
-    { id: 'd203',      label: 'District 203',      title: 'Naperville Community Unit School District 203', icon: 'https://www.naperville203.org/favicon.ico' }
+    { id: 'formative', label: 'Formative',         title: 'Formative',                                    icon: 'https://cdn.prod.website-files.com/605fdb6b57d00c47e806a2dd/6848851066d26403b2729ff8_Formative_Icon%201.png' },
+    { id: 'clever',    label: 'Clever',            title: 'Clever | Portal',                              icon: 'https://www.clever.com/wp-content/uploads/2023/06/cropped-Favicon-512px-192x192.png' },
+    { id: 'd203',      label: 'District 203',      title: 'Naperville Community Unit School District 203', icon: 'https://resources.finalsite.net/images/v1749062123/naperville203org/ufxikmfkxw1iykkgox5a/naperville-favicon.ico' }
   ];
 
   function read(key, fallback) {
