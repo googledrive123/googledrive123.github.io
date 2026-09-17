@@ -9,6 +9,7 @@
   <!-- Blocking on purpose: the cloak has to land before the first paint. -->
   <script src="/js/mimicry.js"></script>
   <script src="/js/urlcloak.js"></script>
+  <script src="/js/pwa.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -146,6 +147,18 @@
       <a class="btn" id="cloakLink" href="#" draggable="true">Open work</a>
       <button class="btn" id="cloakCopy" type="button">Copy bookmark link</button>
     </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-label">Install as an app</div>
+    <p class="panel-note" style="margin-top:0">The strongest cloak: an installed app runs in its own
+    window with no address bar at all. It takes the name and icon of the disguise selected above, so
+    it sits in the launcher as <span id="installAs">GameVault</span>. Pick the disguise first —
+    the app keeps whatever name it was installed with.</p>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="installBtn" type="button">Install</button>
+    </div>
+    <p class="panel-note" id="installNote"></p>
   </div>
 
   <div class="panel">
@@ -295,6 +308,7 @@
     var href = urlCloak.bookmarklet('/');
     cloakLink.setAttribute('href', href);
     cloakLink.textContent = urlCloak.disguise().title;
+    paintInstall();
   }
   cloakLink.addEventListener('click', function (e) { e.preventDefault(); });
   cloakCopy.addEventListener('click', function () {
@@ -305,6 +319,43 @@
       window.prompt('Copy this:', href);
     }
   });
+
+  var pwa = window.GV.pwa;
+  var installBtn = document.getElementById('installBtn');
+  var installNote = document.getElementById('installNote');
+  var installAs = document.getElementById('installAs');
+
+  var MANUAL_NOTE = 'This browser has no one-click install. Use its own menu: Chrome and Edge → '
+    + 'the icon at the right of the address bar, or ⋮ → Cast, save and share → Install page as app. '
+    + 'Safari → Share → Add to Dock or Add to Home Screen.';
+
+  function paintInstall() {
+    var id = pwa.applyManifest();
+    // The shelf name is whatever the manifest says, so read it rather than guess.
+    fetch('/manifest/' + id + '.webmanifest')
+      .then(function (r) { return r.json(); })
+      .then(function (m) { installAs.textContent = m.short_name; })
+      .catch(function () {});
+
+    var s = pwa.state();
+    installBtn.disabled = s === 'installed';
+    installBtn.textContent = s === 'installed' ? 'Installed' : 'Install';
+    if (s === 'installed') installNote.textContent = 'Already installed. Open it from your launcher, dock or shelf.';
+    else if (s === 'manual') installNote.textContent = MANUAL_NOTE;
+    else installNote.textContent = '';
+  }
+
+  installBtn.addEventListener('click', function () {
+    pwa.install().then(function (outcome) {
+      if (outcome === 'unavailable') { installNote.textContent = MANUAL_NOTE; return; }
+      installNote.textContent = outcome === 'accepted'
+        ? 'Installed. Open it from your launcher, dock or shelf.'
+        : 'Install cancelled.';
+    });
+  });
+
+  pwa.onChange(paintInstall);
+
   var proxyInput = document.getElementById('proxyInput');
   proxyInput.value = ls(PROXY_KEY, DEFAULT_PROXY);
   document.getElementById('proxySave').addEventListener('click', function () {
