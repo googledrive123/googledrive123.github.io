@@ -184,6 +184,7 @@ body {
   transition: all 0.15s;
 }
 .btn:hover { background: rgba(255,255,255,0.06); }
+.btn:disabled { opacity: 0.45; cursor: default; }
 .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
 .btn-primary:hover { background: #ff5252; border-color: #ff5252; }
 .btn-row { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1rem; }

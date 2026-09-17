@@ -8,6 +8,7 @@
   <!-- Blocking on purpose: the cloak has to land before the first paint. -->
   <script src="/js/mimicry.js"></script>
   <script src="/js/urlcloak.js"></script>
+  <script src="/js/pwa.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
@@ -1459,6 +1460,7 @@
       width: 100%; margin-bottom: 0.4rem; transition: opacity 0.15s;
     }
     .url-cloak-btn:hover { opacity: 0.85; }
+    .url-cloak-btn:disabled { opacity: 0.45; cursor: default; }
     .mini-nav {
       display: flex; justify-content: center; flex-wrap: wrap;
       gap: 0.4rem 0.9rem;
@@ -2449,6 +2451,12 @@
       <button class="cloak-reset" id="cloakBookmarkBtn" type="button">Copy bookmark link</button>
       <div id="urlCloakNote" style="font-size:0.72rem;color:var(--muted);line-height:1.4;margin-top:0.5rem">Firefox and Safari keep <code style="background:rgba(255,255,255,0.08);padding:0 3px;border-radius:3px">about:blank</code> in the bar. Chrome and Edge replace it with the address of whatever page opened the tab — so save the bookmark link, then click it from Classroom or Drive and the bar shows that site instead. Allow pop-ups if prompted.</div>
     </div>
+
+    <div class="settings-section">
+      <div class="settings-label">Install as an app</div>
+      <button class="url-cloak-btn" id="installBtn" type="button">Install</button>
+      <div id="installNote" style="font-size:0.72rem;color:var(--muted);line-height:1.4;margin-top:0.5rem">Runs in its own window with no address bar at all, under the name and icon of the disguise above. Pick the disguise first — the app keeps the name it was installed with.</div>
+    </div>
   </div>
 </div>
 
@@ -3218,6 +3226,9 @@ function paintPresetState() {
     b.classList.toggle('active', !!(c && c.presetId === b.dataset.id)));
   document.getElementById('cloakEmail')
     .classList.toggle('show', !!(c && c.presetId === 'gmail'));
+  // The installable app takes its name from the disguise, so repoint the
+  // manifest whenever the disguise changes.
+  paintInstall();
 }
 
 function buildPresets() {
@@ -3331,6 +3342,37 @@ document.getElementById('cloakBookmarkBtn').addEventListener('click', () => {
 settingsOverlay.addEventListener('transitionend', () => {
   if (!settingsOverlay.classList.contains('show')) urlCloakNote.innerHTML = urlCloakNoteHTML;
 });
+
+// ───── Install as an app ─────
+const pwa = window.GV.pwa;
+const installBtn = document.getElementById('installBtn');
+const installNote = document.getElementById('installNote');
+const installNoteHTML = installNote.innerHTML;
+const MANUAL_INSTALL_NOTE = 'This browser has no one-click install. Use its own menu: Chrome and Edge → '
+  + 'the install icon at the right of the address bar. Safari → Share → Add to Dock.';
+
+function paintInstall() {
+  pwa.applyManifest();
+  const s = pwa.state();
+  installBtn.disabled = s === 'installed';
+  installBtn.textContent = s === 'installed' ? 'Installed' : 'Install';
+  if (s === 'installed') installNote.textContent = 'Already installed. Open it from your launcher, dock or shelf.';
+  else if (s === 'manual') installNote.textContent = MANUAL_INSTALL_NOTE;
+  else installNote.innerHTML = installNoteHTML;
+}
+
+installBtn.addEventListener('click', () => {
+  pwa.install().then(outcome => {
+    if (outcome === 'unavailable') { installNote.textContent = MANUAL_INSTALL_NOTE; return; }
+    installNote.textContent = outcome === 'accepted'
+      ? 'Installed. Open it from your launcher, dock or shelf.'
+      : 'Install cancelled.';
+  });
+});
+
+pwa.onChange(paintInstall);
+paintInstall();
+
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && settingsOverlay.classList.contains('show')) closeSettings();
 });
