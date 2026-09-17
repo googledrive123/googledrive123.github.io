@@ -8,6 +8,7 @@
     { href: '/',           label: 'Games' },
     { href: '/schedule/',  label: 'Schedule' },
     { href: '/status/',    label: 'Requests' },
+    { href: '/music/',     label: 'Music' },
     { href: '/unblocker/', label: 'Browser' },
     { href: '/settings/',  label: 'Settings' }
   ];
