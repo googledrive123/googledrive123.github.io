@@ -7,6 +7,7 @@
   <link rel="icon" href="/favicon.svg">
   <!-- Blocking on purpose: the cloak has to land before the first paint. -->
   <script src="/js/mimicry.js"></script>
+  <script src="/js/urlcloak.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
@@ -2443,9 +2444,10 @@
     </div>
 
     <div class="settings-section">
-      <div class="settings-label">URL Cloak — hide in about:blank</div>
-      <button class="url-cloak-btn" id="aboutBlankBtn">Open with cloaked URL</button>
-      <div style="font-size:0.72rem;color:var(--muted);line-height:1.4">Opens this site in a new tab showing <code style="background:rgba(255,255,255,0.08);padding:0 3px;border-radius:3px">about:blank</code> in the address bar. Allow pop-ups if prompted.</div>
+      <div class="settings-label">URL Cloak — hide the address bar</div>
+      <button class="url-cloak-btn" id="aboutBlankBtn" type="button">Open in a blank tab</button>
+      <button class="cloak-reset" id="cloakBookmarkBtn" type="button">Copy bookmark link</button>
+      <div id="urlCloakNote" style="font-size:0.72rem;color:var(--muted);line-height:1.4;margin-top:0.5rem">Firefox and Safari keep <code style="background:rgba(255,255,255,0.08);padding:0 3px;border-radius:3px">about:blank</code> in the bar. Chrome and Edge replace it with the address of whatever page opened the tab — so save the bookmark link, then click it from Classroom or Drive and the bar shows that site instead. Allow pop-ups if prompted.</div>
     </div>
   </div>
 </div>
@@ -3209,7 +3211,6 @@ window.addEventListener('popstate', function() {
 // that pages under /games/ behave identically to this one.
 const cloak = window.GV.cloak;
 const security = window.GV.security;
-const DEFAULT_TITLE = 'GameVault';
 
 function paintPresetState() {
   const c = cloak.current();
@@ -3302,20 +3303,34 @@ document.getElementById('confirmCloseInput').addEventListener('change', (e) => {
   security.setConfirmClose(e.target.checked);
 });
 
+const urlCloakNote = document.getElementById('urlCloakNote');
+const urlCloakNoteHTML = urlCloakNote.innerHTML;
+
 document.getElementById('aboutBlankBtn').addEventListener('click', () => {
-  const w = window.open('about:blank', '_blank');
-  if (!w) { alert('Allow pop-ups to use URL cloaking.'); return; }
-  const c = cloak.current();
-  const title = (c && c.title) || DEFAULT_TITLE;
-  w.document.write(
-    '<!DOCTYPE html><html><head><title>' + title + '</title>' +
-    '<style>*{margin:0;padding:0}html,body{width:100%;height:100%;overflow:hidden}' +
-    'iframe{display:block;width:100%;height:100%;border:none}</style>' +
-    '</head><body><iframe src="' + location.origin + '/"></iframe></body></html>'
-  );
-  w.document.close();
+  const r = GV.urlCloak.open('/');
+  if (!r.ok) {
+    urlCloakNote.textContent = 'The browser blocked the pop-up. Allow pop-ups for this site, then try again.';
+    return;
+  }
+  urlCloakNote.textContent = r.hidesUrl
+    ? 'Opened. The new tab reads about:blank.'
+    : 'Opened, but this browser puts GameVault in the address bar of the new tab. Use the bookmark link instead.';
 });
 
+document.getElementById('cloakBookmarkBtn').addEventListener('click', () => {
+  const href = GV.urlCloak.bookmarklet('/');
+  const done = () => { urlCloakNote.textContent = 'Copied. Make a new bookmark and paste that as its URL.'; };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(href).then(done, () => window.prompt('Copy this:', href));
+  } else {
+    window.prompt('Copy this:', href);
+  }
+});
+
+// Put the explanation back whenever the panel is reopened.
+settingsOverlay.addEventListener('transitionend', () => {
+  if (!settingsOverlay.classList.contains('show')) urlCloakNote.innerHTML = urlCloakNoteHTML;
+});
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && settingsOverlay.classList.contains('show')) closeSettings();
 });
