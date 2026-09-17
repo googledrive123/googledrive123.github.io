@@ -1,0 +1,31 @@
+{
+  "id": "/?app=clever",
+  "name": "Clever Portal",
+  "short_name": "Clever",
+  "start_url": "/?app=clever",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#436cf0",
+  "theme_color": "#436cf0",
+  "icons": [
+    {
+      "src": "/icons/clever-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/clever-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/clever-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "id": "/?app=d203",
+  "name": "Naperville CUSD 203",
+  "short_name": "District 203",
+  "start_url": "/?app=d203",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b2f5e",
+  "theme_color": "#0b2f5e",
+  "icons": [
+    {
+      "src": "/icons/d203-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/d203-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/d203-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

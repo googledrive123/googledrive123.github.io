@@ -1,0 +1,31 @@
+{
+  "id": "/?app=classroom",
+  "name": "Google Classroom",
+  "short_name": "Classroom",
+  "start_url": "/?app=classroom",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0f9d58",
+  "theme_color": "#0f9d58",
+  "icons": [
+    {
+      "src": "/icons/classroom-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/classroom-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/classroom-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

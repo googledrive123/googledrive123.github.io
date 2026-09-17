@@ -1,0 +1,31 @@
+{
+  "id": "/?app=schoology",
+  "name": "Schoology",
+  "short_name": "Schoology",
+  "start_url": "/?app=schoology",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0d78c4",
+  "theme_color": "#0d78c4",
+  "icons": [
+    {
+      "src": "/icons/schoology-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/schoology-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/schoology-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
