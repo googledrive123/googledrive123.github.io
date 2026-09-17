@@ -8,6 +8,7 @@
   <link rel="icon" href="/favicon.svg">
   <!-- Blocking on purpose: the cloak has to land before the first paint. -->
   <script src="/js/mimicry.js"></script>
+  <script src="/js/urlcloak.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -127,10 +128,23 @@
 
   <div class="panel">
     <div class="panel-label">Hide the address too</div>
-    <p class="panel-note" style="margin-top:0">Opens GameVault in a fresh tab whose address bar
-    reads <code>about:blank</code>. Allow pop-ups if your browser blocks it.</p>
+    <p class="panel-note" style="margin-top:0">Opens GameVault inside a fresh tab. Firefox and Safari
+    leave <code>about:blank</code> in the address bar. Chrome and Edge do not: they replace it with the
+    address of whatever page opened the tab, so from here they show GameVault anyway. Allow pop-ups
+    if your browser blocks the tab.</p>
     <div class="btn-row">
-      <button class="btn btn-primary" id="aboutBlank" type="button">Open in about:blank</button>
+      <button class="btn btn-primary" id="aboutBlank" type="button">Open in a blank tab</button>
+    </div>
+    <p class="panel-note" id="aboutBlankNote" hidden></p>
+
+    <div class="panel-label" style="margin-top:1.4rem">Bookmark version — works in Chrome</div>
+    <p class="panel-note" style="margin-top:0">Same tab, opened from a page you are already on.
+    Chrome shows the address of that page instead of this one, so GameVault never appears in the bar.
+    Drag the link to your bookmarks bar, or copy it and make a bookmark whose URL is what you copied.
+    Then open Classroom, Drive, or any school site and click the bookmark.</p>
+    <div class="btn-row">
+      <a class="btn" id="cloakLink" href="#" draggable="true">Open work</a>
+      <button class="btn" id="cloakCopy" type="button">Copy bookmark link</button>
     </div>
   </div>
 
@@ -186,6 +200,7 @@
     document.getElementById('previewTitle').textContent = document.title;
     var icon = document.querySelector("link[rel~='icon']");
     document.getElementById('previewIcon').src = (icon && icon.href) || '/favicon.svg';
+    paintBookmarklet();
   }
 
   var grid = document.getElementById('presetGrid');
@@ -257,20 +272,39 @@
   });
   confirmClose.addEventListener('change', function () { security.setConfirmClose(confirmClose.checked); });
 
+  var urlCloak = window.GV.urlCloak;
+  var blankNote = document.getElementById('aboutBlankNote');
+
   document.getElementById('aboutBlank').addEventListener('click', function () {
-    var w = window.open('about:blank', '_blank');
-    if (!w) { alert('Allow pop-ups to use this.'); return; }
-    var c = cloak.current();
-    var title = (c && c.title) || 'GameVault';
-    w.document.write(
-      '<!DOCTYPE html><html><head><title>' + title + '</title>' +
-      '<style>*{margin:0;padding:0}html,body{width:100%;height:100%;overflow:hidden}' +
-      'iframe{display:block;width:100%;height:100%;border:none}</style>' +
-      '</head><body><iframe src="' + location.origin + '/"></iframe></body></html>'
-    );
-    w.document.close();
+    var r = urlCloak.open('/');
+    blankNote.hidden = false;
+    if (!r.ok) {
+      blankNote.textContent = 'The browser blocked the pop-up. Allow pop-ups for this site, then try again.';
+      return;
+    }
+    blankNote.textContent = r.hidesUrl
+      ? 'Opened. The new tab reads about:blank.'
+      : 'Opened, but this browser puts GameVault in the address bar of the new tab. Use the bookmark below instead.';
   });
 
+  /* The bookmarklet carries the current disguise, so repaint the link every
+     time the cloak changes rather than once at load. */
+  var cloakLink = document.getElementById('cloakLink');
+  var cloakCopy = document.getElementById('cloakCopy');
+  function paintBookmarklet() {
+    var href = urlCloak.bookmarklet('/');
+    cloakLink.setAttribute('href', href);
+    cloakLink.textContent = urlCloak.disguise().title;
+  }
+  cloakLink.addEventListener('click', function (e) { e.preventDefault(); });
+  cloakCopy.addEventListener('click', function () {
+    var href = urlCloak.bookmarklet('/');
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(href).then(saved, function () { window.prompt('Copy this:', href); });
+    } else {
+      window.prompt('Copy this:', href);
+    }
+  });
   var proxyInput = document.getElementById('proxyInput');
   proxyInput.value = ls(PROXY_KEY, DEFAULT_PROXY);
   document.getElementById('proxySave').addEventListener('click', function () {
