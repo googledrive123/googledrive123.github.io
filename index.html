@@ -1398,6 +1398,21 @@
       font-size: 0.7rem; letter-spacing: 0.22em;
       text-transform: uppercase; color: var(--muted);
     }
+    /* The loader ignores clicks, so this one button has to take them back. */
+    .game-loader-swap {
+      pointer-events: auto;
+      background: transparent;
+      border: 1px solid var(--border-strong);
+      border-radius: 100px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.82rem;
+      padding: 0.45rem 1.1rem;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .game-loader-swap:hover { border-color: var(--accent); color: var(--accent); }
+    .game-loader-swap[hidden] { display: none; }
 
     /* ───────────── SETTINGS MODAL ───────────── */
     .settings-box {
@@ -2403,7 +2418,8 @@
     <iframe id="gameFrame" allowfullscreen allow="autoplay; fullscreen *; gamepad *;"></iframe>
     <div class="game-loader" id="gameLoader">
       <div class="game-loader-spinner"></div>
-      <div class="game-loader-text">Loading game…</div>
+      <div class="game-loader-text" id="gameLoaderText">Loading game…</div>
+      <button class="game-loader-swap" id="loaderSwap" hidden>Use the offline copy</button>
     </div>
   </div>
 </div>
