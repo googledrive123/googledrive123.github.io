@@ -3188,22 +3188,94 @@ const gameLoader   = document.getElementById('gameLoader');
 const gameBack     = document.getElementById('gameBack');
 const gameFS       = document.getElementById('gameFullscreen');
 const gameNewTab   = document.getElementById('gameNewTab');
+const gameSwap     = document.getElementById('gameSwap');
+const loaderSwap   = document.getElementById('loaderSwap');
+const gameLoaderText = document.getElementById('gameLoaderText');
+
+// ───── Offline copies ─────
+// The games marked `local` in the catalog run off someone else's host now, but
+// the build they used to run is still sitting in /games/<id>/. When that host
+// is blocked or the build is broken, these buttons move that one game over to
+// the copy in this repo. Nothing switches on its own — a slow game is not a
+// broken one, and swapping a frame out from under someone mid-load is worse.
+const STALL_MS = 8000;
+let stallTimer = null;
+let expectLoad = false;
+let mounted = null;
+
+// Which games this browser has been told to run locally. Survives reloads, so
+// someone on a network that blocks the host picks once and it stays picked.
+const prefs = {
+  key: 'gv.offline',
+  offline() {
+    try { return new Set(JSON.parse(localStorage.getItem(this.key) || '[]')); }
+    catch (e) { return new Set(); }
+  },
+  flip(id) {
+    const set = this.offline();
+    if (set.has(id)) set.delete(id); else set.add(id);
+    try { localStorage.setItem(this.key, JSON.stringify([...set])); } catch (e) {}
+  }
+};
+
+function localUrl(g) { return '/games/' + g.id + '/'; }
+function isOffline(g) { return !g.src || prefs.offline().has(g.id); }
+function gameUrl(g) { return isOffline(g) ? localUrl(g) : g.src; }
+// Games with no `src` are already local, so they get no button to press.
+function canSwap(g) { return !!(g && g.src && g.local); }
+
+function paintSwap(g) {
+  loaderSwap.hidden = true;
+  gameSwap.hidden = !canSwap(g);
+  if (!canSwap(g)) return;
+  gameSwap.innerHTML = isOffline(g) ? '&#8646; Use online copy' : '&#8646; Use offline copy';
+}
+
+function mountGame(g) {
+  mounted = g;
+  const url = gameUrl(g);
+  gameTitle.textContent = g.name;
+  gameNewTab.href = url;
+  gameLoaderText.textContent = 'Loading game…';
+  gameLoader.classList.remove('hidden');
+  paintSwap(g);
+  clearTimeout(stallTimer);
+  expectLoad = false;
+  gameFrame.src = '';
+  setTimeout(() => {
+    expectLoad = true;
+    gameFrame.src = url;
+    // A cross-origin frame fires `load` even for the browser's own error page,
+    // so a game that never finishes loading is the only failure this can see.
+    if (canSwap(g) && !isOffline(g)) {
+      stallTimer = setTimeout(() => {
+        if (gameLoader.classList.contains('hidden')) return;
+        gameLoaderText.textContent = 'Still loading…';
+        loaderSwap.hidden = false;
+      }, STALL_MS);
+    }
+  }, 60);
+}
+
+function toggleOffline() {
+  if (!canSwap(mounted)) return;
+  prefs.flip(mounted.id);
+  mountGame(mounted);
+}
+gameSwap.addEventListener('click', toggleOffline);
+loaderSwap.addEventListener('click', toggleOffline);
 
 function openGame(g) {
-  gameTitle.textContent = g.name;
-  const gameSrc = g.src || ('/games/' + g.id + '/');
-  gameNewTab.href = gameSrc;
-  gameLoader.classList.remove('hidden');
-  gameFrame.src = '';
   gameOverlay.classList.add('show');
   document.body.style.overflow = 'hidden';
   history.pushState({page:'game',gameId:g.id}, '', '/games/' + g.id);
-  setTimeout(() => {
-    gameFrame.src = gameSrc;
-  }, 60);
+  mountGame(g);
 }
 function closeGame() {
   if (window._trackClose) window._trackClose();
+  clearTimeout(stallTimer);
+  expectLoad = false;
+  mounted = null;
   gameOverlay.classList.remove('show');
   gameFrame.src = '';
   document.body.style.overflow = '';
@@ -3212,6 +3284,10 @@ function closeGame() {
   }
 }
 gameFrame.addEventListener('load', () => {
+  // Blanking the frame between games fires this too. Only the real one counts.
+  if (!expectLoad) return;
+  clearTimeout(stallTimer);
+  loaderSwap.hidden = true;
   gameLoader.classList.add('hidden');
 });
 gameBack.addEventListener('click', closeGame);
