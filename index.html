@@ -1355,6 +1355,21 @@
       white-space: nowrap;
     }
     .game-bar-newtab:hover { border-color: var(--border-strong); color: var(--text); }
+    /* Only shows for the games that still have a copy in /games/. */
+    .game-bar-swap {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 0.78rem;
+      padding: 0.35rem 0.85rem;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+    .game-bar-swap:hover { border-color: var(--border-strong); color: var(--text); }
+    .game-bar-swap[hidden] { display: none; }
     .bell-game { font-size: 0.65rem; letter-spacing: 0.12em; backdrop-filter: none; padding: 0.3rem 0.7rem; }
     .bell-game .sep { height: 10px; }
 
@@ -2381,6 +2396,7 @@
       <span><span class="lbl">ends</span> <span class="val" data-bell="endsAt">&#8212;</span></span>
       <span class="bell-progress" data-bell="progress"></span>
     </div>
+    <button class="game-bar-swap" id="gameSwap" hidden>&#8646; Use offline copy</button>
     <a class="game-bar-newtab" id="gameNewTab" href="#" target="_blank" rel="noopener">&#8599; New Tab</a>    <button class="game-bar-fs" id="gameFullscreen">⛶ Fullscreen</button>
   </div>
   <div class="game-frame-wrap">
