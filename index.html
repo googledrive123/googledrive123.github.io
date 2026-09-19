@@ -2130,6 +2130,72 @@
       .pt-notice-text { flex-basis: 100%; }
     }
 
+
+    /* ───────────── Newest strip ───────────── */
+    /* Eye-catching but deliberately not a strobe: the glow cycles once every
+       2s. Anything near or above 3Hz is a seizure risk and reads as spam. */
+    .newest {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin: 38px auto 0;
+      padding: 12px 16px;
+      max-width: 620px;
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: 10px;
+      animation: newestGlow 2s ease-in-out infinite;
+    }
+    .newest[hidden] { display: none; }
+    .newest-kicker {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .newest-body { flex: 1; min-width: 0; text-align: left; }
+    .newest-label {
+      display: block;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .newest-meta {
+      display: block;
+      margin-top: 2px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .newest-more {
+      flex-shrink: 0;
+      padding: 7px 14px;
+      font: inherit;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text);
+      background: transparent;
+      border: 1px solid var(--border-strong);
+      border-radius: 7px;
+      cursor: pointer;
+    }
+    .newest-more:hover { background: var(--surface-2); }
+    @keyframes newestGlow {
+      0%, 100% { border-color: var(--border-strong); box-shadow: 0 0 0 0 rgba(255,59,59,0); }
+      50%      { border-color: var(--accent);        box-shadow: 0 0 14px 0 rgba(255,59,59,0.28); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .newest { animation: none; border-color: var(--accent); }
+    }
+    @media (max-width: 560px) {
+      .newest { flex-wrap: wrap; }
+      .newest-body { flex-basis: 100%; }
+    }
+
   </style>
 </head>
 <body>
