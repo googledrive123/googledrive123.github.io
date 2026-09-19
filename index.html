@@ -3659,6 +3659,12 @@ function hasPlayed(gameId) {
   } catch (e) { return false; }
 }
 
+function dismissPolytrackNotice() {
+  const box = document.getElementById('ptNotice');
+  if (box) box.hidden = true;
+  try { localStorage.setItem(PT_NOTICE_KEY, 'dismissed'); } catch (e) {}
+}
+
 bootCatalog();
 
 // ═══════════════════════════════════════════════════════
