@@ -311,8 +311,14 @@
     var css = document.createElement('style');
     css.id = STYLE_ID;
     css.textContent = [
+      // The row is a fixed 100px with a clip-path, so a third line only fits
+      // if the two the game already draws give some space back.
+      '.leaderboard-ui > .container > button.main > .left {',
+      '  display: inline-flex; flex-direction: column; justify-content: center;',
+      '  height: 100px; box-sizing: border-box; }',
+      '.leaderboard-ui > .container > button.main > .left > p { padding: 2px 12px; }',
       '.leaderboard-ui > .container > button.main > .left > p.gv-verify {',
-      '  padding: 0 12px 10px 12px; margin: -8px 0 0 0; font-size: 15px; }',
+      '  margin: 0; padding: 2px 12px 0 12px; font-size: 15px; line-height: 1.1; }',
       '.gv-verify.gv-yes { color: #5f5; }',
       '.gv-verify.gv-no  { color: #f55; }',
       '.leaderboard-ui > .container > button.main > .right > .verified-state > img { display: none; }',
