@@ -1,0 +1,296 @@
+// Site leaderboard for PolyTrack.
+//
+// The game talks to vps.kodub.com, which only answers official builds, so the
+// board here is always empty and the game reports "Failed to load". This file
+// answers those same requests from the site's own Supabase instead, so a time
+// set here is ranked against everyone else who plays here.
+//
+// It works by standing in front of XMLHttpRequest rather than by editing
+// main.bundle.js. The game's bundle stays byte-for-byte what Kodub shipped,
+// which means dropping in a newer PolyTrack does not mean redoing any of this.
+// Anything not addressed to vps.kodub.com is handed to the real XHR untouched.
+//
+// Loaded before main.bundle.js in index.html. Must stay before it: the game
+// captures XMLHttpRequest when its own module initialises.
+(function () {
+  'use strict';
+
+  var SUPA_URL = 'https://dxwjxzmlezfyursysays.supabase.co';
+  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
+  var AUTH_KEY = 'sb-dxwjxzmlezfyursysays-auth-token';
+  var HOST = 'vps.kodub.com';
+
+  var NativeXHR = window.XMLHttpRequest;
+
+  // ── Identity ──────────────────────────────────────────────────────────
+  // The game runs from /games/polytrack/, same origin as the site, so the
+  // session the site already established is readable here. No message passing,
+  // no second sign-in.
+
+  function accessToken() {
+    try {
+      var raw = localStorage.getItem(AUTH_KEY);
+      if (!raw) return null;
+      var parsed = JSON.parse(raw);
+      return (parsed && parsed.access_token) || null;
+    } catch (e) { return null; }
+  }
+
+  // Guests are keyed by the visitor id the analytics layer already assigns, so
+  // a guest keeps one row across sessions instead of a new one per visit.
+  function visitorId() {
+    try { return localStorage.getItem('gv.vid') || null; } catch (e) { return null; }
+  }
+
+  function rpc(name, body) {
+    var token = accessToken();
+    return fetch(SUPA_URL + '/rest/v1/rpc/' + name, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPA_KEY,
+        'Authorization': 'Bearer ' + (token || SUPA_KEY)
+      },
+      body: JSON.stringify(body)
+    }).then(function (res) {
+      if (!res.ok) return res.text().then(function (t) { throw new Error(t || res.status); });
+      return res.status === 204 ? null : res.json();
+    });
+  }
+
+  // ── Request parsing ───────────────────────────────────────────────────
+
+  function queryOf(url) {
+    var out = {};
+    var q = url.indexOf('?');
+    if (q < 0) return out;
+    url.slice(q + 1).split('&').forEach(function (pair) {
+      if (!pair) return;
+      var eq = pair.indexOf('=');
+      var k = eq < 0 ? pair : pair.slice(0, eq);
+      var v = eq < 0 ? '' : pair.slice(eq + 1);
+      try { out[decodeURIComponent(k)] = decodeURIComponent(v.replace(/\+/g, ' ')); }
+      catch (e) { out[k] = v; }
+    });
+    return out;
+  }
+
+  function endpointOf(url) {
+    var m = /vps\.kodub\.com\/v\d+\/([^?]*)/.exec(url);
+    return m ? m[1] : null;
+  }
+
+  // ── Handlers ──────────────────────────────────────────────────────────
+  // Each returns a promise of the JSON the game expects. Shapes are validated
+  // strictly by the bundle — a missing field is reported to the player as a
+  // leaderboard error, so they are built to match exactly.
+
+  function getBoard(q) {
+    return rpc('polytrack_board', {
+      p_track_id: q.trackId || '',
+      p_skip: parseInt(q.skip || '0', 10) || 0,
+      p_amount: parseInt(q.amount || '50', 10) || 50,
+      p_visitor_id: visitorId()
+    }).then(function (board) {
+      return board || { total: 0, entries: [], userEntry: null };
+    });
+  }
+
+  function getUserEntry(q) {
+    // No dedicated endpoint: the board already computes the caller's standing,
+    // and asking for one row is not worth a second function.
+    return getBoard({ trackId: q.trackId, skip: '0', amount: '1' })
+      .then(function (board) { return board.userEntry || null; });
+  }
+
+  function submit(body) {
+    var q = queryOf('?' + body);
+    var frames = parseInt(q.frames || '0', 10);
+    if (!frames || frames < 1) throw new Error('invalid frames');
+
+    // Read the standing before and after so the game can show the "moved up
+    // from Nth" animation it plays on a personal best.
+    var trackId = q.trackId || '';
+    return getBoard({ trackId: trackId, skip: '0', amount: '1' }).then(function (before) {
+      var previous = before.userEntry ? before.userEntry.position : null;
+      return rpc('polytrack_submit', {
+        p_track_id: trackId,
+        p_frames: frames,
+        p_nickname: q.nickname || 'Player',
+        p_country_code: q.countryCode || null,
+        p_car_style: q.carStyle || null,
+        p_visitor_id: visitorId()
+      }).then(function () {
+        return getBoard({ trackId: trackId, skip: '0', amount: '1' });
+      }).then(function (after) {
+        var entry = after.userEntry;
+        if (!entry) return null;
+        if (previous == null) return entry.id;
+        return {
+          uploadId: entry.id,
+          positionChange: { previousPosition: previous, newPosition: entry.position }
+        };
+      });
+    });
+  }
+
+  function getUser() {
+    // The game keeps its own profile locally and sends it on submit, so there
+    // is nothing extra to store. Returning null lets it use what it has.
+    return Promise.resolve(null);
+  }
+
+  // Recordings are the ghost-replay data. Nothing here stores them, and the
+  // shape allows nulls, so every id resolves to "no replay available".
+  function getRecordings(q) {
+    var ids = (q.ids || '').split(',').filter(Boolean);
+    return Promise.resolve(ids.map(function () { return null; }));
+  }
+
+  var HANDLED = [
+    'leaderboard', 'leaderboardUserEntry', 'user',
+    'recordings', 'verifyRecordings', 'iceServers'
+  ];
+
+  // Asked at open(), before any body exists, so it must not touch the
+  // handlers — deciding by calling route() would fire a submit on every POST.
+  function handles(url) {
+    return String(url).indexOf(HOST) >= 0 && HANDLED.indexOf(endpointOf(url)) >= 0;
+  }
+
+  function route(method, url, body) {
+    var endpoint = endpointOf(url);
+    var q = queryOf(url);
+    if (endpoint === 'leaderboard') {
+      return method === 'POST' ? submit(body) : getBoard(q);
+    }
+    if (endpoint === 'leaderboardUserEntry') return getUserEntry(q);
+    if (endpoint === 'user') return method === 'POST' ? Promise.resolve(null) : getUser();
+    if (endpoint === 'recordings') return getRecordings(q);
+    if (endpoint === 'verifyRecordings') {
+      return Promise.resolve({ unverifiedRecordings: [], exhaustive: true, estimatedRemaining: 0 });
+    }
+    if (endpoint === 'iceServers') return Promise.resolve([]);
+    return null; // Not ours — caller falls through to the real network.
+  }
+
+  // ── The stand-in ──────────────────────────────────────────────────────
+  // Mimics only what the bundle touches: readyState, status, responseText,
+  // onreadystatechange, timeout, overrideMimeType, setRequestHeader.
+
+  function FakeXHR() {
+    this.readyState = 0;
+    this.status = 0;
+    this.responseText = '';
+    this.onreadystatechange = null;
+    this.onerror = null;
+    this.ontimeout = null;
+    this.onload = null;
+    this.timeout = 0;
+    this._method = 'GET';
+    this._url = '';
+  }
+  FakeXHR.prototype.open = function (method, url) {
+    this._method = String(method || 'GET').toUpperCase();
+    this._url = url;
+    this.readyState = 1;
+  };
+  FakeXHR.prototype.setRequestHeader = function () {};
+  FakeXHR.prototype.overrideMimeType = function () {};
+  FakeXHR.prototype.getAllResponseHeaders = function () { return ''; };
+  FakeXHR.prototype.getResponseHeader = function () { return null; };
+  FakeXHR.prototype.abort = function () { this.readyState = 0; };
+  FakeXHR.prototype.addEventListener = function (type, fn) {
+    if (type === 'readystatechange') this.onreadystatechange = fn;
+    if (type === 'error') this.onerror = fn;
+    if (type === 'load') this.onload = fn;
+  };
+  FakeXHR.prototype.removeEventListener = function () {};
+  FakeXHR.prototype._finish = function (status, text) {
+    this.status = status;
+    this.responseText = text;
+    this.readyState = 4;
+    try { if (this.onreadystatechange) this.onreadystatechange(); } catch (e) { console.error(e); }
+    try { if (this.onload) this.onload(); } catch (e) { console.error(e); }
+  };
+  FakeXHR.prototype.send = function (body) {
+    var self = this;
+    var pending;
+    try { pending = route(this._method, this._url, body); }
+    catch (e) { pending = Promise.reject(e); }
+    pending.then(function (data) {
+      self._finish(200, data === null ? 'null' : JSON.stringify(data));
+    }).catch(function (err) {
+      console.error('[leaderboard]', err);
+      // A non-200 is what the bundle already expects from a server problem, so
+      // it shows its normal error rather than an unhandled rejection.
+      self._finish(500, '');
+    });
+  };
+  FakeXHR.UNSENT = 0;
+  FakeXHR.OPENED = 1;
+  FakeXHR.HEADERS_RECEIVED = 2;
+  FakeXHR.LOADING = 3;
+  FakeXHR.DONE = 4;
+
+  function PatchedXHR() {
+    var real = new NativeXHR();
+    var fake = new FakeXHR();
+    var chosen = null;
+    var self = this;
+
+    // Which object serves the call is only known at open(), so both exist until
+    // then and every property is mirrored off whichever one is chosen.
+    this.open = function (method, url) {
+      chosen = handles(url) ? fake : real;
+      chosen.open.apply(chosen, arguments);
+      sync();
+    };
+    this.send = function (body) {
+      var target = chosen || real;
+      var prior = target.onreadystatechange;
+      target.onreadystatechange = function () {
+        sync();
+        if (self.onreadystatechange) self.onreadystatechange();
+        if (prior) prior();
+      };
+      target.send(body);
+    };
+    ['setRequestHeader', 'overrideMimeType', 'abort',
+     'getAllResponseHeaders', 'getResponseHeader'].forEach(function (name) {
+      self[name] = function () {
+        var target = chosen || real;
+        return target[name] ? target[name].apply(target, arguments) : undefined;
+      };
+    });
+    this.addEventListener = function (type, fn) {
+      var target = chosen || real;
+      target.addEventListener(type, function () { sync(); fn.apply(self, arguments); });
+    };
+    this.removeEventListener = function () {};
+
+    function sync() {
+      var target = chosen || real;
+      self.readyState = target.readyState;
+      self.status = target.status;
+      try { self.responseText = target.responseText; } catch (e) { self.responseText = ''; }
+    }
+
+    Object.defineProperty(this, 'timeout', {
+      get: function () { return (chosen || real).timeout; },
+      set: function (v) { real.timeout = v; fake.timeout = v; }
+    });
+
+    this.readyState = 0;
+    this.status = 0;
+    this.responseText = '';
+    this.onreadystatechange = null;
+  }
+  PatchedXHR.UNSENT = 0;
+  PatchedXHR.OPENED = 1;
+  PatchedXHR.HEADERS_RECEIVED = 2;
+  PatchedXHR.LOADING = 3;
+  PatchedXHR.DONE = 4;
+
+  window.XMLHttpRequest = PatchedXHR;
+})();
