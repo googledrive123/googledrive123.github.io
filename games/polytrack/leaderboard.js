@@ -319,8 +319,10 @@
       '.leaderboard-ui > .container > button.main > .left > p { padding: 2px 12px; }',
       '.leaderboard-ui > .container > button.main > .left > p.gv-verify {',
       '  margin: 0; padding: 2px 12px 0 12px; font-size: 15px; line-height: 1.1; }',
-      '.gv-verify.gv-yes { color: #5f5; }',
-      '.gv-verify.gv-no  { color: #f55; }',
+      // The game colours every row paragraph with a 3-class selector, which
+      // outranks a bare .gv-yes, so these have to match its depth to win.
+      '.leaderboard-ui > .container > button.main > .left > p.gv-verify.gv-yes { color: #5f5; }',
+      '.leaderboard-ui > .container > button.main > .left > p.gv-verify.gv-no { color: #f55; }',
       '.leaderboard-ui > .container > button.main > .right > .verified-state > img { display: none; }',
       // Mirrors .total-players, which sits in the opposite corner.
       '.leaderboard-ui > .gv-info {',
