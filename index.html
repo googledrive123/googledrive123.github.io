@@ -2079,6 +2079,57 @@
       .movie-card { width: 115px; }
       .movie-skeleton { width: 115px; }
     }
+
+    /* ───────────── PolyTrack update notice ───────────── */
+    /* Only shown to someone who has actually played PolyTrack here before —
+       a first-time visitor has nothing to be told is new. Dismissing it is
+       permanent on this browser, so it never becomes something to re-close. */
+    .pt-notice {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      margin-bottom: 26px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 2px solid var(--accent);
+      border-radius: 10px;
+    }
+    .pt-notice[hidden] { display: none; }
+    .pt-notice-text { flex: 1; font-size: 13.5px; line-height: 1.5; color: var(--muted); }
+    .pt-notice-text b { color: var(--text); font-weight: 600; }
+    .pt-notice-text a { color: var(--text); text-decoration: underline; text-underline-offset: 2px; }
+    .pt-notice-play {
+      flex-shrink: 0;
+      padding: 8px 16px;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      background: var(--accent);
+      border: 0;
+      border-radius: 7px;
+      cursor: pointer;
+    }
+    .pt-notice-play:hover { filter: brightness(1.12); }
+    .pt-notice-close {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      color: var(--muted-2);
+      background: none;
+      border: 0;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .pt-notice-close:hover { color: var(--text); background: var(--surface-2); }
+    @media (max-width: 560px) {
+      .pt-notice { flex-wrap: wrap; }
+      .pt-notice-text { flex-basis: 100%; }
+    }
+
   </style>
 </head>
 <body>
