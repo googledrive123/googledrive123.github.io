@@ -3644,6 +3644,7 @@ async function bootCatalog() {
   buildCatBar();
   render();
   initRoute();
+  initPolytrackNotice();
 }
 // ───── PolyTrack update notice ─────
 // Appears once for people who have played PolyTrack here before, pointing them
@@ -3663,6 +3664,18 @@ function dismissPolytrackNotice() {
   const box = document.getElementById('ptNotice');
   if (box) box.hidden = true;
   try { localStorage.setItem(PT_NOTICE_KEY, 'dismissed'); } catch (e) {}
+}
+
+function initPolytrackNotice() {
+  const box = document.getElementById('ptNotice');
+  if (!box) return;
+
+  let dismissed = false;
+  try { dismissed = localStorage.getItem(PT_NOTICE_KEY) === 'dismissed'; } catch (e) {}
+  if (dismissed || !hasPlayed('polytrack') || !gamesById['polytrack']) return;
+
+  box.hidden = false;
+  document.getElementById('ptNoticeClose').addEventListener('click', dismissPolytrackNotice);
 }
 
 bootCatalog();
