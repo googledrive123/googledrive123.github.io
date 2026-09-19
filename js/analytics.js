@@ -1,6 +1,10 @@
 /*
  * GameVault analytics tracker
  * ---------------------------
+ * Writes are accepted only from this site's own origin. Forks of this repo
+ * ship a working anon key, so without that gate their traffic lands in this
+ * project. The origin column is filled server-side from the request header.
+ *
  * Records site usage into the Supabase table `analytics_events` (insert-only
  * for the anon key; reads happen through the secret-protected RPC used by
  * /analytics). Everything here is self-contained: it hooks the existing page
