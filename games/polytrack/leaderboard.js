@@ -328,10 +328,14 @@
       '  width: 22px; height: 22px; padding: 0; line-height: 22px;',
       '  font: inherit; font-size: 15px; text-align: center; cursor: pointer;',
       '  color: var(--text-color); background-color: var(--button-color);',
-      '  border: none; border-radius: 50%; }',
+      '  border: none; border-radius: 50%;',
+      // #ui is pointer-events: none so the canvas stays draggable through it.
+      // Every interactive element in the game opts back in; this must too.
+      '  pointer-events: auto; }',
       '.leaderboard-ui > .gv-info:hover { background-color: var(--button-hover-color); }',
       '.gv-dialog { position: absolute; left: 0; top: 0; z-index: 10;',
-      '  width: 100%; height: 100%; background-color: rgba(20, 20, 30, 0.5); }',
+      '  width: 100%; height: 100%; background-color: rgba(20, 20, 30, 0.5);',
+      '  pointer-events: auto; }',
       '.gv-dialog > div { position: absolute; left: calc(50% - 250px); top: 25%;',
       '  width: 500px; box-sizing: border-box; padding: 10px;',
       '  background-color: var(--surface-color); text-align: center; }',
