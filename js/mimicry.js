@@ -87,19 +87,29 @@
     } catch (e) { return null; }
   }
 
-  function faviconEl() {
-    var el = document.querySelector("link[rel~='icon']");
-    if (!el) {
-      el = document.createElement('link');
-      el.rel = 'icon';
-      document.head.appendChild(el);
+  /* Chrome only reads an icon link that sits in <head>, and it is far more
+     reliable about re-reading one when the element itself is replaced than
+     when its href is edited in place. Drop every icon link, add one fresh.
+
+     This used to just set .href on whatever link it found. index.html carried
+     22 stray byte order marks in front of its doctype, which made the parser
+     open <body> early and put the whole head — icon link included — inside it.
+     The title still applied, the favicon silently did not. The marks are gone;
+     rebuilding the link in <head> means a stray one cannot do it again. */
+  function setFavicon(href) {
+    var old = document.querySelectorAll("link[rel~='icon']");
+    for (var i = 0; i < old.length; i++) {
+      if (old[i].parentNode) old[i].parentNode.removeChild(old[i]);
     }
-    return el;
+    var el = document.createElement('link');
+    el.rel = 'icon';
+    el.href = href;
+    (document.head || document.documentElement).appendChild(el);
   }
 
   function paint(title, icon) {
     document.title = title || DEFAULT_TITLE;
-    faviconEl().href = icon || DEFAULT_ICON;
+    setFavicon(icon || DEFAULT_ICON);
   }
 
   function apply() {
