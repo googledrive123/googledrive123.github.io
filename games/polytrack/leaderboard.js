@@ -301,8 +301,8 @@
   // check a run. So the icon is replaced with a plain word.
   //
   // Verified means the time is tied to a signed-in account. Unverified means
-  // it is not, and nothing proves who set it. Done by rewriting the rendered
-  // rows, so the bundle stays untouched.
+  // it is not, and nothing proves who set it. Both are done by rewriting the
+  // rendered rows, so the bundle stays untouched.
 
   var STYLE_ID = 'gv-leaderboard-style';
 
@@ -316,6 +316,14 @@
       '.gv-verify.gv-yes { color: #5f5; }',
       '.gv-verify.gv-no  { color: #f55; }',
       '.leaderboard-ui > .container > button.main > .right > .verified-state > img { display: none; }',
+      // Mirrors .total-players, which sits in the opposite corner.
+      '.leaderboard-ui > .gv-info {',
+      '  margin: 10px; position: absolute; left: 0; top: 0; z-index: 3;',
+      '  width: 22px; height: 22px; padding: 0; line-height: 22px;',
+      '  font: inherit; font-size: 15px; text-align: center; cursor: pointer;',
+      '  color: var(--text-color); background-color: var(--button-color);',
+      '  border: none; border-radius: 50%; }',
+      '.leaderboard-ui > .gv-info:hover { background-color: var(--button-hover-color); }',
       '.gv-dialog { position: absolute; left: 0; top: 0; z-index: 10;',
       '  width: 100%; height: 100%; background-color: rgba(20, 20, 30, 0.5); }',
       '.gv-dialog > div { position: absolute; left: calc(50% - 250px); top: 25%;',
@@ -372,10 +380,23 @@
     panel.appendChild(wrap);
   }
 
+  function ensureInfoButton(panel) {
+    if (panel.querySelector('.gv-info')) return;
+    var btn = document.createElement('button');
+    btn.className = 'gv-info';
+    btn.type = 'button';
+    btn.textContent = 'i';
+    btn.title = 'What does Verified mean?';
+    btn.setAttribute('aria-label', 'What does Verified mean?');
+    btn.addEventListener('click', showInfo);
+    panel.appendChild(btn);
+  }
+
   function decorate() {
     var panel = document.querySelector('.leaderboard-ui');
     if (!panel) return;
     ensureStyles();
+    ensureInfoButton(panel);
     // Rows are rebuilt on every page change, so this re-runs rather than
     // assuming the ones seen first are the only ones.
     panel.querySelectorAll('.container > button.main').forEach(labelRow);
