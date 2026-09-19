@@ -306,6 +306,9 @@
   apply();
 
   function ready() {
+    // Again once the document is built: the first pass runs mid-head, before
+    // the rest of the page — and anything it adds — exists.
+    apply();
     initGoogleAnalytics();
     initSecurity();
     askOnce();
