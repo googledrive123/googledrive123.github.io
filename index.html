@@ -2213,6 +2213,16 @@
       <a href="/unblocker/">Browser <span class="tag-new">new</span></a>
       <a href="/settings/">Settings</a>
     </nav>
+    <!-- Newest item from NEWS, filled by renderNewest(). Sits under the hero
+         because the landing page has room there and nothing was using it. -->
+    <div class="newest" id="newest" hidden>
+      <span class="newest-kicker"><span class="news-dot"></span> newest</span>
+      <div class="newest-body">
+        <span class="newest-label" id="newestLabel"></span>
+        <span class="newest-meta" id="newestMeta"></span>
+      </div>
+      <button class="newest-more" id="newestMore" type="button">See full <span class="arrow">&rarr;</span></button>
+    </div>
   </div>
 </section>
 
