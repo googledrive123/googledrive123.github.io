@@ -316,7 +316,16 @@
       '.gv-verify.gv-yes { color: #5f5; }',
       '.gv-verify.gv-no  { color: #f55; }',
       '.leaderboard-ui > .container > button.main > .right > .verified-state > img { display: none; }',
-      // Mirrors .total-players, which sits in the opposite corner.
+      '.gv-dialog { position: absolute; left: 0; top: 0; z-index: 10;',
+      '  width: 100%; height: 100%; background-color: rgba(20, 20, 30, 0.5); }',
+      '.gv-dialog > div { position: absolute; left: calc(50% - 250px); top: 25%;',
+      '  width: 500px; box-sizing: border-box; padding: 10px;',
+      '  background-color: var(--surface-color); text-align: center; }',
+      '.gv-dialog > div > p { margin: 0 0 10px 0; padding: 10px; text-align: left;',
+      '  background-color: var(--surface-secondary-color); font-size: 19px;',
+      '  line-height: 1.25; color: var(--text-color); }',
+      '.gv-dialog b.gv-yes { color: #5f5; }',
+      '.gv-dialog b.gv-no { color: #f55; }'
     ].join('\n');
     document.head.appendChild(css);
   }
@@ -336,6 +345,31 @@
     state.title = verified
       ? 'Verified - set while signed in'
       : 'Unverified - set without signing in';
+  }
+
+  function showInfo() {
+    var panel = document.querySelector('.leaderboard-ui');
+    if (!panel || panel.querySelector('.gv-dialog')) return;
+    var wrap = document.createElement('div');
+    wrap.className = 'gv-dialog';
+    var box = document.createElement('div');
+    var text = document.createElement('p');
+    text.innerHTML =
+      '<b class="gv-yes">Verified</b> means the time was set while signed in to ' +
+      'GameVault, so it belongs to a known account.<br><br>' +
+      '<b class="gv-no">Unverified</b> means it was set without signing in. ' +
+      'The run still counts and still appears here, but nothing proves who set ' +
+      'it, so unverified times are ranked below verified ones.<br><br>' +
+      'Sign in before racing to have your times verified.';
+    var ok = document.createElement('button');
+    ok.className = 'button';
+    ok.textContent = 'Ok';
+    ok.addEventListener('click', function () { wrap.remove(); });
+    wrap.addEventListener('click', function (e) { if (e.target === wrap) wrap.remove(); });
+    box.appendChild(text);
+    box.appendChild(ok);
+    wrap.appendChild(box);
+    panel.appendChild(wrap);
   }
 
   function decorate() {
