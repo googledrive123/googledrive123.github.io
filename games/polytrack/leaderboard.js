@@ -293,4 +293,66 @@
   PatchedXHR.DONE = 4;
 
   window.XMLHttpRequest = PatchedXHR;
+
+  // ── Verified / unverified labelling ───────────────────────────────────
+  // The game has three states: Pending, Verified, Invalid. None of them mean
+  // "guest", and the icon it draws for a guest reads as Pending — which
+  // promises a verification that is never coming, because nothing here can
+  // check a run. So the icon is replaced with a plain word.
+  //
+  // Verified means the time is tied to a signed-in account. Unverified means
+  // it is not, and nothing proves who set it. Done by rewriting the rendered
+  // rows, so the bundle stays untouched.
+
+  var STYLE_ID = 'gv-leaderboard-style';
+
+  function ensureStyles() {
+    if (document.getElementById(STYLE_ID)) return;
+    var css = document.createElement('style');
+    css.id = STYLE_ID;
+    css.textContent = [
+      '.leaderboard-ui > .container > button.main > .left > p.gv-verify {',
+      '  padding: 0 12px 10px 12px; margin: -8px 0 0 0; font-size: 15px; }',
+      '.gv-verify.gv-yes { color: #5f5; }',
+      '.gv-verify.gv-no  { color: #f55; }',
+      '.leaderboard-ui > .container > button.main > .right > .verified-state > img { display: none; }',
+      // Mirrors .total-players, which sits in the opposite corner.
+    ].join('\n');
+    document.head.appendChild(css);
+  }
+
+  function labelRow(row) {
+    if (row.dataset.gvLabelled) return;
+    var state = row.querySelector('.verified-state');
+    var left = row.querySelector('.left');
+    if (!state || !left) return;
+    row.dataset.gvLabelled = '1';
+
+    var verified = state.classList.contains('verified');
+    var label = document.createElement('p');
+    label.className = 'gv-verify ' + (verified ? 'gv-yes' : 'gv-no');
+    label.textContent = verified ? 'Verified' : 'Unverified';
+    left.appendChild(label);
+    state.title = verified
+      ? 'Verified - set while signed in'
+      : 'Unverified - set without signing in';
+  }
+
+  function decorate() {
+    var panel = document.querySelector('.leaderboard-ui');
+    if (!panel) return;
+    ensureStyles();
+    // Rows are rebuilt on every page change, so this re-runs rather than
+    // assuming the ones seen first are the only ones.
+    panel.querySelectorAll('.container > button.main').forEach(labelRow);
+  }
+
+  function watch() {
+    new MutationObserver(decorate)
+      .observe(document.body, { childList: true, subtree: true });
+    decorate();
+  }
+
+  if (document.body) watch();
+  else document.addEventListener('DOMContentLoaded', watch);
 })();
