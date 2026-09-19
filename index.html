@@ -2332,6 +2332,18 @@
   </div>
 
   <main>
+    <!-- Shown only to returning PolyTrack players. See initPolytrackNotice(). -->
+    <div class="pt-notice" id="ptNotice" role="status" hidden>
+      <div class="pt-notice-text">
+        You&rsquo;ve played <b>PolyTrack</b> here before &mdash; the copy here is now
+        <b>v0.6.3</b>, with new tracks, cars and a rebuilt physics engine.
+      </div>
+      <button class="pt-notice-play" id="ptNoticePlay" type="button">Play Now</button>
+      <button class="pt-notice-close" id="ptNoticeClose" type="button" aria-label="Dismiss">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
     <!-- Continue (recently played) -->
     <div class="section" id="recentSection" style="display:none">
       <div class="section-head">
