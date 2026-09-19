@@ -3676,6 +3676,12 @@ function initPolytrackNotice() {
 
   box.hidden = false;
   document.getElementById('ptNoticeClose').addEventListener('click', dismissPolytrackNotice);
+  document.getElementById('ptNoticePlay').addEventListener('click', () => {
+    dismissPolytrackNotice();
+    // Read openGame off window at click time — the auth block replaces it with a
+    // playtime-tracking wrapper after this runs, and the wrapper is the one we want.
+    (window.openGame || openGame)(gamesById['polytrack']);
+  });
 }
 
 bootCatalog();
