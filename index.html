@@ -2763,6 +2763,17 @@ const NEWS = [
 
 const BADGE_LABELS = { new: 'NEW', added: 'ADDED', progress: 'IN PROGRESS', soon: 'COMING SOON' };
 
+// Mirrors the top of NEWS onto the landing page. Reads the same array the
+// modal renders, so adding an entry there updates both.
+function renderNewest() {
+  const box = document.getElementById('newest');
+  if (!box || !NEWS.length) return;
+  const item = NEWS[0];
+  document.getElementById('newestLabel').textContent = item.label;
+  document.getElementById('newestMeta').textContent = item.meta;
+  box.hidden = false;
+}
+
 function renderNews() {
   const list = document.getElementById('newsList');
   list.innerHTML = '';
