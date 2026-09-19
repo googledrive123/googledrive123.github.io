@@ -3645,6 +3645,20 @@ async function bootCatalog() {
   render();
   initRoute();
 }
+// ───── PolyTrack update notice ─────
+// Appears once for people who have played PolyTrack here before, pointing them
+// at the updated build. Dismissal is stored, not just hidden, so it does not
+// come back on the next visit. Playing from the button counts as seen too —
+// telling someone about an update they just opened is noise.
+const PT_NOTICE_KEY = 'gv.polytrack.notice';
+
+function hasPlayed(gameId) {
+  try {
+    const sessions = JSON.parse(localStorage.getItem('gv.sessions') || '[]');
+    return sessions.some(s => s && s.gameId === gameId);
+  } catch (e) { return false; }
+}
+
 bootCatalog();
 
 // ═══════════════════════════════════════════════════════
