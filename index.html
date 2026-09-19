@@ -2808,6 +2808,8 @@ const newsClose = document.getElementById('newsClose');
 function openNews() { newsOverlay.classList.add('show'); }
 function closeNews() { newsOverlay.classList.remove('show'); }
 document.getElementById('newsBtn').addEventListener('click', openNews);
+document.getElementById('newestMore').addEventListener('click', openNews);
+renderNewest();
 newsClose.addEventListener('click', closeNews);
 newsOverlay.addEventListener('click', (e) => { if (e.target === newsOverlay) closeNews(); });
 document.addEventListener('keydown', (e) => {
