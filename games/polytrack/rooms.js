@@ -115,6 +115,54 @@
     });
   }
 
+  // ── The realtime client ────────────────────────────────────
+  // Signalling needs a channel both players are listening on, which means the
+  // supabase-js SDK. The game's page does not load it, and most visits never
+  // open a room, so it is fetched the first time a room is actually created or
+  // joined rather than on every page load. Same pinned CDN build the site's
+  // own index.html uses.
+
+  var SDK_URL = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js';
+  var sdk = null;
+  var client = null;
+
+  function loadSdk() {
+    if (sdk !== null) return sdk;
+    sdk = new Promise(function (resolve, reject) {
+      if (window.supabase && window.supabase.createClient) {
+        resolve(window.supabase);
+        return;
+      }
+      var tag = document.createElement('script');
+      tag.src = SDK_URL;
+      tag.onload = function () {
+        if (window.supabase && window.supabase.createClient) resolve(window.supabase);
+        else reject(new Error('supabase-js loaded without createClient'));
+      };
+      tag.onerror = function () {
+        reject(new Error('could not load supabase-js'));
+      };
+      document.head.appendChild(tag);
+    });
+    return sdk;
+  }
+
+  // One client for the page. Sessions are deliberately not persisted: this
+  // client exists for realtime only, and writing auth state would tread on the
+  // session the site established, which leaderboard.js and account.js read.
+  function realtime() {
+    if (client !== null) return client;
+    client = loadSdk().then(function (lib) {
+      return lib.createClient(SUPA_URL, SUPA_KEY, {
+        auth: { persistSession: false, autoRefreshToken: false },
+        realtime: { params: { eventsPerSecond: 20 } }
+      });
+    });
+    return client;
+  }
+
+  // ── Sockets ───────────────────────────────────────────────
+
   function nativeSocket(url, protocols) {
     return protocols === undefined
       ? new NativeWebSocket(url)
