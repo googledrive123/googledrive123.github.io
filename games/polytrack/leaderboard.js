@@ -196,7 +196,7 @@
 
   var HANDLED = [
     'leaderboard', 'leaderboardUserEntry', 'user',
-    'recordings', 'verifyRecordings', 'iceServers'
+    'recordings', 'verifyRecordings', 'iceServers', 'trackOfTheWeek'
   ];
 
   // Asked at open(), before any body exists, so it must not touch the
@@ -217,7 +217,18 @@
     if (endpoint === 'verifyRecordings') {
       return Promise.resolve({ unverifiedRecordings: [], exhaustive: true, estimatedRemaining: 0 });
     }
-    if (endpoint === 'iceServers') return Promise.resolve([]);
+    // An empty list means WebRTC never gets off the ground, which is what
+    // kept multiplayer dead here. rooms.js owns the real list.
+    // Track of the Week is served to official builds only, so this request
+    // went out to kodub every session and came back refused. The game has a
+    // shape for "there is no track this week", and it takes it quietly.
+    if (endpoint === 'trackOfTheWeek') {
+      return Promise.resolve({ serverTime: new Date().toISOString(), current: null });
+    }
+    if (endpoint === 'iceServers') {
+      var rooms = window.GV && window.GV.rooms;
+      return rooms ? rooms.iceServers() : Promise.resolve([]);
+    }
     return null; // Not ours — caller falls through to the real network.
   }
 

@@ -22,3 +22,17 @@ Conditions this copy is kept in compliance with:
   the official game pages.
 
 Kodub.com and CrazyGames reserve the right to request removal.
+
+## What is added here
+
+The game bundle is byte-for-byte what Kodub shipped. Everything this site adds
+sits beside it and stands in front of a browser API instead:
+
+- `leaderboard.js` - answers the game's leaderboard requests from Supabase.
+- `rooms.js` - signalling for the game's own multiplayer, so rooms and invite
+  codes work without kodub's servers. Races themselves run peer to peer.
+- `scene.js` - a handle on the 3D scene, for room options about what is drawn.
+- `rooms_ui.js` - the room lobby: track lists, round length, car visibility.
+- `leaderboard.sql`, `rooms.sql` - the Supabase side of both.
+
+No request reaches vps.kodub.com.
