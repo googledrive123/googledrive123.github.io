@@ -259,11 +259,52 @@
     return message !== null && typeof message === 'object' ? message : null;
   }
 
+  // The host's key is the secret that proves a later call belongs to the same
+  // room. The game has none on its first createInvite and sends back whatever
+  // it was given on every one after that, so the first call is where it is
+  // minted.
+  function newKey() {
+    var bytes = new Uint8Array(16);
+    window.crypto.getRandomValues(bytes);
+    var out = '';
+    for (var i = 0; i < bytes.length; i++) out += (bytes[i] + 256).toString(16).slice(1);
+    return out;
+  }
+
   function hostRole(socket) {
+    var room = { code: null, key: null, nickname: null };
+
+    // censoredNickname is assigned straight onto the host's player record, so
+    // it cannot be left blank. The game sends its nickname only while it has
+    // none of its own, which is the first call, so remembering it there covers
+    // every renewal after.
+    function createInvite(message) {
+      if (typeof message.nickname === 'string' && message.nickname !== '') {
+        room.nickname = message.nickname;
+      }
+      room.key = typeof message.key === 'string' && message.key !== '' ? message.key : newKey();
+
+      rpc('polytrack_room_create', { p_key: room.key, p_name: room.nickname })
+        .then(function (created) {
+          room.code = created.code;
+          socket.deliver({
+            type: 'createInvite',
+            inviteCode: created.code,
+            key: room.key,
+            timeoutMilliseconds: created.timeout_milliseconds,
+            censoredNickname: room.nickname || 'Player'
+          });
+        })
+        .catch(function (error) {
+          console.error('Failed to open a room:', error);
+          socket.deliver({ type: 'error', error: 'UnknownServerError' });
+        });
+    }
+
     socket.send = function (raw) {
       var message = parse(raw);
       if (message === null) return;
-      socket.deliver({ type: 'error', error: 'UnknownServerError' });
+      if (message.type === 'createInvite') createInvite(message);
     };
   }
 
