@@ -797,6 +797,24 @@
     attach();
   }
 
+  // A handle on what the lobby currently believes. Rooms fail in ways that are
+  // invisible from the outside, where everything connects and one person's
+  // screen quietly disagrees with everyone else's, and the only way to tell
+  // which is from the console of the machine that is wrong.
+  window.GV = window.GV || {};
+  window.GV.roomsUi = {
+    state: function () {
+      return {
+        at: at,
+        roundEndsAt: roundEndsAt,
+        playerPicked: playerPicked,
+        active: active,
+        settings: settings,
+        effective: effective()
+      };
+    }
+  };
+
   if (document.body) start();
   else document.addEventListener('DOMContentLoaded', start);
 }());
