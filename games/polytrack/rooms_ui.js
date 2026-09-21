@@ -160,6 +160,34 @@
     '  padding: 4px 14px;',
     '  font-size: 22px;',
     '}',
+    // The stock panel was built for three short blocks and is absolutely
+    // positioned, so it just grows off the bottom of the screen. With a track
+    // list on it the Back and Host buttons ended up past the viewport, which
+    // means a host who cannot start their own room.
+    //
+    // The box is capped to the window and scrolls, and the buttons are stuck
+    // to its bottom edge so they are always reachable without hunting for
+    // them. The heading stays put for the same reason.
+    '.multiplayer-ui > .host.gv-fitted {',
+    '  top: 6vh;',
+    '  max-height: 88vh;',
+    '}',
+    '.multiplayer-ui > .host.gv-fitted > .main-box {',
+    '  max-height: 88vh;',
+    '  overflow-y: auto;',
+    '  overscroll-behavior: contain;',
+    '}',
+    '.multiplayer-ui > .host.gv-fitted > .main-box > h2 {',
+    '  position: sticky;',
+    '  top: 0;',
+    '  z-index: 2;',
+    '}',
+    '.multiplayer-ui > .host.gv-fitted > .main-box > .buttons {',
+    '  position: sticky;',
+    '  bottom: 0;',
+    '  z-index: 2;',
+    '  background-color: var(--surface-secondary-color);',
+    '}',
     '.gv-round {',
     '  margin: 4px 0 0 0;',
     '  color: var(--text-color);',
@@ -603,6 +631,8 @@
   function fillHostPanel(root) {
     var box = root.querySelector(':scope > .host > .main-box');
     if (!box) return;
+    root.querySelector(':scope > .host').classList.add('gv-fitted');
+
     var thumbnail = box.querySelector(':scope > .track-button .thumbnail');
     if (thumbnail) chosenThumbnail = thumbnail.getAttribute('src');
 
