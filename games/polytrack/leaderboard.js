@@ -420,9 +420,8 @@
       '.leaderboard-ui > .container > button.main > .left > p.gv-verify.gv-no { color: #f55; }',
       '.leaderboard-ui > .container > button.main > .right > .verified-state > img { display: none; }',
       // Sits between the name and the game's own "(You)", quiet enough to
-      // read as an aside rather than as a second name.
-      // The game's own "(You)" carries a -16px left margin, so the gap on the
-      // right has to pay for that as well as itself.
+      // read as an aside rather than as a second name. That "(You)" carries a
+      // -16px left margin, so the gap on the right pays for it too.
       '.leaderboard-ui .gv-realname {',
       '  margin-left: 8px; margin-right: 22px; font-size: 19px;',
       '  opacity: 0.55; white-space: nowrap; }',
