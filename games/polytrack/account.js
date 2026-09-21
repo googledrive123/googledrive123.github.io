@@ -65,7 +65,7 @@
       // the same few pixels. That block is hidden whenever the menu moves off
       // its front screen, and the strip goes with it.
       '.menu-ui > .info > .gv-whoami {',
-      '  display: block; margin: 0 auto 4px auto; padding: 5px;',
+      '  display: block; margin: 0 auto 4px auto; padding: 2px 5px;',
       '  width: fit-content; border: none; background: none;',
       '  font: inherit; font-size: 24px; color: var(--text-color);',
       '  cursor: pointer; pointer-events: auto; }',
