@@ -260,6 +260,60 @@
     menu.appendChild(panel);
   }
 
+  // ── Making room ───────────────────────────────────────────────────────
+  // PolyTrack's menu is 800 logical pixels tall at its shortest, and at that
+  // size its own footer already sits on top of the button tiles before
+  // anything of ours is added. A 1200x750 Chromebook lands exactly there, so
+  // this is the common case rather than the edge one.
+  //
+  // The logo is 280 of those 800 pixels. It gives up whatever the strip needs
+  // and nothing more, so a tall window still renders the menu the game ships.
+
+  var LOGO_MARGIN = 80;    // the game's own values, restored when there is room
+  var LOGO_HEIGHT = 200;
+  var LOGO_MIN_MARGIN = 8;
+  var LOGO_MIN_HEIGHT = 140;
+  var CLEARANCE = 10;
+
+  // Rects are in screen pixels and the game scales the whole interface down on
+  // a small window, so they have to be divided back into the pixels the
+  // stylesheet is written in.
+  function uiScale() {
+    var raw = getComputedStyle(document.documentElement)
+      .getPropertyValue('--ui-scale-factor');
+    var n = parseFloat(raw);
+    return n > 0 ? n : 1;
+  }
+
+  function fitMenu(menu) {
+    var logo = menu.querySelector(':scope > .logo');
+    var tile = menu.querySelector(':scope > .main-buttons-container .button-image');
+    var info = menu.querySelector(':scope > .info');
+    if (!logo || !tile || !info) return;
+
+    logo.style.marginTop = '';
+    logo.style.height = '';
+
+    var tileBox = tile.getBoundingClientRect();
+    var infoBox = info.getBoundingClientRect();
+    // Mid-transition, or on a screen the menu is not currently showing.
+    if (!tileBox.height || !infoBox.height) return;
+
+    var scale = uiScale();
+    var over = (tileBox.bottom / scale) + CLEARANCE - (infoBox.top / scale);
+    if (over <= 0) return;
+
+    // The button container grows into whatever the logo gives up and then
+    // re-centres its row inside itself, so the tiles only rise by half.
+    var give = Math.ceil(over * 2);
+    var margin = Math.max(LOGO_MIN_MARGIN, LOGO_MARGIN - give);
+    give -= LOGO_MARGIN - margin;
+    var height = Math.max(LOGO_MIN_HEIGHT, LOGO_HEIGHT - give);
+
+    logo.style.marginTop = margin + 'px';
+    logo.style.height = height + 'px';
+  }
+
   // ── Wiring ────────────────────────────────────────────────────────────
   // The menu is rebuilt whenever the game returns to it, so the strip is put
   // back rather than assumed to have survived.
