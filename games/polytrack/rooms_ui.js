@@ -103,9 +103,12 @@
   var STYLE_ID = 'gv-rooms-style';
 
   var STYLE = [
+    // Tighter than the game's own blocks. Three of these are being added to a
+    // panel built for none, and every pixel saved is a pixel nobody has to
+    // scroll past to reach the Host button.
     '.gv-room-option {',
-    '  margin: 10px;',
-    '  padding: 20px;',
+    '  margin: 8px 10px;',
+    '  padding: 14px;',
     '  box-sizing: border-box;',
     '  width: calc(100% - 10px * 2);',
     '  background-color: var(--surface-color);',
@@ -123,33 +126,40 @@
     '  background-color: var(--button-hover-color);',
     '}',
     '.gv-room-option > .info {',
-    '  margin: 10px 0 0 0;',
+    '  margin: 8px 0 0 0;',
     '  padding: 0;',
-    '  font-size: 20px;',
+    '  font-size: 18px;',
     '  color: var(--text-color);',
+    '}',
+    // The list scrolls inside its own block rather than stretching the panel.
+    // A ten track circuit should not push everything else off the screen.
+    '.gv-track-list > .rows {',
+    '  max-height: 184px;',
+    '  overflow-y: auto;',
+    '  overscroll-behavior: contain;',
     '}',
     '.gv-track-row {',
     '  display: flex;',
     '  align-items: center;',
-    '  margin: 0 0 6px 0;',
+    '  margin: 0 0 4px 0;',
     '  background-color: var(--button-color);',
     '  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);',
     '}',
     '.gv-track-row > .position {',
-    '  padding: 0 12px;',
-    '  font-size: 22px;',
+    '  padding: 0 10px;',
+    '  font-size: 20px;',
     '  color: var(--text-color);',
     '  opacity: 0.6;',
     '}',
     '.gv-track-row > .thumbnail {',
-    '  width: 48px;',
-    '  height: 48px;',
+    '  width: 38px;',
+    '  height: 38px;',
     '  image-rendering: pixelated;',
     '}',
     '.gv-track-row > .name {',
     '  flex: 1;',
-    '  padding: 0 12px;',
-    '  font-size: 22px;',
+    '  padding: 0 10px;',
+    '  font-size: 20px;',
     '  color: var(--text-color);',
     '  white-space: nowrap;',
     '  overflow: hidden;',
@@ -157,8 +167,42 @@
     '}',
     '.gv-track-row > .remove {',
     '  margin: 0;',
-    '  padding: 4px 14px;',
-    '  font-size: 22px;',
+    '  padding: 2px 12px;',
+    '  font-size: 20px;',
+    '}',
+    // The stock panel was built for three short blocks and is absolutely
+    // positioned, so it just grows off the bottom of the screen. With a track
+    // list on it the Back and Host buttons ended up past the viewport, which
+    // means a host who cannot start their own room.
+    //
+    // The box is capped to the window and scrolls, and the buttons are stuck
+    // to its bottom edge so they stay reachable. The heading stays put too, so
+    // it is always clear which panel is being scrolled.
+    //
+    // Keyed off #ui rather than a class of our own. An id outranks the
+    // bundle's selectors whichever order the stylesheets land in, and it means
+    // nothing here writes to the DOM: adding a class to a live panel wakes the
+    // observer that called us, and that fed back into itself hard enough to
+    // lock the page.
+    '#ui .multiplayer-ui > .host {',
+    '  top: 6vh;',
+    '  max-height: 88vh;',
+    '}',
+    '#ui .multiplayer-ui > .host > .main-box {',
+    '  max-height: 88vh;',
+    '  overflow-y: auto;',
+    '  overscroll-behavior: contain;',
+    '}',
+    '#ui .multiplayer-ui > .host > .main-box > h2 {',
+    '  position: sticky;',
+    '  top: 0;',
+    '  z-index: 2;',
+    '}',
+    '#ui .multiplayer-ui > .host > .main-box > .buttons {',
+    '  position: sticky;',
+    '  bottom: 0;',
+    '  z-index: 2;',
+    '  background-color: var(--surface-secondary-color);',
     '}',
     '.gv-round {',
     '  margin: 4px 0 0 0;',
@@ -603,6 +647,7 @@
   function fillHostPanel(root) {
     var box = root.querySelector(':scope > .host > .main-box');
     if (!box) return;
+
     var thumbnail = box.querySelector(':scope > .track-button .thumbnail');
     if (thumbnail) chosenThumbnail = thumbnail.getAttribute('src');
 
