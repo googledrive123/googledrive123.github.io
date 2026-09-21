@@ -82,3 +82,32 @@
 //     inbound message, so an idle room needs traffic to stay open.
 //   - iceServers arrives on the host through joinInvite, so the list has to be
 //     supplied per join, not only through the iceServers endpoint.
+
+(function () {
+  'use strict';
+
+  var NativeWebSocket = window.WebSocket;
+
+  function nativeSocket(url, protocols) {
+    return protocols === undefined
+      ? new NativeWebSocket(url)
+      : new NativeWebSocket(url, protocols);
+  }
+
+  // ── The stand-in ──────────────────────────────────────────────────────
+  // Returning a different object from a constructor replaces the instance, so
+  // a passed-through call hands back a genuine WebSocket. The game cannot
+  // tell the difference, and a socket that is none of our business never sees
+  // this file again. Routing for the two multiplayer paths lands next.
+
+  function PatchedWebSocket(url, protocols) {
+    return nativeSocket(url, protocols);
+  }
+
+  PatchedWebSocket.CONNECTING = 0;
+  PatchedWebSocket.OPEN = 1;
+  PatchedWebSocket.CLOSING = 2;
+  PatchedWebSocket.CLOSED = 3;
+
+  window.WebSocket = PatchedWebSocket;
+}());
