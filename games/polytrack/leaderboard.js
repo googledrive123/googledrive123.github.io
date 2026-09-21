@@ -371,6 +371,11 @@
       '.leaderboard-ui > .container > button.main > .left > p.gv-verify.gv-yes { color: #5f5; }',
       '.leaderboard-ui > .container > button.main > .left > p.gv-verify.gv-no { color: #f55; }',
       '.leaderboard-ui > .container > button.main > .right > .verified-state > img { display: none; }',
+      // Sits between the name and the game's own "(You)", quiet enough to
+      // read as an aside rather than as a second name.
+      '.leaderboard-ui .gv-realname {',
+      '  margin-left: 8px; font-size: 19px; opacity: 0.55;',
+      '  white-space: nowrap; }',
       // Mirrors .total-players, which sits in the opposite corner.
       '.leaderboard-ui > .gv-info {',
       '  margin: 10px; position: absolute; left: 0; top: 0; z-index: 3;',
