@@ -48,3 +48,62 @@
       if (rows && rows[0] && rows[0].username) gv.setAccountName(rows[0].username);
     }).catch(function () {});
   }
+
+  // ── Styles ────────────────────────────────────────────────────────────
+  // Built out of the game's own custom properties so the panel is the same
+  // furniture as the rest of the menu rather than a web page bolted onto it.
+
+  var STYLE_ID = 'gv-account-style';
+
+  function ensureStyles() {
+    if (document.getElementById(STYLE_ID)) return;
+    var css = document.createElement('style');
+    css.id = STYLE_ID;
+    css.textContent = [
+      // The button row is a flex row that centres its 200px buttons, so the
+      // middle of the container is the middle of a button and 116px below it
+      // clears the row whatever height the menu happens to be.
+      '.menu-ui > .main-buttons-container { position: relative; }',
+      '.gv-whoami {',
+      '  position: absolute; left: 0; right: 0; top: calc(50% + 116px);',
+      '  margin: 0; padding: 6px 14px; border: none; background: none;',
+      '  font: inherit; font-size: 24px; color: var(--text-color);',
+      '  text-align: center; cursor: pointer; pointer-events: auto; }',
+      '.gv-whoami > .gv-who-label { opacity: 0.5; }',
+      '.gv-whoami > .gv-who-name { margin-left: 8px; }',
+      '.gv-whoami:hover > .gv-who-name { text-decoration: underline; }',
+
+      '.gv-panel {',
+      '  position: absolute; left: 0; top: 0; z-index: 3;',
+      '  width: 100%; height: 100%; display: flex;',
+      '  align-items: center; justify-content: center;',
+      '  background-color: rgba(20, 20, 30, 0.6); pointer-events: auto; }',
+      '.gv-panel > .gv-box {',
+      '  width: 700px; max-width: 92%; display: flex; flex-direction: column;',
+      '  text-align: left; background-color: var(--surface-color); }',
+      '.gv-panel h2 {',
+      '  margin: 10px; padding: 4px; font-weight: normal; font-size: 30px;',
+      '  color: var(--text-color); }',
+      '.gv-panel > .gv-box > .gv-body {',
+      '  margin: 0; padding: 4px 0;',
+      '  background-color: var(--surface-secondary-color); }',
+      '.gv-panel .gv-setting { margin: 10px; display: flex; align-items: center; }',
+      '.gv-panel .gv-setting > p {',
+      '  margin: 0; padding: 4px; flex-grow: 1; font-size: 24px;',
+      '  color: var(--text-color); }',
+      '.gv-panel .gv-note {',
+      '  margin: 0 14px 10px 14px; padding: 0; font-size: 18px;',
+      '  line-height: 1.3; color: var(--text-color); opacity: 0.5; }',
+      '.gv-panel input.gv-name {',
+      '  margin: 0; padding: 8px 12px; width: 320px; max-width: 50%;',
+      '  box-sizing: border-box; border: none; font: inherit; font-size: 24px;',
+      '  color: var(--text-color); background-color: var(--button-color);',
+      '  pointer-events: auto; }',
+      '.gv-panel input.gv-name:disabled { color: var(--text-disabled-color); }',
+      '.gv-panel .gv-toggle > button { font-size: 24px; }',
+      '.gv-panel .gv-toggle > button.selected {',
+      '  background-color: var(--button-hover-color); }',
+      '.gv-panel > .gv-box > .gv-foot { margin: 10px; }'
+    ].join('\n');
+    document.head.appendChild(css);
+  }
