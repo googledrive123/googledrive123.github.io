@@ -289,23 +289,26 @@
     return n > 0 ? n : 1;
   }
 
+  // False means the menu could not be measured yet, not that it needed
+  // nothing. The caller uses that to decide whether to try again.
   function fitMenu(menu) {
     var logo = menu.querySelector(':scope > .logo');
     var tile = menu.querySelector(':scope > .main-buttons-container .button-image');
     var info = menu.querySelector(':scope > .info');
-    if (!logo || !tile || !info) return;
+    if (!logo || !tile || !info) return false;
 
     logo.style.marginTop = '';
     logo.style.height = '';
 
     var tileBox = tile.getBoundingClientRect();
     var infoBox = info.getBoundingClientRect();
-    // Mid-transition, or on a screen the menu is not currently showing.
-    if (!tileBox.height || !infoBox.height) return;
+    // Mid-transition, or on a screen the menu is not currently showing. The
+    // front page flickers through several of these while the game starts.
+    if (!tileBox.height || !infoBox.height) return false;
 
     var scale = uiScale();
     var over = (tileBox.bottom / scale) + CLEARANCE - (infoBox.top / scale);
-    if (over <= 0) return;
+    if (over <= 0) return true;
 
     // The button container grows into whatever the logo gives up and then
     // re-centres its row inside itself, so the tiles only rise by half.
@@ -316,6 +319,7 @@
 
     logo.style.marginTop = margin + 'px';
     logo.style.height = height + 'px';
+    return true;
   }
 
   // The strip is often added while the menu is still behind a loading screen
@@ -331,9 +335,9 @@
     if (!logo || !info || info.offsetParent === null) return;
     var key = menu.offsetWidth + 'x' + menu.offsetHeight;
     if (logo === fittedLogo && key === fittedKey) return;
+    if (!fitMenu(menu)) return;
     fittedLogo = logo;
     fittedKey = key;
-    fitMenu(menu);
   }
 
   // ── Wiring ────────────────────────────────────────────────────────────
