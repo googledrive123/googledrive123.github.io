@@ -216,3 +216,49 @@ begin
   return coalesce(v_value, '[]'::jsonb);
 end;
 $function$;
+
+
+-- Anyone can read the anon key out of this repo and the origin header can be
+-- forged by anything that is not a browser, so the ice-servers function is
+-- reachable by a determined stranger. Relay traffic is billed past the free
+-- tier, which makes a scraped credential worth something.
+--
+-- This caps how many credentials one address can be issued per hour. A player
+-- needs one per room, and the page holds it for half an hour, so the ceiling
+-- is far above any honest use and well below anything worth farming.
+create table if not exists public.polytrack_ice_grants (
+  ip text not null,
+  window_start timestamptz not null,
+  grants integer not null default 0,
+  primary key (ip, window_start)
+);
+
+alter table public.polytrack_ice_grants enable row level security;
+
+
+-- Called by the ice-servers edge function with the service role, never by the
+-- browser. Counting a request the caller made against themselves is the worst
+-- anyone can do by calling it directly.
+create or replace function public.polytrack_ice_allow(
+  p_ip text,
+  p_limit integer default 40
+) returns boolean
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_window timestamptz := date_trunc('hour', now());
+  v_count integer;
+begin
+  delete from polytrack_ice_grants where window_start < now() - interval '3 hours';
+
+  insert into polytrack_ice_grants (ip, window_start, grants)
+  values (coalesce(nullif(btrim(p_ip), ''), 'unknown'), v_window, 1)
+  on conflict (ip, window_start) do update
+    set grants = polytrack_ice_grants.grants + 1
+  returning grants into v_count;
+
+  return v_count <= p_limit;
+end;
+$function$;
