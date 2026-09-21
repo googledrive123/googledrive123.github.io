@@ -108,6 +108,7 @@
     return choiceBlock('Other Cars', OTHER_CARS, settings.otherCars, function (value) {
       settings.otherCars = value;
       write();
+      applyNow();
     });
   }
 
@@ -117,6 +118,70 @@
     var buttons = box.querySelector(':scope > .buttons');
     if (!buttons) return;
     box.insertBefore(otherCarsBlock(), buttons);
+  }
+
+  // ── Applying it on screen ───────────────────────────────────
+  // The game rebuilds cars as players join, leave and reset, and it has no
+  // idea anyone else has an opinion about them, so the setting is reapplied on
+  // a timer rather than set once. The work is a handful of property writes
+  // over at most a few cars, far below anything that would show up in a frame.
+  //
+  // Materials are cloned the first time a car is touched. PolyTrack shares
+  // them between cars, so fading one without a clone would fade the one being
+  // driven along with it.
+
+  var TRANSLUCENT = 0.35;
+  var applyTimer = null;
+
+  function meshes(root, fn) {
+    root.traverse(function (object) { if (object.isMesh === true) fn(object); });
+  }
+
+  function ownMaterials(mesh) {
+    if (mesh.userData.gvOwnMaterial !== true) {
+      mesh.material = Array.isArray(mesh.material)
+        ? mesh.material.map(function (material) { return material.clone(); })
+        : mesh.material.clone();
+      mesh.userData.gvOwnMaterial = true;
+    }
+    return Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+  }
+
+  function paint(car, mode) {
+    car.visible = mode !== 'hidden';
+    if (mode === 'hidden') return;
+
+    var opacity = mode === 'translucent' ? TRANSLUCENT : 1;
+    meshes(car, function (mesh) {
+      // A car left alone has never been cloned, and solid is what it already
+      // is, so there is nothing to do and no clone worth making.
+      if (opacity === 1 && mesh.userData.gvOwnMaterial !== true) return;
+      ownMaterials(mesh).forEach(function (material) {
+        material.transparent = opacity < 1;
+        material.opacity = opacity;
+        material.depthWrite = opacity >= 1;
+      });
+    });
+  }
+
+  function applyNow() {
+    var scene = window.GV && window.GV.scene;
+    if (!scene || scene.current() === null) return;
+    var others = scene.otherCars();
+    for (var i = 0; i < others.length; i++) paint(others[i], settings.otherCars);
+  }
+
+  function startApplying() {
+    if (applyTimer !== null) return;
+    applyTimer = setInterval(applyNow, 500);
+  }
+
+  function stopApplying() {
+    if (applyTimer === null) return;
+    clearInterval(applyTimer);
+    applyTimer = null;
+    settings.otherCars = 'solid';
+    applyNow();
   }
 
   // ── Wiring ────────────────────────────────────────────────────────────
@@ -134,6 +199,14 @@
   }
 
   function start() {
+    var rooms = window.GV && window.GV.rooms;
+    if (rooms) {
+      rooms.onState(function (state) {
+        if (state.code === null) stopApplying();
+        else startApplying();
+      });
+    }
+
     new MutationObserver(attach).observe(document.body, {
       childList: true, subtree: true, attributes: true, attributeFilter: ['class']
     });
