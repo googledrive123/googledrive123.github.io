@@ -141,3 +141,65 @@
     var strips = document.querySelectorAll('.gv-whoami');
     for (var i = 0; i < strips.length; i++) paintStrip(strips[i]);
   }
+
+  // ── The settings page ─────────────────────────────────────────────────
+
+  function setting(labelText, control) {
+    var row = document.createElement('div');
+    row.className = 'gv-setting';
+    var label = document.createElement('p');
+    label.textContent = labelText;
+    row.appendChild(label);
+    row.appendChild(control);
+    return row;
+  }
+
+  function note(text) {
+    var p = document.createElement('p');
+    p.className = 'gv-note';
+    p.textContent = text;
+    return p;
+  }
+
+  function nameField(gv) {
+    var input = document.createElement('input');
+    input.className = 'gv-name';
+    input.type = 'text';
+    input.maxLength = 32;
+    input.spellcheck = false;
+    input.autocomplete = 'off';
+    input.value = gv.realName();
+    // A signed-in player already has a name the whole site knows them by, and
+    // two places to change it is one too many.
+    input.disabled = signedIn();
+    input.addEventListener('input', function () {
+      gv.setChosenName(input.value);
+    });
+    // An empty field is not a name. Falling back to the generated one is
+    // better than letting somebody race as nothing at all.
+    input.addEventListener('blur', function () {
+      if (!input.value.trim()) input.value = gv.realName();
+    });
+    return input;
+  }
+
+  function anonymousToggle(gv) {
+    var wrap = document.createElement('div');
+    wrap.className = 'gv-toggle';
+    var off = document.createElement('button');
+    var on = document.createElement('button');
+    off.className = 'button';
+    on.className = 'button';
+    off.textContent = 'Off';
+    on.textContent = 'On';
+    function paint() {
+      off.classList.toggle('selected', !gv.anonymous());
+      on.classList.toggle('selected', gv.anonymous());
+    }
+    off.addEventListener('click', function () { gv.setAnonymous(false); paint(); });
+    on.addEventListener('click', function () { gv.setAnonymous(true); paint(); });
+    paint();
+    wrap.appendChild(off);
+    wrap.appendChild(on);
+    return wrap;
+  }
