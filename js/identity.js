@@ -57,3 +57,37 @@
         + ';path=/;max-age=' + COOKIE_MAX_AGE + ';samesite=lax';
     } catch (e) {}
   }
+
+  /* IndexedDB is the slow store and the only asynchronous one, so nothing
+     waits on it to get an id. It is read and repaired in the background and
+     callers that care - the leaderboard, which must not file a run under the
+     wrong name - wait on ready first. */
+  function openDb() {
+    return new Promise(function (resolve) {
+      var request;
+      try { request = indexedDB.open(DB_NAME, 1); } catch (e) { return resolve(null); }
+      if (!request) return resolve(null);
+      request.onupgradeneeded = function () {
+        try { request.result.createObjectStore(DB_STORE); } catch (e) {}
+      };
+      request.onsuccess = function () { resolve(request.result || null); };
+      request.onerror = function () { resolve(null); };
+      request.onblocked = function () { resolve(null); };
+    });
+  }
+
+  function readDb(db) {
+    return new Promise(function (resolve) {
+      if (!db) return resolve(null);
+      var request;
+      try { request = db.transaction(DB_STORE, 'readonly').objectStore(DB_STORE).get(DB_RECORD); }
+      catch (e) { return resolve(null); }
+      request.onsuccess = function () { resolve(request.result || null); };
+      request.onerror = function () { resolve(null); };
+    });
+  }
+
+  function writeDb(db, id) {
+    try { db.transaction(DB_STORE, 'readwrite').objectStore(DB_STORE).put(id, DB_RECORD); }
+    catch (e) {}
+  }
