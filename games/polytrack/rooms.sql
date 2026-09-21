@@ -165,3 +165,54 @@ begin
     and host_key = p_key;
 end;
 $function$;
+
+
+-- WebRTC needs a list of STUN and TURN servers before it will try to connect.
+-- STUN is free and public; a TURN relay is what carries the connection when a
+-- network blocks direct traffic, which school and office networks routinely
+-- do, and a relay comes with credentials.
+--
+-- This repository is public, so those credentials cannot live in it: anyone
+-- reading the source would be spending someone else's relay quota. They live
+-- in a row here instead, handed out per request behind the origin gate, and
+-- the game never learns where they came from.
+--
+-- Seeded with public STUN only. To turn a relay on, paste the credentials from
+-- Metered or Cloudflare into the row:
+--
+--   update public.polytrack_settings set value = '[
+--     {"urls": ["stun:stun.l.google.com:19302"]},
+--     {"urls": ["turn:...:80", "turns:...:443?transport=tcp"],
+--      "username": "...", "credential": "..."}
+--   ]'::jsonb where key = 'ice_servers';
+create table if not exists public.polytrack_settings (
+  key text primary key,
+  value jsonb not null
+);
+
+alter table public.polytrack_settings enable row level security;
+
+insert into public.polytrack_settings (key, value)
+values ('ice_servers', '[
+  {"urls": ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"]}
+]'::jsonb)
+on conflict (key) do nothing;
+
+
+create or replace function public.polytrack_ice_servers()
+returns jsonb
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_value jsonb;
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'ice servers are not served to this origin';
+  end if;
+
+  select value into v_value from polytrack_settings where key = 'ice_servers';
+  return coalesce(v_value, '[]'::jsonb);
+end;
+$function$;
