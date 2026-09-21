@@ -37,7 +37,8 @@
   var STORE_KEY = 'gv.rooms.settings';
 
   var DEFAULTS = {
-    otherCars: 'translucent'
+    otherCars: 'translucent',
+    playlist: []
   };
 
   // What the host has chosen, kept between sessions. In a room this is only
@@ -114,6 +115,44 @@
     '  padding: 0;',
     '  font-size: 20px;',
     '  color: var(--text-color);',
+    '}',
+    '.gv-track-row {',
+    '  display: flex;',
+    '  align-items: center;',
+    '  margin: 0 0 6px 0;',
+    '  background-color: var(--button-color);',
+    '  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);',
+    '}',
+    '.gv-track-row > .position {',
+    '  padding: 0 12px;',
+    '  font-size: 22px;',
+    '  color: var(--text-color);',
+    '  opacity: 0.6;',
+    '}',
+    '.gv-track-row > .thumbnail {',
+    '  width: 48px;',
+    '  height: 48px;',
+    '  image-rendering: pixelated;',
+    '}',
+    '.gv-track-row > .name {',
+    '  flex: 1;',
+    '  padding: 0 12px;',
+    '  font-size: 22px;',
+    '  color: var(--text-color);',
+    '  white-space: nowrap;',
+    '  overflow: hidden;',
+    '  text-overflow: ellipsis;',
+    '}',
+    '.gv-track-row > .remove {',
+    '  margin: 0;',
+    '  padding: 4px 14px;',
+    '  font-size: 22px;',
+    '}',
+    '.gv-track-empty {',
+    '  margin: 0 0 6px 0;',
+    '  font-size: 20px;',
+    '  color: var(--text-color);',
+    '  opacity: 0.6;',
     '}'
   ].join('\n');
 
@@ -171,6 +210,144 @@
     });
   }
 
+  // ── The track list ───────────────────────────────────────────
+  // A room plays a sequence of tracks rather than one. The game has no idea
+  // about that, so the list lives here and the game is walked through it one
+  // track at a time, the same way a person would.
+  //
+  // Adding one opens the game's own track picker rather than building a second
+  // one. Whatever the host clicks in there is both what the game selects and
+  // what gets appended, so the two can never disagree.
+  //
+  // A track is remembered by its thumbnail path, which is unique per track and
+  // is also what makes it findable in the picker later.
+
+  function trackPicker() {
+    // The game keeps two of these, one for Play and one for hosting, and the
+    // idle one stays in the document. Only the visible one is the live one.
+    return document.querySelector('.track-selection-ui:not(.hidden)');
+  }
+
+  function cardFor(picker, thumbnail) {
+    var cards = picker.querySelectorAll('.track');
+    for (var i = 0; i < cards.length; i++) {
+      var image = cards[i].querySelector('.thumbnail');
+      if (image && image.getAttribute('src') === thumbnail) return cards[i];
+    }
+    return null;
+  }
+
+  function readCard(card) {
+    var title = card.querySelector('.track-title p') || card.querySelector('.track-title');
+    var image = card.querySelector('.thumbnail');
+    if (!title || !image) return null;
+    return { name: title.textContent.trim(), thumbnail: image.getAttribute('src') };
+  }
+
+  // One-shot: the next track the host clicks in the picker is appended.
+  var catching = null;
+
+  function catchNextPick(onPicked) {
+    if (catching !== null) document.removeEventListener('click', catching, true);
+    catching = function (event) {
+      var card = event.target.closest ? event.target.closest('.track') : null;
+      if (!card || !card.closest('.track-selection-ui')) return;
+      var track = readCard(card);
+      document.removeEventListener('click', catching, true);
+      catching = null;
+      if (track) onPicked(track);
+    };
+    document.addEventListener('click', catching, true);
+  }
+
+  function addTrack() {
+    var button = document.querySelector('.multiplayer-ui > .host .track-button');
+    if (!button) return;
+    catchNextPick(function (track) {
+      settings.playlist = settings.playlist.concat([track]);
+      write();
+      refreshPlaylist();
+      tellRoom();
+    });
+    button.click();
+  }
+
+  function removeTrack(at) {
+    settings.playlist = settings.playlist.filter(function (ignored, i) { return i !== at; });
+    write();
+    refreshPlaylist();
+    tellRoom();
+  }
+
+  function playlistBlock() {
+    var block = document.createElement('div');
+    block.className = 'gv-room-option gv-track-list';
+
+    var heading = document.createElement('div');
+    heading.className = 'title';
+    heading.textContent = 'Track List';
+    block.appendChild(heading);
+
+    var rows = document.createElement('div');
+    rows.className = 'rows';
+    block.appendChild(rows);
+
+    var add = document.createElement('button');
+    add.className = 'button';
+    add.textContent = 'Add Track';
+    add.addEventListener('click', addTrack);
+    block.appendChild(add);
+
+    var info = document.createElement('div');
+    info.className = 'info';
+    info.textContent = 'Played in order. The room moves on to the next one when a round ends.';
+    block.appendChild(info);
+
+    return block;
+  }
+
+  function refreshPlaylist() {
+    var rows = document.querySelector('.gv-track-list > .rows');
+    if (!rows) return;
+    rows.innerHTML = '';
+
+    if (settings.playlist.length === 0) {
+      var empty = document.createElement('div');
+      empty.className = 'gv-track-empty';
+      empty.textContent = 'No tracks yet. The room needs at least one.';
+      rows.appendChild(empty);
+      return;
+    }
+
+    settings.playlist.forEach(function (track, at) {
+      var row = document.createElement('div');
+      row.className = 'gv-track-row';
+
+      var position = document.createElement('div');
+      position.className = 'position';
+      position.textContent = String(at + 1);
+      row.appendChild(position);
+
+      var image = document.createElement('img');
+      image.className = 'thumbnail';
+      image.src = track.thumbnail;
+      row.appendChild(image);
+
+      var name = document.createElement('div');
+      name.className = 'name';
+      name.textContent = track.name;
+      row.appendChild(name);
+
+      var remove = document.createElement('button');
+      remove.className = 'button remove';
+      remove.textContent = '\u00d7';
+      remove.addEventListener('click', function () { removeTrack(at); });
+      row.appendChild(remove);
+
+      rows.appendChild(row);
+    });
+  }
+
   // The same control on the join side, under the code box. A player decides
   // how the others look on their own screen, so this wins over whatever the
   // host sent: the host's choice is where everyone starts, not a rule.
@@ -215,10 +392,16 @@
 
   function fillHostPanel(root) {
     var box = root.querySelector(':scope > .host > .main-box');
-    if (!box || box.querySelector('.gv-room-option')) return;
+    if (!box) return;
+    if (box.querySelector('.gv-room-option')) {
+      refreshPlaylist();
+      return;
+    }
     var buttons = box.querySelector(':scope > .buttons');
     if (!buttons) return;
+    box.insertBefore(playlistBlock(), buttons);
     box.insertBefore(otherCarsBlock(), buttons);
+    refreshPlaylist();
   }
 
   // ── Applying it on screen ───────────────────────────────────
