@@ -314,6 +314,42 @@
     channel.send({ type: 'broadcast', event: event, payload: payload });
   }
 
+  // ── What the lobby sees ────────────────────────────────────
+  // rooms_ui.js needs to know which room this page is in and to talk to the
+  // others in it. It rides the same channel rather than opening a second one,
+  // under a single event name, because a supabase channel only accepts
+  // handlers before it subscribes and the lobby's vocabulary is still growing.
+
+  var lobby = { code: null, role: null, channel: null, states: [], messages: [] };
+
+  function announce() {
+    var state = { code: lobby.code, role: lobby.role };
+    for (var i = 0; i < lobby.states.length; i++) {
+      try { lobby.states[i](state); } catch (e) { console.error(e); }
+    }
+  }
+
+  function onLobbyMessage(payload) {
+    for (var i = 0; i < lobby.messages.length; i++) {
+      try { lobby.messages[i](payload); } catch (e) { console.error(e); }
+    }
+  }
+
+  function enterLobby(role, code, channel) {
+    lobby.role = role;
+    lobby.code = code;
+    lobby.channel = channel;
+    announce();
+  }
+
+  function leaveLobby() {
+    if (lobby.channel === null) return;
+    lobby.role = null;
+    lobby.code = null;
+    lobby.channel = null;
+    announce();
+  }
+
   // ── Roles ───────────────────────────────────────────────────
   // A role takes over the socket's send and decides what comes back. The game
   // is strict about what it accepts, so anything unrecognised is dropped
@@ -445,7 +481,8 @@
           return openChannel(created.code, {
             join: onJoin,
             'join-ice': onJoinerIce,
-            leave: onLeave
+            leave: onLeave,
+            lobby: onLobbyMessage
           });
         })
         .then(function (channel) {
@@ -456,6 +493,7 @@
             return;
           }
           room.channel = channel;
+          enterLobby('host', room.code, channel);
           startHeartbeat();
           // Warmed now rather than when the first player knocks, so handing
           // over an offer is a local step instead of a round trip.
@@ -502,6 +540,7 @@
         room.beat = null;
       }
       if (room.channel !== null) {
+        leaveLobby();
         room.channel.unsubscribe();
         room.channel = null;
       }
@@ -575,13 +614,15 @@
           return openChannel(room.code, {
             accept: onAccept,
             decline: onDecline,
-            'host-ice': onHostIce
+            'host-ice': onHostIce,
+            lobby: onLobbyMessage
           }).then(function (channel) {
             if (socket.readyState === 3) {
               channel.unsubscribe();
               return;
             }
             seat.channel = channel;
+            enterLobby('player', room.code, channel);
 
             var hello = {
               session: seat.session,
@@ -629,6 +670,7 @@
       stopRetry();
       if (seat.channel !== null) {
         post(seat.channel, 'leave', { session: seat.session });
+        leaveLobby();
         seat.channel.unsubscribe();
         seat.channel = null;
       }
@@ -668,5 +710,11 @@
   // leaderboard.js answers the game's iceServers request and is loaded
   // before this file, so it reads the list through here at call time.
   window.GV = window.GV || {};
-  window.GV.rooms = { iceServers: iceServers };
+  window.GV.rooms = {
+    iceServers: iceServers,
+    state: function () { return { code: lobby.code, role: lobby.role }; },
+    onState: function (fn) { lobby.states.push(fn); },
+    onMessage: function (fn) { lobby.messages.push(fn); },
+    say: function (payload) { post(lobby.channel, 'lobby', payload); }
+  };
 }());
