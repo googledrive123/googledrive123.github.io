@@ -247,6 +247,34 @@
     return found === null ? null : found[1];
   }
 
+  // ── Roles ───────────────────────────────────────────────────
+  // A role takes over the socket's send and decides what comes back. The game
+  // is strict about what it accepts, so anything unrecognised is dropped
+  // rather than answered with a guess: an unexpected reply closes the socket
+  // and takes the room with it, while silence only stalls the one message.
+
+  function parse(raw) {
+    var message;
+    try { message = JSON.parse(raw); } catch (e) { return null; }
+    return message !== null && typeof message === 'object' ? message : null;
+  }
+
+  function hostRole(socket) {
+    socket.send = function (raw) {
+      var message = parse(raw);
+      if (message === null) return;
+      socket.deliver({ type: 'error', error: 'UnknownServerError' });
+    };
+  }
+
+  function joinRole(socket) {
+    socket.send = function (raw) {
+      var message = parse(raw);
+      if (message === null) return;
+      socket.deliver({ type: 'declineJoin', reason: 'UnknownServerError' });
+    };
+  }
+
   // ── The stand-in ─────────────────────────────────────────
   // Returning a different object from a constructor replaces the instance, so
   // a passed-through call hands back a genuine WebSocket. The game cannot tell
@@ -262,10 +290,10 @@
     if (role === null) return nativeSocket(url, protocols);
 
     var socket = new FakeWebSocket(url);
-    setTimeout(function () {
-      socket.opened();
-      socket.deliver({ type: 'error', error: 'NotImplemented' });
-    }, 0);
+    if (role === 'host') hostRole(socket);
+    else joinRole(socket);
+
+    setTimeout(function () { socket.opened(); }, 0);
     return socket;
   }
 
