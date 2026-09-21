@@ -418,6 +418,23 @@
       var message = parse(raw);
       if (message === null) return;
       if (message.type === 'createInvite') createInvite(message);
+      else if (message.type === 'acceptJoin') {
+        // Forwarded whole. clientId, the version string and the mod fields are
+        // the host's own, and the joiner validates every one of them.
+        post(room.channel, 'accept', {
+          session: message.session,
+          answer: message.answer,
+          version: message.version,
+          mods: message.mods,
+          isModsVanillaCompatible: message.isModsVanillaCompatible,
+          clientId: message.clientId
+        });
+      } else if (message.type === 'declineJoin') {
+        post(room.channel, 'decline', {
+          session: message.session,
+          reason: message.reason
+        });
+      }
     };
 
     var close = socket.close;
