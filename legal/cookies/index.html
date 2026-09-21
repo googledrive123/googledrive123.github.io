@@ -12,6 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/site.css">
+  <script src="/js/identity.js" defer></script>
   <script src="/js/analytics.js" defer></script>
   <script src="/js/site.js" defer></script>
   <script src="/js/player.js" defer></script>
@@ -22,9 +23,9 @@
   <h1>Cookies and local storage</h1>
   <p class="lede">GameVault sets no advertising cookies, because there are no ads.</p>
   <h2>What this site actually uses</h2>
-  <p>GameVault does not set tracking cookies of its own. It uses your browser's
-  <strong>local storage</strong> and <strong>session storage</strong>, which are similar but
-  stay on your device and are never attached to outgoing requests.</p>
+  <p>GameVault sets one cookie of its own, <code>gv_vid</code>. Everything else it remembers
+  uses your browser's <strong>local storage</strong> and <strong>session storage</strong>,
+  which are similar but stay on your device and are never attached to outgoing requests.</p>
 
   <div class="table-wrap">
     <table class="gv">
@@ -40,6 +41,11 @@
         <tr><td>gv.proxy</td><td>Local storage</td><td>Which proxy the in-page browser uses</td></tr>
         <tr><td>gv.schedule.classes.v1</td><td>Local storage</td><td>Class names you typed into the schedule</td></tr>
         <tr><td>gv.noanalytics</td><td>Local storage</td><td>Set to 1 to switch analytics off</td></tr>
+        <tr><td>gv.name</td><td>Local storage</td><td>The name you race under on leaderboards</td></tr>
+        <tr><td>gv.anon</td><td>Local storage</td><td>Whether anonymous mode is on</td></tr>
+        <tr><td>gv.username</td><td>Local storage</td><td>Your account username, so pages can show it without asking the server again</td></tr>
+        <tr><td>gv.vid</td><td>Local storage</td><td>A random id for this browser, used to count visits and to keep your leaderboard times together</td></tr>
+        <tr><td>gv_vid</td><td>Cookie, and IndexedDB</td><td>The same random id again. Kept in three places so clearing one of them does not turn you into a second player on the leaderboards</td></tr>
         <tr><td>panicKey, panicRedirectUrl, panicEnabled, verificationEnabled</td><td>Local storage</td><td>Panic key and close-confirmation settings</td></tr>
         <tr><td>gv.redirect</td><td>Session storage</td><td>Holds a deep link for a moment while the page loads</td></tr>
         <tr><td>panicActivation</td><td>Session storage</td><td>Stops the close prompt firing during a panic exit</td></tr>
@@ -59,7 +65,7 @@
   <h2>Clearing it</h2>
   <p>Clearing site data for this domain in your browser settings removes everything above.
   You will lose your starred games, your recents and your settings — nothing else.</p>
-  <p class="panel-note">Last updated: 16 September 2026 · See also the <a href="/legal/privacy-policy/">Privacy Policy</a>.</p>
+  <p class="panel-note">Last updated: 21 September 2026 · See also the <a href="/legal/privacy-policy/">Privacy Policy</a>.</p>
 </main>
 </body>
 </html>

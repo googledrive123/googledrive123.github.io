@@ -12,6 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/site.css">
+  <script src="/js/identity.js" defer></script>
   <script src="/js/analytics.js" defer></script>
   <script src="/js/site.js" defer></script>
   <script src="/js/player.js" defer></script>
@@ -33,6 +34,11 @@
     <li><code>gv.sugg.v1</code> — whether you have dismissed the suggestion popup.</li>
     <li><code>panicKey</code>, <code>panicRedirectUrl</code>, <code>verificationEnabled</code> —
     your panic key and close-confirmation settings.</li>
+    <li><code>gv.name</code>, <code>gv.anon</code> — the name you race under on leaderboards,
+    and whether anonymous mode is on.</li>
+    <li><code>gv.vid</code> — a random id for this browser. It is also kept in a cookie named
+    <code>gv_vid</code> and in IndexedDB, so that clearing one of the three does not make your
+    leaderboard times look like a second player's.</li>
   </ul>
   <p>Clearing your browser data clears all of it. There is no copy kept anywhere else unless
   you sign in.</p>
@@ -89,7 +95,7 @@
 
   <h2>8. Changes</h2>
   <p>If this policy changes, the date below changes with it.</p>
-  <p class="panel-note">Last updated: 16 September 2026</p>
+  <p class="panel-note">Last updated: 21 September 2026</p>
 </main>
 </body>
 </html>
