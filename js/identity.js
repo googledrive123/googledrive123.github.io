@@ -158,10 +158,13 @@
     'Vulture', 'Wolf', 'Wombat', 'Weasel', 'Shark', 'Moose', 'Cobra', 'Condor'
   ];
 
-  /* FNV-1a, seeded differently for each of the three words so the picks do
-     not move together. 48 x 32 x 48 is a little over 73,000 names. */
-  function hash(text, seed) {
-    var h = seed >>> 0;
+  /* FNV-1a for the id, then a murmur3 finaliser per word. Re-running FNV with
+     a different starting value is not enough on its own: the two runs come out
+     a fixed distance apart, so the three words move together and most of the
+     name space is never reached. Mixing one hash three ways does reach it.
+     48 x 32 x 48 is a little over 73,000 names. */
+  function hash(text) {
+    var h = 0x811c9dc5;
     for (var i = 0; i < text.length; i++) {
       h ^= text.charCodeAt(i);
       h = (h + ((h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24))) >>> 0;
@@ -169,11 +172,19 @@
     return h >>> 0;
   }
 
+  function mix(h) {
+    h = (h ^ (h >>> 16)) >>> 0;
+    h = Math.imul(h, 0x85ebca6b) >>> 0;
+    h = (h ^ (h >>> 13)) >>> 0;
+    h = Math.imul(h, 0xc2b2ae35) >>> 0;
+    return (h ^ (h >>> 16)) >>> 0;
+  }
+
   function guestName(source) {
-    var text = String(source || id || '');
-    return ADJECTIVES[hash(text, 0x811c9dc5) % ADJECTIVES.length]
-      + COLOURS[hash(text, 0x1000193) % COLOURS.length]
-      + CREATURES[hash(text, 0x27d4eb2f) % CREATURES.length];
+    var h = hash(String(source || id || ''));
+    return ADJECTIVES[mix((h ^ 0x9e3779b9) >>> 0) % ADJECTIVES.length]
+      + COLOURS[mix((h ^ 0x85ebca6b) >>> 0) % COLOURS.length]
+      + CREATURES[mix((h ^ 0xc2b2ae35) >>> 0) % CREATURES.length];
   }
 
   /* ── Stored preferences ───────────────────────────────────────────────
