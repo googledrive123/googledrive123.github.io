@@ -370,6 +370,19 @@
 
   var at = 0;
 
+  // Which track the room is actually starting on is whatever the game had
+  // selected when the host pressed Host, which is not necessarily the first in
+  // the list. The host panel is gone by the time the session exists, so the
+  // selection is noted while it is still on screen.
+  var chosenThumbnail = null;
+
+  function indexOfTrack(thumbnail) {
+    for (var i = 0; i < settings.playlist.length; i++) {
+      if (settings.playlist[i].thumbnail === thumbnail) return i;
+    }
+    return 0;
+  }
+
   function toolbarButtons() {
     return document.querySelector('.game-toolbar-ui .button-container');
   }
@@ -492,6 +505,9 @@
   function fillHostPanel(root) {
     var box = root.querySelector(':scope > .host > .main-box');
     if (!box) return;
+    var thumbnail = box.querySelector(':scope > .track-button .thumbnail');
+    if (thumbnail) chosenThumbnail = thumbnail.getAttribute('src');
+
     if (box.querySelector('.gv-room-option')) {
       refreshPlaylist();
       return;
@@ -664,7 +680,7 @@
         // so until the first broadcast lands they sit on the defaults rather
         // than briefly applying what they last chose as a host themselves.
         // Unless they already picked on the join screen, which stands.
-        at = 0;
+        at = indexOfTrack(chosenThumbnail);
         if (state.role === 'host') active = settings;
         else active = copyOf(playerPicked ? settings : DEFAULTS);
         startApplying();
