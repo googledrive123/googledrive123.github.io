@@ -69,3 +69,42 @@ begin
                             then now() else polytrack_scores.updated_at end;
 end;
 $function$;
+
+
+-- Renaming without racing. A player who changes their name, or turns
+-- anonymous mode on or off, has times already sitting on boards for tracks
+-- they are not going to drive again today.
+create or replace function public.polytrack_set_name(
+  p_visitor_id text,
+  p_nickname text
+) returns integer
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+  v_key  text := coalesce(v_user::text, 'guest:' || nullif(p_visitor_id, ''));
+  v_name text := left(coalesce(nullif(btrim(p_nickname), ''), 'Player'), 50);
+  v_rows integer := 0;
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'submissions are not accepted from this origin';
+  end if;
+  if v_key is null then
+    return 0;
+  end if;
+
+  -- updated_at is left alone: it is the date of the run, and a rename is not
+  -- a run.
+  update polytrack_scores
+     set nickname = v_name
+   where player_key = v_key
+     and nickname is distinct from v_name;
+
+  get diagnostics v_rows = row_count;
+  return v_rows;
+end;
+$function$;
+
+grant execute on function public.polytrack_set_name(text, text) to anon, authenticated;
