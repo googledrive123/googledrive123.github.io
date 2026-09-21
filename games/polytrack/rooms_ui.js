@@ -127,7 +127,7 @@
 
   function choiceBlock(title, options, current, onPick) {
     var block = document.createElement('div');
-    block.className = 'game-mode-container gv-room-option';
+    block.className = 'gv-room-option';
 
     var heading = document.createElement('div');
     heading.className = 'title';
