@@ -40,7 +40,15 @@
     otherCars: 'solid'
   };
 
+  // What the host has chosen, kept between sessions. In a room this is only
+  // the host's copy: everyone else races under whatever the host sends, held
+  // in active, and gets their own preferences back when they leave.
   var settings = read();
+  var active = null;
+
+  function effective() {
+    return active === null ? settings : active;
+  }
 
   function read() {
     var saved = {};
@@ -109,6 +117,7 @@
       settings.otherCars = value;
       write();
       applyNow();
+      tellRoom();
     });
   }
 
@@ -173,7 +182,8 @@
     var scene = window.GV && window.GV.scene;
     if (!scene || scene.current() === null) return;
     var others = scene.otherCars();
-    for (var i = 0; i < others.length; i++) paint(others[i], mode || settings.otherCars);
+    var chosen = mode || effective().otherCars;
+    for (var i = 0; i < others.length; i++) paint(others[i], chosen);
   }
 
   function eachFrame() {
@@ -198,6 +208,46 @@
     applyNow('solid');
   }
 
+  // ── Keeping the room in step ────────────────────────────────
+  // The host's choices are the room's, so they are sent to everyone in it.
+  // They go out on a repeat rather than once, because a player who joins
+  // midway through has no way to ask for what they missed, and the payload is
+  // a few dozen bytes.
+
+  var TELL_EVERY = 3000;
+  var telling = null;
+
+  function tellRoom() {
+    var rooms = window.GV && window.GV.rooms;
+    if (!rooms) return;
+    rooms.say({ kind: 'settings', settings: settings });
+  }
+
+  function startTelling() {
+    if (telling !== null) return;
+    tellRoom();
+    telling = setInterval(tellRoom, TELL_EVERY);
+  }
+
+  function stopTelling() {
+    if (telling === null) return;
+    clearInterval(telling);
+    telling = null;
+  }
+
+  function heardSettings(payload) {
+    if (!payload || payload.kind !== 'settings' || !payload.settings) return;
+    var rooms = window.GV && window.GV.rooms;
+    // The host is the one sending these, and its own copy is the original.
+    if (!rooms || rooms.state().role !== 'player') return;
+
+    var next = {};
+    Object.keys(DEFAULTS).forEach(function (key) {
+      next[key] = payload.settings[key] === undefined ? DEFAULTS[key] : payload.settings[key];
+    });
+    active = next;
+  }
+
   // ── Wiring ────────────────────────────────────────────────────────────
   // The menu is rebuilt from scratch every time the game returns to it, so the
   // rename is reapplied rather than assumed to have survived. Class changes
@@ -215,9 +265,17 @@
   function start() {
     var rooms = window.GV && window.GV.rooms;
     if (rooms) {
+      rooms.onMessage(heardSettings);
       rooms.onState(function (state) {
-        if (state.code === null) stopApplying();
-        else startApplying();
+        if (state.code === null) {
+          stopTelling();
+          stopApplying();
+          active = null;
+          return;
+        }
+        active = state.role === 'host' ? settings : null;
+        startApplying();
+        if (state.role === 'host') startTelling();
       });
     }
 
