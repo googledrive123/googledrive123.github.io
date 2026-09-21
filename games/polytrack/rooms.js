@@ -453,10 +453,103 @@
   }
 
   function joinRole(socket) {
+    var seat = { session: newKey(), channel: null, waiting: [] };
+
+    function onAccept(payload) {
+      if (payload.session !== seat.session) return;
+      socket.deliver({
+        type: 'acceptJoin',
+        answer: payload.answer,
+        version: typeof payload.version === 'string' ? payload.version : '0.6.3',
+        mods: Array.isArray(payload.mods) ? payload.mods : [],
+        isModsVanillaCompatible: payload.isModsVanillaCompatible !== false,
+        clientId: typeof payload.clientId === 'number' ? payload.clientId : 0
+      });
+    }
+
+    function onDecline(payload) {
+      if (payload.session !== seat.session) return;
+      socket.deliver({ type: 'declineJoin', reason: payload.reason });
+    }
+
+    function onHostIce(payload) {
+      if (payload.session !== seat.session) return;
+      socket.deliver({ type: 'iceCandidate', candidate: payload.candidate });
+    }
+
+    // Candidates start arriving the moment the game sets its local
+    // description, which is well before the channel has finished subscribing.
+    // Holding them is the difference between a connection that pairs and one
+    // that has half its routes missing.
+    function toHost(event, payload) {
+      if (seat.channel === null) seat.waiting.push([event, payload]);
+      else post(seat.channel, event, payload);
+    }
+
+    function flush() {
+      while (seat.waiting.length > 0) {
+        var held = seat.waiting.shift();
+        post(seat.channel, held[0], held[1]);
+      }
+    }
+
+    // A code nobody is hosting and a code whose room has gone quiet are the
+    // same thing to the player, and the game already has a word for it.
+    function request(message) {
+      rpc('polytrack_room_lookup', { p_code: message.inviteCode })
+        .then(function (room) {
+          if (room === null) {
+            socket.deliver({ type: 'error', error: 'ExpiredInvite' });
+            return;
+          }
+          return openChannel(room.code, {
+            accept: onAccept,
+            decline: onDecline,
+            'host-ice': onHostIce
+          }).then(function (channel) {
+            if (socket.readyState === 3) {
+              channel.unsubscribe();
+              return;
+            }
+            seat.channel = channel;
+            post(channel, 'join', {
+              session: seat.session,
+              offer: message.offer,
+              version: message.version,
+              mods: message.mods,
+              isModsVanillaCompatible: message.isModsVanillaCompatible,
+              nickname: message.nickname,
+              countryCode: message.countryCode,
+              carStyle: message.carStyle
+            });
+            flush();
+          });
+        })
+        .catch(function (error) {
+          console.error('Failed to join a room:', error);
+          socket.deliver({ type: 'error', error: 'ExpiredInvite' });
+        });
+    }
+
     socket.send = function (raw) {
       var message = parse(raw);
       if (message === null) return;
-      socket.deliver({ type: 'declineJoin', reason: 'UnknownServerError' });
+      // Nothing on this socket carries a type: the path is the context. The
+      // first message is the join request, everything after is a candidate.
+      if (typeof message.inviteCode === 'string') request(message);
+      else if ('candidate' in message) {
+        toHost('join-ice', { session: seat.session, candidate: message.candidate });
+      }
+    };
+
+    var close = socket.close;
+    socket.close = function () {
+      if (seat.channel !== null) {
+        post(seat.channel, 'leave', { session: seat.session });
+        seat.channel.unsubscribe();
+        seat.channel = null;
+      }
+      close.call(socket);
     };
   }
 
