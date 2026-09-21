@@ -487,10 +487,21 @@
   }
 
   function joinRole(socket) {
-    var seat = { session: newKey(), channel: null, waiting: [] };
+    var seat = { session: newKey(), channel: null, waiting: [], retry: null };
+
+    // The host subscribes to the channel a moment after its code appears on
+    // screen, and a broadcast sent into a room nobody is listening to is
+    // simply gone. Repeating the request costs nothing and covers both that
+    // gap and an ordinary dropped message.
+    function stopRetry() {
+      if (seat.retry === null) return;
+      clearInterval(seat.retry);
+      seat.retry = null;
+    }
 
     function onAccept(payload) {
       if (payload.session !== seat.session) return;
+      stopRetry();
       socket.deliver({
         type: 'acceptJoin',
         answer: payload.answer,
@@ -503,11 +514,13 @@
 
     function onDecline(payload) {
       if (payload.session !== seat.session) return;
+      stopRetry();
       socket.deliver({ type: 'declineJoin', reason: payload.reason });
     }
 
     function onHostIce(payload) {
       if (payload.session !== seat.session) return;
+      stopRetry();
       socket.deliver({ type: 'iceCandidate', candidate: payload.candidate });
     }
 
@@ -546,7 +559,8 @@
               return;
             }
             seat.channel = channel;
-            post(channel, 'join', {
+
+            var hello = {
               session: seat.session,
               offer: message.offer,
               version: message.version,
@@ -555,8 +569,19 @@
               nickname: message.nickname,
               countryCode: message.countryCode,
               carStyle: message.carStyle
-            });
+            };
+            post(channel, 'join', hello);
             flush();
+
+            var left = 4;
+            seat.retry = setInterval(function () {
+              if (left === 0) {
+                stopRetry();
+                return;
+              }
+              left = left - 1;
+              post(channel, 'join', hello);
+            }, 1500);
           });
         })
         .catch(function (error) {
@@ -578,6 +603,7 @@
 
     var close = socket.close;
     socket.close = function () {
+      stopRetry();
       if (seat.channel !== null) {
         post(seat.channel, 'leave', { session: seat.session });
         seat.channel.unsubscribe();
