@@ -124,6 +124,16 @@
     var frames = parseInt(q.frames || '0', 10);
     if (!frames || frames < 1) throw new Error('invalid frames');
 
+    // Whatever the player typed into the game's own profile is the name they
+    // already chose to race under, so it is kept rather than overwritten the
+    // first time a run goes up. "Anonymous" is the game's untouched default
+    // and is not a choice.
+    var gv = identity();
+    if (gv && q.nickname && q.nickname !== 'Anonymous'
+        && !gv.chosenName() && !gv.accountName()) {
+      gv.setChosenName(q.nickname);
+    }
+
     // Read the standing before and after so the game can show the "moved up
     // from Nth" animation it plays on a personal best.
     var trackId = q.trackId || '';
@@ -132,7 +142,7 @@
       return rpc('polytrack_submit', {
         p_track_id: trackId,
         p_frames: frames,
-        p_nickname: q.nickname || 'Player',
+        p_nickname: gv ? gv.publicName() : (q.nickname || 'Player'),
         p_country_code: q.countryCode || null,
         p_car_style: q.carStyle || null,
         p_visitor_id: visitorId()
