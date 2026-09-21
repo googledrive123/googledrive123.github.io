@@ -131,7 +131,7 @@
   // driven along with it.
 
   var TRANSLUCENT = 0.35;
-  var applyTimer = null;
+  var applying = false;
 
   function meshes(root, fn) {
     root.traverse(function (object) { if (object.isMesh === true) fn(object); });
@@ -157,6 +157,7 @@
       // is, so there is nothing to do and no clone worth making.
       if (opacity === 1 && mesh.userData.gvOwnMaterial !== true) return;
       ownMaterials(mesh).forEach(function (material) {
+        if (material.opacity === opacity && material.transparent === (opacity < 1)) return;
         material.transparent = opacity < 1;
         material.opacity = opacity;
         // Depth writing stays on. Turning it off is the usual way to make
@@ -175,18 +176,25 @@
     for (var i = 0; i < others.length; i++) paint(others[i], mode || settings.otherCars);
   }
 
+  function eachFrame() {
+    applyNow();
+  }
+
   function startApplying() {
-    if (applyTimer !== null) return;
-    applyTimer = setInterval(function () { applyNow(); }, 500);
+    var scene = window.GV && window.GV.scene;
+    if (applying || !scene) return;
+    applying = true;
+    scene.onBeforeRender(eachFrame);
   }
 
   // Leaving a room puts the cars back the way the game had them. The setting
   // itself is untouched: it is the host's choice for next time, not a
   // description of what is currently on screen.
   function stopApplying() {
-    if (applyTimer === null) return;
-    clearInterval(applyTimer);
-    applyTimer = null;
+    var scene = window.GV && window.GV.scene;
+    if (!applying || !scene) return;
+    applying = false;
+    scene.offBeforeRender(eachFrame);
     applyNow('solid');
   }
 
