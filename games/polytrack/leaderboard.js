@@ -397,12 +397,39 @@
     document.head.appendChild(css);
   }
 
+  // The rank the game printed on a row, digits only: it draws the number and
+  // its ordinal suffix into the same element.
+  function positionOf(row) {
+    var el = row.querySelector('.position');
+    if (!el) return null;
+    var n = parseInt(String(el.textContent || '').replace(/[^0-9]/g, ''), 10);
+    return isFinite(n) ? n : null;
+  }
+
+  // Anonymous mode hides the player from everybody, including the player, who
+  // is then left scanning a column of identical "Anonymous" for the run they
+  // remember setting. Their own row, and only on their own screen, also
+  // carries the name behind it.
+  function nameSelfRow(row) {
+    if (selfPosition == null || positionOf(row) !== selfPosition) return;
+    var gv = identity();
+    var shown = row.querySelector('.name');
+    if (!gv || !shown) return;
+    var real = gv.realName();
+    if (!real || shown.textContent === real) return;
+    var tag = document.createElement('span');
+    tag.className = 'gv-realname';
+    tag.textContent = '(' + real + ')';
+    shown.parentNode.insertBefore(tag, shown.nextSibling);
+  }
+
   function labelRow(row) {
     if (row.dataset.gvLabelled) return;
     var state = row.querySelector('.verified-state');
     var left = row.querySelector('.left');
     if (!state || !left) return;
     row.dataset.gvLabelled = '1';
+    nameSelfRow(row);
 
     var verified = state.classList.contains('verified');
     var label = document.createElement('p');
