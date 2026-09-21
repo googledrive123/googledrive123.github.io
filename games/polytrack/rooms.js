@@ -483,25 +483,6 @@
       else if (seen[session] === 'pending') held[session].push(message);
     }
 
-    // Two clocks have to be held off. The game closes the socket after thirty
-    // five seconds without a message, and a room stops being findable ten
-    // minutes after it was last touched. A host sitting in an empty lobby
-    // waiting for a friend trips both.
-    //
-    // pong is the one inbound type the game accepts and then ignores, which
-    // makes it the right thing to send when there is nothing to say.
-    function startHeartbeat() {
-      var ticks = 0;
-      room.beat = setInterval(function () {
-        socket.deliver({ type: 'pong' });
-        ticks = ticks + 1;
-        if (ticks % 4 === 0 && room.code !== null) {
-          rpc('polytrack_room_touch', { p_code: room.code, p_key: room.key })
-            .catch(function (error) { console.error('Room keep-alive failed:', error); });
-        }
-      }, 15000);
-    }
-
     // A join request reaches the host as a joinInvite. The ICE list rides
     // along with it, because that is where the game reads it from when it
     // builds the peer connection for this particular player.

@@ -2412,8 +2412,8 @@
     <!-- Shown only to returning PolyTrack players. See initPolytrackNotice(). -->
     <div class="pt-notice" id="ptNotice" role="status" hidden>
       <div class="pt-notice-text">
-        You&rsquo;ve played <b>PolyTrack</b> here before, and the NEWEST and most UPDATED version is here now!
-        <b>v0.6.3</b>, with new tracks, cars and a rebuilt physics engine.
+        You&rsquo;ve played <b>PolyTrack</b> here before. It has <b>rooms</b> now:
+        make one, share the code, and race your friends across a list of tracks.
         </div>
       <button class="pt-notice-play" id="ptNoticePlay" type="button">Play Now</button>
       <button class="pt-notice-close" id="ptNoticeClose" type="button" aria-label="Dismiss">
@@ -2746,7 +2746,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // ───── What's new ─────
 const NEWS = [
-  {id:'polytrack', label:'PolyTrack updated, with a site leaderboard', status:'new', meta:'New tracks, cars and physics · your times now rank against everyone here'},
+  {id:'polytrack', label:'PolyTrack rooms: race your friends', status:'new', meta:'Create a room, share the code · track playlists, round timer, per-player options'},
+  {id:'polytrack', label:'PolyTrack updated, with a site leaderboard', status:'added', meta:'New tracks, cars and physics · your times now rank against everyone here'},
   {id:null, label:'247 more games added', status:'added', meta:'Expanded library · now 1,272 games'},
   {id:null, label:'203 games on new builds', status:'added', meta:'Same titles, swapped to a different host'},
   {id:null, label:'Schedule page', status:'added', meta:'Name your periods · knows days off and finals weeks'},
@@ -3742,7 +3743,9 @@ async function bootCatalog() {
 // at the updated build. Dismissal is stored, not just hidden, so it does not
 // come back on the next visit. Playing from the button counts as seen too —
 // telling someone about an update they just opened is noise.
-const PT_NOTICE_KEY = 'gv.polytrack.notice';
+// Keyed per announcement: someone who dismissed the 0.6.3 notice has not seen
+// the rooms one, and reusing the key would mean they never do.
+const PT_NOTICE_KEY = 'gv.polytrack.notice.rooms';
 
 function hasPlayed(gameId) {
   try {
