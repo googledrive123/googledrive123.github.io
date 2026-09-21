@@ -434,6 +434,11 @@
           session: message.session,
           reason: message.reason
         });
+      } else if (message.type === 'iceCandidate') {
+        post(room.channel, 'host-ice', {
+          session: message.session,
+          candidate: message.candidate
+        });
       }
     };
 
