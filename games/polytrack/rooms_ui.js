@@ -159,7 +159,11 @@
       ownMaterials(mesh).forEach(function (material) {
         material.transparent = opacity < 1;
         material.opacity = opacity;
-        material.depthWrite = opacity >= 1;
+        // Depth writing stays on. Turning it off is the usual way to make
+        // transparency look right against a scene, but a car is a solid object
+        // with parts inside it, and without depth the wheels and the seat show
+        // straight through the bodywork.
+        material.depthWrite = true;
       });
     });
   }
