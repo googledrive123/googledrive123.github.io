@@ -366,7 +366,13 @@
       gv.ready.then(repaintStrips);
     }
     loadAccountName();
-    new MutationObserver(attach).observe(document.body, { childList: true, subtree: true });
+    // Class changes matter as much as new nodes here: the game moves between
+    // menu screens by toggling "hidden", so the front page coming back is an
+    // attribute change and nothing else. Watching only child lists meant the
+    // menu was measured while it was still off screen and never again.
+    new MutationObserver(attach).observe(document.body, {
+      childList: true, subtree: true, attributes: true, attributeFilter: ['class']
+    });
     attach();
   }
 
