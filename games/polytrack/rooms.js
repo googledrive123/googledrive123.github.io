@@ -457,6 +457,9 @@
           }
           room.channel = channel;
           startHeartbeat();
+          // Warmed now rather than when the first player knocks, so handing
+          // over an offer is a local step instead of a round trip.
+          iceServers();
         })
         .catch(function (error) {
           console.error('Failed to open a room:', error);
