@@ -326,12 +326,16 @@
           stopTelling();
           stopApplying();
           active = null;
+          // The next room starts by following its own host again.
+          playerPicked = false;
           return;
         }
         // A player races under the host's choices, not their own saved ones,
         // so until the first broadcast lands they sit on the defaults rather
         // than briefly applying what they last chose as a host themselves.
-        active = state.role === 'host' ? settings : copyOf(DEFAULTS);
+        // Unless they already picked on the join screen, which stands.
+        if (state.role === 'host') active = settings;
+        else active = copyOf(playerPicked ? settings : DEFAULTS);
         startApplying();
         if (state.role === 'host') startTelling();
       });
