@@ -91,3 +91,37 @@
     try { db.transaction(DB_STORE, 'readwrite').objectStore(DB_STORE).put(id, DB_RECORD); }
     catch (e) {}
   }
+
+  function uuid() {
+    try { if (window.crypto && crypto.randomUUID) return crypto.randomUUID(); } catch (e) {}
+    var out = '';
+    for (var i = 0; i < 32; i++) out += Math.floor(Math.random() * 16).toString(16);
+    return out;
+  }
+
+  /* localStorage and the cookie answer straight away, so the id is settled
+     before anything on the page asks for it. Whichever of the two is empty is
+     filled from the other. */
+  var id = readLocal();
+  var fromCookie = readCookie();
+  if (!id) id = fromCookie;
+  if (!id) id = uuid();
+  if (readLocal() !== id) writeLocal(id);
+  if (fromCookie !== id) writeCookie(id);
+
+  /* IndexedDB catches up afterwards. If it is holding an older id than the one
+     just settled on, that older id is the one this browser has been playing
+     under, so it wins and the other two stores are corrected to match. */
+  var ready = openDb().then(function (db) {
+    if (!db) return id;
+    return readDb(db).then(function (stored) {
+      if (stored && stored !== id) {
+        id = stored;
+        writeLocal(id);
+        writeCookie(id);
+      } else if (!stored) {
+        writeDb(db, id);
+      }
+      return id;
+    });
+  }).catch(function () { return id; });
