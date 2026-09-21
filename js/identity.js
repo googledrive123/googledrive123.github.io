@@ -125,3 +125,35 @@
       return id;
     });
   }).catch(function () { return id; });
+
+  /* ── Guest names ──────────────────────────────────────────────────────
+     A visitor who has not signed in still needs something to be called, and
+     "Anonymous" is not a name - it is the same non-name everybody else on the
+     board is wearing. Three words picked out of the id give a guest something
+     to recognise. The same id always produces the same name, so nothing has
+     to be stored and the name survives everything the id survives. */
+
+  var ADJECTIVES = [
+    'Swift', 'Brave', 'Calm', 'Bold', 'Clever', 'Quiet', 'Rapid', 'Sharp',
+    'Silent', 'Sly', 'Steady', 'Bright', 'Lucky', 'Mighty', 'Nimble', 'Quick',
+    'Wild', 'Wise', 'Eager', 'Fierce', 'Gentle', 'Humble', 'Jolly', 'Keen',
+    'Lively', 'Merry', 'Noble', 'Proud', 'Royal', 'Sunny', 'Tidy', 'Vivid',
+    'Witty', 'Zesty', 'Frosty', 'Sturdy', 'Breezy', 'Cosmic', 'Dapper', 'Feisty',
+    'Glossy', 'Hidden', 'Jagged', 'Loyal', 'Modest', 'Restless', 'Solar', 'Stormy'
+  ];
+
+  var COLOURS = [
+    'Amber', 'Azure', 'Bronze', 'Cobalt', 'Coral', 'Crimson', 'Emerald', 'Golden',
+    'Indigo', 'Ivory', 'Jade', 'Lilac', 'Maroon', 'Mint', 'Navy', 'Ochre',
+    'Olive', 'Onyx', 'Opal', 'Pearl', 'Plum', 'Rose', 'Ruby', 'Saffron',
+    'Sage', 'Scarlet', 'Silver', 'Slate', 'Teal', 'Topaz', 'Violet', 'Wheat'
+  ];
+
+  var CREATURES = [
+    'Fox', 'Falcon', 'Otter', 'Badger', 'Heron', 'Ibis', 'Jackal', 'Kestrel',
+    'Lynx', 'Marten', 'Newt', 'Osprey', 'Panther', 'Quail', 'Raven', 'Stoat',
+    'Tapir', 'Urchin', 'Viper', 'Walrus', 'Yak', 'Zebra', 'Bison', 'Crane',
+    'Dingo', 'Eagle', 'Ferret', 'Gecko', 'Hawk', 'Impala', 'Jaguar', 'Koala',
+    'Lemur', 'Mantis', 'Narwhal', 'Ocelot', 'Puffin', 'Rhino', 'Seal', 'Tiger',
+    'Vulture', 'Wolf', 'Wombat', 'Weasel', 'Shark', 'Moose', 'Cobra', 'Condor'
+  ];
