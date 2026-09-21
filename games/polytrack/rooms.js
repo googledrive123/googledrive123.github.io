@@ -115,6 +115,31 @@
     });
   }
 
+  // ── ICE servers ──────────────────────────────────────────────
+  // WebRTC will not attempt a connection without these. The list is served by
+  // Supabase rather than written here, because a TURN relay comes with
+  // credentials and this repository is public. Fetched once per page.
+  //
+  // The fallback is public STUN, which is enough on an ordinary home network
+  // and not enough on one that blocks direct traffic. Losing the list
+  // entirely should still leave most players able to race.
+
+  var STUN_ONLY = [{ urls: ['stun:stun.l.google.com:19302'] }];
+  var ice = null;
+
+  function iceServers() {
+    if (ice !== null) return ice;
+    ice = rpc('polytrack_ice_servers', {})
+      .then(function (list) {
+        return Array.isArray(list) && list.length > 0 ? list : STUN_ONLY;
+      })
+      .catch(function (error) {
+        console.error('Falling back to public STUN:', error);
+        return STUN_ONLY;
+      });
+    return ice;
+  }
+
   // ── The realtime client ────────────────────────────────────
   // Signalling needs a channel both players are listening on, which means the
   // supabase-js SDK. The game's page does not load it, and most visits never
@@ -344,4 +369,9 @@
   PatchedWebSocket.CLOSED = 3;
 
   window.WebSocket = PatchedWebSocket;
+
+  // leaderboard.js answers the game's iceServers request and is loaded
+  // before this file, so it reads the list through here at call time.
+  window.GV = window.GV || {};
+  window.GV.rooms = { iceServers: iceServers };
 }());
