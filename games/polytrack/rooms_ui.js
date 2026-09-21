@@ -49,6 +49,10 @@
   var active = null;
   var playerPicked = false;
 
+  // The last thing the host said, kept so that a broadcast arriving before
+  // this page knows it is in a room is not simply lost.
+  var heard = null;
+
   function effective() {
     return active === null ? settings : active;
   }
@@ -726,7 +730,11 @@
     if (!payload || payload.kind !== 'settings' || !payload.settings) return;
     var rooms = window.GV && window.GV.rooms;
     // The host is the one sending these, and its own copy is the original.
-    if (!rooms || rooms.state().role !== 'player') return;
+    // Anything else listens, including a page that has subscribed to the room
+    // but has not yet been told it is in one: the channel is live a moment
+    // before the role is, and a message dropped in that window used to leave a
+    // player racing under the wrong settings until the next broadcast.
+    if (!rooms || rooms.state().role === 'host') return;
 
     // Where the room has got to is the host's to say, whatever the player
     // thinks about how the cars should look.
@@ -740,6 +748,7 @@
     Object.keys(DEFAULTS).forEach(function (key) {
       next[key] = payload.settings[key] === undefined ? DEFAULTS[key] : payload.settings[key];
     });
+    heard = next;
     active = next;
   }
 
@@ -773,6 +782,7 @@
           stopTicking();
           stopApplying();
           active = null;
+          heard = null;
           // The next room starts by following its own host again.
           playerPicked = false;
           return;
@@ -782,8 +792,11 @@
         // than briefly applying what they last chose as a host themselves.
         // Unless they already picked on the join screen, which stands.
         at = indexOfTrack(chosenThumbnail);
+        // Whatever the host has already said outranks the defaults, so a
+        // broadcast that beat this callback is not thrown away.
         if (state.role === 'host') active = settings;
-        else active = copyOf(playerPicked ? settings : DEFAULTS);
+        else if (playerPicked) active = copyOf(settings);
+        else active = heard || copyOf(DEFAULTS);
         if (state.role === 'host') restartRound();
         startApplying();
         startTicking();
