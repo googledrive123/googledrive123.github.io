@@ -72,11 +72,20 @@
   // only the renderer knows, so it is read as each frame goes out.
   var activeCamera = null;
 
+  // The game writes to its cars' materials every frame, including a fade that
+  // makes a car see-through when the camera is close to it. Anything applied
+  // on a timer is overwritten before it is ever seen. Sitting on the render
+  // call is the only place that reliably gets the last word.
+  var beforeRender = [];
+
   function watchRenderer(target) {
     var render = target.render;
     if (typeof render !== 'function' || render.gvWrapped === true) return;
     var wrapped = function (renderScene, camera) {
       if (camera && camera.isCamera === true) activeCamera = camera;
+      for (var i = 0; i < beforeRender.length; i++) {
+        try { beforeRender[i](renderScene, camera); } catch (e) { console.error(e); }
+      }
       return render.apply(this, arguments);
     };
     wrapped.gvWrapped = true;
@@ -107,6 +116,11 @@
     localCar: localCar,
     otherCars: otherCars,
     activeCamera: function () { return activeCamera; },
+    onBeforeRender: function (fn) { beforeRender.push(fn); },
+    offBeforeRender: function (fn) {
+      var at = beforeRender.indexOf(fn);
+      if (at >= 0) beforeRender.splice(at, 1);
+    },
     // Resolves once both are known, and calls back again for nothing after.
     // Callers that need the live scene should read current() each time.
     ready: function (fn) {
