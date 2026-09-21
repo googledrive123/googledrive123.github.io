@@ -107,3 +107,37 @@
     ].join('\n');
     document.head.appendChild(css);
   }
+
+  // ── The strip under the menu buttons ──────────────────────────────────
+
+  function labelFor() {
+    if (signedIn()) return 'Signed in as';
+    return 'Playing as';
+  }
+
+  function paintStrip(strip) {
+    var gv = identity();
+    if (!gv) return;
+    strip.querySelector('.gv-who-label').textContent = labelFor();
+    strip.querySelector('.gv-who-name').textContent = gv.realName();
+    strip.title = gv.anonymous()
+      ? 'Anonymous mode is on. Other players see "Anonymous" on the leaderboard.'
+      : 'This is the name other players see on the leaderboard.';
+  }
+
+  function ensureStrip(menu) {
+    var buttons = menu.querySelector('.main-buttons-container');
+    if (!buttons || buttons.querySelector('.gv-whoami')) return;
+    var strip = document.createElement('button');
+    strip.type = 'button';
+    strip.className = 'gv-whoami';
+    strip.innerHTML = '<span class="gv-who-label"></span><span class="gv-who-name"></span>';
+    strip.addEventListener('click', function () { openPanel(menu); });
+    buttons.appendChild(strip);
+    paintStrip(strip);
+  }
+
+  function repaintStrips() {
+    var strips = document.querySelectorAll('.gv-whoami');
+    for (var i = 0; i < strips.length; i++) paintStrip(strips[i]);
+  }
