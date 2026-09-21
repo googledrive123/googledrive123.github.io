@@ -341,6 +341,54 @@
 
   window.XMLHttpRequest = PatchedXHR;
 
+  // ── Keeping the board's copy of the name current ──────────────────────
+  // The name is stamped on every row the player owns. Renaming, or turning
+  // anonymous mode on, has to reach times that are already up there: no new
+  // run is going to reach them, because nobody re-drives a track just to
+  // correct a label.
+
+  var pushedName = null;
+  var pushTimer = null;
+
+  function pushName() {
+    var gv = identity();
+    if (!gv) return;
+    var name = gv.publicName();
+    if (name === pushedName) return;
+    pushedName = name;
+    rpc('polytrack_set_name', { p_visitor_id: visitorId(), p_nickname: name })
+      .catch(function (err) { console.error('[leaderboard]', err); });
+  }
+
+  // Typing in the name field fires on every keystroke.
+  function scheduleNamePush() {
+    clearTimeout(pushTimer);
+    pushTimer = setTimeout(pushName, 500);
+  }
+
+  // Signing in used to leave the guest's times behind under the browser id
+  // while the account started again from nothing, which is the other half of
+  // seeing yourself twice.
+  function claimGuestScores() {
+    if (!accessToken()) return Promise.resolve(null);
+    return rpc('polytrack_claim', { p_visitor_id: visitorId() })
+      .catch(function (err) { console.error('[leaderboard]', err); });
+  }
+
+  settled().then(function () {
+    claimGuestScores();
+    var gv = identity();
+    if (gv) gv.onChange(scheduleNamePush);
+  });
+
+  // The game sits in an iframe on a page that owns the session, so signing in
+  // or out happens in the other document and arrives here as a storage event.
+  window.addEventListener('storage', function (e) {
+    if (!e || (e.key !== AUTH_KEY && e.key !== 'gv.username')) return;
+    claimGuestScores();
+    scheduleNamePush();
+  });
+
   // ── Verified / unverified labelling ───────────────────────────────────
   // The game has three states: Pending, Verified, Invalid. None of them mean
   // "guest", and the icon it draws for a guest reads as Pending — which
