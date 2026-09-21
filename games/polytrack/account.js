@@ -125,9 +125,12 @@
       : 'This is the name other players see on the leaderboard.';
   }
 
+  // Returns true only when a strip was actually added, so the caller knows to
+  // remeasure. This runs off a mutation observer that fires every frame during
+  // a race, and remeasuring forces a reflow.
   function ensureStrip(menu) {
     var info = menu.querySelector(':scope > .info');
-    if (!info || info.querySelector('.gv-whoami')) return;
+    if (!info || info.querySelector('.gv-whoami')) return false;
     var strip = document.createElement('button');
     strip.type = 'button';
     strip.className = 'gv-whoami';
@@ -135,6 +138,7 @@
     strip.addEventListener('click', function () { openPanel(menu); });
     info.insertBefore(strip, info.firstChild);
     paintStrip(strip);
+    return true;
   }
 
   function repaintStrips() {
@@ -322,8 +326,19 @@
     var menu = document.querySelector('.menu-ui');
     if (!menu) return;
     ensureStyles();
-    ensureStrip(menu);
+    if (ensureStrip(menu)) fitMenu(menu);
   }
+
+  var fitTimer = null;
+  window.addEventListener('resize', function () {
+    clearTimeout(fitTimer);
+    fitTimer = setTimeout(function () {
+      var menu = document.querySelector('.menu-ui');
+      // The game rescales the whole interface on resize too, and does it from
+      // its own listener. Measuring before that lands reads the old size.
+      if (menu) fitMenu(menu);
+    }, 200);
+  });
 
   function start() {
     var gv = identity();
