@@ -164,24 +164,26 @@
     });
   }
 
-  function applyNow() {
+  function applyNow(mode) {
     var scene = window.GV && window.GV.scene;
     if (!scene || scene.current() === null) return;
     var others = scene.otherCars();
-    for (var i = 0; i < others.length; i++) paint(others[i], settings.otherCars);
+    for (var i = 0; i < others.length; i++) paint(others[i], mode || settings.otherCars);
   }
 
   function startApplying() {
     if (applyTimer !== null) return;
-    applyTimer = setInterval(applyNow, 500);
+    applyTimer = setInterval(function () { applyNow(); }, 500);
   }
 
+  // Leaving a room puts the cars back the way the game had them. The setting
+  // itself is untouched: it is the host's choice for next time, not a
+  // description of what is currently on screen.
   function stopApplying() {
     if (applyTimer === null) return;
     clearInterval(applyTimer);
     applyTimer = null;
-    settings.otherCars = 'solid';
-    applyNow();
+    applyNow('solid');
   }
 
   // ── Wiring ────────────────────────────────────────────────────────────
