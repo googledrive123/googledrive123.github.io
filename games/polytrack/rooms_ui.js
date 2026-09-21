@@ -37,7 +37,7 @@
   var STORE_KEY = 'gv.rooms.settings';
 
   var DEFAULTS = {
-    otherCars: 'solid'
+    otherCars: 'translucent'
   };
 
   // What the host has chosen, kept between sessions. In a room this is only
@@ -45,6 +45,7 @@
   // in active, and gets their own preferences back when they leave.
   var settings = read();
   var active = null;
+  var playerPicked = false;
 
   function effective() {
     return active === null ? settings : active;
@@ -125,6 +126,48 @@
       applyNow();
       tellRoom();
     });
+  }
+
+  // The same control on the join side, under the code box. A player decides
+  // how the others look on their own screen, so this wins over whatever the
+  // host sent: the host's choice is where everyone starts, not a rule.
+  //
+  // It stays out of the way until there is a code to join, because until then
+  // there is no room for it to be about.
+  function joinChoiceBlock() {
+    var block = choiceBlock('Other Cars', OTHER_CARS, effective().otherCars, function (value) {
+      settings.otherCars = value;
+      playerPicked = true;
+      write();
+      if (active !== null) active.otherCars = value;
+      applyNow();
+    });
+    block.classList.add('gv-join-option');
+    return block;
+  }
+
+  function fillJoinPanel(root) {
+    var box = root.querySelector(':scope > .join > .main-box');
+    if (!box) return;
+
+    var block = box.querySelector('.gv-join-option');
+    if (!block) {
+      block = joinChoiceBlock();
+      var after = box.querySelector(':scope > .invite-code-container');
+      if (!after) return;
+      box.insertBefore(block, after.nextSibling);
+
+      var code = box.querySelector('.invite-code');
+      if (code) code.addEventListener('input', function () { showJoinOption(box); });
+    }
+    showJoinOption(box);
+  }
+
+  function showJoinOption(box) {
+    var block = box.querySelector('.gv-join-option');
+    var code = box.querySelector('.invite-code');
+    if (!block || !code) return;
+    block.style.display = code.value.trim().length > 0 ? '' : 'none';
   }
 
   function fillHostPanel(root) {
@@ -247,6 +290,9 @@
     // The host is the one sending these, and its own copy is the original.
     if (!rooms || rooms.state().role !== 'player') return;
 
+    // A player who has picked for themselves keeps their pick.
+    if (playerPicked) return;
+
     var next = {};
     Object.keys(DEFAULTS).forEach(function (key) {
       next[key] = payload.settings[key] === undefined ? DEFAULTS[key] : payload.settings[key];
@@ -265,7 +311,10 @@
     if (menu) renameTile(menu);
 
     var rooms = document.querySelector('.multiplayer-ui');
-    if (rooms) fillHostPanel(rooms);
+    if (rooms) {
+      fillHostPanel(rooms);
+      fillJoinPanel(rooms);
+    }
   }
 
   function start() {
