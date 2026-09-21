@@ -245,3 +245,37 @@
     });
     menu.appendChild(panel);
   }
+
+  // ── Wiring ────────────────────────────────────────────────────────────
+  // The menu is rebuilt whenever the game returns to it, so the strip is put
+  // back rather than assumed to have survived.
+
+  function attach() {
+    var menu = document.querySelector('.menu-ui');
+    if (!menu) return;
+    ensureStyles();
+    ensureStrip(menu);
+  }
+
+  function start() {
+    var gv = identity();
+    if (gv) {
+      gv.onChange(repaintStrips);
+      gv.ready.then(repaintStrips);
+    }
+    loadAccountName();
+    new MutationObserver(attach).observe(document.body, { childList: true, subtree: true });
+    attach();
+  }
+
+  // Signing in happens on the page around the iframe, so it arrives here as a
+  // storage event rather than as anything the game did.
+  window.addEventListener('storage', function (e) {
+    if (!e || (e.key !== AUTH_KEY && e.key !== 'gv.username')) return;
+    loadAccountName();
+    repaintStrips();
+  });
+
+  if (document.body) start();
+  else document.addEventListener('DOMContentLoaded', start);
+})();
