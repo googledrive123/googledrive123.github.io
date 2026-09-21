@@ -318,6 +318,24 @@
     logo.style.height = height + 'px';
   }
 
+  // The strip is often added while the menu is still behind a loading screen
+  // or a sub-page, where everything measures zero. Rather than measure once
+  // and hope, the fit is redone whenever the menu is visible and either the
+  // window or the menu itself has changed since the last one.
+  var fittedLogo = null;
+  var fittedKey = null;
+
+  function maybeFit(menu) {
+    var logo = menu.querySelector(':scope > .logo');
+    var info = menu.querySelector(':scope > .info');
+    if (!logo || !info || info.offsetParent === null) return;
+    var key = menu.offsetWidth + 'x' + menu.offsetHeight;
+    if (logo === fittedLogo && key === fittedKey) return;
+    fittedLogo = logo;
+    fittedKey = key;
+    fitMenu(menu);
+  }
+
   // ── Wiring ────────────────────────────────────────────────────────────
   // The menu is rebuilt whenever the game returns to it, so the strip is put
   // back rather than assumed to have survived.
@@ -326,17 +344,18 @@
     var menu = document.querySelector('.menu-ui');
     if (!menu) return;
     ensureStyles();
-    if (ensureStrip(menu)) fitMenu(menu);
+    ensureStrip(menu);
+    maybeFit(menu);
   }
 
   var fitTimer = null;
   window.addEventListener('resize', function () {
     clearTimeout(fitTimer);
+    // The game rescales the whole interface from its own resize listener.
+    // Measuring before that lands reads the size that is on its way out.
     fitTimer = setTimeout(function () {
       var menu = document.querySelector('.menu-ui');
-      // The game rescales the whole interface on resize too, and does it from
-      // its own listener. Measuring before that lands reads the old size.
-      if (menu) fitMenu(menu);
+      if (menu) maybeFit(menu);
     }, 200);
   });
 
