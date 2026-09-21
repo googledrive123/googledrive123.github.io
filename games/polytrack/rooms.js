@@ -163,6 +163,74 @@
 
   // ── Sockets ───────────────────────────────────────────────
 
+  // A socket that is never dialled. The game holds it, listens on it and
+  // sends JSON into it exactly as it would a real one; what comes back is
+  // assembled here instead of arriving off the wire. Only the surface the
+  // bundle actually touches is implemented, which is the four events, send,
+  // close and readyState.
+  //
+  // The role handler replaces send. Until one is attached the socket accepts
+  // messages and drops them, so a half-wired path fails quietly rather than
+  // throwing inside the game's own handler.
+
+  function FakeWebSocket(url) {
+    this.url = String(url);
+    this.readyState = 0;
+    this.onopen = null;
+    this.onmessage = null;
+    this.onclose = null;
+    this.onerror = null;
+    this.listeners = { open: [], message: [], close: [], error: [] };
+  }
+
+  FakeWebSocket.prototype.CONNECTING = 0;
+  FakeWebSocket.prototype.OPEN = 1;
+  FakeWebSocket.prototype.CLOSING = 2;
+  FakeWebSocket.prototype.CLOSED = 3;
+
+  FakeWebSocket.prototype.addEventListener = function (type, fn) {
+    if (this.listeners[type] && typeof fn === 'function') this.listeners[type].push(fn);
+  };
+
+  FakeWebSocket.prototype.removeEventListener = function (type, fn) {
+    var list = this.listeners[type];
+    if (!list) return;
+    var at = list.indexOf(fn);
+    if (at >= 0) list.splice(at, 1);
+  };
+
+  FakeWebSocket.prototype.emit = function (type, event) {
+    var handler = this['on' + type];
+    if (typeof handler === 'function') {
+      try { handler.call(this, event); } catch (e) { console.error(e); }
+    }
+    var list = this.listeners[type].slice();
+    for (var i = 0; i < list.length; i++) {
+      try { list[i].call(this, event); } catch (e) { console.error(e); }
+    }
+  };
+
+  FakeWebSocket.prototype.opened = function () {
+    if (this.readyState !== 0) return;
+    this.readyState = 1;
+    this.emit('open', { type: 'open' });
+  };
+
+  // Everything the game reads arrives as a JSON string, so callers hand over
+  // the object and the stringify happens in one place.
+  FakeWebSocket.prototype.deliver = function (message) {
+    if (this.readyState !== 1) return;
+    this.emit('message', { type: 'message', data: JSON.stringify(message) });
+  };
+
+  FakeWebSocket.prototype.send = function () {};
+
+  FakeWebSocket.prototype.close = function () {
+    if (this.readyState === 3) return;
+    this.readyState = 3;
+    this.emit('close', { type: 'close', code: 1000, wasClean: true });
+  };
+
   function nativeSocket(url, protocols) {
     return protocols === undefined
       ? new NativeWebSocket(url)
