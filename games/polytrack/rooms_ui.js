@@ -306,9 +306,20 @@
     return block;
   }
 
+  // Everything here runs from a MutationObserver, and everything here writes
+  // to the DOM, so rebuilding unconditionally means observing our own writes
+  // and rebuilding again, forever, until the page stops responding. Nothing is
+  // touched unless what would be drawn has actually changed.
+  var drawn = null;
+
   function refreshPlaylist() {
     var rows = document.querySelector('.gv-track-list > .rows');
     if (!rows) return;
+
+    var signature = settings.playlist.map(function (track) { return track.thumbnail; }).join('|');
+    if (signature === drawn) return;
+    drawn = signature;
+
     rows.innerHTML = '';
 
     if (settings.playlist.length === 0) {
@@ -387,7 +398,10 @@
     var block = box.querySelector('.gv-join-option');
     var code = box.querySelector('.invite-code');
     if (!block || !code) return;
-    block.style.display = code.value.trim().length > 0 ? '' : 'none';
+    var wanted = code.value.trim().length > 0 ? '' : 'none';
+    // Same reason as the track list: writing an attribute that already holds
+    // this value still wakes the observer that called us.
+    if (block.style.display !== wanted) block.style.display = wanted;
   }
 
   function fillHostPanel(root) {
@@ -397,6 +411,8 @@
       refreshPlaylist();
       return;
     }
+    // A freshly built panel has nothing drawn in it yet.
+    drawn = null;
     var buttons = box.querySelector(':scope > .buttons');
     if (!buttons) return;
     box.insertBefore(playlistBlock(), buttons);
