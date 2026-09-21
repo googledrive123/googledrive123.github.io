@@ -359,6 +359,91 @@
     });
   }
 
+  // ── Moving through the list ─────────────────────────────────
+  // Mid-race the host's toolbar already has a Change Track button, and using
+  // it restarts the round on the new track for everyone in the room. So the
+  // circuit does not need a mechanism of its own: it needs to press that
+  // button and then pick the right track out of the list that opens.
+  //
+  // Only the host has that button, which is also exactly who should be
+  // deciding the room moves on.
+
+  var at = 0;
+
+  function toolbarButtons() {
+    return document.querySelector('.game-toolbar-ui .button-container');
+  }
+
+  function buttonNamed(root, text) {
+    if (!root) return null;
+    var all = root.querySelectorAll('button, .button');
+    for (var i = 0; i < all.length; i++) {
+      if (all[i].textContent.trim() === text) return all[i];
+    }
+    return null;
+  }
+
+  // The picker takes a moment to build, and the card wanted may be in a group
+  // that has to finish opening, so this waits rather than assuming.
+  function whenPickerReady(thumbnail, then, tries) {
+    var left = tries === undefined ? 20 : tries;
+    var picker = trackPicker();
+    var card = picker === null ? null : cardFor(picker, thumbnail);
+    if (card !== null && card.querySelector('button').offsetParent !== null) {
+      then(card);
+      return;
+    }
+    if (left <= 0) {
+      console.error('Rooms: could not find ' + thumbnail + ' in the track picker');
+      return;
+    }
+    setTimeout(function () { whenPickerReady(thumbnail, then, left - 1); }, 250);
+  }
+
+  function goToTrack(index) {
+    if (settings.playlist.length === 0) return;
+    at = ((index % settings.playlist.length) + settings.playlist.length) % settings.playlist.length;
+    var track = settings.playlist[at];
+
+    var change = buttonNamed(toolbarButtons(), 'Change Track');
+    if (change === null) return;
+    change.click();
+
+    whenPickerReady(track.thumbnail, function (card) {
+      card.querySelector('button').click();
+      tellRoom();
+    });
+  }
+
+  function nextTrack() {
+    goToTrack(at + 1);
+  }
+
+  // ── The in-race button ─────────────────────────────────────
+  // Added next to the game's own toolbar buttons so it reads as one of them.
+  // It only appears for the host of a room with somewhere to go.
+
+  function fillToolbar() {
+    var rooms = window.GV && window.GV.rooms;
+    var container = toolbarButtons();
+    if (!container) return;
+
+    var wanted = !!rooms && rooms.state().role === 'host' && settings.playlist.length > 1;
+    var existing = container.querySelector('.gv-next-track');
+
+    if (!wanted) {
+      if (existing) existing.parentElement.removeChild(existing);
+      return;
+    }
+    if (existing) return;
+
+    var button = document.createElement('button');
+    button.className = 'button gv-next-track';
+    button.textContent = 'Next Track';
+    button.addEventListener('click', nextTrack);
+    container.appendChild(button);
+  }
+
   // The same control on the join side, under the code box. A player decides
   // how the others look on their own screen, so this wins over whatever the
   // host sent: the host's choice is where everyone starts, not a rule.
@@ -558,6 +643,8 @@
       fillHostPanel(rooms);
       fillJoinPanel(rooms);
     }
+
+    fillToolbar();
   }
 
   function start() {
@@ -577,6 +664,7 @@
         // so until the first broadcast lands they sit on the defaults rather
         // than briefly applying what they last chose as a host themselves.
         // Unless they already picked on the join screen, which stands.
+        at = 0;
         if (state.role === 'host') active = settings;
         else active = copyOf(playerPicked ? settings : DEFAULTS);
         startApplying();
