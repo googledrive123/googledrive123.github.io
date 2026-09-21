@@ -60,15 +60,15 @@
     var css = document.createElement('style');
     css.id = STYLE_ID;
     css.textContent = [
-      // The button row is a flex row that centres its 200px buttons, so the
-      // middle of the container is the middle of a button and 116px below it
-      // clears the row whatever height the menu happens to be.
-      '.menu-ui > .main-buttons-container { position: relative; }',
-      '.gv-whoami {',
-      '  position: absolute; left: 0; right: 0; top: calc(50% + 116px);',
-      '  margin: 0; padding: 6px 14px; border: none; background: none;',
+      // First line of the block the game already keeps under the buttons, so
+      // it stacks with the game's own text instead of being positioned into
+      // the same few pixels. That block is hidden whenever the menu moves off
+      // its front screen, and the strip goes with it.
+      '.menu-ui > .info > .gv-whoami {',
+      '  display: block; margin: 0 auto 4px auto; padding: 5px;',
+      '  width: fit-content; border: none; background: none;',
       '  font: inherit; font-size: 24px; color: var(--text-color);',
-      '  text-align: center; cursor: pointer; pointer-events: auto; }',
+      '  cursor: pointer; pointer-events: auto; }',
       '.gv-whoami > .gv-who-label { opacity: 0.5; }',
       '.gv-whoami > .gv-who-name { margin-left: 8px; }',
       '.gv-whoami:hover > .gv-who-name { text-decoration: underline; }',
@@ -126,14 +126,14 @@
   }
 
   function ensureStrip(menu) {
-    var buttons = menu.querySelector('.main-buttons-container');
-    if (!buttons || buttons.querySelector('.gv-whoami')) return;
+    var info = menu.querySelector(':scope > .info');
+    if (!info || info.querySelector('.gv-whoami')) return;
     var strip = document.createElement('button');
     strip.type = 'button';
     strip.className = 'gv-whoami';
     strip.innerHTML = '<span class="gv-who-label"></span><span class="gv-who-name"></span>';
     strip.addEventListener('click', function () { openPanel(menu); });
-    buttons.appendChild(strip);
+    info.insertBefore(strip, info.firstChild);
     paintStrip(strip);
   }
 
