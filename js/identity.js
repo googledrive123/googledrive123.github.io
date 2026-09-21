@@ -175,3 +175,41 @@
       + COLOURS[hash(text, 0x1000193) % COLOURS.length]
       + CREATURES[hash(text, 0x27d4eb2f) % CREATURES.length];
   }
+
+  /* ── Stored preferences ───────────────────────────────────────────────
+     A chosen name overrides the generated one. Anonymous mode is off unless
+     it was deliberately turned on, so a first-time player is somebody rather
+     than nobody. */
+
+  var NAME_KEY = 'gv.name';
+  var ANON_KEY = 'gv.anon';
+
+  var watchers = [];
+
+  function announce() {
+    for (var i = 0; i < watchers.length; i++) {
+      try { watchers[i](); } catch (e) {}
+    }
+  }
+
+  function chosenName() {
+    try { return localStorage.getItem(NAME_KEY) || null; } catch (e) { return null; }
+  }
+
+  function setChosenName(name) {
+    var clean = String(name == null ? '' : name).trim().slice(0, 32);
+    try {
+      if (clean) localStorage.setItem(NAME_KEY, clean);
+      else localStorage.removeItem(NAME_KEY);
+    } catch (e) {}
+    announce();
+  }
+
+  function anonymous() {
+    try { return localStorage.getItem(ANON_KEY) === '1'; } catch (e) { return false; }
+  }
+
+  function setAnonymous(on) {
+    try { localStorage.setItem(ANON_KEY, on ? '1' : '0'); } catch (e) {}
+    announce();
+  }
