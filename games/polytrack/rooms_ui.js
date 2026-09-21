@@ -82,6 +82,49 @@
     { value: 'hidden', label: 'Hidden', info: 'Race alone against their times.' }
   ];
 
+  // The game styles these blocks by their full path, .multiplayer-ui > .host >
+  // .main-box > .game-mode-container > .title and so on, so an identical block
+  // on the join side matches none of it and comes out as unstyled black text.
+  // These are the same declarations, keyed off our own class instead, so one
+  // block looks right wherever it is put.
+  var STYLE_ID = 'gv-rooms-style';
+
+  var STYLE = [
+    '.gv-room-option {',
+    '  margin: 10px;',
+    '  padding: 20px;',
+    '  box-sizing: border-box;',
+    '  width: calc(100% - 10px * 2);',
+    '  background-color: var(--surface-color);',
+    '}',
+    '.gv-room-option > .title {',
+    '  margin: 0 0 6px 0;',
+    '  padding: 0;',
+    '  font-size: 26px;',
+    '  color: var(--text-color);',
+    '}',
+    '.gv-room-option > .button:first-of-type {',
+    '  margin: 0 0 0 -5px;',
+    '}',
+    '.gv-room-option > .button.selected {',
+    '  background-color: var(--button-hover-color);',
+    '}',
+    '.gv-room-option > .info {',
+    '  margin: 10px 0 0 0;',
+    '  padding: 0;',
+    '  font-size: 20px;',
+    '  color: var(--text-color);',
+    '}'
+  ].join('\n');
+
+  function ensureStyles() {
+    if (document.getElementById(STYLE_ID)) return;
+    var tag = document.createElement('style');
+    tag.id = STYLE_ID;
+    tag.textContent = STYLE;
+    document.head.appendChild(tag);
+  }
+
   function choiceBlock(title, options, current, onPick) {
     var block = document.createElement('div');
     block.className = 'game-mode-container gv-room-option';
@@ -312,6 +355,7 @@
 
     var rooms = document.querySelector('.multiplayer-ui');
     if (rooms) {
+      ensureStyles();
       fillHostPanel(rooms);
       fillJoinPanel(rooms);
     }
