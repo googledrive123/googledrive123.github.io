@@ -235,14 +235,28 @@
     back.className = 'button';
     back.innerHTML = '<img class="button-icon" src="images/back.svg">';
     back.appendChild(document.createTextNode(' Back'));
-    back.addEventListener('click', function () { panel.remove(); });
     foot.appendChild(back);
     box.appendChild(foot);
 
     panel.appendChild(box);
-    panel.addEventListener('click', function (e) {
-      if (e.target === panel) panel.remove();
-    });
+
+    // Escape closes the panel and goes no further: the game reads it too, and
+    // would take the menu back a screen behind a panel that had already
+    // answered the same key.
+    function onKey(e) {
+      if (e.key !== 'Escape') return;
+      e.stopPropagation();
+      e.preventDefault();
+      close();
+    }
+    function close() {
+      window.removeEventListener('keydown', onKey, true);
+      panel.remove();
+    }
+    window.addEventListener('keydown', onKey, true);
+    back.addEventListener('click', close);
+    panel.addEventListener('click', function (e) { if (e.target === panel) close(); });
+
     menu.appendChild(panel);
   }
 
