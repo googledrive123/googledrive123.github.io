@@ -29,9 +29,16 @@ const STUN_ONLY = [
   { urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }
 ];
 
-// Rooms last minutes. Two hours is far longer than any of them and well under
-// the 48 hour ceiling Cloudflare allows.
+// Rooms last minutes, but a credential has to outlive the whole session: TURN
+// allocations are refreshed with the same credential, so if it expires
+// mid-race the relay drops. Two hours covers any realistic session and is well
+// under the 48 hour ceiling Cloudflare allows.
 const TTL_SECONDS = 7200;
+
+// One credential is enough for a room, and the page holds it for half an hour,
+// so this ceiling is far above honest use. Past it the answer is still a
+// working one, just without a relay: rooms degrade rather than break.
+const GRANTS_PER_HOUR = 40;
 
 function headersFor(origin: string) {
   return {
@@ -40,6 +47,36 @@ function headersFor(origin: string) {
     'Access-Control-Allow-Headers': 'authorization, apikey, content-type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS'
   };
+}
+
+// Cloudflare bills relay traffic past the free tier, and the anon key is
+// public while the origin header is forgeable by anything that is not a
+// browser. So issuance is counted per address before a credential is minted.
+async function withinLimit(ip: string): Promise<boolean> {
+  const url = Deno.env.get('SUPABASE_URL');
+  const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  if (!url || !key) return true;
+
+  try {
+    const res = await fetch(`${url}/rest/v1/rpc/polytrack_ice_allow`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: key, Authorization: `Bearer ${key}` },
+      body: JSON.stringify({ p_ip: ip, p_limit: GRANTS_PER_HOUR })
+    });
+    if (!res.ok) return true;
+    return (await res.json()) !== false;
+  } catch (error) {
+    // A limiter that is down must not take the feature down with it.
+    console.error('Rate limit check failed, allowing:', error);
+    return true;
+  }
+}
+
+// Tags usage in Cloudflare's analytics without handing them an address.
+async function tagFor(ip: string): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('polytrack:' + ip));
+  return 'pt_' + Array.from(new Uint8Array(digest)).slice(0, 6)
+    .map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
 Deno.serve(async (request: Request) => {
@@ -58,13 +95,19 @@ Deno.serve(async (request: Request) => {
     return new Response(JSON.stringify(STUN_ONLY), { headers });
   }
 
+  const ip = (request.headers.get('x-forwarded-for') ?? '').split(',')[0].trim();
+  if (!(await withinLimit(ip))) {
+    console.warn('ICE credential limit reached for an address');
+    return new Response(JSON.stringify(STUN_ONLY), { headers });
+  }
+
   try {
     const minted = await fetch(
       `https://rtc.live.cloudflare.com/v1/turn/keys/${keyId}/credentials/generate-ice-servers`,
       {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ttl: TTL_SECONDS })
+        body: JSON.stringify({ ttl: TTL_SECONDS, customIdentifier: await tagFor(ip) })
       }
     );
 
