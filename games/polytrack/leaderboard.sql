@@ -108,3 +108,55 @@ end;
 $function$;
 
 grant execute on function public.polytrack_set_name(text, text) to anon, authenticated;
+
+
+-- Signing in used to split a player in two: the guest rows stayed where they
+-- were under the browser's visitor id and the account started an empty second
+-- set. This hands the guest rows over to the account, keeping the better time
+-- wherever both exist for the same track.
+create or replace function public.polytrack_claim(
+  p_visitor_id text
+) returns integer
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user  uuid := auth.uid();
+  v_key   text;
+  v_moved integer := 0;
+begin
+  if v_user is null or coalesce(char_length(p_visitor_id), 0) = 0 then
+    return 0;
+  end if;
+  v_key := 'guest:' || p_visitor_id;
+
+  -- Guest rows the account already matches or beats have nothing to add.
+  delete from polytrack_scores g
+   using polytrack_scores u
+   where g.player_key = v_key
+     and u.user_id = v_user
+     and u.track_id = g.track_id
+     and u.frames <= g.frames;
+
+  -- Where the guest was faster, its row is the one that survives.
+  delete from polytrack_scores u
+   using polytrack_scores g
+   where u.user_id = v_user
+     and g.player_key = v_key
+     and g.track_id = u.track_id
+     and g.frames < u.frames;
+
+  -- player_key is generated from these two columns, so the rows move to the
+  -- account's half of the board on their own.
+  update polytrack_scores
+     set user_id = v_user,
+         visitor_id = null
+   where player_key = v_key;
+
+  get diagnostics v_moved = row_count;
+  return v_moved;
+end;
+$function$;
+
+grant execute on function public.polytrack_claim(text) to authenticated;
