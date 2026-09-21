@@ -320,7 +320,12 @@
   // under a single event name, because a supabase channel only accepts
   // handlers before it subscribes and the lobby's vocabulary is still growing.
 
-  var lobby = { code: null, role: null, channel: null, states: [], messages: [] };
+  // The channel outlives the socket that opened it. A joining player's socket
+  // is closed by the game the moment the handshake succeeds, and the host's
+  // invite socket closes when the invite expires, but in both cases the room
+  // is still very much running. Tying the channel to the socket meant a player
+  // dropped out of the room's conversation the instant they got in.
+  var lobby = { code: null, role: null, channel: null, states: [], messages: [], beat: null };
 
   function announce() {
     var state = { code: lobby.code, role: lobby.role };
@@ -336,6 +341,7 @@
   }
 
   function enterLobby(role, code, channel) {
+    if (lobby.channel !== null && lobby.channel !== channel) lobby.channel.unsubscribe();
     lobby.role = role;
     lobby.code = code;
     lobby.channel = channel;
@@ -344,11 +350,44 @@
 
   function leaveLobby() {
     if (lobby.channel === null) return;
+    if (lobby.role === 'player') post(lobby.channel, 'leave', { session: lobby.session });
+    lobby.channel.unsubscribe();
+    stopHeartbeat();
     lobby.role = null;
     lobby.code = null;
     lobby.channel = null;
+    lobby.session = null;
     announce();
   }
+
+  // Two clocks have to be held off. The game closes the host's invite socket
+  // after thirty five seconds without a message, and a room stops being
+  // findable ten minutes after it was last touched. A host sitting in an empty
+  // lobby waiting for a friend trips both.
+  //
+  // pong is the one inbound type the game accepts and then ignores, which
+  // makes it the right thing to send when there is nothing to say.
+  function startHeartbeat(socket) {
+    stopHeartbeat();
+    var ticks = 0;
+    lobby.beat = setInterval(function () {
+      socket.deliver({ type: 'pong' });
+      ticks = ticks + 1;
+      if (ticks % 4 === 0 && lobby.code !== null) {
+        rpc('polytrack_room_touch', { p_code: lobby.code, p_key: lobby.key })
+          .catch(function (error) { console.error('Room keep-alive failed:', error); });
+      }
+    }, 15000);
+  }
+
+  function stopHeartbeat() {
+    if (lobby.beat === null) return;
+    clearInterval(lobby.beat);
+    lobby.beat = null;
+  }
+
+  // Leaving the page is the one moment a player is definitely out of the room.
+  window.addEventListener('pagehide', leaveLobby);
 
   // ── Roles ───────────────────────────────────────────────────
   // A role takes over the socket's send and decides what comes back. The game
@@ -375,7 +414,23 @@
   }
 
   function hostRole(socket) {
-    var room = { code: null, key: null, nickname: null, channel: null, beat: null };
+    var room = { code: null, key: null, nickname: null, channel: null };
+    // seen holds each joining session's state, which is 'pending' from the
+    // moment its request arrives until its offer has been handed over, then
+    // 'ready'. held keeps whatever turned up in between.
+    var seen = {};
+    var held = {};
+
+    // The game drops an ICE candidate for a session it has not been told about
+    // yet, with a warning and nothing else, and the one it drops may be the
+    // candidate that would have connected. Handing over an offer takes a round
+    // trip to fetch the ICE list, which is easily long enough for the joiner's
+    // first candidates to overtake it, so they wait their turn.
+    function relay(session, message) {
+      if (seen[session] === 'ready') socket.deliver(message);
+      else if (seen[session] === 'pending') held[session].push(message);
+    }
+
     // seen holds each joining session's state, which is 'pending' from the
     // moment its request arrives until its offer has been handed over, then
     // 'ready'. held keeps whatever turned up in between.
@@ -493,8 +548,9 @@
             return;
           }
           room.channel = channel;
+          lobby.key = room.key;
           enterLobby('host', room.code, channel);
-          startHeartbeat();
+          startHeartbeat(socket);
           // Warmed now rather than when the first player knocks, so handing
           // over an offer is a local step instead of a round trip.
           iceServers();
@@ -533,19 +589,8 @@
       }
     };
 
-    var close = socket.close;
-    socket.close = function () {
-      if (room.beat !== null) {
-        clearInterval(room.beat);
-        room.beat = null;
-      }
-      if (room.channel !== null) {
-        leaveLobby();
-        room.channel.unsubscribe();
-        room.channel = null;
-      }
-      close.call(socket);
-    };
+    // The socket closing is not the room closing: the game drops this one when
+    // the invite expires and opens a fresh one to renew. The channel stays.
   }
 
   function joinRole(socket) {
@@ -622,6 +667,7 @@
               return;
             }
             seat.channel = channel;
+            lobby.session = seat.session;
             enterLobby('player', room.code, channel);
 
             var hello = {
@@ -665,15 +711,12 @@
       }
     };
 
+    // The game closes this socket as soon as it is accepted, because the rest
+    // of the conversation runs peer to peer. The room is only just starting at
+    // that point, so nothing here is torn down with it.
     var close = socket.close;
     socket.close = function () {
       stopRetry();
-      if (seat.channel !== null) {
-        post(seat.channel, 'leave', { session: seat.session });
-        leaveLobby();
-        seat.channel.unsubscribe();
-        seat.channel = null;
-      }
       close.call(socket);
     };
   }
