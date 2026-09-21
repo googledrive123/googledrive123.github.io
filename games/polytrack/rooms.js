@@ -340,6 +340,7 @@
 
   function hostRole(socket) {
     var room = { code: null, key: null, nickname: null, channel: null, beat: null };
+    var seen = {};
 
     // Two clocks have to be held off. The game closes the socket after thirty
     // five seconds without a message, and a room stops being findable ten
@@ -365,6 +366,12 @@
     // builds the peer connection for this particular player.
     function onJoin(payload) {
       if (typeof payload.session !== 'string' || typeof payload.offer !== 'string') return;
+      // A joiner repeats its request until it is answered, so the same session
+      // arrives more than once. Handing the game a second one would have it
+      // build a second peer connection for a player who already has one.
+      if (seen[payload.session] === true) return;
+      seen[payload.session] = true;
+
       iceServers().then(function (servers) {
         socket.deliver({
           type: 'joinInvite',
