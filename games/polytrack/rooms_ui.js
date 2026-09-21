@@ -50,6 +50,12 @@
     return active === null ? settings : active;
   }
 
+  function copyOf(source) {
+    var out = {};
+    Object.keys(source).forEach(function (key) { out[key] = source[key]; });
+    return out;
+  }
+
   function read() {
     var saved = {};
     try { saved = JSON.parse(localStorage.getItem(STORE_KEY) || '{}') || {}; } catch (e) { saved = {}; }
@@ -273,7 +279,10 @@
           active = null;
           return;
         }
-        active = state.role === 'host' ? settings : null;
+        // A player races under the host's choices, not their own saved ones,
+        // so until the first broadcast lands they sit on the defaults rather
+        // than briefly applying what they last chose as a host themselves.
+        active = state.role === 'host' ? settings : copyOf(DEFAULTS);
         startApplying();
         if (state.role === 'host') startTelling();
       });
