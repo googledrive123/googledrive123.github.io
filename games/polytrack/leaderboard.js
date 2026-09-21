@@ -36,10 +36,26 @@
     } catch (e) { return null; }
   }
 
-  // Guests are keyed by the visitor id the analytics layer already assigns, so
-  // a guest keeps one row across sessions instead of a new one per visit.
+  function identity() {
+    return (window.GV && window.GV.identity) || null;
+  }
+
+  // Guests are keyed by the browser's visitor id. js/identity.js keeps that id
+  // in localStorage, a cookie and IndexedDB at once and reads it back from
+  // whichever survived, which is what stops one person turning into two rows
+  // on the board a day apart.
   function visitorId() {
+    var gv = identity();
+    if (gv) return gv.id();
     try { return localStorage.getItem('gv.vid') || null; } catch (e) { return null; }
+  }
+
+  // IndexedDB is the store most likely to still be holding an id the other two
+  // have lost, and it is the one that only answers asynchronously. Nothing is
+  // filed under an identity before it has had its say.
+  function settled() {
+    var gv = identity();
+    return gv ? gv.ready : Promise.resolve(null);
   }
 
   function rpc(name, body) {
@@ -215,9 +231,9 @@
   };
   FakeXHR.prototype.send = function (body) {
     var self = this;
-    var pending;
-    try { pending = route(this._method, this._url, body); }
-    catch (e) { pending = Promise.reject(e); }
+    var pending = settled().then(function () {
+      return route(self._method, self._url, body);
+    });
     pending.then(function (data) {
       self._finish(200, data === null ? 'null' : JSON.stringify(data));
     }).catch(function (err) {
