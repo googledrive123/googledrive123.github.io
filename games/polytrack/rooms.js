@@ -272,6 +272,48 @@
     return found === null ? null : found[1];
   }
 
+  // ── The room channel ─────────────────────────────────────────
+  // One realtime channel per room, named after the code. Everyone in the room
+  // is on it, so every message carries the session it belongs to and each side
+  // ignores the ones that are not its own.
+  //
+  // What crosses this channel is only ever an introduction: a connection
+  // offer, an answer, and the network candidates the two browsers will try.
+  // Once they are talking, the race runs between them and this channel has
+  // nothing further to carry.
+
+  function channelName(code) {
+    return 'pt-room-' + String(code).toUpperCase();
+  }
+
+  function openChannel(code, handlers) {
+    return realtime().then(function (lib) {
+      return new Promise(function (resolve, reject) {
+        var channel = lib.channel(channelName(code), {
+          config: { broadcast: { self: false } }
+        });
+
+        Object.keys(handlers).forEach(function (event) {
+          channel.on('broadcast', { event: event }, function (packet) {
+            handlers[event](packet.payload || {});
+          });
+        });
+
+        channel.subscribe(function (status, error) {
+          if (status === 'SUBSCRIBED') resolve(channel);
+          else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+            reject(error || new Error('room channel ' + status));
+          }
+        });
+      });
+    });
+  }
+
+  function post(channel, event, payload) {
+    if (channel === null) return;
+    channel.send({ type: 'broadcast', event: event, payload: payload });
+  }
+
   // ── Roles ───────────────────────────────────────────────────
   // A role takes over the socket's send and decides what comes back. The game
   // is strict about what it accepts, so anything unrecognised is dropped
