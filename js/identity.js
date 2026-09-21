@@ -244,3 +244,20 @@
   function publicName() {
     return anonymous() ? 'Anonymous' : realName();
   }
+
+  window.GV = window.GV || {};
+  window.GV.identity = {
+    ready: ready,
+    id: function () { return id; },
+    guestName: guestName,
+    chosenName: chosenName,
+    setChosenName: setChosenName,
+    accountName: accountName,
+    setAccountName: setAccountName,
+    anonymous: anonymous,
+    setAnonymous: setAnonymous,
+    realName: realName,
+    publicName: publicName,
+    onChange: function (fn) { if (typeof fn === 'function') watchers.push(fn); }
+  };
+})();
