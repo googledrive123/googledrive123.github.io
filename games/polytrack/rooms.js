@@ -340,7 +340,21 @@
 
   function hostRole(socket) {
     var room = { code: null, key: null, nickname: null, channel: null, beat: null };
+    // seen holds each joining session's state, which is 'pending' from the
+    // moment its request arrives until its offer has been handed over, then
+    // 'ready'. held keeps whatever turned up in between.
     var seen = {};
+    var held = {};
+
+    // The game drops an ICE candidate for a session it has not been told about
+    // yet, with a warning and nothing else, and the one it drops may be the
+    // candidate that would have connected. Handing over an offer takes a round
+    // trip to fetch the ICE list, which is easily long enough for the joiner's
+    // first candidates to overtake it, so they wait their turn.
+    function relay(session, message) {
+      if (seen[session] === 'ready') socket.deliver(message);
+      else if (seen[session] === 'pending') held[session].push(message);
+    }
 
     // Two clocks have to be held off. The game closes the socket after thirty
     // five seconds without a message, and a room stops being findable ten
@@ -369,8 +383,9 @@
       // A joiner repeats its request until it is answered, so the same session
       // arrives more than once. Handing the game a second one would have it
       // build a second peer connection for a player who already has one.
-      if (seen[payload.session] === true) return;
-      seen[payload.session] = true;
+      if (seen[payload.session] !== undefined) return;
+      seen[payload.session] = 'pending';
+      held[payload.session] = [];
 
       iceServers().then(function (servers) {
         socket.deliver({
@@ -385,12 +400,17 @@
           carStyle: typeof payload.carStyle === 'string' ? payload.carStyle : '',
           iceServers: servers
         });
+
+        seen[payload.session] = 'ready';
+        var waiting = held[payload.session];
+        delete held[payload.session];
+        for (var i = 0; i < waiting.length; i++) socket.deliver(waiting[i]);
       });
     }
 
     function onJoinerIce(payload) {
       if (typeof payload.session !== 'string') return;
-      socket.deliver({
+      relay(payload.session, {
         type: 'iceCandidate',
         session: payload.session,
         candidate: payload.candidate
@@ -399,7 +419,7 @@
 
     function onLeave(payload) {
       if (typeof payload.session !== 'string') return;
-      socket.deliver({ type: 'joinDisconnect', session: payload.session });
+      relay(payload.session, { type: 'joinDisconnect', session: payload.session });
     }
 
     // censoredNickname is assigned straight onto the host's player record, so
