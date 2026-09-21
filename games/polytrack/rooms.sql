@@ -177,14 +177,14 @@ $function$;
 -- in a row here instead, handed out per request behind the origin gate, and
 -- the game never learns where they came from.
 --
--- Seeded with public STUN only. To turn a relay on, paste the credentials from
--- Metered or Cloudflare into the row:
+-- This row is the fallback, and it holds public STUN only. TURN proper is
+-- handled by the ice-servers edge function, which mints short lived Cloudflare
+-- credentials from a key held in its environment. Credentials that expire are
+-- worth the extra moving part: a static username and password handed to every
+-- visitor is a relay quota anyone can spend.
 --
---   update public.polytrack_settings set value = '[
---     {"urls": ["stun:stun.l.google.com:19302"]},
---     {"urls": ["turn:...:80", "turns:...:443?transport=tcp"],
---      "username": "...", "credential": "..."}
---   ]'::jsonb where key = 'ice_servers';
+-- The game asks the function first and falls back to this row, so rooms keep
+-- working on ordinary connections even if the function is down.
 create table if not exists public.polytrack_settings (
   key text primary key,
   value jsonb not null
