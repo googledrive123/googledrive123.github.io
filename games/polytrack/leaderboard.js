@@ -217,7 +217,12 @@
     if (endpoint === 'verifyRecordings') {
       return Promise.resolve({ unverifiedRecordings: [], exhaustive: true, estimatedRemaining: 0 });
     }
-    if (endpoint === 'iceServers') return Promise.resolve([]);
+    // An empty list means WebRTC never gets off the ground, which is what
+    // kept multiplayer dead here. rooms.js owns the real list.
+    if (endpoint === 'iceServers') {
+      var rooms = window.GV && window.GV.rooms;
+      return rooms ? rooms.iceServers() : Promise.resolve([]);
+    }
     return null; // Not ours — caller falls through to the real network.
   }
 
