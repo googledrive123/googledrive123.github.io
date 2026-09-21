@@ -38,7 +38,8 @@
 
   var DEFAULTS = {
     otherCars: 'translucent',
-    playlist: []
+    playlist: [],
+    roundSeconds: 0
   };
 
   // What the host has chosen, kept between sessions. In a room this is only
@@ -76,6 +77,13 @@
   // The game's own host panel is a stack of blocks: a title, a row of buttons,
   // a line of explanation. Ours reuse .game-mode-container and .button, so
   // they are not styled to look like the game's, they are the game's.
+
+  var ROUND_LENGTHS = [
+    { value: 0, label: 'Manual', info: 'The room stays on a track until the host moves it on.' },
+    { value: 120, label: '2 min', info: 'Each track runs for two minutes, then the room moves on.' },
+    { value: 180, label: '3 min', info: 'Each track runs for three minutes, then the room moves on.' },
+    { value: 300, label: '5 min', info: 'Each track runs for five minutes, then the room moves on.' }
+  ];
 
   var OTHER_CARS = [
     { value: 'solid', label: 'Solid', info: 'Other players appear as normal cars.' },
@@ -147,6 +155,11 @@
     '  margin: 0;',
     '  padding: 4px 14px;',
     '  font-size: 22px;',
+    '}',
+    '.gv-round {',
+    '  margin: 4px 0 0 0;',
+    '  color: var(--text-color);',
+    '  opacity: 0.8;',
     '}',
     '.gv-track-empty {',
     '  margin: 0 0 6px 0;',
@@ -369,6 +382,8 @@
   // deciding the room moves on.
 
   var at = 0;
+  var roundEndsAt = null;
+  var ticker = null;
 
   // Which track the room is actually starting on is whatever the game had
   // selected when the host pressed Host, which is not necessarily the first in
@@ -424,12 +439,82 @@
 
     whenPickerReady(track.thumbnail, function (card) {
       card.querySelector('button').click();
+      restartRound();
       tellRoom();
     });
   }
 
   function nextTrack() {
     goToTrack(at + 1);
+  }
+
+  // ── The round clock ──────────────────────────────────────────
+  // A race here has no natural end: in Casual everyone keeps driving for a
+  // better time, and nobody crosses a finish line for the last time in any way
+  // the game announces. So a round is a length of time, and when it runs out
+  // the host moves the room on. Manual leaves that to the host entirely.
+  //
+  // Only the host counts down and acts on it. Everyone else is told when the
+  // round ends so their screen agrees, and does nothing when it does.
+
+  function restartRound() {
+    var length = effective().roundSeconds;
+    roundEndsAt = length > 0 ? Date.now() + length * 1000 : null;
+  }
+
+  function roundTick() {
+    var rooms = window.GV && window.GV.rooms;
+    renderRound();
+    if (!rooms || rooms.state().role !== 'host') return;
+    if (roundEndsAt === null || Date.now() < roundEndsAt) return;
+    if (settings.playlist.length < 2) {
+      restartRound();
+      return;
+    }
+    nextTrack();
+  }
+
+  function startTicking() {
+    if (ticker !== null) return;
+    ticker = setInterval(roundTick, 1000);
+  }
+
+  function stopTicking() {
+    if (ticker === null) return;
+    clearInterval(ticker);
+    ticker = null;
+    roundEndsAt = null;
+    var line = document.querySelector('.gv-round');
+    if (line) line.parentElement.removeChild(line);
+  }
+
+  function clock(seconds) {
+    var whole = Math.max(0, Math.floor(seconds));
+    var minutes = Math.floor(whole / 60);
+    var rest = whole % 60;
+    return minutes + ':' + (rest < 10 ? '0' : '') + rest;
+  }
+
+  // Sits with the track name and game mode the game already shows, because
+  // that is where someone looks to find out what they are racing.
+  function renderRound() {
+    var rooms = window.GV && window.GV.rooms;
+    var content = document.querySelector('.game-toolbar-ui .info-container .content');
+    if (!content || !rooms || rooms.state().code === null) return;
+
+    var list = effective().playlist || [];
+    if (list.length === 0) return;
+
+    var text = 'Track ' + (at + 1) + ' of ' + list.length;
+    if (roundEndsAt !== null) text = text + '  \u00b7  ' + clock((roundEndsAt - Date.now()) / 1000);
+
+    var line = content.querySelector('.gv-round');
+    if (!line) {
+      line = document.createElement('div');
+      line.className = 'gv-round';
+      content.appendChild(line);
+    }
+    if (line.textContent !== text) line.textContent = text;
   }
 
   // ── The in-race button ─────────────────────────────────────
@@ -502,6 +587,15 @@
     if (block.style.display !== wanted) block.style.display = wanted;
   }
 
+  function roundLengthBlock() {
+    return choiceBlock('Round Length', ROUND_LENGTHS, settings.roundSeconds, function (value) {
+      settings.roundSeconds = value;
+      write();
+      restartRound();
+      tellRoom();
+    });
+  }
+
   function fillHostPanel(root) {
     var box = root.querySelector(':scope > .host > .main-box');
     if (!box) return;
@@ -517,6 +611,7 @@
     var buttons = box.querySelector(':scope > .buttons');
     if (!buttons) return;
     box.insertBefore(playlistBlock(), buttons);
+    box.insertBefore(roundLengthBlock(), buttons);
     box.insertBefore(otherCarsBlock(), buttons);
     refreshPlaylist();
   }
@@ -612,7 +707,7 @@
   function tellRoom() {
     var rooms = window.GV && window.GV.rooms;
     if (!rooms) return;
-    rooms.say({ kind: 'settings', settings: settings });
+    rooms.say({ kind: 'settings', settings: settings, at: at, endsAt: roundEndsAt });
   }
 
   function startTelling() {
@@ -632,6 +727,11 @@
     var rooms = window.GV && window.GV.rooms;
     // The host is the one sending these, and its own copy is the original.
     if (!rooms || rooms.state().role !== 'player') return;
+
+    // Where the room has got to is the host's to say, whatever the player
+    // thinks about how the cars should look.
+    if (typeof payload.at === 'number') at = payload.at;
+    roundEndsAt = typeof payload.endsAt === 'number' ? payload.endsAt : null;
 
     // A player who has picked for themselves keeps their pick.
     if (playerPicked) return;
@@ -670,6 +770,7 @@
       rooms.onState(function (state) {
         if (state.code === null) {
           stopTelling();
+          stopTicking();
           stopApplying();
           active = null;
           // The next room starts by following its own host again.
@@ -683,7 +784,9 @@
         at = indexOfTrack(chosenThumbnail);
         if (state.role === 'host') active = settings;
         else active = copyOf(playerPicked ? settings : DEFAULTS);
+        if (state.role === 'host') restartRound();
         startApplying();
+        startTicking();
         if (state.role === 'host') startTelling();
       });
     }
