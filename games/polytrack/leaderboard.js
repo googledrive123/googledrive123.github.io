@@ -101,6 +101,24 @@
   // strictly by the bundle — a missing field is reported to the player as a
   // leaderboard error, so they are built to match exactly.
 
+  // Where the caller stands on the board they last asked for. The row
+  // decoration further down needs it, and the DOM has no idea who anyone is.
+  var selfPosition = null;
+
+  // The game picks its own row out by comparing each entry's userId against
+  // the profile token hash it sent up with the request. The board answers with
+  // its own key for that player instead, so nothing ever matched and the row
+  // was never marked. Relabelling the one row the board named as the caller's
+  // is enough to light up the highlight and the "(You)" the game already
+  // draws for it.
+  function markSelfEntry(board, tokenHash) {
+    if (!tokenHash || !board.userEntry) return;
+    var entries = board.entries || [];
+    for (var i = 0; i < entries.length; i++) {
+      if (entries[i].id === board.userEntry.id) entries[i].userId = tokenHash;
+    }
+  }
+
   function getBoard(q) {
     return rpc('polytrack_board', {
       p_track_id: q.trackId || '',
@@ -108,7 +126,10 @@
       p_amount: parseInt(q.amount || '50', 10) || 50,
       p_visitor_id: visitorId()
     }).then(function (board) {
-      return board || { total: 0, entries: [], userEntry: null };
+      board = board || { total: 0, entries: [], userEntry: null };
+      selfPosition = board.userEntry ? board.userEntry.position : null;
+      markSelfEntry(board, q.userTokenHash);
+      return board;
     });
   }
 
