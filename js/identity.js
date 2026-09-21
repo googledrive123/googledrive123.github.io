@@ -157,3 +157,21 @@
     'Lemur', 'Mantis', 'Narwhal', 'Ocelot', 'Puffin', 'Rhino', 'Seal', 'Tiger',
     'Vulture', 'Wolf', 'Wombat', 'Weasel', 'Shark', 'Moose', 'Cobra', 'Condor'
   ];
+
+  /* FNV-1a, seeded differently for each of the three words so the picks do
+     not move together. 48 x 32 x 48 is a little over 73,000 names. */
+  function hash(text, seed) {
+    var h = seed >>> 0;
+    for (var i = 0; i < text.length; i++) {
+      h ^= text.charCodeAt(i);
+      h = (h + ((h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24))) >>> 0;
+    }
+    return h >>> 0;
+  }
+
+  function guestName(source) {
+    var text = String(source || id || '');
+    return ADJECTIVES[hash(text, 0x811c9dc5) % ADJECTIVES.length]
+      + COLOURS[hash(text, 0x1000193) % COLOURS.length]
+      + CREATURES[hash(text, 0x27d4eb2f) % CREATURES.length];
+  }
