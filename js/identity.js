@@ -213,3 +213,34 @@
     try { localStorage.setItem(ANON_KEY, on ? '1' : '0'); } catch (e) {}
     announce();
   }
+
+  /* The signed-in username is looked up by whichever page has a Supabase
+     client to hand and left here, so the rest of the site can read it without
+     waiting on a round trip of its own. Cleared on sign-out. */
+
+  var ACCOUNT_KEY = 'gv.username';
+
+  function accountName() {
+    try { return localStorage.getItem(ACCOUNT_KEY) || null; } catch (e) { return null; }
+  }
+
+  function setAccountName(name) {
+    var clean = String(name == null ? '' : name).trim().slice(0, 32);
+    try {
+      if (clean) localStorage.setItem(ACCOUNT_KEY, clean);
+      else localStorage.removeItem(ACCOUNT_KEY);
+    } catch (e) {}
+    announce();
+  }
+
+  /* The name behind the player, whether or not anyone else gets to see it.
+     An account username wins: it is the name the site already knows them by,
+     and there is no sense in the same person answering to two things. */
+  function realName() {
+    return accountName() || chosenName() || guestName(id);
+  }
+
+  /* The name everybody else sees. */
+  function publicName() {
+    return anonymous() ? 'Anonymous' : realName();
+  }
