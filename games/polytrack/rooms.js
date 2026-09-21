@@ -86,7 +86,34 @@
 (function () {
   'use strict';
 
+  var SUPA_URL = 'https://dxwjxzmlezfyursysays.supabase.co';
+  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
+
   var NativeWebSocket = window.WebSocket;
+
+  // ── Talking to Supabase ───────────────────────────────────────
+  // Same shape as the helper in leaderboard.js: a plain fetch at PostgREST,
+  // anon key only. Rooms belong to whoever is holding the host key, not to a
+  // signed-in account, so there is no session to attach here.
+
+  function rpc(name, body) {
+    return fetch(SUPA_URL + '/rest/v1/rpc/' + name, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPA_KEY,
+        'Authorization': 'Bearer ' + SUPA_KEY
+      },
+      body: JSON.stringify(body || {})
+    }).then(function (res) {
+      if (!res.ok) {
+        return res.text().then(function (text) {
+          throw new Error('rpc ' + name + ' failed: ' + res.status + ' ' + text);
+        });
+      }
+      return res.json();
+    });
+  }
 
   function nativeSocket(url, protocols) {
     return protocols === undefined
