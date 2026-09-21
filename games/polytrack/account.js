@@ -203,3 +203,45 @@
     wrap.appendChild(on);
     return wrap;
   }
+
+  function openPanel(menu) {
+    var gv = identity();
+    if (!gv || menu.querySelector('.gv-panel')) return;
+
+    var panel = document.createElement('div');
+    panel.className = 'gv-panel';
+
+    var box = document.createElement('div');
+    box.className = 'gv-box';
+
+    var title = document.createElement('h2');
+    title.textContent = 'GameVault account';
+    box.appendChild(title);
+
+    var body = document.createElement('div');
+    body.className = 'gv-body';
+    body.appendChild(setting('Name', nameField(gv)));
+    body.appendChild(note(signedIn()
+      ? 'Your GameVault username. Change it from your profile on the site.'
+      : 'Picked for this browser. Change it to anything you like.'));
+    body.appendChild(setting('Anonymous mode', anonymousToggle(gv)));
+    body.appendChild(note('On, the leaderboard shows you as Anonymous to '
+      + 'everyone else. Your own row still shows your name so you can find it.'));
+    box.appendChild(body);
+
+    var foot = document.createElement('div');
+    foot.className = 'gv-foot';
+    var back = document.createElement('button');
+    back.className = 'button';
+    back.innerHTML = '<img class="button-icon" src="images/back.svg">';
+    back.appendChild(document.createTextNode(' Back'));
+    back.addEventListener('click', function () { panel.remove(); });
+    foot.appendChild(back);
+    box.appendChild(foot);
+
+    panel.appendChild(box);
+    panel.addEventListener('click', function (e) {
+      if (e.target === panel) panel.remove();
+    });
+    menu.appendChild(panel);
+  }
