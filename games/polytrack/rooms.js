@@ -237,14 +237,36 @@
       : new NativeWebSocket(url, protocols);
   }
 
-  // ── The stand-in ──────────────────────────────────────────────────────
+  // Only the two multiplayer paths are ours. The game opens no other socket,
+  // but the site around it might, so anything else is built as a real one.
+
+  var MULTIPLAYER = /vps\.kodub\.com\/v\d+\/multiplayer\/(host|join)/;
+
+  function roleOf(url) {
+    var found = MULTIPLAYER.exec(String(url));
+    return found === null ? null : found[1];
+  }
+
+  // ── The stand-in ─────────────────────────────────────────
   // Returning a different object from a constructor replaces the instance, so
-  // a passed-through call hands back a genuine WebSocket. The game cannot
-  // tell the difference, and a socket that is none of our business never sees
-  // this file again. Routing for the two multiplayer paths lands next.
+  // a passed-through call hands back a genuine WebSocket. The game cannot tell
+  // the difference, and a socket that is none of our business never sees this
+  // file again.
+  //
+  // Opening is deferred by a turn because the game attaches its listeners on
+  // the line after the constructor returns. An open event raised synchronously
+  // would land before anything was listening.
 
   function PatchedWebSocket(url, protocols) {
-    return nativeSocket(url, protocols);
+    var role = roleOf(url);
+    if (role === null) return nativeSocket(url, protocols);
+
+    var socket = new FakeWebSocket(url);
+    setTimeout(function () {
+      socket.opened();
+      socket.deliver({ type: 'error', error: 'NotImplemented' });
+    }, 0);
+    return socket;
   }
 
   PatchedWebSocket.CONNECTING = 0;
