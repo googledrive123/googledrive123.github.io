@@ -229,6 +229,8 @@
     this.readyState = 0;
     this.status = 0;
     this.responseText = '';
+    this.response = '';
+    this.responseType = '';
     this.onreadystatechange = null;
     this.onerror = null;
     this.ontimeout = null;
@@ -256,6 +258,7 @@
   FakeXHR.prototype._finish = function (status, text) {
     this.status = status;
     this.responseText = text;
+    this.response = this.responseType === 'json' ? JSON.parse(text || 'null') : text;
     this.readyState = 4;
     try { if (this.onreadystatechange) this.onreadystatechange(); } catch (e) { console.error(e); }
     try { if (this.onload) this.onload(); } catch (e) { console.error(e); }
@@ -326,6 +329,24 @@
     Object.defineProperty(this, 'timeout', {
       get: function () { return (chosen || real).timeout; },
       set: function (v) { real.timeout = v; fake.timeout = v; }
+    });
+
+    // The game loads its audio and its models as arraybuffers. Those two
+    // properties were missing here, so responseType never reached the real
+    // request and response came back undefined: every sound in the game
+    // failed to decode, and the music one surfaced as an error screen.
+    // Set before open() as often as after it, so both objects get it.
+    Object.defineProperty(this, 'responseType', {
+      get: function () { return (chosen || real).responseType; },
+      set: function (v) {
+        try { real.responseType = v; } catch (e) {}
+        fake.responseType = v;
+      }
+    });
+    Object.defineProperty(this, 'response', {
+      get: function () {
+        try { return (chosen || real).response; } catch (e) { return null; }
+      }
     });
 
     this.readyState = 0;
