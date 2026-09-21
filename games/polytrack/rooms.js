@@ -339,7 +339,42 @@
   }
 
   function hostRole(socket) {
-    var room = { code: null, key: null, nickname: null };
+    var room = { code: null, key: null, nickname: null, channel: null };
+
+    // A join request reaches the host as a joinInvite. The ICE list rides
+    // along with it, because that is where the game reads it from when it
+    // builds the peer connection for this particular player.
+    function onJoin(payload) {
+      if (typeof payload.session !== 'string' || typeof payload.offer !== 'string') return;
+      iceServers().then(function (servers) {
+        socket.deliver({
+          type: 'joinInvite',
+          session: payload.session,
+          offer: payload.offer,
+          version: typeof payload.version === 'string' ? payload.version : '0.6.3',
+          mods: Array.isArray(payload.mods) ? payload.mods : [],
+          isModsVanillaCompatible: payload.isModsVanillaCompatible !== false,
+          nickname: typeof payload.nickname === 'string' ? payload.nickname : 'Player',
+          countryCode: typeof payload.countryCode === 'string' ? payload.countryCode : '',
+          carStyle: typeof payload.carStyle === 'string' ? payload.carStyle : '',
+          iceServers: servers
+        });
+      });
+    }
+
+    function onJoinerIce(payload) {
+      if (typeof payload.session !== 'string') return;
+      socket.deliver({
+        type: 'iceCandidate',
+        session: payload.session,
+        candidate: payload.candidate
+      });
+    }
+
+    function onLeave(payload) {
+      if (typeof payload.session !== 'string') return;
+      socket.deliver({ type: 'joinDisconnect', session: payload.session });
+    }
 
     // censoredNickname is assigned straight onto the host's player record, so
     // it cannot be left blank. The game sends its nickname only while it has
@@ -361,6 +396,17 @@
             timeoutMilliseconds: created.timeout_milliseconds,
             censoredNickname: room.nickname || 'Player'
           });
+          return openChannel(created.code, {
+            join: onJoin,
+            'join-ice': onJoinerIce,
+            leave: onLeave
+          });
+        })
+        .then(function (channel) {
+          // The host can give up on the room while the channel is still
+          // opening, and a channel nobody is holding never gets torn down.
+          if (socket.readyState === 3) channel.unsubscribe();
+          else room.channel = channel;
         })
         .catch(function (error) {
           console.error('Failed to open a room:', error);
@@ -372,6 +418,15 @@
       var message = parse(raw);
       if (message === null) return;
       if (message.type === 'createInvite') createInvite(message);
+    };
+
+    var close = socket.close;
+    socket.close = function () {
+      if (room.channel !== null) {
+        room.channel.unsubscribe();
+        room.channel = null;
+      }
+      close.call(socket);
     };
   }
 
