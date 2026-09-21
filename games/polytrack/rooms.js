@@ -125,18 +125,54 @@
   // entirely should still leave most players able to race.
 
   var STUN_ONLY = [{ urls: ['stun:stun.l.google.com:19302'] }];
-  var ice = null;
 
-  function iceServers() {
-    if (ice !== null) return ice;
-    ice = rpc('polytrack_ice_servers', {})
+  // TURN credentials expire, so the list is not kept for the life of the page.
+  // Well inside the two hours the credentials are minted for, and far longer
+  // than any room lasts.
+  var ICE_GOOD_FOR = 30 * 60 * 1000;
+  var ice = null;
+  var iceFetchedAt = 0;
+
+  function usable(list) {
+    return Array.isArray(list) && list.length > 0 ? list : null;
+  }
+
+  // The edge function is asked first because it is the only thing that can
+  // mint TURN credentials. The RPC behind it serves the plain list, and covers
+  // the function being unreachable; public STUN covers both being unreachable.
+  function fetchIce() {
+    return fetch(SUPA_URL + '/functions/v1/ice-servers', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPA_KEY,
+        'Authorization': 'Bearer ' + SUPA_KEY
+      }
+    })
+      .then(function (res) {
+        if (!res.ok) throw new Error('ice-servers responded ' + res.status);
+        return res.json();
+      })
       .then(function (list) {
-        return Array.isArray(list) && list.length > 0 ? list : STUN_ONLY;
+        var ok = usable(list);
+        if (ok === null) throw new Error('ice-servers returned nothing usable');
+        return ok;
       })
       .catch(function (error) {
-        console.error('Falling back to public STUN:', error);
-        return STUN_ONLY;
+        console.error('Falling back to the stored ICE list:', error);
+        return rpc('polytrack_ice_servers', {}).then(function (list) {
+          return usable(list) || STUN_ONLY;
+        });
       });
+  }
+
+  function iceServers() {
+    if (ice !== null && Date.now() - iceFetchedAt < ICE_GOOD_FOR) return ice;
+    iceFetchedAt = Date.now();
+    ice = fetchIce().catch(function (error) {
+      console.error('Falling back to public STUN:', error);
+      return STUN_ONLY;
+    });
     return ice;
   }
 
