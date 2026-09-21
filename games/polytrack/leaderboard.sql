@@ -1,0 +1,9 @@
+-- Server side of the PolyTrack leaderboard.
+--
+-- The table and the two functions the board already ran on were created by
+-- hand in the Supabase dashboard and never written down here. This file is the
+-- record of the change that added names to the board, and it is what has to be
+-- applied to the project for leaderboard.js to behave as written.
+--
+-- Apply against project dxwjxzmlezfyursysays. Every statement is safe to run
+-- twice.
