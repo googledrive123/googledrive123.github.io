@@ -36,10 +36,26 @@
     } catch (e) { return null; }
   }
 
-  // Guests are keyed by the visitor id the analytics layer already assigns, so
-  // a guest keeps one row across sessions instead of a new one per visit.
+  function identity() {
+    return (window.GV && window.GV.identity) || null;
+  }
+
+  // Guests are keyed by the browser's visitor id. js/identity.js keeps that id
+  // in localStorage, a cookie and IndexedDB at once and reads it back from
+  // whichever survived, which is what stops one person turning into two rows
+  // on the board a day apart.
   function visitorId() {
+    var gv = identity();
+    if (gv) return gv.id();
     try { return localStorage.getItem('gv.vid') || null; } catch (e) { return null; }
+  }
+
+  // IndexedDB is the store most likely to still be holding an id the other two
+  // have lost, and it is the one that only answers asynchronously. Nothing is
+  // filed under an identity before it has had its say.
+  function settled() {
+    var gv = identity();
+    return gv ? gv.ready : Promise.resolve(null);
   }
 
   function rpc(name, body) {
@@ -85,6 +101,24 @@
   // strictly by the bundle — a missing field is reported to the player as a
   // leaderboard error, so they are built to match exactly.
 
+  // Where the caller stands on the board they last asked for. The row
+  // decoration further down needs it, and the DOM has no idea who anyone is.
+  var selfPosition = null;
+
+  // The game picks its own row out by comparing each entry's userId against
+  // the profile token hash it sent up with the request. The board answers with
+  // its own key for that player instead, so nothing ever matched and the row
+  // was never marked. Relabelling the one row the board named as the caller's
+  // is enough to light up the highlight and the "(You)" the game already
+  // draws for it.
+  function markSelfEntry(board, tokenHash) {
+    if (!tokenHash || !board.userEntry) return;
+    var entries = board.entries || [];
+    for (var i = 0; i < entries.length; i++) {
+      if (entries[i].id === board.userEntry.id) entries[i].userId = tokenHash;
+    }
+  }
+
   function getBoard(q) {
     return rpc('polytrack_board', {
       p_track_id: q.trackId || '',
@@ -92,7 +126,10 @@
       p_amount: parseInt(q.amount || '50', 10) || 50,
       p_visitor_id: visitorId()
     }).then(function (board) {
-      return board || { total: 0, entries: [], userEntry: null };
+      board = board || { total: 0, entries: [], userEntry: null };
+      selfPosition = board.userEntry ? board.userEntry.position : null;
+      markSelfEntry(board, q.userTokenHash);
+      return board;
     });
   }
 
@@ -108,6 +145,16 @@
     var frames = parseInt(q.frames || '0', 10);
     if (!frames || frames < 1) throw new Error('invalid frames');
 
+    // Whatever the player typed into the game's own profile is the name they
+    // already chose to race under, so it is kept rather than overwritten the
+    // first time a run goes up. "Anonymous" is the game's untouched default
+    // and is not a choice.
+    var gv = identity();
+    if (gv && q.nickname && q.nickname !== 'Anonymous'
+        && !gv.chosenName() && !gv.accountName()) {
+      gv.setChosenName(q.nickname);
+    }
+
     // Read the standing before and after so the game can show the "moved up
     // from Nth" animation it plays on a personal best.
     var trackId = q.trackId || '';
@@ -116,7 +163,7 @@
       return rpc('polytrack_submit', {
         p_track_id: trackId,
         p_frames: frames,
-        p_nickname: q.nickname || 'Player',
+        p_nickname: gv ? gv.publicName() : (q.nickname || 'Player'),
         p_country_code: q.countryCode || null,
         p_car_style: q.carStyle || null,
         p_visitor_id: visitorId()
@@ -182,6 +229,8 @@
     this.readyState = 0;
     this.status = 0;
     this.responseText = '';
+    this.response = '';
+    this.responseType = '';
     this.onreadystatechange = null;
     this.onerror = null;
     this.ontimeout = null;
@@ -209,15 +258,16 @@
   FakeXHR.prototype._finish = function (status, text) {
     this.status = status;
     this.responseText = text;
+    this.response = this.responseType === 'json' ? JSON.parse(text || 'null') : text;
     this.readyState = 4;
     try { if (this.onreadystatechange) this.onreadystatechange(); } catch (e) { console.error(e); }
     try { if (this.onload) this.onload(); } catch (e) { console.error(e); }
   };
   FakeXHR.prototype.send = function (body) {
     var self = this;
-    var pending;
-    try { pending = route(this._method, this._url, body); }
-    catch (e) { pending = Promise.reject(e); }
+    var pending = settled().then(function () {
+      return route(self._method, self._url, body);
+    });
     pending.then(function (data) {
       self._finish(200, data === null ? 'null' : JSON.stringify(data));
     }).catch(function (err) {
@@ -281,6 +331,24 @@
       set: function (v) { real.timeout = v; fake.timeout = v; }
     });
 
+    // The game loads its audio and its models as arraybuffers. Those two
+    // properties were missing here, so responseType never reached the real
+    // request and response came back undefined: every sound in the game
+    // failed to decode, and the music one surfaced as an error screen.
+    // Set before open() as often as after it, so both objects get it.
+    Object.defineProperty(this, 'responseType', {
+      get: function () { return (chosen || real).responseType; },
+      set: function (v) {
+        try { real.responseType = v; } catch (e) {}
+        fake.responseType = v;
+      }
+    });
+    Object.defineProperty(this, 'response', {
+      get: function () {
+        try { return (chosen || real).response; } catch (e) { return null; }
+      }
+    });
+
     this.readyState = 0;
     this.status = 0;
     this.responseText = '';
@@ -293,6 +361,54 @@
   PatchedXHR.DONE = 4;
 
   window.XMLHttpRequest = PatchedXHR;
+
+  // ── Keeping the board's copy of the name current ──────────────────────
+  // The name is stamped on every row the player owns. Renaming, or turning
+  // anonymous mode on, has to reach times that are already up there: no new
+  // run is going to reach them, because nobody re-drives a track just to
+  // correct a label.
+
+  var pushedName = null;
+  var pushTimer = null;
+
+  function pushName() {
+    var gv = identity();
+    if (!gv) return;
+    var name = gv.publicName();
+    if (name === pushedName) return;
+    pushedName = name;
+    rpc('polytrack_set_name', { p_visitor_id: visitorId(), p_nickname: name })
+      .catch(function (err) { console.error('[leaderboard]', err); });
+  }
+
+  // Typing in the name field fires on every keystroke.
+  function scheduleNamePush() {
+    clearTimeout(pushTimer);
+    pushTimer = setTimeout(pushName, 500);
+  }
+
+  // Signing in used to leave the guest's times behind under the browser id
+  // while the account started again from nothing, which is the other half of
+  // seeing yourself twice.
+  function claimGuestScores() {
+    if (!accessToken()) return Promise.resolve(null);
+    return rpc('polytrack_claim', { p_visitor_id: visitorId() })
+      .catch(function (err) { console.error('[leaderboard]', err); });
+  }
+
+  settled().then(function () {
+    claimGuestScores();
+    var gv = identity();
+    if (gv) gv.onChange(scheduleNamePush);
+  });
+
+  // The game sits in an iframe on a page that owns the session, so signing in
+  // or out happens in the other document and arrives here as a storage event.
+  window.addEventListener('storage', function (e) {
+    if (!e || (e.key !== AUTH_KEY && e.key !== 'gv.username')) return;
+    claimGuestScores();
+    scheduleNamePush();
+  });
 
   // ── Verified / unverified labelling ───────────────────────────────────
   // The game has three states: Pending, Verified, Invalid. None of them mean
@@ -324,6 +440,12 @@
       '.leaderboard-ui > .container > button.main > .left > p.gv-verify.gv-yes { color: #5f5; }',
       '.leaderboard-ui > .container > button.main > .left > p.gv-verify.gv-no { color: #f55; }',
       '.leaderboard-ui > .container > button.main > .right > .verified-state > img { display: none; }',
+      // Sits between the name and the game's own "(You)", quiet enough to
+      // read as an aside rather than as a second name. That "(You)" carries a
+      // -16px left margin, so the gap on the right pays for it too.
+      '.leaderboard-ui .gv-realname {',
+      '  margin-left: 8px; margin-right: 22px; font-size: 19px;',
+      '  opacity: 0.55; white-space: nowrap; }',
       // Mirrors .total-players, which sits in the opposite corner.
       '.leaderboard-ui > .gv-info {',
       '  margin: 10px; position: absolute; left: 0; top: 0; z-index: 3;',
@@ -350,12 +472,39 @@
     document.head.appendChild(css);
   }
 
+  // The rank the game printed on a row, digits only: it draws the number and
+  // its ordinal suffix into the same element.
+  function positionOf(row) {
+    var el = row.querySelector('.position');
+    if (!el) return null;
+    var n = parseInt(String(el.textContent || '').replace(/[^0-9]/g, ''), 10);
+    return isFinite(n) ? n : null;
+  }
+
+  // Anonymous mode hides the player from everybody, including the player, who
+  // is then left scanning a column of identical "Anonymous" for the run they
+  // remember setting. Their own row, and only on their own screen, also
+  // carries the name behind it.
+  function nameSelfRow(row) {
+    if (selfPosition == null || positionOf(row) !== selfPosition) return;
+    var gv = identity();
+    var shown = row.querySelector('.name');
+    if (!gv || !shown) return;
+    var real = gv.realName();
+    if (!real || shown.textContent === real) return;
+    var tag = document.createElement('span');
+    tag.className = 'gv-realname';
+    tag.textContent = '(' + real + ')';
+    shown.parentNode.insertBefore(tag, shown.nextSibling);
+  }
+
   function labelRow(row) {
     if (row.dataset.gvLabelled) return;
     var state = row.querySelector('.verified-state');
     var left = row.querySelector('.left');
     if (!state || !left) return;
     row.dataset.gvLabelled = '1';
+    nameSelfRow(row);
 
     var verified = state.classList.contains('verified');
     var label = document.createElement('p');

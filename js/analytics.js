@@ -51,14 +51,20 @@
     return s;
   }
 
-  var visitorId = ls(true, 'gv.vid');
-  var isNewVisitor = false;
+  // js/identity.js holds the same id in a cookie and in IndexedDB as well, so
+  // it can hand back one this browser has used before where localStorage on
+  // its own would have minted a second. Kept optional: a page that does not
+  // load it still tracks, it just has the shorter memory it always had.
+  var shared = window.GV && window.GV.identity;
+  var visitorId = shared ? shared.id() : ls(true, 'gv.vid');
   if (!visitorId) {
     visitorId = uuid();
-    isNewVisitor = true;
     ls(false, 'gv.vid', visitorId);
-    ls(false, 'gv.first_seen', new Date().toISOString());
   }
+  // New means never seen here before, not "no id in localStorage" - a restored
+  // id belongs to somebody who has been before.
+  var isNewVisitor = !ls(true, 'gv.first_seen');
+  if (isNewVisitor) ls(false, 'gv.first_seen', new Date().toISOString());
 
   var now = Date.now();
   var sessionId = ss(true, 'gv.sid');
