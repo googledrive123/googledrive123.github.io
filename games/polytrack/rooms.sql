@@ -78,9 +78,15 @@ $function$;
 -- Called when the host opens the multiplayer menu. Retries on the unlikely
 -- collision rather than trusting one draw, and gives up after a few attempts
 -- so a full keyspace cannot spin here forever.
+--
+-- The old two argument version is dropped first. Left beside this one, a call
+-- naming only p_key and p_name would match both and PostgREST would refuse it.
+drop function if exists public.polytrack_room_create(text, text);
+
 create or replace function public.polytrack_room_create(
   p_key text,
-  p_name text default null
+  p_name text default null,
+  p_public boolean default false
 ) returns json
 language plpgsql
 security definer
@@ -105,8 +111,13 @@ begin
     v_attempt := v_attempt + 1;
     v_code := public.polytrack_room_code();
 
-    insert into polytrack_rooms (code, host_key, host_name)
-    values (v_code, p_key, left(nullif(btrim(coalesce(p_name, '')), ''), 50))
+    insert into polytrack_rooms (code, host_key, host_name, is_public)
+    values (
+      v_code,
+      p_key,
+      left(nullif(btrim(coalesce(p_name, '')), ''), 50),
+      coalesce(p_public, false)
+    )
     on conflict (code) do nothing;
 
     if found then
