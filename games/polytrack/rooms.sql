@@ -86,7 +86,8 @@ drop function if exists public.polytrack_room_create(text, text);
 create or replace function public.polytrack_room_create(
   p_key text,
   p_name text default null,
-  p_public boolean default false
+  p_public boolean default false,
+  p_track text default null
 ) returns json
 language plpgsql
 security definer
@@ -111,12 +112,13 @@ begin
     v_attempt := v_attempt + 1;
     v_code := public.polytrack_room_code();
 
-    insert into polytrack_rooms (code, host_key, host_name, is_public)
+    insert into polytrack_rooms (code, host_key, host_name, is_public, track_name)
     values (
       v_code,
       p_key,
       left(nullif(btrim(coalesce(p_name, '')), ''), 50),
-      coalesce(p_public, false)
+      coalesce(p_public, false),
+      left(nullif(btrim(coalesce(p_track, '')), ''), 80)
     )
     on conflict (code) do nothing;
 
