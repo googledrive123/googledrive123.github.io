@@ -545,6 +545,7 @@
     var rooms = window.GV && window.GV.rooms;
     renderRound();
     if (!rooms || rooms.state().role !== 'host') return;
+    tellTrack(document.querySelector('.game-toolbar-ui .track-name'));
     if (roundEndsAt === null || Date.now() < roundEndsAt) return;
     if (settings.playlist.length < 2) {
       restartRound();
