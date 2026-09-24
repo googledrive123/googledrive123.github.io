@@ -945,9 +945,33 @@
     if (!join || !panel) return;
     join.classList.toggle('hidden', show);
     panel.classList.toggle('hidden', !show);
-    if (!show) return;
+    if (!show) {
+      stopRefreshing();
+      return;
+    }
     publicNote('Looking for rooms...');
     loadPublic();
+    startRefreshing();
+  }
+
+  // Rooms open and close while the list is up, so it keeps itself current
+  // for as long as it is on screen, and stops once it is not.
+  var REFRESH_EVERY = 5000;
+  var refreshing = null;
+
+  function startRefreshing() {
+    if (refreshing !== null) return;
+    refreshing = setInterval(function () {
+      var rows = publicRows();
+      if (!rows || rows.offsetParent === null) stopRefreshing();
+      else loadPublic();
+    }, REFRESH_EVERY);
+  }
+
+  function stopRefreshing() {
+    if (refreshing === null) return;
+    clearInterval(refreshing);
+    refreshing = null;
   }
 
   function fillPublicRooms(root) {
