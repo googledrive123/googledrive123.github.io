@@ -34,6 +34,12 @@ create table if not exists public.polytrack_rooms (
 create index if not exists polytrack_rooms_last_seen_idx
   on public.polytrack_rooms (last_seen);
 
+-- A public room is listed for anyone to join without typing its code. Rooms
+-- are private unless the host asks otherwise, which is also what every room
+-- made before this column existed was.
+alter table public.polytrack_rooms
+  add column if not exists is_public boolean not null default false;
+
 -- Every path in and out of this table is a security definer function, so there
 -- is no policy to write. RLS on with no policies means a direct PostgREST
 -- request against the table reads nothing and writes nothing.
