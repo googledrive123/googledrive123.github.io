@@ -421,15 +421,17 @@
     scheduleNamePush();
   });
 
-  // ── Verified / unverified labelling ───────────────────────────────────
+  // ── Signed in / guest labelling ───────────────────────────────────────
   // The game has three states: Pending, Verified, Invalid. None of them mean
   // "guest", and the icon it draws for a guest reads as Pending — which
   // promises a verification that is never coming, because nothing here can
   // check a run. So the icon is replaced with a plain word.
   //
-  // Verified means the time is tied to a signed-in account. Unverified means
-  // it is not, and nothing proves who set it. Both are done by rewriting the
-  // rendered rows, so the bundle stays untouched.
+  // Signed in means the time is tied to a GameVault account. Guest means it
+  // is not, and nothing proves who set it. These used to read Verified and
+  // Unverified, which is now the word for the blue check, so they say what
+  // they actually mean. Both are done by rewriting the rendered rows, so the
+  // bundle stays untouched.
 
   var STYLE_ID = 'gv-leaderboard-style';
 
@@ -520,11 +522,11 @@
     var verified = state.classList.contains('verified');
     var label = document.createElement('p');
     label.className = 'gv-verify ' + (verified ? 'gv-yes' : 'gv-no');
-    label.textContent = verified ? 'Verified' : 'Unverified';
+    label.textContent = verified ? 'Signed in' : 'Guest';
     left.appendChild(label);
     state.title = verified
-      ? 'Verified - set while signed in'
-      : 'Unverified - set without signing in';
+      ? 'Signed in - set while signed in to GameVault'
+      : 'Guest - set without signing in';
   }
 
   function showInfo() {
