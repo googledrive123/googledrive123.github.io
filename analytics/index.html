@@ -775,6 +775,27 @@
     }).join('') : '<option value="">' + (people.length ? 'No players match' : 'No players yet') + '</option>';
     // Typing should narrow the list, not lose the player already picked.
     if (keep && shown.some(function (p) { return p.key === keep; })) $('verifySelect').value = keep;
+    syncVerifyBtn();
+  }
+  function picked() {
+    var key = $('verifySelect').value;
+    return people.filter(function (p) { return p.key === key; })[0] || null;
+  }
+  // One button, which does whichever the picked player needs.
+  function syncVerifyBtn() {
+    var p = picked();
+    $('verifyBtn').disabled = !p;
+    $('verifyBtn').textContent = p && p.verified ? 'Remove check' : 'Verify';
+  }
+  function setVerified(p, on) {
+    $('verifyBtn').disabled = true;
+    return rpc('gv_verify_set', { p_secret: state.secret, p_key: p.key, p_verified: on, p_name: p.name }).then(function () {
+      $('verifyMsg').textContent = (on ? 'Verified ' : 'Took the check off ') + p.name + '.';
+      return loadPeople();
+    }).catch(function (e) {
+      $('verifyMsg').textContent = 'Could not save: ' + e.message;
+      syncVerifyBtn();
+    });
   }
 
   // ── load ──
@@ -815,6 +836,8 @@
   $('logoutBtn').addEventListener('click', function () { try { localStorage.removeItem(SECRET_KEY); } catch (e) {} location.reload(); });
   $('refreshBtn').addEventListener('click', load);
   $('verifySearch').addEventListener('input', fillSelect);
+  $('verifySelect').addEventListener('change', syncVerifyBtn);
+  $('verifyBtn').addEventListener('click', function () { var p = picked(); if (p) setVerified(p, !p.verified); });
   $('exportBtn').addEventListener('click', exportCSV);
   $('autoRefresh').addEventListener('change', setTimer);
   $('rangeSeg').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; state.range = b.dataset.range; $('rangeSeg').querySelectorAll('button').forEach(function (x) { x.classList.toggle('active', x === b); }); load(); });
