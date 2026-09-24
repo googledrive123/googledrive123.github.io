@@ -6,7 +6,7 @@
 -- applied to the project for leaderboard.js to behave as written.
 --
 -- Apply against project dxwjxzmlezfyursysays. Every statement is safe to run
--- twice. Applied on 21 September 2026.
+-- twice. Applied on 21 September 2026; the board on 24 September 2026.
 
 
 -- A run is filed under the player's public name, and that name can change

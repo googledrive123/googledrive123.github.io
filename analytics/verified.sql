@@ -5,7 +5,7 @@
 -- the site and on the PolyTrack leaderboards.
 --
 -- Apply against project dxwjxzmlezfyursysays. Every statement is safe to run
--- twice.
+-- twice. Applied on 24 September 2026.
 
 
 -- key is the same thing polytrack_scores calls player_key: an account's user
