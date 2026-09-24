@@ -208,6 +208,42 @@ end;
 $function$;
 
 
+-- The public room list. Codes are handed out here, which is fine: a public
+-- room is one its host chose to let anyone into.
+--
+-- Only rooms still being kept alive are shown. The host touches its room once
+-- a minute, so three minutes allows for a couple of missed ones without
+-- offering a room long after its host has gone.
+create or replace function public.polytrack_room_list()
+returns json
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'rooms are not read from this origin';
+  end if;
+
+  return coalesce((
+    select json_agg(json_build_object(
+      'code', listed.code,
+      'host_name', listed.host_name,
+      'track_name', listed.track_name
+    ) order by listed.created_at desc)
+    from (
+      select code, host_name, track_name, created_at
+      from polytrack_rooms
+      where is_public
+        and last_seen > now() - interval '3 minutes'
+      order by created_at desc
+      limit 50
+    ) listed
+  ), '[]'::json);
+end;
+$function$;
+
+
 -- WebRTC needs a list of STUN and TURN servers before it will try to connect.
 -- STUN is free and public; a TURN relay is what carries the connection when a
 -- network blocks direct traffic, which school and office networks routinely
