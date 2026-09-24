@@ -117,3 +117,37 @@ begin
   return coalesce(p_verified, false);
 end;
 $function$;
+
+
+-- Asked by the site and by PolyTrack on the player's own behalf. A signed-in
+-- player is looked up by their account, and by the browser they are on in
+-- case the check was given to them as a guest before they signed up.
+--
+-- Returns null for anyone not verified, otherwise when the check was given,
+-- which the pages use to tell the player once and only once.
+create or replace function public.gv_verified_status(p_visitor_id text default null)
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+  v_found timestamptz;
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'verification is not read from this origin';
+  end if;
+
+  select min(verified_at) into v_found
+  from gv_verified
+  where key = v_user::text
+     or key = 'guest:' || nullif(btrim(coalesce(p_visitor_id, '')), '');
+
+  if v_found is null then
+    return null;
+  end if;
+  return json_build_object('verified_at', v_found);
+end;
+$function$;
