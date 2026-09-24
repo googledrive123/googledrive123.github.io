@@ -361,7 +361,7 @@
   // invite socket closes when the invite expires, but in both cases the room
   // is still very much running. Tying the channel to the socket meant a player
   // dropped out of the room's conversation the instant they got in.
-  var lobby = { code: null, role: null, channel: null, states: [], messages: [], beat: null };
+  var lobby = { code: null, role: null, channel: null, states: [], messages: [], beat: null, public: false };
 
   function announce() {
     var state = { code: lobby.code, role: lobby.role };
@@ -393,6 +393,7 @@
     lobby.code = null;
     lobby.channel = null;
     lobby.session = null;
+    lobby.public = false;
     announce();
   }
 
@@ -580,6 +581,7 @@
           }
           room.channel = channel;
           lobby.key = room.key;
+          lobby.public = room.public;
           enterLobby('host', room.code, channel);
           startHeartbeat(socket);
           // Warmed now rather than when the first player knocks, so handing
@@ -699,6 +701,7 @@
             }
             seat.channel = channel;
             lobby.session = seat.session;
+            lobby.public = room.is_public === true;
             enterLobby('player', room.code, channel);
 
             var hello = {
@@ -786,7 +789,7 @@
   window.GV = window.GV || {};
   window.GV.rooms = {
     iceServers: iceServers,
-    state: function () { return { code: lobby.code, role: lobby.role }; },
+    state: function () { return { code: lobby.code, role: lobby.role, public: lobby.public }; },
     onState: function (fn) { lobby.states.push(fn); },
     onMessage: function (fn) { lobby.messages.push(fn); },
     say: function (payload) { post(lobby.channel, 'lobby', payload); },
