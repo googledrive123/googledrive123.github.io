@@ -87,6 +87,10 @@
     }).then(function (data) {
       verifiedAt = data && data.verified_at ? data.verified_at : null;
       repaintStrips();
+      // The menu may already be sitting still, with nothing left to wake the
+      // observer that would otherwise get round to telling them.
+      var menu = document.querySelector('.menu-ui');
+      if (menu) tellVerified(menu);
     }).catch(function () {});
   }
 
