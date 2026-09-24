@@ -481,6 +481,10 @@
       '  margin-left: 8px; margin-right: 22px; font-size: 19px;',
       '  opacity: 0.55; white-space: nowrap; }',
       // Mirrors .total-players, which sits in the opposite corner.
+      // The game's "(You)" pulls itself 16px left to sit against the name.
+      // The right margin gives that back so it does not land on the check.
+      '.leaderboard-ui .gv-check {',
+      '  width: 24px; height: 24px; flex-shrink: 0; margin: 0 14px 0 -4px; }',
       '.leaderboard-ui > .gv-info {',
       '  margin: 10px; position: absolute; left: 0; top: 0; z-index: 3;',
       '  width: 22px; height: 22px; padding: 0; line-height: 22px;',
@@ -532,6 +536,18 @@
     shown.parentNode.insertBefore(tag, shown.nextSibling);
   }
 
+  var CHECK_SVG = '<svg class="gv-check" viewBox="0 0 24 24" role="img" aria-label="Verified">'
+    + '<circle cx="12" cy="12" r="11" fill="#1d9bf0"/><path d="M7 12.5l3.2 3.2L17 9" fill="none"'
+    + ' stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  // Straight after the name, ahead of anything else the row adds to it, so
+  // the check reads as part of the name.
+  function checkRow(row) {
+    var shown = row.querySelector('.name');
+    if (!shown || checked[positionOf(row)] !== true) return;
+    shown.insertAdjacentHTML('afterend', CHECK_SVG);
+  }
+
   function labelRow(row) {
     if (row.dataset.gvLabelled) return;
     var state = row.querySelector('.verified-state');
@@ -539,6 +555,7 @@
     if (!state || !left) return;
     row.dataset.gvLabelled = '1';
     nameSelfRow(row);
+    checkRow(row);
 
     var verified = state.classList.contains('verified');
     var label = document.createElement('p');
