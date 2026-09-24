@@ -1004,9 +1004,25 @@
     join.className = 'button';
     join.innerHTML = ' <img class="button-icon" src="images/play.svg">';
     join.prepend(document.createTextNode('Join'));
+    join.addEventListener('click', function () { joinPublic(room.code); });
     row.appendChild(join);
 
     return row;
+  }
+
+  // Joining goes through the game's own join panel, as if the code had been
+  // typed, so there is one way into a room and it is the one the game knows.
+  // The code box is faded out while connecting, so the code is never shown.
+  function joinPublic(code) {
+    var root = document.querySelector('.multiplayer-ui');
+    var input = root && root.querySelector(':scope > .join .invite-code');
+    var join = root && root.querySelector(':scope > .join > .main-box > .buttons > .join');
+    if (!input || !join || typeof code !== 'string') return;
+
+    showPublic(false);
+    input.value = code;
+    input.dispatchEvent(new Event('input'));
+    join.click();
   }
 
   function drawPublic(list) {
