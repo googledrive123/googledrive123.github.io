@@ -244,6 +244,31 @@ end;
 $function$;
 
 
+-- The host calls this on the way out of a public room, so the list stops
+-- offering it straight away rather than a few minutes later. The row itself
+-- is left for the sweep: taking it off the list is all that is needed, and a
+-- player already racing in it loses nothing.
+create or replace function public.polytrack_room_unlist(
+  p_code text,
+  p_key text
+) returns void
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'rooms are not updated from this origin';
+  end if;
+
+  update polytrack_rooms
+  set is_public = false
+  where code = upper(btrim(coalesce(p_code, '')))
+    and host_key = p_key;
+end;
+$function$;
+
+
 -- WebRTC needs a list of STUN and TURN servers before it will try to connect.
 -- STUN is free and public; a TURN relay is what carries the connection when a
 -- network blocks direct traffic, which school and office networks routinely
