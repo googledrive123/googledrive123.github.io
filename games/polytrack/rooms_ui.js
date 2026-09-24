@@ -294,6 +294,14 @@
     if (rooms) rooms.setPublic(settings.visibility === 'public');
   }
 
+  // The public list shows what a room is racing on. Before the room exists
+  // that is the track picked on the host panel; after, it is whatever the
+  // game's toolbar says, however the track was changed.
+  function tellTrack(element) {
+    var rooms = window.GV && window.GV.rooms;
+    if (rooms && element) rooms.setTrack(element.textContent.trim());
+  }
+
   // ── The track list ───────────────────────────────────────────
   // A room plays a sequence of tracks rather than one. The game has no idea
   // about that, so the list lives here and the game is walked through it one
@@ -673,6 +681,7 @@
 
     var thumbnail = box.querySelector(':scope > .track-button .thumbnail');
     if (thumbnail) chosenThumbnail = thumbnail.getAttribute('src');
+    tellTrack(box.querySelector(':scope > .track-button > .name:not(.placeholder)'));
 
     if (box.querySelector('.gv-room-option')) {
       refreshPlaylist();
