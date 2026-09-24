@@ -410,7 +410,7 @@
       socket.deliver({ type: 'pong' });
       ticks = ticks + 1;
       if (ticks % 4 === 0 && lobby.code !== null) {
-        rpc('polytrack_room_touch', { p_code: lobby.code, p_key: lobby.key })
+        rpc('polytrack_room_touch', { p_code: lobby.code, p_key: lobby.key, p_track: listing.track })
           .catch(function (error) { console.error('Room keep-alive failed:', error); });
       }
     }, 15000);
