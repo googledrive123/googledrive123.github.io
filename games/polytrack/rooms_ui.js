@@ -39,7 +39,8 @@
   var DEFAULTS = {
     otherCars: 'translucent',
     playlist: [],
-    roundSeconds: 0
+    roundSeconds: 0,
+    visibility: 'private'
   };
 
   // What the host has chosen, kept between sessions. In a room this is only
