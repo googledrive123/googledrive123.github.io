@@ -843,7 +843,7 @@
   $('loginBtn').addEventListener('click', function () { tryLogin($('secretInput').value.trim(), true); });
   $('secretInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') tryLogin($('secretInput').value.trim(), true); });
   $('logoutBtn').addEventListener('click', function () { try { localStorage.removeItem(SECRET_KEY); } catch (e) {} location.reload(); });
-  $('refreshBtn').addEventListener('click', load);
+  $('refreshBtn').addEventListener('click', function () { load(); loadPeople(); });
   $('verifySearch').addEventListener('input', fillSelect);
   $('verifySelect').addEventListener('change', syncVerifyBtn);
   $('verifyList').addEventListener('click', function (e) {
