@@ -537,12 +537,12 @@
     var box = document.createElement('div');
     var text = document.createElement('p');
     text.innerHTML =
-      '<b class="gv-yes">Verified</b> means the time was set while signed in to ' +
+      '<b class="gv-yes">Signed in</b> means the time was set while signed in to ' +
       'GameVault, so it belongs to a known account.<br><br>' +
-      '<b class="gv-no">Unverified</b> means it was set without signing in. ' +
+      '<b class="gv-no">Guest</b> means it was set without signing in. ' +
       'The run still counts and still appears here, but nothing proves who set ' +
-      'it, so unverified times are ranked below verified ones.<br><br>' +
-      'Sign in before racing to have your times verified.';
+      'it, so guest times are ranked below signed-in ones.<br><br>' +
+      'Sign in before racing to have your times count as signed in.';
     var ok = document.createElement('button');
     ok.className = 'button';
     ok.textContent = 'Ok';
@@ -560,8 +560,8 @@
     btn.className = 'gv-info';
     btn.type = 'button';
     btn.textContent = 'i';
-    btn.title = 'What does Verified mean?';
-    btn.setAttribute('aria-label', 'What does Verified mean?');
+    btn.title = 'What do these labels mean?';
+    btn.setAttribute('aria-label', 'What do these labels mean?');
     btn.addEventListener('click', showInfo);
     panel.appendChild(btn);
   }
