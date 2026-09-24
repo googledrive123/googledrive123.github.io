@@ -425,6 +425,12 @@
   // Leaving the page is the one moment a player is definitely out of the room.
   window.addEventListener('pagehide', leaveLobby);
 
+  // ── Public rooms ─────────────────────────────────────────────
+  // A public room is listed for anyone to join without its code. The lobby
+  // decides which kind the next room is before the game asks for one, because
+  // the game asks the instant Host is pressed and there is no later moment.
+  var listing = { public: false };
+
   // ── Roles ───────────────────────────────────────────────────
   // A role takes over the socket's send and decides what comes back. The game
   // is strict about what it accepts, so anything unrecognised is dropped
@@ -775,6 +781,7 @@
     state: function () { return { code: lobby.code, role: lobby.role }; },
     onState: function (fn) { lobby.states.push(fn); },
     onMessage: function (fn) { lobby.messages.push(fn); },
-    say: function (payload) { post(lobby.channel, 'lobby', payload); }
+    say: function (payload) { post(lobby.channel, 'lobby', payload); },
+    setPublic: function (flag) { listing.public = flag === true; }
   };
 }());
