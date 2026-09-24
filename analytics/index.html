@@ -108,6 +108,19 @@
   .tabs { display: flex; gap: 6px; margin-left: auto; }
   .tabs button { background: transparent; border: 1px solid var(--border); color: var(--muted); font: inherit; font-size: 0.68rem; padding: 3px 8px; border-radius: 6px; cursor: pointer; }
   .tabs button.active { color: var(--text); border-color: var(--border-strong); }
+
+  /* verified players */
+  .verify-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .verify-bar input, .verify-bar select { background: var(--bg); border: 1px solid var(--border-strong); color: var(--text); font: inherit; font-size: 0.8rem; padding: 7px 10px; border-radius: 8px; min-width: 0; }
+  .verify-bar input { flex: 1 1 200px; }
+  .verify-bar select { flex: 2 1 260px; }
+  .verify-msg { font-size: 0.74rem; color: var(--muted); margin-top: 8px; min-height: 1em; }
+  .verify-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .verify-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 0.76rem; padding: 4px 4px 4px 8px; border: 1px solid var(--border); border-radius: 999px; }
+  .verify-chip .kind { color: var(--muted-2); font-size: 0.68rem; }
+  .verify-chip button { background: none; border: 0; color: var(--muted); font: inherit; font-size: 0.9rem; line-height: 1; padding: 2px 6px; cursor: pointer; }
+  .verify-chip button:hover { color: var(--accent); }
+  .vcheck { width: 14px; height: 14px; flex-shrink: 0; }
 </style>
 </head>
 <body>
@@ -147,6 +160,19 @@
       <div class="kpi live"><div class="l">Playing now</div><div class="v" id="livePlaying">–</div><div class="s" id="livePlayingSub">–</div></div>
       <div class="kpi"><div class="l">Last event</div><div class="v" id="lastEventAgo" style="font-size:1.1rem">–</div><div class="s" id="lastEventWhat">–</div></div>
       <div class="kpi"><div class="l">Events today</div><div class="v" id="todayEvents">–</div><div class="s" id="todayVisitors">–</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Verified players <small>blue check on the site and on the PolyTrack leaderboards</small></h2>
+    <div class="card">
+      <div class="verify-bar">
+        <input type="search" id="verifySearch" placeholder="Search accounts and PolyTrack players" autocomplete="off">
+        <select id="verifySelect" aria-label="Player"></select>
+        <button class="btn" id="verifyBtn" disabled>Verify</button>
+      </div>
+      <div class="verify-msg" id="verifyMsg"></div>
+      <div class="verify-list" id="verifyList"></div>
     </div>
   </section>
 
