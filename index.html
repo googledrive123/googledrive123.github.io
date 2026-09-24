@@ -3902,6 +3902,24 @@ async function loadVerified() {
   if (error) { console.error('Could not check verification', error); return; }
   verifiedAt = data ? data.verified_at : null;
   updateUserUI();
+  tellVerified();
+}
+
+// Keyed by when the check was given rather than a plain flag, so a player who
+// loses it and is verified again hears about it again.
+const VERIFIED_SEEN_KEY = 'gv.verified.seen';
+
+function tellVerified() {
+  const box = document.getElementById('verifiedToast');
+  if (!box || !verifiedAt) return;
+  let seen = null;
+  try { seen = localStorage.getItem(VERIFIED_SEEN_KEY); } catch (e) {}
+  if (seen === verifiedAt) return;
+  box.hidden = false;
+  document.getElementById('verifiedToastClose').onclick = () => {
+    box.hidden = true;
+    try { localStorage.setItem(VERIFIED_SEEN_KEY, verifiedAt); } catch (e) {}
+  };
 }
 
 // ─── Load username ───
