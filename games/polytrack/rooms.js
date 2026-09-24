@@ -456,7 +456,7 @@
   }
 
   function hostRole(socket) {
-    var room = { code: null, key: null, nickname: null, channel: null };
+    var room = { code: null, key: null, nickname: null, channel: null, public: false };
     // seen holds each joining session's state, which is 'pending' from the
     // moment its request arrives until its offer has been handed over, then
     // 'ready'. held keeps whatever turned up in between.
@@ -545,8 +545,13 @@
         room.nickname = message.nickname;
       }
       room.key = typeof message.key === 'string' && message.key !== '' ? message.key : newKey();
+      room.public = listing.public;
 
-      rpc('polytrack_room_create', { p_key: room.key, p_name: room.nickname })
+      rpc('polytrack_room_create', {
+        p_key: room.key,
+        p_name: room.nickname,
+        p_public: room.public
+      })
         .then(function (created) {
           room.code = created.code;
           socket.deliver({
