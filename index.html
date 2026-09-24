@@ -3828,11 +3828,17 @@ function userName() {
   if (!currentUser) return 'Guest';
   return currentUser._username || currentUser.email.split('@')[0];
 }
+// A verified guest has a name on the PolyTrack boards, and "Guest" with a
+// check next to it says nothing about who was checked.
+function displayName() {
+  if (!currentUser && verifiedAt && window.GV && GV.identity) return GV.identity.realName();
+  return userName();
+}
 
 // ─── Update all user buttons ───
 function updateUserUI() {
   const signed = !!currentUser;
-  const name = userName();
+  const name = displayName();
   // Left where pages without a Supabase client can read it. PolyTrack runs in
   // an iframe with no session of its own and needs the name for its menu and
   // its leaderboard rows.
@@ -3970,7 +3976,7 @@ const profileOverlay = document.getElementById('profileOverlay');
 async function openProfile() {
   profileOverlay.classList.add('show');
   const signed = !!currentUser;
-  const name = userName();
+  const name = displayName();
   const av = document.getElementById('profileAvatarLg');
 
   document.getElementById('profileName').textContent = name;
