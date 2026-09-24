@@ -194,10 +194,14 @@
     '  top: 6vh;',
     '  max-height: 88vh;',
     '}',
+    // #ui is pointer-events: none so the canvas behind it can be dragged, and
+    // the box inherited that, so the wheel went straight through it to the
+    // canvas and the panel never scrolled. Only its buttons had opted back in.
     '#ui .multiplayer-ui > .host > .main-box {',
     '  max-height: 88vh;',
     '  overflow-y: auto;',
     '  overscroll-behavior: contain;',
+    '  pointer-events: auto;',
     '}',
     '#ui .multiplayer-ui > .host > .main-box > h2 {',
     '  position: sticky;',
