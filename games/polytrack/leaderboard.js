@@ -119,6 +119,26 @@
     }
   }
 
+  // Which rows carry the blue check from analytics/verified.sql, by position.
+  // The game has no field for it, so it is taken off each entry before the
+  // game sees the board and drawn onto the row further down. Kept per track:
+  // the one-row lookups for the caller's own standing land between full
+  // pages, and must add to what is known rather than wipe it.
+  var checkedTrack = null;
+  var checked = {};
+
+  function noteChecks(trackId, entries) {
+    if (trackId !== checkedTrack) {
+      checkedTrack = trackId;
+      checked = {};
+    }
+    for (var i = 0; i < entries.length; i++) {
+      var entry = entries[i];
+      if (typeof entry.position === 'number') checked[entry.position] = entry.gvVerified === true;
+      delete entry.gvVerified;
+    }
+  }
+
   function getBoard(q) {
     return rpc('polytrack_board', {
       p_track_id: q.trackId || '',
@@ -127,6 +147,7 @@
       p_visitor_id: visitorId()
     }).then(function (board) {
       board = board || { total: 0, entries: [], userEntry: null };
+      noteChecks(q.trackId || '', board.entries || []);
       selfPosition = board.userEntry ? board.userEntry.position : null;
       markSelfEntry(board, q.userTokenHash);
       return board;
