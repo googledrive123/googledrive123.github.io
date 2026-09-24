@@ -146,7 +146,12 @@
       '.gv-panel .gv-toggle > button { font-size: 24px; }',
       '.gv-panel .gv-toggle > button.selected {',
       '  background-color: var(--button-hover-color); }',
-      '.gv-panel > .gv-box > .gv-foot { margin: 10px; }'
+      '.gv-panel > .gv-box > .gv-foot { margin: 10px; }',
+      '.gv-panel h2 > .gv-check {',
+      '  width: 30px; height: 30px; margin-left: 10px; vertical-align: -4px; }',
+      '.gv-panel .gv-lead {',
+      '  margin: 10px 14px; padding: 0; font-size: 22px; line-height: 1.3;',
+      '  color: var(--text-color); }'
     ].join('\n');
     document.head.appendChild(css);
   }
@@ -309,6 +314,71 @@
     menu.appendChild(panel);
   }
 
+  // ── Telling a verified player ─────────────────────────────────────────
+  // Once, the first time the menu is up after the check was given. Keyed by
+  // when it was given, so losing the check and getting it back is told again.
+  // Separate from the site's own message: that one says the check exists,
+  // this one says what it means in here.
+
+  var VERIFIED_SEEN_KEY = 'gv.verified.polytrack';
+  var told = false;
+
+  function tellVerified(menu) {
+    if (told || !verifiedAt) return;
+    var seen = null;
+    try { seen = localStorage.getItem(VERIFIED_SEEN_KEY); } catch (e) {}
+    if (seen === verifiedAt) {
+      told = true;
+      return;
+    }
+    // Only over the front of the menu. Anywhere else it would either sit on
+    // top of a race or be opened behind a loading screen and never seen.
+    var info = menu.querySelector(':scope > .info');
+    if (!info || info.offsetParent === null || menu.querySelector('.gv-panel')) return;
+    told = true;
+
+    var panel = document.createElement('div');
+    panel.className = 'gv-panel';
+
+    var box = document.createElement('div');
+    box.className = 'gv-box';
+
+    var title = document.createElement('h2');
+    title.textContent = 'You\u2019re verified';
+    title.insertAdjacentHTML('beforeend', CHECK_SVG);
+    box.appendChild(title);
+
+    var body = document.createElement('div');
+    body.className = 'gv-body';
+    var lead = document.createElement('p');
+    lead.className = 'gv-lead';
+    lead.textContent = 'GameVault has picked you out as one of its top PolyTrack racers. '
+      + 'A blue check now sits next to your name on every leaderboard here and under '
+      + 'the menu, so everyone you race knows who they are up against.';
+    body.appendChild(lead);
+    body.appendChild(note('Checks are given by hand. Racing as Anonymous hides the '
+      + 'check along with your name.'));
+    box.appendChild(body);
+
+    var foot = document.createElement('div');
+    foot.className = 'gv-foot';
+    var ok = document.createElement('button');
+    ok.className = 'button';
+    ok.textContent = 'Ok';
+    foot.appendChild(ok);
+    box.appendChild(foot);
+    panel.appendChild(box);
+
+    function close() {
+      try { localStorage.setItem(VERIFIED_SEEN_KEY, verifiedAt); } catch (e) {}
+      panel.remove();
+    }
+    ok.addEventListener('click', close);
+    panel.addEventListener('click', function (e) { if (e.target === panel) close(); });
+
+    menu.appendChild(panel);
+  }
+
   // ── Making room ───────────────────────────────────────────────────────
   // PolyTrack's menu is 800 logical pixels tall at its shortest, and at that
   // size its own footer already sits on top of the button tiles before
@@ -395,6 +465,7 @@
     ensureStyles();
     ensureStrip(menu);
     maybeFit(menu);
+    tellVerified(menu);
   }
 
   var fitTimer = null;
