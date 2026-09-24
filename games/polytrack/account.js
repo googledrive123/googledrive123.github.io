@@ -55,6 +55,10 @@
 
   var verifiedAt = null;
 
+  var CHECK_SVG = '<svg class="gv-check" viewBox="0 0 24 24" role="img" aria-label="Verified">'
+    + '<circle cx="12" cy="12" r="11" fill="#1d9bf0"/><path d="M7 12.5l3.2 3.2L17 9" fill="none"'
+    + ' stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
   function loadVerified() {
     var gv = identity();
     if (!gv) return;
@@ -82,6 +86,7 @@
       return res.ok ? res.json() : null;
     }).then(function (data) {
       verifiedAt = data && data.verified_at ? data.verified_at : null;
+      repaintStrips();
     }).catch(function () {});
   }
 
@@ -108,6 +113,8 @@
       '.gv-whoami > .gv-who-label { opacity: 0.5; }',
       '.gv-whoami > .gv-who-name { margin-left: 8px; }',
       '.gv-whoami:hover > .gv-who-name { text-decoration: underline; }',
+      '.gv-whoami .gv-check {',
+      '  width: 22px; height: 22px; margin-left: 8px; vertical-align: -3px; }',
 
       '.gv-panel {',
       '  position: absolute; left: 0; top: 0; z-index: 3;',
@@ -155,7 +162,9 @@
     var gv = identity();
     if (!gv) return;
     strip.querySelector('.gv-who-label').textContent = labelFor();
-    strip.querySelector('.gv-who-name').textContent = gv.realName();
+    var name = strip.querySelector('.gv-who-name');
+    name.textContent = gv.realName();
+    if (verifiedAt) name.insertAdjacentHTML('beforeend', CHECK_SVG);
     strip.title = gv.anonymous()
       ? 'Anonymous mode is on. Other players see "Anonymous" on the leaderboard.'
       : 'This is the name other players see on the leaderboard.';
