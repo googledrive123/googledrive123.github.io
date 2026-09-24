@@ -283,7 +283,15 @@
     return choiceBlock('Visibility', VISIBILITY, settings.visibility, function (value) {
       settings.visibility = value;
       write();
+      tellVisibility();
     });
+  }
+
+  // rooms.js opens the room the moment Host is pressed, so it has to know the
+  // choice beforehand rather than be told once the room exists.
+  function tellVisibility() {
+    var rooms = window.GV && window.GV.rooms;
+    if (rooms) rooms.setPublic(settings.visibility === 'public');
   }
 
   // ── The track list ───────────────────────────────────────────
@@ -837,6 +845,7 @@
   function start() {
     var rooms = window.GV && window.GV.rooms;
     if (rooms) {
+      tellVisibility();
       rooms.onMessage(heardSettings);
       rooms.onState(function (state) {
         if (state.code === null) {
