@@ -96,9 +96,12 @@
   // anon key only. Rooms belong to whoever is holding the host key, not to a
   // signed-in account, so there is no session to attach here.
 
-  function rpc(name, body) {
+  // keepalive lets a call finish after the page has gone, which is the only
+  // way a request sent on the way out ever arrives.
+  function rpc(name, body, keepalive) {
     return fetch(SUPA_URL + '/rest/v1/rpc/' + name, {
       method: 'POST',
+      keepalive: keepalive === true,
       headers: {
         'Content-Type': 'application/json',
         'apikey': SUPA_KEY,
@@ -111,6 +114,9 @@
           throw new Error('rpc ' + name + ' failed: ' + res.status + ' ' + text);
         });
       }
+      // A function that returns nothing answers 204 with no body, and parsing
+      // that as JSON throws, which made every keep-alive look like a failure.
+      if (res.status === 204) return null;
       return res.json();
     });
   }
@@ -361,7 +367,7 @@
   // invite socket closes when the invite expires, but in both cases the room
   // is still very much running. Tying the channel to the socket meant a player
   // dropped out of the room's conversation the instant they got in.
-  var lobby = { code: null, role: null, channel: null, states: [], messages: [], beat: null };
+  var lobby = { code: null, role: null, channel: null, states: [], messages: [], beat: null, public: false };
 
   function announce() {
     var state = { code: lobby.code, role: lobby.role };
@@ -387,12 +393,14 @@
   function leaveLobby() {
     if (lobby.channel === null) return;
     if (lobby.role === 'player') post(lobby.channel, 'leave', { session: lobby.session });
+    if (lobby.role === 'host' && lobby.public) unlist(lobby.code, lobby.key);
     lobby.channel.unsubscribe();
     stopHeartbeat();
     lobby.role = null;
     lobby.code = null;
     lobby.channel = null;
     lobby.session = null;
+    lobby.public = false;
     announce();
   }
 
@@ -410,7 +418,7 @@
       socket.deliver({ type: 'pong' });
       ticks = ticks + 1;
       if (ticks % 4 === 0 && lobby.code !== null) {
-        rpc('polytrack_room_touch', { p_code: lobby.code, p_key: lobby.key })
+        rpc('polytrack_room_touch', { p_code: lobby.code, p_key: lobby.key, p_track: listing.track })
           .catch(function (error) { console.error('Room keep-alive failed:', error); });
       }
     }, 15000);
@@ -424,6 +432,21 @@
 
   // Leaving the page is the one moment a player is definitely out of the room.
   window.addEventListener('pagehide', leaveLobby);
+
+  // ── Public rooms ─────────────────────────────────────────────
+  // A public room is listed for anyone to join without its code. The lobby
+  // decides which kind the next room is before the game asks for one, because
+  // the game asks the instant Host is pressed and there is no later moment.
+  //
+  // The track is only for the list to show, and the lobby keeps it current.
+  var listing = { public: false, track: null };
+
+  // Taken off the list the moment the host leaves rather than minutes later
+  // when its keep-alives stop, so nobody is offered a room that won't answer.
+  function unlist(code, key) {
+    rpc('polytrack_room_unlist', { p_code: code, p_key: key }, true)
+      .catch(function (error) { console.error('Could not unlist the room:', error); });
+  }
 
   // ── Roles ───────────────────────────────────────────────────
   // A role takes over the socket's send and decides what comes back. The game
@@ -450,7 +473,7 @@
   }
 
   function hostRole(socket) {
-    var room = { code: null, key: null, nickname: null, channel: null };
+    var room = { code: null, key: null, nickname: null, channel: null, public: false };
     // seen holds each joining session's state, which is 'pending' from the
     // moment its request arrives until its offer has been handed over, then
     // 'ready'. held keeps whatever turned up in between.
@@ -539,8 +562,14 @@
         room.nickname = message.nickname;
       }
       room.key = typeof message.key === 'string' && message.key !== '' ? message.key : newKey();
+      room.public = listing.public;
 
-      rpc('polytrack_room_create', { p_key: room.key, p_name: room.nickname })
+      rpc('polytrack_room_create', {
+        p_key: room.key,
+        p_name: room.nickname,
+        p_public: room.public,
+        p_track: listing.track
+      })
         .then(function (created) {
           room.code = created.code;
           socket.deliver({
@@ -566,6 +595,7 @@
           }
           room.channel = channel;
           lobby.key = room.key;
+          lobby.public = room.public;
           enterLobby('host', room.code, channel);
           startHeartbeat(socket);
           // Warmed now rather than when the first player knocks, so handing
@@ -608,6 +638,12 @@
 
     // The socket closing is not the room closing: the game drops this one when
     // the invite expires and opens a fresh one to renew. The channel stays.
+    //
+    // Except in a public room, whose invite never expires. Its socket only
+    // closes when the host leaves the room, so that is when it is unlisted.
+    socket.addEventListener('close', function () {
+      if (room.public && room.code !== null) unlist(room.code, room.key);
+    });
   }
 
   function joinRole(socket) {
@@ -685,6 +721,7 @@
             }
             seat.channel = channel;
             lobby.session = seat.session;
+            lobby.public = room.is_public === true;
             enterLobby('player', room.code, channel);
 
             var hello = {
@@ -772,9 +809,16 @@
   window.GV = window.GV || {};
   window.GV.rooms = {
     iceServers: iceServers,
-    state: function () { return { code: lobby.code, role: lobby.role }; },
+    state: function () { return { code: lobby.code, role: lobby.role, public: lobby.public }; },
     onState: function (fn) { lobby.states.push(fn); },
     onMessage: function (fn) { lobby.messages.push(fn); },
-    say: function (payload) { post(lobby.channel, 'lobby', payload); }
+    say: function (payload) { post(lobby.channel, 'lobby', payload); },
+    setPublic: function (flag) { listing.public = flag === true; },
+    setTrack: function (name) { listing.track = typeof name === 'string' && name !== '' ? name : null; },
+    publicRooms: function () {
+      return rpc('polytrack_room_list', {}).then(function (list) {
+        return Array.isArray(list) ? list : [];
+      });
+    }
   };
 }());
