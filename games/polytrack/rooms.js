@@ -114,6 +114,9 @@
           throw new Error('rpc ' + name + ' failed: ' + res.status + ' ' + text);
         });
       }
+      // A function that returns nothing answers 204 with no body, and parsing
+      // that as JSON throws, which made every keep-alive look like a failure.
+      if (res.status === 204) return null;
       return res.json();
     });
   }
