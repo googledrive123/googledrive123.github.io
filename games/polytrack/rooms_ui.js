@@ -1097,6 +1097,12 @@
     if (title && title.textContent !== PUBLIC_INVITE) title.textContent = PUBLIC_INVITE;
     var code = box.querySelector('input');
     if (code && code.style.display !== 'none') code.style.display = 'none';
+
+    // Copy would put the hidden code on the clipboard. It has no class of its
+    // own, so it is found by its icon.
+    var icon = document.querySelector('.invite-ui > .buttons-container img[src="images/copy.svg"]');
+    var copy = icon && icon.closest('button');
+    if (copy && copy.style.display !== 'none') copy.style.display = 'none';
   }
 
   // ── Wiring ────────────────────────────────────────────────────────────
