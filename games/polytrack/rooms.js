@@ -429,7 +429,9 @@
   // A public room is listed for anyone to join without its code. The lobby
   // decides which kind the next room is before the game asks for one, because
   // the game asks the instant Host is pressed and there is no later moment.
-  var listing = { public: false };
+  //
+  // The track is only for the list to show, and the lobby keeps it current.
+  var listing = { public: false, track: null };
 
   // ── Roles ───────────────────────────────────────────────────
   // A role takes over the socket's send and decides what comes back. The game
@@ -550,7 +552,8 @@
       rpc('polytrack_room_create', {
         p_key: room.key,
         p_name: room.nickname,
-        p_public: room.public
+        p_public: room.public,
+        p_track: listing.track
       })
         .then(function (created) {
           room.code = created.code;
@@ -787,6 +790,7 @@
     onState: function (fn) { lobby.states.push(fn); },
     onMessage: function (fn) { lobby.messages.push(fn); },
     say: function (payload) { post(lobby.channel, 'lobby', payload); },
-    setPublic: function (flag) { listing.public = flag === true; }
+    setPublic: function (flag) { listing.public = flag === true; },
+    setTrack: function (name) { listing.track = typeof name === 'string' && name !== '' ? name : null; }
   };
 }());
