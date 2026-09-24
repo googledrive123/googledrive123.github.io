@@ -253,11 +253,14 @@
     '  background-color: var(--surface-color);',
     '  color: var(--text-color);',
     '}',
+    // Same as the host panel: without this the wheel falls through #ui to
+    // the canvas and a long list cannot be scrolled.
     '.gv-public-rooms > .main-box > .rows {',
     '  padding: 0 10px;',
-    '  max-height: 60vh;',
+    '  max-height: calc(60vh / var(--ui-scale-factor, 1));',
     '  overflow-y: auto;',
     '  overscroll-behavior: contain;',
+    '  pointer-events: auto;',
     '}',
     '.gv-public-rooms > .main-box > .buttons {',
     '  display: flex;',
