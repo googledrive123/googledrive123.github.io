@@ -2135,6 +2135,34 @@
     }
 
 
+    /* ───────────── Verified message ───────────── */
+    /* Told once, on the first visit after the check is given. Fixed rather
+       than in the page, because the welcome screen and the catalog both need
+       to show it and a player may land on either. */
+    .verified-toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      z-index: 1500;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      width: min(460px, calc(100vw - 32px));
+      box-sizing: border-box;
+      padding: 14px 12px 14px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-left: 2px solid #1d9bf0;
+      border-radius: 10px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+    }
+    .verified-toast[hidden] { display: none; }
+    .verified-toast > .verified-badge { width: 22px; height: 22px; margin: 1px 0 0 0; }
+    .verified-toast-text { flex: 1; font-size: 13.5px; line-height: 1.5; color: var(--muted); }
+    .verified-toast-text b { color: var(--text); font-weight: 600; }
+
+
     /* ───────────── Newest strip ───────────── */
     /* Eye-catching but deliberately not a strobe: the glow cycles once every
        2s. Anything near or above 3Hz is a seizure risk and reads as spam. */
@@ -4613,6 +4641,18 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
 </div>
 
 <!-- ══════════════ PROFILE PANEL ══════════════ -->
+<!-- Shown once to a player after they are verified. See tellVerified(). -->
+<div class="verified-toast" id="verifiedToast" role="status" hidden>
+  <svg class="verified-badge" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#1d9bf0"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <div class="verified-toast-text">
+    <b>You&rsquo;re verified.</b> GameVault has picked you out as one of its top players.
+    Your name now has a blue check here and on the PolyTrack leaderboards.
+  </div>
+  <button class="pt-notice-close" id="verifiedToastClose" type="button" aria-label="Dismiss">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+</div>
+
 <div class="profile-overlay" id="profileOverlay">
   <div class="profile-backdrop" id="profileBackdrop"></div>
   <div class="profile-panel" id="profilePanel">
