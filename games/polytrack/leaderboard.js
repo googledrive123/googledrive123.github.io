@@ -505,7 +505,8 @@
       '  background-color: var(--surface-secondary-color); font-size: 19px;',
       '  line-height: 1.25; color: var(--text-color); }',
       '.gv-dialog b.gv-yes { color: #5f5; }',
-      '.gv-dialog b.gv-no { color: #f55; }'
+      '.gv-dialog b.gv-no { color: #f55; }',
+      '.gv-dialog .gv-check { width: 20px; height: 20px; margin: 0; vertical-align: -4px; }'
     ].join('\n');
     document.head.appendChild(css);
   }
@@ -580,7 +581,9 @@
       '<b class="gv-no">Guest</b> means it was set without signing in. ' +
       'The run still counts and still appears here, but nothing proves who set ' +
       'it, so guest times are ranked below signed-in ones.<br><br>' +
-      'Sign in before racing to have your times count as signed in.';
+      'Sign in before racing to have your times count as signed in.<br><br>' +
+      CHECK_SVG + ' A blue check next to a name means GameVault has picked that ' +
+      'player out as one of its top racers.';
     var ok = document.createElement('button');
     ok.className = 'button';
     ok.textContent = 'Ok';
