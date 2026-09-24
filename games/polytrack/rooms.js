@@ -811,6 +811,11 @@
     onMessage: function (fn) { lobby.messages.push(fn); },
     say: function (payload) { post(lobby.channel, 'lobby', payload); },
     setPublic: function (flag) { listing.public = flag === true; },
-    setTrack: function (name) { listing.track = typeof name === 'string' && name !== '' ? name : null; }
+    setTrack: function (name) { listing.track = typeof name === 'string' && name !== '' ? name : null; },
+    publicRooms: function () {
+      return rpc('polytrack_room_list', {}).then(function (list) {
+        return Array.isArray(list) ? list : [];
+      });
+    }
   };
 }());
