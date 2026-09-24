@@ -180,9 +180,15 @@ $function$;
 -- The host calls this while its room is open. Without it a room that outlives
 -- the ten minute window stops being findable even though the host is sitting
 -- in the lobby waiting for someone.
+--
+-- It also carries the track the room is on, for the public list. Dropped and
+-- recreated for the same reason as polytrack_room_create.
+drop function if exists public.polytrack_room_touch(text, text);
+
 create or replace function public.polytrack_room_touch(
   p_code text,
-  p_key text
+  p_key text,
+  p_track text default null
 ) returns void
 language plpgsql
 security definer
@@ -194,7 +200,8 @@ begin
   end if;
 
   update polytrack_rooms
-  set last_seen = now()
+  set last_seen = now(),
+      track_name = coalesce(left(nullif(btrim(coalesce(p_track, '')), ''), 80), track_name)
   where code = upper(btrim(coalesce(p_code, '')))
     and host_key = p_key;
 end;
