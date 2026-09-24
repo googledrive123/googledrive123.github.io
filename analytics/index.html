@@ -767,9 +767,14 @@
     }).catch(function (e) { $('verifyMsg').textContent = 'Could not load players: ' + e.message; });
   }
   function fillSelect() {
-    $('verifySelect').innerHTML = people.length ? people.map(function (p) {
+    var q = $('verifySearch').value.trim().toLowerCase();
+    var keep = $('verifySelect').value;
+    var shown = people.filter(function (p) { return !q || p.name.toLowerCase().indexOf(q) !== -1; });
+    $('verifySelect').innerHTML = shown.length ? shown.map(function (p) {
       return '<option value="' + esc(p.key) + '">' + (p.verified ? '\u2713 ' : '') + esc(p.name) + ' \u00b7 ' + esc(kindLabel(p)) + '</option>';
-    }).join('') : '<option value="">No players yet</option>';
+    }).join('') : '<option value="">' + (people.length ? 'No players match' : 'No players yet') + '</option>';
+    // Typing should narrow the list, not lose the player already picked.
+    if (keep && shown.some(function (p) { return p.key === keep; })) $('verifySelect').value = keep;
   }
 
   // ── load ──
@@ -809,6 +814,7 @@
   $('secretInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') tryLogin($('secretInput').value.trim(), true); });
   $('logoutBtn').addEventListener('click', function () { try { localStorage.removeItem(SECRET_KEY); } catch (e) {} location.reload(); });
   $('refreshBtn').addEventListener('click', load);
+  $('verifySearch').addEventListener('input', fillSelect);
   $('exportBtn').addEventListener('click', exportCSV);
   $('autoRefresh').addEventListener('change', setTimer);
   $('rangeSeg').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; state.range = b.dataset.range; $('rangeSeg').querySelectorAll('button').forEach(function (x) { x.classList.toggle('active', x === b); }); load(); });
