@@ -10,7 +10,7 @@
 -- and then it is swept. Nothing here is worth keeping.
 --
 -- Apply against project dxwjxzmlezfyursysays. Every statement is safe to run
--- twice. Applied on 21 September 2026.
+-- twice. Applied on 21 September 2026; public rooms on 24 September 2026.
 
 
 -- code is what a player types in, so it is the primary key: looking a room up
