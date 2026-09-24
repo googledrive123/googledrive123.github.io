@@ -832,6 +832,24 @@
     active = next;
   }
 
+  // ── The invite panel ─────────────────────────────────────────
+  // A public room is joined from the list, not with a code, so its invite
+  // panel says where to find it instead of showing one. The game rebuilds
+  // the panel whenever the invite changes, so this is reapplied each time.
+
+  var PUBLIC_INVITE = 'This room is public. Anyone can join it from Public Rooms.';
+
+  function fillInvite() {
+    var rooms = window.GV && window.GV.rooms;
+    var box = document.querySelector('.invite-ui .invite-code-container');
+    if (!box || !rooms || !rooms.state().public) return;
+
+    var title = box.querySelector('.title');
+    if (title && title.textContent !== PUBLIC_INVITE) title.textContent = PUBLIC_INVITE;
+    var code = box.querySelector('input');
+    if (code && code.style.display !== 'none') code.style.display = 'none';
+  }
+
   // ── Wiring ────────────────────────────────────────────────────────────
   // The menu is rebuilt from scratch every time the game returns to it, so the
   // rename is reapplied rather than assumed to have survived. Class changes
@@ -850,6 +868,7 @@
     }
 
     fillToolbar();
+    fillInvite();
   }
 
   function start() {
