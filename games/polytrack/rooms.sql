@@ -168,7 +168,11 @@ begin
     return null;
   end if;
 
-  return json_build_object('code', v_room.code, 'host_name', v_room.host_name);
+  return json_build_object(
+    'code', v_room.code,
+    'host_name', v_room.host_name,
+    'is_public', v_room.is_public
+  );
 end;
 $function$;
 
