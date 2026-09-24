@@ -96,9 +96,12 @@
   // anon key only. Rooms belong to whoever is holding the host key, not to a
   // signed-in account, so there is no session to attach here.
 
-  function rpc(name, body) {
+  // keepalive lets a call finish after the page has gone, which is the only
+  // way a request sent on the way out ever arrives.
+  function rpc(name, body, keepalive) {
     return fetch(SUPA_URL + '/rest/v1/rpc/' + name, {
       method: 'POST',
+      keepalive: keepalive === true,
       headers: {
         'Content-Type': 'application/json',
         'apikey': SUPA_KEY,
