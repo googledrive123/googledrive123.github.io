@@ -390,6 +390,7 @@
   function leaveLobby() {
     if (lobby.channel === null) return;
     if (lobby.role === 'player') post(lobby.channel, 'leave', { session: lobby.session });
+    if (lobby.role === 'host' && lobby.public) unlist(lobby.code, lobby.key);
     lobby.channel.unsubscribe();
     stopHeartbeat();
     lobby.role = null;
@@ -436,6 +437,13 @@
   //
   // The track is only for the list to show, and the lobby keeps it current.
   var listing = { public: false, track: null };
+
+  // Taken off the list the moment the host leaves rather than minutes later
+  // when its keep-alives stop, so nobody is offered a room that won't answer.
+  function unlist(code, key) {
+    rpc('polytrack_room_unlist', { p_code: code, p_key: key }, true)
+      .catch(function (error) { console.error('Could not unlist the room:', error); });
+  }
 
   // ── Roles ───────────────────────────────────────────────────
   // A role takes over the socket's send and decides what comes back. The game
