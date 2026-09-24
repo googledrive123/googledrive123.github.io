@@ -49,6 +49,42 @@
     }).catch(function () {});
   }
 
+  // ── The blue check ────────────────────────────────────────────────────
+  // Handed out from the site's analytics dashboard. Asked by account and by
+  // browser, the same way the site asks, and held as when it was given.
+
+  var verifiedAt = null;
+
+  function loadVerified() {
+    var gv = identity();
+    if (!gv) return;
+    var s = session();
+    var token = s && s.access_token;
+
+    function ask(bearer) {
+      return fetch(SUPA_URL + '/rest/v1/rpc/gv_verified_status', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPA_KEY,
+          'Authorization': 'Bearer ' + (bearer || SUPA_KEY)
+        },
+        body: JSON.stringify({ p_visitor_id: gv.id() })
+      });
+    }
+
+    // A token past its expiry is refused outright, and refreshing it is the
+    // site's job. Asking again without it still finds a check given to this
+    // browser, which is better than finding nothing.
+    ask(token).then(function (res) {
+      return res.ok || !token ? res : ask(null);
+    }).then(function (res) {
+      return res.ok ? res.json() : null;
+    }).then(function (data) {
+      verifiedAt = data && data.verified_at ? data.verified_at : null;
+    }).catch(function () {});
+  }
+
   // ── Styles ────────────────────────────────────────────────────────────
   // Built out of the game's own custom properties so the panel is the same
   // furniture as the rest of the menu rather than a web page bolted onto it.
@@ -368,6 +404,7 @@
     if (gv) {
       gv.onChange(repaintStrips);
       gv.ready.then(repaintStrips);
+      gv.ready.then(loadVerified);
     }
     loadAccountName();
     // Class changes matter as much as new nodes here: the game moves between
@@ -385,6 +422,7 @@
   window.addEventListener('storage', function (e) {
     if (!e || (e.key !== AUTH_KEY && e.key !== 'gv.username')) return;
     loadAccountName();
+    loadVerified();
     repaintStrips();
   });
 
