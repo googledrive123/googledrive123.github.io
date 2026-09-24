@@ -3851,6 +3851,7 @@ function updateUserUI() {
       av.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
     }
     lbl.textContent = name;
+    if (verifiedAt) lbl.insertAdjacentHTML('beforeend', BADGE_SVG);
   });
 }
 
@@ -3859,6 +3860,7 @@ function updateUserUI() {
 // by this browser's visitor id, so a check given to a guest does not vanish
 // the moment they sign up. Holds when it was given, or null.
 let verifiedAt = null;
+const BADGE_SVG = '<svg class="verified-badge" viewBox="0 0 24 24" role="img" aria-label="Verified"><circle cx="12" cy="12" r="11" fill="#1d9bf0"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
 async function loadVerified() {
   const vid = window.GV && GV.identity ? GV.identity.id() : null;
@@ -3972,6 +3974,7 @@ async function openProfile() {
   const av = document.getElementById('profileAvatarLg');
 
   document.getElementById('profileName').textContent = name;
+  if (verifiedAt) document.getElementById('profileName').insertAdjacentHTML('beforeend', BADGE_SVG);
   document.getElementById('profileEmail').style.display = 'none';
   document.getElementById('profileSignout').style.display = signed ? '' : 'none';
   document.getElementById('profileSigninBtn').style.display = signed ? 'none' : '';
