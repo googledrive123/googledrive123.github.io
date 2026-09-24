@@ -1026,7 +1026,7 @@
 
     var join = document.createElement('button');
     join.className = 'button';
-    join.innerHTML = ' <img class="button-icon" src="images/play.svg">';
+    join.innerHTML = '<img class="button-icon" src="images/play.svg"> ';
     join.prepend(document.createTextNode('Join'));
     join.addEventListener('click', function () { joinPublic(room.code); });
     row.appendChild(join);
