@@ -83,3 +83,37 @@ begin
   ), '[]'::json);
 end;
 $function$;
+
+
+-- Gives or takes back a check. Giving one twice keeps the first date, so the
+-- message a player sees once is not shown to them again for a repeat click.
+create or replace function public.gv_verify_set(
+  p_secret text,
+  p_key text,
+  p_verified boolean,
+  p_name text default null
+) returns boolean
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+  if p_key is null or char_length(p_key) not between 1 and 128 then
+    raise exception 'invalid key';
+  end if;
+
+  if coalesce(p_verified, false) then
+    insert into gv_verified (key, name)
+    values (p_key, left(nullif(btrim(coalesce(p_name, '')), ''), 50))
+    on conflict (key) do update
+      set name = coalesce(excluded.name, gv_verified.name);
+  else
+    delete from gv_verified where key = p_key;
+  end if;
+
+  return coalesce(p_verified, false);
+end;
+$function$;
