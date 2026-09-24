@@ -635,6 +635,12 @@
 
     // The socket closing is not the room closing: the game drops this one when
     // the invite expires and opens a fresh one to renew. The channel stays.
+    //
+    // Except in a public room, whose invite never expires. Its socket only
+    // closes when the host leaves the room, so that is when it is unlisted.
+    socket.addEventListener('close', function () {
+      if (room.public && room.code !== null) unlist(room.code, room.key);
+    });
   }
 
   function joinRole(socket) {
