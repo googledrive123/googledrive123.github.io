@@ -832,6 +832,65 @@
     active = next;
   }
 
+  // ── Public rooms ─────────────────────────────────────────────
+  // The join panel gets a Public Rooms button beside Host, which swaps it for
+  // a list of the public rooms still open. Built from the same pieces as the
+  // game's own panels, and put next to them so it comes and goes with them.
+
+  var PUBLIC_CLASS = 'gv-public-rooms';
+
+  function publicPanel() {
+    var panel = document.createElement('div');
+    panel.className = PUBLIC_CLASS + ' hidden';
+
+    var box = document.createElement('div');
+    box.className = 'main-box';
+    panel.appendChild(box);
+
+    var heading = document.createElement('h2');
+    heading.textContent = 'Public Rooms';
+    box.appendChild(heading);
+
+    var rows = document.createElement('div');
+    rows.className = 'rows';
+    box.appendChild(rows);
+
+    var buttons = document.createElement('div');
+    buttons.className = 'buttons';
+    box.appendChild(buttons);
+
+    var back = document.createElement('button');
+    back.className = 'button';
+    back.innerHTML = '<img class="button-icon" src="images/back.svg"> ';
+    back.appendChild(document.createTextNode('Back'));
+    back.addEventListener('click', function () { showPublic(false); });
+    buttons.appendChild(back);
+
+    return panel;
+  }
+
+  function showPublic(show) {
+    var root = document.querySelector('.multiplayer-ui');
+    var join = root && root.querySelector(':scope > .join');
+    var panel = root && root.querySelector(':scope > .' + PUBLIC_CLASS);
+    if (!join || !panel) return;
+    join.classList.toggle('hidden', show);
+    panel.classList.toggle('hidden', !show);
+  }
+
+  function fillPublicRooms(root) {
+    var buttons = root.querySelector(':scope > .join > .main-box > .buttons');
+    if (!buttons || buttons.querySelector('.gv-public-button')) return;
+
+    var open = document.createElement('button');
+    open.className = 'button gv-public-button';
+    open.textContent = 'Public Rooms';
+    open.addEventListener('click', function () { showPublic(true); });
+    buttons.insertBefore(open, buttons.querySelector(':scope > .join'));
+
+    root.appendChild(publicPanel());
+  }
+
   // ── The invite panel ─────────────────────────────────────────
   // A public room is joined from the list, not with a code, so its invite
   // panel says where to find it instead of showing one. The game rebuilds
@@ -865,6 +924,7 @@
       ensureStyles();
       fillHostPanel(rooms);
       fillJoinPanel(rooms);
+      fillPublicRooms(rooms);
     }
 
     fillToolbar();
