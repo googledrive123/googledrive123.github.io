@@ -986,15 +986,22 @@
 
   function fillPublicRooms(root) {
     var buttons = root.querySelector(':scope > .join > .main-box > .buttons');
-    if (!buttons || buttons.querySelector('.gv-public-button')) return;
+    if (!buttons) return;
 
-    var open = document.createElement('button');
-    open.className = 'button gv-public-button';
-    open.textContent = 'Public Rooms';
-    open.addEventListener('click', function () { showPublic(true); });
-    buttons.insertBefore(open, buttons.querySelector(':scope > .join'));
+    var open = buttons.querySelector('.gv-public-button');
+    if (!open) {
+      open = document.createElement('button');
+      open.className = 'button gv-public-button';
+      open.textContent = 'Public Rooms';
+      open.addEventListener('click', function () { showPublic(true); });
+      buttons.insertBefore(open, buttons.querySelector(':scope > .join'));
+      root.appendChild(publicPanel());
+    }
 
-    root.appendChild(publicPanel());
+    // The game greys out Host and Join while a join is under way, and the
+    // list should not open over a connection in progress either.
+    var busy = root.querySelector(':scope > .join .invite-code-container.connecting') !== null;
+    if (open.disabled !== busy) open.disabled = busy;
   }
 
   // Same reason as the track list: redrawing a list that has not changed
