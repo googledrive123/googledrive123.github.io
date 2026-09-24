@@ -1033,7 +1033,7 @@
 
     var host = document.createElement('div');
     host.className = 'host';
-    host.textContent = (room.host_name || 'Player') + '’s room';
+    host.textContent = (room.host_name || 'Player') + '\u2019s room';
     details.appendChild(host);
 
     var track = document.createElement('div');
