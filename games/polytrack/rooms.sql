@@ -40,6 +40,11 @@ create index if not exists polytrack_rooms_last_seen_idx
 alter table public.polytrack_rooms
   add column if not exists is_public boolean not null default false;
 
+-- What the public list shows beside the host's name. The host reports it with
+-- every keep-alive, so it follows the room from track to track.
+alter table public.polytrack_rooms
+  add column if not exists track_name text;
+
 -- Every path in and out of this table is a security definer function, so there
 -- is no policy to write. RLS on with no policies means a direct PostgREST
 -- request against the table reads nothing and writes nothing.
