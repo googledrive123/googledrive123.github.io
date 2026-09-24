@@ -945,6 +945,9 @@
     if (!join || !panel) return;
     join.classList.toggle('hidden', show);
     panel.classList.toggle('hidden', !show);
+    if (!show) return;
+    publicNote('Looking for rooms...');
+    loadPublic();
   }
 
   function fillPublicRooms(root) {
@@ -958,6 +961,77 @@
     buttons.insertBefore(open, buttons.querySelector(':scope > .join'));
 
     root.appendChild(publicPanel());
+  }
+
+  // Same reason as the track list: redrawing a list that has not changed
+  // would reset its scroll and flash under the pointer every few seconds.
+  var listed = null;
+
+  function publicRows() {
+    return document.querySelector('.' + PUBLIC_CLASS + ' > .main-box > .rows');
+  }
+
+  function publicNote(text) {
+    var rows = publicRows();
+    if (!rows || listed === text) return;
+    listed = text;
+    rows.innerHTML = '';
+    var note = document.createElement('div');
+    note.className = 'gv-public-note';
+    note.textContent = text;
+    rows.appendChild(note);
+  }
+
+  function publicRow(room) {
+    var row = document.createElement('div');
+    row.className = 'gv-public-row';
+
+    var details = document.createElement('div');
+    details.className = 'details';
+    row.appendChild(details);
+
+    var host = document.createElement('div');
+    host.className = 'host';
+    host.textContent = (room.host_name || 'Player') + '’s room';
+    details.appendChild(host);
+
+    var track = document.createElement('div');
+    track.className = 'track';
+    track.textContent = room.track_name || 'Picking a track';
+    details.appendChild(track);
+
+    var join = document.createElement('button');
+    join.className = 'button';
+    join.innerHTML = ' <img class="button-icon" src="images/play.svg">';
+    join.prepend(document.createTextNode('Join'));
+    row.appendChild(join);
+
+    return row;
+  }
+
+  function drawPublic(list) {
+    var rows = publicRows();
+    if (!rows) return;
+    if (list.length === 0) {
+      publicNote('No public rooms right now. Host one and pick Public to be the first.');
+      return;
+    }
+
+    var signature = JSON.stringify(list);
+    if (signature === listed) return;
+    listed = signature;
+
+    rows.innerHTML = '';
+    list.forEach(function (room) { rows.appendChild(publicRow(room)); });
+  }
+
+  function loadPublic() {
+    var rooms = window.GV && window.GV.rooms;
+    if (!rooms || !publicRows()) return;
+    rooms.publicRooms().then(drawPublic, function (error) {
+      console.error('Could not load public rooms:', error);
+      publicNote('Could not load public rooms. Check your connection and try again.');
+    });
   }
 
   // ── The invite panel ─────────────────────────────────────────
