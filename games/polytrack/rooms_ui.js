@@ -935,6 +935,13 @@
     back.addEventListener('click', function () { showPublic(false); });
     buttons.appendChild(back);
 
+    var refresh = document.createElement('button');
+    refresh.className = 'button';
+    refresh.innerHTML = '<img class="button-icon" src="images/refresh.svg"> ';
+    refresh.prepend(document.createTextNode('Refresh '));
+    refresh.addEventListener('click', loadPublic);
+    buttons.appendChild(refresh);
+
     return panel;
   }
 
