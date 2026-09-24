@@ -39,7 +39,8 @@
   var DEFAULTS = {
     otherCars: 'translucent',
     playlist: [],
-    roundSeconds: 0
+    roundSeconds: 0,
+    visibility: 'private'
   };
 
   // What the host has chosen, kept between sessions. In a room this is only
@@ -87,6 +88,11 @@
     { value: 120, label: '2 min', info: 'Each track runs for two minutes, then the room moves on.' },
     { value: 180, label: '3 min', info: 'Each track runs for three minutes, then the room moves on.' },
     { value: 300, label: '5 min', info: 'Each track runs for five minutes, then the room moves on.' }
+  ];
+
+  var VISIBILITY = [
+    { value: 'private', label: 'Private', info: 'Players join with the room code.' },
+    { value: 'public', label: 'Public', info: 'Listed under Public Rooms, where anyone can join without a code.' }
   ];
 
   var OTHER_CARS = [
@@ -214,6 +220,78 @@
     '  font-size: 20px;',
     '  color: var(--text-color);',
     '  opacity: 0.6;',
+    '}',
+    // The public list sits where the join panel does and copies its look,
+    // but every one of the game's rules for that panel starts from .join, so
+    // none of them reach this one.
+    '#ui .multiplayer-ui > .gv-public-rooms {',
+    '  position: absolute;',
+    '  left: calc(50% - 700px / 2);',
+    '  top: 12vh;',
+    '}',
+    '#ui .multiplayer-ui > .gv-public-rooms.hidden {',
+    '  display: none;',
+    '}',
+    '.gv-public-rooms > .main-box {',
+    '  width: 700px;',
+    '  box-sizing: border-box;',
+    '  background-color: var(--surface-secondary-color);',
+    '}',
+    '.gv-public-rooms > .main-box > h2 {',
+    '  margin: 0 0 10px 0;',
+    '  padding: 10px 20px;',
+    '  font-weight: normal;',
+    '  font-size: 38px;',
+    '  text-align: center;',
+    '  background-color: var(--surface-color);',
+    '  color: var(--text-color);',
+    '}',
+    '.gv-public-rooms > .main-box > .rows {',
+    '  padding: 0 10px;',
+    '  max-height: 60vh;',
+    '  overflow-y: auto;',
+    '  overscroll-behavior: contain;',
+    '}',
+    '.gv-public-rooms > .main-box > .buttons {',
+    '  display: flex;',
+    '  justify-content: space-between;',
+    '  margin: 10px 0 0 0;',
+    '  padding: 10px;',
+    '  background-color: var(--surface-color);',
+    '}',
+    '.gv-public-row {',
+    '  display: flex;',
+    '  align-items: center;',
+    '  margin: 0 0 8px 0;',
+    '  padding: 6px 6px 6px 0;',
+    '  background-color: var(--surface-color);',
+    '}',
+    '.gv-public-row > .details {',
+    '  flex: 1;',
+    '  min-width: 0;',
+    '  padding: 0 16px;',
+    '}',
+    '.gv-public-row > .details > div {',
+    '  white-space: nowrap;',
+    '  overflow: hidden;',
+    '  text-overflow: ellipsis;',
+    '  color: var(--text-color);',
+    '}',
+    '.gv-public-row > .details > .host {',
+    '  font-size: 26px;',
+    '}',
+    '.gv-public-row > .details > .track {',
+    '  font-size: 18px;',
+    '  opacity: 0.7;',
+    '}',
+    '.gv-public-row > .button > .button-icon {',
+    '  margin-left: 6px;',
+    '}',
+    '.gv-public-note {',
+    '  padding: 6px 6px 14px 6px;',
+    '  font-size: 22px;',
+    '  color: var(--text-color);',
+    '  opacity: 0.7;',
     '}'
   ].join('\n');
 
@@ -269,6 +347,31 @@
       applyNow();
       tellRoom();
     });
+  }
+
+  // Whether anyone can find the room or only people given its code. It goes
+  // above the game's own blocks, because it decides who the rest is for.
+  function visibilityBlock() {
+    return choiceBlock('Visibility', VISIBILITY, settings.visibility, function (value) {
+      settings.visibility = value;
+      write();
+      tellVisibility();
+    });
+  }
+
+  // rooms.js opens the room the moment Host is pressed, so it has to know the
+  // choice beforehand rather than be told once the room exists.
+  function tellVisibility() {
+    var rooms = window.GV && window.GV.rooms;
+    if (rooms) rooms.setPublic(settings.visibility === 'public');
+  }
+
+  // The public list shows what a room is racing on. Before the room exists
+  // that is the track picked on the host panel; after, it is whatever the
+  // game's toolbar says, however the track was changed.
+  function tellTrack(element) {
+    var rooms = window.GV && window.GV.rooms;
+    if (rooms && element) rooms.setTrack(element.textContent.trim());
   }
 
   // ── The track list ───────────────────────────────────────────
@@ -514,6 +617,7 @@
     var rooms = window.GV && window.GV.rooms;
     renderRound();
     if (!rooms || rooms.state().role !== 'host') return;
+    tellTrack(document.querySelector('.game-toolbar-ui .track-name'));
     if (roundEndsAt === null || Date.now() < roundEndsAt) return;
     if (settings.playlist.length < 2) {
       restartRound();
@@ -650,6 +754,7 @@
 
     var thumbnail = box.querySelector(':scope > .track-button .thumbnail');
     if (thumbnail) chosenThumbnail = thumbnail.getAttribute('src');
+    tellTrack(box.querySelector(':scope > .track-button > .name:not(.placeholder)'));
 
     if (box.querySelector('.gv-room-option')) {
       refreshPlaylist();
@@ -658,7 +763,9 @@
     // A freshly built panel has nothing drawn in it yet.
     drawn = null;
     var buttons = box.querySelector(':scope > .buttons');
-    if (!buttons) return;
+    var heading = box.querySelector(':scope > h2');
+    if (!buttons || !heading) return;
+    box.insertBefore(visibilityBlock(), heading.nextSibling);
     box.insertBefore(playlistBlock(), buttons);
     box.insertBefore(roundLengthBlock(), buttons);
     box.insertBefore(otherCarsBlock(), buttons);
@@ -797,6 +904,218 @@
     active = next;
   }
 
+  // ── Public rooms ─────────────────────────────────────────────
+  // The join panel gets a Public Rooms button beside Host, which swaps it for
+  // a list of the public rooms still open. Built from the same pieces as the
+  // game's own panels, and put next to them so it comes and goes with them.
+
+  var PUBLIC_CLASS = 'gv-public-rooms';
+
+  function publicPanel() {
+    var panel = document.createElement('div');
+    panel.className = PUBLIC_CLASS + ' hidden';
+
+    var box = document.createElement('div');
+    box.className = 'main-box';
+    panel.appendChild(box);
+
+    var heading = document.createElement('h2');
+    heading.textContent = 'Public Rooms';
+    box.appendChild(heading);
+
+    var rows = document.createElement('div');
+    rows.className = 'rows';
+    box.appendChild(rows);
+
+    var buttons = document.createElement('div');
+    buttons.className = 'buttons';
+    box.appendChild(buttons);
+
+    var back = document.createElement('button');
+    back.className = 'button';
+    back.innerHTML = '<img class="button-icon" src="images/back.svg"> ';
+    back.appendChild(document.createTextNode('Back'));
+    back.addEventListener('click', function () { showPublic(false); });
+    buttons.appendChild(back);
+
+    var refresh = document.createElement('button');
+    refresh.className = 'button';
+    refresh.innerHTML = '<img class="button-icon" src="images/refresh.svg"> ';
+    refresh.prepend(document.createTextNode('Refresh '));
+    refresh.addEventListener('click', loadPublic);
+    buttons.appendChild(refresh);
+
+    return panel;
+  }
+
+  function showPublic(show) {
+    var root = document.querySelector('.multiplayer-ui');
+    var join = root && root.querySelector(':scope > .join');
+    var panel = root && root.querySelector(':scope > .' + PUBLIC_CLASS);
+    if (!join || !panel) return;
+    join.classList.toggle('hidden', show);
+    panel.classList.toggle('hidden', !show);
+    if (!show) {
+      stopRefreshing();
+      return;
+    }
+    publicNote('Looking for rooms...');
+    loadPublic();
+    startRefreshing();
+  }
+
+  // Rooms open and close while the list is up, so it keeps itself current
+  // for as long as it is on screen, and stops once it is not.
+  var REFRESH_EVERY = 5000;
+  var refreshing = null;
+
+  function startRefreshing() {
+    if (refreshing !== null) return;
+    refreshing = setInterval(function () {
+      var rows = publicRows();
+      if (!rows || rows.offsetParent === null) stopRefreshing();
+      else loadPublic();
+    }, REFRESH_EVERY);
+  }
+
+  function stopRefreshing() {
+    if (refreshing === null) return;
+    clearInterval(refreshing);
+    refreshing = null;
+  }
+
+  function fillPublicRooms(root) {
+    var buttons = root.querySelector(':scope > .join > .main-box > .buttons');
+    if (!buttons) return;
+
+    var open = buttons.querySelector('.gv-public-button');
+    if (!open) {
+      open = document.createElement('button');
+      open.className = 'button gv-public-button';
+      open.textContent = 'Public Rooms';
+      open.addEventListener('click', function () { showPublic(true); });
+      buttons.insertBefore(open, buttons.querySelector(':scope > .join'));
+      root.appendChild(publicPanel());
+    }
+
+    // The game greys out Host and Join while a join is under way, and the
+    // list should not open over a connection in progress either.
+    var busy = root.querySelector(':scope > .join .invite-code-container.connecting') !== null;
+    if (open.disabled !== busy) open.disabled = busy;
+  }
+
+  // Same reason as the track list: redrawing a list that has not changed
+  // would reset its scroll and flash under the pointer every few seconds.
+  var listed = null;
+
+  function publicRows() {
+    return document.querySelector('.' + PUBLIC_CLASS + ' > .main-box > .rows');
+  }
+
+  function publicNote(text) {
+    var rows = publicRows();
+    if (!rows || listed === text) return;
+    listed = text;
+    rows.innerHTML = '';
+    var note = document.createElement('div');
+    note.className = 'gv-public-note';
+    note.textContent = text;
+    rows.appendChild(note);
+  }
+
+  function publicRow(room) {
+    var row = document.createElement('div');
+    row.className = 'gv-public-row';
+
+    var details = document.createElement('div');
+    details.className = 'details';
+    row.appendChild(details);
+
+    var host = document.createElement('div');
+    host.className = 'host';
+    host.textContent = (room.host_name || 'Player') + '\u2019s room';
+    details.appendChild(host);
+
+    var track = document.createElement('div');
+    track.className = 'track';
+    track.textContent = room.track_name || 'Picking a track';
+    details.appendChild(track);
+
+    var join = document.createElement('button');
+    join.className = 'button';
+    join.innerHTML = '<img class="button-icon" src="images/play.svg"> ';
+    join.prepend(document.createTextNode('Join'));
+    join.addEventListener('click', function () { joinPublic(room.code); });
+    row.appendChild(join);
+
+    return row;
+  }
+
+  // Joining goes through the game's own join panel, as if the code had been
+  // typed, so there is one way into a room and it is the one the game knows.
+  // The code box is faded out while connecting, so the code stays out of
+  // sight on the way in.
+  function joinPublic(code) {
+    var root = document.querySelector('.multiplayer-ui');
+    var input = root && root.querySelector(':scope > .join .invite-code');
+    var join = root && root.querySelector(':scope > .join > .main-box > .buttons > .join');
+    if (!input || !join || typeof code !== 'string') return;
+
+    showPublic(false);
+    input.value = code;
+    input.dispatchEvent(new Event('input'));
+    join.click();
+  }
+
+  function drawPublic(list) {
+    var rows = publicRows();
+    if (!rows) return;
+    if (list.length === 0) {
+      publicNote('No public rooms right now. Host one and pick Public to be the first.');
+      return;
+    }
+
+    var signature = JSON.stringify(list);
+    if (signature === listed) return;
+    listed = signature;
+
+    rows.innerHTML = '';
+    list.forEach(function (room) { rows.appendChild(publicRow(room)); });
+  }
+
+  function loadPublic() {
+    var rooms = window.GV && window.GV.rooms;
+    if (!rooms || !publicRows()) return;
+    rooms.publicRooms().then(drawPublic, function (error) {
+      console.error('Could not load public rooms:', error);
+      publicNote('Could not load public rooms. Check your connection and try again.');
+    });
+  }
+
+  // ── The invite panel ─────────────────────────────────────────
+  // A public room is joined from the list, not with a code, so its invite
+  // panel says where to find it instead of showing one. The game rebuilds
+  // the panel whenever the invite changes, so this is reapplied each time.
+
+  var PUBLIC_INVITE = 'This room is public. Anyone can join it from Public Rooms.';
+
+  function fillInvite() {
+    var rooms = window.GV && window.GV.rooms;
+    var box = document.querySelector('.invite-ui .invite-code-container');
+    if (!box || !rooms || !rooms.state().public) return;
+
+    var title = box.querySelector('.title');
+    if (title && title.textContent !== PUBLIC_INVITE) title.textContent = PUBLIC_INVITE;
+    var code = box.querySelector('input');
+    if (code && code.style.display !== 'none') code.style.display = 'none';
+
+    // Copy would put the hidden code on the clipboard. It has no class of its
+    // own, so it is found by its icon.
+    var icon = document.querySelector('.invite-ui > .buttons-container img[src="images/copy.svg"]');
+    var copy = icon && icon.closest('button');
+    if (copy && copy.style.display !== 'none') copy.style.display = 'none';
+  }
+
   // ── Wiring ────────────────────────────────────────────────────────────
   // The menu is rebuilt from scratch every time the game returns to it, so the
   // rename is reapplied rather than assumed to have survived. Class changes
@@ -812,14 +1131,17 @@
       ensureStyles();
       fillHostPanel(rooms);
       fillJoinPanel(rooms);
+      fillPublicRooms(rooms);
     }
 
     fillToolbar();
+    fillInvite();
   }
 
   function start() {
     var rooms = window.GV && window.GV.rooms;
     if (rooms) {
+      tellVisibility();
       rooms.onMessage(heardSettings);
       rooms.onState(function (state) {
         if (state.code === null) {
@@ -848,6 +1170,18 @@
         if (state.role === 'host') startTelling();
       });
     }
+
+    // The game reads Escape on the join screen as leaving multiplayer. From
+    // the public list the step back a player expects is to the join screen,
+    // so it is caught on the way down, before it reaches the game's handler.
+    document.addEventListener('keydown', function (event) {
+      if (event.code !== 'Escape') return;
+      var rows = publicRows();
+      if (!rows || rows.offsetParent === null) return;
+      event.stopPropagation();
+      event.preventDefault();
+      showPublic(false);
+    }, true);
 
     new MutationObserver(attach).observe(document.body, {
       childList: true, subtree: true, attributes: true, attributeFilter: ['class']

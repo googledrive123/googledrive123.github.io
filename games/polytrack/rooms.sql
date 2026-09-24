@@ -10,7 +10,7 @@
 -- and then it is swept. Nothing here is worth keeping.
 --
 -- Apply against project dxwjxzmlezfyursysays. Every statement is safe to run
--- twice. Applied on 21 September 2026.
+-- twice. Applied on 21 September 2026; public rooms on 24 September 2026.
 
 
 -- code is what a player types in, so it is the primary key: looking a room up
@@ -33,6 +33,17 @@ create table if not exists public.polytrack_rooms (
 
 create index if not exists polytrack_rooms_last_seen_idx
   on public.polytrack_rooms (last_seen);
+
+-- A public room is listed for anyone to join without typing its code. Rooms
+-- are private unless the host asks otherwise, which is also what every room
+-- made before this column existed was.
+alter table public.polytrack_rooms
+  add column if not exists is_public boolean not null default false;
+
+-- What the public list shows beside the host's name. The host reports it with
+-- every keep-alive, so it follows the room from track to track.
+alter table public.polytrack_rooms
+  add column if not exists track_name text;
 
 -- Every path in and out of this table is a security definer function, so there
 -- is no policy to write. RLS on with no policies means a direct PostgREST
@@ -67,9 +78,16 @@ $function$;
 -- Called when the host opens the multiplayer menu. Retries on the unlikely
 -- collision rather than trusting one draw, and gives up after a few attempts
 -- so a full keyspace cannot spin here forever.
+--
+-- The old two argument version is dropped first. Left beside this one, a call
+-- naming only p_key and p_name would match both and PostgREST would refuse it.
+drop function if exists public.polytrack_room_create(text, text);
+
 create or replace function public.polytrack_room_create(
   p_key text,
-  p_name text default null
+  p_name text default null,
+  p_public boolean default false,
+  p_track text default null
 ) returns json
 language plpgsql
 security definer
@@ -94,12 +112,24 @@ begin
     v_attempt := v_attempt + 1;
     v_code := public.polytrack_room_code();
 
-    insert into polytrack_rooms (code, host_key, host_name)
-    values (v_code, p_key, left(nullif(btrim(coalesce(p_name, '')), ''), 50))
+    insert into polytrack_rooms (code, host_key, host_name, is_public, track_name)
+    values (
+      v_code,
+      p_key,
+      left(nullif(btrim(coalesce(p_name, '')), ''), 50),
+      coalesce(p_public, false),
+      left(nullif(btrim(coalesce(p_track, '')), ''), 80)
+    )
     on conflict (code) do nothing;
 
+    -- A public room's invite never expires. Nobody holds its code to renew,
+    -- and the game closes an expired invite's socket, which would leave the
+    -- room listed but no longer answering. The game reads null as no limit.
     if found then
-      return json_build_object('code', v_code, 'timeout_milliseconds', 600000);
+      return json_build_object(
+        'code', v_code,
+        'timeout_milliseconds', case when coalesce(p_public, false) then null else 600000 end
+      );
     end if;
 
     if v_attempt >= 8 then
@@ -138,7 +168,11 @@ begin
     return null;
   end if;
 
-  return json_build_object('code', v_room.code, 'host_name', v_room.host_name);
+  return json_build_object(
+    'code', v_room.code,
+    'host_name', v_room.host_name,
+    'is_public', v_room.is_public
+  );
 end;
 $function$;
 
@@ -146,7 +180,75 @@ $function$;
 -- The host calls this while its room is open. Without it a room that outlives
 -- the ten minute window stops being findable even though the host is sitting
 -- in the lobby waiting for someone.
+--
+-- It also carries the track the room is on, for the public list. Dropped and
+-- recreated for the same reason as polytrack_room_create.
+drop function if exists public.polytrack_room_touch(text, text);
+
 create or replace function public.polytrack_room_touch(
+  p_code text,
+  p_key text,
+  p_track text default null
+) returns void
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'rooms are not updated from this origin';
+  end if;
+
+  update polytrack_rooms
+  set last_seen = now(),
+      track_name = coalesce(left(nullif(btrim(coalesce(p_track, '')), ''), 80), track_name)
+  where code = upper(btrim(coalesce(p_code, '')))
+    and host_key = p_key;
+end;
+$function$;
+
+
+-- The public room list. Codes are handed out here, which is fine: a public
+-- room is one its host chose to let anyone into.
+--
+-- Only rooms still being kept alive are shown. The host touches its room once
+-- a minute, so three minutes allows for a couple of missed ones without
+-- offering a room long after its host has gone.
+create or replace function public.polytrack_room_list()
+returns json
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'rooms are not read from this origin';
+  end if;
+
+  return coalesce((
+    select json_agg(json_build_object(
+      'code', listed.code,
+      'host_name', listed.host_name,
+      'track_name', listed.track_name
+    ) order by listed.created_at desc)
+    from (
+      select code, host_name, track_name, created_at
+      from polytrack_rooms
+      where is_public
+        and last_seen > now() - interval '3 minutes'
+      order by created_at desc
+      limit 50
+    ) listed
+  ), '[]'::json);
+end;
+$function$;
+
+
+-- The host calls this on the way out of a public room, so the list stops
+-- offering it straight away rather than a few minutes later. The row itself
+-- is left for the sweep: taking it off the list is all that is needed, and a
+-- player already racing in it loses nothing.
+create or replace function public.polytrack_room_unlist(
   p_code text,
   p_key text
 ) returns void
@@ -160,7 +262,7 @@ begin
   end if;
 
   update polytrack_rooms
-  set last_seen = now()
+  set is_public = false
   where code = upper(btrim(coalesce(p_code, '')))
     and host_key = p_key;
 end;
