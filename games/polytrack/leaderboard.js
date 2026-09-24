@@ -607,11 +607,23 @@
     panel.appendChild(btn);
   }
 
+  // The game's filter at the foot of the board says "Only verified", which is
+  // its word for signed in. Here that word now belongs to the blue check, so
+  // the button says what it filters. Only written when it still needs it,
+  // because this runs off an observer that would otherwise hear itself.
+  function renameFilter(panel) {
+    var button = panel.querySelector('.only-verified');
+    var text = button && button.firstChild;
+    if (!text || text.nodeType !== 3 || text.nodeValue !== 'Only verified') return;
+    text.nodeValue = 'Only signed in';
+  }
+
   function decorate() {
     var panel = document.querySelector('.leaderboard-ui');
     if (!panel) return;
     ensureStyles();
     ensureInfoButton(panel);
+    renameFilter(panel);
     // Rows are rebuilt on every page change, so this re-runs rather than
     // assuming the ones seen first are the only ones.
     panel.querySelectorAll('.container > button.main').forEach(labelRow);
