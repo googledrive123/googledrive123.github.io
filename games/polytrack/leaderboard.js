@@ -119,6 +119,26 @@
     }
   }
 
+  // Which rows carry the blue check from analytics/verified.sql, by position.
+  // The game has no field for it, so it is taken off each entry before the
+  // game sees the board and drawn onto the row further down. Kept per track:
+  // the one-row lookups for the caller's own standing land between full
+  // pages, and must add to what is known rather than wipe it.
+  var checkedTrack = null;
+  var checked = {};
+
+  function noteChecks(trackId, entries) {
+    if (trackId !== checkedTrack) {
+      checkedTrack = trackId;
+      checked = {};
+    }
+    for (var i = 0; i < entries.length; i++) {
+      var entry = entries[i];
+      if (typeof entry.position === 'number') checked[entry.position] = entry.gvVerified === true;
+      delete entry.gvVerified;
+    }
+  }
+
   function getBoard(q) {
     return rpc('polytrack_board', {
       p_track_id: q.trackId || '',
@@ -127,6 +147,7 @@
       p_visitor_id: visitorId()
     }).then(function (board) {
       board = board || { total: 0, entries: [], userEntry: null };
+      noteChecks(q.trackId || '', board.entries || []);
       selfPosition = board.userEntry ? board.userEntry.position : null;
       markSelfEntry(board, q.userTokenHash);
       return board;
@@ -421,15 +442,17 @@
     scheduleNamePush();
   });
 
-  // ── Verified / unverified labelling ───────────────────────────────────
+  // ── Signed in / guest labelling ───────────────────────────────────────
   // The game has three states: Pending, Verified, Invalid. None of them mean
   // "guest", and the icon it draws for a guest reads as Pending — which
   // promises a verification that is never coming, because nothing here can
   // check a run. So the icon is replaced with a plain word.
   //
-  // Verified means the time is tied to a signed-in account. Unverified means
-  // it is not, and nothing proves who set it. Both are done by rewriting the
-  // rendered rows, so the bundle stays untouched.
+  // Signed in means the time is tied to a GameVault account. Guest means it
+  // is not, and nothing proves who set it. These used to read Verified and
+  // Unverified, which is now the word for the blue check, so they say what
+  // they actually mean. Both are done by rewriting the rendered rows, so the
+  // bundle stays untouched.
 
   var STYLE_ID = 'gv-leaderboard-style';
 
@@ -458,6 +481,10 @@
       '  margin-left: 8px; margin-right: 22px; font-size: 19px;',
       '  opacity: 0.55; white-space: nowrap; }',
       // Mirrors .total-players, which sits in the opposite corner.
+      // The game's "(You)" pulls itself 16px left to sit against the name.
+      // The right margin gives that back so it does not land on the check.
+      '.leaderboard-ui .gv-check {',
+      '  width: 24px; height: 24px; flex-shrink: 0; margin: 0 14px 0 -4px; }',
       '.leaderboard-ui > .gv-info {',
       '  margin: 10px; position: absolute; left: 0; top: 0; z-index: 3;',
       '  width: 22px; height: 22px; padding: 0; line-height: 22px;',
@@ -478,7 +505,8 @@
       '  background-color: var(--surface-secondary-color); font-size: 19px;',
       '  line-height: 1.25; color: var(--text-color); }',
       '.gv-dialog b.gv-yes { color: #5f5; }',
-      '.gv-dialog b.gv-no { color: #f55; }'
+      '.gv-dialog b.gv-no { color: #f55; }',
+      '.gv-dialog .gv-check { width: 20px; height: 20px; margin: 0; vertical-align: -4px; }'
     ].join('\n');
     document.head.appendChild(css);
   }
@@ -509,6 +537,18 @@
     shown.parentNode.insertBefore(tag, shown.nextSibling);
   }
 
+  var CHECK_SVG = '<svg class="gv-check" viewBox="0 0 24 24" role="img" aria-label="Verified">'
+    + '<circle cx="12" cy="12" r="11" fill="#1d9bf0"/><path d="M7 12.5l3.2 3.2L17 9" fill="none"'
+    + ' stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  // Straight after the name, ahead of anything else the row adds to it, so
+  // the check reads as part of the name.
+  function checkRow(row) {
+    var shown = row.querySelector('.name');
+    if (!shown || checked[positionOf(row)] !== true) return;
+    shown.insertAdjacentHTML('afterend', CHECK_SVG);
+  }
+
   function labelRow(row) {
     if (row.dataset.gvLabelled) return;
     var state = row.querySelector('.verified-state');
@@ -516,15 +556,16 @@
     if (!state || !left) return;
     row.dataset.gvLabelled = '1';
     nameSelfRow(row);
+    checkRow(row);
 
     var verified = state.classList.contains('verified');
     var label = document.createElement('p');
     label.className = 'gv-verify ' + (verified ? 'gv-yes' : 'gv-no');
-    label.textContent = verified ? 'Verified' : 'Unverified';
+    label.textContent = verified ? 'Signed in' : 'Guest';
     left.appendChild(label);
     state.title = verified
-      ? 'Verified - set while signed in'
-      : 'Unverified - set without signing in';
+      ? 'Signed in - set while signed in to GameVault'
+      : 'Guest - set without signing in';
   }
 
   function showInfo() {
@@ -535,12 +576,14 @@
     var box = document.createElement('div');
     var text = document.createElement('p');
     text.innerHTML =
-      '<b class="gv-yes">Verified</b> means the time was set while signed in to ' +
+      '<b class="gv-yes">Signed in</b> means the time was set while signed in to ' +
       'GameVault, so it belongs to a known account.<br><br>' +
-      '<b class="gv-no">Unverified</b> means it was set without signing in. ' +
+      '<b class="gv-no">Guest</b> means it was set without signing in. ' +
       'The run still counts and still appears here, but nothing proves who set ' +
-      'it, so unverified times are ranked below verified ones.<br><br>' +
-      'Sign in before racing to have your times verified.';
+      'it, so guest times are ranked below signed-in ones.<br><br>' +
+      'Sign in before racing to have your times count as signed in.<br><br>' +
+      CHECK_SVG + ' A blue check next to a name means GameVault has picked that ' +
+      'player out as one of its top racers.';
     var ok = document.createElement('button');
     ok.className = 'button';
     ok.textContent = 'Ok';
@@ -558,10 +601,21 @@
     btn.className = 'gv-info';
     btn.type = 'button';
     btn.textContent = 'i';
-    btn.title = 'What does Verified mean?';
-    btn.setAttribute('aria-label', 'What does Verified mean?');
+    btn.title = 'What do these labels mean?';
+    btn.setAttribute('aria-label', 'What do these labels mean?');
     btn.addEventListener('click', showInfo);
     panel.appendChild(btn);
+  }
+
+  // The game's filter at the foot of the board says "Only verified", which is
+  // its word for signed in. Here that word now belongs to the blue check, so
+  // the button says what it filters. Only written when it still needs it,
+  // because this runs off an observer that would otherwise hear itself.
+  function renameFilter(panel) {
+    var button = panel.querySelector('.only-verified');
+    var text = button && button.firstChild;
+    if (!text || text.nodeType !== 3 || text.nodeValue !== 'Only verified') return;
+    text.nodeValue = 'Only signed in';
   }
 
   function decorate() {
@@ -569,6 +623,7 @@
     if (!panel) return;
     ensureStyles();
     ensureInfoButton(panel);
+    renameFilter(panel);
     // Rows are rebuilt on every page change, so this re-runs rather than
     // assuming the ones seen first are the only ones.
     panel.querySelectorAll('.container > button.main').forEach(labelRow);

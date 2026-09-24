@@ -108,6 +108,19 @@
   .tabs { display: flex; gap: 6px; margin-left: auto; }
   .tabs button { background: transparent; border: 1px solid var(--border); color: var(--muted); font: inherit; font-size: 0.68rem; padding: 3px 8px; border-radius: 6px; cursor: pointer; }
   .tabs button.active { color: var(--text); border-color: var(--border-strong); }
+
+  /* verified players */
+  .verify-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .verify-bar input, .verify-bar select { background: var(--bg); border: 1px solid var(--border-strong); color: var(--text); font: inherit; font-size: 0.8rem; padding: 7px 10px; border-radius: 8px; min-width: 0; }
+  .verify-bar input { flex: 1 1 200px; }
+  .verify-bar select { flex: 2 1 260px; }
+  .verify-msg { font-size: 0.74rem; color: var(--muted); margin-top: 8px; min-height: 1em; }
+  .verify-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .verify-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 0.76rem; padding: 4px 4px 4px 8px; border: 1px solid var(--border); border-radius: 999px; }
+  .verify-chip .kind { color: var(--muted-2); font-size: 0.68rem; }
+  .verify-chip button { background: none; border: 0; color: var(--muted); font: inherit; font-size: 0.9rem; line-height: 1; padding: 2px 6px; cursor: pointer; }
+  .verify-chip button:hover { color: var(--accent); }
+  .vcheck { width: 14px; height: 14px; flex-shrink: 0; }
 </style>
 </head>
 <body>
@@ -147,6 +160,19 @@
       <div class="kpi live"><div class="l">Playing now</div><div class="v" id="livePlaying">–</div><div class="s" id="livePlayingSub">–</div></div>
       <div class="kpi"><div class="l">Last event</div><div class="v" id="lastEventAgo" style="font-size:1.1rem">–</div><div class="s" id="lastEventWhat">–</div></div>
       <div class="kpi"><div class="l">Events today</div><div class="v" id="todayEvents">–</div><div class="s" id="todayVisitors">–</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Verified players <small>blue check on the site and on the PolyTrack leaderboards</small></h2>
+    <div class="card">
+      <div class="verify-bar">
+        <input type="search" id="verifySearch" placeholder="Search accounts and PolyTrack players" autocomplete="off">
+        <select id="verifySelect" aria-label="Player"></select>
+        <button class="btn" id="verifyBtn" disabled>Verify</button>
+      </div>
+      <div class="verify-msg" id="verifyMsg"></div>
+      <div class="verify-list" id="verifyList"></div>
     </div>
   </section>
 
@@ -728,6 +754,59 @@
     ranked('rkAllGames', (o.top_games || []).filter(function (g) { return g.plays; }).slice(0, 15).map(function (g) { return [g.name || g.game_id, g.plays, g.players + ' players · ' + dur(g.secs)]; }), { share: false });
   }
 
+  // ── verified players ──
+  // Everyone who can be given the blue check: accounts by username, and guests
+  // by the name they race under on the PolyTrack boards. Guests often share a
+  // name ("Anonymous" most of all), so each carries a slice of its id.
+  var people = [];
+  function kindLabel(p) { return p.kind === 'account' ? 'account' : 'guest ' + p.key.slice(6, 12); }
+  function loadPeople() {
+    return rpc('gv_verify_candidates', { p_secret: state.secret }).then(function (list) {
+      people = Array.isArray(list) ? list : [];
+      fillSelect();
+      renderVerified();
+    }).catch(function (e) { $('verifyMsg').textContent = 'Could not load players: ' + e.message; });
+  }
+  function fillSelect() {
+    var q = $('verifySearch').value.trim().toLowerCase();
+    var keep = $('verifySelect').value;
+    var shown = people.filter(function (p) { return !q || p.name.toLowerCase().indexOf(q) !== -1; });
+    $('verifySelect').innerHTML = shown.length ? shown.map(function (p) {
+      return '<option value="' + esc(p.key) + '">' + (p.verified ? '\u2713 ' : '') + esc(p.name) + ' \u00b7 ' + esc(kindLabel(p)) + '</option>';
+    }).join('') : '<option value="">' + (people.length ? 'No players match' : 'No players yet') + '</option>';
+    // Typing should narrow the list, not lose the player already picked.
+    if (keep && shown.some(function (p) { return p.key === keep; })) $('verifySelect').value = keep;
+    syncVerifyBtn();
+  }
+  var CHECK = '<svg class="vcheck" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#1d9bf0"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  function renderVerified() {
+    var list = people.filter(function (p) { return p.verified; });
+    $('verifyList').innerHTML = list.length ? list.map(function (p) {
+      return '<span class="verify-chip">' + CHECK + esc(p.name) + ' <span class="kind">' + esc(kindLabel(p)) + '</span>'
+        + '<button type="button" data-key="' + esc(p.key) + '" title="Take the check off" aria-label="Take the check off ' + esc(p.name) + '">\u00d7</button></span>';
+    }).join('') : '<div class="empty">Nobody is verified yet.</div>';
+  }
+  function picked() {
+    var key = $('verifySelect').value;
+    return people.filter(function (p) { return p.key === key; })[0] || null;
+  }
+  // One button, which does whichever the picked player needs.
+  function syncVerifyBtn() {
+    var p = picked();
+    $('verifyBtn').disabled = !p;
+    $('verifyBtn').textContent = p && p.verified ? 'Remove check' : 'Verify';
+  }
+  function setVerified(p, on) {
+    $('verifyBtn').disabled = true;
+    return rpc('gv_verify_set', { p_secret: state.secret, p_key: p.key, p_verified: on, p_name: p.name }).then(function () {
+      $('verifyMsg').textContent = (on ? 'Verified ' : 'Took the check off ') + p.name + '.';
+      return loadPeople();
+    }).catch(function (e) {
+      $('verifyMsg').textContent = 'Could not save: ' + e.message;
+      syncVerifyBtn();
+    });
+  }
+
   // ── load ──
   var loading = false;
   function load() {
@@ -752,7 +831,7 @@
   }
 
   // ── auth / wiring ──
-  function showDash() { $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); load(); setTimer(); }
+  function showDash() { $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); load(); loadPeople(); setTimer(); }
   function setTimer() { clearInterval(state.timer); if ($('autoRefresh').checked) state.timer = setInterval(load, 60000); }
   function tryLogin(secret, remember) {
     $('loginErr').textContent = '';
@@ -764,7 +843,15 @@
   $('loginBtn').addEventListener('click', function () { tryLogin($('secretInput').value.trim(), true); });
   $('secretInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') tryLogin($('secretInput').value.trim(), true); });
   $('logoutBtn').addEventListener('click', function () { try { localStorage.removeItem(SECRET_KEY); } catch (e) {} location.reload(); });
-  $('refreshBtn').addEventListener('click', load);
+  $('refreshBtn').addEventListener('click', function () { load(); loadPeople(); });
+  $('verifySearch').addEventListener('input', fillSelect);
+  $('verifySelect').addEventListener('change', syncVerifyBtn);
+  $('verifyList').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-key]'); if (!b) return;
+    var p = people.filter(function (x) { return x.key === b.dataset.key; })[0];
+    if (p) setVerified(p, false);
+  });
+  $('verifyBtn').addEventListener('click', function () { var p = picked(); if (p) setVerified(p, !p.verified); });
   $('exportBtn').addEventListener('click', exportCSV);
   $('autoRefresh').addEventListener('change', setTimer);
   $('rangeSeg').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; state.range = b.dataset.range; $('rangeSeg').querySelectorAll('button').forEach(function (x) { x.classList.toggle('active', x === b); }); load(); });
