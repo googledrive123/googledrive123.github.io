@@ -49,6 +49,51 @@
     }).catch(function () {});
   }
 
+  // ── The blue check ────────────────────────────────────────────────────
+  // Handed out from the site's analytics dashboard. Asked by account and by
+  // browser, the same way the site asks, and held as when it was given.
+
+  var verifiedAt = null;
+
+  var CHECK_SVG = '<svg class="gv-check" viewBox="0 0 24 24" role="img" aria-label="Verified">'
+    + '<circle cx="12" cy="12" r="11" fill="#1d9bf0"/><path d="M7 12.5l3.2 3.2L17 9" fill="none"'
+    + ' stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  function loadVerified() {
+    var gv = identity();
+    if (!gv) return;
+    var s = session();
+    var token = s && s.access_token;
+
+    function ask(bearer) {
+      return fetch(SUPA_URL + '/rest/v1/rpc/gv_verified_status', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPA_KEY,
+          'Authorization': 'Bearer ' + (bearer || SUPA_KEY)
+        },
+        body: JSON.stringify({ p_visitor_id: gv.id() })
+      });
+    }
+
+    // A token past its expiry is refused outright, and refreshing it is the
+    // site's job. Asking again without it still finds a check given to this
+    // browser, which is better than finding nothing.
+    ask(token).then(function (res) {
+      return res.ok || !token ? res : ask(null);
+    }).then(function (res) {
+      return res.ok ? res.json() : null;
+    }).then(function (data) {
+      verifiedAt = data && data.verified_at ? data.verified_at : null;
+      repaintStrips();
+      // The menu may already be sitting still, with nothing left to wake the
+      // observer that would otherwise get round to telling them.
+      var menu = document.querySelector('.menu-ui');
+      if (menu) tellVerified(menu);
+    }).catch(function () {});
+  }
+
   // ── Styles ────────────────────────────────────────────────────────────
   // Built out of the game's own custom properties so the panel is the same
   // furniture as the rest of the menu rather than a web page bolted onto it.
@@ -72,6 +117,8 @@
       '.gv-whoami > .gv-who-label { opacity: 0.5; }',
       '.gv-whoami > .gv-who-name { margin-left: 8px; }',
       '.gv-whoami:hover > .gv-who-name { text-decoration: underline; }',
+      '.gv-whoami .gv-check {',
+      '  width: 22px; height: 22px; margin-left: 8px; vertical-align: -3px; }',
 
       '.gv-panel {',
       '  position: absolute; left: 0; top: 0; z-index: 3;',
@@ -103,7 +150,12 @@
       '.gv-panel .gv-toggle > button { font-size: 24px; }',
       '.gv-panel .gv-toggle > button.selected {',
       '  background-color: var(--button-hover-color); }',
-      '.gv-panel > .gv-box > .gv-foot { margin: 10px; }'
+      '.gv-panel > .gv-box > .gv-foot { margin: 10px; }',
+      '.gv-panel h2 > .gv-check {',
+      '  width: 30px; height: 30px; margin-left: 10px; vertical-align: -4px; }',
+      '.gv-panel .gv-lead {',
+      '  margin: 10px 14px; padding: 0; font-size: 22px; line-height: 1.3;',
+      '  color: var(--text-color); }'
     ].join('\n');
     document.head.appendChild(css);
   }
@@ -119,7 +171,9 @@
     var gv = identity();
     if (!gv) return;
     strip.querySelector('.gv-who-label').textContent = labelFor();
-    strip.querySelector('.gv-who-name').textContent = gv.realName();
+    var name = strip.querySelector('.gv-who-name');
+    name.textContent = gv.realName();
+    if (verifiedAt) name.insertAdjacentHTML('beforeend', CHECK_SVG);
     strip.title = gv.anonymous()
       ? 'Anonymous mode is on. Other players see "Anonymous" on the leaderboard.'
       : 'This is the name other players see on the leaderboard.';
@@ -264,6 +318,71 @@
     menu.appendChild(panel);
   }
 
+  // ── Telling a verified player ─────────────────────────────────────────
+  // Once, the first time the menu is up after the check was given. Keyed by
+  // when it was given, so losing the check and getting it back is told again.
+  // Separate from the site's own message: that one says the check exists,
+  // this one says what it means in here.
+
+  var VERIFIED_SEEN_KEY = 'gv.verified.polytrack';
+  var told = false;
+
+  function tellVerified(menu) {
+    if (told || !verifiedAt) return;
+    var seen = null;
+    try { seen = localStorage.getItem(VERIFIED_SEEN_KEY); } catch (e) {}
+    if (seen === verifiedAt) {
+      told = true;
+      return;
+    }
+    // Only over the front of the menu. Anywhere else it would either sit on
+    // top of a race or be opened behind a loading screen and never seen.
+    var info = menu.querySelector(':scope > .info');
+    if (!info || info.offsetParent === null || menu.querySelector('.gv-panel')) return;
+    told = true;
+
+    var panel = document.createElement('div');
+    panel.className = 'gv-panel';
+
+    var box = document.createElement('div');
+    box.className = 'gv-box';
+
+    var title = document.createElement('h2');
+    title.textContent = 'You\u2019re verified';
+    title.insertAdjacentHTML('beforeend', CHECK_SVG);
+    box.appendChild(title);
+
+    var body = document.createElement('div');
+    body.className = 'gv-body';
+    var lead = document.createElement('p');
+    lead.className = 'gv-lead';
+    lead.textContent = 'GameVault has picked you out as one of its top PolyTrack racers. '
+      + 'A blue check now sits next to your name on every leaderboard here and under '
+      + 'the menu, so everyone you race knows who they are up against.';
+    body.appendChild(lead);
+    body.appendChild(note('Checks are given by hand. Racing as Anonymous hides the '
+      + 'check along with your name.'));
+    box.appendChild(body);
+
+    var foot = document.createElement('div');
+    foot.className = 'gv-foot';
+    var ok = document.createElement('button');
+    ok.className = 'button';
+    ok.textContent = 'Ok';
+    foot.appendChild(ok);
+    box.appendChild(foot);
+    panel.appendChild(box);
+
+    function close() {
+      try { localStorage.setItem(VERIFIED_SEEN_KEY, verifiedAt); } catch (e) {}
+      panel.remove();
+    }
+    ok.addEventListener('click', close);
+    panel.addEventListener('click', function (e) { if (e.target === panel) close(); });
+
+    menu.appendChild(panel);
+  }
+
   // ── Making room ───────────────────────────────────────────────────────
   // PolyTrack's menu is 800 logical pixels tall at its shortest, and at that
   // size its own footer already sits on top of the button tiles before
@@ -350,6 +469,7 @@
     ensureStyles();
     ensureStrip(menu);
     maybeFit(menu);
+    tellVerified(menu);
   }
 
   var fitTimer = null;
@@ -368,6 +488,7 @@
     if (gv) {
       gv.onChange(repaintStrips);
       gv.ready.then(repaintStrips);
+      gv.ready.then(loadVerified);
     }
     loadAccountName();
     // Class changes matter as much as new nodes here: the game moves between
@@ -385,6 +506,7 @@
   window.addEventListener('storage', function (e) {
     if (!e || (e.key !== AUTH_KEY && e.key !== 'gv.username')) return;
     loadAccountName();
+    loadVerified();
     repaintStrips();
   });
 

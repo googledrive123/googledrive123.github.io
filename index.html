@@ -1600,6 +1600,9 @@
       flex-shrink: 0; color: var(--text);
     }
     .user-avatar.guest { border-style: dashed; color: var(--muted); }
+    /* The blue check handed out from the analytics dashboard. */
+    .verified-badge { width: 14px; height: 14px; margin-left: 4px; flex-shrink: 0; vertical-align: -2px; }
+    .profile-name .verified-badge { width: 16px; height: 16px; margin-left: 6px; vertical-align: -3px; }
 
     /* Auth overlay */
     .auth-overlay {
@@ -2130,6 +2133,34 @@
       .pt-notice { flex-wrap: wrap; }
       .pt-notice-text { flex-basis: 100%; }
     }
+
+
+    /* ───────────── Verified message ───────────── */
+    /* Told once, on the first visit after the check is given. Fixed rather
+       than in the page, because the welcome screen and the catalog both need
+       to show it and a player may land on either. */
+    .verified-toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      z-index: 1500;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      width: min(460px, calc(100vw - 32px));
+      box-sizing: border-box;
+      padding: 14px 12px 14px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-left: 2px solid #1d9bf0;
+      border-radius: 10px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+    }
+    .verified-toast[hidden] { display: none; }
+    .verified-toast > .verified-badge { width: 22px; height: 22px; margin: 1px 0 0 0; }
+    .verified-toast-text { flex: 1; font-size: 13.5px; line-height: 1.5; color: var(--muted); }
+    .verified-toast-text b { color: var(--text); font-weight: 600; }
 
 
     /* ───────────── Newest strip ───────────── */
@@ -3825,11 +3856,17 @@ function userName() {
   if (!currentUser) return 'Guest';
   return currentUser._username || currentUser.email.split('@')[0];
 }
+// A verified guest has a name on the PolyTrack boards, and "Guest" with a
+// check next to it says nothing about who was checked.
+function displayName() {
+  if (!currentUser && verifiedAt && window.GV && GV.identity) return GV.identity.realName();
+  return userName();
+}
 
 // ─── Update all user buttons ───
 function updateUserUI() {
   const signed = !!currentUser;
-  const name = userName();
+  const name = displayName();
   // Left where pages without a Supabase client can read it. PolyTrack runs in
   // an iframe with no session of its own and needs the name for its menu and
   // its leaderboard rows.
@@ -3848,7 +3885,41 @@ function updateUserUI() {
       av.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
     }
     lbl.textContent = name;
+    if (verifiedAt) lbl.insertAdjacentHTML('beforeend', BADGE_SVG);
   });
+}
+
+// ─── Verified badge ───
+// The blue check handed out from the analytics dashboard. Asked by account and
+// by this browser's visitor id, so a check given to a guest does not vanish
+// the moment they sign up. Holds when it was given, or null.
+let verifiedAt = null;
+const BADGE_SVG = '<svg class="verified-badge" viewBox="0 0 24 24" role="img" aria-label="Verified"><circle cx="12" cy="12" r="11" fill="#1d9bf0"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+async function loadVerified() {
+  const vid = window.GV && GV.identity ? GV.identity.id() : null;
+  const { data, error } = await sb.rpc('gv_verified_status', { p_visitor_id: vid });
+  if (error) { console.error('Could not check verification', error); return; }
+  verifiedAt = data ? data.verified_at : null;
+  updateUserUI();
+  tellVerified();
+}
+
+// Keyed by when the check was given rather than a plain flag, so a player who
+// loses it and is verified again hears about it again.
+const VERIFIED_SEEN_KEY = 'gv.verified.seen';
+
+function tellVerified() {
+  const box = document.getElementById('verifiedToast');
+  if (!box || !verifiedAt) return;
+  let seen = null;
+  try { seen = localStorage.getItem(VERIFIED_SEEN_KEY); } catch (e) {}
+  if (seen === verifiedAt) return;
+  box.hidden = false;
+  document.getElementById('verifiedToastClose').onclick = () => {
+    box.hidden = true;
+    try { localStorage.setItem(VERIFIED_SEEN_KEY, verifiedAt); } catch (e) {}
+  };
 }
 
 // ─── Load username ───
@@ -3878,6 +3949,7 @@ async function uploadLocalSessions() {
 sb.auth.onAuthStateChange(async (event, session) => {
   currentUser = session?.user ?? null;
   updateUserUI();
+  loadVerified();
   if (currentUser) {
     await loadUsername();
     await uploadLocalSessions();
@@ -3950,10 +4022,11 @@ const profileOverlay = document.getElementById('profileOverlay');
 async function openProfile() {
   profileOverlay.classList.add('show');
   const signed = !!currentUser;
-  const name = userName();
+  const name = displayName();
   const av = document.getElementById('profileAvatarLg');
 
   document.getElementById('profileName').textContent = name;
+  if (verifiedAt) document.getElementById('profileName').insertAdjacentHTML('beforeend', BADGE_SVG);
   document.getElementById('profileEmail').style.display = 'none';
   document.getElementById('profileSignout').style.display = signed ? '' : 'none';
   document.getElementById('profileSigninBtn').style.display = signed ? 'none' : '';
@@ -3993,6 +4066,7 @@ document.getElementById('profileSaveBtn').addEventListener('click', async () => 
     currentUser._username = username;
     updateUserUI();
     document.getElementById('profileName').textContent = username;
+    if (verifiedAt) document.getElementById('profileName').insertAdjacentHTML('beforeend', BADGE_SVG);
     document.getElementById('profileAvatarLg').textContent = initials(username);
   }
   if (pw) {
@@ -4585,6 +4659,18 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
 </div>
 
 <!-- ══════════════ PROFILE PANEL ══════════════ -->
+<!-- Shown once to a player after they are verified. See tellVerified(). -->
+<div class="verified-toast" id="verifiedToast" role="status" hidden>
+  <svg class="verified-badge" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#1d9bf0"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <div class="verified-toast-text">
+    <b>You&rsquo;re verified.</b> GameVault has picked you out as one of its top players.
+    Your name now has a blue check here and on the PolyTrack leaderboards.
+  </div>
+  <button class="pt-notice-close" id="verifiedToastClose" type="button" aria-label="Dismiss">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+</div>
+
 <div class="profile-overlay" id="profileOverlay">
   <div class="profile-backdrop" id="profileBackdrop"></div>
   <div class="profile-panel" id="profilePanel">

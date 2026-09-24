@@ -190,14 +190,21 @@
     // nothing here writes to the DOM: adding a class to a live panel wakes the
     // observer that called us, and that fed back into itself hard enough to
     // lock the page.
+    // The whole of #ui is scaled down on a small window, and vh is measured
+    // before that scale, so 88vh came out as barely 60% of the screen. Divided
+    // back out the same way the game sizes its own track picker.
     '#ui .multiplayer-ui > .host {',
-    '  top: 6vh;',
-    '  max-height: 88vh;',
+    '  top: calc(6vh / var(--ui-scale-factor, 1));',
+    '  max-height: calc(88vh / var(--ui-scale-factor, 1));',
     '}',
+    // #ui is pointer-events: none so the canvas behind it can be dragged, and
+    // the box inherited that, so the wheel went straight through it to the
+    // canvas and the panel never scrolled. Only its buttons had opted back in.
     '#ui .multiplayer-ui > .host > .main-box {',
-    '  max-height: 88vh;',
+    '  max-height: calc(88vh / var(--ui-scale-factor, 1));',
     '  overflow-y: auto;',
     '  overscroll-behavior: contain;',
+    '  pointer-events: auto;',
     '}',
     '#ui .multiplayer-ui > .host > .main-box > h2 {',
     '  position: sticky;',
@@ -246,11 +253,14 @@
     '  background-color: var(--surface-color);',
     '  color: var(--text-color);',
     '}',
+    // Same as the host panel: without this the wheel falls through #ui to
+    // the canvas and a long list cannot be scrolled.
     '.gv-public-rooms > .main-box > .rows {',
     '  padding: 0 10px;',
-    '  max-height: 60vh;',
+    '  max-height: calc(60vh / var(--ui-scale-factor, 1));',
     '  overflow-y: auto;',
     '  overscroll-behavior: contain;',
+    '  pointer-events: auto;',
     '}',
     '.gv-public-rooms > .main-box > .buttons {',
     '  display: flex;',
