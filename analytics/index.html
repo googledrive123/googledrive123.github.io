@@ -754,6 +754,24 @@
     ranked('rkAllGames', (o.top_games || []).filter(function (g) { return g.plays; }).slice(0, 15).map(function (g) { return [g.name || g.game_id, g.plays, g.players + ' players · ' + dur(g.secs)]; }), { share: false });
   }
 
+  // ── verified players ──
+  // Everyone who can be given the blue check: accounts by username, and guests
+  // by the name they race under on the PolyTrack boards. Guests often share a
+  // name ("Anonymous" most of all), so each carries a slice of its id.
+  var people = [];
+  function kindLabel(p) { return p.kind === 'account' ? 'account' : 'guest ' + p.key.slice(6, 12); }
+  function loadPeople() {
+    return rpc('gv_verify_candidates', { p_secret: state.secret }).then(function (list) {
+      people = Array.isArray(list) ? list : [];
+      fillSelect();
+    }).catch(function (e) { $('verifyMsg').textContent = 'Could not load players: ' + e.message; });
+  }
+  function fillSelect() {
+    $('verifySelect').innerHTML = people.length ? people.map(function (p) {
+      return '<option value="' + esc(p.key) + '">' + (p.verified ? '\u2713 ' : '') + esc(p.name) + ' \u00b7 ' + esc(kindLabel(p)) + '</option>';
+    }).join('') : '<option value="">No players yet</option>';
+  }
+
   // ── load ──
   var loading = false;
   function load() {
@@ -778,7 +796,7 @@
   }
 
   // ── auth / wiring ──
-  function showDash() { $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); load(); setTimer(); }
+  function showDash() { $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); load(); loadPeople(); setTimer(); }
   function setTimer() { clearInterval(state.timer); if ($('autoRefresh').checked) state.timer = setInterval(load, 60000); }
   function tryLogin(secret, remember) {
     $('loginErr').textContent = '';
