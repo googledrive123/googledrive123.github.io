@@ -764,6 +764,7 @@
     return rpc('gv_verify_candidates', { p_secret: state.secret }).then(function (list) {
       people = Array.isArray(list) ? list : [];
       fillSelect();
+      renderVerified();
     }).catch(function (e) { $('verifyMsg').textContent = 'Could not load players: ' + e.message; });
   }
   function fillSelect() {
@@ -776,6 +777,14 @@
     // Typing should narrow the list, not lose the player already picked.
     if (keep && shown.some(function (p) { return p.key === keep; })) $('verifySelect').value = keep;
     syncVerifyBtn();
+  }
+  var CHECK = '<svg class="vcheck" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#1d9bf0"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  function renderVerified() {
+    var list = people.filter(function (p) { return p.verified; });
+    $('verifyList').innerHTML = list.length ? list.map(function (p) {
+      return '<span class="verify-chip">' + CHECK + esc(p.name) + ' <span class="kind">' + esc(kindLabel(p)) + '</span>'
+        + '<button type="button" data-key="' + esc(p.key) + '" title="Take the check off" aria-label="Take the check off ' + esc(p.name) + '">\u00d7</button></span>';
+    }).join('') : '<div class="empty">Nobody is verified yet.</div>';
   }
   function picked() {
     var key = $('verifySelect').value;
@@ -837,6 +846,11 @@
   $('refreshBtn').addEventListener('click', load);
   $('verifySearch').addEventListener('input', fillSelect);
   $('verifySelect').addEventListener('change', syncVerifyBtn);
+  $('verifyList').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-key]'); if (!b) return;
+    var p = people.filter(function (x) { return x.key === b.dataset.key; })[0];
+    if (p) setVerified(p, false);
+  });
   $('verifyBtn').addEventListener('click', function () { var p = picked(); if (p) setVerified(p, !p.verified); });
   $('exportBtn').addEventListener('click', exportCSV);
   $('autoRefresh').addEventListener('change', setTimer);
