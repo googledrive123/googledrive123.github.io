@@ -168,6 +168,10 @@ grant execute on function public.polytrack_claim(text) to authenticated;
 -- Guests rank below accounts: is_guest sorts first. userId is the row's own
 -- player key rather than anything the game knows, which is why leaderboard.js
 -- has to relabel the caller's row for the game to find it.
+--
+-- gvVerified is the blue check from analytics/verified.sql. The game has no
+-- field for it, so leaderboard.js takes it off each entry before the game
+-- sees the board and draws the check itself.
 create or replace function public.polytrack_board(
   p_track_id text,
   p_skip integer default 0,
@@ -211,8 +215,10 @@ begin
                    'YYYY-MM-DD"T"HH24:MI:SS"Z"') as time,
            coalesce(r.car_style, '')           as "carStyle",
            case when r.is_guest then 0 else 1 end as "verifiedState",
+           v.key is not null                   as "gvVerified",
            r.position
     from ranked r
+    left join gv_verified v on v.key = r.player_key
     order by r.position
     offset p_skip limit p_amount
   ) e;
