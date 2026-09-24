@@ -4020,6 +4020,7 @@ document.getElementById('profileSaveBtn').addEventListener('click', async () => 
     currentUser._username = username;
     updateUserUI();
     document.getElementById('profileName').textContent = username;
+    if (verifiedAt) document.getElementById('profileName').insertAdjacentHTML('beforeend', BADGE_SVG);
     document.getElementById('profileAvatarLg').textContent = initials(username);
   }
   if (pw) {
