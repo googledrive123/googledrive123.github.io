@@ -3854,6 +3854,20 @@ function updateUserUI() {
   });
 }
 
+// ─── Verified badge ───
+// The blue check handed out from the analytics dashboard. Asked by account and
+// by this browser's visitor id, so a check given to a guest does not vanish
+// the moment they sign up. Holds when it was given, or null.
+let verifiedAt = null;
+
+async function loadVerified() {
+  const vid = window.GV && GV.identity ? GV.identity.id() : null;
+  const { data, error } = await sb.rpc('gv_verified_status', { p_visitor_id: vid });
+  if (error) { console.error('Could not check verification', error); return; }
+  verifiedAt = data ? data.verified_at : null;
+  updateUserUI();
+}
+
 // ─── Load username ───
 async function loadUsername() {
   if (!currentUser) return;
@@ -3881,6 +3895,7 @@ async function uploadLocalSessions() {
 sb.auth.onAuthStateChange(async (event, session) => {
   currentUser = session?.user ?? null;
   updateUserUI();
+  loadVerified();
   if (currentUser) {
     await loadUsername();
     await uploadLocalSessions();
