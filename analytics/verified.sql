@@ -24,3 +24,62 @@ create table if not exists public.gv_verified (
 -- Every path in and out is a security definer function, so there is no
 -- policy to write and a direct PostgREST request reads and writes nothing.
 alter table public.gv_verified enable row level security;
+
+
+-- Everyone the dashboard can hand a check to: every account by its username,
+-- and every guest who has a name on a PolyTrack board. A guest with no times
+-- has no name anywhere, so there is nothing to search them by.
+--
+-- Anyone already verified is included even if they are on neither list any
+-- more, so a check can always be taken back.
+--
+-- Behind the dashboard secret, like the rest of the analytics functions: the
+-- list carries account ids and visitor ids.
+create or replace function public.gv_verify_candidates(p_secret text)
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+
+  return coalesce((
+    with accounts as (
+      select p.id::text as key,
+             coalesce(nullif(btrim(p.username), ''), 'Account ' || left(p.id::text, 8)) as name,
+             'account'::text as kind
+      from profiles p
+    ), guests as (
+      select distinct on (s.player_key)
+             s.player_key as key, s.nickname as name, 'guest'::text as kind
+      from polytrack_scores s
+      where s.user_id is null
+      order by s.player_key, s.updated_at desc
+    ), everyone as (
+      select * from accounts
+      union all
+      select * from guests
+      union all
+      select v.key,
+             coalesce(v.name, v.key),
+             case when v.key like 'guest:%' then 'guest' else 'account' end
+      from gv_verified v
+      where not exists (select 1 from accounts a where a.key = v.key)
+        and not exists (select 1 from guests g where g.key = v.key)
+    )
+    select json_agg(json_build_object(
+             'key', e.key,
+             'name', e.name,
+             'kind', e.kind,
+             'verified', v.key is not null,
+             'verified_at', v.verified_at
+           ) order by (v.key is null), lower(e.name))
+    from everyone e
+    left join gv_verified v on v.key = e.key
+  ), '[]'::json);
+end;
+$function$;
