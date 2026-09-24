@@ -1154,6 +1154,18 @@
       });
     }
 
+    // The game reads Escape on the join screen as leaving multiplayer. From
+    // the public list the step back a player expects is to the join screen,
+    // so it is caught on the way down, before it reaches the game's handler.
+    document.addEventListener('keydown', function (event) {
+      if (event.code !== 'Escape') return;
+      var rows = publicRows();
+      if (!rows || rows.offsetParent === null) return;
+      event.stopPropagation();
+      event.preventDefault();
+      showPublic(false);
+    }, true);
+
     new MutationObserver(attach).observe(document.body, {
       childList: true, subtree: true, attributes: true, attributeFilter: ['class']
     });
