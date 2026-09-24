@@ -160,3 +160,81 @@ end;
 $function$;
 
 grant execute on function public.polytrack_claim(text) to authenticated;
+
+
+-- The board itself, as it stood when it was first written down here. Like the
+-- table, it was created by hand in the dashboard.
+--
+-- Guests rank below accounts: is_guest sorts first. userId is the row's own
+-- player key rather than anything the game knows, which is why leaderboard.js
+-- has to relabel the caller's row for the game to find it.
+create or replace function public.polytrack_board(
+  p_track_id text,
+  p_skip integer default 0,
+  p_amount integer default 50,
+  p_visitor_id text default null
+) returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user  uuid := auth.uid();
+  v_key   text := coalesce(v_user::text, 'guest:' || nullif(p_visitor_id, ''));
+  v_total integer;
+  v_rows  json;
+  v_self  json;
+begin
+  p_skip   := greatest(coalesce(p_skip, 0), 0);
+  p_amount := least(greatest(coalesce(p_amount, 50), 1), 200);
+
+  select count(*) into v_total
+  from polytrack_scores where track_id = p_track_id;
+
+  with ranked as (
+    select s.*,
+           row_number() over (
+             order by s.is_guest, s.frames, s.created_at
+           ) as position
+    from polytrack_scores s
+    where s.track_id = p_track_id
+  )
+  select coalesce(json_agg(e order by e.position), '[]'::json) into v_rows
+  from (
+    select r.id,
+           r.player_key                        as "userId",
+           r.nickname,
+           r.country_code                      as "countryCode",
+           r.frames,
+           to_char(r.updated_at at time zone 'UTC',
+                   'YYYY-MM-DD"T"HH24:MI:SS"Z"') as time,
+           coalesce(r.car_style, '')           as "carStyle",
+           case when r.is_guest then 0 else 1 end as "verifiedState",
+           r.position
+    from ranked r
+    order by r.position
+    offset p_skip limit p_amount
+  ) e;
+
+  if v_key is not null then
+    with ranked as (
+      select s.*,
+             row_number() over (
+               order by s.is_guest, s.frames, s.created_at
+             ) as position
+      from polytrack_scores s
+      where s.track_id = p_track_id
+    )
+    select json_build_object('position', r.position, 'frames', r.frames, 'id', r.id)
+      into v_self
+    from ranked r where r.player_key = v_key;
+  end if;
+
+  return json_build_object(
+    'total',     v_total,
+    'entries',   v_rows,
+    'userEntry', v_self
+  );
+end;
+$function$;
