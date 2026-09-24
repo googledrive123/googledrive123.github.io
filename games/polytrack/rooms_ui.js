@@ -1053,7 +1053,8 @@
 
   // Joining goes through the game's own join panel, as if the code had been
   // typed, so there is one way into a room and it is the one the game knows.
-  // The code box is faded out while connecting, so the code is never shown.
+  // The code box is faded out while connecting, so the code stays out of
+  // sight on the way in.
   function joinPublic(code) {
     var root = document.querySelector('.multiplayer-ui');
     var input = root && root.querySelector(':scope > .join .invite-code');
