@@ -215,7 +215,9 @@ begin
                    'YYYY-MM-DD"T"HH24:MI:SS"Z"') as time,
            coalesce(r.car_style, '')           as "carStyle",
            case when r.is_guest then 0 else 1 end as "verifiedState",
-           v.key is not null                   as "gvVerified",
+           -- Anonymous mode hides who a row belongs to, and a check on it
+           -- would say it is somebody worth knowing.
+           v.key is not null and r.nickname <> 'Anonymous' as "gvVerified",
            r.position
     from ranked r
     left join gv_verified v on v.key = r.player_key
