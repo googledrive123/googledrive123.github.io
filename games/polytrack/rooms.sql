@@ -122,8 +122,14 @@ begin
     )
     on conflict (code) do nothing;
 
+    -- A public room's invite never expires. Nobody holds its code to renew,
+    -- and the game closes an expired invite's socket, which would leave the
+    -- room listed but no longer answering. The game reads null as no limit.
     if found then
-      return json_build_object('code', v_code, 'timeout_milliseconds', 600000);
+      return json_build_object(
+        'code', v_code,
+        'timeout_milliseconds', case when coalesce(p_public, false) then null else 600000 end
+      );
     end if;
 
     if v_attempt >= 8 then
