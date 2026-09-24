@@ -90,6 +90,11 @@
     { value: 300, label: '5 min', info: 'Each track runs for five minutes, then the room moves on.' }
   ];
 
+  var VISIBILITY = [
+    { value: 'private', label: 'Private', info: 'Players join with the room code.' },
+    { value: 'public', label: 'Public', info: 'Listed under Public Rooms, where anyone can join without a code.' }
+  ];
+
   var OTHER_CARS = [
     { value: 'solid', label: 'Solid', info: 'Other players appear as normal cars.' },
     { value: 'translucent', label: 'Translucent', info: 'Other players are see-through, so the track stays readable.' },
@@ -269,6 +274,15 @@
       write();
       applyNow();
       tellRoom();
+    });
+  }
+
+  // Whether anyone can find the room or only people given its code. It goes
+  // above the game's own blocks, because it decides who the rest is for.
+  function visibilityBlock() {
+    return choiceBlock('Visibility', VISIBILITY, settings.visibility, function (value) {
+      settings.visibility = value;
+      write();
     });
   }
 
@@ -659,7 +673,9 @@
     // A freshly built panel has nothing drawn in it yet.
     drawn = null;
     var buttons = box.querySelector(':scope > .buttons');
-    if (!buttons) return;
+    var heading = box.querySelector(':scope > h2');
+    if (!buttons || !heading) return;
+    box.insertBefore(visibilityBlock(), heading.nextSibling);
     box.insertBefore(playlistBlock(), buttons);
     box.insertBefore(roundLengthBlock(), buttons);
     box.insertBefore(otherCarsBlock(), buttons);
