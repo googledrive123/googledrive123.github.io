@@ -224,6 +224,24 @@
     }
   }
 
+  // The still is only the 3D view: the timer, the toolbar and the rest of the
+  // race's interface are page elements drawn over the canvas, and a still
+  // without them looks like the game has broken. A copy of them as they are
+  // right now goes on top of it. The copy keeps the game's own scaling,
+  // which is set on the element itself, and none of its behaviour.
+  function coverInterface() {
+    var ui = document.getElementById('ui');
+    if (!cover || !ui) return;
+    var copy = ui.cloneNode(true);
+    copy.removeAttribute('id');
+    copy.style.position = 'absolute';
+    copy.style.left = '0';
+    copy.style.top = '0';
+    copy.style.transformOrigin = '0 0';
+    copy.style.pointerEvents = 'none';
+    cover.insertBefore(copy, cover.firstChild);
+  }
+
   // A button under the text, for the one case where the cover should not lift
   // on its own: something went wrong and the reason needs reading.
   function coverButton(label, onClick) {
@@ -312,6 +330,7 @@
     stillOrNothing()
       .then(function (picture) {
         showCover(picture, null);
+        coverInterface();
         return toMenu();
       })
       .then(function () {
