@@ -84,7 +84,32 @@
   // moment the picture is still there.
   var stills = [];
 
+  // Resolution below what the game asks for. The game works out a pixel ratio
+  // from its own settings every frame and sets it whenever the renderer's
+  // differs, so the renderer is made to report the ratio the game asked for
+  // while drawing at that ratio times this factor. The game is satisfied,
+  // never sets it again, and the canvas really is drawn at the lower size.
+  var factor = 1;
+  var asked = null;
+  var applyRatio = null;
+
+  function scaleRatio(target) {
+    var set = target.setPixelRatio;
+    var get = target.getPixelRatio;
+    if (typeof set !== 'function' || typeof get !== 'function' || set.gvWrapped === true) return;
+    asked = get.call(target);
+    applyRatio = function () { set.call(target, asked * factor); };
+    var wrappedSet = function (ratio) {
+      asked = ratio;
+      applyRatio();
+    };
+    wrappedSet.gvWrapped = true;
+    target.setPixelRatio = wrappedSet;
+    target.getPixelRatio = function () { return asked; };
+  }
+
   function watchRenderer(target) {
+    scaleRatio(target);
     var render = target.render;
     if (typeof render !== 'function' || render.gvWrapped === true) return;
     var wrapped = function (renderScene, camera) {
@@ -134,6 +159,14 @@
     otherCars: otherCars,
     activeCamera: function () { return activeCamera; },
     onBeforeRender: function (fn) { beforeRender.push(fn); },
+    // A multiplier on the resolution the game renders at, from 0.25 to 1.
+    resolutionFactor: function () { return factor; },
+    setResolutionFactor: function (value) {
+      var next = Math.min(1, Math.max(0.25, Number(value) || 1));
+      if (next === factor) return;
+      factor = next;
+      if (applyRatio) applyRatio();
+    },
     // Resolves with a data URL of the next frame drawn, or null if the canvas
     // could not be read.
     still: function () {
