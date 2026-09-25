@@ -130,7 +130,7 @@
         var exit = buttonNamed(document.querySelector('.game-toolbar-ui'), 'Exit');
         if (confirm) confirm.click();
         else if (exit) exit.click();
-        else document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true }));
+        else sendEscape();
         setTimeout(step, 700);
       }());
     });
@@ -200,6 +200,28 @@
     }
     if (picture) cover.style.backgroundImage = 'url(' + picture + ')';
     coverText(text);
+  }
+
+  // Keys pressed under the cover would drive the menus being clicked through:
+  // a stray Escape backs out of them, Enter presses whatever has focus. They
+  // are held back until it lifts, apart from the Escapes this file sends
+  // itself. Releases still go through, so a key held down when the cover
+  // went up is not left stuck down behind it.
+  var sending = false;
+
+  function holdKeys(e) {
+    if (!cover || sending) return;
+    e.stopImmediatePropagation();
+    e.preventDefault();
+  }
+
+  function sendEscape() {
+    sending = true;
+    try {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true }));
+    } finally {
+      sending = false;
+    }
   }
 
   // Faded rather than dropped, so the game coming back reads as a cut.
@@ -474,6 +496,7 @@
       room.onMessage(heard);
     }
     document.addEventListener('visibilitychange', beat);
+    window.addEventListener('keydown', holdKeys, true);
 
     var visit = readVisit();
     if (visit) joinAsCreator(visit);
