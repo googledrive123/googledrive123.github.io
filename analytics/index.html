@@ -350,7 +350,7 @@
   var NICE = { game_open: 'Opened game', game_close: 'Closed game', game_load: 'Game loaded', game_fullscreen: 'Fullscreen', game_newtab: 'Open in new tab', movie_play: 'Played movie', tv_play: 'Played TV', movie_close: 'Closed movie', tv_close: 'Closed TV', search: 'Searched', category: 'Category filter', genre: 'Genre filter', sort: 'Sort changed', roll: 'Random roll', star: 'Starred', enter: 'Entered vault', news_open: 'Opened news', movies_enter: 'Entered movies', profile_open: 'Opened profile', mode_movies: 'Tab: Movies', mode_tv: 'Tab: TV', cloak: 'Tab cloak', auth_signin: 'Signed in', pageview: 'Page view', nav: 'Navigated', ping: 'Heartbeat', hidden: 'Tab hidden', visible: 'Tab visible', session_end: 'Left site', error: 'JS error' };
 
   var $ = function (id) { return document.getElementById(id); };
-  var state = { secret: null, range: '24h', rows: [], overview: null, gameSort: { key: 'plays', dir: -1 }, gameN: 25, timer: null };
+  var state = { secret: null, range: '24h', rows: [], vlist: [], feed: [], overview: null, gameSort: { key: 'plays', dir: -1 }, gameN: 25, timer: null };
   var charts = {};
 
   // ── helpers ──
@@ -669,6 +669,15 @@
       v.browser = r.browser || v.browser; v.os = r.os || v.os; v.device = r.device || v.device;
     });
     var vlist = Object.keys(vmap).map(function (k) { var v = vmap[k]; v.nsess = Object.keys(v.sessions).length; v.fav = (v.games.top(1)[0] || [''])[0]; return v; }).sort(function (a, b) { return b.clicks - a.clicks; }).slice(0, 50);
+    state.vlist = vlist;
+    renderVisitors();
+
+    // ── feed ──
+    state.feed = rows.slice(-150).reverse();
+    renderFeed();
+  }
+
+  function renderVisitors() {
     table('visitorsTable', [
       { key: 'id', label: 'Visitor', render: function (v) { return '<span class="mono">' + shortId(v.id) + '</span>' + (v.user ? ' <span class="pill b">signed in</span>' : '') + (v.isNew ? ' <span class="pill g">new</span>' : ''); } },
       { key: 'last', label: 'Last seen', render: function (v) { return ago(v.last); } },
@@ -682,10 +691,10 @@
       { key: 'env', label: 'Device', render: function (v) { return esc((v.browser || '?') + ' · ' + (v.os || '?') + ' · ' + (v.device || '?')); } },
       { key: 'tz', label: 'Time zone' },
       { key: 'ref', label: 'Referrer', render: function (v) { return esc(v.ref || '–'); } }
-    ], vlist);
+    ], state.vlist);
+  }
 
-    // ── feed ──
-    var feed = rows.slice(-150).reverse();
+  function renderFeed() {
     table('feedTable', [
       { key: 'ts', label: 'Time', render: function (r) { return r.t.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' }) + ' <span class="muted">' + r.t.toLocaleDateString([], { month: 'short', day: 'numeric' }) + '</span>'; } },
       { key: 'visitor_id', label: 'Visitor', render: function (r) { return '<span class="mono">' + shortId(r.visitor_id) + '</span>' + (r.user_id ? ' <span class="pill b">user</span>' : ''); } },
@@ -704,7 +713,7 @@
       } },
       { key: 'env', label: 'Device', render: function (r) { return esc((r.browser || '?') + ' · ' + (r.os || '?') + ' · ' + (r.viewport || '')); } },
       { key: 'path', label: 'Path' }
-    ], feed);
+    ], state.feed);
   }
 
   function renderGamesTable(gameList) {
