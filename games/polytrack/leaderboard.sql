@@ -242,6 +242,8 @@ begin
            -- Anonymous mode hides who a row belongs to, and a check on it
            -- would say it is somebody worth knowing.
            v.key is not null and r.nickname <> 'Anonymous' as "gvVerified",
+           -- Whether the row has a replay to watch or race. Older times do not.
+           r.recording is not null             as "gvReplay",
            r.position
     from ranked r
     left join gv_verified v on v.key = r.player_key
