@@ -125,6 +125,13 @@
   /* playing now */
   .kpi .more { margin-top: 8px; padding: 0; background: none; border: 0; color: var(--muted); font: inherit; font-size: 0.72rem; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
   .kpi .more:hover { color: var(--text); }
+  .modal { position: fixed; inset: 0; z-index: 50; display: flex; align-items: flex-start; justify-content: center; padding: 60px 16px; overflow-y: auto; background: rgba(0,0,0,0.65); }
+  .modal-card { width: min(980px, 100%); background: var(--surface); border: 1px solid var(--border-strong); border-radius: 12px; padding: 16px 18px; }
+  .modal-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .modal-head h2 { margin: 0; }
+  .modal-head .btn { margin-left: auto; }
+  .modal-msg { font-size: 0.76rem; color: var(--muted); margin-top: 10px; min-height: 1em; }
+  td .btn { padding: 4px 10px; font-size: 0.72rem; }
 
   /* who a visitor is */
   .who-user { font-weight: 600; }
@@ -345,6 +352,18 @@
   <div class="footer">
     Data source: Supabase table <code>analytics_events</code>, written by <code>/js/analytics.js</code>. Clicks = every user interaction (game opens, searches, filters, buttons); page views, pings and close events are counted separately.
     Sessions expire after 30 minutes idle. Times shown in your browser's time zone. Rows loaded for this range: <span id="rowCount" class="mono">0</span>.
+  </div>
+</div>
+
+<div class="modal hidden" id="playingModal" role="dialog" aria-modal="true" aria-labelledby="playingTitle">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h2 id="playingTitle">Playing now <small id="playingCount"></small></h2>
+      <button class="btn ghost" id="playingClose" type="button">Close</button>
+    </div>
+    <div class="tbl-wrap"><table id="playingTable"></table></div>
+    <div class="modal-msg" id="playingMsg"></div>
+    <div class="footer" style="margin-top:12px">Join opens PolyTrack in a new tab. Close any other PolyTrack tab first: the game only runs once per browser.</div>
   </div>
 </div>
 
