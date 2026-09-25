@@ -449,8 +449,62 @@
       .catch(function (err) { console.error('[leaderboard]', err); });
   }
 
+  // ── Replays kept from before ──────────────────────────────────────────
+  // Every time on the board set before replays were kept has none, but the
+  // player who set it usually still has it: the game saves the replay of
+  // their best run on each track in the browser, under
+  // polytrack_v5_prod_record_<slot>_default_<track>. Those are sent up, and
+  // the server only takes one that matches the player's own time exactly.
+
+  var RECORD_KEY = /^polytrack_v5_prod_record_\d+_default_(.+)$/;
+  var SENT_KEY = 'gv.replays.sent';
+
+  function keptReplays() {
+    var out = [];
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var key = localStorage.key(i);
+        var match = key && RECORD_KEY.exec(key);
+        if (!match) continue;
+        var record = JSON.parse(localStorage.getItem(key) || 'null');
+        if (!record || typeof record.recording !== 'string' || typeof record.frames !== 'number') continue;
+        out.push({ track: match[1], frames: record.frames, recording: record.recording });
+      }
+    } catch (e) {}
+    return out;
+  }
+
+  // Each is sent once for each way of being on the board. A replay the
+  // server turns down is one whose time is not this player's on the board,
+  // and sending it again changes nothing, but signing in moves the times to
+  // an account and gives the same replays somewhere new to go.
+  function sentKey(replay) {
+    return (accessToken() ? 'account:' : 'guest:') + replay.track + ':' + replay.frames;
+  }
+
+  function sendKeptReplays() {
+    var sent = [];
+    try { sent = JSON.parse(localStorage.getItem(SENT_KEY) || '[]') || []; } catch (e) { sent = []; }
+    var todo = keptReplays().filter(function (replay) { return sent.indexOf(sentKey(replay)) < 0; });
+    var batches = [];
+    for (var i = 0; i < todo.length; i += 10) batches.push(todo.slice(i, i + 10));
+    return batches.reduce(function (chain, batch) {
+      return chain.then(function () {
+        return rpc('polytrack_attach_replays', { p_visitor_id: visitorId(), p_items: batch }).then(function () {
+          batch.forEach(function (replay) { sent.push(sentKey(replay)); });
+          try { localStorage.setItem(SENT_KEY, JSON.stringify(sent)); } catch (e) {}
+        });
+      });
+    }, Promise.resolve()).catch(function (err) { console.error('[leaderboard]', err); });
+  }
+
   settled().then(function () {
-    claimGuestScores();
+    // Claimed first, so a signed-in player's guest times are already on the
+    // account when their replays arrive. A few seconds in, so this does not
+    // compete with the game loading.
+    Promise.resolve(claimGuestScores()).then(function () {
+      setTimeout(sendKeptReplays, 5000);
+    });
     var gv = identity();
     if (gv) gv.onChange(scheduleNamePush);
   });
@@ -459,7 +513,7 @@
   // or out happens in the other document and arrives here as a storage event.
   window.addEventListener('storage', function (e) {
     if (!e || (e.key !== AUTH_KEY && e.key !== 'gv.username')) return;
-    claimGuestScores();
+    Promise.resolve(claimGuestScores()).then(sendKeptReplays);
     scheduleNamePush();
   });
 
