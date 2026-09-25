@@ -491,11 +491,23 @@
 
   function explain(shown) {
     var all = logged.join(' | ');
-    // The game checks at start-up that its physics come out the same as
-    // everyone else's, and refuses multiplayer in a browser where they do not.
+    // The game checks at start-up that its physics come out the same as on
+    // every other computer, and refuses multiplayer where they do not. That
+    // fails one of two ways, with different fixes, and its own message box
+    // says which.
+    if (/determinism check failed/i.test(gameSaid)) {
+      return 'This browser cannot play PolyTrack multiplayer. PolyTrack checks that its '
+        + 'physics come out exactly the same as on other computers, and in this browser '
+        + 'they do not. Join from a different browser, like Chrome.';
+    }
+    if (/non-deterministic game assets/i.test(gameSaid)) {
+      return 'This browser has old or damaged PolyTrack files saved, so PolyTrack turned '
+        + 'multiplayer off. Clear this site\u2019s cached files, reload, and join again.';
+    }
     if (/non-deterministic/i.test(all)) {
-      return 'This browser cannot play PolyTrack multiplayer: the game\u2019s physics check '
-        + 'failed here. Chrome or Edge with hardware acceleration on works.';
+      return 'This browser failed PolyTrack\u2019s multiplayer check'
+        + (gameSaid ? ' ("' + gameSaid + '")' : '')
+        + '. Join from a different browser, or clear this site\u2019s cached files and reload.';
     }
     var last = logged.filter(function (line) { return !/Presence beat/.test(line); }).pop();
     return 'Could not join: ' + (shown || 'no reason given')
