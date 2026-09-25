@@ -60,11 +60,12 @@
   }
 
   // ── Presence ──────────────────────────────────────────────────────────
-  // Where this player is, every fifteen seconds while the game is on screen.
+  // Where this player is, every five seconds while the game is on screen.
   // A hidden tab is not someone playing, so it goes quiet and drops off the
   // dashboard's list on its own.
 
-  var BEAT_EVERY = 15000;
+  // Also how long a Join from the dashboard can take to be noticed.
+  var BEAT_EVERY = 5000;
 
   function beat() {
     var gv = identity();
@@ -445,7 +446,7 @@
     var who = wait.name || 'them';
     recordErrors();
     showCover(null, wait.solo
-      ? 'Waiting for ' + who + ' to start their run over...'
+      ? 'Opening ' + who + '\u2019s room...'
       : 'Joining ' + who + '...');
     awaitHandover(wait).then(function (data) {
       if (data.error) {
