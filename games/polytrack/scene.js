@@ -134,7 +134,7 @@
       // Passes into an offscreen target (shadows, reflections) are not the
       // picture on screen, so only a pass drawn to the canvas is kept.
       var toScreen = typeof target.getRenderTarget !== 'function' || target.getRenderTarget() === null;
-      if (stills.length > 0 && toScreen) {
+      if (stills.length > 0 && toScreen && isScreen(target)) {
         var waiting = stills;
         stills = [];
         var picture = null;
