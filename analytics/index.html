@@ -913,45 +913,56 @@
         var pr = p.presence;
         if (!pr) return '';
         return pr.code
-          ? '<button class="btn" type="button" data-room="' + esc(pr.code) + '">Join room</button>'
+          ? '<button class="btn" type="button" data-room="' + esc(pr.code) + '" data-visitor="' + esc(p.visitor_id) + '">Join room</button>'
           : '<button class="btn" type="button" data-solo="' + esc(p.visitor_id) + '">Join</button>';
       } }
     ], list);
   }
 
-  // Opened before anything is asked of the server, while the click still
-  // counts as the user's own: a tab opened after a round trip is a popup,
-  // and browsers block those.
-  function blankTab(text) {
-    var tab = window.open('', '_blank');
-    if (!tab) {
-      $('playingMsg').textContent = 'The browser blocked the new tab. Allow popups for this page and try again.';
-      return null;
-    }
-    try {
-      tab.document.title = 'Joining PolyTrack';
-      tab.document.body.style.cssText = 'background:#08080a;color:#8a8a96;font:14px system-ui,sans-serif;padding:24px';
-      tab.document.body.textContent = text;
-    } catch (e) {}
-    return tab;
+  // The game tab is opened on the click itself, while it still counts as the
+  // user's own: a tab opened after a round trip is a popup, and browsers
+  // block those. It starts loading straight away behind a cover of its own,
+  // and waits to be handed the room through localStorage, which both pages
+  // share. By the time the room is ready the game is too.
+  var JOIN_KEY = 'gv.creator.join';
+  function displayName(visitor) {
+    var n = names[visitor] || {};
+    return n.username || n.polytrack || shortId(visitor);
+  }
+  function gameTab(visitor, solo) {
+    var at = Date.now();
+    try { localStorage.removeItem(JOIN_KEY); } catch (e) {}
+    var tab = window.open('/games/polytrack/#gv-creator-wait=' + encodeURIComponent(displayName(visitor))
+      + (solo ? '&solo=1' : '') + '&t=' + at, '_blank');
+    if (!tab) $('playingMsg').textContent = 'The browser blocked the new tab. Allow popups for this page and try again.';
+    return !!tab;
+  }
+  function handOver(data) {
+    data.at = Date.now();
+    try { localStorage.setItem(JOIN_KEY, JSON.stringify(data)); } catch (e) {}
   }
   // The ticket is what lets every game in the room know it really is the
   // creator arriving, and not a player claiming to be.
-  function sendIn(tab, code) {
+  function sendIn(code) {
     return rpc('gv_creator_ticket', { p_secret: state.secret, p_code: code }).then(function (ticket) {
-      tab.location.href = location.origin + '/games/polytrack/#gv-creator=' + encodeURIComponent(ticket) + '&join=' + encodeURIComponent(code);
+      handOver({ ticket: ticket, code: code });
     });
   }
+  function failed(e) {
+    handOver({ error: 'Could not join: ' + e.message });
+    $('playingMsg').textContent = 'Could not join: ' + e.message;
+  }
+
   // A solo player's game opens a room of its own when asked, but not in the
   // middle of a run: it waits until they start over (R twice, T or
-  // Backspace), then takes a few seconds clicking through screens. The room
-  // shows in their presence once it exists, and the creator follows them in
-  // from there. Their game gives up on the call just before this does.
+  // Backspace) or begin a new race, then switches behind a still of their
+  // screen. The room shows in their presence once it exists, and the
+  // creator's tab is handed it from there. Their game gives up on the call
+  // just before this does.
   var SUMMON_WAIT = 180000;
   function joinSolo(visitor) {
-    var tab = blankTab('Waiting for them to start their run over...');
-    if (!tab) return;
-    $('playingMsg').textContent = 'Their game opens a room the next time they start their run over (R twice, T or Backspace). Waiting up to 3 minutes.';
+    if (!gameTab(visitor, true)) return;
+    $('playingMsg').textContent = 'Their game opens a room the next time they start a run (R twice, T, Backspace or a new race). Waiting up to 3 minutes.';
     var started = Date.now();
     rpc('gv_creator_summon', { p_secret: state.secret, p_visitor_id: visitor }).then(function () {
       return new Promise(function (resolve, reject) {
@@ -959,27 +970,20 @@
           rpc('analytics_polytrack_live', { p_secret: state.secret }).then(function (list) {
             var mine = (list || []).filter(function (p) { return p.visitor_id === visitor && p.code; })[0];
             if (mine) return resolve(mine.code);
-            if (Date.now() - started > SUMMON_WAIT) return reject(new Error('they did not start over within 3 minutes'));
+            if (Date.now() - started > SUMMON_WAIT) return reject(new Error('they did not start a run within 3 minutes'));
             setTimeout(poll, 2500);
           }, reject);
         }());
       });
     }).then(function (code) {
       $('playingMsg').textContent = 'Their room is open. Joining ' + code + '.';
-      return sendIn(tab, code);
-    }).catch(function (e) {
-      try { tab.close(); } catch (x) {}
-      $('playingMsg').textContent = 'Could not join: ' + e.message;
-    });
+      return sendIn(code);
+    }).catch(failed);
   }
-  function joinRoom(code) {
-    var tab = blankTab('Opening PolyTrack...');
-    if (!tab) return;
+  function joinRoom(code, visitor) {
+    if (!gameTab(visitor, false)) return;
     $('playingMsg').textContent = 'Joining room ' + code + '.';
-    sendIn(tab, code).catch(function (e) {
-      try { tab.close(); } catch (x) {}
-      $('playingMsg').textContent = 'Could not join: ' + e.message;
-    });
+    sendIn(code).catch(failed);
   }
   function playingOpen() { return !$('playingModal').classList.contains('hidden'); }
 
@@ -1049,7 +1053,7 @@
   $('playingClose').addEventListener('click', closePlaying);
   $('playingTable').addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b) return;
-    if (b.dataset.room) joinRoom(b.dataset.room);
+    if (b.dataset.room) joinRoom(b.dataset.room, b.dataset.visitor);
     else if (b.dataset.solo) joinSolo(b.dataset.solo);
   });
   $('playingModal').addEventListener('click', function (e) { if (e.target === $('playingModal')) closePlaying(); });
