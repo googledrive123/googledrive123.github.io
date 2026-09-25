@@ -462,6 +462,7 @@
 
   function openAsCreator(wait) {
     var who = wait.name || 'them';
+    recordErrors();
     showCover(null, wait.solo
       ? 'Waiting for ' + who + ' to start their run over...'
       : 'Joining ' + who + '...');
@@ -478,17 +479,21 @@
   // The game shows a join failure as a line of text, and for anything it did
   // not expect that line is "Unknown connection error", which says nothing.
   // The real reason is in what it logged, so that is kept for the message.
+  // Only in the creator's own tab; nobody else's console is touched.
   var logged = [];
-  var originalError = console.error;
-  console.error = function () {
-    try {
-      logged.push(Array.prototype.map.call(arguments, function (part) {
-        return part && part.message ? part.message : String(part);
-      }).join(' '));
-      if (logged.length > 20) logged.shift();
-    } catch (e) {}
-    return originalError.apply(console, arguments);
-  };
+
+  function recordErrors() {
+    var original = console.error;
+    console.error = function () {
+      try {
+        logged.push(Array.prototype.map.call(arguments, function (part) {
+          return part && part.message ? part.message : String(part);
+        }).join(' '));
+        if (logged.length > 20) logged.shift();
+      } catch (e) {}
+      return original.apply(console, arguments);
+    };
+  }
 
   function explain(shown) {
     var all = logged.join(' | ');
