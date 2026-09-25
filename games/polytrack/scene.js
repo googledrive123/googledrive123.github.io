@@ -93,7 +93,10 @@
         try { beforeRender[i](renderScene, camera); } catch (e) { console.error(e); }
       }
       var out = render.apply(this, arguments);
-      if (stills.length > 0) {
+      // Passes into an offscreen target (shadows, reflections) are not the
+      // picture on screen, so only a pass drawn to the canvas is kept.
+      var toScreen = typeof target.getRenderTarget !== 'function' || target.getRenderTarget() === null;
+      if (stills.length > 0 && toScreen) {
         var waiting = stills;
         stills = [];
         var picture = null;
