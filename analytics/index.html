@@ -942,15 +942,16 @@
       tab.location.href = location.origin + '/games/polytrack/#gv-creator=' + encodeURIComponent(ticket) + '&join=' + encodeURIComponent(code);
     });
   }
-  // A solo player's game opens a room of its own when asked, which takes it
-  // a few seconds of clicking through screens after its next beat picks the
-  // call up. The room shows in their presence once it exists, and the
-  // creator follows them in from there.
-  var SUMMON_WAIT = 90000;
+  // A solo player's game opens a room of its own when asked, but not in the
+  // middle of a run: it waits until they start over (R twice, T or
+  // Backspace), then takes a few seconds clicking through screens. The room
+  // shows in their presence once it exists, and the creator follows them in
+  // from there. Their game gives up on the call just before this does.
+  var SUMMON_WAIT = 180000;
   function joinSolo(visitor) {
-    var tab = blankTab('Asking their game to open a room...');
+    var tab = blankTab('Waiting for them to start their run over...');
     if (!tab) return;
-    $('playingMsg').textContent = 'Asking their game to open a room. This takes up to half a minute.';
+    $('playingMsg').textContent = 'Their game opens a room the next time they start their run over (R twice, T or Backspace). Waiting up to 3 minutes.';
     var started = Date.now();
     rpc('gv_creator_summon', { p_secret: state.secret, p_visitor_id: visitor }).then(function () {
       return new Promise(function (resolve, reject) {
@@ -958,7 +959,7 @@
           rpc('analytics_polytrack_live', { p_secret: state.secret }).then(function (list) {
             var mine = (list || []).filter(function (p) { return p.visitor_id === visitor && p.code; })[0];
             if (mine) return resolve(mine.code);
-            if (Date.now() - started > SUMMON_WAIT) return reject(new Error('their game did not open a room'));
+            if (Date.now() - started > SUMMON_WAIT) return reject(new Error('they did not start over within 3 minutes'));
             setTimeout(poll, 2500);
           }, reject);
         }());
