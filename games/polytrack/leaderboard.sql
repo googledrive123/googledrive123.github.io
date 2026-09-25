@@ -9,6 +9,15 @@
 -- twice. Applied on 21 September 2026; the board on 24 September 2026.
 
 
+-- The replay of each time on the board, so other players can watch it and
+-- race against it. The game sends one with every run it submits, deflated
+-- and base64url encoded, and refuses to send any over 10,000 characters.
+-- Rows set before this column existed have none, and stay without one until
+-- their player beats their own time.
+alter table public.polytrack_scores
+  add column if not exists recording text;
+
+
 -- A run is filed under the player's public name, and that name can change
 -- without a new run being set: turning anonymous mode on has to take the name
 -- off the times already on the board. The old upsert only wrote anything when
