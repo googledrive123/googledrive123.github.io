@@ -191,3 +191,29 @@ begin
   ), '[]'::json);
 end;
 $function$;
+
+
+-- The dashboard's Join on a solo player: asks their game to open a room.
+-- Nothing is asked of the player; their game hosts on its own and the
+-- dashboard follows them in once the room shows up in their presence.
+create or replace function public.gv_creator_summon(p_secret text, p_visitor_id text)
+returns bigint
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_id bigint;
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+  if p_visitor_id is null or char_length(p_visitor_id) not between 1 and 64 then
+    raise exception 'invalid visitor id';
+  end if;
+
+  insert into gv_creator_calls (visitor_id) values (p_visitor_id)
+  returning id into v_id;
+  return v_id;
+end;
+$function$;
