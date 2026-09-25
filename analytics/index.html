@@ -911,8 +911,10 @@
       } },
       { key: 'join', label: '', render: function (p) {
         var pr = p.presence;
-        if (!pr || !pr.code) return '';
-        return '<button class="btn" type="button" data-room="' + esc(pr.code) + '">Join room</button>';
+        if (!pr) return '';
+        return pr.code
+          ? '<button class="btn" type="button" data-room="' + esc(pr.code) + '">Join room</button>'
+          : '<button class="btn" type="button" data-solo="' + esc(p.visitor_id) + '">Join</button>';
       } }
     ], list);
   }
@@ -938,6 +940,35 @@
   function sendIn(tab, code) {
     return rpc('gv_creator_ticket', { p_secret: state.secret, p_code: code }).then(function (ticket) {
       tab.location.href = location.origin + '/games/polytrack/#gv-creator=' + encodeURIComponent(ticket) + '&join=' + encodeURIComponent(code);
+    });
+  }
+  // A solo player's game opens a room of its own when asked, which takes it
+  // a few seconds of clicking through screens after its next beat picks the
+  // call up. The room shows in their presence once it exists, and the
+  // creator follows them in from there.
+  var SUMMON_WAIT = 90000;
+  function joinSolo(visitor) {
+    var tab = blankTab('Asking their game to open a room...');
+    if (!tab) return;
+    $('playingMsg').textContent = 'Asking their game to open a room. This takes up to half a minute.';
+    var started = Date.now();
+    rpc('gv_creator_summon', { p_secret: state.secret, p_visitor_id: visitor }).then(function () {
+      return new Promise(function (resolve, reject) {
+        (function poll() {
+          rpc('analytics_polytrack_live', { p_secret: state.secret }).then(function (list) {
+            var mine = (list || []).filter(function (p) { return p.visitor_id === visitor && p.code; })[0];
+            if (mine) return resolve(mine.code);
+            if (Date.now() - started > SUMMON_WAIT) return reject(new Error('their game did not open a room'));
+            setTimeout(poll, 2500);
+          }, reject);
+        }());
+      });
+    }).then(function (code) {
+      $('playingMsg').textContent = 'Their room is open. Joining ' + code + '.';
+      return sendIn(tab, code);
+    }).catch(function (e) {
+      try { tab.close(); } catch (x) {}
+      $('playingMsg').textContent = 'Could not join: ' + e.message;
     });
   }
   function joinRoom(code) {
@@ -1018,6 +1049,7 @@
   $('playingTable').addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b) return;
     if (b.dataset.room) joinRoom(b.dataset.room);
+    else if (b.dataset.solo) joinSolo(b.dataset.solo);
   });
   $('playingModal').addEventListener('click', function (e) { if (e.target === $('playingModal')) closePlaying(); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePlaying(); });
