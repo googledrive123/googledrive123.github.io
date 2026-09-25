@@ -224,6 +224,20 @@
     }
   }
 
+  // A button under the text, for the one case where the cover should not lift
+  // on its own: something went wrong and the reason needs reading.
+  function coverButton(label, onClick) {
+    if (!cover) return;
+    var line = cover.querySelector('.gv-cover-text');
+    if (!line) return;
+    var button = document.createElement('button');
+    button.className = 'button';
+    button.style.cssText = 'display:block;margin:14px auto 0;font:inherit;pointer-events:auto';
+    button.textContent = label;
+    button.addEventListener('click', onClick);
+    line.appendChild(button);
+  }
+
   // Faded rather than dropped, so the game coming back reads as a cut.
   function hideCover() {
     if (!cover) return;
