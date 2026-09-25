@@ -272,6 +272,18 @@
       .catch(function (error) { console.error('Could not join as the creator:', error); });
   }
 
+  // Once in, the room is told who arrived. Said a few times over the first
+  // seconds, because a game still settling into the room can miss one.
+  function announce(state) {
+    var room = rooms();
+    if (!creatorTicket || !room || state.role !== 'player' || !state.code) return;
+    var ticket = creatorTicket;
+    creatorTicket = null;
+    [0, 2000, 6000].forEach(function (delay) {
+      setTimeout(function () { room.say({ kind: 'creator', ticket: ticket }); }, delay);
+    });
+  }
+
   function start() {
     var gv = identity();
     var room = rooms();
@@ -280,7 +292,10 @@
     setInterval(beat, BEAT_EVERY);
     // Joining or leaving a room is exactly what the dashboard is waiting to
     // see, so it is reported straight away rather than on the next beat.
-    if (room) room.onState(beat);
+    if (room) {
+      room.onState(beat);
+      room.onState(announce);
+    }
     document.addEventListener('visibilitychange', beat);
 
     var visit = readVisit();
