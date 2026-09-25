@@ -877,6 +877,42 @@
     }).catch(function (e) { console.error('Could not load names', e); });
   }
 
+  // ── playing now ──
+  // Everyone in a game right now, by name. PolyTrack also reports where each
+  // player is, so for them it says which room they are in.
+  function playingPeople() {
+    var by = Object.create(null);
+    state.playing.forEach(function (r) {
+      by[r.visitor_id] = { visitor_id: r.visitor_id, user_id: r.user_id || null, game: r.item_title || r.game_id, presence: null };
+    });
+    state.live.forEach(function (p) {
+      var row = by[p.visitor_id] || (by[p.visitor_id] = { visitor_id: p.visitor_id, user_id: null, game: 'PolyTrack', presence: null });
+      row.presence = p;
+      row.user_id = row.user_id || p.user_id;
+      // PolyTrack says who it is racing as, which may be all there is to go
+      // on for someone who has never set a time.
+      var n = names[p.visitor_id] || (names[p.visitor_id] = {});
+      if (!n.username && p.username) n.username = p.username;
+      if (!n.polytrack && p.name) n.polytrack = p.name;
+    });
+    return Object.keys(by).map(function (k) { return by[k]; });
+  }
+  function renderPlaying() {
+    var list = playingPeople();
+    $('playingCount').textContent = fmt(list.length) + ' in a game';
+    table('playingTable', [
+      { key: 'who', label: 'Player', render: function (p) { return who(p.visitor_id); } },
+      { key: 'game', label: 'Playing', render: function (p) { return esc(p.game || '–'); } },
+      { key: 'room', label: 'Room', render: function (p) {
+        var pr = p.presence;
+        if (!pr) return '<span class="muted">–</span>';
+        return pr.code ? '<span class="mono">' + esc(pr.code) + '</span> <span class="muted">' + esc(pr.role || '') + '</span>' : '<span class="muted">Racing alone</span>';
+      } }
+    ], list);
+  }
+  function openPlaying() { $('playingModal').classList.remove('hidden'); renderPlaying(); }
+  function closePlaying() { $('playingModal').classList.add('hidden'); }
+
   // ── load ──
   var loading = false;
   function load() {
@@ -916,6 +952,10 @@
   $('logoutBtn').addEventListener('click', function () { try { localStorage.removeItem(SECRET_KEY); } catch (e) {} location.reload(); });
   $('refreshBtn').addEventListener('click', function () { load(); loadPeople(); });
   $('verifySearch').addEventListener('input', fillSelect);
+  $('playingMore').addEventListener('click', openPlaying);
+  $('playingClose').addEventListener('click', closePlaying);
+  $('playingModal').addEventListener('click', function (e) { if (e.target === $('playingModal')) closePlaying(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePlaying(); });
   $('verifySelect').addEventListener('change', syncVerifyBtn);
   $('verifyList').addEventListener('click', function (e) {
     var b = e.target.closest('button[data-key]'); if (!b) return;
