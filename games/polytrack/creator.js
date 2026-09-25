@@ -407,21 +407,72 @@
   }
 
   // ── The creator's own game ────────────────────────────────────────────
-  // Opened by the dashboard with the room to join and a ticket proving who is
-  // joining: #gv-creator=<ticket>&join=<code>. The game is walked into the
-  // room the way a player typing the code in would get there.
+  // Opened by the dashboard with #gv-creator-wait. The tab opens straight
+  // away so the game loads while the dashboard is still sorting out the room,
+  // and everything it does is under the cover: the creator sees a loading
+  // screen and then the other player's race, never the menus or the code.
+  //
+  // The dashboard hands over the room through localStorage, which both pages
+  // share, once it has one: the code, and a ticket proving who is joining.
 
+  var JOIN_KEY = 'gv.creator.join';
   var creatorTicket = null;
 
-  function readVisit() {
+  function readWait() {
     var params = new URLSearchParams(location.hash.slice(1));
-    var ticket = params.get('gv-creator');
-    var code = params.get('join');
-    if (!ticket || !code) return null;
-    // Out of the address bar, so a reload or a copied link is an ordinary
-    // visit rather than a second arrival.
+    if (!params.has('gv-creator-wait')) return null;
+    // Out of the address bar, so a reload is an ordinary visit rather than a
+    // second arrival.
     history.replaceState(null, '', location.pathname + location.search);
-    return { ticket: ticket, code: code };
+    return {
+      name: params.get('gv-creator-wait') || '',
+      solo: params.get('solo') === '1',
+      since: parseInt(params.get('t') || '0', 10) || 0
+    };
+  }
+
+  // Anything written before this tab was opened belongs to an earlier join.
+  function takeHandover(since) {
+    var data = null;
+    try { data = JSON.parse(localStorage.getItem(JOIN_KEY) || 'null'); } catch (e) { data = null; }
+    if (!data || typeof data !== 'object' || (data.at || 0) < since) return null;
+    try { localStorage.removeItem(JOIN_KEY); } catch (e) {}
+    return data;
+  }
+
+  function awaitHandover(wait) {
+    return new Promise(function (resolve) {
+      var poll = setInterval(check, 500);
+      window.addEventListener('storage', check);
+      function check() {
+        var data = takeHandover(wait.since);
+        if (!data) return;
+        clearInterval(poll);
+        window.removeEventListener('storage', check);
+        resolve(data);
+      }
+      check();
+    });
+  }
+
+  function showFailure(message) {
+    showCover(null, message);
+    coverButton('Close', hideCover);
+  }
+
+  function openAsCreator(wait) {
+    var who = wait.name || 'them';
+    showCover(null, wait.solo
+      ? 'Waiting for ' + who + ' to start their run over...'
+      : 'Joining ' + who + '...');
+    awaitHandover(wait).then(function (data) {
+      if (data.error) {
+        showFailure(data.error);
+        return;
+      }
+      coverText('Joining ' + who + '...');
+      joinAsCreator({ ticket: data.ticket, code: data.code });
+    });
   }
 
   function joinAsCreator(visit) {
@@ -443,8 +494,18 @@
         var join = document.querySelector('.multiplayer-ui > .join > .main-box > .buttons > .join');
         if (!join) throw new Error('no Join button');
         join.click();
+        return waitFor(function () {
+          var room = rooms();
+          return room && room.state().code && inRace();
+        }, 45000);
       })
-      .catch(function (error) { console.error('Could not join as the creator:', error); });
+      // A few frames for the race to draw itself before it is shown.
+      .then(function () { return new Promise(function (resolve) { setTimeout(resolve, 700); }); })
+      .then(hideCover)
+      .catch(function (error) {
+        console.error('Could not join as the creator:', error);
+        showFailure('Could not join: ' + error.message);
+      });
   }
 
   // Once in, the room is told who arrived. Said a few times over the first
@@ -541,8 +602,8 @@
     document.addEventListener('visibilitychange', beat);
     window.addEventListener('keydown', holdKeys, true);
 
-    var visit = readVisit();
-    if (visit) joinAsCreator(visit);
+    var wait = readWait();
+    if (wait) openAsCreator(wait);
   }
 
   if (document.body) start();
