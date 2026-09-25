@@ -122,14 +122,13 @@ begin
     )
     on conflict (code) do nothing;
 
-    -- A public room's invite never expires. Nobody holds its code to renew,
-    -- and the game closes an expired invite's socket, which would leave the
-    -- room listed but no longer answering. The game reads null as no limit.
+    -- An invite lasts as long as its host is in the room. Renewing one used
+    -- to hand the host a new code and a new channel while everyone already
+    -- racing stayed on the old one, which split the room in two: the old code
+    -- still looked live, and nobody on it was listening. The game reads null
+    -- as no limit, and hides its Renew button.
     if found then
-      return json_build_object(
-        'code', v_code,
-        'timeout_milliseconds', case when coalesce(p_public, false) then null else 600000 end
-      );
+      return json_build_object('code', v_code, 'timeout_milliseconds', null);
     end if;
 
     if v_attempt >= 8 then
@@ -159,10 +158,18 @@ begin
     return null;
   end if;
 
-  select * into v_room
-  from polytrack_rooms
-  where code = upper(btrim(p_code))
-    and last_seen > now() - interval '10 minutes';
+  -- A host whose game had to open a fresh invite, after its connection
+  -- dropped, is on a new code while their players still hold the old one.
+  -- The host key is the same across both, so an old code leads to wherever
+  -- that host is now.
+  select r.* into v_room
+  from polytrack_rooms r
+  where r.host_key = (
+      select host_key from polytrack_rooms where code = upper(btrim(p_code))
+    )
+    and r.last_seen > now() - interval '10 minutes'
+  order by r.created_at desc
+  limit 1;
 
   if not found then
     return null;
