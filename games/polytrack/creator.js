@@ -86,8 +86,10 @@
   // player would click, and waits to see each screen arrive before the next
   // step, because none of them appear straight away.
 
+  // Anything inside the cover is a picture of the game, not the game, and
+  // must never be mistaken for a screen or a button that is really there.
   function visible(el) {
-    return !!el && el.offsetParent !== null;
+    return !!el && el.offsetParent !== null && !el.closest('.gv-cover');
   }
 
   function waitFor(test, timeout) {
@@ -130,7 +132,7 @@
         var exit = buttonNamed(document.querySelector('.game-toolbar-ui'), 'Exit');
         if (confirm) confirm.click();
         else if (exit) exit.click();
-        else document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true }));
+        else sendEscape();
         setTimeout(step, 700);
       }());
     });
@@ -148,6 +150,127 @@
     return false;
   }
 
+  // ── The cover ─────────────────────────────────────────────────────────
+  // Whatever the game has to click through to change sessions happens under
+  // this, so the screen shows one picture the whole time instead of menus
+  // flashing past. It sits over everything, the game's own interface
+  // included, and takes the clicks so none land on the screens underneath.
+
+  var COVER_STYLE_ID = 'gv-cover-style';
+
+  var COVER_STYLE = [
+    '.gv-cover {',
+    '  position: fixed; left: 0; top: 0; width: 100%; height: 100%;',
+    '  z-index: 2147483647; background: #10183a center / 100% 100% no-repeat;',
+    '  transition: opacity 0.35s ease; }',
+    '.gv-cover.gv-cover-out { opacity: 0; pointer-events: none; }',
+    '.gv-cover-text {',
+    '  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);',
+    '  max-width: 80%; padding: 14px 22px; box-sizing: border-box;',
+    '  background: rgba(17, 32, 82, 0.92); color: #fff; text-align: center;',
+    '  font: 24px/1.3 ForcedSquare, sans-serif; }'
+  ].join('\n');
+
+  var cover = null;
+
+  function coverText(text) {
+    if (!cover) return;
+    var line = cover.querySelector('.gv-cover-text');
+    if (!text) {
+      if (line) line.remove();
+      return;
+    }
+    if (!line) {
+      line = document.createElement('div');
+      line.className = 'gv-cover-text';
+      cover.appendChild(line);
+    }
+    line.textContent = text;
+  }
+
+  function showCover(picture, text) {
+    if (!document.getElementById(COVER_STYLE_ID)) {
+      var css = document.createElement('style');
+      css.id = COVER_STYLE_ID;
+      css.textContent = COVER_STYLE;
+      document.head.appendChild(css);
+    }
+    if (!cover) {
+      cover = document.createElement('div');
+      cover.className = 'gv-cover';
+      document.body.appendChild(cover);
+    }
+    if (picture) cover.style.backgroundImage = 'url(' + picture + ')';
+    coverText(text);
+  }
+
+  // Keys pressed under the cover would drive the menus being clicked through:
+  // a stray Escape backs out of them, Enter presses whatever has focus. They
+  // are held back until it lifts, apart from the Escapes this file sends
+  // itself. Releases still go through, so a key held down when the cover
+  // went up is not left stuck down behind it.
+  var sending = false;
+
+  function holdKeys(e) {
+    if (!cover || sending) return;
+    e.stopImmediatePropagation();
+    e.preventDefault();
+  }
+
+  function sendEscape() {
+    sending = true;
+    try {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true }));
+    } finally {
+      sending = false;
+    }
+  }
+
+  // The still is only the 3D view: the timer, the toolbar and the rest of the
+  // race's interface are page elements drawn over the canvas, and a still
+  // without them looks like the game has broken. A copy of them as they are
+  // right now goes on top of it. The copy keeps the game's own scaling,
+  // which is set on the element itself, and none of its behaviour.
+  function coverInterface() {
+    var ui = document.getElementById('ui');
+    if (!cover || !ui) return;
+    var copy = ui.cloneNode(true);
+    copy.removeAttribute('id');
+    // Without the id, the game's own #ui rule no longer sizes it, and at its
+    // natural size everything inside wraps into a column.
+    copy.style.position = 'absolute';
+    copy.style.left = '0';
+    copy.style.top = '0';
+    copy.style.width = ui.style.width || '100%';
+    copy.style.height = ui.style.height || '100%';
+    copy.style.transformOrigin = '0 0';
+    copy.style.pointerEvents = 'none';
+    cover.insertBefore(copy, cover.firstChild);
+  }
+
+  // A button under the text, for the one case where the cover should not lift
+  // on its own: something went wrong and the reason needs reading.
+  function coverButton(label, onClick) {
+    if (!cover) return;
+    var line = cover.querySelector('.gv-cover-text');
+    if (!line) return;
+    var button = document.createElement('button');
+    button.className = 'button';
+    button.style.cssText = 'display:block;margin:14px auto 0;font:inherit;pointer-events:auto';
+    button.textContent = label;
+    button.addEventListener('click', onClick);
+    line.appendChild(button);
+  }
+
+  // Faded rather than dropped, so the game coming back reads as a cut.
+  function hideCover() {
+    if (!cover) return;
+    var leaving = cover;
+    cover = null;
+    leaving.classList.add('gv-cover-out');
+    setTimeout(function () { leaving.remove(); }, 400);
+  }
+
   // ── Opening a room for the creator ────────────────────────────────────
   // Asked for from the dashboard, for a player racing on their own. Nothing
   // is asked of them: once their run is over, a private room opens on the
@@ -159,7 +282,10 @@
   // The game keeps more than one picker in the document and the newest one
   // is the one just opened.
   function newestPicker() {
-    var all = document.querySelectorAll('.track-selection-ui:not(.hidden)');
+    var all = Array.prototype.filter.call(
+      document.querySelectorAll('.track-selection-ui:not(.hidden)'),
+      function (picker) { return !picker.closest('.gv-cover'); }
+    );
     return all.length ? all[all.length - 1] : null;
   }
 
@@ -189,6 +315,17 @@
     } catch (e) { return false; }
   }
 
+  // The frame on screen right now, or nothing if one does not come quickly.
+  // Frames stop while the tab is hidden, and this must not wait on one.
+  function stillOrNothing() {
+    var scene = window.GV && window.GV.scene;
+    if (!scene || typeof scene.still !== 'function') return Promise.resolve(null);
+    return Promise.race([
+      scene.still(),
+      new Promise(function (resolve) { setTimeout(function () { resolve(null); }, 500); })
+    ]);
+  }
+
   function hostNow() {
     var room = rooms();
     if (hosting || !room || room.state().code !== null) return;
@@ -196,7 +333,15 @@
     var shown = document.querySelector('.game-toolbar-ui .track-name');
     var track = shown ? shown.textContent.trim() : null;
 
-    toMenu()
+    // The player has just started over, so the frame under the cover is the
+    // start line, which is exactly where the room's race puts them. Their
+    // screen holds still for a moment and then carries on from there.
+    stillOrNothing()
+      .then(function (picture) {
+        showCover(picture, null);
+        coverInterface();
+        return toMenu();
+      })
       .then(function () {
         if (!openRooms()) throw new Error('no Rooms tile on the menu');
         return waitFor(function () {
@@ -226,16 +371,25 @@
         go.click();
         return waitFor(function () { return room.state().code; }, 20000);
       })
-      .then(function () { room.setPublic(savedPublic()); })
+      .then(function () {
+        room.setPublic(savedPublic());
+        return waitFor(inRace, 20000);
+      })
+      // A few frames for the new race to draw itself before it is shown.
+      .then(function () { return new Promise(function (resolve) { setTimeout(resolve, 700); }); })
       .catch(function (error) { console.error('Could not open a room for the creator:', error); })
-      .then(function () { hosting = false; });
+      .then(function () {
+        hideCover();
+        hosting = false;
+      });
   }
 
-  // A solo player mid-run is not pulled out of it. The room waits for the
-  // run to end on their terms: the next time they start over, which is T or
-  // Backspace, or R twice, since a single R only goes back a checkpoint.
-  // Leaving the race themselves counts too. A call that has waited longer
-  // than the dashboard will is dropped rather than opening an empty room.
+  // A solo player is never pulled out of a run, or off the menu into one.
+  // The room waits for a run that has nothing in it yet: the moment they
+  // start over, which is T or Backspace, or R twice since a single R only
+  // goes back a checkpoint, or the moment a new race of theirs begins. A
+  // call that has waited longer than the dashboard will is dropped rather
+  // than opening a room nobody is coming to.
   var ARM_FOR = 170000;
   var armed = null;
 
@@ -246,12 +400,9 @@
   function armHost() {
     var room = rooms();
     if (armed || hosting || !room || room.state().code !== null) return;
-    if (!inRace()) {
-      hostNow();
-      return;
-    }
     var until = Date.now() + ARM_FOR;
     var lastR = 0;
+    var racing = inRace();
 
     function disarm() {
       window.removeEventListener('keydown', onKey, true);
@@ -263,7 +414,7 @@
       hostNow();
     }
     function onKey(e) {
-      if (e.repeat) return;
+      if (e.repeat || !inRace()) return;
       if (e.code === 'KeyT' || e.code === 'Backspace') fire();
       else if (e.code === 'KeyR') {
         if (Date.now() - lastR < 1000) fire();
@@ -272,36 +423,126 @@
     }
 
     armed = setInterval(function () {
-      if (Date.now() > until) disarm();
-      else if (!inRace()) fire();
-    }, 500);
+      if (Date.now() > until) {
+        disarm();
+        return;
+      }
+      var now = inRace();
+      if (now && !racing) fire();
+      racing = now;
+    }, 300);
     window.addEventListener('keydown', onKey, true);
   }
 
   // ── The creator's own game ────────────────────────────────────────────
-  // Opened by the dashboard with the room to join and a ticket proving who is
-  // joining: #gv-creator=<ticket>&join=<code>. The game is walked into the
-  // room the way a player typing the code in would get there.
+  // Opened by the dashboard with #gv-creator-wait. The tab opens straight
+  // away so the game loads while the dashboard is still sorting out the room,
+  // and everything it does is under the cover: the creator sees a loading
+  // screen and then the other player's race, never the menus or the code.
+  //
+  // The dashboard hands over the room through localStorage, which both pages
+  // share, once it has one: the code, and a ticket proving who is joining.
 
+  var JOIN_KEY = 'gv.creator.join';
   var creatorTicket = null;
 
-  function readVisit() {
+  function readWait() {
     var params = new URLSearchParams(location.hash.slice(1));
-    var ticket = params.get('gv-creator');
-    var code = params.get('join');
-    if (!ticket || !code) return null;
-    // Out of the address bar, so a reload or a copied link is an ordinary
-    // visit rather than a second arrival.
+    if (!params.has('gv-creator-wait')) return null;
+    // Out of the address bar, so a reload is an ordinary visit rather than a
+    // second arrival.
     history.replaceState(null, '', location.pathname + location.search);
-    return { ticket: ticket, code: code };
+    return {
+      name: params.get('gv-creator-wait') || '',
+      solo: params.get('solo') === '1',
+      since: parseInt(params.get('t') || '0', 10) || 0
+    };
   }
 
-  function joinAsCreator(visit) {
-    creatorTicket = visit.ticket;
-    waitFor(function () {
-      return menuFront() || document.querySelector('.game-toolbar-ui');
-    }, 60000)
-      .then(toMenu)
+  // Anything written before this tab was opened belongs to an earlier join.
+  function takeHandover(since) {
+    var data = null;
+    try { data = JSON.parse(localStorage.getItem(JOIN_KEY) || 'null'); } catch (e) { data = null; }
+    if (!data || typeof data !== 'object' || (data.at || 0) < since) return null;
+    try { localStorage.removeItem(JOIN_KEY); } catch (e) {}
+    return data;
+  }
+
+  function awaitHandover(wait) {
+    return new Promise(function (resolve) {
+      var poll = setInterval(check, 500);
+      window.addEventListener('storage', check);
+      function check() {
+        var data = takeHandover(wait.since);
+        if (!data) return;
+        clearInterval(poll);
+        window.removeEventListener('storage', check);
+        resolve(data);
+      }
+      check();
+    });
+  }
+
+  function showFailure(message) {
+    showCover(null, message);
+    coverButton('Close', hideCover);
+  }
+
+  function openAsCreator(wait) {
+    var who = wait.name || 'them';
+    recordErrors();
+    showCover(null, wait.solo
+      ? 'Waiting for ' + who + ' to start their run over...'
+      : 'Joining ' + who + '...');
+    awaitHandover(wait).then(function (data) {
+      if (data.error) {
+        showFailure(data.error);
+        return;
+      }
+      coverText('Joining ' + who + '...');
+      joinAsCreator({ ticket: data.ticket, code: data.code });
+    });
+  }
+
+  // The game shows a join failure as a line of text, and for anything it did
+  // not expect that line is "Unknown connection error", which says nothing.
+  // The real reason is in what it logged, so that is kept for the message.
+  // Only in the creator's own tab; nobody else's console is touched.
+  var logged = [];
+
+  function recordErrors() {
+    var original = console.error;
+    console.error = function () {
+      try {
+        logged.push(Array.prototype.map.call(arguments, function (part) {
+          return part && part.message ? part.message : String(part);
+        }).join(' '));
+        if (logged.length > 20) logged.shift();
+      } catch (e) {}
+      return original.apply(console, arguments);
+    };
+  }
+
+  function explain(shown) {
+    var all = logged.join(' | ');
+    // The game checks at start-up that its physics come out the same as
+    // everyone else's, and refuses multiplayer in a browser where they do not.
+    if (/non-deterministic/i.test(all)) {
+      return 'This browser cannot play PolyTrack multiplayer: the game\u2019s physics check '
+        + 'failed here. Chrome or Edge with hardware acceleration on works.';
+    }
+    var last = logged.filter(function (line) { return !/Presence beat/.test(line); }).pop();
+    return 'Could not join: ' + (shown || 'no reason given')
+      + (last ? ' (' + last.slice(0, 160) + ')' : '');
+  }
+
+  function joinFailed() {
+    var box = document.querySelector('.multiplayer-ui > .join > .error-box.show');
+    return box && box.textContent.trim() ? box.textContent.trim() : null;
+  }
+
+  function attemptJoin(code) {
+    return toMenu()
       .then(function () {
         if (!openRooms()) throw new Error('no Rooms tile on the menu');
         return waitFor(function () {
@@ -310,13 +551,46 @@
         }, 8000);
       })
       .then(function (input) {
-        input.value = visit.code;
+        input.value = code;
         input.dispatchEvent(new Event('input'));
         var join = document.querySelector('.multiplayer-ui > .join > .main-box > .buttons > .join');
         if (!join) throw new Error('no Join button');
         join.click();
+        return waitFor(function () {
+          var room = rooms();
+          if (room && room.state().code && inRace()) return { joined: true };
+          var failed = joinFailed();
+          return failed ? { joined: false, shown: failed } : null;
+        }, 45000);
+      });
+  }
+
+  function joinAsCreator(visit) {
+    creatorTicket = visit.ticket;
+    waitFor(function () {
+      return menuFront() || document.querySelector('.game-toolbar-ui');
+    }, 60000)
+      .then(function () { return attemptJoin(visit.code); })
+      // A connection can fail once for reasons that have gone a moment later,
+      // so a second try is made before telling anyone. Not when the browser
+      // itself is the problem: that will not have changed.
+      .then(function (result) {
+        if (result.joined || /non-deterministic/i.test(logged.join(' '))) return result;
+        return new Promise(function (resolve) { setTimeout(resolve, 2500); })
+          .then(function () { return attemptJoin(visit.code); });
       })
-      .catch(function (error) { console.error('Could not join as the creator:', error); });
+      .then(function (result) {
+        if (!result.joined) throw new Error(explain(result.shown));
+        // A few frames for the race to draw itself before it is shown.
+        return new Promise(function (resolve) { setTimeout(resolve, 700); });
+      })
+      .then(hideCover)
+      .catch(function (error) {
+        console.error('Could not join as the creator:', error);
+        showFailure(/^Could not join|^This browser/.test(error.message)
+          ? error.message
+          : 'Could not join: ' + error.message);
+      });
   }
 
   // Once in, the room is told who arrived. Said a few times over the first
@@ -411,9 +685,10 @@
       room.onMessage(heard);
     }
     document.addEventListener('visibilitychange', beat);
+    window.addEventListener('keydown', holdKeys, true);
 
-    var visit = readVisit();
-    if (visit) joinAsCreator(visit);
+    var wait = readWait();
+    if (wait) openAsCreator(wait);
   }
 
   if (document.body) start();
