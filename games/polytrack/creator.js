@@ -79,6 +79,73 @@
     }).catch(function (error) { console.error('Presence beat failed:', error); });
   }
 
+  // ── Driving the game ──────────────────────────────────────────────────
+  // Everything below moves through the game's own screens by clicking what a
+  // player would click, and waits to see each screen arrive before the next
+  // step, because none of them appear straight away.
+
+  function visible(el) {
+    return !!el && el.offsetParent !== null;
+  }
+
+  function waitFor(test, timeout) {
+    return new Promise(function (resolve, reject) {
+      var started = Date.now();
+      (function check() {
+        var found = null;
+        try { found = test(); } catch (e) { found = null; }
+        if (found) return resolve(found);
+        if (Date.now() - started > timeout) return reject(new Error('timed out waiting for the game'));
+        setTimeout(check, 200);
+      }());
+    });
+  }
+
+  function buttonNamed(root, text) {
+    if (!root) return null;
+    var all = root.querySelectorAll('button');
+    for (var i = 0; i < all.length; i++) {
+      if (visible(all[i]) && all[i].textContent.trim() === text) return all[i];
+    }
+    return null;
+  }
+
+  function menuFront() {
+    var info = document.querySelector('.menu-ui > .info');
+    return visible(info) ? document.querySelector('.menu-ui') : null;
+  }
+
+  // From wherever the player is to the front of the menu. A race is left by
+  // its own Exit button, confirmed if the game asks; anything else steps back
+  // a screen at a time with Escape, which is what the game binds it to.
+  function toMenu() {
+    var tries = 0;
+    return new Promise(function (resolve, reject) {
+      (function step() {
+        if (menuFront()) return resolve();
+        if (tries++ > 12) return reject(new Error('could not reach the menu'));
+        var confirm = buttonNamed(document, 'Confirm');
+        var exit = buttonNamed(document.querySelector('.game-toolbar-ui'), 'Exit');
+        if (confirm) confirm.click();
+        else if (exit) exit.click();
+        else document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true }));
+        setTimeout(step, 700);
+      }());
+    });
+  }
+
+  // rooms_ui.js renames the tile, and may not have got to it yet.
+  function openRooms() {
+    var labels = document.querySelectorAll('.menu-ui .button-image > p');
+    for (var i = 0; i < labels.length; i++) {
+      var text = labels[i].textContent;
+      if (text !== 'Rooms' && text !== 'Multiplayer') continue;
+      (labels[i].closest('button') || labels[i].parentElement).click();
+      return true;
+    }
+    return false;
+  }
+
   function start() {
     var gv = identity();
     var room = rooms();
