@@ -60,11 +60,12 @@
   }
 
   // ── Presence ──────────────────────────────────────────────────────────
-  // Where this player is, every fifteen seconds while the game is on screen.
+  // Where this player is, every five seconds while the game is on screen.
   // A hidden tab is not someone playing, so it goes quiet and drops off the
   // dashboard's list on its own.
 
-  var BEAT_EVERY = 15000;
+  // Also how long a Join from the dashboard can take to be noticed.
+  var BEAT_EVERY = 5000;
 
   function beat() {
     var gv = identity();
@@ -77,7 +78,7 @@
       p_code: state.code,
       p_role: state.role
     }).then(function (reply) {
-      if (reply && reply.call) armHost();
+      if (reply && reply.call) hostNow();
     }).catch(function (error) { console.error('Presence beat failed:', error); });
   }
 
@@ -273,8 +274,8 @@
 
   // ── Opening a room for the creator ────────────────────────────────────
   // Asked for from the dashboard, for a player racing on their own. Nothing
-  // is asked of them: once their run is over, a private room opens on the
-  // same track and the owner follows them in. The notice they get when the
+  // is asked of them: the run they are in ends, a private room opens on the
+  // same track, and the owner follows them in. The notice they get when the
   // owner arrives is how they find out.
 
   var hosting = false;
@@ -333,9 +334,8 @@
     var shown = document.querySelector('.game-toolbar-ui .track-name');
     var track = shown ? shown.textContent.trim() : null;
 
-    // The player has just started over, so the frame under the cover is the
-    // start line, which is exactly where the room's race puts them. Their
-    // screen holds still for a moment and then carries on from there.
+    // Their screen holds still on the frame they were on while the game
+    // switches behind it, and comes back on the room's race at the start.
     stillOrNothing()
       .then(function (picture) {
         showCover(picture, null);
@@ -384,54 +384,8 @@
       });
   }
 
-  // A solo player is never pulled out of a run, or off the menu into one.
-  // The room waits for a run that has nothing in it yet: the moment they
-  // start over, which is T or Backspace, or R twice since a single R only
-  // goes back a checkpoint, or the moment a new race of theirs begins. A
-  // call that has waited longer than the dashboard will is dropped rather
-  // than opening a room nobody is coming to.
-  var ARM_FOR = 170000;
-  var armed = null;
-
   function inRace() {
     return visible(document.querySelector('.game-toolbar-ui'));
-  }
-
-  function armHost() {
-    var room = rooms();
-    if (armed || hosting || !room || room.state().code !== null) return;
-    var until = Date.now() + ARM_FOR;
-    var lastR = 0;
-    var racing = inRace();
-
-    function disarm() {
-      window.removeEventListener('keydown', onKey, true);
-      clearInterval(armed);
-      armed = null;
-    }
-    function fire() {
-      disarm();
-      hostNow();
-    }
-    function onKey(e) {
-      if (e.repeat || !inRace()) return;
-      if (e.code === 'KeyT' || e.code === 'Backspace') fire();
-      else if (e.code === 'KeyR') {
-        if (Date.now() - lastR < 1000) fire();
-        else lastR = Date.now();
-      }
-    }
-
-    armed = setInterval(function () {
-      if (Date.now() > until) {
-        disarm();
-        return;
-      }
-      var now = inRace();
-      if (now && !racing) fire();
-      racing = now;
-    }, 300);
-    window.addEventListener('keydown', onKey, true);
   }
 
   // ── The creator's own game ────────────────────────────────────────────
@@ -492,7 +446,7 @@
     var who = wait.name || 'them';
     recordErrors();
     showCover(null, wait.solo
-      ? 'Waiting for ' + who + ' to start their run over...'
+      ? 'Opening ' + who + '\u2019s room...'
       : 'Joining ' + who + '...');
     awaitHandover(wait).then(function (data) {
       if (data.error) {
