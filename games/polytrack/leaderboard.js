@@ -126,16 +126,23 @@
   // pages, and must add to what is known rather than wipe it.
   var checkedTrack = null;
   var checked = {};
+  // Which rows have a replay to watch or race, noted the same way.
+  var replays = {};
 
   function noteChecks(trackId, entries) {
     if (trackId !== checkedTrack) {
       checkedTrack = trackId;
       checked = {};
+      replays = {};
     }
     for (var i = 0; i < entries.length; i++) {
       var entry = entries[i];
-      if (typeof entry.position === 'number') checked[entry.position] = entry.gvVerified === true;
+      if (typeof entry.position === 'number') {
+        checked[entry.position] = entry.gvVerified === true;
+        replays[entry.position] = entry.gvReplay === true;
+      }
       delete entry.gvVerified;
+      delete entry.gvReplay;
     }
   }
 
