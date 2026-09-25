@@ -231,6 +231,47 @@
       .then(function () { hosting = false; });
   }
 
+  // ── The creator's own game ────────────────────────────────────────────
+  // Opened by the dashboard with the room to join and a ticket proving who is
+  // joining: #gv-creator=<ticket>&join=<code>. The game is walked into the
+  // room the way a player typing the code in would get there.
+
+  var creatorTicket = null;
+
+  function readVisit() {
+    var params = new URLSearchParams(location.hash.slice(1));
+    var ticket = params.get('gv-creator');
+    var code = params.get('join');
+    if (!ticket || !code) return null;
+    // Out of the address bar, so a reload or a copied link is an ordinary
+    // visit rather than a second arrival.
+    history.replaceState(null, '', location.pathname + location.search);
+    return { ticket: ticket, code: code };
+  }
+
+  function joinAsCreator(visit) {
+    creatorTicket = visit.ticket;
+    waitFor(function () {
+      return menuFront() || document.querySelector('.game-toolbar-ui');
+    }, 60000)
+      .then(toMenu)
+      .then(function () {
+        if (!openRooms()) throw new Error('no Rooms tile on the menu');
+        return waitFor(function () {
+          var input = document.querySelector('.multiplayer-ui > .join .invite-code');
+          return visible(input) ? input : null;
+        }, 8000);
+      })
+      .then(function (input) {
+        input.value = visit.code;
+        input.dispatchEvent(new Event('input'));
+        var join = document.querySelector('.multiplayer-ui > .join > .main-box > .buttons > .join');
+        if (!join) throw new Error('no Join button');
+        join.click();
+      })
+      .catch(function (error) { console.error('Could not join as the creator:', error); });
+  }
+
   function start() {
     var gv = identity();
     var room = rooms();
@@ -241,6 +282,9 @@
     // see, so it is reported straight away rather than on the next beat.
     if (room) room.onState(beat);
     document.addEventListener('visibilitychange', beat);
+
+    var visit = readVisit();
+    if (visit) joinAsCreator(visit);
   }
 
   if (document.body) start();
