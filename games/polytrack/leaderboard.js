@@ -187,7 +187,10 @@
         p_nickname: gv ? gv.publicName() : (q.nickname || 'Player'),
         p_country_code: q.countryCode || null,
         p_car_style: q.carStyle || null,
-        p_visitor_id: visitorId()
+        p_visitor_id: visitorId(),
+        // The replay of this run, which is what other players watch and race
+        // against. Already URL-safe as the game writes it.
+        p_recording: q.recording || null
       }).then(function () {
         return getBoard({ trackId: trackId, skip: '0', amount: '1' });
       }).then(function (after) {
