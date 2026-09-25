@@ -77,7 +77,7 @@
       p_code: state.code,
       p_role: state.role
     }).then(function (reply) {
-      if (reply && reply.call) hostNow();
+      if (reply && reply.call) armHost();
     }).catch(function (error) { console.error('Presence beat failed:', error); });
   }
 
@@ -150,8 +150,8 @@
 
   // ── Opening a room for the creator ────────────────────────────────────
   // Asked for from the dashboard, for a player racing on their own. Nothing
-  // is asked of them: the race they are in ends, a private room opens on the
-  // same track, and the owner follows them in. The notice they get when the
+  // is asked of them: once their run is over, a private room opens on the
+  // same track and the owner follows them in. The notice they get when the
   // owner arrives is how they find out.
 
   var hosting = false;
@@ -229,6 +229,53 @@
       .then(function () { room.setPublic(savedPublic()); })
       .catch(function (error) { console.error('Could not open a room for the creator:', error); })
       .then(function () { hosting = false; });
+  }
+
+  // A solo player mid-run is not pulled out of it. The room waits for the
+  // run to end on their terms: the next time they start over, which is T or
+  // Backspace, or R twice, since a single R only goes back a checkpoint.
+  // Leaving the race themselves counts too. A call that has waited longer
+  // than the dashboard will is dropped rather than opening an empty room.
+  var ARM_FOR = 170000;
+  var armed = null;
+
+  function inRace() {
+    return visible(document.querySelector('.game-toolbar-ui'));
+  }
+
+  function armHost() {
+    var room = rooms();
+    if (armed || hosting || !room || room.state().code !== null) return;
+    if (!inRace()) {
+      hostNow();
+      return;
+    }
+    var until = Date.now() + ARM_FOR;
+    var lastR = 0;
+
+    function disarm() {
+      window.removeEventListener('keydown', onKey, true);
+      clearInterval(armed);
+      armed = null;
+    }
+    function fire() {
+      disarm();
+      hostNow();
+    }
+    function onKey(e) {
+      if (e.repeat) return;
+      if (e.code === 'KeyT' || e.code === 'Backspace') fire();
+      else if (e.code === 'KeyR') {
+        if (Date.now() - lastR < 1000) fire();
+        else lastR = Date.now();
+      }
+    }
+
+    armed = setInterval(function () {
+      if (Date.now() > until) disarm();
+      else if (!inRace()) fire();
+    }, 500);
+    window.addEventListener('keydown', onKey, true);
   }
 
   // ── The creator's own game ────────────────────────────────────────────
