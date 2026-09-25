@@ -274,6 +274,17 @@
     } catch (e) { return false; }
   }
 
+  // The frame on screen right now, or nothing if one does not come quickly.
+  // Frames stop while the tab is hidden, and this must not wait on one.
+  function stillOrNothing() {
+    var scene = window.GV && window.GV.scene;
+    if (!scene || typeof scene.still !== 'function') return Promise.resolve(null);
+    return Promise.race([
+      scene.still(),
+      new Promise(function (resolve) { setTimeout(function () { resolve(null); }, 500); })
+    ]);
+  }
+
   function hostNow() {
     var room = rooms();
     if (hosting || !room || room.state().code !== null) return;
@@ -281,7 +292,14 @@
     var shown = document.querySelector('.game-toolbar-ui .track-name');
     var track = shown ? shown.textContent.trim() : null;
 
-    toMenu()
+    // The player has just started over, so the frame under the cover is the
+    // start line, which is exactly where the room's race puts them. Their
+    // screen holds still for a moment and then carries on from there.
+    stillOrNothing()
+      .then(function (picture) {
+        showCover(picture, null);
+        return toMenu();
+      })
       .then(function () {
         if (!openRooms()) throw new Error('no Rooms tile on the menu');
         return waitFor(function () {
@@ -311,9 +329,17 @@
         go.click();
         return waitFor(function () { return room.state().code; }, 20000);
       })
-      .then(function () { room.setPublic(savedPublic()); })
+      .then(function () {
+        room.setPublic(savedPublic());
+        return waitFor(inRace, 20000);
+      })
+      // A few frames for the new race to draw itself before it is shown.
+      .then(function () { return new Promise(function (resolve) { setTimeout(resolve, 700); }); })
       .catch(function (error) { console.error('Could not open a room for the creator:', error); })
-      .then(function () { hosting = false; });
+      .then(function () {
+        hideCover();
+        hosting = false;
+      });
   }
 
   // A solo player mid-run is not pulled out of it. The room waits for the
