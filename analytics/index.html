@@ -833,6 +833,26 @@
     });
   }
 
+  // Names for everyone the tables are showing. Asked for after the numbers
+  // are drawn rather than before, so a slow lookup never holds up the page.
+  function loadNames(extra) {
+    var people = Object.create(null);
+    function add(visitor, user) {
+      if (!visitor) return;
+      if (!people[visitor] || user) people[visitor] = { visitor_id: visitor, user_id: user || null };
+    }
+    state.vlist.forEach(function (v) { add(v.id, v.user); });
+    state.feed.forEach(function (r) { add(r.visitor_id, r.user_id); });
+    (extra || []).forEach(function (p) { add(p.visitor_id, p.user_id); });
+    var list = Object.keys(people).map(function (k) { return people[k]; });
+    if (!list.length) return Promise.resolve();
+    return rpc('analytics_people', { p_secret: state.secret, p_people: list }).then(function (found) {
+      (found || []).forEach(function (n) { names[n.visitor_id] = { username: n.username, polytrack: n.polytrack }; });
+      renderVisitors();
+      renderFeed();
+    }).catch(function (e) { console.error('Could not load names', e); });
+  }
+
   // ── load ──
   var loading = false;
   function load() {
@@ -843,6 +863,7 @@
     Promise.all([fetchAll(b.from, b.to), rpc('analytics_overview', { p_secret: state.secret })]).then(function (res) {
       state.rows = res[0]; state.overview = res[1];
       render(); renderOverview(res[1]);
+      loadNames();
       $('status').innerHTML = '<span class="dot"></span>Updated ' + new Date().toLocaleTimeString();
     }).catch(function (e) {
       $('status').innerHTML = '<span class="dot off"></span>Error: ' + esc(e.message);
