@@ -273,8 +273,8 @@
 
   // ── Opening a room for the creator ────────────────────────────────────
   // Asked for from the dashboard, for a player racing on their own. Nothing
-  // is asked of them: once their run is over, a private room opens on the
-  // same track and the owner follows them in. The notice they get when the
+  // is asked of them: the run they are in ends, a private room opens on the
+  // same track, and the owner follows them in. The notice they get when the
   // owner arrives is how they find out.
 
   var hosting = false;
@@ -333,9 +333,8 @@
     var shown = document.querySelector('.game-toolbar-ui .track-name');
     var track = shown ? shown.textContent.trim() : null;
 
-    // The player has just started over, so the frame under the cover is the
-    // start line, which is exactly where the room's race puts them. Their
-    // screen holds still for a moment and then carries on from there.
+    // Their screen holds still on the frame they were on while the game
+    // switches behind it, and comes back on the room's race at the start.
     stillOrNothing()
       .then(function (picture) {
         showCover(picture, null);
