@@ -121,6 +121,23 @@
   .verify-chip button { background: none; border: 0; color: var(--muted); font: inherit; font-size: 0.9rem; line-height: 1; padding: 2px 6px; cursor: pointer; }
   .verify-chip button:hover { color: var(--accent); }
   .vcheck { width: 14px; height: 14px; flex-shrink: 0; }
+
+  /* playing now */
+  .kpi .more { margin-top: 8px; padding: 0; background: none; border: 0; color: var(--muted); font: inherit; font-size: 0.72rem; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+  .kpi .more:hover { color: var(--text); }
+  .modal { position: fixed; inset: 0; z-index: 50; display: flex; align-items: flex-start; justify-content: center; padding: 60px 16px; overflow-y: auto; background: rgba(0,0,0,0.65); }
+  .modal-card { width: min(980px, 100%); background: var(--surface); border: 1px solid var(--border-strong); border-radius: 12px; padding: 16px 18px; }
+  .modal-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .modal-head h2 { margin: 0; }
+  .modal-head .btn { margin-left: auto; }
+  .modal-msg { font-size: 0.76rem; color: var(--muted); margin-top: 10px; min-height: 1em; }
+  td .btn { padding: 4px 10px; font-size: 0.72rem; }
+
+  /* who a visitor is */
+  .who-user { font-weight: 600; }
+  .who-pt { color: #8ab8f2; }
+  .who-pt::before { content: 'PT'; margin-right: 4px; font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--muted-2); }
+  .who-id { font-family: 'JetBrains Mono', monospace; color: var(--muted-2); }
 </style>
 </head>
 <body>
@@ -157,7 +174,7 @@
     <h2>Right now <small>last 5 minutes · updates with refresh</small></h2>
     <div class="kpis">
       <div class="kpi live"><div class="l">Visitors online</div><div class="v" id="liveVisitors">–</div><div class="s" id="liveSub">–</div></div>
-      <div class="kpi live"><div class="l">Playing now</div><div class="v" id="livePlaying">–</div><div class="s" id="livePlayingSub">–</div></div>
+      <div class="kpi live"><div class="l">Playing now</div><div class="v" id="livePlaying">–</div><div class="s" id="livePlayingSub">–</div><button class="more" id="playingMore" type="button">See who</button></div>
       <div class="kpi"><div class="l">Last event</div><div class="v" id="lastEventAgo" style="font-size:1.1rem">–</div><div class="s" id="lastEventWhat">–</div></div>
       <div class="kpi"><div class="l">Events today</div><div class="v" id="todayEvents">–</div><div class="s" id="todayVisitors">–</div></div>
     </div>
@@ -338,6 +355,18 @@
   </div>
 </div>
 
+<div class="modal hidden" id="playingModal" role="dialog" aria-modal="true" aria-labelledby="playingTitle">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h2 id="playingTitle">Playing now <small id="playingCount"></small></h2>
+      <button class="btn ghost" id="playingClose" type="button">Close</button>
+    </div>
+    <div class="tbl-wrap"><table id="playingTable"></table></div>
+    <div class="modal-msg" id="playingMsg"></div>
+    <div class="footer" style="margin-top:12px">Join opens PolyTrack in a new tab. Close any other PolyTrack tab first: the game only runs once per browser.</div>
+  </div>
+</div>
+
 <script>
 (function () {
   'use strict';
@@ -350,7 +379,7 @@
   var NICE = { game_open: 'Opened game', game_close: 'Closed game', game_load: 'Game loaded', game_fullscreen: 'Fullscreen', game_newtab: 'Open in new tab', movie_play: 'Played movie', tv_play: 'Played TV', movie_close: 'Closed movie', tv_close: 'Closed TV', search: 'Searched', category: 'Category filter', genre: 'Genre filter', sort: 'Sort changed', roll: 'Random roll', star: 'Starred', enter: 'Entered vault', news_open: 'Opened news', movies_enter: 'Entered movies', profile_open: 'Opened profile', mode_movies: 'Tab: Movies', mode_tv: 'Tab: TV', cloak: 'Tab cloak', auth_signin: 'Signed in', pageview: 'Page view', nav: 'Navigated', ping: 'Heartbeat', hidden: 'Tab hidden', visible: 'Tab visible', session_end: 'Left site', error: 'JS error' };
 
   var $ = function (id) { return document.getElementById(id); };
-  var state = { secret: null, range: '24h', rows: [], overview: null, gameSort: { key: 'plays', dir: -1 }, gameN: 25, timer: null };
+  var state = { secret: null, range: '24h', rows: [], vlist: [], feed: [], playing: [], live: [], overview: null, gameSort: { key: 'plays', dir: -1 }, gameN: 25, timer: null };
   var charts = {};
 
   // ── helpers ──
@@ -376,6 +405,17 @@
   function counter() { var m = Object.create(null); return { add: function (k, n) { if (k == null || k === '') k = '(none)'; m[k] = (m[k] || 0) + (n == null ? 1 : n); }, top: function (n) { return Object.keys(m).map(function (k) { return [k, m[k]]; }).sort(function (a, b) { return b[1] - a[1]; }).slice(0, n || 9999); }, get: function (k) { return m[k] || 0; }, size: function () { return Object.keys(m).length; } }; }
   function uniq(rows, key) { var s = Object.create(null); rows.forEach(function (r) { if (r[key]) s[r[key]] = 1; }); return Object.keys(s).length; }
   function shortId(id) { return id ? id.slice(0, 8) : '–'; }
+
+  // Who a visitor id belongs to: their GameVault username if they signed in,
+  // the name they race under in PolyTrack if they have one, then the id.
+  // Filled in by loadNames(); an id with no names yet shows just the id.
+  var names = Object.create(null);
+  function who(id) {
+    var n = names[id] || {};
+    return (n.username ? '<span class="who-user">' + esc(n.username) + '</span> ' : '')
+      + (n.polytrack ? '<span class="who-pt" title="PolyTrack name">' + esc(n.polytrack) + '</span> ' : '')
+      + '<span class="who-id">' + shortId(id) + '</span>';
+  }
 
   function rangeBounds() {
     var to = new Date(Date.now() + 60000), from;
@@ -478,6 +518,7 @@
     var lastGame = Object.create(null);
     rows.forEach(function (r) { if (now - r.tms < 10 * 60000 && (r.event === 'game_open' || r.event === 'game_close' || (r.event === 'ping' && r.game_id) || r.event === 'session_end')) lastGame[r.visitor_id] = r; });
     var playing = Object.keys(lastGame).map(function (v) { return lastGame[v]; }).filter(function (r) { return r.event === 'game_open' || r.event === 'ping'; });
+    state.playing = playing;
     $('livePlaying').textContent = fmt(playing.length);
     var pc = counter(); playing.forEach(function (r) { pc.add(r.item_title || r.game_id); });
     $('livePlayingSub').textContent = pc.top(3).map(function (p) { return p[0] + (p[1] > 1 ? ' ×' + p[1] : ''); }).join(', ') || 'nobody in a game';
@@ -669,8 +710,17 @@
       v.browser = r.browser || v.browser; v.os = r.os || v.os; v.device = r.device || v.device;
     });
     var vlist = Object.keys(vmap).map(function (k) { var v = vmap[k]; v.nsess = Object.keys(v.sessions).length; v.fav = (v.games.top(1)[0] || [''])[0]; return v; }).sort(function (a, b) { return b.clicks - a.clicks; }).slice(0, 50);
+    state.vlist = vlist;
+    renderVisitors();
+
+    // ── feed ──
+    state.feed = rows.slice(-150).reverse();
+    renderFeed();
+  }
+
+  function renderVisitors() {
     table('visitorsTable', [
-      { key: 'id', label: 'Visitor', render: function (v) { return '<span class="mono">' + shortId(v.id) + '</span>' + (v.user ? ' <span class="pill b">signed in</span>' : '') + (v.isNew ? ' <span class="pill g">new</span>' : ''); } },
+      { key: 'id', label: 'Visitor', render: function (v) { return who(v.id) + (v.user ? ' <span class="pill b">signed in</span>' : '') + (v.isNew ? ' <span class="pill g">new</span>' : ''); } },
       { key: 'last', label: 'Last seen', render: function (v) { return ago(v.last); } },
       { key: 'first', label: 'First seen (range)', render: function (v) { return new Date(v.first).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); } },
       { key: 'clicks', label: 'Clicks', num: true, render: function (v) { return fmt(v.clicks); } },
@@ -682,13 +732,13 @@
       { key: 'env', label: 'Device', render: function (v) { return esc((v.browser || '?') + ' · ' + (v.os || '?') + ' · ' + (v.device || '?')); } },
       { key: 'tz', label: 'Time zone' },
       { key: 'ref', label: 'Referrer', render: function (v) { return esc(v.ref || '–'); } }
-    ], vlist);
+    ], state.vlist);
+  }
 
-    // ── feed ──
-    var feed = rows.slice(-150).reverse();
+  function renderFeed() {
     table('feedTable', [
       { key: 'ts', label: 'Time', render: function (r) { return r.t.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' }) + ' <span class="muted">' + r.t.toLocaleDateString([], { month: 'short', day: 'numeric' }) + '</span>'; } },
-      { key: 'visitor_id', label: 'Visitor', render: function (r) { return '<span class="mono">' + shortId(r.visitor_id) + '</span>' + (r.user_id ? ' <span class="pill b">user</span>' : ''); } },
+      { key: 'visitor_id', label: 'Visitor', render: function (r) { return who(r.visitor_id) + (r.user_id ? ' <span class="pill b">user</span>' : ''); } },
       { key: 'event', label: 'Event', render: function (r) { var cls = r.event === 'error' ? 'r' : r.event === 'game_open' ? 'g' : (r.event === 'movie_play' || r.event === 'tv_play') ? 'o' : ''; return '<span class="pill ' + cls + '">' + esc(NICE[r.event] || r.event) + '</span>'; } },
       { key: 'detail', label: 'Detail', render: function (r) {
         var d = r.item_title || r.game_id || r.item_id || '';
@@ -704,7 +754,7 @@
       } },
       { key: 'env', label: 'Device', render: function (r) { return esc((r.browser || '?') + ' · ' + (r.os || '?') + ' · ' + (r.viewport || '')); } },
       { key: 'path', label: 'Path' }
-    ], feed);
+    ], state.feed);
   }
 
   function renderGamesTable(gameList) {
@@ -807,6 +857,155 @@
     });
   }
 
+  // Names for everyone the tables are showing. Asked for after the numbers
+  // are drawn rather than before, so a slow lookup never holds up the page.
+  function loadNames(extra) {
+    var people = Object.create(null);
+    function add(visitor, user) {
+      if (!visitor) return;
+      if (!people[visitor] || user) people[visitor] = { visitor_id: visitor, user_id: user || null };
+    }
+    state.vlist.forEach(function (v) { add(v.id, v.user); });
+    state.feed.forEach(function (r) { add(r.visitor_id, r.user_id); });
+    (extra || []).forEach(function (p) { add(p.visitor_id, p.user_id); });
+    var list = Object.keys(people).map(function (k) { return people[k]; });
+    if (!list.length) return Promise.resolve();
+    return rpc('analytics_people', { p_secret: state.secret, p_people: list }).then(function (found) {
+      (found || []).forEach(function (n) { names[n.visitor_id] = { username: n.username, polytrack: n.polytrack }; });
+      renderVisitors();
+      renderFeed();
+      if (playingOpen()) renderPlaying();
+    }).catch(function (e) { console.error('Could not load names', e); });
+  }
+
+  // ── playing now ──
+  // Everyone in a game right now, by name. PolyTrack also reports where each
+  // player is, so for them it says which room they are in.
+  function playingPeople() {
+    var by = Object.create(null);
+    state.playing.forEach(function (r) {
+      by[r.visitor_id] = { visitor_id: r.visitor_id, user_id: r.user_id || null, game: r.item_title || r.game_id, presence: null };
+    });
+    state.live.forEach(function (p) {
+      var row = by[p.visitor_id] || (by[p.visitor_id] = { visitor_id: p.visitor_id, user_id: null, game: 'PolyTrack', presence: null });
+      row.presence = p;
+      row.user_id = row.user_id || p.user_id;
+      // PolyTrack says who it is racing as, which may be all there is to go
+      // on for someone who has never set a time.
+      var n = names[p.visitor_id] || (names[p.visitor_id] = {});
+      if (!n.username && p.username) n.username = p.username;
+      if (!n.polytrack && p.name) n.polytrack = p.name;
+    });
+    return Object.keys(by).map(function (k) { return by[k]; });
+  }
+  function renderPlaying() {
+    var list = playingPeople();
+    $('playingCount').textContent = fmt(list.length) + ' in a game';
+    table('playingTable', [
+      { key: 'who', label: 'Player', render: function (p) { return who(p.visitor_id); } },
+      { key: 'game', label: 'Playing', render: function (p) { return esc(p.game || '–'); } },
+      { key: 'room', label: 'Room', render: function (p) {
+        var pr = p.presence;
+        if (!pr) return '<span class="muted">–</span>';
+        return pr.code ? '<span class="mono">' + esc(pr.code) + '</span> <span class="muted">' + esc(pr.role || '') + '</span>' : '<span class="muted">Racing alone</span>';
+      } },
+      { key: 'join', label: '', render: function (p) {
+        var pr = p.presence;
+        if (!pr) return '';
+        return pr.code
+          ? '<button class="btn" type="button" data-room="' + esc(pr.code) + '">Join room</button>'
+          : '<button class="btn" type="button" data-solo="' + esc(p.visitor_id) + '">Join</button>';
+      } }
+    ], list);
+  }
+
+  // Opened before anything is asked of the server, while the click still
+  // counts as the user's own: a tab opened after a round trip is a popup,
+  // and browsers block those.
+  function blankTab(text) {
+    var tab = window.open('', '_blank');
+    if (!tab) {
+      $('playingMsg').textContent = 'The browser blocked the new tab. Allow popups for this page and try again.';
+      return null;
+    }
+    try {
+      tab.document.title = 'Joining PolyTrack';
+      tab.document.body.style.cssText = 'background:#08080a;color:#8a8a96;font:14px system-ui,sans-serif;padding:24px';
+      tab.document.body.textContent = text;
+    } catch (e) {}
+    return tab;
+  }
+  // The ticket is what lets every game in the room know it really is the
+  // creator arriving, and not a player claiming to be.
+  function sendIn(tab, code) {
+    return rpc('gv_creator_ticket', { p_secret: state.secret, p_code: code }).then(function (ticket) {
+      tab.location.href = location.origin + '/games/polytrack/#gv-creator=' + encodeURIComponent(ticket) + '&join=' + encodeURIComponent(code);
+    });
+  }
+  // A solo player's game opens a room of its own when asked, but not in the
+  // middle of a run: it waits until they start over (R twice, T or
+  // Backspace), then takes a few seconds clicking through screens. The room
+  // shows in their presence once it exists, and the creator follows them in
+  // from there. Their game gives up on the call just before this does.
+  var SUMMON_WAIT = 180000;
+  function joinSolo(visitor) {
+    var tab = blankTab('Waiting for them to start their run over...');
+    if (!tab) return;
+    $('playingMsg').textContent = 'Their game opens a room the next time they start their run over (R twice, T or Backspace). Waiting up to 3 minutes.';
+    var started = Date.now();
+    rpc('gv_creator_summon', { p_secret: state.secret, p_visitor_id: visitor }).then(function () {
+      return new Promise(function (resolve, reject) {
+        (function poll() {
+          rpc('analytics_polytrack_live', { p_secret: state.secret }).then(function (list) {
+            var mine = (list || []).filter(function (p) { return p.visitor_id === visitor && p.code; })[0];
+            if (mine) return resolve(mine.code);
+            if (Date.now() - started > SUMMON_WAIT) return reject(new Error('they did not start over within 3 minutes'));
+            setTimeout(poll, 2500);
+          }, reject);
+        }());
+      });
+    }).then(function (code) {
+      $('playingMsg').textContent = 'Their room is open. Joining ' + code + '.';
+      return sendIn(tab, code);
+    }).catch(function (e) {
+      try { tab.close(); } catch (x) {}
+      $('playingMsg').textContent = 'Could not join: ' + e.message;
+    });
+  }
+  function joinRoom(code) {
+    var tab = blankTab('Opening PolyTrack...');
+    if (!tab) return;
+    $('playingMsg').textContent = 'Joining room ' + code + '.';
+    sendIn(tab, code).catch(function (e) {
+      try { tab.close(); } catch (x) {}
+      $('playingMsg').textContent = 'Could not join: ' + e.message;
+    });
+  }
+  function playingOpen() { return !$('playingModal').classList.contains('hidden'); }
+
+  // Where PolyTrack players are changes by the second, so while the list is
+  // open it is asked again every few seconds rather than once a minute.
+  var liveTimer = null;
+  function refreshLive() {
+    return rpc('analytics_polytrack_live', { p_secret: state.secret }).then(function (list) {
+      state.live = Array.isArray(list) ? list : [];
+      if (playingOpen()) renderPlaying();
+      return loadNames(playingPeople());
+    }).catch(function (e) { $('playingMsg').textContent = 'Could not load PolyTrack players: ' + e.message; });
+  }
+  function openPlaying() {
+    $('playingModal').classList.remove('hidden');
+    renderPlaying();
+    refreshLive();
+    clearInterval(liveTimer);
+    liveTimer = setInterval(refreshLive, 8000);
+  }
+  function closePlaying() {
+    $('playingModal').classList.add('hidden');
+    clearInterval(liveTimer);
+    liveTimer = null;
+  }
+
   // ── load ──
   var loading = false;
   function load() {
@@ -817,6 +1016,7 @@
     Promise.all([fetchAll(b.from, b.to), rpc('analytics_overview', { p_secret: state.secret })]).then(function (res) {
       state.rows = res[0]; state.overview = res[1];
       render(); renderOverview(res[1]);
+      loadNames();
       $('status').innerHTML = '<span class="dot"></span>Updated ' + new Date().toLocaleTimeString();
     }).catch(function (e) {
       $('status').innerHTML = '<span class="dot off"></span>Error: ' + esc(e.message);
@@ -845,6 +1045,15 @@
   $('logoutBtn').addEventListener('click', function () { try { localStorage.removeItem(SECRET_KEY); } catch (e) {} location.reload(); });
   $('refreshBtn').addEventListener('click', function () { load(); loadPeople(); });
   $('verifySearch').addEventListener('input', fillSelect);
+  $('playingMore').addEventListener('click', openPlaying);
+  $('playingClose').addEventListener('click', closePlaying);
+  $('playingTable').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.room) joinRoom(b.dataset.room);
+    else if (b.dataset.solo) joinSolo(b.dataset.solo);
+  });
+  $('playingModal').addEventListener('click', function (e) { if (e.target === $('playingModal')) closePlaying(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePlaying(); });
   $('verifySelect').addEventListener('change', syncVerifyBtn);
   $('verifyList').addEventListener('click', function (e) {
     var b = e.target.closest('button[data-key]'); if (!b) return;

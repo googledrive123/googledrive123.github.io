@@ -34,6 +34,8 @@ sits beside it and stands in front of a browser API instead:
 - `scene.js` - a handle on the 3D scene, for room options about what is drawn.
 - `rooms_ui.js` - the room lobby: public rooms, track lists, round length, car
   visibility.
+- `creator.js` - tells the analytics dashboard who is playing and in which
+  room, and lets the site owner join them from there.
 - `leaderboard.sql`, `rooms.sql` - the Supabase side of both.
 
 No request reaches vps.kodub.com.
