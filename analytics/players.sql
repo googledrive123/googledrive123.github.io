@@ -6,7 +6,7 @@
 -- from the dashboard.
 --
 -- Apply against project dxwjxzmlezfyursysays. Every statement is safe to run
--- twice.
+-- twice. Applied on 25 September 2026.
 
 
 -- One row per browser with PolyTrack open, refreshed every few seconds by
