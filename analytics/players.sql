@@ -282,11 +282,22 @@ begin
     raise exception 'tickets are not checked from this origin';
   end if;
 
+  -- The ticket's room, or any room with the same host: players who joined
+  -- before the host's game opened a fresh invite are still on the old code.
   return exists (
-    select 1 from gv_creator_visits
-    where ticket = p_ticket
-      and code = upper(btrim(coalesce(p_code, '')))
-      and created_at > now() - interval '6 hours'
+    select 1 from gv_creator_visits v
+    where v.ticket = p_ticket
+      and v.created_at > now() - interval '6 hours'
+      and (
+        v.code = upper(btrim(coalesce(p_code, '')))
+        or exists (
+          select 1
+          from polytrack_rooms minted
+          join polytrack_rooms asked on asked.host_key = minted.host_key
+          where minted.code = v.code
+            and asked.code = upper(btrim(coalesce(p_code, '')))
+        )
+      )
   );
 end;
 $function$;
