@@ -6,7 +6,17 @@
 -- applied to the project for leaderboard.js to behave as written.
 --
 -- Apply against project dxwjxzmlezfyursysays. Every statement is safe to run
--- twice. Applied on 21 September 2026; the board on 24 September 2026.
+-- twice. Applied on 21 September 2026; the board on 24 September 2026;
+-- replays on 25 September 2026.
+
+
+-- The replay of each time on the board, so other players can watch it and
+-- race against it. The game sends one with every run it submits, deflated
+-- and base64url encoded, and refuses to send any over 10,000 characters.
+-- Rows set before this column existed have none, and stay without one until
+-- their player beats their own time.
+alter table public.polytrack_scores
+  add column if not exists recording text;
 
 
 -- A run is filed under the player's public name, and that name can change
@@ -15,13 +25,18 @@
 -- the run was faster, so the name got stuck at whatever it was on the day of
 -- the player's best lap. It now refreshes the name on every submission and
 -- still keeps the better time.
+-- Dropped first because it gains an argument, and the old six argument
+-- version left beside it would make every call ambiguous to PostgREST.
+drop function if exists public.polytrack_submit(text, integer, text, text, text, text);
+
 create or replace function public.polytrack_submit(
   p_track_id text,
   p_frames integer,
   p_nickname text,
   p_country_code text default null,
   p_car_style text default null,
-  p_visitor_id text default null
+  p_visitor_id text default null,
+  p_recording text default null
 ) returns void
 language plpgsql
 security definer
@@ -46,7 +61,7 @@ begin
   end if;
 
   insert into polytrack_scores (
-    user_id, visitor_id, nickname, country_code, track_id, frames, car_style
+    user_id, visitor_id, nickname, country_code, track_id, frames, car_style, recording
   )
   values (
     v_user,
@@ -55,20 +70,29 @@ begin
     left(nullif(btrim(coalesce(p_country_code, '')), ''), 8),
     p_track_id,
     p_frames,
-    left(p_car_style, 256)
+    left(p_car_style, 256),
+    -- The game will not send one this long; anything that does is not it.
+    case when char_length(p_recording) between 1 and 12000 then p_recording end
   )
   on conflict (player_key, track_id) do update
     set nickname     = excluded.nickname,
         country_code = excluded.country_code,
         frames       = least(excluded.frames, polytrack_scores.frames),
-        -- The car and the date belong to the run on the board, so they only
-        -- move when the run does.
+        -- The car, the replay and the date belong to the run on the board,
+        -- so they only move when the run does.
         car_style    = case when excluded.frames < polytrack_scores.frames
                             then excluded.car_style else polytrack_scores.car_style end,
+        recording    = case when excluded.frames < polytrack_scores.frames
+                            then excluded.recording else polytrack_scores.recording end,
         updated_at   = case when excluded.frames < polytrack_scores.frames
                             then now() else polytrack_scores.updated_at end;
 end;
 $function$;
+
+-- The same access the six argument version had: signed in or not, but not to
+-- anything that is neither.
+revoke all on function public.polytrack_submit(text, integer, text, text, text, text, text) from public;
+grant execute on function public.polytrack_submit(text, integer, text, text, text, text, text) to anon, authenticated;
 
 
 -- Renaming without racing. A player who changes their name, or turns
@@ -246,3 +270,45 @@ begin
   );
 end;
 $function$;
+
+
+-- Replays for the game's Watch and race-against buttons. The game asks for a
+-- list of board row ids and wants an answer in the same order, with null for
+-- any it cannot have, so each id keeps its place even when it has no replay.
+create or replace function public.polytrack_recordings(p_ids bigint[])
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'recordings are not served to this origin';
+  end if;
+  if p_ids is null or cardinality(p_ids) = 0 then
+    return '[]'::json;
+  end if;
+  -- The game picks at most ten opponents, so a longer list is not the game.
+  if cardinality(p_ids) > 50 then
+    raise exception 'too many recordings asked for';
+  end if;
+
+  return (
+    select json_agg(
+      case when s.recording is null then null
+           else json_build_object(
+             'recording', s.recording,
+             'frames', s.frames,
+             'carStyle', coalesce(s.car_style, ''),
+             'verifiedState', case when s.is_guest then 0 else 1 end
+           )
+      end
+      order by q.ord)
+    from unnest(p_ids) with ordinality as q(id, ord)
+    left join polytrack_scores s on s.id = q.id
+  );
+end;
+$function$;
+
+grant execute on function public.polytrack_recordings(bigint[]) to anon, authenticated;

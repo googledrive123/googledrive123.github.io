@@ -187,7 +187,10 @@
         p_nickname: gv ? gv.publicName() : (q.nickname || 'Player'),
         p_country_code: q.countryCode || null,
         p_car_style: q.carStyle || null,
-        p_visitor_id: visitorId()
+        p_visitor_id: visitorId(),
+        // The replay of this run, which is what other players watch and race
+        // against. Already URL-safe as the game writes it.
+        p_recording: q.recording || null
       }).then(function () {
         return getBoard({ trackId: trackId, skip: '0', amount: '1' });
       }).then(function (after) {
@@ -208,11 +211,22 @@
     return Promise.resolve(null);
   }
 
-  // Recordings are the ghost-replay data. Nothing here stores them, and the
-  // shape allows nulls, so every id resolves to "no replay available".
+  // Recordings are the replays behind Watch and racing against someone. The
+  // game asks by board row id and wants one answer per id, in order, with
+  // null where there is no replay. A time set before replays were kept has
+  // none, and nor does anything the server could not answer for.
   function getRecordings(q) {
     var ids = (q.ids || '').split(',').filter(Boolean);
-    return Promise.resolve(ids.map(function () { return null; }));
+    var numbers = ids.map(function (id) { return parseInt(id, 10); });
+    if (numbers.some(function (n) { return !isFinite(n); })) {
+      return Promise.resolve(ids.map(function () { return null; }));
+    }
+    return rpc('polytrack_recordings', { p_ids: numbers }).then(function (list) {
+      return ids.map(function (id, at) { return (list && list[at]) || null; });
+    }).catch(function (err) {
+      console.error('[leaderboard]', err);
+      return ids.map(function () { return null; });
+    });
   }
 
   var HANDLED = [
