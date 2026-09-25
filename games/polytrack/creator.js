@@ -86,8 +86,10 @@
   // player would click, and waits to see each screen arrive before the next
   // step, because none of them appear straight away.
 
+  // Anything inside the cover is a picture of the game, not the game, and
+  // must never be mistaken for a screen or a button that is really there.
   function visible(el) {
-    return !!el && el.offsetParent !== null;
+    return !!el && el.offsetParent !== null && !el.closest('.gv-cover');
   }
 
   function waitFor(test, timeout) {
