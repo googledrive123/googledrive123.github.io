@@ -78,6 +78,12 @@
   // call is the only place that reliably gets the last word.
   var beforeRender = [];
 
+  // Stills of what is on screen. WebGL clears the canvas once a frame has been
+  // shown, so reading it any other time gives back a blank image. Straight
+  // after a render call, before control goes back to the browser, is the one
+  // moment the picture is still there.
+  var stills = [];
+
   function watchRenderer(target) {
     var render = target.render;
     if (typeof render !== 'function' || render.gvWrapped === true) return;
@@ -86,7 +92,18 @@
       for (var i = 0; i < beforeRender.length; i++) {
         try { beforeRender[i](renderScene, camera); } catch (e) { console.error(e); }
       }
-      return render.apply(this, arguments);
+      var out = render.apply(this, arguments);
+      // Passes into an offscreen target (shadows, reflections) are not the
+      // picture on screen, so only a pass drawn to the canvas is kept.
+      var toScreen = typeof target.getRenderTarget !== 'function' || target.getRenderTarget() === null;
+      if (stills.length > 0 && toScreen) {
+        var waiting = stills;
+        stills = [];
+        var picture = null;
+        try { picture = target.domElement.toDataURL('image/jpeg', 0.9); } catch (e) { console.error(e); }
+        for (var j = 0; j < waiting.length; j++) waiting[j](picture);
+      }
+      return out;
     };
     wrapped.gvWrapped = true;
     target.render = wrapped;
@@ -117,6 +134,11 @@
     otherCars: otherCars,
     activeCamera: function () { return activeCamera; },
     onBeforeRender: function (fn) { beforeRender.push(fn); },
+    // Resolves with a data URL of the next frame drawn, or null if the canvas
+    // could not be read.
+    still: function () {
+      return new Promise(function (resolve) { stills.push(resolve); });
+    },
     offBeforeRender: function (fn) {
       var at = beforeRender.indexOf(fn);
       if (at >= 0) beforeRender.splice(at, 1);
