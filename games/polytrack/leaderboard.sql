@@ -7,7 +7,7 @@
 --
 -- Apply against project dxwjxzmlezfyursysays. Every statement is safe to run
 -- twice. Applied on 21 September 2026; the board on 24 September 2026;
--- replays on 25 September 2026.
+-- replays on 25 September 2026, recovered replays the same day.
 
 
 -- The replay of each time on the board, so other players can watch it and
