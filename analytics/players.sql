@@ -108,3 +108,53 @@ begin
   return json_build_object('call', json_build_object('id', v_call));
 end;
 $function$;
+
+
+-- Names for the visitor ids the dashboard is showing: the GameVault username
+-- for a signed-in visitor, and the name they race under in PolyTrack.
+--
+-- p_people is a list of {visitor_id, user_id}. The dashboard already knows
+-- which visitors signed in from the events it loaded, so it says rather than
+-- this digging through every event to work it out again.
+--
+-- A board row in anonymous mode reads "Anonymous", which is no help here, so
+-- a real name from the board wins, then the one PolyTrack last reported.
+create or replace function public.analytics_people(p_secret text, p_people json)
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+
+  return coalesce((
+    select json_agg(json_build_object(
+      'visitor_id', q.visitor_id,
+      'username', (select p.username from profiles p where p.id = q.user_id),
+      'polytrack', coalesce(
+        (select s.nickname from polytrack_scores s
+          where s.player_key in (q.user_id::text, 'guest:' || q.visitor_id)
+            and s.nickname <> 'Anonymous'
+          order by s.updated_at desc limit 1),
+        (select pr.name from polytrack_presence pr where pr.visitor_id = q.visitor_id),
+        (select s.nickname from polytrack_scores s
+          where s.player_key in (q.user_id::text, 'guest:' || q.visitor_id)
+          order by s.updated_at desc limit 1)
+      )
+    ))
+    from (
+      select distinct on (x->>'visitor_id')
+             x->>'visitor_id' as visitor_id,
+             nullif(x->>'user_id', '')::uuid as user_id
+      from json_array_elements(coalesce(p_people, '[]'::json)) x
+      where coalesce(x->>'visitor_id', '') <> ''
+      order by x->>'visitor_id', (x->>'user_id') is null
+      limit 2000
+    ) q
+  ), '[]'::json);
+end;
+$function$;
