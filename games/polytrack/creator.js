@@ -284,6 +284,28 @@
     });
   }
 
+  // ── The notice ────────────────────────────────────────────────────────
+  // Anyone holding the room code can say anything on the room's channel, so
+  // the creator's message is only believed once its ticket checks out.
+  // Checked once per ticket, whichever of the repeats arrives first.
+
+  var checked = {};
+
+  function heard(payload) {
+    var room = rooms();
+    if (!room || !payload || payload.kind !== 'creator' || typeof payload.ticket !== 'string') return;
+    if (checked[payload.ticket]) return;
+    checked[payload.ticket] = true;
+    // The channel is live a moment before this page knows which room it is
+    // in, so the code may not be there yet.
+    waitFor(function () { return room.state().code; }, 5000)
+      .then(function (code) {
+        return rpc('gv_creator_check', { p_code: code, p_ticket: payload.ticket });
+      })
+      .then(function (genuine) { if (genuine === true) showNotice(); })
+      .catch(function (error) { console.error('Could not check the creator ticket:', error); });
+  }
+
   function start() {
     var gv = identity();
     var room = rooms();
@@ -295,6 +317,7 @@
     if (room) {
       room.onState(beat);
       room.onState(announce);
+      room.onMessage(heard);
     }
     document.addEventListener('visibilitychange', beat);
 
