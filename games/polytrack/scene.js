@@ -84,7 +84,45 @@
   // moment the picture is still there.
   var stills = [];
 
+  // Resolution below what the game asks for. The game works out a pixel ratio
+  // from its own settings every frame and sets it whenever the renderer's
+  // differs, so the renderer is made to report the ratio the game asked for
+  // while drawing at that ratio times this factor. The game is satisfied,
+  // never sets it again, and the canvas really is drawn at the lower size.
+  //
+  // The game makes more than one renderer, for the car previews as well as
+  // the race, so each is wrapped and only the one drawing to the page's own
+  // #screen canvas is scaled. A preview drawn at a fraction of its size is
+  // just a blurry thumbnail, and saves nothing.
+  var factor = 1;
+  var scaled = [];
+
+  function isScreen(target) {
+    return !!target.domElement && target.domElement.id === 'screen';
+  }
+
+  function scaleRatio(target) {
+    var set = target.setPixelRatio;
+    var get = target.getPixelRatio;
+    if (typeof set !== 'function' || typeof get !== 'function' || set.gvWrapped === true) return;
+    var entry = {
+      asked: get.call(target),
+      apply: function () {
+        set.call(target, isScreen(target) ? entry.asked * factor : entry.asked);
+      }
+    };
+    var wrappedSet = function (ratio) {
+      entry.asked = ratio;
+      entry.apply();
+    };
+    wrappedSet.gvWrapped = true;
+    target.setPixelRatio = wrappedSet;
+    target.getPixelRatio = function () { return entry.asked; };
+    scaled.push(entry);
+  }
+
   function watchRenderer(target) {
+    scaleRatio(target);
     var render = target.render;
     if (typeof render !== 'function' || render.gvWrapped === true) return;
     var wrapped = function (renderScene, camera) {
@@ -96,7 +134,7 @@
       // Passes into an offscreen target (shadows, reflections) are not the
       // picture on screen, so only a pass drawn to the canvas is kept.
       var toScreen = typeof target.getRenderTarget !== 'function' || target.getRenderTarget() === null;
-      if (stills.length > 0 && toScreen) {
+      if (stills.length > 0 && toScreen && isScreen(target)) {
         var waiting = stills;
         stills = [];
         var picture = null;
@@ -134,6 +172,14 @@
     otherCars: otherCars,
     activeCamera: function () { return activeCamera; },
     onBeforeRender: function (fn) { beforeRender.push(fn); },
+    // A multiplier on the resolution the game renders at, from 0.25 to 1.
+    resolutionFactor: function () { return factor; },
+    setResolutionFactor: function (value) {
+      var next = Math.min(1, Math.max(0.25, Number(value) || 1));
+      if (next === factor) return;
+      factor = next;
+      for (var i = 0; i < scaled.length; i++) scaled[i].apply();
+    },
     // Resolves with a data URL of the next frame drawn, or null if the canvas
     // could not be read.
     still: function () {
