@@ -236,9 +236,13 @@
     if (!cover || !ui) return;
     var copy = ui.cloneNode(true);
     copy.removeAttribute('id');
+    // Without the id, the game's own #ui rule no longer sizes it, and at its
+    // natural size everything inside wraps into a column.
     copy.style.position = 'absolute';
     copy.style.left = '0';
     copy.style.top = '0';
+    copy.style.width = ui.style.width || '100%';
+    copy.style.height = ui.style.height || '100%';
     copy.style.transformOrigin = '0 0';
     copy.style.pointerEvents = 'none';
     cover.insertBefore(copy, cover.firstChild);
