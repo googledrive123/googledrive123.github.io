@@ -513,7 +513,7 @@
   // or out happens in the other document and arrives here as a storage event.
   window.addEventListener('storage', function (e) {
     if (!e || (e.key !== AUTH_KEY && e.key !== 'gv.username')) return;
-    claimGuestScores();
+    Promise.resolve(claimGuestScores()).then(sendKeptReplays);
     scheduleNamePush();
   });
 
