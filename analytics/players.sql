@@ -181,7 +181,17 @@ begin
       'user_id', pr.user_id,
       'username', p.username,
       'name', pr.name,
-      'code', pr.code,
+      -- The host's current code, not the one a player joined on: a host
+      -- whose game had to open a fresh invite is on a new one, and joining
+      -- the old one reaches nobody.
+      'code', coalesce((
+        select newest.code
+        from polytrack_rooms joined
+        join polytrack_rooms newest on newest.host_key = joined.host_key
+        where joined.code = pr.code
+        order by newest.created_at desc
+        limit 1
+      ), pr.code),
       'role', pr.role,
       'updated_at', pr.updated_at
     ) order by pr.updated_at desc)
