@@ -158,10 +158,18 @@ begin
     return null;
   end if;
 
-  select * into v_room
-  from polytrack_rooms
-  where code = upper(btrim(p_code))
-    and last_seen > now() - interval '10 minutes';
+  -- A host whose game had to open a fresh invite, after its connection
+  -- dropped, is on a new code while their players still hold the old one.
+  -- The host key is the same across both, so an old code leads to wherever
+  -- that host is now.
+  select r.* into v_room
+  from polytrack_rooms r
+  where r.host_key = (
+      select host_key from polytrack_rooms where code = upper(btrim(p_code))
+    )
+    and r.last_seen > now() - interval '10 minutes'
+  order by r.created_at desc
+  limit 1;
 
   if not found then
     return null;
