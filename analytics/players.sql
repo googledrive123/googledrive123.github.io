@@ -194,8 +194,9 @@ $function$;
 
 
 -- The dashboard's Join on a solo player: asks their game to open a room.
--- Nothing is asked of the player; their game hosts on its own and the
--- dashboard follows them in once the room shows up in their presence.
+-- Nothing is asked of the player. Their game waits for them to start their
+-- run over, hosts on its own, and the dashboard follows them in once the
+-- room shows up in their presence.
 create or replace function public.gv_creator_summon(p_secret text, p_visitor_id text)
 returns bigint
 language plpgsql
