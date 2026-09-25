@@ -158,3 +158,36 @@ begin
   ), '[]'::json);
 end;
 $function$;
+
+
+-- Everyone in PolyTrack right now, for the dashboard's Playing now list:
+-- where they are, and a name to go with them. A beat lands every fifteen
+-- seconds, so forty five allows for one that went missing.
+create or replace function public.analytics_polytrack_live(p_secret text)
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+
+  return coalesce((
+    select json_agg(json_build_object(
+      'visitor_id', pr.visitor_id,
+      'user_id', pr.user_id,
+      'username', p.username,
+      'name', pr.name,
+      'code', pr.code,
+      'role', pr.role,
+      'updated_at', pr.updated_at
+    ) order by pr.updated_at desc)
+    from polytrack_presence pr
+    left join profiles p on p.id = pr.user_id
+    where pr.updated_at > now() - interval '45 seconds'
+  ), '[]'::json);
+end;
+$function$;
