@@ -166,6 +166,124 @@
   }
   requestAnimationFrame(tick);
 
+  // ── The Settings screen ───────────────────────────────────────────────
+  // Rows at the top of the game's own Graphics section, built the way the
+  // game builds its rows so they look like part of it. Quality works by
+  // pressing the game's own buttons further down, so each setting changes
+  // exactly as if the player had pressed it, and the game's Apply saves it.
+
+  // The game's row for each stored setting, and its button for each value.
+  var ROWS = {
+    ShadowQuality: { label: 'Shadows', choices: { '0': 'Off', '1': 'Minimal', '2': 'Low', '3': 'Medium', '4': 'High', '5': 'Ultra' } },
+    CloudsEnabled: { label: 'Clouds', choices: { 'false': 'Off', 'true': 'On' } },
+    ParticlesEnabled: { label: 'Particles', choices: { 'false': 'Off', 'true': 'On' } },
+    SkidmarksEnabled: { label: 'Skidmarks', choices: { 'false': 'Off', 'true': 'On' } },
+    FogEnabled: { label: 'Fog', choices: { 'false': 'Off', 'true': 'On' } },
+    RenderScale: { label: 'Render scale', choices: { '0.5': '50%', '0.75': '75%', '1': '100%' } },
+    ScreenPixelDensity: { label: 'Screen Pixel Density', choices: { 'false': 'Fixed', 'true': 'Auto' } },
+    Antialiasing: { label: 'Anti-aliasing (requires restart)', choices: { 'false': 'Off', 'true': 'On' } }
+  };
+
+  function gameButton(menu, name, value) {
+    var row = ROWS[name];
+    var settings = menu.querySelectorAll('.setting');
+    for (var i = 0; i < settings.length; i++) {
+      var label = settings[i].querySelector(':scope > p');
+      if (!label || label.textContent !== row.label) continue;
+      var buttons = settings[i].querySelectorAll('.button-wrapper > button');
+      for (var j = 0; j < buttons.length; j++) {
+        if (buttons[j].textContent === row.choices[value]) return buttons[j];
+      }
+    }
+    return null;
+  }
+
+  function applyPreset(menu, preset) {
+    Object.keys(preset.values).forEach(function (name) {
+      var button = gameButton(menu, name, preset.values[name]);
+      if (button && !button.classList.contains('selected')) button.click();
+    });
+  }
+
+  // Whichever preset the rows below currently add up to, if any.
+  function matchingPreset(menu) {
+    for (var i = 0; i < PRESETS.length; i++) {
+      var values = PRESETS[i].values;
+      var all = Object.keys(values).every(function (name) {
+        var button = gameButton(menu, name, values[name]);
+        return button && button.classList.contains('selected');
+      });
+      if (all) return PRESETS[i].name;
+    }
+    return null;
+  }
+
+  function choiceRow(className, label, options, selected, onPick) {
+    var row = document.createElement('div');
+    row.className = 'setting ' + className;
+    var text = document.createElement('p');
+    text.textContent = label;
+    row.appendChild(text);
+    var wrapper = document.createElement('div');
+    wrapper.className = 'button-wrapper';
+    row.appendChild(wrapper);
+    options.forEach(function (option) {
+      var button = document.createElement('button');
+      button.className = option === selected ? 'button selected' : 'button';
+      button.textContent = option;
+      button.addEventListener('click', function () { onPick(option); });
+      wrapper.appendChild(button);
+    });
+    return row;
+  }
+
+  function markSelected(row, selected) {
+    var buttons = row.querySelectorAll('.button-wrapper > button');
+    for (var i = 0; i < buttons.length; i++) {
+      var want = buttons[i].textContent === selected ? 'button selected' : 'button';
+      if (buttons[i].className !== want) buttons[i].className = want;
+    }
+  }
+
+  function fillSettings() {
+    var menu = document.querySelector('.settings-menu-ui');
+    if (!menu || menu.querySelector('.gv-quality')) return;
+    var headings = menu.querySelectorAll('h2');
+    var heading = null;
+    for (var i = 0; i < headings.length; i++) {
+      if (headings[i].textContent === 'Graphics') heading = headings[i];
+    }
+    if (!heading) return;
+
+    var quality = choiceRow('gv-quality', 'Quality', PRESETS.map(function (p) { return p.name; }),
+      matchingPreset(menu), function (name) {
+        applyPreset(menu, presetNamed(name));
+        markSelected(quality, matchingPreset(menu));
+      });
+    var auto = choiceRow('gv-auto-resolution', 'Auto resolution', ['Off', 'On'],
+      autoOn() ? 'On' : 'Off', function (choice) {
+        setAuto(choice === 'On');
+        markSelected(auto, choice);
+      });
+
+    heading.parentNode.insertBefore(auto, heading.nextSibling);
+    heading.parentNode.insertBefore(quality, heading.nextSibling);
+
+    // Changing any single row can make the rows add up to a different preset,
+    // or to none of them.
+    menu.addEventListener('click', function () {
+      setTimeout(function () { markSelected(quality, matchingPreset(menu)); }, 0);
+    });
+  }
+
+  function watchSettings() {
+    new MutationObserver(fillSettings).observe(document.body, { childList: true, subtree: true });
+    fillSettings();
+  }
+
+  if (document.body) watchSettings();
+  else document.addEventListener('DOMContentLoaded', watchSettings);
+
   window.GV = window.GV || {};
   window.GV.graphics = {
     presets: function () { return PRESETS.map(function (p) { return p.name; }); },
