@@ -534,12 +534,16 @@
         var join = document.querySelector('.multiplayer-ui > .join > .main-box > .buttons > .join');
         if (!join) throw new Error('no Join button');
         join.click();
+        // A room whose host is not listening never says no, it just never
+        // answers, so silence past this long counts as a failed try.
         return waitFor(function () {
           var room = rooms();
           if (room && room.state().code && inRace()) return { joined: true };
           var failed = joinFailed();
           return failed ? { joined: false, shown: failed } : null;
-        }, 45000);
+        }, 25000).catch(function () {
+          return { joined: false, shown: 'the room did not answer. They may have left it' };
+        });
       });
   }
 
