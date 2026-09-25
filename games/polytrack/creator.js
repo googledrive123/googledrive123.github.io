@@ -148,6 +148,69 @@
     return false;
   }
 
+  // ── The cover ─────────────────────────────────────────────────────────
+  // Whatever the game has to click through to change sessions happens under
+  // this, so the screen shows one picture the whole time instead of menus
+  // flashing past. It sits over everything, the game's own interface
+  // included, and takes the clicks so none land on the screens underneath.
+
+  var COVER_STYLE_ID = 'gv-cover-style';
+
+  var COVER_STYLE = [
+    '.gv-cover {',
+    '  position: fixed; left: 0; top: 0; width: 100%; height: 100%;',
+    '  z-index: 2147483647; background: #10183a center / 100% 100% no-repeat;',
+    '  transition: opacity 0.35s ease; }',
+    '.gv-cover.gv-cover-out { opacity: 0; pointer-events: none; }',
+    '.gv-cover-text {',
+    '  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);',
+    '  max-width: 80%; padding: 14px 22px; box-sizing: border-box;',
+    '  background: rgba(17, 32, 82, 0.92); color: #fff; text-align: center;',
+    '  font: 24px/1.3 ForcedSquare, sans-serif; }'
+  ].join('\n');
+
+  var cover = null;
+
+  function coverText(text) {
+    if (!cover) return;
+    var line = cover.querySelector('.gv-cover-text');
+    if (!text) {
+      if (line) line.remove();
+      return;
+    }
+    if (!line) {
+      line = document.createElement('div');
+      line.className = 'gv-cover-text';
+      cover.appendChild(line);
+    }
+    line.textContent = text;
+  }
+
+  function showCover(picture, text) {
+    if (!document.getElementById(COVER_STYLE_ID)) {
+      var css = document.createElement('style');
+      css.id = COVER_STYLE_ID;
+      css.textContent = COVER_STYLE;
+      document.head.appendChild(css);
+    }
+    if (!cover) {
+      cover = document.createElement('div');
+      cover.className = 'gv-cover';
+      document.body.appendChild(cover);
+    }
+    if (picture) cover.style.backgroundImage = 'url(' + picture + ')';
+    coverText(text);
+  }
+
+  // Faded rather than dropped, so the game coming back reads as a cut.
+  function hideCover() {
+    if (!cover) return;
+    var leaving = cover;
+    cover = null;
+    leaving.classList.add('gv-cover-out');
+    setTimeout(function () { leaving.remove(); }, 400);
+  }
+
   // ── Opening a room for the creator ────────────────────────────────────
   // Asked for from the dashboard, for a player racing on their own. Nothing
   // is asked of them: once their run is over, a private room opens on the
