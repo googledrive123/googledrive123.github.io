@@ -291,6 +291,50 @@
 
   var checked = {};
 
+  var STYLE_ID = 'gv-creator-style';
+
+  // Off to the side, above the speedometer, where nothing in a race is drawn,
+  // and it stays until dismissed rather than vanishing before it is read.
+  var STYLE = [
+    '.gv-creator-notice {',
+    '  position: absolute; right: 20px; bottom: 110px; z-index: 5;',
+    '  display: flex; align-items: center; gap: 14px; max-width: 460px;',
+    '  padding: 10px 10px 10px 18px; box-sizing: border-box;',
+    '  background-color: var(--surface-color); border-left: 4px solid #1d9bf0;',
+    '  color: var(--text-color); font-size: 22px; line-height: 1.25;',
+    // #ui is pointer-events: none so the canvas can be dragged through it.
+    '  pointer-events: auto; }',
+    '.gv-creator-notice > .button { margin: 0; padding: 4px 14px; font-size: 22px; }'
+  ].join('\n');
+
+  function showNotice() {
+    var ui = document.getElementById('ui');
+    if (!ui || ui.querySelector('.gv-creator-notice')) return;
+    if (!document.getElementById(STYLE_ID)) {
+      var css = document.createElement('style');
+      css.id = STYLE_ID;
+      css.textContent = STYLE;
+      document.head.appendChild(css);
+    }
+
+    var notice = document.createElement('div');
+    notice.className = 'gv-creator-notice';
+    notice.setAttribute('role', 'status');
+
+    var text = document.createElement('span');
+    text.textContent = 'The GameVault creator joined the room';
+    notice.appendChild(text);
+
+    var close = document.createElement('button');
+    close.className = 'button';
+    close.textContent = '\u00d7';
+    close.setAttribute('aria-label', 'Dismiss');
+    close.addEventListener('click', function () { notice.remove(); });
+    notice.appendChild(close);
+
+    ui.appendChild(notice);
+  }
+
   function heard(payload) {
     var room = rooms();
     if (!room || !payload || payload.kind !== 'creator' || typeof payload.ticket !== 'string') return;
