@@ -874,6 +874,7 @@
       (found || []).forEach(function (n) { names[n.visitor_id] = { username: n.username, polytrack: n.polytrack }; });
       renderVisitors();
       renderFeed();
+      if (playingOpen()) renderPlaying();
     }).catch(function (e) { console.error('Could not load names', e); });
   }
 
@@ -910,8 +911,30 @@
       } }
     ], list);
   }
-  function openPlaying() { $('playingModal').classList.remove('hidden'); renderPlaying(); }
-  function closePlaying() { $('playingModal').classList.add('hidden'); }
+  function playingOpen() { return !$('playingModal').classList.contains('hidden'); }
+
+  // Where PolyTrack players are changes by the second, so while the list is
+  // open it is asked again every few seconds rather than once a minute.
+  var liveTimer = null;
+  function refreshLive() {
+    return rpc('analytics_polytrack_live', { p_secret: state.secret }).then(function (list) {
+      state.live = Array.isArray(list) ? list : [];
+      if (playingOpen()) renderPlaying();
+      return loadNames(playingPeople());
+    }).catch(function (e) { $('playingMsg').textContent = 'Could not load PolyTrack players: ' + e.message; });
+  }
+  function openPlaying() {
+    $('playingModal').classList.remove('hidden');
+    renderPlaying();
+    refreshLive();
+    clearInterval(liveTimer);
+    liveTimer = setInterval(refreshLive, 8000);
+  }
+  function closePlaying() {
+    $('playingModal').classList.add('hidden');
+    clearInterval(liveTimer);
+    liveTimer = null;
+  }
 
   // ── load ──
   var loading = false;
