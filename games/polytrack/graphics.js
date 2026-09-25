@@ -29,11 +29,12 @@
       SkidmarksEnabled: 'false', FogEnabled: 'true', RenderScale: '0.75',
       ScreenPixelDensity: 'false', Antialiasing: 'false' } },
     { name: 'Medium', values: {
-      ShadowQuality: '2', CloudsEnabled: 'true', ParticlesEnabled: 'true',
+      ShadowQuality: '1', CloudsEnabled: 'true', ParticlesEnabled: 'true',
       SkidmarksEnabled: 'true', FogEnabled: 'true', RenderScale: '1',
       ScreenPixelDensity: 'false', Antialiasing: 'true' } },
+    // Exactly what the game starts on by itself.
     { name: 'High', values: {
-      ShadowQuality: '3', CloudsEnabled: 'true', ParticlesEnabled: 'true',
+      ShadowQuality: '2', CloudsEnabled: 'true', ParticlesEnabled: 'true',
       SkidmarksEnabled: 'true', FogEnabled: 'true', RenderScale: '1',
       ScreenPixelDensity: 'true', Antialiasing: 'true' } },
     { name: 'Ultra', values: {
