@@ -696,7 +696,7 @@
 
   function renderVisitors() {
     table('visitorsTable', [
-      { key: 'id', label: 'Visitor', render: function (v) { return '<span class="mono">' + shortId(v.id) + '</span>' + (v.user ? ' <span class="pill b">signed in</span>' : '') + (v.isNew ? ' <span class="pill g">new</span>' : ''); } },
+      { key: 'id', label: 'Visitor', render: function (v) { return who(v.id) + (v.user ? ' <span class="pill b">signed in</span>' : '') + (v.isNew ? ' <span class="pill g">new</span>' : ''); } },
       { key: 'last', label: 'Last seen', render: function (v) { return ago(v.last); } },
       { key: 'first', label: 'First seen (range)', render: function (v) { return new Date(v.first).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); } },
       { key: 'clicks', label: 'Clicks', num: true, render: function (v) { return fmt(v.clicks); } },
@@ -714,7 +714,7 @@
   function renderFeed() {
     table('feedTable', [
       { key: 'ts', label: 'Time', render: function (r) { return r.t.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' }) + ' <span class="muted">' + r.t.toLocaleDateString([], { month: 'short', day: 'numeric' }) + '</span>'; } },
-      { key: 'visitor_id', label: 'Visitor', render: function (r) { return '<span class="mono">' + shortId(r.visitor_id) + '</span>' + (r.user_id ? ' <span class="pill b">user</span>' : ''); } },
+      { key: 'visitor_id', label: 'Visitor', render: function (r) { return who(r.visitor_id) + (r.user_id ? ' <span class="pill b">user</span>' : ''); } },
       { key: 'event', label: 'Event', render: function (r) { var cls = r.event === 'error' ? 'r' : r.event === 'game_open' ? 'g' : (r.event === 'movie_play' || r.event === 'tv_play') ? 'o' : ''; return '<span class="pill ' + cls + '">' + esc(NICE[r.event] || r.event) + '</span>'; } },
       { key: 'detail', label: 'Detail', render: function (r) {
         var d = r.item_title || r.game_id || r.item_id || '';
