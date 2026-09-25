@@ -445,6 +445,7 @@
   function openAsCreator(wait) {
     var who = wait.name || 'them';
     recordErrors();
+    setInterval(noteGameMessage, 200);
     showCover(null, wait.solo
       ? 'Opening ' + who + '\u2019s room...'
       : 'Joining ' + who + '...');
@@ -475,6 +476,17 @@
       } catch (e) {}
       return original.apply(console, arguments);
     };
+  }
+
+  // What the game itself said when it started, if anything. A browser that
+  // fails its physics check gets a message box saying which of two quite
+  // different problems it is, and the steps above can close that box before
+  // anyone reads it, so it is noted as soon as it opens.
+  var gameSaid = '';
+
+  function noteGameMessage() {
+    var text = document.querySelector('dialog.message-box-ui[open] p');
+    if (text && text.textContent.trim()) gameSaid = text.textContent.trim();
   }
 
   function explain(shown) {
