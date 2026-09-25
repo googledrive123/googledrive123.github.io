@@ -89,23 +89,36 @@
   // differs, so the renderer is made to report the ratio the game asked for
   // while drawing at that ratio times this factor. The game is satisfied,
   // never sets it again, and the canvas really is drawn at the lower size.
+  //
+  // The game makes more than one renderer, for the car previews as well as
+  // the race, so each is wrapped and only the one drawing to the page's own
+  // #screen canvas is scaled. A preview drawn at a fraction of its size is
+  // just a blurry thumbnail, and saves nothing.
   var factor = 1;
-  var asked = null;
-  var applyRatio = null;
+  var scaled = [];
+
+  function isScreen(target) {
+    return !!target.domElement && target.domElement.id === 'screen';
+  }
 
   function scaleRatio(target) {
     var set = target.setPixelRatio;
     var get = target.getPixelRatio;
     if (typeof set !== 'function' || typeof get !== 'function' || set.gvWrapped === true) return;
-    asked = get.call(target);
-    applyRatio = function () { set.call(target, asked * factor); };
+    var entry = {
+      asked: get.call(target),
+      apply: function () {
+        set.call(target, isScreen(target) ? entry.asked * factor : entry.asked);
+      }
+    };
     var wrappedSet = function (ratio) {
-      asked = ratio;
-      applyRatio();
+      entry.asked = ratio;
+      entry.apply();
     };
     wrappedSet.gvWrapped = true;
     target.setPixelRatio = wrappedSet;
-    target.getPixelRatio = function () { return asked; };
+    target.getPixelRatio = function () { return entry.asked; };
+    scaled.push(entry);
   }
 
   function watchRenderer(target) {
@@ -165,7 +178,7 @@
       var next = Math.min(1, Math.max(0.25, Number(value) || 1));
       if (next === factor) return;
       factor = next;
-      if (applyRatio) applyRatio();
+      for (var i = 0; i < scaled.length; i++) scaled[i].apply();
     },
     // Resolves with a data URL of the next frame drawn, or null if the canvas
     // could not be read.
