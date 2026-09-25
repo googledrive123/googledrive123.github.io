@@ -475,12 +475,41 @@
     });
   }
 
-  function joinAsCreator(visit) {
-    creatorTicket = visit.ticket;
-    waitFor(function () {
-      return menuFront() || document.querySelector('.game-toolbar-ui');
-    }, 60000)
-      .then(toMenu)
+  // The game shows a join failure as a line of text, and for anything it did
+  // not expect that line is "Unknown connection error", which says nothing.
+  // The real reason is in what it logged, so that is kept for the message.
+  var logged = [];
+  var originalError = console.error;
+  console.error = function () {
+    try {
+      logged.push(Array.prototype.map.call(arguments, function (part) {
+        return part && part.message ? part.message : String(part);
+      }).join(' '));
+      if (logged.length > 20) logged.shift();
+    } catch (e) {}
+    return originalError.apply(console, arguments);
+  };
+
+  function explain(shown) {
+    var all = logged.join(' | ');
+    // The game checks at start-up that its physics come out the same as
+    // everyone else's, and refuses multiplayer in a browser where they do not.
+    if (/non-deterministic/i.test(all)) {
+      return 'This browser cannot play PolyTrack multiplayer: the game\u2019s physics check '
+        + 'failed here. Chrome or Edge with hardware acceleration on works.';
+    }
+    var last = logged.filter(function (line) { return !/Presence beat/.test(line); }).pop();
+    return 'Could not join: ' + (shown || 'no reason given')
+      + (last ? ' (' + last.slice(0, 160) + ')' : '');
+  }
+
+  function joinFailed() {
+    var box = document.querySelector('.multiplayer-ui > .join > .error-box.show');
+    return box && box.textContent.trim() ? box.textContent.trim() : null;
+  }
+
+  function attemptJoin(code) {
+    return toMenu()
       .then(function () {
         if (!openRooms()) throw new Error('no Rooms tile on the menu');
         return waitFor(function () {
@@ -489,22 +518,45 @@
         }, 8000);
       })
       .then(function (input) {
-        input.value = visit.code;
+        input.value = code;
         input.dispatchEvent(new Event('input'));
         var join = document.querySelector('.multiplayer-ui > .join > .main-box > .buttons > .join');
         if (!join) throw new Error('no Join button');
         join.click();
         return waitFor(function () {
           var room = rooms();
-          return room && room.state().code && inRace();
+          if (room && room.state().code && inRace()) return { joined: true };
+          var failed = joinFailed();
+          return failed ? { joined: false, shown: failed } : null;
         }, 45000);
+      });
+  }
+
+  function joinAsCreator(visit) {
+    creatorTicket = visit.ticket;
+    waitFor(function () {
+      return menuFront() || document.querySelector('.game-toolbar-ui');
+    }, 60000)
+      .then(function () { return attemptJoin(visit.code); })
+      // A connection can fail once for reasons that have gone a moment later,
+      // so a second try is made before telling anyone. Not when the browser
+      // itself is the problem: that will not have changed.
+      .then(function (result) {
+        if (result.joined || /non-deterministic/i.test(logged.join(' '))) return result;
+        return new Promise(function (resolve) { setTimeout(resolve, 2500); })
+          .then(function () { return attemptJoin(visit.code); });
       })
-      // A few frames for the race to draw itself before it is shown.
-      .then(function () { return new Promise(function (resolve) { setTimeout(resolve, 700); }); })
+      .then(function (result) {
+        if (!result.joined) throw new Error(explain(result.shown));
+        // A few frames for the race to draw itself before it is shown.
+        return new Promise(function (resolve) { setTimeout(resolve, 700); });
+      })
       .then(hideCover)
       .catch(function (error) {
         console.error('Could not join as the creator:', error);
-        showFailure('Could not join: ' + error.message);
+        showFailure(/^Could not join|^This browser/.test(error.message)
+          ? error.message
+          : 'Could not join: ' + error.message);
       });
   }
 
