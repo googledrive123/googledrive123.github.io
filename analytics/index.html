@@ -122,6 +122,10 @@
   .verify-chip button:hover { color: var(--accent); }
   .vcheck { width: 14px; height: 14px; flex-shrink: 0; }
 
+  /* playing now */
+  .kpi .more { margin-top: 8px; padding: 0; background: none; border: 0; color: var(--muted); font: inherit; font-size: 0.72rem; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+  .kpi .more:hover { color: var(--text); }
+
   /* who a visitor is */
   .who-user { font-weight: 600; }
   .who-pt { color: #8ab8f2; }
@@ -163,7 +167,7 @@
     <h2>Right now <small>last 5 minutes · updates with refresh</small></h2>
     <div class="kpis">
       <div class="kpi live"><div class="l">Visitors online</div><div class="v" id="liveVisitors">–</div><div class="s" id="liveSub">–</div></div>
-      <div class="kpi live"><div class="l">Playing now</div><div class="v" id="livePlaying">–</div><div class="s" id="livePlayingSub">–</div></div>
+      <div class="kpi live"><div class="l">Playing now</div><div class="v" id="livePlaying">–</div><div class="s" id="livePlayingSub">–</div><button class="more" id="playingMore" type="button">See who</button></div>
       <div class="kpi"><div class="l">Last event</div><div class="v" id="lastEventAgo" style="font-size:1.1rem">–</div><div class="s" id="lastEventWhat">–</div></div>
       <div class="kpi"><div class="l">Events today</div><div class="v" id="todayEvents">–</div><div class="s" id="todayVisitors">–</div></div>
     </div>
@@ -356,7 +360,7 @@
   var NICE = { game_open: 'Opened game', game_close: 'Closed game', game_load: 'Game loaded', game_fullscreen: 'Fullscreen', game_newtab: 'Open in new tab', movie_play: 'Played movie', tv_play: 'Played TV', movie_close: 'Closed movie', tv_close: 'Closed TV', search: 'Searched', category: 'Category filter', genre: 'Genre filter', sort: 'Sort changed', roll: 'Random roll', star: 'Starred', enter: 'Entered vault', news_open: 'Opened news', movies_enter: 'Entered movies', profile_open: 'Opened profile', mode_movies: 'Tab: Movies', mode_tv: 'Tab: TV', cloak: 'Tab cloak', auth_signin: 'Signed in', pageview: 'Page view', nav: 'Navigated', ping: 'Heartbeat', hidden: 'Tab hidden', visible: 'Tab visible', session_end: 'Left site', error: 'JS error' };
 
   var $ = function (id) { return document.getElementById(id); };
-  var state = { secret: null, range: '24h', rows: [], vlist: [], feed: [], overview: null, gameSort: { key: 'plays', dir: -1 }, gameN: 25, timer: null };
+  var state = { secret: null, range: '24h', rows: [], vlist: [], feed: [], playing: [], live: [], overview: null, gameSort: { key: 'plays', dir: -1 }, gameN: 25, timer: null };
   var charts = {};
 
   // ── helpers ──
@@ -495,6 +499,7 @@
     var lastGame = Object.create(null);
     rows.forEach(function (r) { if (now - r.tms < 10 * 60000 && (r.event === 'game_open' || r.event === 'game_close' || (r.event === 'ping' && r.game_id) || r.event === 'session_end')) lastGame[r.visitor_id] = r; });
     var playing = Object.keys(lastGame).map(function (v) { return lastGame[v]; }).filter(function (r) { return r.event === 'game_open' || r.event === 'ping'; });
+    state.playing = playing;
     $('livePlaying').textContent = fmt(playing.length);
     var pc = counter(); playing.forEach(function (r) { pc.add(r.item_title || r.game_id); });
     $('livePlayingSub').textContent = pc.top(3).map(function (p) { return p[0] + (p[1] > 1 ? ' ×' + p[1] : ''); }).join(', ') || 'nobody in a game';
