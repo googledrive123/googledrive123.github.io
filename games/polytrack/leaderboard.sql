@@ -314,3 +314,50 @@ end;
 $function$;
 
 grant execute on function public.polytrack_recordings(bigint[]) to anon, authenticated;
+
+
+-- Replays for times set before replays were kept. The game keeps the replay
+-- of each player's best run on every track in their own browser, so the next
+-- time they open it, leaderboard.js sends those up here.
+--
+-- A replay is only taken for the caller's own row on that track, only when
+-- its time is exactly the one on the board, and only where the row has none,
+-- so nobody can put a replay on someone else's time or swap out a real one.
+create or replace function public.polytrack_attach_replays(
+  p_visitor_id text,
+  p_items json
+) returns integer
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+  v_key  text := coalesce(v_user::text, 'guest:' || nullif(p_visitor_id, ''));
+  v_rows integer := 0;
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'replays are not accepted from this origin';
+  end if;
+  if v_key is null or p_items is null or json_typeof(p_items) <> 'array' then
+    return 0;
+  end if;
+  if json_array_length(p_items) > 20 then
+    raise exception 'too many replays at once';
+  end if;
+
+  update polytrack_scores s
+     set recording = i.recording
+    from json_to_recordset(p_items) as i(track text, frames integer, recording text)
+   where s.player_key = v_key
+     and s.track_id = i.track
+     and s.frames = i.frames
+     and s.recording is null
+     and char_length(i.recording) between 1 and 12000;
+
+  get diagnostics v_rows = row_count;
+  return v_rows;
+end;
+$function$;
+
+grant execute on function public.polytrack_attach_replays(text, json) to anon, authenticated;
