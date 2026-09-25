@@ -24,13 +24,18 @@ alter table public.polytrack_scores
 -- the run was faster, so the name got stuck at whatever it was on the day of
 -- the player's best lap. It now refreshes the name on every submission and
 -- still keeps the better time.
+-- Dropped first because it gains an argument, and the old six argument
+-- version left beside it would make every call ambiguous to PostgREST.
+drop function if exists public.polytrack_submit(text, integer, text, text, text, text);
+
 create or replace function public.polytrack_submit(
   p_track_id text,
   p_frames integer,
   p_nickname text,
   p_country_code text default null,
   p_car_style text default null,
-  p_visitor_id text default null
+  p_visitor_id text default null,
+  p_recording text default null
 ) returns void
 language plpgsql
 security definer
@@ -55,7 +60,7 @@ begin
   end if;
 
   insert into polytrack_scores (
-    user_id, visitor_id, nickname, country_code, track_id, frames, car_style
+    user_id, visitor_id, nickname, country_code, track_id, frames, car_style, recording
   )
   values (
     v_user,
@@ -64,20 +69,29 @@ begin
     left(nullif(btrim(coalesce(p_country_code, '')), ''), 8),
     p_track_id,
     p_frames,
-    left(p_car_style, 256)
+    left(p_car_style, 256),
+    -- The game will not send one this long; anything that does is not it.
+    case when char_length(p_recording) between 1 and 12000 then p_recording end
   )
   on conflict (player_key, track_id) do update
     set nickname     = excluded.nickname,
         country_code = excluded.country_code,
         frames       = least(excluded.frames, polytrack_scores.frames),
-        -- The car and the date belong to the run on the board, so they only
-        -- move when the run does.
+        -- The car, the replay and the date belong to the run on the board,
+        -- so they only move when the run does.
         car_style    = case when excluded.frames < polytrack_scores.frames
                             then excluded.car_style else polytrack_scores.car_style end,
+        recording    = case when excluded.frames < polytrack_scores.frames
+                            then excluded.recording else polytrack_scores.recording end,
         updated_at   = case when excluded.frames < polytrack_scores.frames
                             then now() else polytrack_scores.updated_at end;
 end;
 $function$;
+
+-- The same access the six argument version had: signed in or not, but not to
+-- anything that is neither.
+revoke all on function public.polytrack_submit(text, integer, text, text, text, text, text) from public;
+grant execute on function public.polytrack_submit(text, integer, text, text, text, text, text) to anon, authenticated;
 
 
 -- Renaming without racing. A player who changes their name, or turns
