@@ -107,14 +107,34 @@
   var slowFor = 0;
   var smoothFor = 0;
 
+  // Not every slow machine is slow at drawing pixels. One capped at 30 frames
+  // by a power saving mode, or held back by its processor, gets nothing from
+  // a blurrier picture. So each step down is checked: if the frame rate did
+  // not come up, the step is undone and no more are tried for a minute.
+  var lastStep = null;
+  var holdUntil = 0;
+
   function adjust(fps) {
     var scene = window.GV && window.GV.scene;
     if (!scene || !autoOn()) return;
     var now = scene.resolutionFactor();
+
+    if (lastStep !== null) {
+      var step = lastStep;
+      lastStep = null;
+      if (fps < step.fps * 1.08) {
+        scene.setResolutionFactor(step.from);
+        holdUntil = Date.now() + 60000;
+        slowFor = 0;
+        return;
+      }
+    }
+
     slowFor = fps < SLOW_FPS ? slowFor + 1 : 0;
     smoothFor = fps >= SMOOTH_FPS ? smoothFor + 1 : 0;
     // Two slow seconds in a row, so a single hitch does not blur the screen.
-    if (slowFor >= 2 && now > LOWEST) {
+    if (slowFor >= 2 && now > LOWEST && Date.now() >= holdUntil) {
+      lastStep = { from: now, fps: fps };
       scene.setResolutionFactor(Math.max(LOWEST, now * 0.85));
       slowFor = 0;
     // Five smooth ones before sharpening again, so it does not see-saw.
