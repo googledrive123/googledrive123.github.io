@@ -278,7 +278,10 @@
   // The game keeps more than one picker in the document and the newest one
   // is the one just opened.
   function newestPicker() {
-    var all = document.querySelectorAll('.track-selection-ui:not(.hidden)');
+    var all = Array.prototype.filter.call(
+      document.querySelectorAll('.track-selection-ui:not(.hidden)'),
+      function (picker) { return !picker.closest('.gv-cover'); }
+    );
     return all.length ? all[all.length - 1] : null;
   }
 
