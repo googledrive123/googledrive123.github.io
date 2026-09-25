@@ -631,7 +631,9 @@
       'it, so guest times are ranked below signed-in ones.<br><br>' +
       'Sign in before racing to have your times count as signed in.<br><br>' +
       CHECK_SVG + ' A blue check next to a name means GameVault has picked that ' +
-      'player out as one of its top racers.';
+      'player out as one of its top racers.<br><br>' +
+      'No replay means the time was set before replays were saved, so it cannot ' +
+      'be watched or raced. It gets one the next time that player beats it.';
     var ok = document.createElement('button');
     ok.className = 'button';
     ok.textContent = 'Ok';
