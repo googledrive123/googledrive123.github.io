@@ -342,11 +342,12 @@
       });
   }
 
-  // A solo player mid-run is not pulled out of it. The room waits for the
-  // run to end on their terms: the next time they start over, which is T or
-  // Backspace, or R twice, since a single R only goes back a checkpoint.
-  // Leaving the race themselves counts too. A call that has waited longer
-  // than the dashboard will is dropped rather than opening an empty room.
+  // A solo player is never pulled out of a run, or off the menu into one.
+  // The room waits for a run that has nothing in it yet: the moment they
+  // start over, which is T or Backspace, or R twice since a single R only
+  // goes back a checkpoint, or the moment a new race of theirs begins. A
+  // call that has waited longer than the dashboard will is dropped rather
+  // than opening a room nobody is coming to.
   var ARM_FOR = 170000;
   var armed = null;
 
@@ -357,12 +358,9 @@
   function armHost() {
     var room = rooms();
     if (armed || hosting || !room || room.state().code !== null) return;
-    if (!inRace()) {
-      hostNow();
-      return;
-    }
     var until = Date.now() + ARM_FOR;
     var lastR = 0;
+    var racing = inRace();
 
     function disarm() {
       window.removeEventListener('keydown', onKey, true);
@@ -374,7 +372,7 @@
       hostNow();
     }
     function onKey(e) {
-      if (e.repeat) return;
+      if (e.repeat || !inRace()) return;
       if (e.code === 'KeyT' || e.code === 'Backspace') fire();
       else if (e.code === 'KeyR') {
         if (Date.now() - lastR < 1000) fire();
@@ -383,9 +381,14 @@
     }
 
     armed = setInterval(function () {
-      if (Date.now() > until) disarm();
-      else if (!inRace()) fire();
-    }, 500);
+      if (Date.now() > until) {
+        disarm();
+        return;
+      }
+      var now = inRace();
+      if (now && !racing) fire();
+      racing = now;
+    }, 300);
     window.addEventListener('keydown', onKey, true);
   }
 
