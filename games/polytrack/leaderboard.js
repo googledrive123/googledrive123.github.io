@@ -126,16 +126,23 @@
   // pages, and must add to what is known rather than wipe it.
   var checkedTrack = null;
   var checked = {};
+  // Which rows have a replay to watch or race, noted the same way.
+  var replays = {};
 
   function noteChecks(trackId, entries) {
     if (trackId !== checkedTrack) {
       checkedTrack = trackId;
       checked = {};
+      replays = {};
     }
     for (var i = 0; i < entries.length; i++) {
       var entry = entries[i];
-      if (typeof entry.position === 'number') checked[entry.position] = entry.gvVerified === true;
+      if (typeof entry.position === 'number') {
+        checked[entry.position] = entry.gvVerified === true;
+        replays[entry.position] = entry.gvReplay === true;
+      }
       delete entry.gvVerified;
+      delete entry.gvReplay;
     }
   }
 
@@ -499,6 +506,10 @@
       // The right margin gives that back so it does not land on the check.
       '.leaderboard-ui .gv-check {',
       '  width: 24px; height: 24px; flex-shrink: 0; margin: 0 14px 0 -4px; }',
+      '.leaderboard-ui > .container > button.main.gv-no-replay { cursor: default; }',
+      '.leaderboard-ui > .container > button.main.gv-no-replay > .image-container { opacity: 0.4; }',
+      '.leaderboard-ui > .container > button.main > .right > p.gv-replay-tag {',
+      '  margin: 0; padding: 0 12px; font-size: 15px; opacity: 0.5; text-align: right; }',
       '.leaderboard-ui > .gv-info {',
       '  margin: 10px; position: absolute; left: 0; top: 0; z-index: 3;',
       '  width: 22px; height: 22px; padding: 0; line-height: 22px;',
@@ -563,6 +574,28 @@
     shown.insertAdjacentHTML('afterend', CHECK_SVG);
   }
 
+  // A time with no replay cannot be watched or raced, and picking one makes
+  // the game fail the whole selection with "Failed to load recordings". The
+  // row says so and does not take the pick. The player's own row is left
+  // alone: the game plays that one from the copy it keeps itself.
+  function markReplay(row) {
+    var at = positionOf(row);
+    if (replays[at] !== false || at === selfPosition) return;
+    row.classList.add('gv-no-replay');
+    row.title = 'No replay saved for this time';
+    var right = row.querySelector('.right');
+    if (right) {
+      var tag = document.createElement('p');
+      tag.className = 'gv-replay-tag';
+      tag.textContent = 'No replay';
+      right.appendChild(tag);
+    }
+    row.addEventListener('click', function (e) {
+      e.stopImmediatePropagation();
+      e.preventDefault();
+    }, true);
+  }
+
   function labelRow(row) {
     if (row.dataset.gvLabelled) return;
     var state = row.querySelector('.verified-state');
@@ -571,6 +604,7 @@
     row.dataset.gvLabelled = '1';
     nameSelfRow(row);
     checkRow(row);
+    markReplay(row);
 
     var verified = state.classList.contains('verified');
     var label = document.createElement('p');
@@ -597,7 +631,9 @@
       'it, so guest times are ranked below signed-in ones.<br><br>' +
       'Sign in before racing to have your times count as signed in.<br><br>' +
       CHECK_SVG + ' A blue check next to a name means GameVault has picked that ' +
-      'player out as one of its top racers.';
+      'player out as one of its top racers.<br><br>' +
+      'No replay means the time was set before replays were saved, so it cannot ' +
+      'be watched or raced. It gets one the next time that player beats it.';
     var ok = document.createElement('button');
     ok.className = 'button';
     ok.textContent = 'Ok';
