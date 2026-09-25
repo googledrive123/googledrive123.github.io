@@ -269,3 +269,45 @@ begin
   );
 end;
 $function$;
+
+
+-- Replays for the game's Watch and race-against buttons. The game asks for a
+-- list of board row ids and wants an answer in the same order, with null for
+-- any it cannot have, so each id keeps its place even when it has no replay.
+create or replace function public.polytrack_recordings(p_ids bigint[])
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'recordings are not served to this origin';
+  end if;
+  if p_ids is null or cardinality(p_ids) = 0 then
+    return '[]'::json;
+  end if;
+  -- The game picks at most ten opponents, so a longer list is not the game.
+  if cardinality(p_ids) > 50 then
+    raise exception 'too many recordings asked for';
+  end if;
+
+  return (
+    select json_agg(
+      case when s.recording is null then null
+           else json_build_object(
+             'recording', s.recording,
+             'frames', s.frames,
+             'carStyle', coalesce(s.car_style, ''),
+             'verifiedState', case when s.is_guest then 0 else 1 end
+           )
+      end
+      order by q.ord)
+    from unnest(p_ids) with ordinality as q(id, ord)
+    left join polytrack_scores s on s.id = q.id
+  );
+end;
+$function$;
+
+grant execute on function public.polytrack_recordings(bigint[]) to anon, authenticated;
