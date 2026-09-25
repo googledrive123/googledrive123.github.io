@@ -76,6 +76,8 @@
       p_name: gv.realName(),
       p_code: state.code,
       p_role: state.role
+    }).then(function (reply) {
+      if (reply && reply.call) hostNow();
     }).catch(function (error) { console.error('Presence beat failed:', error); });
   }
 
@@ -144,6 +146,89 @@
       return true;
     }
     return false;
+  }
+
+  // ── Opening a room for the creator ────────────────────────────────────
+  // Asked for from the dashboard, for a player racing on their own. Nothing
+  // is asked of them: the race they are in ends, a private room opens on the
+  // same track, and the owner follows them in. The notice they get when the
+  // owner arrives is how they find out.
+
+  var hosting = false;
+
+  // The game keeps more than one picker in the document and the newest one
+  // is the one just opened.
+  function newestPicker() {
+    var all = document.querySelectorAll('.track-selection-ui:not(.hidden)');
+    return all.length ? all[all.length - 1] : null;
+  }
+
+  // A community or custom track is not one this can find by name, so the room
+  // opens on the first official track rather than not opening at all.
+  function pickTrack(name) {
+    return waitFor(function () {
+      var picker = newestPicker();
+      var cards = picker ? picker.querySelectorAll('.track') : [];
+      return cards.length ? cards : null;
+    }, 8000).then(function (cards) {
+      var chosen = null;
+      for (var i = 0; i < cards.length && !chosen; i++) {
+        var title = cards[i].querySelector('.track-title');
+        if (name && title && title.textContent.trim() === name) chosen = cards[i];
+      }
+      (chosen || cards[0]).querySelector('button').click();
+    });
+  }
+
+  // What the player last chose on the host panel, which this room overrides
+  // and the next one they open themselves should get back.
+  function savedPublic() {
+    try {
+      var saved = JSON.parse(localStorage.getItem('gv.rooms.settings') || '{}') || {};
+      return saved.visibility === 'public';
+    } catch (e) { return false; }
+  }
+
+  function hostNow() {
+    var room = rooms();
+    if (hosting || !room || room.state().code !== null) return;
+    hosting = true;
+    var shown = document.querySelector('.game-toolbar-ui .track-name');
+    var track = shown ? shown.textContent.trim() : null;
+
+    toMenu()
+      .then(function () {
+        if (!openRooms()) throw new Error('no Rooms tile on the menu');
+        return waitFor(function () {
+          return buttonNamed(document.querySelector('.multiplayer-ui > .join'), 'Host');
+        }, 8000);
+      })
+      .then(function (host) {
+        host.click();
+        return waitFor(function () {
+          var button = document.querySelector('.multiplayer-ui > .host .track-button');
+          return visible(button) ? button : null;
+        }, 8000);
+      })
+      .then(function (trackButton) {
+        trackButton.click();
+        return pickTrack(track);
+      })
+      .then(function () {
+        return waitFor(function () {
+          var go = buttonNamed(document.querySelector('.multiplayer-ui > .host .buttons'), 'Host');
+          return go && !go.disabled ? go : null;
+        }, 8000);
+      })
+      .then(function (go) {
+        // Just the two of them: a room nobody else can find in the list.
+        room.setPublic(false);
+        go.click();
+        return waitFor(function () { return room.state().code; }, 20000);
+      })
+      .then(function () { room.setPublic(savedPublic()); })
+      .catch(function (error) { console.error('Could not open a room for the creator:', error); })
+      .then(function () { hosting = false; });
   }
 
   function start() {
