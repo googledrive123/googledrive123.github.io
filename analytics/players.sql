@@ -25,3 +25,16 @@ create table if not exists public.polytrack_presence (
 -- Every path in and out is a security definer function, so there is no
 -- policy to write and a direct PostgREST request reads and writes nothing.
 alter table public.polytrack_presence enable row level security;
+
+
+-- A request from the dashboard for a solo player's game to open a room, so
+-- the site owner can join them. Picked up by that player's next presence
+-- beat and marked taken, so one click opens one room.
+create table if not exists public.gv_creator_calls (
+  id bigint generated always as identity primary key,
+  visitor_id text not null,
+  created_at timestamptz not null default now(),
+  taken_at timestamptz
+);
+
+alter table public.gv_creator_calls enable row level security;
