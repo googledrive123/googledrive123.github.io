@@ -161,8 +161,8 @@ $function$;
 
 
 -- Everyone in PolyTrack right now, for the dashboard's Playing now list:
--- where they are, and a name to go with them. A beat lands every fifteen
--- seconds, so forty five allows for one that went missing.
+-- where they are, and a name to go with them. A beat lands every five
+-- seconds, so forty five allows for a few that went missing.
 create or replace function public.analytics_polytrack_live(p_secret text)
 returns json
 language plpgsql
@@ -194,9 +194,9 @@ $function$;
 
 
 -- The dashboard's Join on a solo player: asks their game to open a room.
--- Nothing is asked of the player. Their game waits for them to start their
--- run over, hosts on its own, and the dashboard follows them in once the
--- room shows up in their presence.
+-- Nothing is asked of the player. Their game ends the run, hosts on its
+-- own, and the dashboard follows them in once the room shows up in their
+-- presence.
 create or replace function public.gv_creator_summon(p_secret text, p_visitor_id text)
 returns bigint
 language plpgsql
