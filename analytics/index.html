@@ -953,16 +953,14 @@
     $('playingMsg').textContent = 'Could not join: ' + e.message;
   }
 
-  // A solo player's game opens a room of its own when asked, but not in the
-  // middle of a run: it waits until they start over (R twice, T or
-  // Backspace) or begin a new race, then switches behind a still of their
-  // screen. The room shows in their presence once it exists, and the
-  // creator's tab is handed it from there. Their game gives up on the call
-  // just before this does.
-  var SUMMON_WAIT = 180000;
+  // A solo player's game opens a room of its own when asked: the run they
+  // are in ends, and it switches behind a still of their screen. Their game
+  // notices the call within a few seconds, and the room shows in their
+  // presence once it exists. The creator's tab is handed it from there.
+  var SUMMON_WAIT = 60000;
   function joinSolo(visitor) {
     if (!gameTab(visitor, true)) return;
-    $('playingMsg').textContent = 'Their game opens a room the next time they start a run (R twice, T, Backspace or a new race). Waiting up to 3 minutes.';
+    $('playingMsg').textContent = 'Opening their room. This takes a few seconds.';
     var started = Date.now();
     rpc('gv_creator_summon', { p_secret: state.secret, p_visitor_id: visitor }).then(function () {
       return new Promise(function (resolve, reject) {
@@ -970,7 +968,7 @@
           rpc('analytics_polytrack_live', { p_secret: state.secret }).then(function (list) {
             var mine = (list || []).filter(function (p) { return p.visitor_id === visitor && p.code; })[0];
             if (mine) return resolve(mine.code);
-            if (Date.now() - started > SUMMON_WAIT) return reject(new Error('they did not start a run within 3 minutes'));
+            if (Date.now() - started > SUMMON_WAIT) return reject(new Error('their game did not open a room'));
             setTimeout(poll, 2500);
           }, reject);
         }());
