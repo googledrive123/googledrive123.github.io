@@ -79,8 +79,77 @@
     }
   } catch (e) {}
 
+  // ── Auto resolution ───────────────────────────────────────────────────
+  // When the frame rate drops, the resolution drops with it, a step at a
+  // time, and comes back up once there is room. Everything else about the
+  // picture stays as chosen: this only trades sharpness for smoothness, and
+  // only as much as the machine needs right now. Frames are counted from the
+  // browser's own animation callback, which slows down exactly when the game
+  // cannot keep up.
+
+  var AUTO_KEY = 'gv.graphics.autoResolution';
+  var LOWEST = 0.4;
+  var SLOW_FPS = 48;
+  var SMOOTH_FPS = 57;
+
+  function autoOn() {
+    try { return localStorage.getItem(AUTO_KEY) !== 'off'; } catch (e) { return true; }
+  }
+
+  function setAuto(on) {
+    try { localStorage.setItem(AUTO_KEY, on ? 'on' : 'off'); } catch (e) {}
+    var scene = window.GV && window.GV.scene;
+    if (!on && scene) scene.setResolutionFactor(1);
+  }
+
+  var frames = 0;
+  var windowStart = 0;
+  var slowFor = 0;
+  var smoothFor = 0;
+
+  function adjust(fps) {
+    var scene = window.GV && window.GV.scene;
+    if (!scene || !autoOn()) return;
+    var now = scene.resolutionFactor();
+    slowFor = fps < SLOW_FPS ? slowFor + 1 : 0;
+    smoothFor = fps >= SMOOTH_FPS ? smoothFor + 1 : 0;
+    // Two slow seconds in a row, so a single hitch does not blur the screen.
+    if (slowFor >= 2 && now > LOWEST) {
+      scene.setResolutionFactor(Math.max(LOWEST, now * 0.85));
+      slowFor = 0;
+    // Five smooth ones before sharpening again, so it does not see-saw.
+    } else if (smoothFor >= 5 && now < 1) {
+      scene.setResolutionFactor(Math.min(1, now * 1.1));
+      smoothFor = 0;
+    }
+  }
+
+  function tick(time) {
+    requestAnimationFrame(tick);
+    // A hidden tab gets no frames to speak of, and that is not the game
+    // struggling.
+    if (document.visibilityState === 'hidden') {
+      windowStart = 0;
+      return;
+    }
+    if (!windowStart) {
+      windowStart = time;
+      frames = 0;
+      return;
+    }
+    frames = frames + 1;
+    if (time - windowStart >= 1000) {
+      adjust(frames * 1000 / (time - windowStart));
+      windowStart = time;
+      frames = 0;
+    }
+  }
+  requestAnimationFrame(tick);
+
   window.GV = window.GV || {};
   window.GV.graphics = {
-    presets: function () { return PRESETS.map(function (p) { return p.name; }); }
+    presets: function () { return PRESETS.map(function (p) { return p.name; }); },
+    autoResolution: autoOn,
+    setAutoResolution: setAuto
   };
 }());
