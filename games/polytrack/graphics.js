@@ -49,6 +49,36 @@
     return null;
   }
 
+  // ── First launch ──────────────────────────────────────────────────────
+  // Someone who has never opened the game here has no saved settings, and
+  // the game would start them on everything turned up. On a Chromebook or
+  // anything with few cores or little memory, that is the version that
+  // barely runs, and most players never find the Settings screen to fix it.
+  // They start on Low instead. Anyone with settings of their own keeps them.
+
+  function looksLowEnd() {
+    var ua = navigator.userAgent || '';
+    if (/CrOS/.test(ua)) return true;
+    if (navigator.deviceMemory && navigator.deviceMemory <= 4) return true;
+    if (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) return true;
+    return false;
+  }
+
+  // The game stores its settings as a list of [name, value] pairs and fills
+  // in its own defaults for anything the list leaves out.
+  function writePreset(preset) {
+    var pairs = Object.keys(preset.values).map(function (name) {
+      return [name, preset.values[name]];
+    });
+    try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(pairs)); } catch (e) {}
+  }
+
+  try {
+    if (localStorage.getItem(SETTINGS_KEY) === null && looksLowEnd()) {
+      writePreset(presetNamed('Low'));
+    }
+  } catch (e) {}
+
   window.GV = window.GV || {};
   window.GV.graphics = {
     presets: function () { return PRESETS.map(function (p) { return p.name; }); }
