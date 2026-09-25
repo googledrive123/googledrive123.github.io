@@ -217,3 +217,65 @@ begin
   return v_id;
 end;
 $function$;
+
+
+-- Proof that whoever just joined a room really is the site owner. The room
+-- channel is open to anyone holding the code, so a message there saying
+-- "the creator joined" could come from any player. The dashboard mints a
+-- ticket for one room, the creator's game sends it into the room, and every
+-- other game checks it here before showing anything.
+create table if not exists public.gv_creator_visits (
+  ticket text primary key,
+  code text not null,
+  created_at timestamptz not null default now()
+);
+
+alter table public.gv_creator_visits enable row level security;
+
+
+create or replace function public.gv_creator_ticket(p_secret text, p_code text)
+returns text
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_ticket text := replace(gen_random_uuid()::text, '-', '');
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+  if p_code is null or char_length(btrim(p_code)) not between 1 and 32 then
+    raise exception 'invalid room code';
+  end if;
+
+  delete from gv_creator_visits where created_at < now() - interval '1 day';
+  insert into gv_creator_visits (ticket, code) values (v_ticket, upper(btrim(p_code)));
+  return v_ticket;
+end;
+$function$;
+
+
+-- Asked by every game in the room when the creator's ticket arrives. A
+-- ticket only vouches for the room it was minted for, and only for a few
+-- hours, so an old one replayed into another room proves nothing.
+create or replace function public.gv_creator_check(p_code text, p_ticket text)
+returns boolean
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'tickets are not checked from this origin';
+  end if;
+
+  return exists (
+    select 1 from gv_creator_visits
+    where ticket = p_ticket
+      and code = upper(btrim(coalesce(p_code, '')))
+      and created_at > now() - interval '6 hours'
+  );
+end;
+$function$;
