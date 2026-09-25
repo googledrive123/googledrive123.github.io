@@ -36,6 +36,9 @@ sits beside it and stands in front of a browser API instead:
   visibility.
 - `creator.js` - tells the analytics dashboard who is playing and in which
   room, and lets the site owner join them from there.
+- `graphics.js` - a Quality preset row in the game's settings, Low settings
+  for weaker devices on first launch, and resolution that drops on its own
+  when the frame rate does.
 - `leaderboard.sql`, `rooms.sql` - the Supabase side of both.
 
 No request reaches vps.kodub.com.
