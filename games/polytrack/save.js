@@ -16,6 +16,10 @@
 (function () {
   'use strict';
 
+  var SUPA_URL = 'https://dxwjxzmlezfyursysays.supabase.co';
+  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
+  var AUTH_KEY = 'sb-dxwjxzmlezfyursysays-auth-token';
+
   // Everything that is the player's rather than the machine's. Must match
   // polytrack_save_push in save.sql, which refuses any other key.
   var SYNCED = new RegExp('^(polytrack_v5_prod_(user_slot|user_\\d{1,3}'
@@ -174,6 +178,20 @@
   function changed(key) {
     dirty[key] = true;
     saveDirty();
+  }
+
+  // ── Account ───────────────────────────────────────────────────────────
+
+  function session() {
+    return parse(read(AUTH_KEY));
+  }
+
+  function userOf(s) {
+    return (s && s.access_token && s.user && s.user.id) || null;
+  }
+
+  function live(s) {
+    return !!userOf(s) && (!s.expires_at || s.expires_at * 1000 > Date.now() + 30000);
   }
 
   // ── Start ─────────────────────────────────────────────────────────────
