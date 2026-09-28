@@ -254,6 +254,44 @@
     return match ? match[1] : null;
   }
 
+  var PROFILE_KEY = /^polytrack_v5_prod_user_\d+$/;
+  var PROFILE_SLOTS = 3;
+
+  // What the game gives every new profile: this name, and a car with the
+  // default parts and trim in a main colour picked at random. A profile still
+  // like that is one nobody has dressed up yet.
+  var DEFAULT_NAME = 'Anonymous';
+  var DEFAULT_TRIM = [0xff, 0xff, 0xff, 0x13, 0x13, 0x13, 0x66, 0x66, 0x66];
+
+  // Car styles are 16 bytes, base64url: a version, the pattern, rims and
+  // exhaust, then four colours. Only the first colour is left to chance.
+  function dealtCar(style) {
+    var bytes;
+    try { bytes = atob(String(style).replace(/-/g, '+').replace(/_/g, '/')); } catch (e) { return false; }
+    if (bytes.length < 16 || bytes.charCodeAt(1) || bytes.charCodeAt(2) || bytes.charCodeAt(3)) return false;
+    for (var i = 0; i < DEFAULT_TRIM.length; i++) {
+      if (bytes.charCodeAt(7 + i) !== DEFAULT_TRIM[i]) return false;
+    }
+    return true;
+  }
+
+  // A profile held here and on the account when this browser first meets it.
+  // The account's is kept, since the account's best times are filed under its
+  // token, but a car or a name somebody chose beats one the game dealt.
+  function mergeProfiles(local, cloud) {
+    var mine = parse(local);
+    var out = parse(cloud);
+    if (!mine || !out || typeof mine !== 'object' || typeof out !== 'object') return cloud;
+    if (typeof mine.carStyle === 'string' && dealtCar(out.carStyle) && !dealtCar(mine.carStyle)) {
+      out.carStyle = mine.carStyle;
+    }
+    if (out.nickname === DEFAULT_NAME && mine.nickname && mine.nickname !== DEFAULT_NAME) {
+      out.nickname = mine.nickname;
+    }
+    if (out.countryCode == null && mine.countryCode != null) out.countryCode = mine.countryCode;
+    return JSON.stringify(out);
+  }
+
   // One key, held on both sides with different values. Some have a right
   // answer whichever side it is on. For the rest, an edit made here that the
   // account has not seen yet wins, and otherwise the account does.
@@ -263,6 +301,7 @@
       if (preferLocal) return local;
       return cloud != null ? cloud : local;
     }
+    if (!preferLocal && PROFILE_KEY.test(key)) return mergeProfiles(local, cloud);
     var a = parse(local);
     var b = parse(cloud);
     var kind = kindOf(key);
@@ -314,9 +353,11 @@
       var slot = /^polytrack_v5_prod_user_(\d+)$/.exec(key);
       if (!slot || local[key] == null || cloud[key] == null) return;
       var kept = parse(result[key]);
-      var lost = parse(result[key] === cloud[key] ? local[key] : cloud[key]);
-      if (!kept || !lost || typeof kept.token !== 'string' || typeof lost.token !== 'string'
-          || kept.token === lost.token) return;
+      if (!kept || typeof kept.token !== 'string') return;
+      var lost = [parse(local[key]), parse(cloud[key])].filter(function (profile) {
+        return profile && typeof profile.token === 'string' && profile.token !== kept.token;
+      })[0];
+      if (!lost) return;
       jobs.push(Promise.all([sha256(kept.token), sha256(lost.token)]).then(function (hashes) {
         var prefix = 'polytrack_v5_prod_record_' + slot[1] + '_';
         Object.keys(result).forEach(function (other) {
@@ -343,7 +384,30 @@
       result[key] = resolve(key, key in local ? local[key] : null,
         key in cloud ? cloud[key] : null, false);
     });
+    keepSpares(result, local, cloud);
     return refile(result, local, cloud);
+  }
+
+  // Two profiles that were both somebody's choice, and one slot. The one from
+  // here moves to a free slot, where the game's Profiles screen can switch to
+  // it, instead of being lost.
+  function keepSpares(result, local, cloud) {
+    Object.keys(local).forEach(function (key) {
+      if (!PROFILE_KEY.test(key) || cloud[key] == null) return;
+      var mine = parse(local[key]);
+      var kept = parse(result[key]);
+      if (!mine || !kept) return;
+      var lostCar = mine.carStyle !== kept.carStyle && !dealtCar(mine.carStyle);
+      var lostName = mine.nickname !== kept.nickname && mine.nickname !== DEFAULT_NAME;
+      if (!lostCar && !lostName) return;
+      for (var slot = 0; slot < PROFILE_SLOTS; slot++) {
+        var free = 'polytrack_v5_prod_user_' + slot;
+        if (result[free] == null) {
+          result[free] = local[key];
+          return;
+        }
+      }
+    });
   }
 
   // A different account from the one this browser's save belongs to, which
