@@ -493,9 +493,42 @@
     if (document.visibilityState === 'hidden') push(true);
   });
 
+  // ── Signing in with the game open ─────────────────────────────────────
+  // That happens on the page around the game, and the account's save can
+  // only go in before the game starts. So the game starts again, the next
+  // time it is sitting on its front menu and not in a race or a room.
+
+  var reloading = false;
+
+  function reloadAtMenu() {
+    if (reloading) return;
+    reloading = true;
+    setInterval(function () {
+      var info = document.querySelector('.menu-ui > .info');
+      if (!info || info.offsetParent === null || document.querySelector('.gv-panel')) return;
+      var rooms = window.GV && window.GV.rooms;
+      if (rooms && rooms.state().code) return;
+      location.reload();
+    }, 1000);
+  }
+
+  var seen = userOf(session());
+
+  window.addEventListener('storage', function (e) {
+    if (e.key !== AUTH_KEY) return;
+    var user = userOf(session());
+    // Every hourly token refresh lands here too.
+    if (user === seen) return;
+    seen = user;
+    // Signing out leaves the save where it is.
+    if (!user) return;
+    if (user === account) schedulePush(0);
+    else reloadAtMenu();
+  });
+
   // ── Start ─────────────────────────────────────────────────────────────
 
-  if (!userOf(session())) {
+  if (!seen) {
     loadGame();
   } else {
     setTimeout(loadGame, WAIT_MS);
