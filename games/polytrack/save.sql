@@ -27,3 +27,42 @@ create index if not exists polytrack_saves_user_updated
 -- Read and written only through the two functions below.
 alter table public.polytrack_saves enable row level security;
 revoke all on table public.polytrack_saves from anon, authenticated;
+
+
+-- The account's save. With no p_since, every key that still has a value:
+-- that is a browser seeing this account for the first time. With one, every
+-- key written since, removals included. The minute of overlap covers a write
+-- that started before the last pull and landed after it; pulling a key twice
+-- changes nothing.
+create or replace function public.polytrack_save_pull(p_since timestamptz default null)
+returns jsonb
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'saves are not served to this origin';
+  end if;
+  if v_user is null then
+    raise exception 'not signed in';
+  end if;
+
+  return jsonb_build_object(
+    'at', now(),
+    'items', coalesce((
+      select jsonb_object_agg(key, value)
+        from polytrack_saves
+       where user_id = v_user
+         and ((p_since is null and value is not null)
+              or updated_at > p_since - interval '1 minute')
+    ), '{}'::jsonb)
+  );
+end;
+$function$;
+
+revoke all on function public.polytrack_save_pull(timestamptz) from public, anon;
+grant execute on function public.polytrack_save_pull(timestamptz) to authenticated;
