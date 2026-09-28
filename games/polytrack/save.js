@@ -239,6 +239,55 @@
     });
   }
 
+  // ── Putting the two together ──────────────────────────────────────────
+
+  function kindOf(key) {
+    var match = /^polytrack_v5_prod_(record|track|unlocked_car_styles|startup_info)/.exec(key);
+    return match ? match[1] : null;
+  }
+
+  // One key, held on both sides with different values. Some have a right
+  // answer whichever side it is on. For the rest, an edit made here that the
+  // account has not seen yet wins, and otherwise the account does.
+  function resolve(key, local, cloud, preferLocal) {
+    if (local === cloud) return local;
+    if (local == null || cloud == null) {
+      if (preferLocal) return local;
+      return cloud != null ? cloud : local;
+    }
+    var a = parse(local);
+    var b = parse(cloud);
+    var kind = kindOf(key);
+    if (a && b && typeof a === 'object' && typeof b === 'object') {
+      // The faster time, wherever it was set.
+      if (kind === 'record' && typeof a.frames === 'number' && typeof b.frames === 'number') {
+        return a.frames < b.frames ? local : cloud;
+      }
+      // The copy of a track saved last in the editor.
+      if (kind === 'track' && typeof a.saveTime === 'number' && typeof b.saveTime === 'number') {
+        return a.saveTime > b.saveTime ? local : cloud;
+      }
+      // A car part unlocked on either.
+      if (kind === 'unlocked_car_styles') {
+        var out = {};
+        ['patterns', 'rims', 'exhausts'].forEach(function (part) {
+          var all = [];
+          [].concat(a[part] || [], b[part] || []).forEach(function (item) {
+            if (all.indexOf(item) < 0) all.push(item);
+          });
+          out[part] = all;
+        });
+        return JSON.stringify(out);
+      }
+      // The tutorial done on either.
+      if (kind === 'startup_info') {
+        a.isTutorialCompleted = !!(a.isTutorialCompleted || b.isTutorialCompleted);
+        return JSON.stringify(a);
+      }
+    }
+    return preferLocal ? local : cloud;
+  }
+
   // ── Start ─────────────────────────────────────────────────────────────
 
   loadGame();
