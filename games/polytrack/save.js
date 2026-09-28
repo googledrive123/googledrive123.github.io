@@ -255,6 +255,7 @@
   }
 
   var PROFILE_KEY = /^polytrack_v5_prod_user_\d+$/;
+  var PROFILE_SLOTS = 3;
 
   // What the game gives every new profile: this name, and a car with the
   // default parts and trim in a main colour picked at random. A profile still
@@ -383,7 +384,30 @@
       result[key] = resolve(key, key in local ? local[key] : null,
         key in cloud ? cloud[key] : null, false);
     });
+    keepSpares(result, local, cloud);
     return refile(result, local, cloud);
+  }
+
+  // Two profiles that were both somebody's choice, and one slot. The one from
+  // here moves to a free slot, where the game's Profiles screen can switch to
+  // it, instead of being lost.
+  function keepSpares(result, local, cloud) {
+    Object.keys(local).forEach(function (key) {
+      if (!PROFILE_KEY.test(key) || cloud[key] == null) return;
+      var mine = parse(local[key]);
+      var kept = parse(result[key]);
+      if (!mine || !kept) return;
+      var lostCar = mine.carStyle !== kept.carStyle && !dealtCar(mine.carStyle);
+      var lostName = mine.nickname !== kept.nickname && mine.nickname !== DEFAULT_NAME;
+      if (!lostCar && !lostName) return;
+      for (var slot = 0; slot < PROFILE_SLOTS; slot++) {
+        var free = 'polytrack_v5_prod_user_' + slot;
+        if (result[free] == null) {
+          result[free] = local[key];
+          return;
+        }
+      }
+    });
   }
 
   // A different account from the one this browser's save belongs to, which
