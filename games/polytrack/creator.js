@@ -552,7 +552,16 @@
     waitFor(function () {
       return menuFront() || document.querySelector('.game-toolbar-ui');
     }, 60000)
-      .then(function () { return attemptJoin(visit.code); })
+      // The menu can be up before the physics check is done, and a join that
+      // goes in first is refused as if the browser had failed it.
+      .then(function () {
+        var physics = window.GV && window.GV.physics;
+        return physics ? physics.ready() : null;
+      })
+      .then(function (state) {
+        if (state === 'failed' || state === 'assets') throw new Error(explain());
+        return attemptJoin(visit.code);
+      })
       // A connection can fail once for reasons that have gone a moment later,
       // so a second try is made before telling anyone. Not when the browser
       // itself is the problem: that will not have changed.
