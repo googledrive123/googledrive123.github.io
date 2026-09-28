@@ -16,6 +16,13 @@
 (function () {
   'use strict';
 
+  // Everything that is the player's rather than the machine's. Must match
+  // polytrack_save_push in save.sql, which refuses any other key.
+  var SYNCED = new RegExp('^(polytrack_v5_prod_(user_slot|user_\\d{1,3}'
+    + '|record_\\d{1,3}_(default|undeterministic)_[0-9a-f]{64}'
+    + '|track_[\\s\\S]{1,200}|unlocked_car_styles|key_bindings|settings'
+    + '|is_music_enabled|startup_info)|gv\\.anon)$');
+
   // What index.html used to load with defer, in the same order.
   var SCRIPTS = ['main.bundle.js', 'account.js', 'rooms_ui.js', 'creator.js'];
 
