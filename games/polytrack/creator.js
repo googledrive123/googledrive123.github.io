@@ -508,7 +508,8 @@
     }
     if (physicsState() === 'assets' || /non-deterministic game assets/i.test(gameSaid)) {
       return 'This browser has old or damaged PolyTrack files saved, so PolyTrack turned '
-        + 'multiplayer off. Clear this site\u2019s cached files, reload, and join again.';
+        + 'multiplayer off. The game is fetching fresh ones and restarting; join again '
+        + 'after that. If it keeps happening, clear this site\u2019s cached files.';
     }
     if (/non-deterministic/i.test(all)) {
       return 'This browser failed PolyTrack\u2019s multiplayer check'
