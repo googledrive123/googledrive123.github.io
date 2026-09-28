@@ -51,6 +51,9 @@
   // this browser has, and the account's copy waits for the next launch.
   var WAIT_MS = 8000;
   var TOKEN_WAIT_MS = 4000;
+  // save.sql forgets removals after 90 days, so a browser away longer than
+  // this takes the whole save again instead of asking what changed.
+  var FULL_AFTER_MS = 80 * 24 * 60 * 60 * 1000;
 
   var ls = null;
   try { ls = window.localStorage; } catch (e) {}
@@ -348,6 +351,26 @@
     result[STARTUP_KEY] = resolve(STARTUP_KEY, read(STARTUP_KEY),
       STARTUP_KEY in cloud ? cloud[STARTUP_KEY] : null, false);
     dirty = {};
+    return result;
+  }
+
+  // This browser has synced with the account before. What changed on the
+  // account since is taken, except where this browser changed the same key
+  // and has not sent it yet: then the two are weighed against each other.
+  function update(cloud, full) {
+    var result = {};
+    Object.keys(cloud).forEach(function (key) {
+      result[key] = dirty[key]
+        ? resolve(key, outgoing(key, read(key)), cloud[key], true)
+        : cloud[key];
+    });
+    // A full pull only lists what is still there, so anything missing from it
+    // was removed on the account.
+    if (full) {
+      syncedKeys().forEach(function (key) {
+        if (!(key in cloud) && !dirty[key]) result[key] = null;
+      });
+    }
     return result;
   }
 
