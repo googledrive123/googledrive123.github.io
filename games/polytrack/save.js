@@ -23,6 +23,17 @@
     + '|track_[\\s\\S]{1,200}|unlocked_car_styles|key_bindings|settings'
     + '|is_music_enabled|startup_info)|gv\\.anon)$');
 
+  var SETTINGS_KEY = 'polytrack_v5_prod_settings';
+  var STARTUP_KEY = 'polytrack_v5_prod_startup_info';
+
+  // Settings that are about the machine and not the player. A school
+  // Chromebook should not pick up the Ultra shadows set on a gaming PC.
+  // graphics.js sets these same ones.
+  var GRAPHICS = [
+    'ShadowQuality', 'CloudsEnabled', 'ParticlesEnabled', 'SkidmarksEnabled',
+    'FogEnabled', 'RenderScale', 'ScreenPixelDensity', 'Antialiasing'
+  ];
+
   // What index.html used to load with defer, in the same order.
   var SCRIPTS = ['main.bundle.js', 'account.js', 'rooms_ui.js', 'creator.js'];
 
@@ -90,6 +101,32 @@
 
   function parse(raw) {
     try { return JSON.parse(raw); } catch (e) { return null; }
+  }
+
+  function isGraphics(pair) {
+    return Array.isArray(pair) && GRAPHICS.indexOf(pair[0]) >= 0;
+  }
+
+  // A key's value as the account holds it. Settings go up without the
+  // graphics ones, and settings with nothing else left in them are none.
+  function outgoing(key, value) {
+    if (key !== SETTINGS_KEY || value == null) return value;
+    var list = parse(value);
+    if (!Array.isArray(list)) return value;
+    var kept = list.filter(function (pair) { return !isGraphics(pair); });
+    return kept.length ? JSON.stringify(kept) : null;
+  }
+
+  // A value from the account as it goes into this browser. This machine's
+  // graphics settings stay what they were.
+  function incoming(key, value) {
+    if (key !== SETTINGS_KEY) return value;
+    var here = parse(read(key));
+    var graphics = Array.isArray(here) ? here.filter(isGraphics) : [];
+    var list = value == null ? [] : parse(value);
+    if (!Array.isArray(list)) return read(key);
+    var all = list.filter(function (pair) { return !isGraphics(pair); }).concat(graphics);
+    return all.length ? JSON.stringify(all) : null;
   }
 
   // ── Start ─────────────────────────────────────────────────────────────
