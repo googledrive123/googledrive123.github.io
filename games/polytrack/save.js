@@ -223,6 +223,22 @@
     });
   }
 
+  function rpc(name, body, token, keepalive) {
+    return fetch(SUPA_URL + '/rest/v1/rpc/' + name, {
+      method: 'POST',
+      keepalive: !!keepalive,
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPA_KEY,
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify(body)
+    }).then(function (res) {
+      if (!res.ok) return res.text().then(function (t) { throw new Error(t || res.status); });
+      return res.json();
+    });
+  }
+
   // ── Start ─────────────────────────────────────────────────────────────
 
   loadGame();
