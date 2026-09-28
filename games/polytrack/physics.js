@@ -42,6 +42,7 @@
       state = STATES[value] || 'pending';
       if (state === 'pending') return;
       waiters.splice(0).forEach(function (fn) { fn(state); });
+      if (state === 'assets') refreshModels();
     }
   });
 
@@ -54,6 +55,27 @@
       waiters.push(resolve);
       setTimeout(function () { resolve(state); }, WAIT_MS);
     });
+  }
+
+  // ── Stale models ──────────────────────────────────────────────────────
+  // Every model the game loads, fetched past the cache so it holds the
+  // current ones, and the game started again on them. Once per tab: models
+  // that still fail after that are not a cache problem.
+
+  var MODELS = [
+    'blocks', 'car', 'garage', 'pillar', 'planes', 'road', 'road_wide',
+    'signs', 'wall_track'
+  ];
+  var REFRESHED_KEY = 'gv.physics.refreshed';
+
+  function refreshModels() {
+    try {
+      if (sessionStorage.getItem(REFRESHED_KEY)) return;
+      sessionStorage.setItem(REFRESHED_KEY, '1');
+    } catch (e) { return; }
+    Promise.all(MODELS.map(function (name) {
+      return fetch('models/' + name + '.glb', { cache: 'reload' }).catch(function () {});
+    })).then(function () { location.reload(); });
   }
 
   // ── Holding a join ────────────────────────────────────────────────────
