@@ -39,6 +39,11 @@ sits beside it and stands in front of a browser API instead:
 - `graphics.js` - a Quality preset row in the game's settings, Low settings
   for weaker devices on first launch, and resolution that drops on its own
   when the frame rate does.
-- `leaderboard.sql`, `rooms.sql` - the Supabase side of both.
+- `save.js` - keeps a signed-in player's save (car, best times, custom tracks,
+  unlocks, controls) on their GameVault account, so it follows them to any
+  browser. It starts the game once the account's copy is in.
+- `physics.js` - holds a room join until the game's physics check is done,
+  and fetches fresh models when stale cached ones fail that check.
+- `leaderboard.sql`, `rooms.sql`, `save.sql` - the Supabase side of these.
 
 No request reaches vps.kodub.com.
