@@ -54,6 +54,10 @@
   // save.sql forgets removals after 90 days, so a browser away longer than
   // this takes the whole save again instead of asking what changed.
   var FULL_AFTER_MS = 80 * 24 * 60 * 60 * 1000;
+  var MAX_VALUE = 1000000;
+  var BATCH = 400000;
+  // fetch refuses keepalive bodies over 64 KB.
+  var KEEPALIVE_BATCH = 60000;
 
   var ls = null;
   try { ls = window.localStorage; } catch (e) {}
@@ -186,6 +190,7 @@
   function changed(key) {
     dirty[key] = true;
     saveDirty();
+    schedulePush();
   }
 
   // ── Account ───────────────────────────────────────────────────────────
@@ -420,10 +425,64 @@
           write(LINKED_KEY, user);
           if (res && res.at) write(SINCE_KEY, res.at);
           account = user;
+          schedulePush(0);
         });
       });
     }).catch(function (err) {
       console.error('[save]', err);
+    });
+  }
+
+  // ── Sending ───────────────────────────────────────────────────────────
+
+  var pushTimer = null;
+  var pushing = false;
+
+  function schedulePush(delay) {
+    if (!account) return;
+    clearTimeout(pushTimer);
+    pushTimer = setTimeout(push, delay == null ? 3000 : delay);
+  }
+
+  function push(keepalive) {
+    var s = session();
+    if (!account || pushing || userOf(s) !== account) return;
+    var limit = keepalive ? KEEPALIVE_BATCH : BATCH;
+    var items = {};
+    var size = 0;
+    var count = 0;
+    Object.keys(dirty).forEach(function (key) {
+      var value = outgoing(key, read(key));
+      if (value != null && value.length > MAX_VALUE) {
+        console.warn('[save] too big to keep on the account:', key);
+        delete dirty[key];
+        return;
+      }
+      var cost = key.length + (value ? value.length : 0);
+      // A normal request always takes at least one key, however big. A
+      // keepalive one cannot, so a big key waits for the next launch.
+      if (size + cost > limit && (count || keepalive)) return;
+      items[key] = value;
+      size += cost;
+      count++;
+    });
+    if (!count) {
+      saveDirty();
+      return;
+    }
+    pushing = true;
+    rpc('polytrack_save_push', { p_items: items }, s.access_token, keepalive).then(function () {
+      Object.keys(items).forEach(function (key) {
+        // Changed again while it was on its way, so it goes again.
+        if (outgoing(key, read(key)) === items[key]) delete dirty[key];
+      });
+      saveDirty();
+      pushing = false;
+      if (Object.keys(dirty).length) schedulePush(0);
+    }).catch(function (err) {
+      pushing = false;
+      console.error('[save]', err);
+      schedulePush(30000);
     });
   }
 
