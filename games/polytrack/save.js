@@ -288,6 +288,41 @@
     return preferLocal ? local : cloud;
   }
 
+  function sha256(text) {
+    return crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)).then(function (buf) {
+      return Array.prototype.map.call(new Uint8Array(buf), function (byte) {
+        return ('0' + byte.toString(16)).slice(-2);
+      }).join('');
+    });
+  }
+
+  // The game files each best time under a hash of the profile's token, and
+  // ignores any time whose hash is not the current profile's. When a profile
+  // from here gives way to the account's, the times set with it are refiled
+  // under the account's so they still count.
+  function refile(result, local, cloud) {
+    var jobs = [];
+    Object.keys(result).forEach(function (key) {
+      var slot = /^polytrack_v5_prod_user_(\d+)$/.exec(key);
+      if (!slot || local[key] == null || cloud[key] == null) return;
+      var kept = parse(result[key]);
+      var lost = parse(result[key] === cloud[key] ? local[key] : cloud[key]);
+      if (!kept || !lost || typeof kept.token !== 'string' || typeof lost.token !== 'string'
+          || kept.token === lost.token) return;
+      jobs.push(Promise.all([sha256(kept.token), sha256(lost.token)]).then(function (hashes) {
+        var prefix = 'polytrack_v5_prod_record_' + slot[1] + '_';
+        Object.keys(result).forEach(function (other) {
+          if (other.indexOf(prefix) !== 0 || result[other] == null) return;
+          var record = parse(result[other]);
+          if (!record || record.tokenHash !== hashes[1]) return;
+          record.tokenHash = hashes[0];
+          result[other] = JSON.stringify(record);
+        });
+      }));
+    });
+    return Promise.all(jobs).then(function () { return result; });
+  }
+
   // ── Start ─────────────────────────────────────────────────────────────
 
   loadGame();
