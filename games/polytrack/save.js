@@ -345,9 +345,11 @@
       var slot = /^polytrack_v5_prod_user_(\d+)$/.exec(key);
       if (!slot || local[key] == null || cloud[key] == null) return;
       var kept = parse(result[key]);
-      var lost = parse(result[key] === cloud[key] ? local[key] : cloud[key]);
-      if (!kept || !lost || typeof kept.token !== 'string' || typeof lost.token !== 'string'
-          || kept.token === lost.token) return;
+      if (!kept || typeof kept.token !== 'string') return;
+      var lost = [parse(local[key]), parse(cloud[key])].filter(function (profile) {
+        return profile && typeof profile.token === 'string' && profile.token !== kept.token;
+      })[0];
+      if (!lost) return;
       jobs.push(Promise.all([sha256(kept.token), sha256(lost.token)]).then(function (hashes) {
         var prefix = 'polytrack_v5_prod_record_' + slot[1] + '_';
         Object.keys(result).forEach(function (other) {
