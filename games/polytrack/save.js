@@ -34,6 +34,12 @@
     'FogEnabled', 'RenderScale', 'ScreenPixelDensity', 'Antialiasing'
   ];
 
+  // Which account this browser's save belongs to, when it last pulled, and
+  // which keys it has changed since that the account does not have yet.
+  var LINKED_KEY = 'gv.ptsave.user';
+  var SINCE_KEY = 'gv.ptsave.at';
+  var DIRTY_KEY = 'gv.ptsave.dirty';
+
   // What index.html used to load with defer, in the same order.
   var SCRIPTS = ['main.bundle.js', 'account.js', 'rooms_ui.js', 'creator.js'];
 
@@ -127,6 +133,47 @@
     if (!Array.isArray(list)) return read(key);
     var all = list.filter(function (pair) { return !isGraphics(pair); }).concat(graphics);
     return all.length ? JSON.stringify(all) : null;
+  }
+
+  // ── Changes made here ─────────────────────────────────────────────────
+  // The game writes through localStorage.setItem, so that is where its
+  // changes are heard. They are remembered across reloads until the account
+  // has them: a lap finished just before the tab closed still gets there.
+
+  var dirty = {};
+  var remembered = parse(read(DIRTY_KEY));
+  (Array.isArray(remembered) ? remembered : []).forEach(function (key) {
+    if (typeof key === 'string' && SYNCED.test(key)) dirty[key] = true;
+  });
+
+  function saveDirty() {
+    var keys = Object.keys(dirty);
+    write(DIRTY_KEY, keys.length ? JSON.stringify(keys) : null);
+  }
+
+  // The game saves the same profile over itself often. Only a write that
+  // leaves the account's view of the key different counts.
+  function watched(storage, key) {
+    return storage === ls && SYNCED.test(String(key));
+  }
+
+  proto.setItem = function (key, value) {
+    var watch = watched(this, key);
+    var before = watch ? outgoing(String(key), read(String(key))) : null;
+    nativeSet.apply(this, arguments);
+    if (watch && outgoing(String(key), read(String(key))) !== before) changed(String(key));
+  };
+
+  proto.removeItem = function (key) {
+    var watch = watched(this, key);
+    var before = watch ? outgoing(String(key), read(String(key))) : null;
+    nativeRemove.apply(this, arguments);
+    if (watch && before != null) changed(String(key));
+  };
+
+  function changed(key) {
+    dirty[key] = true;
+    saveDirty();
   }
 
   // ── Start ─────────────────────────────────────────────────────────────
