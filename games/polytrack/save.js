@@ -338,6 +338,19 @@
     return refile(result, local, cloud);
   }
 
+  // A different account from the one this browser's save belongs to, which
+  // is someone else on a shared computer. Their save replaces it instead of
+  // joining it. Only having done the tutorial carries over.
+  function replace(cloud) {
+    var result = {};
+    syncedKeys().forEach(function (key) { result[key] = null; });
+    Object.keys(cloud).forEach(function (key) { result[key] = cloud[key]; });
+    result[STARTUP_KEY] = resolve(STARTUP_KEY, read(STARTUP_KEY),
+      STARTUP_KEY in cloud ? cloud[STARTUP_KEY] : null, false);
+    dirty = {};
+    return result;
+  }
+
   // ── Start ─────────────────────────────────────────────────────────────
 
   loadGame();
