@@ -58,6 +58,40 @@
     return;
   }
 
+  // ── Storage ───────────────────────────────────────────────────────────
+
+  var proto = Storage.prototype;
+  var nativeSet = proto.setItem;
+  var nativeRemove = proto.removeItem;
+
+  function read(key) {
+    try { return ls.getItem(key); } catch (e) { return null; }
+  }
+
+  // Straight past the watch below: what this file writes is the account's
+  // copy arriving, not a change to send back to it.
+  function write(key, value) {
+    try {
+      if (value == null) nativeRemove.call(ls, key);
+      else nativeSet.call(ls, key, value);
+    } catch (e) { console.error('[save]', e); }
+  }
+
+  function syncedKeys() {
+    var out = [];
+    try {
+      for (var i = 0; i < ls.length; i++) {
+        var key = ls.key(i);
+        if (key && SYNCED.test(key)) out.push(key);
+      }
+    } catch (e) {}
+    return out;
+  }
+
+  function parse(raw) {
+    try { return JSON.parse(raw); } catch (e) { return null; }
+  }
+
   // ── Start ─────────────────────────────────────────────────────────────
 
   loadGame();
