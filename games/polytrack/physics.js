@@ -56,6 +56,33 @@
     });
   }
 
+  // ── Holding a join ────────────────────────────────────────────────────
+  // The two buttons that open a connection: Join, and Host on the host panel.
+  // A press that lands before the check is done is held and pressed again
+  // once it is, unless the check failed, when the game says so itself.
+
+  function connects(target) {
+    var button = target && target.closest && target.closest('.multiplayer-ui button');
+    if (!button) return null;
+    if (button.closest('.join') && button.classList.contains('join')) return button;
+    if (button.closest('.host .buttons') && button.textContent.trim() === 'Host') return button;
+    return null;
+  }
+
+  var releasing = false;
+
+  document.addEventListener('click', function (e) {
+    if (state !== 'pending' || releasing) return;
+    var button = connects(e.target);
+    if (!button) return;
+    e.stopImmediatePropagation();
+    e.preventDefault();
+    ready().then(function () {
+      releasing = true;
+      try { button.click(); } finally { releasing = false; }
+    });
+  }, true);
+
   window.GV = window.GV || {};
   window.GV.physics = {
     state: function () { return state; },
