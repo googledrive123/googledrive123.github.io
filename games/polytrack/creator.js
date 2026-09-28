@@ -27,6 +27,12 @@
     return (window.GV && window.GV.rooms) || null;
   }
 
+  // What the game's start-up physics check came to, from physics.js.
+  function physicsState() {
+    var physics = window.GV && window.GV.physics;
+    return physics ? physics.state() : null;
+  }
+
   function accessToken() {
     try {
       var raw = localStorage.getItem(AUTH_KEY);
@@ -495,14 +501,15 @@
     // every other computer, and refuses multiplayer where they do not. That
     // fails one of two ways, with different fixes, and its own message box
     // says which.
-    if (/determinism check failed/i.test(gameSaid)) {
+    if (physicsState() === 'failed' || /determinism check failed/i.test(gameSaid)) {
       return 'This browser cannot play PolyTrack multiplayer. PolyTrack checks that its '
         + 'physics come out exactly the same as on other computers, and in this browser '
         + 'they do not. Join from a different browser, like Chrome.';
     }
-    if (/non-deterministic game assets/i.test(gameSaid)) {
+    if (physicsState() === 'assets' || /non-deterministic game assets/i.test(gameSaid)) {
       return 'This browser has old or damaged PolyTrack files saved, so PolyTrack turned '
-        + 'multiplayer off. Clear this site\u2019s cached files, reload, and join again.';
+        + 'multiplayer off. The game is fetching fresh ones and restarting; join again '
+        + 'after that. If it keeps happening, clear this site\u2019s cached files.';
     }
     if (/non-deterministic/i.test(all)) {
       return 'This browser failed PolyTrack\u2019s multiplayer check'
@@ -552,7 +559,16 @@
     waitFor(function () {
       return menuFront() || document.querySelector('.game-toolbar-ui');
     }, 60000)
-      .then(function () { return attemptJoin(visit.code); })
+      // The menu can be up before the physics check is done, and a join that
+      // goes in first is refused as if the browser had failed it.
+      .then(function () {
+        var physics = window.GV && window.GV.physics;
+        return physics ? physics.ready() : null;
+      })
+      .then(function (state) {
+        if (state === 'failed' || state === 'assets') throw new Error(explain());
+        return attemptJoin(visit.code);
+      })
       // A connection can fail once for reasons that have gone a moment later,
       // so a second try is made before telling anyone. Not when the browser
       // itself is the problem: that will not have changed.
