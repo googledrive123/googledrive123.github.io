@@ -254,6 +254,8 @@
     return match ? match[1] : null;
   }
 
+  var PROFILE_KEY = /^polytrack_v5_prod_user_\d+$/;
+
   // What the game gives every new profile: this name, and a car with the
   // default parts and trim in a main colour picked at random. A profile still
   // like that is one nobody has dressed up yet.
@@ -294,6 +296,7 @@
       if (preferLocal) return local;
       return cloud != null ? cloud : local;
     }
+    if (!preferLocal && PROFILE_KEY.test(key)) return mergeProfiles(local, cloud);
     var a = parse(local);
     var b = parse(cloud);
     var kind = kindOf(key);
