@@ -47,6 +47,11 @@
   // What index.html used to load with defer, in the same order.
   var SCRIPTS = ['main.bundle.js', 'account.js', 'rooms_ui.js', 'creator.js'];
 
+  // How long the game is held back for the save. Past that it starts on what
+  // this browser has, and the account's copy waits for the next launch.
+  var WAIT_MS = 8000;
+  var TOKEN_WAIT_MS = 4000;
+
   var ls = null;
   try { ls = window.localStorage; } catch (e) {}
 
@@ -192,6 +197,30 @@
 
   function live(s) {
     return !!userOf(s) && (!s.expires_at || s.expires_at * 1000 > Date.now() + 30000);
+  }
+
+  // The page around the game refreshes the session every hour. A game opened
+  // as the old token runs out waits a moment for the new one rather than
+  // being refused with it.
+  function liveSession() {
+    var s = session();
+    if (!userOf(s)) return Promise.resolve(null);
+    if (live(s)) return Promise.resolve(s);
+    return new Promise(function (resolve) {
+      var timer = setTimeout(function () { finish(null); }, TOKEN_WAIT_MS);
+      function check(e) {
+        if (e.key !== AUTH_KEY) return;
+        var next = session();
+        if (live(next)) finish(next);
+        else if (!userOf(next)) finish(null);
+      }
+      function finish(value) {
+        clearTimeout(timer);
+        window.removeEventListener('storage', check);
+        resolve(value);
+      }
+      window.addEventListener('storage', check);
+    });
   }
 
   // ── Start ─────────────────────────────────────────────────────────────
