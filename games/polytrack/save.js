@@ -374,7 +374,65 @@
     return result;
   }
 
+  function commit(result, cloud) {
+    Object.keys(result).forEach(function (key) {
+      var value = incoming(key, result[key]);
+      if (read(key) !== value) write(key, value);
+      if (result[key] !== (key in cloud ? cloud[key] : null)) dirty[key] = true;
+      else delete dirty[key];
+    });
+    saveDirty();
+  }
+
+  // Only what save.js itself would have sent, whatever the server says.
+  function clean(items) {
+    var out = {};
+    if (!items || typeof items !== 'object') return out;
+    Object.keys(items).forEach(function (key) {
+      var value = items[key];
+      if (SYNCED.test(key) && (value === null || typeof value === 'string')) out[key] = value;
+    });
+    return out;
+  }
+
+  // The account this page has pulled for, and so may send to. Nothing is sent
+  // before a pull: an old copy here must not overwrite a newer one there.
+  var account = null;
+
+  function sync() {
+    return liveSession().then(function (s) {
+      var user = userOf(s);
+      if (!user) return;
+      var linked = read(LINKED_KEY);
+      var since = linked === user ? read(SINCE_KEY) : null;
+      var full = !since || !(Date.now() - Date.parse(since) < FULL_AFTER_MS);
+      return rpc('polytrack_save_pull', { p_since: full ? null : since }, s.access_token).then(function (res) {
+        var cloud = clean(res && res.items);
+        var result;
+        if (linked === user) result = update(cloud, full);
+        else if (!linked) result = link(cloud);
+        else result = replace(cloud);
+        return Promise.resolve(result).then(function (result) {
+          // The game started without it, and writing now would change the
+          // save under it. The next launch tries again.
+          if (late) return;
+          commit(result, cloud);
+          write(LINKED_KEY, user);
+          if (res && res.at) write(SINCE_KEY, res.at);
+          account = user;
+        });
+      });
+    }).catch(function (err) {
+      console.error('[save]', err);
+    });
+  }
+
   // ── Start ─────────────────────────────────────────────────────────────
 
-  loadGame();
+  if (!userOf(session())) {
+    loadGame();
+  } else {
+    setTimeout(loadGame, WAIT_MS);
+    sync().then(loadGame);
+  }
 })();
