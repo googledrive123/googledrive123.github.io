@@ -254,6 +254,37 @@
     return match ? match[1] : null;
   }
 
+  // What the game gives every new profile: this name, and a car with the
+  // default parts and trim in a main colour picked at random. A profile still
+  // like that is one nobody has dressed up yet.
+  var DEFAULT_NAME = 'Anonymous';
+  var DEFAULT_TRIM = [0xff, 0xff, 0xff, 0x13, 0x13, 0x13, 0x66, 0x66, 0x66];
+
+  // Car styles are 16 bytes, base64url: a version, the pattern, rims and
+  // exhaust, then four colours. Only the first colour is left to chance.
+  function dealtCar(style) {
+    var bytes;
+    try { bytes = atob(String(style).replace(/-/g, '+').replace(/_/g, '/')); } catch (e) { return false; }
+    if (bytes.length < 16 || bytes.charCodeAt(1) || bytes.charCodeAt(2) || bytes.charCodeAt(3)) return false;
+    for (var i = 0; i < DEFAULT_TRIM.length; i++) {
+      if (bytes.charCodeAt(7 + i) !== DEFAULT_TRIM[i]) return false;
+    }
+    return true;
+  }
+
+  // A profile held here and on the account when this browser first meets it.
+  // The account's is kept, since the account's best times are filed under its
+  // token, but a car or a name somebody chose beats one the game dealt.
+  function mergeProfiles(local, cloud) {
+    var mine = parse(local);
+    var out = parse(cloud);
+    if (!mine || !out || typeof mine !== 'object' || typeof out !== 'object') return cloud;
+    if (typeof mine.carStyle === 'string' && dealtCar(out.carStyle) && !dealtCar(mine.carStyle)) {
+      out.carStyle = mine.carStyle;
+    }
+    return JSON.stringify(out);
+  }
+
   // One key, held on both sides with different values. Some have a right
   // answer whichever side it is on. For the rest, an edit made here that the
   // account has not seen yet wins, and otherwise the account does.
