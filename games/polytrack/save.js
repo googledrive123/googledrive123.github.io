@@ -284,6 +284,10 @@
     if (typeof mine.carStyle === 'string' && dealtCar(out.carStyle) && !dealtCar(mine.carStyle)) {
       out.carStyle = mine.carStyle;
     }
+    if (out.nickname === DEFAULT_NAME && mine.nickname && mine.nickname !== DEFAULT_NAME) {
+      out.nickname = mine.nickname;
+    }
+    if (out.countryCode == null && mine.countryCode != null) out.countryCode = mine.countryCode;
     return JSON.stringify(out);
   }
 
