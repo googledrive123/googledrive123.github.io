@@ -486,6 +486,13 @@
     });
   }
 
+  // Closing the game tears the frame down. Whatever fits in one last request
+  // goes now, and the rest on the next launch.
+  window.addEventListener('pagehide', function () { push(true); });
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden') push(true);
+  });
+
   // ── Start ─────────────────────────────────────────────────────────────
 
   if (!userOf(session())) {
