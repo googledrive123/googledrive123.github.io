@@ -27,6 +27,12 @@
     return (window.GV && window.GV.rooms) || null;
   }
 
+  // What the game's start-up physics check came to, from physics.js.
+  function physicsState() {
+    var physics = window.GV && window.GV.physics;
+    return physics ? physics.state() : null;
+  }
+
   function accessToken() {
     try {
       var raw = localStorage.getItem(AUTH_KEY);
@@ -495,12 +501,12 @@
     // every other computer, and refuses multiplayer where they do not. That
     // fails one of two ways, with different fixes, and its own message box
     // says which.
-    if (/determinism check failed/i.test(gameSaid)) {
+    if (physicsState() === 'failed' || /determinism check failed/i.test(gameSaid)) {
       return 'This browser cannot play PolyTrack multiplayer. PolyTrack checks that its '
         + 'physics come out exactly the same as on other computers, and in this browser '
         + 'they do not. Join from a different browser, like Chrome.';
     }
-    if (/non-deterministic game assets/i.test(gameSaid)) {
+    if (physicsState() === 'assets' || /non-deterministic game assets/i.test(gameSaid)) {
       return 'This browser has old or damaged PolyTrack files saved, so PolyTrack turned '
         + 'multiplayer off. Clear this site\u2019s cached files, reload, and join again.';
     }
