@@ -323,6 +323,21 @@
     return Promise.all(jobs).then(function () { return result; });
   }
 
+  // The first time this browser meets the account. Both sides are the
+  // player's: the account's from other browsers, this one's from playing
+  // here, most likely before signing in. Nothing on either is dropped.
+  function link(cloud) {
+    var local = {};
+    syncedKeys().forEach(function (key) { local[key] = outgoing(key, read(key)); });
+    var result = {};
+    Object.keys(local).concat(Object.keys(cloud)).forEach(function (key) {
+      if (key in result) return;
+      result[key] = resolve(key, key in local ? local[key] : null,
+        key in cloud ? cloud[key] : null, false);
+    });
+    return refile(result, local, cloud);
+  }
+
   // ── Start ─────────────────────────────────────────────────────────────
 
   loadGame();
