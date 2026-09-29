@@ -186,7 +186,9 @@
     }
     var count = scene.framesDrawn();
     var time = performance.now();
-    if (lastCount !== null) adjust((count - lastCount) * 1000 / (time - lastTime));
+    // Nor is a game with nothing drawn since the last look, which is one
+    // still loading.
+    if (lastCount !== null && count > lastCount) adjust((count - lastCount) * 1000 / (time - lastTime));
     lastCount = count;
     lastTime = time;
   }
