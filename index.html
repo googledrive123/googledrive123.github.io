@@ -3967,8 +3967,17 @@ async function uploadLocalSessions() {
 }
 
 // ─── Auth state ───
+// Every token refresh hands over a new user object. What was looked up about
+// the same user carries over, or the name drops back to the email's first half.
+function setCurrentUser(user) {
+  if (user && currentUser && user.id === currentUser.id) {
+    user._username = currentUser._username;
+  }
+  currentUser = user;
+}
+
 sb.auth.onAuthStateChange(async (event, session) => {
-  currentUser = session?.user ?? null;
+  setCurrentUser(session?.user ?? null);
   updateUserUI();
   loadVerified();
   if (currentUser) {
@@ -3978,7 +3987,7 @@ sb.auth.onAuthStateChange(async (event, session) => {
   if (document.getElementById('profileOverlay').classList.contains('show')) openProfile();
 });
 sb.auth.getSession().then(({ data: { session } }) => {
-  currentUser = session?.user ?? null;
+  setCurrentUser(session?.user ?? null);
   updateUserUI();
   if (currentUser) loadUsername();
 });
