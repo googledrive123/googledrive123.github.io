@@ -189,6 +189,12 @@
       factor = next;
       for (var i = 0; i < scaled.length; i++) scaled[i].apply();
     },
+    // The most frames drawn in a second, or 0 for one per display refresh.
+    maxFrameRate: function () { return maxFps; },
+    setMaxFrameRate: function (value) {
+      var next = Math.floor(Number(value));
+      maxFps = next > 0 ? next : 0;
+    },
     // Resolves with a data URL of the next frame drawn, or null if the canvas
     // could not be read.
     still: function () {
