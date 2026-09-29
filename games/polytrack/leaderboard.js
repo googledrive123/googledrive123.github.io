@@ -491,7 +491,11 @@
     if (name === pushedName) return;
     pushedName = name;
     rpc('polytrack_set_name', { p_visitor_id: visitorId(), p_nickname: name })
-      .catch(function (err) { console.error('[leaderboard]', err); });
+      .catch(function (err) {
+        // Forgotten, so the next push tries again instead of assuming it landed.
+        if (pushedName === name) pushedName = null;
+        console.error('[leaderboard]', err);
+      });
   }
 
   // Typing in the name field fires on every keystroke.
