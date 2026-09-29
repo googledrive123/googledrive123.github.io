@@ -38,8 +38,8 @@ sits beside it and stands in front of a browser API instead:
 - `creator.js` - tells the analytics dashboard who is playing and in which
   room, and lets the site owner join them from there.
 - `graphics.js` - a Quality preset row in the game's settings, Low settings
-  for weaker devices on first launch, and resolution that drops on its own
-  when the frame rate does.
+  for weaker devices on first launch, resolution that drops on its own when
+  the frame rate does, and a Max frame rate row that starts at 60.
 - `save.js` - keeps a signed-in player's save (car, best times, custom tracks,
   unlocks, controls) on their GameVault account, so it follows them to any
   browser. It starts the game once the account's copy is in.
