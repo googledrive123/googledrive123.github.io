@@ -526,7 +526,7 @@
     var playing = Object.keys(lastGame).map(function (v) { return lastGame[v]; }).filter(function (r) { return r.event === 'game_open' || r.event === 'ping'; });
     state.playing = playing;
     $('livePlaying').textContent = fmt(playing.length);
-    var pc = counter(); playing.forEach(function (r) { pc.add(r.item_title || r.game_id); });
+    var pc = counter(); playing.forEach(function (r) { pc.add(titleOf(r)); });
     $('livePlayingSub').textContent = pc.top(3).map(function (p) { return p[0] + (p[1] > 1 ? ' ×' + p[1] : ''); }).join(', ') || 'nobody in a game';
     var last = rows[rows.length - 1];
     $('lastEventAgo').textContent = last ? ago(last.tms) : '–';
