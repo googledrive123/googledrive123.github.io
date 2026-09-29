@@ -136,9 +136,18 @@
     var wrappedLoop = function (callback) {
       if (typeof callback !== 'function' || !isScreen(target)) return set.call(target, callback);
       var last = null;
+      var owed = 0;
       return set.call(target, function (time, frame) {
-        if (maxFps > 0 && last !== null && time - last < 1000 / maxFps - 2) return;
-        last = time;
+        if (maxFps > 0 && last !== null) {
+          var gap = 1000 / maxFps;
+          owed = owed + (time - last);
+          last = time;
+          if (owed < gap - 2) return;
+          owed = Math.min(Math.max(0, owed - gap), gap);
+        } else {
+          last = time;
+          owed = 0;
+        }
         return callback(time, frame);
       });
     };
