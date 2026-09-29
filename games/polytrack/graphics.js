@@ -310,6 +310,11 @@
         setAuto(choice === 'On');
         markSelected(auto, choice);
       });
+    var fps = choiceRow('gv-max-fps', 'Max frame rate', Object.keys(FPS_CHOICES),
+      fpsLabel(maxFrameRate()), function (choice) {
+        setMaxFrameRate(FPS_CHOICES[choice]);
+        markSelected(fps, choice);
+      });
 
     heading.parentNode.insertBefore(auto, heading.nextSibling);
     heading.parentNode.insertBefore(quality, heading.nextSibling);
