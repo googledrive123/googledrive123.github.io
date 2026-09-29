@@ -103,6 +103,11 @@
     if (scene && scene.setMaxFrameRate) scene.setMaxFrameRate(maxFrameRate());
   }
 
+  function setMaxFrameRate(fps) {
+    try { localStorage.setItem(FPS_KEY, String(fps)); } catch (e) {}
+    applyMaxFrameRate();
+  }
+
   applyMaxFrameRate();
 
   // ── Auto resolution ───────────────────────────────────────────────────
