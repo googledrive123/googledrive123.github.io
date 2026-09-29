@@ -3890,8 +3890,12 @@ function updateUserUI() {
   const name = displayName();
   // Left where pages without a Supabase client can read it. PolyTrack runs in
   // an iframe with no session of its own and needs the name for its menu and
-  // its leaderboard rows.
-  if (window.GV && GV.identity) GV.identity.setAccountName(signed ? name : null);
+  // its leaderboard rows. Held back until the username is in: the game puts
+  // whatever is here on the account's times, and the email's first half is
+  // only the name the account signed up with.
+  if (window.GV && GV.identity && (!signed || currentUser._nameLoaded)) {
+    GV.identity.setAccountName(signed ? name : null);
+  }
   ['Welcome','Header'].forEach(loc => {
     const btn = document.getElementById('userBtn' + loc);
     const av  = document.getElementById('userAvatar' + loc);
