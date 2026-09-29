@@ -2934,8 +2934,23 @@ function initRoute() {
   if (!p.startsWith('/games/')) return;
 
   var id = p.slice(7).replace(/\/$/, '');
-  var g = gamesById[id];
+  // A typed address comes in whatever case it was typed in.
+  var g = gamesById[id] || GAMES.find(function (x) {
+    return x.id.toLowerCase() === id.toLowerCase();
+  });
+  // Set by /js/mimicry.js when a game page opened on its own sent itself here.
+  var bounced = null;
+  try {
+    bounced = sessionStorage.getItem('gv.bounce');
+    sessionStorage.removeItem('gv.bounce');
+  } catch (e) {}
   if (!g) {
+    // Not every page under /games/ is in the catalog. One that is not goes
+    // straight back, and stays.
+    if (bounced === id) {
+      location.replace('/games/' + id + '/?solo');
+      return;
+    }
     // A deep link to a game that is not in the catalog is a real 404, not a
     // reason to silently dump someone on the browse grid.
     try { sessionStorage.setItem('gv.missing', p); } catch (e) {}
@@ -2943,6 +2958,7 @@ function initRoute() {
     return;
   }
   revealBrowse();
+  history.replaceState({page:'game',gameId:g.id}, '', '/games/' + g.id);
   setTimeout(function () { openGame(g); }, 100);
 }
 
@@ -3421,7 +3437,8 @@ function mountGame(g) {
   mounted = g;
   const url = gameUrl(g);
   gameTitle.textContent = g.name;
-  gameNewTab.href = url;
+  // ?solo keeps a game page from sending itself back into the player.
+  gameNewTab.href = isOffline(g) ? url + '?solo' : url;
   gameLoaderText.textContent = 'Loading game…';
   gameLoader.classList.remove('hidden');
   paintSwap(g);
@@ -3454,7 +3471,10 @@ loaderSwap.addEventListener('click', toggleOffline);
 function openGame(g) {
   gameOverlay.classList.add('show');
   document.body.style.overflow = 'hidden';
-  history.pushState({page:'game',gameId:g.id}, '', '/games/' + g.id);
+  // A deep link is already standing on this address. A second entry for it
+  // would leave the browser's Back doing nothing the first time.
+  const path = '/games/' + g.id;
+  if (location.pathname !== path) history.pushState({page:'game',gameId:g.id}, '', path);
   mountGame(g);
 }
 function closeGame() {
@@ -4054,6 +4074,19 @@ document.getElementById('profileSigninBtn').addEventListener('click', () => {
   closeProfile(); openAuth('signin');
 });
 
+// The PolyTrack boards keep the name each time was set under. A new username
+// is written to them from here, where the session is always fresh, rather
+// than waiting for the game to be opened.
+function renameOnBoards() {
+  if (!window.GV || !GV.identity) return;
+  sb.rpc('polytrack_set_name', {
+    p_visitor_id: GV.identity.id(),
+    p_nickname: GV.identity.publicName()
+  }).then(({ error }) => {
+    if (error) console.error('Could not rename leaderboard times', error);
+  });
+}
+
 document.getElementById('profileSaveBtn').addEventListener('click', async () => {
   if (!currentUser) return;
   const msgEl = document.getElementById('profileMsg');
@@ -4065,6 +4098,7 @@ document.getElementById('profileSaveBtn').addEventListener('click', async () => 
     if (error) { msgEl.textContent = 'Error saving username.'; return; }
     currentUser._username = username;
     updateUserUI();
+    renameOnBoards();
     document.getElementById('profileName').textContent = username;
     if (verifiedAt) document.getElementById('profileName').insertAdjacentHTML('beforeend', BADGE_SVG);
     document.getElementById('profileAvatarLg').textContent = initials(username);

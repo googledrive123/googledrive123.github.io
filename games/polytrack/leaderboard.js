@@ -27,13 +27,57 @@
   // session the site already established is readable here. No message passing,
   // no second sign-in.
 
-  function accessToken() {
+  function session() {
     try {
       var raw = localStorage.getItem(AUTH_KEY);
-      if (!raw) return null;
-      var parsed = JSON.parse(raw);
-      return (parsed && parsed.access_token) || null;
+      return raw ? JSON.parse(raw) : null;
     } catch (e) { return null; }
+  }
+
+  function accessToken() {
+    var s = session();
+    return (s && s.access_token) || null;
+  }
+
+  // Half a minute of slack, so a token is not sent with seconds left on it.
+  function fresh(s) {
+    return !!(s && s.access_token)
+      && (!s.expires_at || s.expires_at * 1000 > Date.now() + 30000);
+  }
+
+  // The site refreshes the session every hour, but a tab left alone or a
+  // laptop that slept comes back with the old token still stored, and the
+  // board refuses an expired token outright. The game shows that as "Failed
+  // to load". So a stale token waits a moment for the site's new one, the way
+  // save.js does, and the board is asked as a guest if none comes.
+  var TOKEN_WAIT_MS = 4000;
+  // A token already waited on once and never replaced. With nothing around the
+  // game to refresh it, every request would otherwise sit out the wait again.
+  var gaveUpOn = null;
+
+  function liveToken() {
+    var s = session();
+    if (!s || !s.access_token) return Promise.resolve(null);
+    if (fresh(s)) return Promise.resolve(s.access_token);
+    if (s.access_token === gaveUpOn) return Promise.resolve(null);
+    return new Promise(function (resolve) {
+      var timer = setTimeout(function () {
+        gaveUpOn = s.access_token;
+        finish(null);
+      }, TOKEN_WAIT_MS);
+      function check(e) {
+        if (e.key !== AUTH_KEY) return;
+        var next = session();
+        if (fresh(next)) finish(next.access_token);
+        else if (!next || !next.access_token) finish(null);
+      }
+      function finish(token) {
+        clearTimeout(timer);
+        window.removeEventListener('storage', check);
+        resolve(token);
+      }
+      window.addEventListener('storage', check);
+    });
   }
 
   function identity() {
@@ -58,8 +102,9 @@
     return gv ? gv.ready : Promise.resolve(null);
   }
 
-  function rpc(name, body) {
-    var token = accessToken();
+  // Right after a laptop wakes, the first request can leave before the
+  // network is back, so one that never got an answer is tried once more.
+  function send(name, body, token, retried) {
     return fetch(SUPA_URL + '/rest/v1/rpc/' + name, {
       method: 'POST',
       headers: {
@@ -68,6 +113,21 @@
         'Authorization': 'Bearer ' + (token || SUPA_KEY)
       },
       body: JSON.stringify(body)
+    }).catch(function (err) {
+      if (retried) throw err;
+      return new Promise(function (wait) { setTimeout(wait, 1000); }).then(function () {
+        return send(name, body, token, true);
+      });
+    });
+  }
+
+  function rpc(name, body) {
+    return liveToken().then(function (token) {
+      // A token that looks fine can still be refused, and a guest's answer
+      // beats "Failed to load".
+      return send(name, body, token).then(function (res) {
+        return res.status === 401 && token ? send(name, body, null) : res;
+      });
     }).then(function (res) {
       if (!res.ok) return res.text().then(function (t) { throw new Error(t || res.status); });
       return res.status === 204 ? null : res.json();
@@ -431,7 +491,11 @@
     if (name === pushedName) return;
     pushedName = name;
     rpc('polytrack_set_name', { p_visitor_id: visitorId(), p_nickname: name })
-      .catch(function (err) { console.error('[leaderboard]', err); });
+      .catch(function (err) {
+        // Forgotten, so the next push tries again instead of assuming it landed.
+        if (pushedName === name) pushedName = null;
+        console.error('[leaderboard]', err);
+      });
   }
 
   // Typing in the name field fires on every keystroke.
@@ -503,6 +567,12 @@
     // account when their replays arrive. A few seconds in, so this does not
     // compete with the game loading.
     Promise.resolve(claimGuestScores()).then(function () {
+      // A username changed while the game was closed never reached the times
+      // already up, which kept the old name with the new one in brackets.
+      // Only once the account's name is here, so they are not relabelled with
+      // a guest name on the way.
+      var gv = identity();
+      if (accessToken() && gv && gv.accountName()) pushName();
       setTimeout(sendKeptReplays, 5000);
     });
     var gv = identity();
