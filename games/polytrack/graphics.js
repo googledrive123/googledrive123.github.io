@@ -123,6 +123,12 @@
   var SLOW_FPS = 48;
   var SMOOTH_FPS = 57;
 
+  // The rate the steps judge against: the ceiling, but never above 60, which
+  // is what they were tuned for.
+  function targetFps() {
+    return Math.min(maxFrameRate() || 60, 60);
+  }
+
   function autoOn() {
     try { return localStorage.getItem(AUTO_KEY) !== 'off'; } catch (e) { return true; }
   }
