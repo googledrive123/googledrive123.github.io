@@ -39,6 +39,12 @@
     return (s && s.access_token) || null;
   }
 
+  // Half a minute of slack, so a token is not sent with seconds left on it.
+  function fresh(s) {
+    return !!(s && s.access_token)
+      && (!s.expires_at || s.expires_at * 1000 > Date.now() + 30000);
+  }
+
   function identity() {
     return (window.GV && window.GV.identity) || null;
   }
