@@ -2935,7 +2935,19 @@ function initRoute() {
 
   var id = p.slice(7).replace(/\/$/, '');
   var g = gamesById[id];
+  // Set by /js/mimicry.js when a game page opened on its own sent itself here.
+  var bounced = null;
+  try {
+    bounced = sessionStorage.getItem('gv.bounce');
+    sessionStorage.removeItem('gv.bounce');
+  } catch (e) {}
   if (!g) {
+    // Not every page under /games/ is in the catalog. One that is not goes
+    // straight back, and stays.
+    if (bounced === id) {
+      location.replace('/games/' + id + '/?solo');
+      return;
+    }
     // A deep link to a game that is not in the catalog is a real 404, not a
     // reason to silently dump someone on the browse grid.
     try { sessionStorage.setItem('gv.missing', p); } catch (e) {}
