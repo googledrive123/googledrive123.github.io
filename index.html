@@ -3471,7 +3471,10 @@ loaderSwap.addEventListener('click', toggleOffline);
 function openGame(g) {
   gameOverlay.classList.add('show');
   document.body.style.overflow = 'hidden';
-  history.pushState({page:'game',gameId:g.id}, '', '/games/' + g.id);
+  // A deep link is already standing on this address. A second entry for it
+  // would leave the browser's Back doing nothing the first time.
+  const path = '/games/' + g.id;
+  if (location.pathname !== path) history.pushState({page:'game',gameId:g.id}, '', path);
   mountGame(g);
 }
 function closeGame() {
