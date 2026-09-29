@@ -153,6 +153,7 @@
           last = time;
           owed = 0;
         }
+        drawn = drawn + 1;
         return callback(time, frame);
       });
     };
