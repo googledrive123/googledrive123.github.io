@@ -515,7 +515,7 @@
     if (hb) return;
     hb = setInterval(function () {
       if (document.visibilityState !== 'visible') return;
-      track('ping', { value: sessionSecs(), game_id: game.id || undefined, meta: game.id ? { playing: game.id } : (media.key ? { watching: media.key } : undefined) });
+      track('ping', { value: sessionSecs(), game_id: game.id || undefined, item_title: game.name || undefined, meta: game.id ? { playing: game.id } : (media.key ? { watching: media.key } : undefined) });
     }, HEARTBEAT_MS);
   }
   startHB();
