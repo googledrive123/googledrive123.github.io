@@ -102,16 +102,24 @@
     return gv ? gv.ready : Promise.resolve(null);
   }
 
+  function send(name, body, token) {
+    return fetch(SUPA_URL + '/rest/v1/rpc/' + name, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPA_KEY,
+        'Authorization': 'Bearer ' + (token || SUPA_KEY)
+      },
+      body: JSON.stringify(body)
+    });
+  }
+
   function rpc(name, body) {
     return liveToken().then(function (token) {
-      return fetch(SUPA_URL + '/rest/v1/rpc/' + name, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': SUPA_KEY,
-          'Authorization': 'Bearer ' + (token || SUPA_KEY)
-        },
-        body: JSON.stringify(body)
+      // A token that looks fine can still be refused, and a guest's answer
+      // beats "Failed to load".
+      return send(name, body, token).then(function (res) {
+        return res.status === 401 && token ? send(name, body, null) : res;
       });
     }).then(function (res) {
       if (!res.ok) return res.text().then(function (t) { throw new Error(t || res.status); });
