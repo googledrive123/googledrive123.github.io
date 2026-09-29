@@ -133,8 +133,6 @@
     if (!on && scene) scene.setResolutionFactor(1);
   }
 
-  var frames = 0;
-  var windowStart = 0;
   var slowFor = 0;
   var smoothFor = 0;
 
