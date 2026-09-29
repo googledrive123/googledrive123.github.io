@@ -175,6 +175,24 @@
     }
   }
 
+  var lastCount = null;
+  var lastTime = 0;
+
+  function sample() {
+    var scene = window.GV && window.GV.scene;
+    // A hidden tab gets no frames to speak of, and that is not the game
+    // struggling.
+    if (!scene || document.visibilityState === 'hidden') {
+      lastCount = null;
+      return;
+    }
+    var count = scene.framesDrawn();
+    var time = performance.now();
+    if (lastCount !== null) adjust((count - lastCount) * 1000 / (time - lastTime));
+    lastCount = count;
+    lastTime = time;
+  }
+
   function tick(time) {
     requestAnimationFrame(tick);
     // A hidden tab gets no frames to speak of, and that is not the game
