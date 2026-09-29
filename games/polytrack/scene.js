@@ -133,6 +133,7 @@
   // to 60 on a 90 or 144 Hz display too, and a little slack means a 60 Hz one
   // never loses a frame to timing jitter.
   var maxFps = 0;
+  var drawn = 0;
 
   function capFrames(target) {
     var set = target.setAnimationLoop;
