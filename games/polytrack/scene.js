@@ -121,6 +121,15 @@
     scaled.push(entry);
   }
 
+  // A ceiling on the frame rate. The game draws a frame for every refresh of
+  // the display, which on a 120 Hz laptop screen is twice what anyone needs
+  // and twice the heat. Its main loop runs through the renderer's
+  // setAnimationLoop, so that loop is let through only as often as the ceiling
+  // allows. The game times everything from the timestamps it is given, and
+  // the physics keep their own clock in the worker, so a skipped refresh is
+  // just a frame not drawn.
+  var maxFps = 0;
+
   function watchRenderer(target) {
     scaleRatio(target);
     var render = target.render;
