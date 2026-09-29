@@ -134,7 +134,10 @@
     var set = target.setAnimationLoop;
     if (typeof set !== 'function' || set.gvWrapped === true) return;
     var wrappedLoop = function (callback) {
-      return set.call(target, callback);
+      if (typeof callback !== 'function' || !isScreen(target)) return set.call(target, callback);
+      return set.call(target, function (time, frame) {
+        return callback(time, frame);
+      });
     };
     wrappedLoop.gvWrapped = true;
     target.setAnimationLoop = wrappedLoop;
