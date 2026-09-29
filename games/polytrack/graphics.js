@@ -98,6 +98,13 @@
     return isFinite(fps) && fps >= 0 ? fps : 60;
   }
 
+  function applyMaxFrameRate() {
+    var scene = window.GV && window.GV.scene;
+    if (scene && scene.setMaxFrameRate) scene.setMaxFrameRate(maxFrameRate());
+  }
+
+  applyMaxFrameRate();
+
   // ── Auto resolution ───────────────────────────────────────────────────
   // When the frame rate drops, the resolution drops with it, a step at a
   // time, and comes back up once there is room. Everything else about the
