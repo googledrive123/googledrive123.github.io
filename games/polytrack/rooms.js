@@ -573,7 +573,7 @@
     // every renewal after.
     function createInvite(message) {
       if (typeof message.nickname === 'string' && message.nickname !== '') {
-        room.nickname = message.nickname;
+        room.nickname = roomName(message.nickname);
       }
       room.key = typeof message.key === 'string' && message.key !== '' ? message.key : newKey();
       room.public = listing.public;
