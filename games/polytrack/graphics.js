@@ -84,6 +84,20 @@
     }
   } catch (e) {}
 
+  // ── Frame rate ────────────────────────────────────────────────────────
+  // At most 60 frames a second unless the player picks otherwise. Kept per
+  // browser, like the rest of the graphics, since a fast desktop and a laptop
+  // on battery want different answers.
+
+  var FPS_KEY = 'gv.graphics.maxFps';
+
+  function maxFrameRate() {
+    var saved = null;
+    try { saved = localStorage.getItem(FPS_KEY); } catch (e) {}
+    var fps = saved === null ? 60 : Number(saved);
+    return isFinite(fps) && fps >= 0 ? fps : 60;
+  }
+
   // ── Auto resolution ───────────────────────────────────────────────────
   // When the frame rate drops, the resolution drops with it, a step at a
   // time, and comes back up once there is room. Everything else about the
