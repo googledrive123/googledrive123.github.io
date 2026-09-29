@@ -120,8 +120,6 @@
 
   var AUTO_KEY = 'gv.graphics.autoResolution';
   var LOWEST = 0.4;
-  var SLOW_FPS = 48;
-  var SMOOTH_FPS = 57;
 
   // The rate the steps judge against: the ceiling, but never above 60, which
   // is what they were tuned for.
