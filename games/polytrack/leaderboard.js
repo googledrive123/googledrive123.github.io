@@ -567,6 +567,12 @@
     // account when their replays arrive. A few seconds in, so this does not
     // compete with the game loading.
     Promise.resolve(claimGuestScores()).then(function () {
+      // A username changed while the game was closed never reached the times
+      // already up, which kept the old name with the new one in brackets.
+      // Only once the account's name is here, so they are not relabelled with
+      // a guest name on the way.
+      var gv = identity();
+      if (accessToken() && gv && gv.accountName()) pushName();
       setTimeout(sendKeptReplays, 5000);
     });
     var gv = identity();
