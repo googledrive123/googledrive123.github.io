@@ -4110,6 +4110,7 @@ document.getElementById('profileSaveBtn').addEventListener('click', async () => 
     const { error } = await sb.from('profiles').upsert({ id: currentUser.id, username });
     if (error) { msgEl.textContent = 'Error saving username.'; return; }
     currentUser._username = username;
+    currentUser._nameLoaded = true;
     updateUserUI();
     renameOnBoards();
     document.getElementById('profileName').textContent = username;
