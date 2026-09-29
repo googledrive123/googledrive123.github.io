@@ -45,6 +45,34 @@
       && (!s.expires_at || s.expires_at * 1000 > Date.now() + 30000);
   }
 
+  // The site refreshes the session every hour, but a tab left alone or a
+  // laptop that slept comes back with the old token still stored, and the
+  // board refuses an expired token outright. The game shows that as "Failed
+  // to load". So a stale token waits a moment for the site's new one, the way
+  // save.js does, and the board is asked as a guest if none comes.
+  var TOKEN_WAIT_MS = 4000;
+
+  function liveToken() {
+    var s = session();
+    if (!s || !s.access_token) return Promise.resolve(null);
+    if (fresh(s)) return Promise.resolve(s.access_token);
+    return new Promise(function (resolve) {
+      var timer = setTimeout(function () { finish(null); }, TOKEN_WAIT_MS);
+      function check(e) {
+        if (e.key !== AUTH_KEY) return;
+        var next = session();
+        if (fresh(next)) finish(next.access_token);
+        else if (!next || !next.access_token) finish(null);
+      }
+      function finish(token) {
+        clearTimeout(timer);
+        window.removeEventListener('storage', check);
+        resolve(token);
+      }
+      window.addEventListener('storage', check);
+    });
+  }
+
   function identity() {
     return (window.GV && window.GV.identity) || null;
   }
