@@ -167,7 +167,7 @@
 
     var target = targetFps();
     slowFor = fps < target * 0.8 ? slowFor + 1 : 0;
-    smoothFor = fps >= SMOOTH_FPS ? smoothFor + 1 : 0;
+    smoothFor = fps >= target * 0.95 ? smoothFor + 1 : 0;
     // Two slow seconds in a row, so a single hitch does not blur the screen.
     if (slowFor >= 2 && now > LOWEST && Date.now() >= holdUntil) {
       lastStep = { from: now, fps: fps };
