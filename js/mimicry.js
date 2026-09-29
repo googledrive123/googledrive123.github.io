@@ -325,6 +325,9 @@
   };
   window.GV.security = security;
 
+  // Before anything else, so a page on its way out does not set up first.
+  if (intoPlayer()) return;
+
   migrateLegacy();
   // Title and favicon before first paint, so the real name never flashes.
   apply();
