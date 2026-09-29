@@ -3421,7 +3421,8 @@ const prefs = {
 };
 
 function localUrl(g) { return '/games/' + g.id + '/'; }
-function isOffline(g) { return !g.src || prefs.offline().has(g.id); }
+// A choice made while a game still had a copy here outlives the copy.
+function isOffline(g) { return !g.src || (!!g.local && prefs.offline().has(g.id)); }
 function gameUrl(g) { return isOffline(g) ? localUrl(g) : g.src; }
 // Games with no `src` are already local, so they get no button to press.
 function canSwap(g) { return !!(g && g.src && g.local); }
