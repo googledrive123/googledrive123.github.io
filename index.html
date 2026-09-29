@@ -2758,6 +2758,7 @@ let GAMES = [];
 
   resize();
   window.addEventListener('resize', resize);
+  new MutationObserver(start).observe(document.body, { attributes: true, attributeFilter: ['class'] });
   start();
 })();
 // ───── Welcome page setup ─────
