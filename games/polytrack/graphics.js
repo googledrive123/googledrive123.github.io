@@ -91,6 +91,17 @@
 
   var FPS_KEY = 'gv.graphics.maxFps';
 
+  // The choices the Settings row offers, as the ceiling each one sets.
+  var FPS_CHOICES = { '30': 30, '60': 60, 'Unlimited': 0 };
+
+  function fpsLabel(fps) {
+    var names = Object.keys(FPS_CHOICES);
+    for (var i = 0; i < names.length; i++) {
+      if (FPS_CHOICES[names[i]] === fps) return names[i];
+    }
+    return null;
+  }
+
   function maxFrameRate() {
     var saved = null;
     try { saved = localStorage.getItem(FPS_KEY); } catch (e) {}
