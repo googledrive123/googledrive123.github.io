@@ -114,9 +114,9 @@
   // When the frame rate drops, the resolution drops with it, a step at a
   // time, and comes back up once there is room. Everything else about the
   // picture stays as chosen: this only trades sharpness for smoothness, and
-  // only as much as the machine needs right now. Frames are counted from the
-  // browser's own animation callback, which slows down exactly when the game
-  // cannot keep up.
+  // only as much as the machine needs right now. Frames are counted as the
+  // game draws them, so a frame rate ceiling is not mistaken for struggling,
+  // and slow means well under the rate the ceiling allows.
 
   var AUTO_KEY = 'gv.graphics.autoResolution';
   var LOWEST = 0.4;
