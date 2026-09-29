@@ -102,7 +102,9 @@
     return gv ? gv.ready : Promise.resolve(null);
   }
 
-  function send(name, body, token) {
+  // Right after a laptop wakes, the first request can leave before the
+  // network is back, so one that never got an answer is tried once more.
+  function send(name, body, token, retried) {
     return fetch(SUPA_URL + '/rest/v1/rpc/' + name, {
       method: 'POST',
       headers: {
@@ -111,6 +113,11 @@
         'Authorization': 'Bearer ' + (token || SUPA_KEY)
       },
       body: JSON.stringify(body)
+    }).catch(function (err) {
+      if (retried) throw err;
+      return new Promise(function (wait) { setTimeout(wait, 1000); }).then(function () {
+        return send(name, body, token, true);
+      });
     });
   }
 
