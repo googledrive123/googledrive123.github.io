@@ -184,6 +184,21 @@
     }
     @media (max-width: 720px) { .floater { display: none; } }
 
+    /* A game covers the whole page. Everything under it would still animate
+       and be redrawn every frame, which costs more than some games do, so
+       while one is open none of it is drawn. Visibility rather than display
+       keeps the page's layout, and with it the scroll position. */
+    body.gv-playing .bg,
+    body.gv-playing #particles,
+    body.gv-playing .streams,
+    body.gv-playing .orb,
+    body.gv-playing .scanlines,
+    body.gv-playing .floaters { display: none; }
+    body.gv-playing #welcome,
+    body.gv-playing .home-footer,
+    body.gv-playing #browse,
+    body.gv-playing #movies { visibility: hidden; }
+
     /* ───────────── WELCOME ───────────── */
     #welcome {
       height: 100vh;
@@ -1385,7 +1400,8 @@
       transition: opacity 0.5s;
       pointer-events: none;
     }
-    .game-loader.hidden { opacity: 0; }
+    /* Hidden once faded, so the spinner stops turning behind the game. */
+    .game-loader.hidden { opacity: 0; visibility: hidden; transition: opacity 0.5s, visibility 0s 0.5s; }
     .game-loader-spinner {
       width: 40px; height: 40px;
       border: 2px solid var(--border-strong);
@@ -2709,7 +2725,17 @@ let GAMES = [];
     });
   }
 
+  // Stops while a game covers the page, and starts again when it closes.
+  let running = false;
+  function covered() { return document.body.classList.contains('gv-playing'); }
+  function start() {
+    if (running || covered()) return;
+    running = true;
+    requestAnimationFrame(tick);
+  }
+
   function tick() {
+    if (covered()) { running = false; return; }
     ctx.clearRect(0, 0, w, h);
     for (const p of parts) {
       p.x += p.vx;
@@ -2733,7 +2759,8 @@ let GAMES = [];
 
   resize();
   window.addEventListener('resize', resize);
-  tick();
+  new MutationObserver(start).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+  start();
 })();
 // ───── Welcome page setup ─────
 function updateWelcomeStats() {
@@ -3393,6 +3420,15 @@ const gameNewTab   = document.getElementById('gameNewTab');
 const gameSwap     = document.getElementById('gameSwap');
 const loaderSwap   = document.getElementById('loaderSwap');
 const gameLoaderText = document.getElementById('gameLoaderText');
+
+// The page under an open game stops drawing (see .gv-playing in the styles).
+// Several paths open and close the overlay, so this follows the overlay itself
+// rather than each of them.
+function notePlaying() {
+  document.body.classList.toggle('gv-playing', gameOverlay.classList.contains('show'));
+}
+new MutationObserver(notePlaying).observe(gameOverlay, { attributes: true, attributeFilter: ['class'] });
+notePlaying();
 
 // ───── Offline copies ─────
 // The games marked `local` in the catalog run off someone else's host now, but

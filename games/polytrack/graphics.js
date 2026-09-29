@@ -10,6 +10,10 @@
 // row that sets them together, starts weaker devices on a lighter one, and
 // lowers the resolution on its own when the frame rate drops.
 //
+// The game also draws a frame for every refresh of the display, 120 a second
+// on a MacBook Pro, which is where the fan noise comes from. It is held to 60
+// unless the player asks for more.
+//
 // Loaded before main.bundle.js in index.html. Must stay before it: the game
 // reads its saved settings once, as it starts.
 (function () {
@@ -80,18 +84,59 @@
     }
   } catch (e) {}
 
+  // ── Frame rate ────────────────────────────────────────────────────────
+  // At most 60 frames a second unless the player picks otherwise. Kept per
+  // browser, like the rest of the graphics, since a fast desktop and a laptop
+  // on battery want different answers.
+
+  var FPS_KEY = 'gv.graphics.maxFps';
+
+  // The choices the Settings row offers, as the ceiling each one sets.
+  var FPS_CHOICES = { '30': 30, '60': 60, 'Unlimited': 0 };
+
+  function fpsLabel(fps) {
+    var names = Object.keys(FPS_CHOICES);
+    for (var i = 0; i < names.length; i++) {
+      if (FPS_CHOICES[names[i]] === fps) return names[i];
+    }
+    return null;
+  }
+
+  function maxFrameRate() {
+    var saved = null;
+    try { saved = localStorage.getItem(FPS_KEY); } catch (e) {}
+    var fps = saved === null ? 60 : Number(saved);
+    return isFinite(fps) && fps >= 0 ? fps : 60;
+  }
+
+  function applyMaxFrameRate() {
+    var scene = window.GV && window.GV.scene;
+    if (scene && scene.setMaxFrameRate) scene.setMaxFrameRate(maxFrameRate());
+  }
+
+  function setMaxFrameRate(fps) {
+    try { localStorage.setItem(FPS_KEY, String(fps)); } catch (e) {}
+    applyMaxFrameRate();
+  }
+
+  applyMaxFrameRate();
+
   // ── Auto resolution ───────────────────────────────────────────────────
   // When the frame rate drops, the resolution drops with it, a step at a
   // time, and comes back up once there is room. Everything else about the
   // picture stays as chosen: this only trades sharpness for smoothness, and
-  // only as much as the machine needs right now. Frames are counted from the
-  // browser's own animation callback, which slows down exactly when the game
-  // cannot keep up.
+  // only as much as the machine needs right now. Frames are counted as the
+  // game draws them, so a frame rate ceiling is not mistaken for struggling,
+  // and slow means well under the rate the ceiling allows.
 
   var AUTO_KEY = 'gv.graphics.autoResolution';
   var LOWEST = 0.4;
-  var SLOW_FPS = 48;
-  var SMOOTH_FPS = 57;
+
+  // The rate the steps judge against: the ceiling, but never above 60, which
+  // is what they were tuned for.
+  function targetFps() {
+    return Math.min(maxFrameRate() || 60, 60);
+  }
 
   function autoOn() {
     try { return localStorage.getItem(AUTO_KEY) !== 'off'; } catch (e) { return true; }
@@ -103,8 +148,6 @@
     if (!on && scene) scene.setResolutionFactor(1);
   }
 
-  var frames = 0;
-  var windowStart = 0;
   var slowFor = 0;
   var smoothFor = 0;
 
@@ -131,8 +174,9 @@
       }
     }
 
-    slowFor = fps < SLOW_FPS ? slowFor + 1 : 0;
-    smoothFor = fps >= SMOOTH_FPS ? smoothFor + 1 : 0;
+    var target = targetFps();
+    slowFor = fps < target * 0.8 ? slowFor + 1 : 0;
+    smoothFor = fps >= target * 0.95 ? smoothFor + 1 : 0;
     // Two slow seconds in a row, so a single hitch does not blur the screen.
     if (slowFor >= 2 && now > LOWEST && Date.now() >= holdUntil) {
       lastStep = { from: now, fps: fps };
@@ -145,27 +189,27 @@
     }
   }
 
-  function tick(time) {
-    requestAnimationFrame(tick);
+  var lastCount = null;
+  var lastTime = 0;
+
+  function sample() {
+    var scene = window.GV && window.GV.scene;
     // A hidden tab gets no frames to speak of, and that is not the game
     // struggling.
-    if (document.visibilityState === 'hidden') {
-      windowStart = 0;
+    if (!scene || document.visibilityState === 'hidden') {
+      lastCount = null;
       return;
     }
-    if (!windowStart) {
-      windowStart = time;
-      frames = 0;
-      return;
-    }
-    frames = frames + 1;
-    if (time - windowStart >= 1000) {
-      adjust(frames * 1000 / (time - windowStart));
-      windowStart = time;
-      frames = 0;
-    }
+    var count = scene.framesDrawn();
+    var time = performance.now();
+    // Nor is a game with nothing drawn since the last look, which is one
+    // still loading.
+    if (lastCount !== null && count > lastCount) adjust((count - lastCount) * 1000 / (time - lastTime));
+    lastCount = count;
+    lastTime = time;
   }
-  requestAnimationFrame(tick);
+
+  setInterval(sample, 1000);
 
   // ── The Settings screen ───────────────────────────────────────────────
   // Rows at the top of the game's own Graphics section, built the way the
@@ -266,7 +310,13 @@
         setAuto(choice === 'On');
         markSelected(auto, choice);
       });
+    var fps = choiceRow('gv-max-fps', 'Max frame rate', Object.keys(FPS_CHOICES),
+      fpsLabel(maxFrameRate()), function (choice) {
+        setMaxFrameRate(FPS_CHOICES[choice]);
+        markSelected(fps, choice);
+      });
 
+    heading.parentNode.insertBefore(fps, heading.nextSibling);
     heading.parentNode.insertBefore(auto, heading.nextSibling);
     heading.parentNode.insertBefore(quality, heading.nextSibling);
 
@@ -289,6 +339,8 @@
   window.GV.graphics = {
     presets: function () { return PRESETS.map(function (p) { return p.name; }); },
     autoResolution: autoOn,
-    setAutoResolution: setAuto
+    setAutoResolution: setAuto,
+    maxFrameRate: maxFrameRate,
+    setMaxFrameRate: setMaxFrameRate
   };
 }());

@@ -121,8 +121,49 @@
     scaled.push(entry);
   }
 
+  // A ceiling on the frame rate. The game draws a frame for every refresh of
+  // the display, which on a 120 Hz laptop screen is twice what anyone needs
+  // and twice the heat. Its main loop runs through the renderer's
+  // setAnimationLoop, so that loop is let through only as often as the ceiling
+  // allows. The game times everything from the timestamps it is given, and
+  // the physics keep their own clock in the worker, so a skipped refresh is
+  // just a frame not drawn.
+  //
+  // Time owed carries over between frames, so a ceiling of 60 comes out close
+  // to 60 on a 90 or 144 Hz display too, and a little slack means a 60 Hz one
+  // never loses a frame to timing jitter.
+  var maxFps = 0;
+  var drawn = 0;
+
+  function capFrames(target) {
+    var set = target.setAnimationLoop;
+    if (typeof set !== 'function' || set.gvWrapped === true) return;
+    var wrappedLoop = function (callback) {
+      if (typeof callback !== 'function' || !isScreen(target)) return set.call(target, callback);
+      var last = null;
+      var owed = 0;
+      return set.call(target, function (time, frame) {
+        if (maxFps > 0 && last !== null) {
+          var gap = 1000 / maxFps;
+          owed = owed + (time - last);
+          last = time;
+          if (owed < gap - 2) return;
+          owed = Math.min(Math.max(0, owed - gap), gap);
+        } else {
+          last = time;
+          owed = 0;
+        }
+        drawn = drawn + 1;
+        return callback(time, frame);
+      });
+    };
+    wrappedLoop.gvWrapped = true;
+    target.setAnimationLoop = wrappedLoop;
+  }
+
   function watchRenderer(target) {
     scaleRatio(target);
+    capFrames(target);
     var render = target.render;
     if (typeof render !== 'function' || render.gvWrapped === true) return;
     var wrapped = function (renderScene, camera) {
@@ -180,6 +221,14 @@
       factor = next;
       for (var i = 0; i < scaled.length; i++) scaled[i].apply();
     },
+    // The most frames drawn in a second, or 0 for one per display refresh.
+    maxFrameRate: function () { return maxFps; },
+    setMaxFrameRate: function (value) {
+      var next = Math.floor(Number(value));
+      maxFps = next > 0 ? next : 0;
+    },
+    // Frames the game has actually drawn so far, for counting a frame rate.
+    framesDrawn: function () { return drawn; },
     // Resolves with a data URL of the next frame drawn, or null if the canvas
     // could not be read.
     still: function () {
