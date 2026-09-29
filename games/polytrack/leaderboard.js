@@ -103,15 +103,16 @@
   }
 
   function rpc(name, body) {
-    var token = accessToken();
-    return fetch(SUPA_URL + '/rest/v1/rpc/' + name, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPA_KEY,
-        'Authorization': 'Bearer ' + (token || SUPA_KEY)
-      },
-      body: JSON.stringify(body)
+    return liveToken().then(function (token) {
+      return fetch(SUPA_URL + '/rest/v1/rpc/' + name, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPA_KEY,
+          'Authorization': 'Bearer ' + (token || SUPA_KEY)
+        },
+        body: JSON.stringify(body)
+      });
     }).then(function (res) {
       if (!res.ok) return res.text().then(function (t) { throw new Error(t || res.status); });
       return res.status === 204 ? null : res.json();
