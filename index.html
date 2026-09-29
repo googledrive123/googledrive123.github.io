@@ -3400,6 +3400,8 @@ const gameLoaderText = document.getElementById('gameLoaderText');
 function notePlaying() {
   document.body.classList.toggle('gv-playing', gameOverlay.classList.contains('show'));
 }
+new MutationObserver(notePlaying).observe(gameOverlay, { attributes: true, attributeFilter: ['class'] });
+notePlaying();
 
 // ───── Offline copies ─────
 // The games marked `local` in the catalog run off someone else's host now, but
