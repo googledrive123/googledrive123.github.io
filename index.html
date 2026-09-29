@@ -186,13 +186,15 @@
 
     /* A game covers the whole page. Everything under it would still animate
        and be redrawn every frame, which costs more than some games do, so
-       while one is open none of it is drawn. */
+       while one is open none of it is drawn. Visibility rather than display
+       keeps the page's layout, and with it the scroll position. */
     body.gv-playing .bg,
     body.gv-playing #particles,
     body.gv-playing .streams,
     body.gv-playing .orb,
     body.gv-playing .scanlines,
     body.gv-playing .floaters { display: none; }
+    body.gv-playing #welcome { visibility: hidden; }
 
     /* ───────────── WELCOME ───────────── */
     #welcome {
