@@ -130,6 +130,16 @@
   // just a frame not drawn.
   var maxFps = 0;
 
+  function capFrames(target) {
+    var set = target.setAnimationLoop;
+    if (typeof set !== 'function' || set.gvWrapped === true) return;
+    var wrappedLoop = function (callback) {
+      return set.call(target, callback);
+    };
+    wrappedLoop.gvWrapped = true;
+    target.setAnimationLoop = wrappedLoop;
+  }
+
   function watchRenderer(target) {
     scaleRatio(target);
     var render = target.render;
