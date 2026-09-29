@@ -27,13 +27,16 @@
   // session the site already established is readable here. No message passing,
   // no second sign-in.
 
-  function accessToken() {
+  function session() {
     try {
       var raw = localStorage.getItem(AUTH_KEY);
-      if (!raw) return null;
-      var parsed = JSON.parse(raw);
-      return (parsed && parsed.access_token) || null;
+      return raw ? JSON.parse(raw) : null;
     } catch (e) { return null; }
+  }
+
+  function accessToken() {
+    var s = session();
+    return (s && s.access_token) || null;
   }
 
   function identity() {
