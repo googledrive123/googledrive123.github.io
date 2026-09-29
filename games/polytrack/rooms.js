@@ -448,6 +448,20 @@
       .catch(function (error) { console.error('Could not unlist the room:', error); });
   }
 
+  // The name a player goes by in a room. The game sends whatever is in its own
+  // profile, and for most players that is still its default, "Anonymous", so
+  // a room of signed-in players showed nobody by name. The site's name for
+  // them is the one on the board and on the menu strip, and anonymous mode
+  // still hides it. A guest who typed a name into the game keeps it.
+  function roomName(gameName) {
+    var gv = window.GV && window.GV.identity;
+    if (!gv) return gameName;
+    if (gv.anonymous()) return 'Anonymous';
+    if (gv.accountName()) return gv.accountName();
+    if (typeof gameName === 'string' && gameName !== '' && gameName !== 'Anonymous') return gameName;
+    return gv.realName();
+  }
+
   // ── Roles ───────────────────────────────────────────────────
   // A role takes over the socket's send and decides what comes back. The game
   // is strict about what it accepts, so anything unrecognised is dropped
@@ -559,7 +573,7 @@
     // every renewal after.
     function createInvite(message) {
       if (typeof message.nickname === 'string' && message.nickname !== '') {
-        room.nickname = message.nickname;
+        room.nickname = roomName(message.nickname);
       }
       room.key = typeof message.key === 'string' && message.key !== '' ? message.key : newKey();
       room.public = listing.public;
@@ -730,7 +744,7 @@
               version: message.version,
               mods: message.mods,
               isModsVanillaCompatible: message.isModsVanillaCompatible,
-              nickname: message.nickname,
+              nickname: roomName(message.nickname),
               countryCode: message.countryCode,
               carStyle: message.carStyle
             };

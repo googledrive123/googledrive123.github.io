@@ -402,6 +402,7 @@
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function avg(arr) { return arr.length ? arr.reduce(function (a, b) { return a + b; }, 0) / arr.length : 0; }
   function median(arr) { if (!arr.length) return 0; var a = arr.slice().sort(function (x, y) { return x - y; }); return a[Math.floor(a.length / 2)]; }
+  function titleOf(r) { return r.item_title || (state.titles && state.titles[r.game_id]) || r.game_id; }
   function counter() { var m = Object.create(null); return { add: function (k, n) { if (k == null || k === '') k = '(none)'; m[k] = (m[k] || 0) + (n == null ? 1 : n); }, top: function (n) { return Object.keys(m).map(function (k) { return [k, m[k]]; }).sort(function (a, b) { return b[1] - a[1]; }).slice(0, n || 9999); }, get: function (k) { return m[k] || 0; }, size: function () { return Object.keys(m).length; } }; }
   function uniq(rows, key) { var s = Object.create(null); rows.forEach(function (r) { if (r[key]) s[r[key]] = 1; }); return Object.keys(s).length; }
   function shortId(id) { return id ? id.slice(0, 8) : '–'; }
@@ -508,6 +509,11 @@
     $('rowCount').textContent = fmt(rows.length);
     $('rangeLabel').textContent = b.from.toLocaleString() + ' → now';
 
+    // Older pings carry a game's id and not its title, so one game could turn
+    // up under both. Any row with a title names its id for the rest.
+    var titles = Object.create(null);
+    rows.forEach(function (r) { if (r.game_id && r.item_title && r.event.indexOf('game_') === 0) titles[r.game_id] = r.item_title; });
+    state.titles = titles;
     // ── live ──
     var now = Date.now();
     var live = rows.filter(function (r) { return now - r.tms < 5 * 60000; });
@@ -520,7 +526,7 @@
     var playing = Object.keys(lastGame).map(function (v) { return lastGame[v]; }).filter(function (r) { return r.event === 'game_open' || r.event === 'ping'; });
     state.playing = playing;
     $('livePlaying').textContent = fmt(playing.length);
-    var pc = counter(); playing.forEach(function (r) { pc.add(r.item_title || r.game_id); });
+    var pc = counter(); playing.forEach(function (r) { pc.add(titleOf(r)); });
     $('livePlayingSub').textContent = pc.top(3).map(function (p) { return p[0] + (p[1] > 1 ? ' ×' + p[1] : ''); }).join(', ') || 'nobody in a game';
     var last = rows[rows.length - 1];
     $('lastEventAgo').textContent = last ? ago(last.tms) : '–';
@@ -884,7 +890,7 @@
   function playingPeople() {
     var by = Object.create(null);
     state.playing.forEach(function (r) {
-      by[r.visitor_id] = { visitor_id: r.visitor_id, user_id: r.user_id || null, game: r.item_title || r.game_id, presence: null };
+      by[r.visitor_id] = { visitor_id: r.visitor_id, user_id: r.user_id || null, game: titleOf(r), presence: null };
     });
     state.live.forEach(function (p) {
       var row = by[p.visitor_id] || (by[p.visitor_id] = { visitor_id: p.visitor_id, user_id: null, game: 'PolyTrack', presence: null });
