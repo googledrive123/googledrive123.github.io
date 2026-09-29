@@ -326,12 +326,13 @@
   };
   window.GV.security = security;
 
-  // Before anything else, so a page on its way out does not set up first.
-  if (intoPlayer()) return;
-
   migrateLegacy();
   // Title and favicon before first paint, so the real name never flashes.
   apply();
+
+  // After the cloak, so the tab stays disguised on its way out, and before
+  // the rest, so a page that is leaving does not set up first.
+  if (intoPlayer()) return;
 
   function ready() {
     // Again once the document is built: the first pass runs mid-head, before
