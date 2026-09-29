@@ -2724,10 +2724,17 @@ let GAMES = [];
     });
   }
 
+  // Stops while a game covers the page, and starts again when it closes.
+  let running = false;
   function covered() { return document.body.classList.contains('gv-playing'); }
+  function start() {
+    if (running || covered()) return;
+    running = true;
+    requestAnimationFrame(tick);
+  }
 
   function tick() {
-    if (covered()) return;
+    if (covered()) { running = false; return; }
     ctx.clearRect(0, 0, w, h);
     for (const p of parts) {
       p.x += p.vx;
