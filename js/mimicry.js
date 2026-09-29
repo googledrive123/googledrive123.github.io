@@ -282,6 +282,25 @@
     window.gtag('config', GA_MEASUREMENT_ID, { page_path: window.location.pathname });
   }
 
+  // ── Player ──────────────────────────────────────────────────────────────
+
+  /* Every game with a folder under /games/ has a real page at /games/<id>/,
+     so GitHub Pages answers /games/<id> with the bare game instead of the
+     player around it. A reload, a typed address, or Chrome bringing back a tab
+     it put to sleep all land there, and the Back bar is gone. A game page with
+     nothing around it hands its address to index.html, which opens it in the
+     player the same way it opens any deep link. */
+  function intoPlayer() {
+    if (window.top !== window.self) return false;
+    var match = /^\/games\/([^\/]+)\/(index\.html)?$/.exec(location.pathname);
+    if (!match) return false;
+    try {
+      sessionStorage.setItem('gv.redirect', '/games/' + match[1]);
+    } catch (e) { return false; }
+    location.replace('/');
+    return true;
+  }
+
   // ── Boot ────────────────────────────────────────────────────────────────
 
   window.GV = window.GV || {};
