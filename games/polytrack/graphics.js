@@ -10,6 +10,10 @@
 // row that sets them together, starts weaker devices on a lighter one, and
 // lowers the resolution on its own when the frame rate drops.
 //
+// The game also draws a frame for every refresh of the display, 120 a second
+// on a MacBook Pro, which is where the fan noise comes from. It is held to 60
+// unless the player asks for more.
+//
 // Loaded before main.bundle.js in index.html. Must stay before it: the game
 // reads its saved settings once, as it starts.
 (function () {
