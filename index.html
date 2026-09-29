@@ -187,7 +187,8 @@
     /* A game covers the whole page. Everything under it would still animate
        and be redrawn every frame, which costs more than some games do, so
        while one is open none of it is drawn. */
-    body.gv-playing .bg { display: none; }
+    body.gv-playing .bg,
+    body.gv-playing #particles { display: none; }
 
     /* ───────────── WELCOME ───────────── */
     #welcome {
