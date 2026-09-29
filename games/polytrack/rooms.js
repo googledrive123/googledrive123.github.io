@@ -452,13 +452,14 @@
   // profile, and for most players that is still its default, "Anonymous", so
   // a room of signed-in players showed nobody by name. The site's name for
   // them is the one on the board and on the menu strip, and anonymous mode
-  // still hides it.
+  // still hides it. A guest who typed a name into the game keeps it.
   function roomName(gameName) {
     var gv = window.GV && window.GV.identity;
     if (!gv) return gameName;
     if (gv.anonymous()) return 'Anonymous';
     if (gv.accountName()) return gv.accountName();
-    return gameName;
+    if (typeof gameName === 'string' && gameName !== '' && gameName !== 'Anonymous') return gameName;
+    return gv.realName();
   }
 
   // ── Roles ───────────────────────────────────────────────────
