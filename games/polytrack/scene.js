@@ -128,6 +128,10 @@
   // allows. The game times everything from the timestamps it is given, and
   // the physics keep their own clock in the worker, so a skipped refresh is
   // just a frame not drawn.
+  //
+  // Time owed carries over between frames, so a ceiling of 60 comes out close
+  // to 60 on a 90 or 144 Hz display too, and a little slack means a 60 Hz one
+  // never loses a frame to timing jitter.
   var maxFps = 0;
 
   function capFrames(target) {
