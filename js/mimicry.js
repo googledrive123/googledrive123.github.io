@@ -1,5 +1,6 @@
 /**
- * GameVault tab cloaking + panic controls.
+ * GameVault tab cloaking + panic controls, and the hand-off that puts a game
+ * page opened on its own back inside the player.
  *
  * Loaded by index.html, every page under /games/, and every standalone page.
  * One engine, one storage key (gv.cloak.v1) — before this, index.html and this
