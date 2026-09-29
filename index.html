@@ -2958,6 +2958,7 @@ function initRoute() {
     return;
   }
   revealBrowse();
+  history.replaceState({page:'game',gameId:g.id}, '', '/games/' + g.id);
   setTimeout(function () { openGame(g); }, 100);
 }
 
