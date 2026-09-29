@@ -508,6 +508,11 @@
     $('rowCount').textContent = fmt(rows.length);
     $('rangeLabel').textContent = b.from.toLocaleString() + ' → now';
 
+    // Older pings carry a game's id and not its title, so one game could turn
+    // up under both. Any row with a title names its id for the rest.
+    var titles = Object.create(null);
+    rows.forEach(function (r) { if (r.game_id && r.item_title && r.event.indexOf('game_') === 0) titles[r.game_id] = r.item_title; });
+    state.titles = titles;
     // ── live ──
     var now = Date.now();
     var live = rows.filter(function (r) { return now - r.tms < 5 * 60000; });
