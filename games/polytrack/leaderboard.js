@@ -51,13 +51,20 @@
   // to load". So a stale token waits a moment for the site's new one, the way
   // save.js does, and the board is asked as a guest if none comes.
   var TOKEN_WAIT_MS = 4000;
+  // A token already waited on once and never replaced. With nothing around the
+  // game to refresh it, every request would otherwise sit out the wait again.
+  var gaveUpOn = null;
 
   function liveToken() {
     var s = session();
     if (!s || !s.access_token) return Promise.resolve(null);
     if (fresh(s)) return Promise.resolve(s.access_token);
+    if (s.access_token === gaveUpOn) return Promise.resolve(null);
     return new Promise(function (resolve) {
-      var timer = setTimeout(function () { finish(null); }, TOKEN_WAIT_MS);
+      var timer = setTimeout(function () {
+        gaveUpOn = s.access_token;
+        finish(null);
+      }, TOKEN_WAIT_MS);
       function check(e) {
         if (e.key !== AUTH_KEY) return;
         var next = session();
