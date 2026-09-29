@@ -31,7 +31,8 @@ sits beside it and stands in front of a browser API instead:
 - `leaderboard.js` - answers the game's leaderboard requests from Supabase.
 - `rooms.js` - signalling for the game's own multiplayer, so rooms and invite
   codes work without kodub's servers. Races themselves run peer to peer.
-- `scene.js` - a handle on the 3D scene, for room options about what is drawn.
+- `scene.js` - a handle on the 3D scene, for room options about what is drawn,
+  and the ceiling on how often it is drawn.
 - `rooms_ui.js` - the room lobby: public rooms, track lists, round length, car
   visibility.
 - `creator.js` - tells the analytics dashboard who is playing and in which
