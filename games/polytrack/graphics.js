@@ -339,6 +339,8 @@
   window.GV.graphics = {
     presets: function () { return PRESETS.map(function (p) { return p.name; }); },
     autoResolution: autoOn,
-    setAutoResolution: setAuto
+    setAutoResolution: setAuto,
+    maxFrameRate: maxFrameRate,
+    setMaxFrameRate: setMaxFrameRate
   };
 }());
