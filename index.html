@@ -3394,6 +3394,13 @@ const gameSwap     = document.getElementById('gameSwap');
 const loaderSwap   = document.getElementById('loaderSwap');
 const gameLoaderText = document.getElementById('gameLoaderText');
 
+// The page under an open game stops drawing (see .gv-playing in the styles).
+// Several paths open and close the overlay, so this follows the overlay itself
+// rather than each of them.
+function notePlaying() {
+  document.body.classList.toggle('gv-playing', gameOverlay.classList.contains('show'));
+}
+
 // ───── Offline copies ─────
 // The games marked `local` in the catalog run off someone else's host now, but
 // the build they used to run is still sitting in /games/<id>/. When that host
