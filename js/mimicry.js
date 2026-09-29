@@ -294,6 +294,9 @@
     if (window.top !== window.self) return false;
     var match = /^\/games\/([^\/]+)\/(index\.html)?$/.exec(location.pathname);
     if (!match) return false;
+    // New Tab (?solo) and the dashboard's creator tab (#gv-creator-wait) open
+    // a game on its own on purpose.
+    if (location.search || location.hash) return false;
     try {
       sessionStorage.setItem('gv.redirect', '/games/' + match[1]);
     } catch (e) { return false; }
