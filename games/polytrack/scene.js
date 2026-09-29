@@ -142,6 +142,7 @@
 
   function watchRenderer(target) {
     scaleRatio(target);
+    capFrames(target);
     var render = target.render;
     if (typeof render !== 'function' || render.gvWrapped === true) return;
     var wrapped = function (renderScene, camera) {
