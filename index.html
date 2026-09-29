@@ -3946,8 +3946,9 @@ function tellVerified() {
 // ─── Load username ───
 async function loadUsername() {
   if (!currentUser) return;
-  const { data } = await sb.from('profiles').select('username').eq('id', currentUser.id).single();
+  const { data, error } = await sb.from('profiles').select('username').eq('id', currentUser.id).single();
   if (data?.username) currentUser._username = data.username;
+  if (!error) currentUser._nameLoaded = true;
   updateUserUI();
 }
 
@@ -3972,6 +3973,7 @@ async function uploadLocalSessions() {
 function setCurrentUser(user) {
   if (user && currentUser && user.id === currentUser.id) {
     user._username = currentUser._username;
+    user._nameLoaded = currentUser._nameLoaded;
   }
   currentUser = user;
 }
