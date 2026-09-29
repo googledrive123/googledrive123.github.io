@@ -2727,6 +2727,7 @@ let GAMES = [];
   function covered() { return document.body.classList.contains('gv-playing'); }
 
   function tick() {
+    if (covered()) return;
     ctx.clearRect(0, 0, w, h);
     for (const p of parts) {
       p.x += p.vx;
