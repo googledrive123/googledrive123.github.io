@@ -135,7 +135,10 @@
     if (typeof set !== 'function' || set.gvWrapped === true) return;
     var wrappedLoop = function (callback) {
       if (typeof callback !== 'function' || !isScreen(target)) return set.call(target, callback);
+      var last = null;
       return set.call(target, function (time, frame) {
+        if (maxFps > 0 && last !== null && time - last < 1000 / maxFps - 2) return;
+        last = time;
         return callback(time, frame);
       });
     };
