@@ -451,10 +451,12 @@
   // The name a player goes by in a room. The game sends whatever is in its own
   // profile, and for most players that is still its default, "Anonymous", so
   // a room of signed-in players showed nobody by name. The site's name for
-  // them is the one on the board and on the menu strip.
+  // them is the one on the board and on the menu strip, and anonymous mode
+  // still hides it.
   function roomName(gameName) {
     var gv = window.GV && window.GV.identity;
     if (!gv) return gameName;
+    if (gv.anonymous()) return 'Anonymous';
     if (gv.accountName()) return gv.accountName();
     return gameName;
   }
