@@ -2934,7 +2934,10 @@ function initRoute() {
   if (!p.startsWith('/games/')) return;
 
   var id = p.slice(7).replace(/\/$/, '');
-  var g = gamesById[id];
+  // A typed address comes in whatever case it was typed in.
+  var g = gamesById[id] || GAMES.find(function (x) {
+    return x.id.toLowerCase() === id.toLowerCase();
+  });
   // Set by /js/mimicry.js when a game page opened on its own sent itself here.
   var bounced = null;
   try {
