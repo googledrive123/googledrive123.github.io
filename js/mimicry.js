@@ -299,6 +299,8 @@
     if (location.search || location.hash) return false;
     try {
       sessionStorage.setItem('gv.redirect', '/games/' + match[1]);
+      // So index.html can send a page it has no catalog entry for back here.
+      sessionStorage.setItem('gv.bounce', match[1]);
     } catch (e) { return false; }
     location.replace('/');
     return true;
