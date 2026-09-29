@@ -448,6 +448,17 @@
       .catch(function (error) { console.error('Could not unlist the room:', error); });
   }
 
+  // The name a player goes by in a room. The game sends whatever is in its own
+  // profile, and for most players that is still its default, "Anonymous", so
+  // a room of signed-in players showed nobody by name. The site's name for
+  // them is the one on the board and on the menu strip.
+  function roomName(gameName) {
+    var gv = window.GV && window.GV.identity;
+    if (!gv) return gameName;
+    if (gv.accountName()) return gv.accountName();
+    return gameName;
+  }
+
   // ── Roles ───────────────────────────────────────────────────
   // A role takes over the socket's send and decides what comes back. The game
   // is strict about what it accepts, so anything unrecognised is dropped
