@@ -3948,7 +3948,8 @@ async function loadUsername() {
   if (!currentUser) return;
   const { data, error } = await sb.from('profiles').select('username').eq('id', currentUser.id).single();
   if (data?.username) currentUser._username = data.username;
-  if (!error) currentUser._nameLoaded = true;
+  // No profile row (PGRST116) is an answer too: the email's name is the name.
+  if (!error || error.code === 'PGRST116') currentUser._nameLoaded = true;
   updateUserUI();
 }
 
