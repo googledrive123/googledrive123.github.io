@@ -227,6 +227,8 @@
       var next = Math.floor(Number(value));
       maxFps = next > 0 ? next : 0;
     },
+    // Frames the game has actually drawn so far, for counting a frame rate.
+    framesDrawn: function () { return drawn; },
     // Resolves with a data URL of the next frame drawn, or null if the canvas
     // could not be read.
     still: function () {
