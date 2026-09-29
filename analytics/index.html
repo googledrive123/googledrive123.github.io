@@ -890,7 +890,7 @@
   function playingPeople() {
     var by = Object.create(null);
     state.playing.forEach(function (r) {
-      by[r.visitor_id] = { visitor_id: r.visitor_id, user_id: r.user_id || null, game: r.item_title || r.game_id, presence: null };
+      by[r.visitor_id] = { visitor_id: r.visitor_id, user_id: r.user_id || null, game: titleOf(r), presence: null };
     });
     state.live.forEach(function (p) {
       var row = by[p.visitor_id] || (by[p.visitor_id] = { visitor_id: p.visitor_id, user_id: null, game: 'PolyTrack', presence: null });
