@@ -31,14 +31,15 @@ sits beside it and stands in front of a browser API instead:
 - `leaderboard.js` - answers the game's leaderboard requests from Supabase.
 - `rooms.js` - signalling for the game's own multiplayer, so rooms and invite
   codes work without kodub's servers. Races themselves run peer to peer.
-- `scene.js` - a handle on the 3D scene, for room options about what is drawn.
+- `scene.js` - a handle on the 3D scene, for room options about what is drawn,
+  and the ceiling on how often it is drawn.
 - `rooms_ui.js` - the room lobby: public rooms, track lists, round length, car
   visibility.
 - `creator.js` - tells the analytics dashboard who is playing and in which
   room, and lets the site owner join them from there.
 - `graphics.js` - a Quality preset row in the game's settings, Low settings
-  for weaker devices on first launch, and resolution that drops on its own
-  when the frame rate does.
+  for weaker devices on first launch, resolution that drops on its own when
+  the frame rate does, and a Max frame rate row that starts at 60.
 - `save.js` - keeps a signed-in player's save (car, best times, custom tracks,
   unlocks, controls) on their GameVault account, so it follows them to any
   browser. It starts the game once the account's copy is in.
