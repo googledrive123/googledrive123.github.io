@@ -4098,6 +4098,7 @@ document.getElementById('profileSaveBtn').addEventListener('click', async () => 
     if (error) { msgEl.textContent = 'Error saving username.'; return; }
     currentUser._username = username;
     updateUserUI();
+    renameOnBoards();
     document.getElementById('profileName').textContent = username;
     if (verifiedAt) document.getElementById('profileName').insertAdjacentHTML('beforeend', BADGE_SVG);
     document.getElementById('profileAvatarLg').textContent = initials(username);
