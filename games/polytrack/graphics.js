@@ -316,6 +316,7 @@
         markSelected(fps, choice);
       });
 
+    heading.parentNode.insertBefore(fps, heading.nextSibling);
     heading.parentNode.insertBefore(auto, heading.nextSibling);
     heading.parentNode.insertBefore(quality, heading.nextSibling);
 
