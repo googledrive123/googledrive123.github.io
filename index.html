@@ -3421,7 +3421,8 @@ function mountGame(g) {
   mounted = g;
   const url = gameUrl(g);
   gameTitle.textContent = g.name;
-  gameNewTab.href = url;
+  // ?solo keeps a game page from sending itself back into the player.
+  gameNewTab.href = isOffline(g) ? url + '?solo' : url;
   gameLoaderText.textContent = 'Loading game…';
   gameLoader.classList.remove('hidden');
   paintSwap(g);
