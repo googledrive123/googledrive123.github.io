@@ -744,7 +744,7 @@
               version: message.version,
               mods: message.mods,
               isModsVanillaCompatible: message.isModsVanillaCompatible,
-              nickname: message.nickname,
+              nickname: roomName(message.nickname),
               countryCode: message.countryCode,
               carStyle: message.carStyle
             };
