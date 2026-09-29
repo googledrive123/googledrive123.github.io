@@ -193,27 +193,7 @@
     lastTime = time;
   }
 
-  function tick(time) {
-    requestAnimationFrame(tick);
-    // A hidden tab gets no frames to speak of, and that is not the game
-    // struggling.
-    if (document.visibilityState === 'hidden') {
-      windowStart = 0;
-      return;
-    }
-    if (!windowStart) {
-      windowStart = time;
-      frames = 0;
-      return;
-    }
-    frames = frames + 1;
-    if (time - windowStart >= 1000) {
-      adjust(frames * 1000 / (time - windowStart));
-      windowStart = time;
-      frames = 0;
-    }
-  }
-  requestAnimationFrame(tick);
+  setInterval(sample, 1000);
 
   // ── The Settings screen ───────────────────────────────────────────────
   // Rows at the top of the game's own Graphics section, built the way the
