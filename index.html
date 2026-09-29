@@ -2724,6 +2724,8 @@ let GAMES = [];
     });
   }
 
+  function covered() { return document.body.classList.contains('gv-playing'); }
+
   function tick() {
     ctx.clearRect(0, 0, w, h);
     for (const p of parts) {
