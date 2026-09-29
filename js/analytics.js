@@ -531,7 +531,7 @@
   }
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'hidden') {
-      track('hidden', { value: sessionSecs(), game_id: game.id || undefined });
+      track('hidden', { value: sessionSecs(), game_id: game.id || undefined, item_title: game.name || undefined });
       flush(true);
     } else {
       ended = false;
