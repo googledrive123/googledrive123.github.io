@@ -56,6 +56,8 @@ declare
   ];
   v_text text := lower(coalesce(p_text, ''));
 begin
+  -- sh!t and b|tch: between two letters, ! and | stand for an i.
+  v_text := regexp_replace(v_text, '([a-z])[!|]+(?=[a-z])', '\1i', 'g');
   v_text := regexp_replace(v_text, '[^a-z0-9@$]+', ' ', 'g');
   -- f u c k and f.u.c.k: letters typed one at a time go back together. Done
   -- before the digits turn into letters, so a score like 4 5 5 stays apart.
