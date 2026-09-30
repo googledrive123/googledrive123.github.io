@@ -121,7 +121,10 @@
     '.gv-fun-toast-bar i{display:block;height:100%;width:99%;background:var(--accent,#ff3b3b);',
     'animation:gvFunLoad 3.2s cubic-bezier(0.1,0.7,0.2,1) both}',
     '.gv-fun-toast.done .gv-fun-toast-bar{display:none}',
-    '@keyframes gvFunLoad{from{width:0}to{width:99%}}'
+    '@keyframes gvFunLoad{from{width:0}to{width:99%}}',
+
+    // Upside-down player. Only the game turns; the bar and its Back button stay put.
+    '#gameOverlay.gv-fun-flipped .game-frame-wrap{transform:rotate(180deg)}'
   ];
 
   function styles() {
@@ -220,12 +223,33 @@
     });
   }
 
+  // index.html owns opening and closing a game, so this watches the overlay's
+  // class for 'show' instead of hooking the code that sets it.
+  function flipPlayer(undo) {
+    var overlay = document.getElementById('gameOverlay');
+    if (!overlay || !window.MutationObserver) return;
+    var open = overlay.classList.contains('show');
+
+    function unflip() { overlay.classList.remove('gv-fun-flipped'); }
+
+    var watch = new MutationObserver(function () {
+      var now = overlay.classList.contains('show');
+      if (now === open) return; // our own class change, or nothing that matters
+      open = now;
+      if (now && Math.random() < 0.3) overlay.classList.add('gv-fun-flipped');
+      else unflip();
+    });
+    watch.observe(overlay, { attributes: true, attributeFilter: ['class'] });
+    undo.push(function () { watch.disconnect(); unflip(); });
+  }
+
   function startApril(undo) {
     styles();
     flag(undo, 'gv-fun-april');
     offChip(undo);
     shyTiles(undo);
     homeworkToast(undo);
+    flipPlayer(undo);
   }
 
   // ── Halloween ───────────────────────────────────────────────────────────
