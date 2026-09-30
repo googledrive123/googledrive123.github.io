@@ -1335,5 +1335,6 @@
 {"id":"new-york-shark","name":"New York Shark","categories":["Action"],"img":"/thumbs/new-york-shark.webp","src":null,"site":8,"path":"flash/?swf=newyorkshark.swf","added":"2026-09-30","ranking":1488},
 {"id":"nucleus","name":"Nucleus","categories":["Arcade"],"img":"/thumbs/nucleus.webp","src":null,"site":8,"path":"flash/?swf=nucleus.swf","added":"2026-09-30","ranking":1489},
 {"id":"one-man-army-2","name":"One Man Army 2","categories":["Shooter"],"img":"/thumbs/one-man-army-2.webp","src":null,"site":8,"path":"flash/?swf=onemanarmy2.swf","added":"2026-09-30","ranking":1490},
-{"id":"out-of-this-world","name":"Out of This World","categories":["Adventure"],"img":"/thumbs/out-of-this-world.webp","src":null,"site":8,"path":"flash/?swf=outofthisworld.swf","added":"2026-09-30","ranking":1491}
+{"id":"out-of-this-world","name":"Out of This World","categories":["Adventure"],"img":"/thumbs/out-of-this-world.webp","src":null,"site":8,"path":"flash/?swf=outofthisworld.swf","added":"2026-09-30","ranking":1491},
+{"id":"papa-louie","name":"Papa Louie","categories":["Platformer"],"img":"/thumbs/papa-louie.webp","src":null,"site":8,"path":"flash/?swf=papalouie.swf","added":"2026-09-30","ranking":1492}
 ]}
