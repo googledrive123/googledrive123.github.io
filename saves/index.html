@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var day = { day: 'numeric', month: 'short' };
     if (d.getFullYear() !== new Date().getFullYear()) day.year = 'numeric';
     return d.toLocaleDateString(undefined, day) + ', '
-      + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+      + d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
   }
 
   // Nothing else can be pressed while a save is packed, sent or put back.
