@@ -363,8 +363,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
       var btn = el('button', 'btn');
       btn.type = 'button';
-      btn.disabled = true;
-      btn.textContent = 'Sign in to open';
+      if (!state.user) {
+        btn.disabled = true;
+        btn.textContent = 'Sign in to open';
+      } else if (coins() < tier.price) {
+        btn.disabled = true;
+        btn.textContent = 'Need ' + (tier.price - coins()) + ' more';
+      } else {
+        btn.textContent = 'Open';
+        btn.addEventListener('click', function () { openCrate(tier); });
+      }
       card.appendChild(btn);
       box.appendChild(card);
     });
@@ -506,10 +514,102 @@ document.addEventListener('DOMContentLoaded', function () {
     return btn;
   }
 
+  // ─── Opening a crate ───
+  var dialog = document.getElementById('reveal');
+  var lastTier = null;
+  var revealRun = 0; // so a slow timer from the last crate cannot write over this one
+  var reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function openCrate(tier) {
+    if (state.busy) return;
+    state.busy = true;
+    lastTier = tier;
+    say('Opening the ' + tier.name.toLowerCase() + '…');
+    document.querySelectorAll('.crate .btn, #revealAgain').forEach(function (b) { b.disabled = true; });
+    rpc('gv_open_crate', { p_tier: tier.id }).then(function (res) {
+      state.wallet.coins = res.coins;
+      res.items.forEach(function (got) {
+        var mine = state.wallet.inventory.filter(function (i) { return i.id === got.id; })[0];
+        if (mine) mine.qty += 1;
+        else state.wallet.inventory.push({ id: got.id, kind: got.kind, name: got.name, rarity: got.rarity, value: got.value, qty: 1 });
+      });
+      say('');
+      showReveal(tier, res.items);
+    }).catch(function (err) {
+      console.error(err);
+      var msg = String(err && err.message || '');
+      var text = /not enough coins/.test(msg) ? 'Not enough coins for that crate yet.'
+        : /sign in/.test(msg) ? 'Sign in on the home page first.'
+        : 'Could not open the crate. Your coins were not spent. Try again.';
+      say(text, true);
+      if (dialog.open) document.getElementById('revealSum').textContent = text;
+    }).then(function () {
+      state.busy = false;
+      render();
+    });
+  }
+
+  function showReveal(tier, items) {
+    var run = ++revealRun;
+    document.getElementById('revealTitle').textContent = tier.name;
+    var cards = document.getElementById('revealCards');
+    cards.innerHTML = '';
+    items.forEach(function (item) {
+      var flip = el('div', 'flip r-' + item.rarity);
+      flip.dataset.tier = tier.id;
+      var inner = el('div', 'flip-inner');
+      var back = el('div', 'face back', '?');
+      back.setAttribute('aria-hidden', 'true');
+      var front = el('div', 'face front');
+      front.appendChild(preview(item));
+      front.appendChild(el('div', 'item-name', item.name));
+      var meta = el('div', 'item-meta');
+      meta.appendChild(el('span', 'rar', cap(item.rarity)));
+      front.appendChild(meta);
+      front.appendChild(item.new ? el('span', 'tag-new', 'New') : el('span', 'tag-dup', 'Duplicate'));
+      inner.appendChild(back);
+      inner.appendChild(front);
+      flip.appendChild(inner);
+      cards.appendChild(flip);
+    });
+
+    var fresh = items.filter(function (i) { return i.new; }).length;
+    var sum = document.getElementById('revealSum');
+    sum.textContent = '';
+    if (!dialog.open) dialog.showModal();
+
+    var flips = cards.querySelectorAll('.flip');
+    var gap = reduceMotion ? 0 : 320;
+    flips.forEach(function (f, n) {
+      setTimeout(function () { if (run === revealRun) f.classList.add('open'); }, reduceMotion ? 0 : 300 + n * gap);
+    });
+    setTimeout(function () {
+      if (run !== revealRun) return;
+      sum.textContent = items.map(function (i) { return i.name; }).join(', ') + '. ' +
+        (fresh === items.length ? 'All new.' : fresh ? fresh + ' new, ' + (items.length - fresh) + ' already owned.' : 'All already owned.');
+    }, reduceMotion ? 0 : 300 + flips.length * gap + 300);
+  }
+
+  function renderRevealButtons() {
+    var again = document.getElementById('revealAgain');
+    if (!lastTier) return;
+    var short = coins() < lastTier.price;
+    again.textContent = short ? 'Need ' + (lastTier.price - coins()) + ' more' : 'Open another · ' + lastTier.price;
+    again.disabled = short || state.busy;
+  }
+
+  document.getElementById('revealAgain').addEventListener('click', function () {
+    if (lastTier) openCrate(lastTier);
+  });
+  document.getElementById('revealDone').addEventListener('click', function () { dialog.close(); });
+  // A click on the dim area around the dialog lands on the dialog itself.
+  dialog.addEventListener('click', function (e) { if (e.target === dialog) dialog.close(); });
+
   function render() {
     renderCrates();
     renderWallet();
     renderCollection();
+    renderRevealButtons();
   }
 
   // Signed in: pay out any play since last time, then read the wallet. The
