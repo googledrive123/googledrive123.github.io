@@ -1090,5 +1090,77 @@
           v, v + ' m/s', 'Velocity is s′(t) = ' + poly([2 * a, b], 't') + ', which is ' + v + ' m/s at t = ' + k + '.', { unit: 'm/s' });
       }
     ],
+    hard: [
+      function () {
+        var a = nz(-5, 5), b = ri(1, 4), c = nz(-6, 6), k = ri(-2, 3);
+        var left = 2 * k * (b * k + c), right = (k * k + a) * b, r = left + right;
+        return num('Find f′(' + s(k) + ').', 'f(x) = (' + poly([1, 0, a]) + ')(' + poly([b, c]) + ')', r, s(r),
+          'Product rule: f′ = 2x(' + poly([b, c]) + ') + (' + poly([1, 0, a]) + ') × ' + b + '. At x = ' + s(k) + ': ' +
+          s(left) + ' + ' + p(right) + ' = ' + s(r) + '.');
+      },
+      function () {
+        var a, b, n, k, inner, r;
+        do { a = ri(1, 3); b = nz(-3, 3); n = ri(2, 4); k = ri(-1, 2); inner = a * k + b; r = n * a * Math.pow(inner, n - 1); }
+        while (Math.abs(r) > 500);
+        return num('Find f′(' + s(k) + ').', 'f(x) = (' + poly([a, b]) + ')<sup>' + n + '</sup>', r, s(r),
+          'Chain rule: f′(x) = ' + n + ' × ' + a + ' × (' + poly([a, b]) + ')' + (n > 2 ? '<sup>' + (n - 1) + '</sup>' : '') +
+          '. At x = ' + s(k) + ': ' + n * a + ' × ' + sup(p(inner), n - 1) + ' = ' + s(r) + '.');
+      },
+      function () {
+        var a = pick([3, 6, -3, 9]), b = pick([2, 4, -2, 6, 0]), c = ri(-5, 5), k = ri(1, 3);
+        var r = a * k * k * k / 3 + b * k * k / 2 + c * k;
+        return num('Work it out.', integral(0, k, '(' + poly([a, b, c]) + ')'), r, s(r),
+          'An antiderivative is ' + poly([a / 3, b / 2, c, 0]) + '. At ' + k + ' it is ' + s(r) + ', and at 0 it is 0.');
+      },
+      function () {
+        if (coin()) {
+          var m = ri(1, 5);
+          return num('This has two turning points. At what positive x-value is one of them?', 'f(x) = ' + poly([1, 0, -3 * m * m, ri(-9, 9)]), m, s(m),
+            'f′(x) = ' + poly([3, 0, -3 * m * m]) + ' = 0 gives x² = ' + m * m + ', so x = ±' + m + '.');
+        }
+        var a = nz(-4, 4), b = nz(-12, 12);
+        return num('At what x-value does f have its turning point?', 'f(x) = ' + poly([a, b, ri(-9, 9)]), -b / (2 * a), ft(-b, 2 * a),
+          'f′(x) = ' + poly([2 * a, b]) + ' = 0 gives x = ' + ft(-b, 2 * a) + '.');
+      },
+      function () {
+        var k = ri(2, 9), form = ri(0, 3);
+        if (form === 0) {
+          return choice('Find the derivative.', ddx('sin(' + k + 'x)'), k + ' cos(' + k + 'x)',
+            ['cos(' + k + 'x)', '−' + k + ' cos(' + k + 'x)', k + ' sin(' + k + 'x)'],
+            'The derivative of sin is cos, times the derivative of the inside, ' + k + '.');
+        }
+        if (form === 1) {
+          return choice('Find the derivative.', ddx('cos(' + k + 'x)'), '−' + k + ' sin(' + k + 'x)',
+            [k + ' sin(' + k + 'x)', '−sin(' + k + 'x)', '−' + k + ' cos(' + k + 'x)'],
+            'The derivative of cos is −sin, times the derivative of the inside, ' + k + '.');
+        }
+        if (form === 2) {
+          var e = 'e<sup>' + k + 'x</sup>';
+          return choice('Find the derivative.', ddx(e), k + e, [e, k + 'x' + e, fr(e, k)],
+            'e to a power stays itself, times the derivative of the power, ' + k + '.');
+        }
+        return choice('Find the derivative.', ddx('ln(' + k + 'x)'), fr('1', 'x'), [fr(k, 'x'), fr('1', k + 'x'), k + ' ln(x)'],
+          'ln(' + k + 'x) = ln(' + k + ') + ln(x), and ln(' + k + ') is a constant, so the derivative is 1/x.');
+      },
+      function () {
+        var a = ri(2, 9), b = ri(2, 9);
+        if (coin()) {
+          return num('Find the limit.', lim('0', fr('sin(' + a + 'x)', 'x')), a, s(a),
+            'Near 0, sin(' + a + 'x) is almost exactly ' + a + 'x, so the fraction heads to ' + a + '.');
+        }
+        return num('Find the limit.', lim('0', fr('sin(' + a + 'x)', b + 'x')), a / b, ft(a, b),
+          'Near 0, sin(' + a + 'x) is almost exactly ' + a + 'x, so the fraction heads to ' + a + '/' + b + (gcd(a, b) > 1 ? ' = ' + ft(a, b) : '') + '.');
+      },
+      function () {
+        var a = nz(-2, 2), b = ri(-4, 4), c = ri(-6, 6), k = ri(-2, 2), r = 12 * a * k * k + 6 * b * k + 2 * c;
+        return num('Find f″(' + s(k) + ').', 'f(x) = ' + poly([a, b, c, 0, 0]), r, s(r),
+          'f′(x) = ' + poly([4 * a, 3 * b, 2 * c, 0]) + ' and f″(x) = ' + poly([12 * a, 6 * b, 2 * c]) + ', so f″(' + s(k) + ') = ' + s(r) + '.');
+      },
+      function () {
+        var k = ri(1, 6), cube = k * k * k;
+        return num('What is the area under y = x² from x = 0 to x = ' + k + '?', '', cube / 3, ft(cube, 3),
+          'Area = ∫ x² dx = x³/3, so ' + cube + '/3 − 0 = ' + ft(cube, 3) + '.');
+      }
+    ]
   };
 })();
