@@ -25,3 +25,36 @@ on conflict (id) do update
   set public = excluded.public,
       file_size_limit = excluded.file_size_limit,
       allowed_mime_types = excluded.allowed_mime_types;
+
+
+-- A new file in the player's own folder, named the way /submit/ names it:
+-- <user id>/<milliseconds>-<name>.zip. At most five a day, two more than
+-- gv_submission_create records, so a failed attempt can be tried again but
+-- the bucket cannot be filled by uploading around the page.
+--
+-- Security definer only to count files, which players cannot see.
+create or replace function public.gv_submission_new_file(p_name text)
+returns boolean
+language sql
+stable
+security definer
+set search_path to 'public', 'pg_temp'
+as $function$
+  select auth.uid() is not null
+     and p_name ~ ('^' || auth.uid()::text || '/[0-9]{10,16}-[A-Za-z0-9._-]{1,80}\.zip$')
+     and (select count(*) from storage.objects o
+           where o.bucket_id = 'submissions'
+             and o.name like auth.uid()::text || '/%'
+             and o.created_at > now() - interval '1 day') < 5;
+$function$;
+
+revoke all on function public.gv_submission_new_file(text) from public, anon;
+grant execute on function public.gv_submission_new_file(text) to authenticated;
+
+-- Adding is the only thing a player can do in this bucket. With no select,
+-- update or delete policy, not even their own file can be read back,
+-- replaced or removed.
+drop policy if exists gv_submissions_files_insert on storage.objects;
+create policy gv_submissions_files_insert on storage.objects
+  for insert to authenticated
+  with check (bucket_id = 'submissions' and public.gv_submission_new_file(name));
