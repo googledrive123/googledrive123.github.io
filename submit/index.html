@@ -131,6 +131,89 @@
   </div>
 
 <script>
+/* supabase-js is deferred like the rest of the chrome, and deferred scripts
+   run before DOMContentLoaded, so window.supabase is ready by then. */
+document.addEventListener('DOMContentLoaded', function () {
+  var SUPA_URL = 'https://dxwjxzmlezfyursysays.supabase.co';
+  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
+
+  function $(id) { return document.getElementById(id); }
+
+  function el(tag, cls, text) {
+    var node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text) node.textContent = text;
+    return node;
+  }
+
+  function message(err) {
+    return (err && err.message) || 'Something went wrong. Try again.';
+  }
+
+  function size(bytes) {
+    if (bytes == null) return '';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return Math.max(1, Math.round(bytes / 1024)) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  function when(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    var day = { day: 'numeric', month: 'short' };
+    if (d.getFullYear() !== new Date().getFullYear()) day.year = 'numeric';
+    return d.toLocaleDateString(undefined, day);
+  }
+
+  var sb = null;
+  try { sb = window.supabase.createClient(SUPA_URL, SUPA_KEY); } catch (e) {}
+  var user = null;
+
+  function rpc(name, args) {
+    return sb.rpc(name, args || {}).then(function (r) {
+      if (r.error) throw r.error;
+      return r.data;
+    });
+  }
+
+  var STATUS = {
+    pending:  { label: 'Waiting',   badge: 'soon' },
+    approved: { label: 'Approved',  badge: 'added' },
+    rejected: { label: 'Not added', badge: 'denied' }
+  };
+
+  function renderMine(list) {
+    var box = $('mine');
+    box.textContent = '';
+    $('minePanel').hidden = !list.length;
+    list.forEach(function (s) {
+      var row = el('div', 'mine-row');
+      var info = el('div', 'mine-info');
+      info.appendChild(el('div', 'mine-title', s.title));
+      info.appendChild(el('div', 'mine-meta', size(s.size_bytes) + ' · ' + when(s.created_at)));
+      row.appendChild(info);
+      var st = STATUS[s.status] || { label: s.status, badge: '' };
+      row.appendChild(el('span', 'badge ' + st.badge, st.label));
+      box.appendChild(row);
+    });
+  }
+
+  function refreshMine() {
+    return rpc('gv_submission_mine').then(renderMine, function () {});
+  }
+
+  (sb ? sb.auth.getSession() : Promise.reject(new Error('Could not reach GameVault. Check your connection and reload.')))
+    .then(function (r) {
+      user = r.data && r.data.session && r.data.session.user;
+      $('gate').hidden = true;
+      if (!user) { $('signedOut').hidden = false; return; }
+      $('form').hidden = false;
+      return refreshMine();
+    })
+    .catch(function (err) {
+      $('gate').textContent = message(err);
+    });
+});
 </script>
 </main>
 </body>
