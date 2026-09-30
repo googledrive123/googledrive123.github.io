@@ -5367,6 +5367,36 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
     try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(all)); } catch (e) {}
   }
 
+  // What is playing, as a progress key ('movie:<id>' or 'tv:<id>:<s>:<e>').
+  let watching = null;
+
+  function mmss(t) {
+    t = Math.floor(t);
+    const h = Math.floor(t / 3600), m = Math.floor(t % 3600 / 60), s = t % 60;
+    return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(s).padStart(2, '0');
+  }
+
+  // Starts the embed, first asking "Continue from 12:34?" when there is a
+  // real spot to go back to (past the first half minute, before the end).
+  function offerResume(src) {
+    const p = progressAll()[watching];
+    const start = at => {
+      playerFrame.innerHTML = '';
+      const f = document.createElement('iframe');
+      f.src = src + (at ? (src.includes('?') ? '&' : '?') + 'startAt=' + Math.floor(at) : '');
+      f.setAttribute('frameborder', '0');
+      f.setAttribute('allowfullscreen', '');
+      playerFrame.appendChild(f);
+    };
+    if (!p || !p.t || p.t < 30 || (p.d && p.t > p.d - 60)) { start(0); return; }
+    playerFrame.innerHTML = '<div class="movie-resume"><div class="movie-resume-q"></div>' +
+      '<div class="movie-resume-row"><button class="btn btn-primary" type="button" data-go="1">Continue</button>' +
+      '<button class="btn btn-ghost" type="button" data-go="0">Start over</button></div></div>';
+    playerFrame.querySelector('.movie-resume-q').textContent = 'Continue from ' + mmss(p.t) + '?';
+    playerFrame.querySelectorAll('[data-go]').forEach(b =>
+      b.addEventListener('click', () => start(b.dataset.go === '1' ? p.t : 0)));
+  }
+
   function loadTVFrame(id, season, episode) {
     const all = progressAll();
     all['show:' + id] = { s: season, e: episode, at: Date.now() };
