@@ -546,6 +546,61 @@
     document.head.appendChild(st);
   }
 
+  // A grid of all 42. Arrow keys move between them and only a click, Enter
+  // or Space picks, so looking around does not save anything.
+  // Returns { el, set(i) } so the page can move the ring itself.
+  function picker(container, current, onPick) {
+    addStyle();
+    var grid = document.createElement('div');
+    grid.className = 'gv-av-grid';
+    grid.setAttribute('role', 'group');
+    grid.setAttribute('aria-label', 'Pick a picture');
+    var buttons = [];
+    for (var i = 0; i < COUNT; i++) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'gv-av-opt';
+      b.title = name(i);
+      b.setAttribute('aria-label', name(i));
+      b.innerHTML = svg(i);
+      buttons.push(b);
+      grid.appendChild(b);
+    }
+
+    var chosen = null;
+    function set(i) {
+      chosen = i == null ? null : index(i);
+      buttons.forEach(function (b, k) {
+        b.setAttribute('aria-pressed', String(k === chosen));
+        b.tabIndex = k === (chosen == null ? 0 : chosen) ? 0 : -1;
+      });
+    }
+    set(current);
+
+    grid.addEventListener('click', function (ev) {
+      var k = buttons.indexOf(ev.target.closest('.gv-av-opt'));
+      if (k < 0) return;
+      set(k);
+      if (typeof onPick === 'function') onPick(k);
+    });
+    grid.addEventListener('keydown', function (ev) {
+      var k = buttons.indexOf(document.activeElement);
+      if (k < 0) return;
+      var cols = 1;
+      while (cols < COUNT && buttons[cols].offsetTop === buttons[0].offsetTop) cols++;
+      var to = { ArrowRight: k + 1, ArrowLeft: k - 1, ArrowDown: k + cols, ArrowUp: k - cols, Home: 0, End: COUNT - 1 }[ev.key];
+      if (to == null || to < 0 || to >= COUNT) return;
+      ev.preventDefault();
+      buttons[k].tabIndex = -1;
+      buttons[to].tabIndex = 0;
+      buttons[to].focus();
+    });
+
+    container.textContent = '';
+    container.appendChild(grid);
+    return { el: grid, set: set };
+  }
+
   window.GV = window.GV || {};
   window.GV.avatars = {
     count: COUNT,
@@ -553,6 +608,7 @@
     name: name,
     defaultFor: defaultFor,
     render: render,
+    picker: picker,
     localPreset: localPreset,
     setLocalPreset: setLocalPreset
   };
