@@ -137,7 +137,7 @@
 
   // Scripts every page shares, loaded from here so a new page cannot miss one.
   function extras() {
-    ['/js/broadcast.js'].forEach(function (src) {
+    ['/js/broadcast.js', '/js/fun.js'].forEach(function (src) {
       if (document.querySelector('script[src="' + src + '"]')) return;
       var s = document.createElement('script');
       s.src = src;
