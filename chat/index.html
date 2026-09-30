@@ -185,6 +185,7 @@
   var MAX = 300;
   var POLL_MS = 4000;
   var KEEP = 300;
+  var REASONS = ['Mean', 'Rude', 'Personal info', 'Spam'];
 
   var chat = document.getElementById('chat');
   var out = document.getElementById('chatOut');
@@ -248,6 +249,15 @@
     time.textContent = when(m.created_at);
     head.appendChild(name);
     head.appendChild(time);
+
+    if (!m.mine) {
+      var flag = document.createElement('button');
+      flag.type = 'button';
+      flag.className = 'msg-report';
+      flag.textContent = 'Report';
+      flag.addEventListener('click', function () { openReport(el, m.id, flag); });
+      head.appendChild(flag);
+    }
 
     var body = document.createElement('div');
     body.className = 'msg-body';
@@ -423,6 +433,53 @@
     if (nearBottom()) jump.hidden = true;
   });
   jump.addEventListener('click', toBottom);
+
+  function closeReport(el) {
+    var row = el.querySelector('.msg-flag');
+    if (row) row.remove();
+    el.classList.remove('reporting');
+  }
+
+  function openReport(el, id, flag) {
+    if (el.querySelector('.msg-flag')) return closeReport(el);
+    el.classList.add('reporting');
+    var row = document.createElement('div');
+    row.className = 'msg-flag';
+    var ask = document.createElement('span');
+    ask.textContent = 'What is wrong with it?';
+    row.appendChild(ask);
+    REASONS.forEach(function (reason) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = reason;
+      b.addEventListener('click', function () { report(el, id, reason, row, flag); });
+      row.appendChild(b);
+    });
+    var cancel = document.createElement('button');
+    cancel.type = 'button';
+    cancel.className = 'cancel';
+    cancel.textContent = 'Cancel';
+    cancel.addEventListener('click', function () { closeReport(el); flag.focus(); });
+    row.appendChild(cancel);
+    el.appendChild(row);
+    row.querySelector('button').focus();
+  }
+
+  function report(el, id, reason, row, flag) {
+    Array.prototype.forEach.call(row.querySelectorAll('button'), function (b) { b.disabled = true; });
+    sb.rpc('gv_chat_report', { p_message_id: id, p_reason: reason }).then(function (res) {
+      if (res.error && recheck(res.error)) return;
+      if (res.error) {
+        row.textContent = ours(res.error) ? res.error.message : 'Could not send the report. Try again in a moment.';
+        setTimeout(function () { closeReport(el); }, 4000);
+        return;
+      }
+      row.textContent = res.data ? 'Reported. Thanks for looking out.' : 'You already reported this one.';
+      flag.textContent = 'Reported';
+      flag.disabled = true;
+      setTimeout(function () { closeReport(el); }, 4000);
+    });
+  }
 
   paintCount();
 
