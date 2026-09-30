@@ -124,7 +124,12 @@
     '@keyframes gvFunLoad{from{width:0}to{width:99%}}',
 
     // Upside-down player. Only the game turns; the bar and its Back button stay put.
-    '#gameOverlay.gv-fun-flipped .game-frame-wrap{transform:rotate(180deg)}'
+    '#gameOverlay.gv-fun-flipped .game-frame-wrap{transform:rotate(180deg)}',
+    '.gv-fun-flipback{position:absolute;left:50%;bottom:24px;z-index:5;transform:translateX(-50%);',
+    'padding:0.75rem 1.4rem;border-radius:100px;border:0;background:var(--accent,#ff3b3b);color:#fff;cursor:pointer;',
+    'font:600 0.92rem/1 "Space Grotesk",system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,0.55)}',
+    '.gv-fun-flipback:focus-visible{outline:2px solid #fff;outline-offset:3px}',
+    '.gv-fun-flipback[hidden]{display:none}'
   ];
 
   function styles() {
@@ -230,14 +235,29 @@
     if (!overlay || !window.MutationObserver) return;
     var open = overlay.classList.contains('show');
 
-    function unflip() { overlay.classList.remove('gv-fun-flipped'); }
+    var back = document.createElement('button');
+    back.type = 'button';
+    back.className = 'gv-fun-flipback';
+    back.textContent = 'Flip it back';
+    back.hidden = true;
+    back.addEventListener('click', unflip);
+    place(undo, back, overlay);
+
+    function unflip() {
+      overlay.classList.remove('gv-fun-flipped');
+      back.hidden = true;
+    }
 
     var watch = new MutationObserver(function () {
       var now = overlay.classList.contains('show');
       if (now === open) return; // our own class change, or nothing that matters
       open = now;
-      if (now && Math.random() < 0.3) overlay.classList.add('gv-fun-flipped');
-      else unflip();
+      if (now && Math.random() < 0.3) {
+        overlay.classList.add('gv-fun-flipped');
+        back.hidden = false;
+      } else {
+        unflip();
+      }
     });
     watch.observe(overlay, { attributes: true, attributeFilter: ['class'] });
     undo.push(function () { watch.disconnect(); unflip(); });
