@@ -9,6 +9,7 @@
   'use strict';
 
   var COUNT = 42;
+  var LOCAL_KEY = 'gv.avatar';
 
   // ─── Drawing ───
   // Every avatar is drawn on a 64x64 square and shown in a circle, so
@@ -486,11 +487,23 @@
     return h % COUNT;
   }
 
+  // ─── Guests ───
+  function localPreset() {
+    var v = null;
+    try { v = localStorage.getItem(LOCAL_KEY); } catch (err) {}
+    return v !== null && /^\d+$/.test(v) && +v < COUNT ? +v : null;
+  }
+  function setLocalPreset(i) {
+    try { localStorage.setItem(LOCAL_KEY, String(index(i))); } catch (err) {}
+  }
+
   window.GV = window.GV || {};
   window.GV.avatars = {
     count: COUNT,
     svg: svg,
     name: name,
-    defaultFor: defaultFor
+    defaultFor: defaultFor,
+    localPreset: localPreset,
+    setLocalPreset: setLocalPreset
   };
 })();
