@@ -210,7 +210,7 @@
 {"id":"avalanche","name":"Avalanche","categories":["Arcade","Skill"],"ranking":227,"img":"/thumbs/avalanche.webp","src":"https://icons-6.us/action-games/avalanche/","site":4,"added":"2026-05-13"},
 {"id":"badicecream","name":"Bad Ice Cream","categories":["Arcade","Puzzle"],"ranking":231,"img":"/thumbs/badicecream.webp","src":"https://icons-6.us/strategy-games/bad-ice-cream/","site":4,"added":"2026-05-13"},
 {"id":"badicecream2","name":"Bad Ice Cream 2","categories":["Arcade","Puzzle"],"ranking":232,"img":"/thumbs/badicecream2.webp","src":"https://icons-6.us/strategy-games/bad-ice-cream-2/","site":4,"added":"2026-05-13"},
-{"id":"badicecream3","name":"Bad Ice Cream 3","categories":["Arcade","Puzzle"],"ranking":233,"img":"https://icons-6.us/strategy-games/bad-ice-cream-3/bad-ice-cream-3.png","src":"https://icons-6.us/strategy-games/bad-ice-cream-3/","local":true},
+{"id":"badicecream3","name":"Bad Ice Cream 3","categories":["Arcade","Puzzle"],"ranking":233,"img":"/thumbs/badicecream3.webp","src":"https://icons-6.us/strategy-games/bad-ice-cream-3/","site":4,"added":"2026-05-13"},
 {"id":"badpiggies","name":"Bad Piggies","categories":["Puzzle"],"ranking":234,"img":"https://upload.wikimedia.org/wikipedia/en/5/51/Bad_Piggies.png","src":null},
 {"id":"black-hole-square","name":"Black Hole Square","categories":["Puzzle","Skill"],"ranking":246,"img":"https://icons-6.us/strategy-games/blacholesquare/icon.png","src":"https://icons-6.us/strategy-games/blacholesquare/","local":true},
 {"id":"bloxorz","name":"Bloxorz","categories":["Puzzle"],"ranking":248,"img":"https://imgs.crazygames.com/games/bloxorz/cover-1669373098527.png","src":null},
