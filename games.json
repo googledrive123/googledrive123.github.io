@@ -388,7 +388,7 @@
 {"id":"ovo-2","name":"OvO 2","categories":["Platformer"],"ranking":511,"img":"/thumbs/ovo-2.webp","src":"https://icons-6.us/action-games/ovo-2/"},
 {"id":"tall-man-run","name":"Tall Man Run","categories":["Action"],"ranking":512,"img":"https://cdn.akamai.steamstatic.com/steam/apps/3819320/header.jpg","src":"/iframe/20a.html","site":13},
 {"id":"toss-the-turtle","name":"Toss the Turtle","categories":["Action"],"ranking":514,"img":"/thumbs/toss-the-turtle.webp","src":"https://icons-6.us/action-games/tosstheturtle/"},
-{"id":"people-playground","name":"People Playground","categories":["Simulation"],"ranking":515,"img":"/thumbs/people-playground.webp","src":"/iframe/194-a.html"},
+{"id":"people-playground","name":"People Playground","categories":["Simulation"],"ranking":515,"img":"/thumbs/people-playground.webp","src":"/iframe/194-a.html","site":13},
 {"id":"speed-stars","name":"Speed Stars","categories":["Action"],"ranking":517,"img":"https://cdn.jsdelivr.net/gh/bubbls/UGS-Assets@main/speed%20stars/screenshots/1.png","src":"/iframe/266.html"},
 {"id":"vena","name":"Vena","categories":["Action"],"ranking":518,"img":"/thumbs/vena.webp","src":null,"site":7,"added":"2026-05-13"},
 {"id":"1-date-danger","name":"1 Date Danger","categories":["Action"],"ranking":519,"img":"/thumbs/1-date-danger.webp","src":"https://genizymath.github.io/iframe/653-f.html"},
