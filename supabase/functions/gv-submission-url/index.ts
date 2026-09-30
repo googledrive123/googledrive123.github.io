@@ -12,21 +12,37 @@
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-// The same origins public.gv_allowed_origins() lets in.
-const ORIGINS = [
-  "https://googledrive123.github.io",
-  "http://localhost:8000",
-  "http://127.0.0.1:8000",
-];
 const LINK_SECONDS = 10 * 60;
+const ORIGINS_MS = 60 * 1000;
 
-function corsHeaders(origin: string | null): Record<string, string> {
+const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
+  auth: { persistSession: false, autoRefreshToken: false },
+});
+
+// The origins public.gv_allowed_origins() lets in: the site, local testing on
+// port 8000 and every active mirror. Read again at most once a minute. When
+// the read fails the last list stays and the next request tries again, so
+// on a cold start with the database down no origin is let in.
+let origins: string[] = [];
+let originsAt = 0;
+
+async function allowedOrigins(): Promise<string[]> {
+  if (Date.now() - originsAt < ORIGINS_MS) return origins;
+  const read = await db.rpc("gv_allowed_origins");
+  if (!read.error && Array.isArray(read.data)) {
+    origins = read.data;
+    originsAt = Date.now();
+  }
+  return origins;
+}
+
+async function corsHeaders(origin: string | null): Promise<Record<string, string>> {
   const headers: Record<string, string> = {
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
     "Vary": "Origin",
   };
-  if (origin && ORIGINS.includes(origin)) headers["Access-Control-Allow-Origin"] = origin;
+  if (origin && (await allowedOrigins()).includes(origin)) headers["Access-Control-Allow-Origin"] = origin;
   return headers;
 }
 
@@ -38,7 +54,7 @@ function fileName(id: number, title: string): string {
 }
 
 Deno.serve(async (req) => {
-  const cors = corsHeaders(req.headers.get("origin"));
+  const cors = await corsHeaders(req.headers.get("origin"));
   const reply = (body: unknown, status = 200) =>
     new Response(JSON.stringify(body), { status, headers: { ...cors, "Content-Type": "application/json" } });
 
@@ -56,10 +72,6 @@ Deno.serve(async (req) => {
   if (!secret || !Number.isSafeInteger(id) || id < 1) {
     return reply({ error: "secret and id are needed" }, 400);
   }
-
-  const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
 
   const check = await db.rpc("analytics_check", { p_secret: secret });
   if (check.error) return reply({ error: "could not check the secret" }, 500);
