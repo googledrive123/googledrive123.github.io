@@ -198,6 +198,44 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  // The bucket's own limit, see submit.sql. Checked here first so nobody
+  // waits through an upload that is going to be refused.
+  var MAX_BYTES = 50 * 1024 * 1024;
+  var fileInput = $('file');
+  var drop = $('drop');
+
+  function note(text, tone) {
+    var n = $('sendNote');
+    n.textContent = text || '';
+    n.className = 'send-note' + (tone ? ' ' + tone : '');
+  }
+
+  function fileProblem(f) {
+    if (!f) return 'Choose the .zip with your game in it.';
+    if (!/\.zip$/i.test(f.name)) return 'That is not a .zip file. Put the game\'s files in a .zip first.';
+    if (f.size < 1) return 'That .zip is empty.';
+    if (f.size > MAX_BYTES) return 'That .zip is ' + size(f.size) + '. It has to be 50 MB or smaller.';
+    return null;
+  }
+
+  function showFile() {
+    var f = fileInput.files && fileInput.files[0];
+    var problem = f ? fileProblem(f) : null;
+    drop.classList.toggle('has-file', !!f && !problem);
+    drop.classList.toggle('bad', !!problem);
+    $('dropMain').textContent = f ? f.name : 'Choose a .zip file';
+    $('dropSub').textContent = f ? size(f.size) + ' · click to pick another' : 'or drop it here · 50 MB at most';
+    note(problem || '', problem ? 'bad' : '');
+  }
+
+  fileInput.addEventListener('change', showFile);
+  ['dragenter', 'dragover'].forEach(function (t) {
+    drop.addEventListener(t, function () { drop.classList.add('over'); });
+  });
+  ['dragleave', 'drop'].forEach(function (t) {
+    drop.addEventListener(t, function () { drop.classList.remove('over'); });
+  });
+
   function refreshMine() {
     return rpc('gv_submission_mine').then(renderMine, function () {});
   }
