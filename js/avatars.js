@@ -286,6 +286,68 @@
         e(32, 46, 12, 8, nose) +
         e(27.5, 45.5, 1.8, 2.3, '#c9184a') + e(36.5, 45.5, 1.8, 2.3, '#c9184a') +
         s('M29 50 Q32 52 35 50', '#c9184a', 1.4);
+    }],
+    ['Raccoon', '#ffb3a7', function () {
+      var fur = '#8d99ae', mask = '#2b2d42', white = '#edf2f4';
+      return p('M13 30 L15 13 L28 21 Z', fur) + p('M51 30 L49 13 L36 21 Z', fur) +
+        p('M16.5 26 L17.5 17 L24.5 21.5 Z', mask) + p('M47.5 26 L46.5 17 L39.5 21.5 Z', mask) +
+        shoulders(fur) + e(32, 38, 20, 17, fur) +
+        e(32, 44, 11, 9, white) + e(24, 28, 5, 2.5, white) + e(40, 28, 5, 2.5, white) +
+        p('M11 36 Q20 29 32 36 Q44 29 53 36 Q44 42 32 39 Q20 42 11 36 Z', mask) +
+        c(24, 35.5, 3, '#fff') + c(40, 35.5, 3, '#fff') +
+        c(24.3, 35.8, 1.8, INK) + c(40.3, 35.8, 1.8, INK) +
+        e(32, 42.5, 3, 2.2, INK) +
+        s('M29.5 46 Q31 47.8 32 46 Q33 47.8 34.5 46', INK, 1.3);
+    }],
+    ['Hamster', '#9d4edd', function () {
+      var fur = '#f6bd60', white = '#fff4e0';
+      return both(function (x) { return c(x, 22, 5, fur) + c(x, 22, 2.6, '#ffb3c6'); }, 18) +
+        e(32, 66, 20, 13, fur) + e(32, 39, 20, 18, fur) +
+        e(32, 50, 8, 7, white) + e(19, 45, 8, 7, white) + e(45, 45, 8, 7, white) +
+        eyes(35, 7, 2.6) + cheeks(44, 13) +
+        e(32, 40.5, 1.8, 1.3, '#ff8fab') +
+        s('M30 43 Q31 44.5 32 43 Q33 44.5 34 43', INK, 1.2);
+    }],
+    ['Axolotl', '#20b2a6', function () {
+      var skin = '#ffc8dd', gill = '#ff70a6';
+      return both(function (x) {
+        var m = x < 32 ? 1 : -1;
+        return s('M' + x + ' 32 Q' + (x - 7 * m) + ' 28 ' + (x - 8 * m) + ' 22', gill, 4) +
+          s('M' + (x - m) + ' 38 Q' + (x - 8 * m) + ' 38 ' + (x - 10 * m) + ' 34', gill, 4) +
+          s('M' + x + ' 44 Q' + (x - 6 * m) + ' 48 ' + (x - 8 * m) + ' 52', gill, 4);
+      }, 13) +
+        e(32, 66, 17, 11, skin) + e(32, 40, 21, 16, skin) +
+        eyes(38, 11, 2.7) + cheeks(44, 13, '#ff8fab') +
+        s('M28 44 Q32 47.5 36 44', INK, 1.6);
+    }],
+    ['Bee', '#3fa7d6', function () {
+      var gold = '#ffd60a';
+      return e(17, 42, 8, 11, '#fff', -25, 0.8) + e(47, 42, 8, 11, '#fff', 25, 0.8) +
+        e(32, 66, 18, 13, INK) + s('M17 59 Q32 54 47 59', gold, 3.5) +
+        s('M26 21 Q24 12 20 10 M38 21 Q40 12 44 10', INK, 1.8) + c(20, 10, 2.4, INK) + c(44, 10, 2.4, INK) +
+        c(32, 35, 16, gold) +
+        eyes(34, 6, 2.8) + cheeks(40, 10) +
+        s('M28.5 40.5 Q32 44 35.5 40.5', INK, 1.7);
+    }],
+    ['Ladybug', '#8fbf5a', function () {
+      var shell = '#e63946', dark = '#1d1d1d';
+      return s('M25 21 Q22 12 18 11 M39 21 Q42 12 46 11', dark, 1.8) + c(18, 11, 2, dark) + c(46, 11, 2, dark) +
+        c(32, 40, 20, shell) +
+        s('M32 30 V60', dark, 1.8) +
+        c(22, 42, 3.5, dark) + c(42, 42, 3.5, dark) + c(25, 53, 2.8, dark) + c(39, 53, 2.8, dark) +
+        p('M16 32 A16 13 0 0 1 48 32 Q32 36 16 32 Z', dark) +
+        c(26, 26, 3.4, '#fff') + c(38, 26, 3.4, '#fff') +
+        c(26.5, 26.5, 1.9, INK) + c(38.5, 26.5, 1.9, INK) +
+        s('M29 30 Q32 32.5 35 30', '#fff', 1.4);
+    }],
+    ['Shark', '#ffb49a', function () {
+      var skin = '#6c8ebf';
+      return p('M28 18 L36 4 L38 19 Z', '#5c7ea8') +
+        shoulders(skin) + e(32, 38, 20, 19, skin) +
+        p('M13 40 Q32 50 51 40 Q50 54 32 57 Q14 54 13 40 Z', '#eaf2fb') +
+        eyes(33, 9, 2.8) +
+        p('M22 43 Q32 53 42 43 Z', INK) +
+        p('M24 43.5 L26 46.5 L28 44.2 Z M30 44.6 L32 47.8 L34 44.6 Z M36 44.2 L38 46.5 L40 43.5 Z', '#fff');
     }]
   ];
 
