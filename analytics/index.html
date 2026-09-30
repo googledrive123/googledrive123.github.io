@@ -1149,7 +1149,7 @@
       $('chBoardH').textContent = 'Board for ' + monthName(month);
       $('chBoard').innerHTML = (rows || []).length ? rows.map(function (r) {
         return '<div class="bc-item"><span class="when">#' + r.rank + '</span>'
-          + '<span class="msg">' + esc(r.nickname || 'a guest') + (r.user_id ? '' : ' (guest)') + '</span>'
+          + '<span class="msg">' + (r.nickname ? esc(r.nickname) + (r.user_id ? '' : ' (guest)') : 'a guest') + '</span>'
           + '<span class="st">' + esc(r.time) + ' \u00b7 ' + esc(new Date(r.at).toLocaleDateString()) + '</span>'
           + '<button class="btn" type="button" data-chrm="' + esc(r.player_key) + '" data-month="' + esc(month) + '">Remove</button></div>';
       }).join('') : '<div class="empty">Nobody has raced it yet.</div>';
