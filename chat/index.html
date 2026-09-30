@@ -262,6 +262,15 @@
 
   function ours(err) { return err && err.code === 'P0001'; }
 
+  // 42501 is PostgREST answering as a guest: the session is gone.
+  function recheck(err) {
+    if (!err || err.code !== '42501') return false;
+    sb.auth.getSession().then(function (r) {
+      if (!r.data.session) signedOut();
+    });
+    return true;
+  }
+
   function poll() {
     if (polling || document.hidden) return;
     polling = true;
@@ -269,7 +278,7 @@
     sb.rpc('gv_chat_recent', { p_after_id: lastId }).then(function (res) {
       polling = false;
       if (res.error) {
-        say('Chat lost its connection. Trying again…', 'wait');
+        if (!recheck(res.error)) say('Chat lost its connection. Trying again…', 'wait');
         return;
       }
       if (status.dataset.kind === 'wait' && !waitTimer) say('');
@@ -330,6 +339,7 @@
   }
 
   function failed(err) {
+    if (recheck(err)) return;
     if (!ours(err)) {
       say('Could not send that. Check your connection and try again.', 'error');
       return;
