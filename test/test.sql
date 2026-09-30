@@ -209,3 +209,52 @@ begin
   return json_build_object('user_id', v_user, 'username', v_name, 'tester', coalesce(p_on, false));
 end;
 $function$;
+
+
+-- The last 500 reports, newest first, resolved ones included so the owner
+-- can see a game's whole history.
+create or replace function public.gv_game_reports_list(p_secret text)
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+
+  return coalesce((
+    select json_agg(json_build_object(
+             'id', r.id,
+             'game_id', r.game_id,
+             'verdict', r.verdict,
+             'note', r.note,
+             'user_id', r.user_id,
+             'username', coalesce(nullif(btrim(p.username), ''), 'Account ' || left(r.user_id::text, 8)),
+             'created_at', r.created_at,
+             'resolved', r.resolved
+           ) order by r.id desc)
+    from (select * from gv_game_reports order by id desc limit 500) r
+    left join profiles p on p.id = r.user_id
+  ), '[]'::json);
+end;
+$function$;
+
+
+create or replace function public.gv_game_report_resolve(p_secret text, p_id bigint)
+returns boolean
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+
+  update gv_game_reports set resolved = true where id = p_id;
+  return found;
+end;
+$function$;
