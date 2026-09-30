@@ -67,3 +67,46 @@ as $function$
 $function$;
 
 revoke all on function public.gv_giveaway_json(public.gv_giveaways, uuid) from public, anon, authenticated;
+
+
+-- What /giveaway/ and /winner/ need: the server's clock (so the countdown
+-- never depends on the visitor's own), the giveaway to show, and the latest
+-- one with a winner. The giveaway to show is the open one ending soonest, or
+-- when none is open, the newest.
+create or replace function public.gv_giveaway_current()
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+  v_show gv_giveaways;
+  v_last gv_giveaways;
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'not read from this origin';
+  end if;
+
+  select * into v_show from gv_giveaways
+  order by (drawn_at is null and ends_at > now()) desc,
+           case when drawn_at is null and ends_at > now() then ends_at end,
+           id desc
+  limit 1;
+
+  select * into v_last from gv_giveaways
+  where drawn_at is not null
+  order by drawn_at desc
+  limit 1;
+
+  return json_build_object(
+    'now', now(),
+    'signed_in', v_user is not null,
+    'giveaway', case when v_show.id is null then null else gv_giveaway_json(v_show, v_user) end,
+    'last_winner', case when v_last.id is null then null else gv_giveaway_json(v_last, v_user) end
+  );
+end;
+$function$;
+
+grant execute on function public.gv_giveaway_current() to anon, authenticated;
