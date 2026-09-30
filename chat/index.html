@@ -79,6 +79,38 @@
       color: #d8d8de;
       overflow-wrap: anywhere;
     }
+    .msg-report {
+      margin-left: auto;
+      padding: 0.1rem 0.4rem;
+      border: 0; border-radius: 6px;
+      background: none;
+      color: var(--muted-2);
+      font: inherit; font-size: 0.7rem;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.15s, color 0.15s;
+    }
+    .msg:hover .msg-report, .msg-report:focus-visible, .msg.reporting .msg-report { opacity: 1; }
+    .msg-report:hover { color: var(--text); }
+    .msg-report:disabled { opacity: 1; cursor: default; color: var(--muted-2); }
+    @media (hover: none) { .msg-report { opacity: 1; } }
+    .msg-flag {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem;
+      margin-top: 0.45rem;
+      font-size: 0.75rem; color: var(--muted);
+    }
+    .msg-flag button {
+      padding: 0.25rem 0.65rem;
+      border-radius: 100px;
+      border: 1px solid var(--border-strong);
+      background: transparent;
+      color: var(--text);
+      font: inherit; font-size: 0.72rem;
+      cursor: pointer;
+    }
+    .msg-flag button:hover { border-color: var(--accent); }
+    .msg-flag button.cancel { border-color: transparent; color: var(--muted-2); }
+    .msg-flag button:disabled { opacity: 0.45; cursor: default; }
 
     .chat-form {
       display: flex; gap: 0.5rem; align-items: center;
