@@ -236,6 +236,65 @@ document.addEventListener('DOMContentLoaded', function () {
     drop.addEventListener(t, function () { drop.classList.remove('over'); });
   });
 
+  // <user id>/<milliseconds>-<name>.zip is the only shape the bucket takes.
+  function storagePath(f) {
+    var base = f.name.replace(/\.zip$/i, '').replace(/[^A-Za-z0-9._-]+/g, '-')
+      .replace(/-+/g, '-').replace(/^[-.]+|[-.]+$/g, '').slice(0, 60);
+    return user.id + '/' + Date.now() + '-' + (base || 'game') + '.zip';
+  }
+
+  // Storage answers in its own words; these are the ones a player can act on.
+  function uploadMessage(err) {
+    var text = String((err && (err.message || err.error)) || '');
+    if (String(err && err.statusCode) === '413' || /maximum allowed size|too large/i.test(text)) {
+      return 'That .zip is over 50 MB, the most one upload can be.';
+    }
+    if (/mime type/i.test(text)) return 'Only .zip files can be sent.';
+    if (/row-level security/i.test(text)) return 'You have sent a lot of files today. Try again tomorrow.';
+    if (/failed to fetch|networkerror|load failed/i.test(text)) {
+      return 'The upload did not get through. Check your connection and try again.';
+    }
+    return text || 'The upload did not get through. Try again.';
+  }
+
+  function setBusy(on) {
+    $('form').querySelectorAll('input, textarea, button').forEach(function (x) { x.disabled = on; });
+    $('sendBtn').textContent = on ? 'Sending…' : 'Send game';
+  }
+
+  $('form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var f = fileInput.files && fileInput.files[0];
+    var fields = { p_title: $('title').value, p_link: $('link').value, p_notes: $('notes').value };
+    if (!fields.p_title.trim()) { note('Give the game a name.', 'bad'); $('title').focus(); return; }
+    var problem = fileProblem(f);
+    if (problem) { note(problem, 'bad'); return; }
+
+    setBusy(true);
+    note('Checking…');
+    var path = storagePath(f);
+    // The words are checked before the file goes, so a refused name does not
+    // cost a 50 MB upload.
+    rpc('gv_submission_check', Object.assign({ p_size: f.size }, fields))
+      .then(function () {
+        note('Uploading ' + size(f.size) + '. A big file can take a minute, so keep this tab open.');
+        return sb.storage.from('submissions').upload(path, f, { contentType: 'application/zip', upsert: false });
+      })
+      .then(function (r) {
+        if (r.error) throw new Error(uploadMessage(r.error));
+        return rpc('gv_submission_create', Object.assign({ p_path: path, p_size: f.size }, fields));
+      })
+      .then(function () {
+        $('form').reset();
+        showFile();
+        note('Sent. The site owner will take a look.', 'good');
+        return refreshMine();
+      }, function (err) {
+        note(message(err), 'bad');
+      })
+      .then(function () { setBusy(false); });
+  });
+
   function refreshMine() {
     return rpc('gv_submission_mine').then(renderMine, function () {});
   }
