@@ -4836,7 +4836,8 @@ sb.auth.getSession().then(({ data: { session } }) => {
 // /?profile (the Settings page links here) opens the profile straight away.
 if (new URLSearchParams(location.search).has('profile')) {
   history.replaceState(history.state, '', location.pathname);
-  openProfile();
+  // After this handler has run, once the profile panel below is set up.
+  setTimeout(openProfile);
 }
 
 // ─── User button → always open profile ───
