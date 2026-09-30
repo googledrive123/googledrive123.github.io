@@ -644,3 +644,59 @@ begin
   return true;
 end;
 $function$;
+
+
+-- Tracks the owner can pick from: every track on the board, most raced first,
+-- with the official ones named. Community tracks have no name on the server,
+-- only their id, and not every player has them.
+create or replace function public.gv_challenge_tracks(p_secret text)
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+
+  return coalesce((
+    select json_agg(json_build_object(
+             'track_id', t.track_id,
+             'name', o.name,
+             'official', o.name is not null,
+             'players', t.players,
+             'this_month', t.this_month
+           ) order by o.name is null, t.players desc, o.name)
+    from (
+      select s.track_id,
+             count(*) as players,
+             count(*) filter (where s.updated_at >= gv_challenge_month()::timestamp at time zone 'utc') as this_month
+      from polytrack_scores s
+      group by s.track_id
+      order by count(*) desc
+      limit 100
+    ) t
+    left join (values
+      ('5803f9e963625804e3de3246d043dc7dde847aa32e991f7f7326b0453f1fa038', 'Summer 1'),
+      ('7eac4fee1111152cfba4d3737410264ca0f22c7f5a2211e79f0099589b8b48c0', 'Summer 2'),
+      ('148826aa16ffaa23dbc453b32cff05e025ddbce1773fc7733cc13d218926515a', 'Summer 3'),
+      ('93c7363dfea7fb09ca1d23b72cad5df43a30841d41c8ff25fb544c85bb03c7ae', 'Summer 4'),
+      ('7603aaeffa1989a649dfaa8e1804bed4481b49df233e377687d0669899566e52', 'Summer 5'),
+      ('c117823cf6788e3247b9ee63a0c091c07352bbe352c650a7790dc6718148c2fa', 'Summer 6'),
+      ('e4bcaca3a583bb0eb62a700a69d14e89c852f0c5bf740fca76e0519ebdfc9ab1', 'Summer 7'),
+      ('7239b17057127936907a805b0caa5d8c6f6c97eca9bdabf1a5312dce479629b7', 'Winter 1'),
+      ('99864b635d1891d22e17eb9267527a07a92c49c0f02893729fa2ded90e3ca0f9', 'Winter 2'),
+      ('a5341fe706097cff2a3812a3fc0d87399254557328351ae8e5c882700fc1a196', 'Winter 3'),
+      ('7d134c939df80c676a258266201beedd3b93572d5603f3ff4339ff8679803715', 'Winter 4'),
+      ('2fe4bd46b0075cc25fc770ce50adbb68447cf493c999635bb272d231811dd264', 'Winter 5'),
+      ('c20b4ee3cd517ca6cae7e43f047548757287fbd08ba81b97892a3ef520159a34', 'Desert 1'),
+      ('88647ea04145fbbbb19b55f1590e038fb0378acb2571110f02cb545cc46b0d57', 'Desert 2'),
+      ('2806030c503abb41a1a26fa9a570888be14296172bb273798ef0ad87a108a2ec', 'Desert 3'),
+      ('4697ea67b18c3f49b30a3d8884602115536650bc5435c88e3732e64d21a72d33', 'Desert 4'),
+      ('e5d084e06db4ab71196fea44efeceb23c8561266a78669c324a38f92581fe2db', 'Desert 5')
+    ) as o (track_id, name) on o.track_id = t.track_id
+  ), '[]'::json);
+end;
+$function$;
