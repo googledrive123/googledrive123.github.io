@@ -71,4 +71,51 @@
     for (var i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
     return bytes;
   }
+
+  var VIEWS = ['Int8Array', 'Uint8Array', 'Uint8ClampedArray', 'Int16Array', 'Uint16Array',
+    'Int32Array', 'Uint32Array', 'Float32Array', 'Float64Array', 'BigInt64Array',
+    'BigUint64Array', 'DataView'];
+
+  function kindOf(v) { return Object.prototype.toString.call(v).slice(8, -1); }
+
+  /* IndexedDB keeps things JSON cannot: bytes, dates, undefined, NaN. Each of
+     those is written as {"$gv": kind, ...} instead. A game's own object that
+     happens to have a "$gv" key is wrapped, so it is never taken for one.
+     A Blob can only be read asynchronously, so it is left as a placeholder
+     and queued in blobs for fillBlobs to finish. */
+  function encode(v, blobs) {
+    if (v === undefined) return { $gv: 'undefined' };
+    if (typeof v === 'number') return isFinite(v) ? v : { $gv: 'number', value: String(v) };
+    if (typeof v === 'bigint') return { $gv: 'bigint', value: v.toString() };
+    if (v === null || typeof v !== 'object') return v;
+
+    var kind = kindOf(v);
+    if (kind === 'Date') return { $gv: 'date', value: v.getTime() };
+    if (kind === 'ArrayBuffer') return { $gv: 'bytes', data: toBase64(new Uint8Array(v)) };
+    if (ArrayBuffer.isView(v)) {
+      return { $gv: 'bytes', view: kind, data: toBase64(new Uint8Array(v.buffer, v.byteOffset, v.byteLength)) };
+    }
+    if (kind === 'Blob' || kind === 'File') {
+      var slot = { $gv: 'blob', type: v.type, data: '' };
+      if (kind === 'File') { slot.name = v.name; slot.lastModified = v.lastModified; }
+      blobs.push([slot, v]);
+      return slot;
+    }
+    if (kind === 'Map') {
+      var entries = [];
+      v.forEach(function (value, key) { entries.push([encode(key, blobs), encode(value, blobs)]); });
+      return { $gv: 'map', entries: entries };
+    }
+    if (kind === 'Set') {
+      var values = [];
+      v.forEach(function (value) { values.push(encode(value, blobs)); });
+      return { $gv: 'set', values: values };
+    }
+    if (kind === 'RegExp') return { $gv: 'regexp', source: v.source, flags: v.flags };
+    if (Array.isArray(v)) return v.map(function (item) { return encode(item, blobs); });
+
+    var out = {};
+    Object.keys(v).forEach(function (key) { out[key] = encode(v[key], blobs); });
+    return Object.prototype.hasOwnProperty.call(v, '$gv') ? { $gv: 'object', value: out } : out;
+  }
 })();
