@@ -3544,6 +3544,26 @@ function render() {
   // ─── Recently played ───
   recentGrid.innerHTML = '';
   const recentGames = recent.map(id => gamesById[id]).filter(Boolean);
+  // ─── Popular now ───
+  const popularSection = document.getElementById('popularSection');
+  const popularGrid = document.getElementById('popularGrid');
+  popularGrid.innerHTML = '';
+  const popularGames = popular.slice(0, POPULAR_ROW).map(id => gamesById[id]);
+  if (isDefaultView && popularGames.length && !GV.layout.hidden('popular')) {
+    popularSection.style.display = '';
+    document.getElementById('popularCount').textContent = popularGames.length;
+    popularGames.forEach((g, i) => {
+      const t = makeTile(g);
+      const rank = document.createElement('span');
+      rank.className = 'popular-rank';
+      rank.textContent = i + 1;
+      t.appendChild(rank);
+      popularGrid.appendChild(t);
+    });
+  } else {
+    popularSection.style.display = 'none';
+  }
+
   if (isDefaultView && recentGames.length > 0 && !GV.layout.hidden('recent')) {
     recentSection.style.display = '';
     recentCount.textContent = recentGames.length;
