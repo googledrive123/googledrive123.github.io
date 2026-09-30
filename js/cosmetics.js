@@ -11,6 +11,7 @@
      applyAvatar(el, cosmetics) rings the element (it should be round already)
      applyTitle(el, cosmetics)  puts the title in el, hides el when there is none
      applyTiles(el, cosmetics)  sets --tile-accent on el
+     fromWallet(wallet)         -> cosmetics, from gv_wallet_get's answer
 
    A cosmetics object is keyed by kind, each an item as the server sends it:
      { name_color: { id, name, rarity, value }, avatar_frame: {...}, title: {...} }
@@ -154,6 +155,20 @@
     else el.style.removeProperty('--tile-accent');
   }
 
+  // gv_wallet_get says what is worn by item id; this looks each one up in
+  // the inventory it sent alongside.
+  function fromWallet(wallet) {
+    var out = {};
+    if (!wallet || !wallet.equipped) return out;
+    var byId = {};
+    (wallet.inventory || []).forEach(function (item) { byId[item.id] = item; });
+    Object.keys(wallet.equipped).forEach(function (kind) {
+      var item = byId[wallet.equipped[kind]];
+      if (item) out[kind] = item;
+    });
+    return out;
+  }
+
   window.GV = window.GV || {};
   window.GV.cosmetics = {
     load: load,
@@ -161,6 +176,7 @@
     applyName: applyName,
     applyAvatar: applyAvatar,
     applyTitle: applyTitle,
-    applyTiles: applyTiles
+    applyTiles: applyTiles,
+    fromWallet: fromWallet
   };
 })();
