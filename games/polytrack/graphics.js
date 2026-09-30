@@ -77,9 +77,13 @@
     return Array.isArray(pairs) ? pairs : [];
   }
 
+  // Everything outside the preset, like the language, stays as it was.
   function writePreset(preset) {
-    var pairs = Object.keys(preset.values).map(function (name) {
-      return [name, preset.values[name]];
+    var pairs = savedSettings().filter(function (pair) {
+      return !Array.isArray(pair) || !(pair[0] in preset.values);
+    });
+    Object.keys(preset.values).forEach(function (name) {
+      pairs.push([name, preset.values[name]]);
     });
     try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(pairs)); } catch (e) {}
   }
