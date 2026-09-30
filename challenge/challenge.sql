@@ -158,3 +158,39 @@ drop trigger if exists gv_challenge_capture on public.polytrack_scores;
 create trigger gv_challenge_capture
   before insert on public.polytrack_scores
   for each row execute function public.gv_challenge_capture();
+
+
+-- Moves a player's runs and badges to another key, keeping the better time
+-- where both have one. Signing in hands a guest's board rows to the account
+-- (polytrack_claim), and the challenge goes with them.
+create or replace function public.gv_challenge_rekey(p_from text, p_to text, p_user uuid)
+returns void
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if p_from is null or p_to is null or p_from = p_to then
+    return;
+  end if;
+
+  insert into gv_challenge_runs (month, track_id, player_key, nickname, user_id, frames, at)
+  select r.month, r.track_id, p_to, r.nickname, p_user, r.frames, r.at
+  from gv_challenge_runs r
+  where r.player_key = p_from
+  on conflict (month, player_key) do update
+    set frames = least(excluded.frames, gv_challenge_runs.frames),
+        at     = case when excluded.frames < gv_challenge_runs.frames
+                      then excluded.at else gv_challenge_runs.at end;
+  delete from gv_challenge_runs where player_key = p_from;
+
+  insert into gv_badges (player_key, badge, month, user_id, created_at)
+  select p_to, b.badge, b.month, p_user, b.created_at
+  from gv_badges b
+  where b.player_key = p_from
+  on conflict do nothing;
+  delete from gv_badges where player_key = p_from;
+end;
+$function$;
+
+revoke all on function public.gv_challenge_rekey(text, text, uuid) from public, anon, authenticated;
