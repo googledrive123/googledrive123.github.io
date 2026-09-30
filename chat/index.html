@@ -503,6 +503,11 @@
     });
   }
 
+  // Signing in on the home page in another tab opens chat here too.
+  window.addEventListener('storage', function (e) {
+    if (e.key === TOKEN_KEY && e.newValue && !out.hidden) location.reload();
+  });
+
   paintCount();
 
   // No session at all needs no network to know, so guests see the sign-in
