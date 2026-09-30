@@ -422,6 +422,8 @@
   proxyInput.value = ls(PROXY_KEY, DEFAULT_PROXY);
   document.getElementById('proxySave').addEventListener('click', function () {
     var v = proxyInput.value.trim();
+    // Only an https proxy: the browser page loads whatever this is in a frame.
+    if (v && !/^https:\/\//i.test(v)) { proxyInput.value = DEFAULT_PROXY; v = ''; }
     try {
       if (!v || v === DEFAULT_PROXY) localStorage.removeItem(PROXY_KEY);
       else localStorage.setItem(PROXY_KEY, v);
