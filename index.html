@@ -19,6 +19,7 @@
   <script src="/js/update-check.js" defer></script>
   <script src="/js/broadcast.js" defer></script>
   <script src="/js/fun.js" defer></script>
+  <script src="/js/apps.js" defer></script>
   <script src="/js/player.js" defer></script>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
@@ -4537,6 +4538,11 @@ function initPolytrackNotice() {
 }
 
 bootCatalog();
+
+// The 9-dot apps menu (js/apps.js, deferred) in both home headers.
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.GV && GV.apps) document.querySelectorAll('[data-apps]').forEach(el => GV.apps.mount(el));
+});
 
 // Some games registered service workers for their own /games/<id>/ folder.
 // Those folders moved to the vaults, and a leftover worker would keep
