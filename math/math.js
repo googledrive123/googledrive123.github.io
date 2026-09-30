@@ -302,4 +302,62 @@
       }
     ]
   };
+
+  // ── Fractions & Percents ────────────────────────────────────────────────
+
+  /* Wrong fractions for a multiple choice: proper, and not equal in value to
+     the right one or to each other once reduced. */
+  function fracWrongs(n, d, pairs) {
+    return pairs.filter(function (f) {
+      return f[0] > 0 && f[0] < f[1] && f[0] * d !== n * f[1];
+    }).map(function (f) { return frac(f[0], f[1]); });
+  }
+
+  var fractions = {
+    easy: [
+      function () {
+        var d = pick([2, 3, 4, 5, 10]), n; do { n = ri(1, d - 1); } while (gcd(n, d) !== 1);
+        var w = d * ri(2, 12), part = w / d, ans = part * n;
+        return num('Work it out.', fr(n, d) + ' of ' + w, ans, s(ans),
+          w + ' ÷ ' + d + ' = ' + part + (n > 1 ? ', and ' + part + ' × ' + n + ' = ' + ans : '') + '.');
+      },
+      function () {
+        var d = ri(5, 12), a = ri(1, d - 2), b = ri(1, d - 1 - a), minus = coin(0.4);
+        var x = minus ? a + b : a, top = minus ? a : a + b, op = minus ? ' − ' : ' + ';
+        return num(minus ? 'Subtract.' : 'Add.', fr(x, d) + op + fr(b, d), top / d, ft(top, d),
+          'The bottoms match, so ' + (minus ? 'subtract' : 'add') + ' the tops: ' + x + op + b + ' = ' + top +
+          ', giving ' + top + '/' + d + (gcd(top, d) > 1 ? ' = ' + ft(top, d) : '') + '.');
+      },
+      function () {
+        var pc = pick([10, 20, 25, 50, 75]);
+        var split = { 10: 10, 20: 5, 25: 4, 50: 2, 75: 4 }[pc], w = split * ri(2, 25), ans = w * pc / 100;
+        var why = pc === 75
+          ? '25% is a quarter: ' + w + ' ÷ 4 = ' + w / 4 + ', and 75% is three of those: ' + ans + '.'
+          : pc + '% is ' + { 10: 'a tenth', 20: 'a fifth', 25: 'a quarter', 50: 'half' }[pc] + ', so ' +
+            w + ' ÷ ' + split + ' = ' + ans + '.';
+        return num('Work it out.', pc + '% of ' + w, ans, s(ans), why);
+      },
+      function () {
+        var f = pick([[1, 2], [1, 4], [3, 4], [1, 5], [2, 5], [3, 5], [4, 5], [3, 10], [7, 10], [9, 10],
+          [1, 20], [3, 20], [7, 20], [4, 25], [6, 25], [1, 8], [3, 8], [5, 8], [7, 8]]);
+        var base = 100 % f[1] === 0 ? 100 : 1000, v = f[0] / f[1];
+        return num('Write it as a decimal.', fr(f[0], f[1]), v, s(v), 'Make the bottom ' + base + ': ' + f[0] + '/' + f[1] +
+          ' = ' + f[0] * base / f[1] + '/' + base + ' = ' + s(v) + '.', { noFrac: true });
+      },
+      function () {
+        var h = coin(0.3) ? ri(1, 9) * 10 : ri(1, 99), v = h / 100;
+        return num('Write it as a percent.', s(v), h, h + '%',
+          'Multiply by 100, which moves the point two places right: ' + s(v) + ' × 100 = ' + h + '%.', { unit: '%' });
+      },
+      function () {
+        var d = ri(3, 12), n; do { n = ri(1, d - 1); } while (gcd(n, d) !== 1);
+        var k = ri(2, 6);
+        // Halving 12/16 to 6/8 is a real mistake: equal, but not simplest.
+        var halfway = k % 2 === 0 && k > 2 ? [fr(n * k / 2, d * k / 2)] : [];
+        return choice('Which is the simplest form?', fr(n * k, d * k), frac(n, d),
+          halfway.concat(fracWrongs(n, d, [[n, d + 1], [n + 1, d], [n, d - 1], [n - 1, d], [n + 1, d + 1]])),
+          'Divide the top and bottom by ' + k + ': ' + n * k + '/' + d * k + ' = ' + n + '/' + d + '.');
+      }
+    ],
+  };
 })();
