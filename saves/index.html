@@ -134,6 +134,53 @@
     <p>PolyTrack is left out because it already syncs with your account. Your sign-in and tab
     disguise are left out too: they belong to this browser, not to a game.</p>
   </div>
+
+<script>
+/* saves.js is deferred like the rest of the chrome, and deferred scripts
+   run before DOMContentLoaded, so GV.saves is ready by then. */
+document.addEventListener('DOMContentLoaded', function () {
+  var saves = window.GV.saves;
+
+  function $(id) { return document.getElementById(id); }
+
+  function el(tag, cls, text) {
+    var node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text) node.textContent = text;
+    return node;
+  }
+
+  function note(target, text, tone) {
+    target.textContent = text || '';
+    target.className = 'save-note' + (tone ? ' ' + tone : '');
+  }
+
+  function message(err) {
+    return (err && err.message) || 'Something went wrong. Try again.';
+  }
+
+  function size(bytes) {
+    if (bytes == null) return '';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return Math.max(1, Math.round(bytes / 1024)) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  function when(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    var day = { day: 'numeric', month: 'short' };
+    if (d.getFullYear() !== new Date().getFullYear()) day.year = 'numeric';
+    return d.toLocaleDateString(undefined, day) + ', '
+      + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  }
+
+  // Nothing else can be pressed while a save is packed, sent or put back.
+  function setBusy(on) {
+    document.querySelectorAll('.page button, .page input').forEach(function (b) { b.disabled = on; });
+  }
+});
+</script>
 </main>
 </body>
 </html>
