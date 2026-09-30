@@ -53,3 +53,61 @@ alter table public.gv_chat_bans enable row level security;
 alter table public.gv_chat_reports enable row level security;
 revoke all on table public.gv_chat_messages, public.gv_chat_bans, public.gv_chat_reports
   from anon, authenticated;
+
+
+-- Sends a message as the signed-in account. Every refusal is a sentence the
+-- page shows as it is.
+create or replace function public.gv_chat_send(p_body text)
+returns json
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+  -- Line breaks and other control characters would let one message fill
+  -- the screen.
+  v_body text := btrim(regexp_replace(coalesce(p_body, ''), '[[:space:][:cntrl:]]+', ' ', 'g'));
+  v_name text;
+  v_row gv_chat_messages;
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'Chat only works on GameVault.';
+  end if;
+  if v_user is null then
+    raise exception 'Sign in to chat.';
+  end if;
+  if v_body = '' then
+    raise exception 'Write something first.';
+  end if;
+  if char_length(v_body) > 300 then
+    raise exception 'Messages can be up to 300 characters.';
+  end if;
+
+  if public.gv_is_rude(v_body) then
+    raise exception 'That message has words we do not allow here. Try saying it another way.';
+  end if;
+
+  -- The profile name, or the name the account signed up with.
+  select nullif(btrim(p.username), '') into v_name from profiles p where p.id = v_user;
+  if v_name is null then
+    select split_part(u.email, '@', 1) into v_name from auth.users u where u.id = v_user;
+  end if;
+  v_name := left(coalesce(nullif(v_name, ''), 'player'), 30);
+
+  insert into gv_chat_messages (user_id, username, body)
+  values (v_user, v_name, v_body)
+  returning * into v_row;
+
+  return json_build_object(
+    'id', v_row.id,
+    'username', v_row.username,
+    'body', v_row.body,
+    'created_at', v_row.created_at,
+    'mine', true
+  );
+end;
+$function$;
+
+revoke all on function public.gv_chat_send(text) from public, anon;
+grant execute on function public.gv_chat_send(text) to authenticated;
