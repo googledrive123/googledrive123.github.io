@@ -62,6 +62,8 @@ as $function$
       select 1 from gv_giveaway_entries e where e.giveaway_id = p_row.id and e.user_id = p_user),
     'winner_name', case when p_row.winner_user is null or public.gv_is_rude(p_row.winner_name) then null
                         else p_row.winner_name end,
+    -- Only ever true for the winner themselves, hidden name or not.
+    'won', coalesce(p_row.winner_user = p_user, false),
     'drawn_at', p_row.drawn_at
   );
 $function$;
