@@ -78,3 +78,8 @@ as $function$
                     auth.uid()::text || '/3.json',
                     auth.uid()::text || '/auto.json');
 $function$;
+
+drop policy if exists gv_saves_files_select on storage.objects;
+create policy gv_saves_files_select on storage.objects
+  for select to authenticated
+  using (bucket_id = 'saves' and public.gv_saves_own_file(name));
