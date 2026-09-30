@@ -308,4 +308,28 @@
       req.onerror = function () { reject(req.error); };
     });
   }
+
+  function fillDb(db, dump) {
+    var names = Object.keys(dump.stores || {});
+    if (!names.length) { db.close(); return Promise.resolve(); }
+    return new Promise(function (resolve, reject) {
+      var tx = db.transaction(names, 'readwrite');
+      names.forEach(function (storeName) {
+        var s = dump.stores[storeName];
+        var store = tx.objectStore(storeName);
+        var inline = isInline(s.keyPath);
+        (s.records || []).forEach(function (r) {
+          if (inline) store.put(decode(r[1]));
+          else store.put(decode(r[1]), decode(r[0]));
+        });
+      });
+      tx.oncomplete = function () { db.close(); resolve(); };
+      tx.onabort = function () { db.close(); reject(tx.error || new Error('A game database could not be written.')); };
+    });
+  }
+
+  function rebuildDb(name, dump) {
+    return deleteDb(name).then(function () { return createDb(name, dump); })
+      .then(function (db) { return fillDb(db, dump); });
+  }
 })();
