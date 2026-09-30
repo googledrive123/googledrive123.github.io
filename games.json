@@ -269,7 +269,7 @@
 {"id":"flippyfish","name":"Flippy Fish","categories":["Arcade","Skill"],"ranking":325,"img":"/thumbs/flippyfish.webp","src":null,"site":5,"added":"2026-05-13"},
 {"id":"fnaf2","name":"\"Five Nights at Freddy's 2\"","categories":["Horror"],"ranking":328,"img":"/thumbs/fnaf2.webp","src":null,"site":5,"added":"2026-05-13"},
 {"id":"fnaf3","name":"\"Five Nights at Freddy's 3\"","categories":["Horror"],"ranking":329,"img":"/thumbs/fnaf3.webp","src":null,"site":5,"added":"2026-05-13"},
-{"id":"fnaf4","name":"\"Five Nights at Freddy's 4\"","categories":["Horror"],"ranking":330,"img":"/games/fnaf4/project/splash.webp","src":null},
+{"id":"fnaf4","name":"\"Five Nights at Freddy's 4\"","categories":["Horror"],"ranking":330,"img":"/thumbs/fnaf4.webp","src":null,"site":5,"added":"2026-05-13"},
 {"id":"fridaynightfunkin","name":"Friday Night Funkin","categories":["Rhythm"],"ranking":331,"img":"/games/fridaynightfunkin/assets/images/logo.png","src":null},
 {"id":"friendlyfire","name":"Friendly Fire","categories":["Action","Shooter"],"ranking":332,"img":"/games/friendlyfire/assets/images/logo.png","src":null},
 {"id":"fruitninja","name":"Fruit Ninja","categories":["Arcade","Skill"],"ranking":333,"img":"https://icons-6.us/casual-games/fruit-ninja/logo.jpg","src":"https://icons-6.us/casual-games/fruit-ninja/","local":true},
