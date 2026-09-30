@@ -132,6 +132,7 @@
   var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
   // Where supabase-js keeps the session the home page signed in with.
   var TOKEN_KEY = 'sb-dxwjxzmlezfyursysays-auth-token';
+  var POLL_MS = 4000;
   var KEEP = 300;
 
   var chat = document.getElementById('chat');
@@ -143,6 +144,7 @@
   var sb = null;
   var byId = {};
   var lastId = 0;
+  var timer = null;
   var polling = false;
 
   function savedSession() {
@@ -153,6 +155,7 @@
   }
 
   function signedOut() {
+    stopPolling();
     chat.hidden = true;
     out.hidden = false;
   }
@@ -229,6 +232,17 @@
     });
   }
 
+  function startPolling() {
+    if (timer) return;
+    poll();
+    timer = setInterval(poll, POLL_MS);
+  }
+
+  function stopPolling() {
+    clearInterval(timer);
+    timer = null;
+  }
+
   // No session at all needs no network to know, so guests see the sign-in
   // note straight away.
   if (!savedSession()) {
@@ -248,7 +262,7 @@
     });
     sb.auth.getSession().then(function (r) {
       if (!r.data.session) return signedOut();
-      poll();
+      startPolling();
     });
   });
 })();
