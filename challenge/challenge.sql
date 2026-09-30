@@ -320,7 +320,12 @@ begin
                  'rank', r.rank,
                  'nickname', r.nickname,
                  'frames', r.frames,
-                 'time', gv_challenge_time(r.frames))
+                 'time', gv_challenge_time(r.frames),
+                 'verified', r.nickname <> 'Anonymous'
+                             and exists (select 1 from gv_verified v where v.key = r.player_key),
+                 'wins', case when r.nickname = 'Anonymous' then 0 else (
+                           select count(*) from gv_badges b
+                           where b.player_key = r.player_key and b.badge = 'challenge-winner') end)
         from ranked r
         where r.player_key = v_key
       )
