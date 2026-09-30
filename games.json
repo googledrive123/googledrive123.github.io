@@ -1328,5 +1328,6 @@
 {"id":"mega-man-project-x","name":"Mega Man Project X","categories":["Platformer"],"img":"/thumbs/mega-man-project-x.webp","src":null,"site":8,"path":"flash/?swf=megamanprojectx.swf","added":"2026-09-30","ranking":1481},
 {"id":"metroid-elements","name":"Metroid Elements","categories":["Platformer"],"img":"/thumbs/metroid-elements.webp","src":null,"site":8,"path":"flash/?swf=metroidelements.swf","added":"2026-09-30","ranking":1482},
 {"id":"miami-shark","name":"Miami Shark","categories":["Action"],"img":"/thumbs/miami-shark.webp","src":null,"site":8,"path":"flash/?swf=miamishark.swf","added":"2026-09-30","ranking":1483},
-{"id":"motherload","name":"Motherload","categories":["Adventure"],"img":"/thumbs/motherload.webp","src":null,"site":8,"path":"flash/?swf=motherload.swf","added":"2026-09-30","ranking":1484}
+{"id":"motherload","name":"Motherload","categories":["Adventure"],"img":"/thumbs/motherload.webp","src":null,"site":8,"path":"flash/?swf=motherload.swf","added":"2026-09-30","ranking":1484},
+{"id":"multitask","name":"Multitask","categories":["Skill"],"img":"/thumbs/multitask.webp","src":null,"site":8,"path":"flash/?swf=multitask.swf","added":"2026-09-30","ranking":1485}
 ]}
