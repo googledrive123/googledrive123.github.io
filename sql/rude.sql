@@ -56,6 +56,7 @@ declare
   ];
   v_text text := lower(coalesce(p_text, ''));
 begin
+  v_text := translate(v_text, '013457@$', 'oieastas');
   v_text := regexp_replace(v_text, '[^a-z]+', ' ', 'g');
 
   return v_text ~ ('\m(' || array_to_string(array(
