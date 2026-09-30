@@ -4088,6 +4088,20 @@ function pickQuick(i) {
 searchInput.addEventListener('input', paintQuickPick);
 searchInput.addEventListener('focus', paintQuickPick);
 searchInput.addEventListener('blur', () => { quickPick.hidden = true; });
+searchInput.addEventListener('keydown', (e) => {
+  if (quickPick.hidden || !qpItems.length) return;
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    const n = qpItems.length;
+    qpOn = e.key === 'ArrowDown' ? (qpOn + 1) % n : (qpOn - 1 + n) % n;
+    quickPick.querySelectorAll('.qp-item').forEach((el, i) => el.classList.toggle('on', i === qpOn));
+  } else if (e.key === 'Enter' && qpOn >= 0) {
+    e.preventDefault();
+    pickQuick(qpOn);
+  } else if (e.key === 'Escape') {
+    quickPick.hidden = true;
+  }
+});
 
 // ───── Sort menu ─────
 const sortBtn = document.getElementById('sortBtn');
