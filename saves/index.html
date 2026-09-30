@@ -381,6 +381,39 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     });
   }
+
+  function rename(slot, info, name) {
+    if (info.querySelector('.slot-rename')) return;
+    var form = el('form', 'slot-rename');
+    var input = el('input', 'field');
+    input.maxLength = 40;
+    input.value = rows[slot].title || '';
+    input.placeholder = 'Name this save';
+    input.setAttribute('aria-label', 'Name for slot ' + slot);
+    var ok = el('button', 'btn btn-sm', 'Save name');
+    ok.type = 'submit';
+    var cancel = button('Cancel', '', function () { form.remove(); name.hidden = false; });
+    form.append(input, ok, cancel);
+    name.hidden = true;
+    info.insertBefore(form, name.nextSibling);
+    input.focus();
+    input.select();
+
+    input.addEventListener('keydown', function (e) { if (e.key === 'Escape') cancel.click(); });
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      setBusy(true);
+      saves.cloudRename(slot, input.value).then(function (saved) {
+        rows[slot] = saved;
+        note(cloudNote, '');
+      }, function (err) {
+        note(cloudNote, message(err), 'bad');
+      }).then(function () {
+        setBusy(false);
+        render();
+      });
+    });
+  }
 });
 </script>
 </main>
