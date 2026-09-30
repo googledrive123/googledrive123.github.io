@@ -4724,7 +4724,12 @@ function updateUserUI() {
     btn.classList.toggle('signed-in', signed);
     av.classList.toggle('guest', !signed && !(window.GV && GV.avatars && GV.avatars.localPreset() != null));
     paintAvatar(av);
-    lbl.textContent = name;
+    // The name in its own span, so a name colour from the shop stays on it.
+    lbl.textContent = '';
+    const nm = document.createElement('span');
+    nm.className = 'user-name-text';
+    nm.textContent = name;
+    lbl.appendChild(nm);
     if (verifiedAt) lbl.insertAdjacentHTML('beforeend', BADGE_SVG);
     if (window._level > 1) {
       const lv = document.createElement('span');
