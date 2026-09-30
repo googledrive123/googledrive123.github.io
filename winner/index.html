@@ -100,6 +100,9 @@
       color: transparent;
       animation: wn-rainbow 4s linear infinite;
     }
+    /* Usernames run up to 32 characters; a long one still fits a line. */
+    .wn-name.long { font-size: clamp(1.9rem, 6.5vw, 3.1rem); }
+    .wn-name.longer { font-size: clamp(1.5rem, 5vw, 2.4rem); }
     /* Deeper colors, so the yellow still reads on white. */
     :root[data-theme="light"] .wn-name {
       background-image: linear-gradient(90deg, #e0262f, #e67700, #c99a00, #1f9d55, #1c7ed6, #6741d9, #c2255c, #e0262f);
@@ -231,7 +234,10 @@
 
   function fill() {
     $('wnLabel').textContent = winner.label;
-    $('wnName').textContent = winner.name;
+    var name = $('wnName');
+    name.textContent = winner.name;
+    name.classList.toggle('long', winner.name.length > 11 && winner.name.length <= 20);
+    name.classList.toggle('longer', winner.name.length > 20);
     $('wnWhat').textContent = winner.what;
     $('wnYou').hidden = !winner.you;
   }
