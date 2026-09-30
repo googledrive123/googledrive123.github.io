@@ -89,3 +89,15 @@ create table if not exists public.gv_crate_tiers (
 );
 
 alter table public.gv_crate_tiers enable row level security;
+
+-- At the 120 a day cap a common crate is under half an hour of play and a
+-- legendary one is more than a week.
+insert into public.gv_crate_tiers (id, name, price, sort, common, uncommon, rare, epic, legendary) values
+  ('common',    'Common crate',      50, 1, 70, 22,  6, 1.8, 0.2),
+  ('rare',      'Rare crate',       150, 2, 40, 35, 18, 6,   1),
+  ('epic',      'Epic crate',       400, 3, 10, 30, 38, 18,  4),
+  ('legendary', 'Legendary crate', 1000, 4,  0, 10, 40, 38, 12)
+on conflict (id) do update
+  set name = excluded.name, price = excluded.price, sort = excluded.sort,
+      common = excluded.common, uncommon = excluded.uncommon, rare = excluded.rare,
+      epic = excluded.epic, legendary = excluded.legendary;
