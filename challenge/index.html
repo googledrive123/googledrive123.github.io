@@ -150,6 +150,159 @@
       keep your badge with your account. Anonymous mode keeps your name off this page as well.</li>
     </ul>
   </div>
+
+<script>
+(function () {
+  'use strict';
+
+  var SUPA_URL = 'https://dxwjxzmlezfyursysays.supabase.co';
+  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
+
+  // PolyTrack's official tracks, by the start of their ids. The server only
+  // knows a track by its id; this says which one it is.
+  var OFFICIAL = {
+    '5803f9e96362': 'Summer 1', '7eac4fee1111': 'Summer 2', '148826aa16ff': 'Summer 3',
+    '93c7363dfea7': 'Summer 4', '7603aaeffa19': 'Summer 5', 'c117823cf678': 'Summer 6',
+    'e4bcaca3a583': 'Summer 7', '7239b1705712': 'Winter 1', '99864b635d18': 'Winter 2',
+    'a5341fe70609': 'Winter 3', '7d134c939df8': 'Winter 4', '2fe4bd46b007': 'Winter 5',
+    'c20b4ee3cd51': 'Desert 1', '88647ea04145': 'Desert 2', '2806030c503a': 'Desert 3',
+    '4697ea67b18c': 'Desert 4', 'e5d084e06db4': 'Desert 5'
+  };
+
+  function $(id) { return document.getElementById(id); }
+
+  var card = $('chCard');
+
+  var sb = null;
+  var data = null;
+  var visitorId = null;
+  // Server time minus this device's time, so a wrong clock on a school laptop
+  // does not move the countdown.
+  var skew = 0;
+  var loading = false;
+
+  function two(n) { return n < 10 ? '0' + n : String(n); }
+
+  function plural(n, one, many) {
+    return Number(n || 0).toLocaleString() + ' ' + (n === 1 ? one : many);
+  }
+
+  function when(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' }) + ', '
+      + d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  }
+
+  // '2026-10-01' as "October 2026", read as UTC so it never slips a month.
+  function monthName(day) {
+    var p = String(day || '').split('-');
+    var d = new Date(Date.UTC(+p[0], +p[1] - 1, 1));
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleDateString(undefined, { month: 'long', year: 'numeric', timeZone: 'UTC' });
+  }
+
+  function official(trackId) {
+    return OFFICIAL[String(trackId || '').slice(0, 12)] || null;
+  }
+
+  function say(text) { $('chMsg').textContent = text || ''; }
+
+  function paintClock() {
+    var c = data && data.challenge;
+    if (!c) return;
+    var left = Math.max(0, Date.parse(c.ends_at) - (Date.now() + skew));
+    var s = Math.floor(left / 1000);
+    $('chD').textContent = Math.floor(s / 86400);
+    $('chH').textContent = two(Math.floor(s / 3600) % 24);
+    $('chM').textContent = two(Math.floor(s / 60) % 60);
+    $('chS').textContent = two(s % 60);
+    // The month is over, so ask for the next one.
+    if (left <= 0) load();
+  }
+
+  function paintNone() {
+    card.dataset.state = 'none';
+    $('chMonth').textContent = 'This month';
+    $('chTitle').textContent = 'No track yet';
+    $('chEnv').hidden = true;
+    $('chTrack').hidden = true;
+    $('chNote').hidden = true;
+    $('chEmpty').hidden = false;
+    $('chFoot').hidden = true;
+  }
+
+  function paintChallenge(c) {
+    card.dataset.state = 'on';
+    $('chMonth').textContent = monthName(c.month);
+    $('chTitle').textContent = c.title;
+    $('chEmpty').hidden = true;
+
+    var name = official(c.track_id);
+    var env = $('chEnv');
+    env.hidden = !name;
+    if (name) {
+      var kind = name.split(' ')[0];
+      env.textContent = kind;
+      env.className = 'badge ' + kind.toLowerCase();
+    }
+    var track = $('chTrack');
+    track.hidden = false;
+    if (!name) track.textContent = 'A community track';
+    else if (name === c.title) track.textContent = 'An official PolyTrack track';
+    else track.textContent = 'Official track: ' + name;
+
+    $('chNote').hidden = !c.note;
+    $('chNote').textContent = c.note || '';
+    $('chMeta').textContent = 'Ends ' + when(c.ends_at) + ' · ' + plural(c.runners, 'racer', 'racers');
+    $('chFoot').hidden = false;
+    paintClock();
+  }
+
+  function paint() {
+    if (data.challenge) paintChallenge(data.challenge);
+    else paintNone();
+  }
+
+  function load() {
+    if (loading) return;
+    loading = true;
+    sb.rpc('gv_challenge_current', { p_visitor_id: visitorId }).then(function (r) {
+      loading = false;
+      if (r.error) throw r.error;
+      skew = Date.parse(r.data.now) - Date.now();
+      data = r.data;
+      say('');
+      paint();
+    }).catch(function (err) {
+      loading = false;
+      console.error(err);
+      if (!data) $('chTitle').textContent = 'The challenge could not load';
+      say('Could not reach GameVault. Refresh to try again.');
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    if (!window.supabase) {
+      $('chTitle').textContent = 'The challenge could not load';
+      say('Refresh to try again.');
+      return;
+    }
+    // Restores the home page's session, if there is one, so a signed-in
+    // player is found by their account and a guest by this browser's id.
+    sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+    var identity = window.GV && window.GV.identity;
+    Promise.all([
+      sb.auth.getSession(),
+      identity ? identity.ready : Promise.resolve(null)
+    ]).then(function (r) {
+      visitorId = r[1] || null;
+      load();
+    });
+    setInterval(paintClock, 1000);
+  });
+})();
+</script>
 </main>
 </body>
 </html>
