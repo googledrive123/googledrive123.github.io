@@ -226,6 +226,43 @@ document.addEventListener('DOMContentLoaded', function () {
       setBusy(false);
     });
   });
+
+  // Games are running on the progress read at load, so the page reloads
+  // once the new progress is in rather than let them save the old over it.
+  function putBack(run, target) {
+    setBusy(true);
+    note(target, 'Putting your progress back…');
+    return run().then(function () {
+      note(target, 'Done. Reloading…', 'good');
+      setTimeout(function () { location.reload(); }, 700);
+    }, function (err) {
+      setBusy(false);
+      note(target, message(err), 'bad');
+    });
+  }
+
+  var uploadInput = $('uploadInput');
+  $('uploadBtn').addEventListener('click', function () { uploadInput.click(); });
+
+  uploadInput.addEventListener('change', function () {
+    var file = uploadInput.files && uploadInput.files[0];
+    uploadInput.value = '';
+    if (!file) return;
+    note(fileNote, '');
+    saves.readFile(file).then(function (data) {
+      var made = when(data.made);
+      return ask($('fileConfirm'), {
+        title: 'This replaces the game progress in this browser',
+        body: 'Every game goes back to how it was in ' + file.name + (made ? ', saved ' + made : '')
+          + '. Anything played since then is lost, unless you download a save file first.',
+        yes: 'Replace my progress'
+      }).then(function (ok) {
+        if (ok) return putBack(function () { return saves.restore(data); }, fileNote);
+      });
+    }).catch(function (err) {
+      note(fileNote, message(err), 'bad');
+    });
+  });
 });
 </script>
 </main>
