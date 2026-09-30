@@ -62,8 +62,13 @@
   var video = document.getElementById('rrVideo');
   var sound = document.getElementById('rrSound');
   // The tap counts as the user asking for sound, so the reload may play it.
+  // A fresh frame rather than a new src: changing src adds a history entry,
+  // and then Back would only take the video back to muted.
   sound.addEventListener('click', function () {
-    video.src = video.src.replace('mute=1', 'mute=0');
+    var fresh = video.cloneNode(false);
+    fresh.src = video.src.replace('mute=1', 'mute=0');
+    video.parentNode.replaceChild(fresh, video);
+    video = fresh;
     sound.hidden = true;
   });
 
