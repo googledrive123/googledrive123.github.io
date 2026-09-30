@@ -1306,5 +1306,6 @@
 {"id":"supermario64","name":"Supermario64","categories":[],"ranking":9999,"img":null,"src":null,"hidden":true,"site":8},
 {"id":"templerun2","name":"Templerun2","categories":[],"ranking":9999,"img":null,"src":null,"hidden":true,"site":8},
 {"id":"thereisnogame","name":"Thereisnogame","categories":[],"ranking":9999,"img":null,"src":null,"hidden":true,"site":8},
-{"id":"tunnelrush","name":"Tunnelrush","categories":[],"ranking":9999,"img":null,"src":null,"hidden":true,"site":8}
+{"id":"tunnelrush","name":"Tunnelrush","categories":[],"ranking":9999,"img":null,"src":null,"hidden":true,"site":8},
+{"id":"win11","name":"Win11","categories":[],"ranking":9999,"img":null,"src":null,"hidden":true,"site":8}
 ]}
