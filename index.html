@@ -3745,6 +3745,7 @@ let mounted = null;
 // answer about an earlier mount from one about this one.
 let mountedFrom = null;
 let mountToken = 0;
+let introToken = -1;
 
 // Which copy this browser has been told to run, by game id: 'vault' or 'src'.
 // Survives reloads, so someone on a network that blocks one picks once and it
@@ -4034,9 +4035,13 @@ function closeGame() {
 gameFrame.addEventListener('load', () => {
   // Blanking the frame between games fires this too. Only the real one counts.
   if (!expectLoad) return;
-  const wrap = gameFrame.parentElement;
-  wrap.querySelectorAll('.gv-intro').forEach(el => el.remove());
-  playIntro(wrap);
+  // Once per mount: a game that moves its frame to another page loads again.
+  if (introToken !== mountToken) {
+    introToken = mountToken;
+    const wrap = gameFrame.parentElement;
+    wrap.querySelectorAll('.gv-intro').forEach(el => el.remove());
+    playIntro(wrap);
+  }
   clearTimeout(stallTimer);
   loaderSwap.hidden = true;
   gameLoader.classList.add('hidden');
