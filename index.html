@@ -3554,13 +3554,14 @@ window.addEventListener('message', (e) => {
   if (mountedFrom === 'vault' && mounted.src) mountGame(mounted, 'src');
 });
 
-function toggleOffline() {
+function toggleSource() {
   if (!canSwap(mounted)) return;
-  prefs.flip(mounted.id);
-  mountGame(mounted);
+  const next = mountedFrom === 'vault' ? 'src' : 'vault';
+  picks.set(mounted.id, next);
+  mountGame(mounted, next);
 }
-gameSwap.addEventListener('click', toggleOffline);
-loaderSwap.addEventListener('click', toggleOffline);
+gameSwap.addEventListener('click', toggleSource);
+loaderSwap.addEventListener('click', toggleSource);
 
 function openGame(g) {
   gameOverlay.classList.add('show');
