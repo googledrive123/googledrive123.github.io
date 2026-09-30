@@ -151,3 +151,48 @@ $function$;
 
 revoke all on function public.gv_giveaway_enter(integer) from public, anon;
 grant execute on function public.gv_giveaway_enter(integer) to authenticated;
+
+
+-- Owner only, behind the dashboard secret.
+--
+-- The prize check is a backstop for the page's promise: site things only.
+-- Anything that reads like money, game currency bought with money, or
+-- something sent to a home is refused.
+create or replace function public.gv_giveaway_create(
+  p_secret text,
+  p_title text,
+  p_prize_text text,
+  p_ends_at timestamptz
+) returns json
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_title text := btrim(coalesce(p_title, ''));
+  v_prize text := btrim(coalesce(p_prize_text, ''));
+  v_row gv_giveaways;
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+  if char_length(v_title) not between 1 and 80 then
+    raise exception 'title must be 1 to 80 characters';
+  end if;
+  if char_length(v_prize) not between 1 and 200 then
+    raise exception 'prize must be 1 to 200 characters';
+  end if;
+  if v_prize ~* '[$£€]|\m(cash|money|dollars?|euros?|gift ?cards?|paypal|venmo|robux|v-?bucks|shipping|shipped|posted|mailed)\M' then
+    raise exception 'prizes are site things only (badges, crates, a name color), never money or anything sent';
+  end if;
+  if p_ends_at is null or p_ends_at <= now() then
+    raise exception 'the end time must be in the future';
+  end if;
+
+  insert into gv_giveaways (title, prize_text, ends_at)
+  values (v_title, v_prize, p_ends_at)
+  returning * into v_row;
+
+  return row_to_json(v_row);
+end;
+$function$;
