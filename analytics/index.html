@@ -1097,7 +1097,7 @@
   }
 
   // ── auth / wiring ──
-  function showDash() { $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); load(); loadPeople(); setTimer(); }
+  function showDash() { $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); load(); loadPeople(); loadBroadcasts(); setTimer(); }
   function setTimer() { clearInterval(state.timer); if ($('autoRefresh').checked) state.timer = setInterval(load, 60000); }
   function tryLogin(secret, remember) {
     $('loginErr').textContent = '';
@@ -1127,6 +1127,8 @@
     if (p) setVerified(p, false);
   });
   $('verifyBtn').addEventListener('click', function () { var p = picked(); if (p) setVerified(p, !p.verified); });
+  $('bcSend').addEventListener('click', sendBroadcast);
+  $('bcList').addEventListener('click', function (e) { var b = e.target.closest('button[data-stop]'); if (b) stopBroadcast(+b.dataset.stop); });
   $('exportBtn').addEventListener('click', exportCSV);
   $('autoRefresh').addEventListener('change', setTimer);
   $('rangeSeg').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; state.range = b.dataset.range; $('rangeSeg').querySelectorAll('button').forEach(function (x) { x.classList.toggle('active', x === b); }); load(); });
