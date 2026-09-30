@@ -18,6 +18,71 @@
   <script src="/js/site.js" defer></script>
   <script src="/js/player.js" defer></script>
   <style>
+    /* Buttons, rows and the clock all set their own display, which would
+       otherwise beat the hidden attribute. */
+    .page [hidden] { display: none !important; }
+
+    /* This month's card, under a strip of chequered flag. */
+    .ch-card { position: relative; padding: 0; overflow: hidden; }
+    .ch-card::before {
+      content: '';
+      display: block;
+      height: 10px;
+      background: repeating-conic-gradient(var(--text) 0 25%, transparent 0 50%) 0 0 / 10px 10px;
+      opacity: 0.14;
+    }
+    .ch-head { padding: 1.15rem 1.25rem 1.1rem; }
+    .ch-head .panel-label { margin-bottom: 0.6rem; }
+    .ch-title-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.75rem; }
+    .ch-title {
+      font-size: clamp(1.6rem, 5vw, 2.3rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.1;
+      color: var(--text);
+      overflow-wrap: anywhere;
+    }
+    .ch-card[data-state="loading"] .ch-title,
+    .ch-card[data-state="none"] .ch-title { font-size: 1.35rem; font-weight: 600; }
+    .badge.summer { color: #5ce08a; border-color: rgba(92,224,138,0.45); }
+    .badge.winter { color: #6aa8ff; border-color: rgba(106,168,255,0.45); }
+    .badge.desert { color: #f0c04a; border-color: rgba(240,192,74,0.45); }
+    .ch-track { margin-top: 0.45rem; font-size: 0.85rem; color: var(--muted); }
+    .page .ch-head p.ch-note { margin-top: 0.6rem; font-size: 0.9rem; color: var(--text); max-width: 62ch; }
+    .page .ch-head p.ch-empty { margin-top: 0.45rem; font-size: 0.88rem; }
+
+    .ch-foot {
+      display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between;
+      gap: 1rem 1.5rem;
+      padding: 1.1rem 1.25rem 1.25rem;
+      border-top: 1px solid var(--border);
+    }
+    .ch-clock { display: flex; gap: 0.45rem; }
+    .ch-cell {
+      min-width: 3.5rem;
+      padding: 0.55rem 0.5rem 0.45rem;
+      border-radius: 10px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+    .ch-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.5rem; font-weight: 600; line-height: 1.1;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+    .ch-unit {
+      margin-top: 0.2rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.56rem; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--muted-2);
+    }
+    .ch-meta { margin-top: 0.55rem; font-size: 0.78rem; color: var(--muted-2); }
+    .page .ch-card a.btn { color: #fff; text-decoration: none; }
+    .ch-race { min-width: 9rem; }
+    .ch-race svg { width: 15px; height: 15px; }
+
+    .ch-msg { padding: 0 1.25rem 1rem; font-size: 0.8rem; color: #ff7a7a; }
+    .ch-msg:empty { display: none; }
+
     .ch-rules { counter-reset: rule; list-style: none; }
     .page ul.ch-rules { margin: 0; }
     .ch-rules li { position: relative; padding-left: 2rem; font-size: 0.86rem; }
@@ -37,6 +102,36 @@
   <h1>Monthly challenge</h1>
   <p class="lede">One PolyTrack track a month. Set the fastest time on it before the month ends
   and the Challenge winner badge is yours.</p>
+
+  <div class="panel ch-card" id="chCard" data-state="loading">
+    <div class="ch-head">
+      <div class="panel-label" id="chMonth">This month</div>
+      <div class="ch-title-row">
+        <div class="ch-title" id="chTitle">Checking this month's track…</div>
+        <span class="badge" id="chEnv" hidden></span>
+      </div>
+      <div class="ch-track" id="chTrack" hidden></div>
+      <p class="ch-note" id="chNote" hidden></p>
+      <p class="ch-empty" id="chEmpty" hidden>No track is set for this month yet. Check back soon,
+      and keep racing: every PolyTrack time still goes on the leaderboard.</p>
+    </div>
+    <div class="ch-foot" id="chFoot" hidden>
+      <div class="ch-time">
+        <div class="ch-clock" role="timer" aria-label="Time left this month">
+          <div class="ch-cell"><div class="ch-num" id="chD">0</div><div class="ch-unit">days</div></div>
+          <div class="ch-cell"><div class="ch-num" id="chH">00</div><div class="ch-unit">hrs</div></div>
+          <div class="ch-cell"><div class="ch-num" id="chM">00</div><div class="ch-unit">min</div></div>
+          <div class="ch-cell"><div class="ch-num" id="chS">00</div><div class="ch-unit">sec</div></div>
+        </div>
+        <div class="ch-meta" id="chMeta"></div>
+      </div>
+      <a class="btn btn-primary ch-race" href="/games/polytrack">
+        Race it
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+    <div class="ch-msg" id="chMsg" role="status"></div>
+  </div>
 
   <div class="panel">
     <div class="panel-label">Rules</div>
