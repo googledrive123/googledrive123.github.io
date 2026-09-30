@@ -3986,6 +3986,9 @@ function paintMore(g) {
       if (window._trackClose) window._trackClose();
       addRecent(x.id);
       showMore(false);
+      // Swap the address rather than stack it: Back leaves the player instead
+      // of showing the new game under the old game's address.
+      history.replaceState({page:'game', gameId:x.id}, '', '/games/' + x.id);
       openGame(x);
     });
     gameMore.appendChild(b);
