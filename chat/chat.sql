@@ -250,3 +250,85 @@ $function$;
 
 revoke all on function public.gv_chat_report(bigint, text) from public, anon;
 grant execute on function public.gv_chat_report(bigint, text) to authenticated;
+
+
+-- Everything the dashboard's chat panel shows, behind the dashboard secret.
+--
+-- reports: one entry per message with open reports, newest report first,
+-- with every reason and who gave it. report_id is the newest report's id,
+-- the one to hand gv_chat_resolve.
+-- recent: the last 200 messages, removed ones included.
+-- bans: every ban, with whether it still holds.
+create or replace function public.gv_chat_mod_list(p_secret text)
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+
+  return json_build_object(
+    'reports', coalesce((
+      select json_agg(r order by r.last_reported_at desc)
+        from (
+          select m.id as message_id,
+                 max(rp.id) as report_id,
+                 m.body,
+                 m.username,
+                 m.user_id,
+                 m.created_at,
+                 m.deleted,
+                 count(*) as count,
+                 max(rp.created_at) as last_reported_at,
+                 json_agg(json_build_object(
+                   'id', rp.id,
+                   'reason', rp.reason,
+                   'reporter', coalesce(nullif(btrim(p.username), ''), rp.reporter::text),
+                   'reporter_id', rp.reporter,
+                   'created_at', rp.created_at
+                 ) order by rp.id) as reports
+            from gv_chat_reports rp
+            join gv_chat_messages m on m.id = rp.message_id
+            left join profiles p on p.id = rp.reporter
+           where not rp.resolved
+           group by m.id
+        ) r
+    ), '[]'::json),
+    'recent', coalesce((
+      select json_agg(json_build_object(
+               'id', m.id,
+               'user_id', m.user_id,
+               'username', m.username,
+               'body', m.body,
+               'created_at', m.created_at,
+               'deleted', m.deleted,
+               'banned', exists (
+                 select 1 from gv_chat_bans b
+                  where b.user_id = m.user_id and (b.until is null or b.until > now())
+               )
+             ) order by m.id desc)
+        from (select * from gv_chat_messages order by id desc limit 200) m
+    ), '[]'::json),
+    'bans', coalesce((
+      select json_agg(json_build_object(
+               'user_id', b.user_id,
+               'username', coalesce(
+                 nullif(btrim(p.username), ''),
+                 (select m.username from gv_chat_messages m
+                   where m.user_id = b.user_id order by m.id desc limit 1),
+                 b.user_id::text),
+               'reason', b.reason,
+               'until', b.until,
+               'created_at', b.created_at,
+               'active', b.until is null or b.until > now()
+             ) order by b.created_at desc)
+        from gv_chat_bans b
+        left join profiles p on p.id = b.user_id
+    ), '[]'::json)
+  );
+end;
+$function$;
