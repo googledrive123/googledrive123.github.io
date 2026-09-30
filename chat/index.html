@@ -171,6 +171,8 @@
   var timer = null;
   var polling = false;
   var sending = false;
+  var waitUntil = 0;
+  var waitTimer = null;
 
   function savedSession() {
     try {
@@ -270,7 +272,7 @@
         say('Chat lost its connection. Trying again…', 'wait');
         return;
       }
-      if (status.dataset.kind === 'wait') say('');
+      if (status.dataset.kind === 'wait' && !waitTimer) say('');
       var list = res.data || [];
       list.forEach(function (m) { if (m.id > lastId) lastId = m.id; });
       add(list, before === 0);
@@ -302,19 +304,50 @@
     count.classList.toggle('full', n >= MAX);
   }
 
+  function pad(n) { return n < 10 ? '0' + n : String(n); }
+
+  function paintSend() {
+    var left = Math.ceil((waitUntil - Date.now()) / 1000);
+    if (left > 0) {
+      send.disabled = true;
+      send.textContent = left >= 60 ? Math.floor(left / 60) + ':' + pad(left % 60) : left + 's';
+      return;
+    }
+    clearInterval(waitTimer);
+    waitTimer = null;
+    send.textContent = 'Send';
+    send.disabled = sending;
+    if (status.dataset.kind === 'wait') say('');
+  }
+
+  // The server holds the real limit. Waiting here as well means a normal
+  // chatter never hits it and never sees the error.
+  function cooldown(secs) {
+    waitUntil = Date.now() + secs * 1000;
+    clearInterval(waitTimer);
+    waitTimer = setInterval(paintSend, 250);
+    paintSend();
+  }
+
   function failed(err) {
     if (!ours(err)) {
       say('Could not send that. Check your connection and try again.', 'error');
       return;
     }
-    say(err.message, 'error');
+    var wait = /wait=(\d+)/.exec(err.hint || '');
+    if (wait) {
+      say(err.message, 'wait');
+      cooldown(Number(wait[1]));
+    } else {
+      say(err.message, 'error');
+    }
   }
 
   input.addEventListener('input', paintCount);
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();
-    if (!sb || sending) return;
+    if (!sb || sending || waitTimer) return;
     var text = input.value.trim();
     if (!text) {
       say('Write something first.', 'wait');
@@ -326,18 +359,18 @@
       sending = false;
       if (res.error) {
         failed(res.error);
-        send.disabled = false;
+        paintSend();
         return;
       }
       input.value = '';
       paintCount();
       say('');
       add([res.data], true);
-      send.disabled = false;
+      cooldown(5);
     }, function () {
       sending = false;
       say('Could not send that. Check your connection and try again.', 'error');
-      send.disabled = false;
+      paintSend();
     });
   });
 
