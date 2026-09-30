@@ -101,6 +101,35 @@
     .level .pts { font-family: 'JetBrains Mono', monospace; font-size: 0.64rem; color: var(--muted-2); margin-left: 0.45rem; }
     .level.active { background: var(--surface-2); color: var(--text); box-shadow: inset 0 0 0 1px var(--border-strong); }
     .level.active .pts { color: var(--accent); }
+
+    /* Question card */
+    .quiz { padding: 1.5rem; transition: border-color 0.2s; }
+    .quiz:focus { outline: none; }
+    .quiz.is-right { border-color: rgba(92,224,138,0.35); }
+    .quiz.is-wrong { border-color: rgba(255,59,59,0.35); }
+    .quiz-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.6rem; }
+    .quiz-head .panel-label { margin: 0; }
+    .quiz-count { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; color: var(--muted-2); }
+    .worth {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.66rem;
+      color: var(--accent);
+      border: 1px solid rgba(255,59,59,0.4);
+      border-radius: 100px;
+      padding: 0.1rem 0.45rem;
+    }
+    .page .ask { margin-top: 1.1rem; color: var(--muted); font-size: 0.95rem; }
+    .page .ask.big { color: var(--text); font-size: 1.15rem; line-height: 1.55; max-width: 60ch; margin-bottom: 1.2rem; }
+
+    .expr {
+      margin: 0.8rem 0 1.4rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(1.35rem, 4.2vw, 2rem);
+      line-height: 1.6;
+      color: var(--text);
+      overflow-wrap: anywhere;
+    }
+    .expr:empty { display: none; }
+    .expr > div + div { margin-top: 0.1rem; }
   </style>
 </head>
 <body>
@@ -123,6 +152,16 @@
     <div class="panel-label" style="margin-top:1.1rem">Difficulty</div>
     <div class="levels" id="levels"></div>
   </div>
+
+  <section class="panel quiz" id="quiz" tabindex="-1" aria-label="Question">
+    <div class="quiz-head">
+      <span class="panel-label" id="quizLabel">Loading</span>
+      <span class="worth" id="quizWorth"></span>
+      <span class="quiz-count" id="quizCount"></span>
+    </div>
+    <p class="ask" id="ask"></p>
+    <div class="expr" id="expr"></div>
+  </section>
 </main>
 </body>
 </html>
