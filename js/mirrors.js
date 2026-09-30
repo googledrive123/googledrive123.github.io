@@ -20,6 +20,7 @@
   var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
   var MAIN = 'https://googledrive123.github.io';
   var CACHE_KEY = 'gv.mirrors.list';
+  var CHECK_MS = 5000;
 
   function rpc(name, args) {
     return fetch(SUPA_URL + '/rest/v1/rpc/' + name, {
@@ -68,9 +69,30 @@
     return listing;
   }
 
+  /* An address's icon, loaded as a plain image: that needs no permission from
+     the other address, and a school filter answers it with a block page or
+     nothing at all, neither of which is an image. 'up' when it loads,
+     'blocked' when it fails, 'unknown' when nothing comes back in time. */
+  function check(origin) {
+    return new Promise(function (resolve) {
+      var img = new Image();
+      var timer = setTimeout(function () { finish('unknown'); }, CHECK_MS);
+      function finish(state) {
+        clearTimeout(timer);
+        img.onload = img.onerror = null;
+        img.removeAttribute('src');
+        resolve(state);
+      }
+      img.onload = function () { finish('up'); };
+      img.onerror = function () { finish('blocked'); };
+      img.src = String(origin).replace(/\/+$/, '') + '/favicon.svg?' + Date.now();
+    });
+  }
+
   window.GV = window.GV || {};
   window.GV.mirrors = {
     MAIN: MAIN,
-    list: list
+    list: list,
+    check: check
   };
 })();
