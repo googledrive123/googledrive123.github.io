@@ -226,6 +226,7 @@
   function $(id) { return document.getElementById(id); }
 
   var card = $('gwCard');
+  var enterBtn = $('gwEnter');
   var note = $('gwNote');
 
   var sb = null;
@@ -234,6 +235,7 @@
   // does not move the countdown.
   var skew = 0;
   var loading = false;
+  var entering = false;
 
   function say(text, bad) {
     note.textContent = text || '';
@@ -280,6 +282,29 @@
     $('gwTicket').hidden = true;
   }
 
+  function paintAction(g) {
+    var open = g.status === 'open';
+    enterBtn.hidden = !open || !data.signed_in || g.entered;
+    enterBtn.disabled = entering;
+    enterBtn.textContent = entering ? 'Entering…' : 'Enter';
+    $('gwIn').hidden = !g.entered || g.status === 'drawn';
+    $('gwSignIn').hidden = !open || data.signed_in;
+    var who = $('gwWho');
+    who.textContent = '';
+    if (open && !data.signed_in) {
+      who.textContent = 'You only need a username.';
+    } else if (open && data.name) {
+      who.appendChild(document.createTextNode(g.entered ? 'Entered as ' : 'Entering as '));
+      var b = document.createElement('b');
+      b.textContent = data.name;
+      who.appendChild(b);
+    } else if (g.status === 'closed' && g.entered) {
+      who.textContent = 'Good luck.';
+    }
+    // An empty column still takes a row on a phone.
+    $('gwAction').hidden = enterBtn.hidden && $('gwIn').hidden && $('gwSignIn').hidden && !who.textContent;
+  }
+
   function paintGiveaway(g) {
     card.dataset.status = g.status;
     $('gwState').textContent = LABELS[g.status] || '';
@@ -309,6 +334,7 @@
     else if (!g.entries) meta.textContent = 'Closed ' + when(g.ends_at) + ' with no entries.';
     else meta.textContent = 'Closed ' + when(g.ends_at) + ' with ' + entries + '. The winner is drawn soon.';
 
+    paintAction(g);
     paintClock();
   }
 
@@ -339,7 +365,9 @@
       loading = false;
       if (r.error) throw r.error;
       skew = Date.parse(r.data.now) - Date.now();
+      var name = data && data.name;
       data = r.data;
+      data.name = data.signed_in ? name : null;
       paint();
     }).catch(function (err) {
       loading = false;
@@ -349,6 +377,36 @@
         $('gwTitle').textContent = 'The giveaway could not load';
       }
       say('Could not reach GameVault. Refresh to try again.', true);
+    });
+  }
+
+  enterBtn.addEventListener('click', function () {
+    var g = data && data.giveaway;
+    if (!g || entering) return;
+    entering = true;
+    say('');
+    paintAction(g);
+    sb.rpc('gv_giveaway_enter', { p_id: g.id }).then(function (r) {
+      entering = false;
+      if (r.error) {
+        // The server's refusals are sentences meant to be shown as they are.
+        say(r.error.message || 'Could not enter. Try again.', true);
+        load();
+        return;
+      }
+      data.giveaway = r.data;
+      paint();
+      say('You are in. The winner is drawn when the clock runs out.');
+    });
+  });
+
+  // The username can change after sign-up; the email it was made with does not.
+  function loadName(user) {
+    sb.from('profiles').select('username').eq('id', user.id).maybeSingle().then(function (r) {
+      var name = (r.data && r.data.username) || (user.email || '').split('@')[0];
+      if (!data) data = { name: name };
+      else data.name = name;
+      if (data.giveaway) paintAction(data.giveaway);
     });
   }
 
@@ -363,6 +421,7 @@
     // when it runs out. Without one every call goes out as a guest.
     sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
     sb.auth.getSession().then(function (r) {
+      if (r.data.session) loadName(r.data.session.user);
       load();
     });
     setInterval(paintClock, 1000);
