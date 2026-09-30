@@ -137,8 +137,8 @@
     .catch(function () { note('Could not load the catalog. Head back to the homepage.'); });
 
   // Sends the address that failed to the owner's dashboard (404/reports.sql).
-  var failed = location.pathname;
-  try { failed = sessionStorage.getItem('gv.missing') || failed; } catch (e) {}
+  // `missing` was read (and cleared from sessionStorage) at the top.
+  var failed = missing || location.pathname;
   var cameFrom = document.referrer;
   var reportBtn = document.getElementById('nfReport');
   reportBtn.addEventListener('click', function () {
