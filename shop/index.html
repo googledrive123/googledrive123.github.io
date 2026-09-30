@@ -162,6 +162,69 @@
       font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase;
       color: var(--text); white-space: nowrap;
     }
+    /* Crate reveal: three cards that flip over one after another. With reduced
+       motion, site.css turns the transition off and they simply turn up. */
+    .reveal {
+      margin: auto; width: min(560px, calc(100vw - 2rem));
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--border-strong); border-radius: 18px;
+      padding: 1.4rem 1.25rem 1.25rem;
+    }
+    .reveal::backdrop { background: rgba(4, 4, 6, 0.78); backdrop-filter: blur(4px); }
+    .reveal h2 { margin: 0 0 1.1rem; font-size: 1.1rem; text-align: center; }
+    .reveal-cards { display: flex; justify-content: center; gap: 0.6rem; }
+    .flip { --tier: #a0a0aa; flex: 1 1 0; max-width: 158px; aspect-ratio: 3 / 4; perspective: 900px; }
+    .flip[data-tier="rare"]      { --tier: #6aa8ff; }
+    .flip[data-tier="epic"]      { --tier: #b58cff; }
+    .flip[data-tier="legendary"] { --tier: #f0c04a; }
+    .flip-inner {
+      position: relative; width: 100%; height: 100%;
+      transform-style: preserve-3d;
+      transition: transform 0.7s cubic-bezier(0.2, 0.75, 0.25, 1);
+    }
+    .flip.open .flip-inner { transform: rotateY(180deg); }
+    .face {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      border-radius: 14px; padding: 0.6rem;
+      backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    }
+    .face.back {
+      border: 1.5px solid var(--tier);
+      background:
+        repeating-linear-gradient(135deg, transparent 0 10px, color-mix(in srgb, var(--tier) 12%, transparent) 10px 20px),
+        linear-gradient(180deg, color-mix(in srgb, var(--tier) 22%, #1a1a20), #101014);
+      font-family: 'JetBrains Mono', monospace; font-size: 2rem; font-weight: 600; color: var(--tier);
+    }
+    .face.front {
+      transform: rotateY(180deg);
+      background: var(--bg);
+      border: 1.5px solid var(--r);
+      box-shadow: 0 0 0 1px color-mix(in srgb, var(--r) 20%, transparent), 0 8px 30px -12px var(--r);
+      text-align: center;
+    }
+    .flip.r-epic .face.front, .flip.r-legendary .face.front { box-shadow: 0 0 26px -4px var(--r); }
+    .face .item-look { height: 52px; }
+    .face .item-name { font-size: 0.8rem; }
+    .face .item-meta { flex-wrap: wrap; }
+    .face .pv-name { font-size: 0.95rem; }
+    .face .pv-title { font-size: 0.56rem; padding: 0.25rem 0.45rem; white-space: normal; }
+    .tag-new {
+      margin-top: 0.45rem; padding: 0.12rem 0.45rem; border-radius: 100px;
+      background: var(--r); color: #0b0b0e;
+      font-family: 'JetBrains Mono', monospace; font-size: 0.56rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+    }
+    .tag-dup { margin-top: 0.45rem; font-family: 'JetBrains Mono', monospace; font-size: 0.56rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted-2); }
+    .reveal-sum { text-align: center; min-height: 1.3em; margin-top: 1rem; font-size: 0.84rem; color: var(--muted); }
+    .reveal .btn-row { justify-content: center; }
+
+    @media (max-width: 420px) {
+      .reveal { padding: 1.1rem 0.75rem 1rem; }
+      .reveal-cards { gap: 0.4rem; }
+      .face { padding: 0.4rem; }
+      .face .pv-avatar { width: 32px; height: 32px; }
+      .face .pv-tile { width: 56px; height: 38px; }
+    }
   </style>
 </head>
 <body>
@@ -203,6 +266,16 @@
 
   <h2 id="itemsHeading">Everything in the crates</h2>
   <div id="collection"></div>
+
+  <dialog class="reveal" id="reveal" aria-labelledby="revealTitle">
+    <h2 id="revealTitle"></h2>
+    <div class="reveal-cards" id="revealCards"></div>
+    <p class="reveal-sum" id="revealSum" aria-live="polite"></p>
+    <div class="btn-row">
+      <button class="btn" type="button" id="revealAgain"></button>
+      <button class="btn btn-primary" type="button" id="revealDone">Done</button>
+    </div>
+  </dialog>
 
 <script>
 // Waits for DOMContentLoaded so supabase-js and js/cosmetics.js (both
