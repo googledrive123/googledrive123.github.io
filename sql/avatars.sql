@@ -228,3 +228,38 @@ end;
 $function$;
 
 grant execute on function public.gv_public_profiles(uuid[]) to anon, authenticated;
+
+
+-- Owner only, behind the dashboard secret. The pictures waiting for review,
+-- oldest first. p_status 'approved' lists the ones already showing instead,
+-- to find one to take down.
+create or replace function public.gv_avatar_queue(p_secret text, p_status text default 'pending')
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+
+  return coalesce((
+    select json_agg(json_build_object(
+             'user_id', v.user_id,
+             'username', coalesce(nullif(btrim(p.username), ''), split_part(u.email, '@', 1)),
+             'upload', case when coalesce(p_status, 'pending') = 'approved'
+                            then v.approved_upload else v.upload end,
+             'uploaded_at', v.uploaded_at,
+             'approved', v.approved_upload
+           ) order by v.uploaded_at)
+    from gv_avatars v
+    join auth.users u on u.id = v.user_id
+    left join profiles p on p.id = v.user_id
+    where case when coalesce(p_status, 'pending') = 'approved'
+               then v.approved_upload is not null
+               else v.upload_status = 'pending' end
+  ), '[]'::json);
+end;
+$function$;
