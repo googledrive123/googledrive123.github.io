@@ -5274,7 +5274,8 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
   async function openMoviePlayer(movie) {
     playerTitle.textContent = movie.title || 'Loading…';
     playerYear.textContent  = movie.year  || '';
-    playerFrame.innerHTML   = `<iframe src="${EMBED_MOVIE}${movie.id}" frameborder="0" allowfullscreen></iframe>`;
+    watching = 'movie:' + movie.id;
+    offerResume(`${EMBED_MOVIE}${movie.id}`);
     history.pushState({page:'movie', id: movie.id}, '', '/movie/' + movie.id);
 
     const posterSrc = movie.poster
@@ -5396,6 +5397,21 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
     playerFrame.querySelectorAll('[data-go]').forEach(b =>
       b.addEventListener('click', () => start(b.dataset.go === '1' ? p.t : 0)));
   }
+
+  // Progress from the embed, at most every few seconds.
+  let lastSaved = 0;
+  window.addEventListener('message', e => {
+    if (e.origin !== 'https://vidlink.pro' || !watching) return;
+    const m = e.data;
+    if (!m || m.type !== 'PLAYER_EVENT' || !m.data) return;
+    const d = m.data;
+    const now = Date.now();
+    if (d.event === 'timeupdate' && now - lastSaved < 5000) return;
+    lastSaved = now;
+    const all = progressAll();
+    all[watching] = { t: d.event === 'ended' ? 0 : +d.currentTime || 0, d: +d.duration || 0, at: now };
+    progressSave(all);
+  });
 
   function loadTVFrame(id, season, episode) {
     const all = progressAll();
