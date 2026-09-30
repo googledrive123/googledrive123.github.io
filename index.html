@@ -4943,6 +4943,7 @@ async function openProfile() {
   document.getElementById('profileEditSection').style.display = signed ? '' : 'none';
 
   paintAvatar(av);
+  paintPicker();
   if (signed) {
     document.getElementById('profileUsernameInput').value = name;
     document.getElementById('profilePwSection').style.display = '';
@@ -4951,6 +4952,47 @@ async function openProfile() {
     renderLocalStats();
   }
 }
+
+// The 42 built-in pictures, and for an account an upload that waits for the
+// owner to approve it.
+function paintPicker() {
+  const A = window.GV && GV.avatars;
+  const box = document.getElementById('profileAvatarPicker');
+  if (!A || !box) return;
+  box.innerHTML = '';
+  const current = currentUser
+    ? (myAvatar && myAvatar.approved ? null : (myAvatar && myAvatar.preset != null ? myAvatar.preset : A.defaultFor(currentUser.id)))
+    : A.localPreset();
+  A.picker(box, current, async (i) => {
+    if (!currentUser) A.setLocalPreset(i);
+    else {
+      try { myAvatar = await A.setPreset(sb, i); }
+      catch (e) { document.getElementById('profileAvatarMsg').textContent = e.message; return; }
+    }
+    updateUserUI();
+    paintAvatar(document.getElementById('profileAvatarLg'));
+  });
+  document.getElementById('profileUploadRow').style.display = currentUser ? '' : 'none';
+  const msg = document.getElementById('profileAvatarMsg');
+  msg.textContent = currentUser && myAvatar && myAvatar.status === 'rejected' ? 'Your last picture was not approved.'
+    : currentUser && myAvatar && myAvatar.status === 'pending' ? 'Your picture is waiting to be approved.' : '';
+}
+
+document.getElementById('profileAvatarFile').addEventListener('change', async (e) => {
+  const file = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!file || !currentUser) return;
+  const msg = document.getElementById('profileAvatarMsg');
+  msg.textContent = 'Sending…';
+  try {
+    myAvatar = await GV.avatars.upload(sb, await GV.avatars.resizeToDataUrl(file));
+    msg.textContent = myAvatar.status === 'approved' ? 'Picture updated.' : 'Sent. It shows once it is approved.';
+    updateUserUI();
+    paintAvatar(document.getElementById('profileAvatarLg'));
+  } catch (err) {
+    msg.textContent = err.message || 'Could not send that picture.';
+  }
+});
 
 function closeProfile() { profileOverlay.classList.remove('show'); }
 document.getElementById('profileBackdrop').addEventListener('click', closeProfile);
