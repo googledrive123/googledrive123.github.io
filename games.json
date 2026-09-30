@@ -34,7 +34,7 @@
 {"id":"badtimesimulator","name":"Bad Time Simulator","categories":["Action","Skill"],"ranking":32,"img":"/games/badtimesimulator/icon-114.png","src":null},
 {"id":"blocky-snakes","name":"Blocky Snakes","categories":["Action"],"ranking":33,"img":"https://cdn.jsdelivr.net/gh/waycrosspublicmedia/whatver/blocky-snakes/icon.png","src":"/iframe/168.html"},
 {"id":"fifa-10","name":"Fifa 10","categories":["Action"],"ranking":34,"img":"https://upload.wikimedia.org/wikipedia/en/2/24/FIFA_10_Cover.jpg","src":"https://genizymath.github.io/iframe/686.html"},
-{"id":"2drocketleague","name":"2D Rocket League","categories":["Sports"],"ranking":35,"img":"/games/2drocketleague/unnamed.png","src":null},
+{"id":"2drocketleague","name":"2D Rocket League","categories":["Sports"],"ranking":35,"img":"/thumbs/2drocketleague.webp","src":null,"site":2,"added":"2026-05-13"},
 {"id":"cuphead","name":"Cuphead","categories":["Action"],"ranking":36,"img":"https://upload.wikimedia.org/wikipedia/en/e/eb/Cuphead_%28artwork%29.png","src":"https://genizymath.github.io/iframe/465-fix.html"},
 {"id":"flappyplane","name":"Flappy Plane","categories":["Arcade","Skill"],"ranking":37,"img":"/games/flappyplane/assets/thumb.png","src":null},
 {"id":"adventure-capitalist","name":"Adventure Capitalist","categories":["Idle"],"ranking":38,"img":"/games/adventure-capitalist/logo.webp","src":null},
