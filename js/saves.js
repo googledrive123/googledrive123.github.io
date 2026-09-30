@@ -480,4 +480,12 @@
   }
 
   function filePath(user, slot) { return user.id + '/' + slot + '.json'; }
+
+  var COLUMNS = 'slot,title,size_bytes,updated_at';
+
+  function cloudList() {
+    return withUser(function (c) {
+      return c.from('gv_saves').select(COLUMNS).order('slot').then(check);
+    });
+  }
 })();
