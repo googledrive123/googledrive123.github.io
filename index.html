@@ -4034,6 +4034,9 @@ function closeGame() {
 gameFrame.addEventListener('load', () => {
   // Blanking the frame between games fires this too. Only the real one counts.
   if (!expectLoad) return;
+  const wrap = gameFrame.parentElement;
+  wrap.querySelectorAll('.gv-intro').forEach(el => el.remove());
+  playIntro(wrap);
   clearTimeout(stallTimer);
   loaderSwap.hidden = true;
   gameLoader.classList.add('hidden');
