@@ -44,7 +44,7 @@
 {"id":"vex7","name":"Vex 7","categories":["Platformer"],"ranking":42,"img":"https://icons-6.us/action-games/vex7/assets/icon.jpeg","src":"https://icons-6.us/action-games/vex7/","local":true},
 {"id":"minesweeper","name":"Minesweeper","categories":["Puzzle"],"ranking":43,"img":"https://icons-6.us/strategy-games/minesweeper/img/minesweeper.png","src":"https://icons-6.us/strategy-games/minesweeper/","local":true},
 {"id":"timeshooter2","name":"Time Shooter 2","categories":["Action","Shooter"],"ranking":44,"img":"https://imgs.crazygames.com/games/time-shooter-2/cover-1655215853507.png","src":null},
-{"id":"1v1space","name":"1v1 Space","categories":["Action","Shooter"],"ranking":46,"img":"/games/1v1space/splash.png","src":null},
+{"id":"1v1space","name":"1v1 Space","categories":["Action","Shooter"],"ranking":46,"img":"/thumbs/1v1space.webp","src":null,"site":2,"added":"2026-05-13"},
 {"id":"8ball","name":"8 Ball Pool","categories":["Sports"],"ranking":47,"img":"https://icons-6.us/driving-games/8-ball/tmp/8BallBilliardsClassicTeaser.jpg","src":"https://icons-6.us/driving-games/8-ball/","local":true},
 {"id":"draw-the-hill","name":"Draw the Hill","categories":["Puzzle","Driving"],"ranking":48,"img":"https://icons-6.us/driving-games/draw-the-hill/icons/icon-512.png","src":"https://icons-6.us/driving-games/draw-the-hill/","local":true},
 {"id":"thisistheonlylevel2","name":"This Is The Only Level 2","categories":["Platformer"],"ranking":49,"img":"/games/thisistheonlylevel2/icon.png","src":null},
