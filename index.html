@@ -3283,6 +3283,8 @@ function toggleStar(id, btn) {
   if (starred.has(id)) { starred.delete(id); btn.classList.remove('active'); }
   else { starred.add(id); btn.classList.add('active'); }
   saveStars(starred);
+  // Signed in, the account keeps a copy too (set up in the auth block below).
+  if (window._starSync) window._starSync(id, starred.has(id));
   btn.classList.remove('pop');
   void btn.offsetWidth;
   btn.classList.add('pop');
