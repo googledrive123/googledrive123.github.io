@@ -209,6 +209,11 @@
   });
 
   say('type an address and press Enter');
+
+  // /unblocker/?url=discord.com opens straight on that site (the Discord and
+  // Amazon tiles on the home page link here).
+  var start = new URLSearchParams(location.search).get('url');
+  if (start) go(start);
 })();
 </script>
 </main>
