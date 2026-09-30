@@ -83,3 +83,15 @@ drop policy if exists gv_saves_files_select on storage.objects;
 create policy gv_saves_files_select on storage.objects
   for select to authenticated
   using (bucket_id = 'saves' and public.gv_saves_own_file(name));
+
+-- An upload that replaces a slot's file needs insert and update both.
+drop policy if exists gv_saves_files_insert on storage.objects;
+create policy gv_saves_files_insert on storage.objects
+  for insert to authenticated
+  with check (bucket_id = 'saves' and public.gv_saves_own_file(name));
+
+drop policy if exists gv_saves_files_update on storage.objects;
+create policy gv_saves_files_update on storage.objects
+  for update to authenticated
+  using (bucket_id = 'saves' and public.gv_saves_own_file(name))
+  with check (bucket_id = 'saves' and public.gv_saves_own_file(name));
