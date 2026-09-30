@@ -177,6 +177,67 @@
   </div>
 
 <script>
+/* supabase-js is deferred like the rest of the chrome, and deferred scripts
+   run before DOMContentLoaded, so window.supabase is ready by then. */
+document.addEventListener('DOMContentLoaded', function () {
+  var SUPA_URL = 'https://dxwjxzmlezfyursysays.supabase.co';
+  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
+
+  function $(id) { return document.getElementById(id); }
+
+  function el(tag, cls, text) {
+    var node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text) node.textContent = text;
+    return node;
+  }
+
+  function message(err) {
+    return (err && err.message) || 'Something went wrong. Try again.';
+  }
+
+  function when(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    var day = { day: 'numeric', month: 'short' };
+    if (d.getFullYear() !== new Date().getFullYear()) day.year = 'numeric';
+    return d.toLocaleDateString(undefined, day) + ', '
+      + d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  }
+
+  var sb = null;
+  try { sb = window.supabase.createClient(SUPA_URL, SUPA_KEY); } catch (e) {}
+
+  function rpc(name, args) {
+    return sb.rpc(name, args || {}).then(function (r) {
+      if (r.error) throw r.error;
+      return r.data;
+    });
+  }
+
+  // Signed out and signed in without the role see the same thing; only the
+  // hint about signing in differs.
+  function gate() {
+    if (!sb) return Promise.reject(new Error('Could not reach GameVault. Check your connection and reload.'));
+    return sb.auth.getSession().then(function (r) {
+      var user = r.data && r.data.session && r.data.session.user;
+      if (!user) return 'out';
+      return rpc('gv_is_tester').then(function (yes) { return yes ? 'tester' : 'no'; });
+    });
+  }
+
+  gate().then(function (who) {
+    $('gate').hidden = true;
+    if (who !== 'tester') {
+      $('notTester').hidden = false;
+      $('signInHint').hidden = who !== 'out';
+      return;
+    }
+    $('tester').hidden = false;
+  }).catch(function (err) {
+    $('gate').textContent = message(err);
+  });
+});
 </script>
 </main>
 </body>
