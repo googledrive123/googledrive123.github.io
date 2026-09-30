@@ -1270,5 +1270,6 @@
 {"id":"santy-is-home","name":"Santy is Home","categories":["Horror"],"ranking":1470,"img":"https://icons-6.us/action-games/santy-is-home/splash.png","src":"https://icons-6.us/action-games/santy-is-home/"},
 {"id":"tunnel-rush-2","name":"Tunnel Rush 2","categories":["Skill"],"ranking":1471,"img":"https://icons-6.us/action-games/tunnel-rush-2/logo.jpg","src":"https://icons-6.us/action-games/tunnel-rush-2/"},
 {"id":"adarkroom","name":"Adarkroom","categories":[],"ranking":9999,"img":null,"src":null,"hidden":true,"site":7},
-{"id":"basketrandom","name":"Basketrandom","categories":[],"ranking":9999,"img":null,"src":null,"hidden":true,"site":7}
+{"id":"basketrandom","name":"Basketrandom","categories":[],"ranking":9999,"img":null,"src":null,"hidden":true,"site":7},
+{"id":"boxingrandom","name":"Boxingrandom","categories":[],"ranking":9999,"img":null,"src":null,"hidden":true,"site":7}
 ]}
