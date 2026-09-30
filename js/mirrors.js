@@ -141,6 +141,30 @@
     return walk(value);
   }
 
+  function host(origin) { return String(origin).replace(/^https?:\/\//, ''); }
+
+  /* Resolves with the first {gv: kind} message from win at origin, or fails
+     after ms, or as soon as the player closes that tab. */
+  function waitFor(win, origin, kind, ms, late) {
+    return new Promise(function (resolve, reject) {
+      var timer = setTimeout(function () { stop(); reject(new Error(late)); }, ms);
+      var watch = setInterval(function () {
+        if (win.closed) { stop(); reject(new Error('The other tab was closed before your saves got there.')); }
+      }, 500);
+      function stop() {
+        clearTimeout(timer);
+        clearInterval(watch);
+        window.removeEventListener('message', on);
+      }
+      function on(e) {
+        if (e.source !== win || e.origin !== origin || !e.data || e.data.gv !== kind) return;
+        stop();
+        resolve(e.data);
+      }
+      window.addEventListener('message', on);
+    });
+  }
+
   window.GV = window.GV || {};
   window.GV.mirrors = {
     MAIN: MAIN,
