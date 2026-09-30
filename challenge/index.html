@@ -83,6 +83,56 @@
     .ch-msg { padding: 0 1.25rem 1rem; font-size: 0.8rem; color: #ff7a7a; }
     .ch-msg:empty { display: none; }
 
+    /* The top ten, and the visitor's own row under them when they are
+       further down. */
+    .ch-board .table-wrap { margin-top: 0; }
+    .ch-board table.gv td { vertical-align: middle; }
+    .ch-board table.gv tr:last-child td { border-bottom: none; }
+    .ch-board th.num, .ch-board td.num { text-align: right; }
+    .ch-pos { width: 3.25rem; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; }
+    table.gv td.ch-pos { color: var(--muted); }
+    .ch-medal {
+      display: inline-grid; place-items: center;
+      width: 1.5rem; height: 1.5rem; border-radius: 50%;
+      font-weight: 600;
+      border: 1px solid currentColor;
+    }
+    .ch-medal.m1 { color: #f0c04a; background: rgba(240,192,74,0.12); }
+    .ch-medal.m2 { color: #c3c7d1; background: rgba(195,199,209,0.1); }
+    .ch-medal.m3 { color: #d8955f; background: rgba(216,149,95,0.12); }
+    :root[data-theme="light"] .ch-medal.m1 { color: #b8860b; }
+    :root[data-theme="light"] .ch-medal.m2 { color: #7a7f8c; }
+    :root[data-theme="light"] .ch-medal.m3 { color: #a8622d; }
+    .ch-who { display: flex; align-items: center; gap: 0.4rem; min-width: 0; }
+    .ch-name { color: var(--text); font-weight: 500; overflow-wrap: anywhere; }
+    .ch-check { width: 14px; height: 14px; flex-shrink: 0; }
+    .ch-crown {
+      display: inline-flex; align-items: center; gap: 0.15rem;
+      font-family: 'JetBrains Mono', monospace; font-size: 0.66rem;
+      color: #f0c04a;
+    }
+    :root[data-theme="light"] .ch-crown { color: #b8860b; }
+    .ch-crown svg { width: 14px; height: 14px; }
+    .ch-you-tag {
+      padding: 0.08rem 0.45rem;
+      border-radius: 100px;
+      font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--accent); border: 1px solid var(--accent);
+    }
+    .ch-board tr.ch-you td { background: rgba(255,59,59,0.07); }
+    .ch-board tr.ch-you td:first-child { box-shadow: inset 2px 0 0 var(--accent); }
+    .ch-board td.ch-clock-cell {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    .ch-board tr.ch-gap td { padding: 0.15rem 0.85rem; color: var(--muted-2); letter-spacing: 0.3em; }
+    .ch-board td.ch-none { padding: 1rem 0.85rem; color: var(--muted); }
+    .ch-standing { margin-top: 0.75rem; font-size: 0.8rem; color: var(--muted-2); }
+    .ch-standing:empty { display: none; }
+    .ch-standing b { color: var(--muted); font-weight: 500; }
+
     .ch-rules { counter-reset: rule; list-style: none; }
     .page ul.ch-rules { margin: 0; }
     .ch-rules li { position: relative; padding-left: 2rem; font-size: 0.86rem; }
@@ -131,6 +181,17 @@
       </a>
     </div>
     <div class="ch-msg" id="chMsg" role="status"></div>
+  </div>
+
+  <div class="panel ch-board" id="chBoard" hidden>
+    <div class="panel-label">Top 10</div>
+    <div class="table-wrap">
+      <table class="gv">
+        <thead><tr><th>#</th><th>Player</th><th class="num">Time</th></tr></thead>
+        <tbody id="chRows"></tbody>
+      </table>
+    </div>
+    <div class="ch-standing" id="chStanding"></div>
   </div>
 
   <div class="panel">
@@ -259,9 +320,95 @@
     paintClock();
   }
 
+  var CHECK_SVG = '<svg class="ch-check" viewBox="0 0 24 24" role="img" aria-label="Verified"><circle cx="12" cy="12" r="11" fill="#1d9bf0"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var CROWN_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/></svg>';
+
+  function cell(cls, text) {
+    var td = document.createElement('td');
+    if (cls) td.className = cls;
+    if (text != null) td.textContent = text;
+    return td;
+  }
+
+  function row(entry) {
+    var tr = document.createElement('tr');
+    if (entry.you) tr.className = 'ch-you';
+
+    var pos = cell('ch-pos');
+    if (entry.rank <= 3) {
+      var medal = document.createElement('span');
+      medal.className = 'ch-medal m' + entry.rank;
+      medal.textContent = entry.rank;
+      pos.appendChild(medal);
+    } else {
+      pos.textContent = entry.rank;
+    }
+    tr.appendChild(pos);
+
+    var who = document.createElement('div');
+    who.className = 'ch-who';
+    var name = document.createElement('span');
+    name.className = 'ch-name';
+    name.textContent = entry.nickname;
+    who.appendChild(name);
+    if (entry.verified) who.insertAdjacentHTML('beforeend', CHECK_SVG);
+    if (entry.wins > 0) {
+      var crown = document.createElement('span');
+      crown.className = 'ch-crown';
+      crown.title = 'Won ' + plural(entry.wins, 'month', 'months');
+      crown.innerHTML = CROWN_SVG;
+      if (entry.wins > 1) crown.appendChild(document.createTextNode('\u00d7' + entry.wins));
+      who.appendChild(crown);
+    }
+    if (entry.you) {
+      var tag = document.createElement('span');
+      tag.className = 'ch-you-tag';
+      tag.textContent = 'You';
+      who.appendChild(tag);
+    }
+    var td = cell('');
+    td.appendChild(who);
+    tr.appendChild(td);
+
+    tr.appendChild(cell('num ch-clock-cell', entry.time));
+    return tr;
+  }
+
+  function paintBoard() {
+    var c = data.challenge;
+    $('chBoard').hidden = !c;
+    if (!c) return;
+    var rows = $('chRows');
+    rows.textContent = '';
+    var top = data.top || [];
+    if (!top.length) {
+      var none = cell('ch-none', 'No times yet this month. Be the first on ' + c.title + '.');
+      none.colSpan = 3;
+      var tr = document.createElement('tr');
+      tr.appendChild(none);
+      rows.appendChild(tr);
+    }
+    top.forEach(function (entry) { rows.appendChild(row(entry)); });
+
+    // Further down than the top ten: a gap, then the visitor's own row.
+    var you = data.you;
+    var shown = top.some(function (e) { return e.you; });
+    if (you && !shown) {
+      var gap = document.createElement('tr');
+      gap.className = 'ch-gap';
+      var dots = cell('', '\u00b7\u00b7\u00b7');
+      dots.colSpan = 3;
+      dots.setAttribute('aria-hidden', 'true');
+      gap.appendChild(dots);
+      rows.appendChild(gap);
+      rows.appendChild(row({ rank: you.rank, nickname: you.nickname, time: you.time, you: true }));
+    }
+  }
+
   function paint() {
     if (data.challenge) paintChallenge(data.challenge);
     else paintNone();
+    paintBoard();
   }
 
   function load() {
