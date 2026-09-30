@@ -227,7 +227,7 @@
 {"id":"bubbleshooter","name":"Bubble Shooter","categories":["Puzzle"],"ranking":262,"img":"https://upload.wikimedia.org/wikipedia/en/thumb/8/82/Bubble_Shooter_Logo.png/330px-Bubble_Shooter_Logo.png","src":null,"site":4,"added":"2026-05-13"},
 {"id":"burgerandfrights","name":"Burger & Frights","categories":["Horror"],"ranking":263,"img":"/thumbs/burgerandfrights.webp","src":null,"site":4,"added":"2026-05-13"},
 {"id":"burritobison","name":"Burrito Bison","categories":["Action"],"ranking":264,"img":"/thumbs/burritobison.webp","src":"https://icons-6.us/strategy-games/burrito-bison/","site":4,"added":"2026-05-13"},
-{"id":"candy-crush","name":"Candy Crush","categories":["Puzzle"],"ranking":265,"img":"https://upload.wikimedia.org/wikipedia/en/b/bc/Candy_Crush_logo.png","src":null,"site":4,"added":"2026-05-13"},
+{"id":"candy-crush","name":"Candy Crush","categories":["Puzzle"],"ranking":265,"img":"/thumbs/candy-crush.webp","src":null,"site":4,"added":"2026-05-13"},
 {"id":"cell-machine","name":"Cell Machine","categories":["Puzzle","Simulation"],"ranking":267,"img":"/thumbs/cell-machine.webp","src":"https://icons-6.us/strategy-games/cell-machine/","site":4,"added":"2026-05-13"},
 {"id":"chess","name":"Chess","categories":["Puzzle","Strategy"],"ranking":269,"img":"/thumbs/chess.webp","src":null,"site":4,"added":"2026-05-13"},
 {"id":"chrome-dino","name":"Chrome Dino","categories":["Arcade"],"ranking":271,"img":"/thumbs/chrome-dino.webp","src":null,"site":4,"added":"2026-05-13"},
