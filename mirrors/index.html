@@ -88,7 +88,7 @@
   need them.</p>
 
   <div class="panel" id="receivePanel" hidden>
-    <div class="panel-label">Moving saves here</div>
+    <div class="panel-label" id="receiveLabel">Moving saves here</div>
     <p class="save-note" id="receiveNote" role="status" aria-live="polite" style="margin-top:0"></p>
     <div id="receiveConfirm"></div>
   </div>
@@ -349,7 +349,13 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  if (params.has('receive')) receiving();
+  if (params.has('receive')) {
+    receiving();
+  } else if (params.has('moved')) {
+    $('receivePanel').hidden = false;
+    $('receiveLabel').textContent = 'Saves moved';
+    note(receiveNote, 'Your progress is at ' + host(here) + ' now. Bookmark it so you can come back.', 'good');
+  }
 });
 </script>
 </main>
