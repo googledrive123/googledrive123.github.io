@@ -27,6 +27,22 @@
     .chat-top .panel-label { display: flex; align-items: center; gap: 0.5rem; margin: 0; }
     .chat-live { width: 6px; height: 6px; border-radius: 50%; background: #5ce08a; }
     .chat-rules { font-size: 0.78rem; color: var(--muted-2); }
+
+    .chat-wrap { position: relative; }
+    /* Sized so the box stays on screen under the heading. */
+    .chat-log {
+      height: clamp(260px, calc(100vh - 420px), 600px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding: 0.6rem 0.75rem;
+      display: flex; flex-direction: column; gap: 0.1rem;
+    }
+    .chat-empty {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--muted-2); font-size: 0.85rem;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
@@ -39,6 +55,10 @@
     <div class="chat-top">
       <div class="panel-label"><span class="chat-live" aria-hidden="true"></span>Everyone</div>
       <div class="chat-rules">Be kind. No personal info. Reports go to the site owner.</div>
+    </div>
+    <div class="chat-wrap">
+      <div class="chat-log" id="chatLog" role="log" aria-live="polite" aria-label="Chat messages"></div>
+      <div class="chat-empty" id="chatEmpty">Loading chat…</div>
     </div>
   </div>
 </main>
