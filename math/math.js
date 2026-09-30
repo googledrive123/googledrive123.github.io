@@ -1524,4 +1524,9 @@
     paintPickers();
     next(false);
   });
+
+  paintStats();
+  paintPickers();
+  // Only jump into the box where there is a real keyboard; on phones it would pop one up.
+  next(window.matchMedia('(hover: hover) and (pointer: fine)').matches);
 })();
