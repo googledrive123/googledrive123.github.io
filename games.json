@@ -198,7 +198,7 @@
 {"id":"temple-run-2","name":"Temple Run 2","categories":["Action","Arcade"],"ranking":197,"img":"https://icons-6.us/action-games/temple-run-2/img/og-icon.png","src":"https://icons-6.us/action-games/temple-run-2/","local":true},
 {"id":"stack","name":"Stack","categories":["Puzzle","Skill"],"ranking":198,"img":"https://icons-6.us/action-games/stack/stack.png","src":"https://icons-6.us/action-games/stack/","local":true},
 {"id":"race-master-3d","name":"Race Master 3D","categories":["Racing"],"ranking":199,"img":"https://cdn.jsdelivr.net/gh/bubbls/youtube-playables@ec4484a07a5d576d25b4bc577df6801b2e8ffb84/race-master-3d/logo.png","src":"/iframe/160.html"},
-{"id":"2048-multitask","name":"2048 Multitask","categories":["Puzzle"],"ranking":204,"img":"https://icons-6.us/strategy-games/2048-multitask/splash.png","src":"https://icons-6.us/strategy-games/2048-multitask/","local":true},
+{"id":"2048-multitask","name":"2048 Multitask","categories":["Puzzle"],"ranking":204,"img":"/thumbs/2048-multitask.webp","src":"https://icons-6.us/strategy-games/2048-multitask/","site":4,"added":"2026-05-13"},
 {"id":"9007199254740992","name":"9007199254740992","categories":["Puzzle"],"ranking":208,"img":"/games/9007199254740992/logo-4.png","src":null},
 {"id":"achieveunlocked","name":"Achieve Unlocked","categories":["Puzzle","Platformer"],"ranking":211,"img":"/games/achieveunlocked/icon.png","src":null},
 {"id":"achieveunlocked2","name":"Achieve Unlocked 2","categories":["Puzzle","Platformer"],"ranking":212,"img":"/games/achieveunlocked2/icon.png","src":null},
