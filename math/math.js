@@ -815,4 +815,57 @@
       }
     ]
   };
+
+  // ── Geometry ────────────────────────────────────────────────────────────
+
+  var geometry = {
+    easy: [
+      function () {
+        var l = ri(3, 15), w = ri(2, 12), around = coin();
+        return num('A rectangle is ' + l + ' cm long and ' + w + ' cm wide. What is its ' + (around ? 'perimeter' : 'area') + '?', '',
+          around ? 2 * (l + w) : l * w, around ? 2 * (l + w) + ' cm' : l * w + ' cm²',
+          around ? 'Perimeter = 2 × (' + l + ' + ' + w + ') = ' + 2 * (l + w) + ' cm.' : 'Area = ' + l + ' × ' + w + ' = ' + l * w + ' cm².',
+          { unit: around ? 'cm' : 'cm²' });
+      },
+      function () {
+        var a = ri(25, 100), b = ri(20, 150 - a), c = 180 - a - b;
+        return num('Two angles of a triangle are ' + a + '° and ' + b + '°. What is the third angle?', '', c, c + '°',
+          'The angles of a triangle add to 180°: 180 − ' + a + ' − ' + b + ' = ' + c + '°.', { unit: '°' });
+      },
+      function () {
+        var straight = coin(), total = straight ? 180 : 90, a = straight ? ri(15, 165) : ri(10, 80);
+        return num('Two angles add to ' + total + '°' + (straight ? ' (a straight line)' : ' (a right angle)') + '. One is ' + a + '°. What is the other?', '',
+          total - a, total - a + '°', total + ' − ' + a + ' = ' + (total - a) + '°.', { unit: '°' });
+      },
+      function () {
+        var b = ri(2, 16), h = ri(2, 14);
+        if (b * h % 2) b += 1;
+        return num('A triangle has a base of ' + b + ' cm and a height of ' + h + ' cm. What is its area?', '', b * h / 2, b * h / 2 + ' cm²',
+          'Area = ½ × base × height = ½ × ' + b + ' × ' + h + ' = ' + b * h / 2 + ' cm².', { unit: 'cm²' });
+      },
+      function () {
+        var side = ri(2, 12);
+        if (coin()) {
+          return num('A square has an area of ' + side * side + ' cm². How long is each side?', '', side, side + ' cm',
+            side + ' × ' + side + ' = ' + side * side + ', so each side is ' + side + ' cm.', { unit: 'cm' });
+        }
+        return num('A square has a perimeter of ' + 4 * side + ' cm. How long is each side?', '', side, side + ' cm',
+          'Four equal sides: ' + 4 * side + ' ÷ 4 = ' + side + ' cm.', { unit: 'cm' });
+      },
+      function () {
+        var e = ri(2, 6), v = e * e * e;
+        return num('A cube has edges ' + e + ' cm long. What is its volume?', '', v, v + ' cm³',
+          e + ' × ' + e + ' × ' + e + ' = ' + v + ' cm³.', { unit: 'cm³' });
+      },
+      function () {
+        var r = ri(2, 25);
+        if (coin()) {
+          return num('A circle has a radius of ' + r + ' cm. What is its diameter?', '', 2 * r, 2 * r + ' cm',
+            'The diameter is two radii across: 2 × ' + r + ' = ' + 2 * r + ' cm.', { unit: 'cm' });
+        }
+        return num('A circle has a diameter of ' + 2 * r + ' cm. What is its radius?', '', r, r + ' cm',
+          'The radius is half the diameter: ' + 2 * r + ' ÷ 2 = ' + r + ' cm.', { unit: 'cm' });
+      }
+    ],
+  };
 })();
