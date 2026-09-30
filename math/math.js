@@ -134,4 +134,48 @@
   function fixed(ask, expr, options, answer, why) {
     return { type: 'mc', ask: ask, expr: expr, choices: options, answer: answer, show: options[answer], why: why };
   }
+
+  // ── Arithmetic ──────────────────────────────────────────────────────────
+
+  var arithmetic = {
+    easy: [
+      function () {
+        var a = ri(12, 89), b = ri(12, 89), ta = a - a % 10, tb = b - b % 10;
+        return num('Add.', a + ' + ' + b, a + b, s(a + b),
+          'Tens: ' + ta + ' + ' + tb + ' = ' + (ta + tb) + '. Ones: ' + a % 10 + ' + ' + b % 10 + ' = ' +
+          (a % 10 + b % 10) + '. Together: ' + (a + b) + '.');
+      },
+      function () {
+        var a = ri(31, 99), b = ri(11, a - 5), d = a - b;
+        return num('Subtract.', a + ' − ' + b, d, s(d), 'Check by adding back: ' + d + ' + ' + b + ' = ' + a + '.');
+      },
+      function () {
+        var a = ri(2, 12), b = ri(2, 12);
+        return num('Multiply.', a + ' × ' + b, a * b, s(a * b), a + ' groups of ' + b + ' make ' + a * b + '.');
+      },
+      function () {
+        var b = ri(2, 12), q = ri(2, 12), a = b * q;
+        return num('Divide.', a + ' ÷ ' + b, q, s(q), q + ' × ' + b + ' = ' + a + ', so ' + a + ' ÷ ' + b + ' = ' + q + '.');
+      },
+      function () {
+        var a = ri(6, 45), x = ri(5, 50), t = a + x;
+        return num('What number goes in the box?', '<span class="box"></span> + ' + a + ' = ' + t, x, s(x),
+          'Take ' + a + ' away from ' + t + ': ' + t + ' − ' + a + ' = ' + x + '.');
+      },
+      function () {
+        var n; do { n = ri(102, 988); } while (n % 10 === 0);
+        var o = n % 10, r = o >= 5 ? n - o + 10 : n - o;
+        return num('Round to the nearest ten.', String(n), r, s(r), 'The ones digit is ' + o +
+          (o >= 5 ? ', which is 5 or more, so round up to ' : ', which is under 5, so round down to ') + r + '.');
+      },
+      function () {
+        var digits = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]).slice(0, 4), at = ri(0, 3);
+        var place = Math.pow(10, 3 - at), worth = digits[at] * place;
+        var shown = digits.map(function (d, i) { return i === at ? '<span class="hl">' + d + '</span>' : d; });
+        return num('What is the highlighted digit worth?', shown[0] + ',' + shown.slice(1).join(''), worth, s(worth),
+          'It sits in the ' + ['thousands', 'hundreds', 'tens', 'ones'][at] + ' place, so it is worth ' +
+          (place === 1 ? digits[at] : digits[at] + ' × ' + place + ' = ' + worth) + '.');
+      }
+    ],
+  };
 })();
