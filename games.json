@@ -1343,5 +1343,6 @@
 {"id":"pong","name":"Pong","categories":["Arcade"],"img":"/thumbs/pong.webp","src":null,"site":8,"path":"flash/?swf=pong.swf","added":"2026-09-30","ranking":1496},
 {"id":"portal-2d","name":"Portal 2D","categories":["Puzzle"],"img":"/thumbs/portal-2d.webp","src":null,"site":8,"path":"flash/?swf=portal2d.swf","added":"2026-09-30","ranking":1497},
 {"id":"quadro-barrel-defence","name":"Quadro Barrel Defence","categories":["Shooter"],"img":"/thumbs/quadro-barrel-defence.webp","src":null,"site":8,"path":"flash/?swf=quadrobarreldefence.swf","added":"2026-09-30","ranking":1498},
-{"id":"redshift","name":"Redshift","categories":["Arcade"],"img":"/thumbs/redshift.webp","src":null,"site":8,"path":"flash/?swf=redshift.swf","added":"2026-09-30","ranking":1499}
+{"id":"redshift","name":"Redshift","categories":["Arcade"],"img":"/thumbs/redshift.webp","src":null,"site":8,"path":"flash/?swf=redshift.swf","added":"2026-09-30","ranking":1499},
+{"id":"revenant-2","name":"Revenant 2","categories":["RPG"],"img":"/thumbs/revenant-2.webp","src":null,"site":8,"path":"flash/?swf=revenant2.swf","added":"2026-09-30","ranking":1500}
 ]}
