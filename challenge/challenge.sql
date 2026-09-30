@@ -160,9 +160,11 @@ create trigger gv_challenge_capture
   for each row execute function public.gv_challenge_capture();
 
 
--- Moves a player's runs and badges to another key, keeping the better time
--- where both have one. Signing in hands a guest's board rows to the account
--- (polytrack_claim), and the challenge goes with them.
+-- Moves a player's runs to another key, keeping the better time where both
+-- have one. Signing in hands a guest's board rows to the account
+-- (polytrack_claim), and the challenge goes with them. Badges stay where they
+-- were earned: polytrack_claim takes any visitor id, so moving them would let
+-- anyone take a guest's crown.
 create or replace function public.gv_challenge_rekey(p_from text, p_to text, p_user uuid)
 returns void
 language plpgsql
@@ -183,19 +185,12 @@ begin
         at     = case when excluded.frames < gv_challenge_runs.frames
                       then excluded.at else gv_challenge_runs.at end;
   delete from gv_challenge_runs where player_key = p_from;
-
-  insert into gv_badges (player_key, badge, month, user_id, created_at)
-  select p_to, b.badge, b.month, p_user, b.created_at
-  from gv_badges b
-  where b.player_key = p_from
-  on conflict do nothing;
-  delete from gv_badges where player_key = p_from;
 end;
 $function$;
 
 revoke all on function public.gv_challenge_rekey(text, text, uuid) from public, anon, authenticated;
 
--- Keeps runs and badges with the board rows they came from, when a row
+-- Keeps runs with the board rows they came from, when a row
 -- changes hands or name without a new run:
 --   polytrack_claim moves a guest's rows to the account they signed in with.
 --     Where the account already had a faster time on a track, it deletes the
