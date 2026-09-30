@@ -177,5 +177,67 @@
           (place === 1 ? digits[at] : digits[at] + ' × ' + place + ' = ' + worth) + '.');
       }
     ],
+    medium: [
+      function () {
+        var a = ri(12, 49), b; do { b = ri(13, 39); } while (b % 10 === 0);
+        var bt = b - b % 10, bo = b % 10;
+        return num('Multiply.', a + ' × ' + b, a * b, s(a * b), 'Split ' + b + ' into ' + bt + ' + ' + bo + ': ' +
+          a + ' × ' + bt + ' = ' + a * bt + ' and ' + a + ' × ' + bo + ' = ' + a * bo + ', total ' + a * b + '.');
+      },
+      function () {
+        var a = ri(2, 20), b = ri(2, 9), c = ri(2, 9), form = ri(0, 2);
+        if (form === 0) {
+          return num('Work it out.', a + ' + ' + b + ' × ' + c, a + b * c, s(a + b * c),
+            'Multiply before adding: ' + b + ' × ' + c + ' = ' + b * c + ', then ' + a + ' + ' + b * c + ' = ' + (a + b * c) + '.');
+        }
+        if (form === 1) {
+          return num('Work it out.', '(' + a + ' + ' + b + ') × ' + c, (a + b) * c, s((a + b) * c),
+            'Brackets first: ' + a + ' + ' + b + ' = ' + (a + b) + ', then × ' + c + ' = ' + (a + b) * c + '.');
+        }
+        var k = ri(2, 9), big = b * k, top = ri(k + 1, k + 40);
+        return num('Work it out.', top + ' − ' + big + ' ÷ ' + b, top - k, s(top - k),
+          'Divide before subtracting: ' + big + ' ÷ ' + b + ' = ' + k + ', then ' + top + ' − ' + k + ' = ' + (top - k) + '.');
+      },
+      function () {
+        var a = ri(2, 20), b = ri(2, 20), form = ri(0, 3), ans, expr, why;
+        if (form === 0) {
+          expr = '−' + a + ' + ' + b; ans = b - a;
+          why = 'Start at −' + a + ' and move ' + b + ' up the number line: ' + s(ans) + '.';
+        } else if (form === 1) {
+          expr = a + ' − (−' + b + ')'; ans = a + b;
+          why = 'Taking away a negative is the same as adding: ' + a + ' + ' + b + ' = ' + ans + '.';
+        } else if (form === 2) {
+          a = ri(2, 12); b = ri(2, 12); expr = '−' + a + ' × ' + b; ans = -a * b;
+          why = 'Negative times positive is negative: ' + a + ' × ' + b + ' = ' + a * b + ', so ' + s(ans) + '.';
+        } else {
+          expr = '−' + a + ' − ' + b; ans = -a - b;
+          why = 'Both move down: ' + a + ' + ' + b + ' = ' + (a + b) + ' below zero, so ' + s(ans) + '.';
+        }
+        return num('Work it out.', expr, ans, s(ans), why);
+      },
+      function () {
+        var d = ri(3, 9), q = ri(21, 99), a = d * q;
+        return num('Divide.', a + ' ÷ ' + d, q, s(q), q + ' × ' + d + ' = ' + a + ', so ' + a + ' ÷ ' + d + ' = ' + q + '.');
+      },
+      function () {
+        var form = ri(0, 2), b, e;
+        if (form === 0) { b = ri(11, 15); e = 2; }
+        else if (form === 1) { b = 2; e = ri(4, 10); }
+        else { b = pick([3, 4, 5]); e = b === 3 ? ri(3, 5) : 3; }
+        var v = Math.pow(b, e), chain = [];
+        for (var i = 0; i < e; i++) chain.push(b);
+        return num('Work it out.', sup(b, e), v, s(v), sup(b, e) + ' means ' + chain.join(' × ') + ' = ' + v + '.');
+      },
+      function () {
+        var k = ri(11, 20), n = k * k;
+        return num('Find the square root.', root(n), k, s(k), k + ' × ' + k + ' = ' + n + ', so ' + root(n) + ' = ' + k + '.');
+      },
+      function () {
+        var a = ri(11, 99), b = ri(101, 999), minus = a * 10 > b && coin(0.4);
+        var r = minus ? a * 10 - b : a * 10 + b, op = minus ? ' − ' : ' + ';
+        return num(minus ? 'Subtract.' : 'Add.', (a / 10).toFixed(1) + op + (b / 100).toFixed(2), r / 100, s(r / 100),
+          'Line up the decimal points: ' + (a / 10).toFixed(2) + op + (b / 100).toFixed(2) + ' = ' + (r / 100).toFixed(2) + '.');
+      }
+    ],
   };
 })();
