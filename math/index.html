@@ -248,6 +248,20 @@
       border-radius: 4px;
       border: 1px solid rgba(255,255,255,0.4);
     }
+
+    @media (max-width: 640px) {
+      .scorebar { grid-template-columns: repeat(2, 1fr); }
+      .subjects { grid-template-columns: repeat(2, 1fr); }
+      .subject { padding: 0.6rem; column-gap: 0.6rem; }
+      .subject .glyph { width: 34px; height: 34px; font-size: 0.8rem; }
+      .levels { display: flex; border-radius: 14px; }
+      .level { flex: 1; padding: 0.4rem; border-radius: 10px; }
+      .level .pts { display: block; margin: 0.1rem 0 0; }
+      .quiz { padding: 1.1rem; }
+      .quiz-count { display: none; }
+      .choices { grid-template-columns: 1fr; }
+      .quiz-actions kbd { display: none; }
+    }
   </style>
 </head>
 <body>
