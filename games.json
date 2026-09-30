@@ -1323,5 +1323,6 @@
 {"id":"bullet-bill","name":"Bullet Bill","categories":["Action"],"img":"/thumbs/bullet-bill.webp","src":null,"site":8,"path":"flash/?swf=bulletbill.swf","added":"2026-09-30","ranking":1476},
 {"id":"dad-n-me","name":"Dad 'n Me","categories":["Action"],"img":"/thumbs/dad-n-me.webp","src":null,"site":8,"path":"flash/?swf=dadnme.swf","added":"2026-09-30","ranking":1477},
 {"id":"defend-your-castle","name":"Defend Your Castle","categories":["Strategy"],"img":"/thumbs/defend-your-castle.webp","src":null,"site":8,"path":"flash/?swf=defendyourcastle.swf","added":"2026-09-30","ranking":1478},
-{"id":"factory-balls-2","name":"Factory Balls 2","categories":["Puzzle"],"img":"/thumbs/factory-balls-2.webp","src":null,"site":8,"path":"flash/?swf=factoryballs2.swf","added":"2026-09-30","ranking":1479}
+{"id":"factory-balls-2","name":"Factory Balls 2","categories":["Puzzle"],"img":"/thumbs/factory-balls-2.webp","src":null,"site":8,"path":"flash/?swf=factoryballs2.swf","added":"2026-09-30","ranking":1479},
+{"id":"factory-balls-3","name":"Factory Balls 3","categories":["Puzzle"],"img":"/thumbs/factory-balls-3.webp","src":null,"site":8,"path":"flash/?swf=factoryballs3.swf","added":"2026-09-30","ranking":1480}
 ]}
