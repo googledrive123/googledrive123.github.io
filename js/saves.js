@@ -551,4 +551,47 @@
         });
     });
   }
+
+  function autoOn() { return read(AUTO_KEY) === '1'; }
+  function setAuto(on) { write(AUTO_KEY, on ? '1' : null); }
+  function autoAt() { return read(AUTO_AT_KEY); }
+
+  function whenIdle() {
+    return new Promise(function (resolve) {
+      if (window.requestIdleCallback) requestIdleCallback(function () { resolve(); }, { timeout: 5000 });
+      else setTimeout(resolve, 1500);
+    });
+  }
+
+  /* Once a day, quietly, for a signed-in player who turned it on in this
+     browser. A browser that has never auto-saved may be a fresh one without
+     the progress the account's auto slot holds, so it leaves that slot alone
+     until /saves/ has offered to load it (autoOffer below). Resolves true
+     only when it saved; never rejects, since nobody is watching. */
+  var autoRunning = false;
+
+  function autoSaveIfDue(existing) {
+    useClient(existing);
+    var last = Date.parse(autoAt() || '');
+    if (autoRunning || !autoOn() || !hasSession()) return Promise.resolve(false);
+    if (last && Date.now() - last < DAY) return Promise.resolve(false);
+
+    autoRunning = true;
+    return whenIdle().then(function () {
+      return withUser(function (c) {
+        var guard = last ? Promise.resolve(null)
+          : c.from('gv_saves').select('slot').eq('slot', 'auto').maybeSingle().then(check);
+        return guard.then(function (existingAuto) {
+          if (existingAuto) return false;
+          return cloudSave('auto').then(function (row) {
+            write(AUTO_AT_KEY, row.updated_at);
+            return true;
+          });
+        });
+      });
+    }).catch(function () { return false; }).then(function (saved) {
+      autoRunning = false;
+      return saved;
+    });
+  }
 })();
