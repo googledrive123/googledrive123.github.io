@@ -196,7 +196,7 @@
 {"id":"cuttherope-holiday","name":"Cut the Rope Holiday","categories":["Puzzle"],"ranking":195,"img":"https://icons-6.us/strategy-games/ctr-holiday/Holiday_Gift.webp","src":"https://icons-6.us/strategy-games/ctr-holiday/","local":true},
 {"id":"ageofwar","name":"Age of War","categories":["Strategy"],"ranking":196,"img":"/thumbs/ageofwar.webp","src":null,"site":4,"added":"2026-05-13"},
 {"id":"temple-run-2","name":"Temple Run 2","categories":["Action","Arcade"],"ranking":197,"img":"https://icons-6.us/action-games/temple-run-2/img/og-icon.png","src":"https://icons-6.us/action-games/temple-run-2/","local":true},
-{"id":"stack","name":"Stack","categories":["Puzzle","Skill"],"ranking":198,"img":"https://icons-6.us/action-games/stack/stack.png","src":"https://icons-6.us/action-games/stack/","local":true},
+{"id":"stack","name":"Stack","categories":["Puzzle","Skill"],"ranking":198,"img":"/thumbs/stack.webp","src":"https://icons-6.us/action-games/stack/","site":4,"added":"2026-05-13"},
 {"id":"race-master-3d","name":"Race Master 3D","categories":["Racing"],"ranking":199,"img":"https://cdn.jsdelivr.net/gh/bubbls/youtube-playables@ec4484a07a5d576d25b4bc577df6801b2e8ffb84/race-master-3d/logo.png","src":"/iframe/160.html"},
 {"id":"2048-multitask","name":"2048 Multitask","categories":["Puzzle"],"ranking":204,"img":"/thumbs/2048-multitask.webp","src":"https://icons-6.us/strategy-games/2048-multitask/","site":4,"added":"2026-05-13"},
 {"id":"9007199254740992","name":"9007199254740992","categories":["Puzzle"],"ranking":208,"img":"/thumbs/9007199254740992.webp","src":null,"site":4,"added":"2026-05-13"},
