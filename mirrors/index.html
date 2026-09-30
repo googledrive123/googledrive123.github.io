@@ -47,6 +47,8 @@
       padding: 0.1rem 0.4rem; border: 1px solid var(--border-strong); border-radius: 999px;
       vertical-align: 0.1em;
     }
+    .mirror-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .mirror .save-note { flex-basis: 100%; margin-top: 0; }
 
     /* Up, blocked or no answer, from this browser on this network. The word
        next to it says the same, so the colour is never the only clue. */
@@ -122,6 +124,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function host(origin) { return origin.replace(/^https?:\/\//, ''); }
 
+  function button(text, onClick) {
+    var b = el('button', 'btn btn-sm', text);
+    b.type = 'button';
+    b.addEventListener('click', onClick);
+    return b;
+  }
+
   var STATES = { checking: 'checking…', up: 'works here', blocked: 'blocked here', unknown: 'no answer' };
   var rows = [];
 
@@ -146,7 +155,49 @@ document.addEventListener('DOMContentLoaded', function () {
     text.append(name, meta);
     info.append(dot, text);
     wrap.appendChild(info);
-    return { item: item, wrap: wrap, dot: dot, state: state };
+
+    var r = { item: item, wrap: wrap, dot: dot, state: state, note: el('p', 'save-note') };
+    r.note.setAttribute('role', 'status');
+    r.note.setAttribute('aria-live', 'polite');
+
+    var actions = el('div', 'mirror-actions');
+    r.copy = button('Copy link', function () { copyLink(r); });
+    actions.appendChild(r.copy);
+    wrap.append(actions, r.note);
+    return r;
+  }
+
+  // The clipboard API needs a secure page and permission; the old copy
+  // command covers a browser that refuses it.
+  function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text).catch(function () { return copyOld(text); });
+    }
+    return copyOld(text);
+  }
+
+  function copyOld(text) {
+    var box = el('textarea');
+    box.value = text;
+    box.setAttribute('readonly', '');
+    box.style.position = 'fixed';
+    box.style.opacity = '0';
+    document.body.appendChild(box);
+    box.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) {}
+    box.remove();
+    return ok ? Promise.resolve() : Promise.reject(new Error('Could not copy. The address is ' + text));
+  }
+
+  function copyLink(r) {
+    var link = r.item.origin + '/';
+    copyText(link).then(function () {
+      r.copy.textContent = 'Copied';
+      setTimeout(function () { r.copy.textContent = 'Copy link'; }, 1500);
+    }, function (err) {
+      note(r.note, message(err), 'bad');
+    });
   }
 
   // The address this page is on answered already, by loading. An answer
