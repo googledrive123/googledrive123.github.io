@@ -64,6 +64,19 @@
     @media (prefers-reduced-motion: reduce) { .dot.checking { animation: none; } }
     .mirror-state.up { color: #5ce08a; }
     .mirror-state.blocked { color: var(--accent); }
+
+    /* Anything that overwrites progress asks here first, in the page, so it
+       reads the same in a disguised tab where pop-up dialogs look out of place. */
+    .confirm {
+      margin-top: 0.9rem;
+      padding: 0.9rem 1rem;
+      border-radius: 10px;
+      border: 1px solid rgba(255,59,59,0.45);
+      background: rgba(255,59,59,0.06);
+    }
+    .confirm-title { color: var(--text); font-size: 0.9rem; font-weight: 600; }
+    .page .confirm p { font-size: 0.82rem; margin-top: 0.3rem; line-height: 1.5; }
+    .confirm .btn-row { margin-top: 0.75rem; }
   </style>
 </head>
 <body>
@@ -73,6 +86,12 @@
   <p class="lede">GameVault also runs at other addresses. Schools block sites one address at a
   time, so when one stops working another usually still does. Bookmark a couple now, before you
   need them.</p>
+
+  <div class="panel" id="receivePanel" hidden>
+    <div class="panel-label">Moving saves here</div>
+    <p class="save-note" id="receiveNote" role="status" aria-live="polite" style="margin-top:0"></p>
+    <div id="receiveConfirm"></div>
+  </div>
 
   <div class="panel">
     <div class="panel-label">Addresses</div>
@@ -98,11 +117,13 @@
   </div>
 
 <script>
-/* mirrors.js is deferred like the rest of the chrome, and deferred
-   scripts run before DOMContentLoaded, so it is ready by then. */
+/* saves.js and mirrors.js are deferred like the rest of the chrome, and
+   deferred scripts run before DOMContentLoaded, so both are ready by then. */
 document.addEventListener('DOMContentLoaded', function () {
   var mirrors = window.GV.mirrors;
+  var saves = window.GV.saves;
   var here = location.origin;
+  var params = new URLSearchParams(location.search);
 
   function $(id) { return document.getElementById(id); }
 
@@ -258,6 +279,77 @@ document.addEventListener('DOMContentLoaded', function () {
       setMoving(false);
     });
   }
+
+  // Resolves true or false with the player's answer.
+  function ask(hostEl, q) {
+    return new Promise(function (resolve) {
+      var box = el('div', 'confirm');
+      box.setAttribute('role', 'alertdialog');
+      box.appendChild(el('div', 'confirm-title', q.title));
+      box.appendChild(el('p', '', q.body));
+      var row = el('div', 'btn-row');
+      var yes = el('button', 'btn btn-primary btn-sm', q.yes);
+      var no = el('button', 'btn btn-sm', 'Cancel');
+      yes.type = no.type = 'button';
+      row.append(yes, no);
+      box.appendChild(row);
+      hostEl.appendChild(box);
+      function finish(answer) { box.remove(); resolve(answer); }
+      yes.addEventListener('click', function () { finish(true); });
+      no.addEventListener('click', function () { finish(false); });
+      yes.focus();
+    });
+  }
+
+  var receiveNote = $('receiveNote');
+
+  // Games run on the progress read at load, so the page moves on once the
+  // new progress is in rather than let one save the old over it.
+  function accept(got) {
+    var from = host(got.from);
+    return ask($('receiveConfirm'), {
+      title: 'Move your saves here from ' + from + '?',
+      body: 'Every game at ' + host(here) + ' goes back to how it was on ' + from
+        + ' just now. Any progress already made at this address is replaced.',
+      yes: 'Move them here'
+    }).then(function (ok) {
+      if (!ok) {
+        note(receiveNote, 'Nothing was changed. You can close this tab.');
+        return;
+      }
+      note(receiveNote, 'Putting your progress here…');
+      return saves.restore(got.data).then(function () {
+        note(receiveNote, 'Done. Reloading…', 'good');
+        setTimeout(function () { location.replace('/mirrors/?moved'); }, 700);
+      });
+    });
+  }
+
+  function receiving() {
+    $('receivePanel').hidden = false;
+    var incoming = mirrors.receive();
+    if (!incoming) {
+      note(receiveNote, 'Nothing is on its way. To move saves here, open Backup addresses on the '
+        + 'address that has your progress and press Move my saves there.');
+      return;
+    }
+    note(receiveNote, 'Waiting for your saves…');
+    var slow = setTimeout(function () {
+      note(receiveNote, 'Nothing has arrived yet. Keep this tab open, or close it and press '
+        + 'Move my saves there again.');
+    }, 45000);
+    incoming.then(function (got) {
+      clearTimeout(slow);
+      note(receiveNote, '');
+      return accept(got).catch(function (err) { note(receiveNote, message(err), 'bad'); });
+    }, function () {
+      clearTimeout(slow);
+      note(receiveNote, 'Could not check where these saves came from, so nothing was changed. '
+        + 'Check your connection, then try again.', 'bad');
+    });
+  }
+
+  if (params.has('receive')) receiving();
 });
 </script>
 </main>
