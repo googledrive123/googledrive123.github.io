@@ -532,4 +532,23 @@
         });
     });
   }
+
+  function cloudRename(slot, title) {
+    return withUser(function (c, user) {
+      return c.from('gv_saves').update({ title: cleanTitle(title) })
+        .eq('user_id', user.id).eq('slot', slot)
+        .select(COLUMNS).single().then(check);
+    });
+  }
+
+  // File first, then the row: a failed delete leaves the slot listed and
+  // still loadable rather than a row pointing at nothing.
+  function cloudDelete(slot) {
+    return withUser(function (c, user) {
+      return c.storage.from(BUCKET).remove([filePath(user, slot)]).then(check)
+        .then(function () {
+          return c.from('gv_saves').delete().eq('user_id', user.id).eq('slot', slot).then(check);
+        });
+    });
+  }
 })();
