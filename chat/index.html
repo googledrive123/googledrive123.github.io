@@ -103,6 +103,7 @@
       color: var(--muted);
     }
     .chat-status.wait { color: #f0c04a; }
+    .chat-status.error { color: #ff7a7a; }
 
     .chat-out a.btn { color: #fff; text-decoration: none; }
   </style>
@@ -158,8 +159,10 @@
   var log = document.getElementById('chatLog');
   var empty = document.getElementById('chatEmpty');
   var jump = document.getElementById('chatJump');
+  var form = document.getElementById('chatForm');
   var input = document.getElementById('chatInput');
   var count = document.getElementById('chatCount');
+  var send = document.getElementById('chatSend');
   var status = document.getElementById('chatStatus');
 
   var sb = null;
@@ -167,6 +170,7 @@
   var lastId = 0;
   var timer = null;
   var polling = false;
+  var sending = false;
 
   function savedSession() {
     try {
@@ -229,13 +233,18 @@
     jump.hidden = true;
   }
 
+  // Keeps the list in id order. A message just sent shows at once, before
+  // the poll that brings in anything posted a moment earlier.
   function add(list, stick) {
     var follow = stick || nearBottom();
     var others = 0;
     list.forEach(function (m) {
       if (byId[m.id]) return;
       var el = render(m);
-      log.appendChild(el);
+      var next = null;
+      var cur = log.lastElementChild;
+      while (cur && Number(cur.dataset.id) > m.id) { next = cur; cur = cur.previousElementSibling; }
+      log.insertBefore(el, next);
       byId[m.id] = el;
       if (!m.mine) others++;
     });
@@ -248,6 +257,8 @@
     if (follow) toBottom();
     else if (others) jump.hidden = false;
   }
+
+  function ours(err) { return err && err.code === 'P0001'; }
 
   function poll() {
     if (polling || document.hidden) return;
@@ -291,7 +302,44 @@
     count.classList.toggle('full', n >= MAX);
   }
 
+  function failed(err) {
+    if (!ours(err)) {
+      say('Could not send that. Check your connection and try again.', 'error');
+      return;
+    }
+    say(err.message, 'error');
+  }
+
   input.addEventListener('input', paintCount);
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!sb || sending) return;
+    var text = input.value.trim();
+    if (!text) {
+      say('Write something first.', 'wait');
+      return;
+    }
+    sending = true;
+    send.disabled = true;
+    sb.rpc('gv_chat_send', { p_body: text }).then(function (res) {
+      sending = false;
+      if (res.error) {
+        failed(res.error);
+        send.disabled = false;
+        return;
+      }
+      input.value = '';
+      paintCount();
+      say('');
+      add([res.data], true);
+      send.disabled = false;
+    }, function () {
+      sending = false;
+      say('Could not send that. Check your connection and try again.', 'error');
+      send.disabled = false;
+    });
+  });
 
   log.addEventListener('scroll', function () {
     if (nearBottom()) jump.hidden = true;
