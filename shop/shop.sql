@@ -254,3 +254,28 @@ $function$;
 
 revoke all on function public.gv_grant_coins() from public, anon;
 grant execute on function public.gv_grant_coins() to authenticated;
+
+
+create or replace function public.gv_wallet_get()
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+begin
+  if v_user is null then
+    raise exception 'sign in first';
+  end if;
+  if not public.gv_origin_allowed() then
+    raise exception 'not from this origin';
+  end if;
+
+  return public.gv_wallet_json(v_user);
+end;
+$function$;
+
+revoke all on function public.gv_wallet_get() from public, anon;
+grant execute on function public.gv_wallet_get() to authenticated;
