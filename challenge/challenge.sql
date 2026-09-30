@@ -563,3 +563,57 @@ begin
   ), '[]'::json);
 end;
 $function$;
+
+-- Hands out the badges for a month that has ended: challenge-winner to first
+-- place, challenge-top3 to second and third. Closing again, say after taking
+-- out a suspicious time, hands them out afresh from the board as it now is.
+create or replace function public.gv_challenge_close(p_secret text, p_month date)
+returns json
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_month date := date_trunc('month', p_month::timestamp)::date;
+  v_row   gv_challenges;
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+
+  select * into v_row from gv_challenges where month = v_month for update;
+  if not found then
+    raise exception 'no challenge that month';
+  end if;
+  if (v_month + interval '1 month') at time zone 'utc' > now() then
+    raise exception 'that month has not ended yet';
+  end if;
+
+  delete from gv_badges
+   where month = v_month
+     and badge in ('challenge-winner', 'challenge-top3');
+
+  insert into gv_badges (player_key, badge, month, user_id)
+  select r.player_key,
+         case when r.rank = 1 then 'challenge-winner' else 'challenge-top3' end,
+         v_month,
+         r.user_id
+  from gv_challenge_ranked(v_month) r
+  where r.rank <= 3;
+
+  update gv_challenges set closed_at = now() where month = v_month;
+
+  return coalesce((
+    select json_agg(json_build_object(
+             'rank', r.rank,
+             'player_key', r.player_key,
+             'user_id', r.user_id,
+             'nickname', r.nickname,
+             'time', gv_challenge_time(r.frames),
+             'badge', case when r.rank = 1 then 'challenge-winner' else 'challenge-top3' end
+           ) order by r.rank)
+    from gv_challenge_ranked(v_month) r
+    where r.rank <= 3
+  ), '[]'::json);
+end;
+$function$;
