@@ -56,8 +56,9 @@ revoke all on table public.gv_chat_messages, public.gv_chat_bans, public.gv_chat
 
 
 -- Sends a message as the signed-in account. Every refusal is a sentence the
--- page shows as it is. A ban's end also comes back in the hint as
--- until=<time>, for the page to show in the reader's own time.
+-- page shows as it is. A wait also comes back in the hint as wait=<seconds>
+-- and a ban's end as until=<time>, for the page to count down or show in
+-- the reader's own time.
 create or replace function public.gv_chat_send(p_body text)
 returns json
 language plpgsql
@@ -70,6 +71,8 @@ declare
   -- the screen.
   v_body text := btrim(regexp_replace(coalesce(p_body, ''), '[[:space:][:cntrl:]]+', ' ', 'g'));
   v_ban gv_chat_bans;
+  v_last timestamptz;
+  v_wait integer;
   v_name text;
   v_row gv_chat_messages;
 begin
@@ -96,6 +99,18 @@ begin
     end if;
     raise exception 'You cannot send messages in chat for now.'
       using hint = 'until=' || to_char(v_ban.until at time zone 'utc', 'YYYY-MM-DD"T"HH24:MI:SS"Z"');
+  end if;
+
+  -- Two sends from the same account at once would both pass slow mode.
+  perform pg_advisory_xact_lock(hashtext('gv_chat_send'), hashtext(v_user::text));
+
+  select max(created_at) into v_last
+    from gv_chat_messages
+   where user_id = v_user;
+  if v_last > now() - interval '5 seconds' then
+    v_wait := greatest(1, ceil(extract(epoch from v_last + interval '5 seconds' - now()))::int);
+    raise exception 'Slow mode is on. Wait a few seconds before sending again.'
+      using hint = 'wait=' || v_wait;
   end if;
 
   if public.gv_is_rude(v_body) then
