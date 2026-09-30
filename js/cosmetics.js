@@ -8,6 +8,7 @@
      load(userIds)              -> Promise<{ [userId]: cosmetics }>
      forget(userId)             drops a cached entry, e.g. after equipping
      applyName(el, cosmetics)   colors the element's text
+     applyAvatar(el, cosmetics) rings the element (it should be round already)
 
    A cosmetics object is keyed by kind, each an item as the server sends it:
      { name_color: { id, name, rarity, value }, avatar_frame: {...}, title: {...} }
@@ -110,10 +111,33 @@
     el.dataset.gvName = item.id || 'on';
   }
 
+  // Rings are box-shadows, so they take no room and cannot shift a layout.
+  // Small avatars get thinner rings so a 22px one is still mostly face.
+  function applyAvatar(el, cosmetics) {
+    if (!el) return;
+    if (el.dataset.gvFrame) {
+      el.style.boxShadow = '';
+      delete el.dataset.gvFrame;
+    }
+    var item = cosmetics && cosmetics.avatar_frame;
+    var v = item && item.value;
+    if (!v) return;
+    var ring = (Array.isArray(v.ring) ? v.ring : []).map(hex).filter(Boolean).slice(0, 4);
+    var glow = hex(v.glow);
+    if (!ring.length && !glow) return;
+    var size = el.offsetWidth || 32;
+    var step = size < 30 ? 1.5 : size < 56 ? 2 : 3;
+    var shadows = ring.map(function (c, i) { return '0 0 0 ' + step * (i + 1) + 'px ' + c; });
+    if (glow) shadows.push('0 0 ' + (step * ring.length + 10) + 'px ' + glow);
+    el.style.boxShadow = shadows.join(', ');
+    el.dataset.gvFrame = item.id || 'on';
+  }
+
   window.GV = window.GV || {};
   window.GV.cosmetics = {
     load: load,
     forget: forget,
-    applyName: applyName
+    applyName: applyName,
+    applyAvatar: applyAvatar
   };
 })();
