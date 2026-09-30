@@ -84,6 +84,28 @@
   }
 
   var body = document.getElementById('requestRows');
+  var search = document.getElementById('requestSearch');
+
+  // "geometry dash" finds "Geometry Dash (full version)", like the home search.
+  function loose(text) { return String(text).toLowerCase().replace(/[^a-z0-9]+/g, ''); }
+
+  function filter() {
+    var q = loose(search.value);
+    var shown = 0;
+    body.querySelectorAll('tr[data-find]').forEach(function (tr) {
+      var hit = !q || tr.dataset.find.indexOf(q) !== -1;
+      tr.hidden = !hit;
+      if (hit) shown++;
+    });
+    var none = document.getElementById('requestNone');
+    if (!shown && !none) {
+      none = message('Nothing matches. Ask for it with the form above.');
+      none.id = 'requestNone';
+      body.appendChild(none);
+    } else if (shown && none) {
+      none.remove();
+    }
+  }
 
   fetch('/requests.json', { cache: 'no-cache' })
     .then(function (r) {
@@ -104,8 +126,20 @@
         badge.className = 'badge ' + key;
         badge.textContent = LABELS[key];
         status.appendChild(badge);
-        body.appendChild(row([td(item.name), status, td(item.note || '')]));
+        var note = td(item.note || '');
+        // A refusal always says why.
+        if (key === 'denied' && item.note) {
+          var why = document.createElement('span');
+          why.className = 'why';
+          why.textContent = 'Why:';
+          note.prepend(why);
+        }
+        var tr = row([td(item.name), status, note]);
+        tr.dataset.find = loose(item.name + ' ' + (item.note || '') + ' ' + LABELS[key]);
+        body.appendChild(tr);
       });
+      search.addEventListener('input', filter);
+      filter();
     })
     .catch(function (err) {
       console.error(err);
