@@ -58,3 +58,26 @@ drop policy if exists gv_submissions_files_insert on storage.objects;
 create policy gv_submissions_files_insert on storage.objects
   for insert to authenticated
   with check (bucket_id = 'submissions' and public.gv_submission_new_file(name));
+
+
+create table if not exists public.gv_submissions (
+  id         bigserial primary key,
+  -- Kept when the account is deleted, without who sent it: SQL cannot remove
+  -- the file (see sql/account.sql), so the row stays for the owner to find.
+  user_id    uuid references auth.users (id) on delete set null,
+  title      text not null check (char_length(title) between 1 and 80),
+  link       text check (char_length(link) <= 300),
+  notes      text check (char_length(notes) <= 1000),
+  -- Where the zip is in the 'submissions' bucket.
+  path       text not null unique,
+  size_bytes int,
+  status     text not null default 'pending' check (status in ('pending', 'approved', 'rejected')),
+  created_at timestamptz not null default now()
+);
+
+-- The daily limit looks up one account's latest submissions.
+create index if not exists gv_submissions_user_created
+  on public.gv_submissions (user_id, created_at desc);
+
+alter table public.gv_submissions enable row level security;
+revoke all on table public.gv_submissions from anon, authenticated;
