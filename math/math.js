@@ -755,5 +755,64 @@
           ' = ' + s(a + b) + '.');
       }
     ],
+    hard: [
+      function () {
+        var a = nz(-9, 9), b = nz(-4, 4), c = nz(-6, 6), k = ri(-3, 4), fg = coin(), r, why;
+        if (fg) {
+          var gk = b * k + c; r = gk * gk + a;
+          why = 'g(' + s(k) + ') = ' + s(gk) + ', then f(' + s(gk) + ') = ' + sup(p(gk), 2) + ' ' + signed(a) + ' = ' + s(r) + '.';
+        } else {
+          var fk = k * k + a; r = b * fk + c;
+          why = 'f(' + s(k) + ') = ' + s(fk) + ', then g(' + s(fk) + ') = ' + s(b) + ' × ' + p(fk) + ' ' + signed(c) + ' = ' + s(r) + '.';
+        }
+        return num('Find ' + (fg ? 'f(g(' : 'g(f(') + s(k) + ')).', lines('f(x) = ' + poly([1, 0, a]), 'g(x) = ' + poly([b, c])), r, s(r), why);
+      },
+      function () {
+        var a = ri(2, 9), b = nz(-9, 9);
+        return choice('Which is the inverse, f<sup>−1</sup>(x)?', 'f(x) = ' + poly([a, b]), fr(poly([1, -b]), a),
+          [fr(poly([1, b]), a), fr('x', a) + ' ' + signed(-b), fr('1', poly([a, b]))],
+          'Swap x and y and solve: x = ' + poly([a, b], 'y') + ' gives y = (' + poly([1, -b]) + ') ÷ ' + a + '.');
+      },
+      function () {
+        var h = nz(-6, 6), k = ri(-12, 12);
+        return num('What is the smallest value f(x) can take?', 'f(x) = ' + poly([1, -2 * h, h * h + k]), k, s(k),
+          'Complete the square: f(x) = (' + poly([1, -h]) + ')² ' + signed(k) + ', and a square is never below 0, so the minimum is ' + s(k) + '.');
+      },
+      function () {
+        var base = pick([2, 3]), a = ri(1, 5), k = base === 2 ? ri(0, 6) : ri(0, 4), pow = Math.pow(base, k), r = a * pow;
+        return num('Find f(' + k + ').', 'f(x) = ' + (a === 1 ? '' : a + ' · ') + sup(base, 'x'), r, s(r),
+          sup(base, k) + ' = ' + pow + (a > 1 ? ', and ' + a + ' × ' + pow + ' = ' + r : '') + '.');
+      },
+      function () {
+        var b = pick([2, 3, 5, 10]), top = { 2: 8, 3: 5, 5: 4, 10: 6 }[b], n = ri(-2, top);
+        var arg = n >= 0 ? s(Math.pow(b, n)) : fr(1, Math.pow(b, -n));
+        return num('Work it out.', 'log<sub>' + b + '</sub>(' + arg + ')', n, s(n),
+          sup(b, s(n)) + ' = ' + (n >= 0 ? Math.pow(b, n) : '1/' + Math.pow(b, -n)) + ', so the answer is ' + s(n) + '.');
+      },
+      function () {
+        var h = nz(-6, 6), k = nz(-6, 6);
+        function move(x, y) { return (x > 0 ? 'Right ' : 'Left ') + Math.abs(x) + ', ' + (y > 0 ? 'up ' : 'down ') + Math.abs(y); }
+        return choice('How is this graph moved from y = x²?', 'y = (' + poly([1, -h]) + ')<sup>2</sup> ' + signed(k), move(h, k),
+          [move(-h, k), move(h, -k), move(-h, -k)],
+          '(' + poly([1, -h]) + ') moves it ' + (h > 0 ? 'right ' : 'left ') + Math.abs(h) + ' (inside the bracket the sign flips), and ' +
+          signed(k) + ' moves it ' + (k > 0 ? 'up ' : 'down ') + Math.abs(k) + '.');
+      },
+      function () {
+        var kind = ri(0, 2), cs;
+        if (kind === 0) cs = coin() ? [nz(-3, 3), 0, nz(-5, 5), 0, ri(-9, 9)] : [nz(-3, 3), 0, nz(-9, 9)];
+        else if (kind === 1) cs = coin() ? [nz(-3, 3), 0, nz(-5, 5), 0] : [nz(-2, 2), 0, 0, 0, nz(-5, 5), 0];
+        else cs = [nz(-3, 3), nz(-5, 5), nz(-9, 9)];
+        return fixed('Is this function even, odd or neither?', 'f(x) = ' + poly(cs), ['Even', 'Odd', 'Neither'], kind,
+          ['Every power of x is even (a number on its own counts as x⁰), so f(−x) = f(x).',
+            'Every power of x is odd and there is no number on its own, so f(−x) = −f(x).',
+            'It mixes even and odd powers, so it is neither.'][kind]);
+      },
+      function () {
+        var a, c; do { a = nz(-6, 6); c = nz(-6, 6); } while (a === c);
+        var x = ri(-6, 6), b = nz(-10, 10), d = a * x + b - c * x;
+        return num('At what x-value do f and g meet?', lines('f(x) = ' + poly([a, b]), 'g(x) = ' + poly([c, d])), x, s(x),
+          'Set them equal: ' + poly([a, b]) + ' = ' + poly([c, d]) + ', so ' + poly([a - c, 0]) + ' = ' + s(d - b) + ' and x = ' + s(x) + '.');
+      }
+    ]
   };
 })();
