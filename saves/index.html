@@ -414,6 +414,27 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     });
   }
+
+  function offerAuto() {
+    return saves.autoOffer(Object.keys(rows).map(function (k) { return rows[k]; })).then(function (row) {
+      if (!row) return;
+      return ask($('autoOfferBox'), {
+        title: 'Load your auto-save from ' + when(row.updated_at) + '?',
+        body: 'Your account has an auto-save this browser has not seen. Loading it replaces the '
+          + 'game progress in this browser.',
+        yes: 'Load auto-save',
+        no: 'Keep what is here',
+        tone: 'offer',
+        quiet: true
+      }).then(function (ok) {
+        if (ok) return putBack(function () { return saves.cloudLoad('auto'); }, cloudNote);
+        if (ok === false) {
+          saves.dismissAutoOffer(row);
+          if (saves.autoOn()) runAuto();
+        }
+      });
+    });
+  }
 });
 </script>
 </main>
