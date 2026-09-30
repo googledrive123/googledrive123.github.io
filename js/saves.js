@@ -440,4 +440,44 @@
     }
     return clientReady;
   }
+
+  // Cheap enough to ask on every page: no library, no network.
+  function hasSession() {
+    try {
+      var s = JSON.parse(read(AUTH_KEY) || 'null');
+      return !!(s && s.access_token);
+    } catch (e) { return false; }
+  }
+
+  function cloudUser() {
+    if (!hasSession()) return Promise.resolve(null);
+    return getClient().then(function (c) { return c.auth.getSession(); }).then(function (r) {
+      return (r.data && r.data.session && r.data.session.user) || null;
+    });
+  }
+
+  function friendly(err) {
+    var text = String((err && (err.message || err.error)) || err || '');
+    if (/exceeded the maximum allowed size|payload too large|413/i.test(text)) {
+      return new Error('That save is over the 45 MB a cloud slot holds. Download it as a file instead.');
+    }
+    if (/failed to fetch|networkerror|load failed/i.test(text)) {
+      return new Error('Could not reach the save server. Check your connection and try again.');
+    }
+    return err instanceof Error ? err : new Error(text || 'Something went wrong. Try again.');
+  }
+
+  function check(r) {
+    if (r.error) throw friendly(r.error);
+    return r.data;
+  }
+
+  function withUser(fn) {
+    return Promise.all([getClient(), cloudUser()]).then(function (both) {
+      if (!both[1]) throw new Error('Sign in on the home page to use cloud slots.');
+      return fn(both[0], both[1]);
+    });
+  }
+
+  function filePath(user, slot) { return user.id + '/' + slot + '.json'; }
 })();
