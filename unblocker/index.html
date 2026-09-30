@@ -135,9 +135,18 @@
   var status = document.getElementById('browserStatus');
   var proxyInput = document.getElementById('proxyInput');
 
+  // The proxy becomes the frame's address, so a javascript: or data: one
+  // would run inside this page. Only an https:// address counts as a proxy.
+  function httpsOnly(v) {
+    v = String(v || '').trim();
+    if (!/^https:\/\//i.test(v)) return '';
+    try { return new URL(v).protocol === 'https:' ? v : ''; }
+    catch (e) { return ''; }
+  }
   function readProxy() {
-    try { return localStorage.getItem(PROXY_KEY) || DEFAULT_PROXY; }
-    catch (e) { return DEFAULT_PROXY; }
+    var v = '';
+    try { v = localStorage.getItem(PROXY_KEY); } catch (e) {}
+    return httpsOnly(v) || DEFAULT_PROXY;
   }
   function writeProxy(v) {
     try { v ? localStorage.setItem(PROXY_KEY, v) : localStorage.removeItem(PROXY_KEY); }
