@@ -10,6 +10,9 @@
   // arrives. Routes the app owns bounce to the root and get replayed there;
   // everything else is a real miss and goes to the 404 page.
   (function () {
+    // Inside the player's game frame this is a game that is not where the
+    // player looked, never a page to show. See inPlayer() below.
+    if (inPlayer()) return;
     var path = location.pathname + location.search;
     var spa = /^\/(games(\/|$)|movie(\/|$)|tv(\/|$))/.test(location.pathname);
     try {
@@ -17,6 +20,13 @@
     } catch (e) {}
     location.replace(spa ? '/' : '/404/');
   })();
+
+  function inPlayer() {
+    try {
+      var frame = parent.document.getElementById('gameFrame');
+      return !!frame && frame.contentWindow === window;
+    } catch (e) { return false; }
+  }
   </script>
 </head>
 <body></body>
