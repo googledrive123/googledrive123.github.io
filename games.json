@@ -1011,7 +1011,7 @@
 {"id":"survival-race","name":"Survival Race","categories":["Racing"],"ranking":1211,"img":"/thumbs/survival-race.webp","src":"/iframe/122.html"},
 {"id":"swords-and-souls","name":"Swords and Souls","categories":["Puzzle"],"ranking":1212,"img":"/thumbs/swords-and-souls.webp","src":"/iframe/178.html"},
 {"id":"tomb-of-the-mask","name":"Tomb Of The Mask","categories":["Action"],"ranking":1213,"img":"https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Tomb_of_the_Mask_promo_art.png/330px-Tomb_of_the_Mask_promo_art.png","src":"/iframe/109.html"},
-{"id":"tower-crash-3d","name":"Tower Crash 3D","categories":["Strategy"],"ranking":1214,"img":"https://icons-6.us/strategy-games/tower-crash-3d/logo.jpg","src":"https://icons-6.us/strategy-games/tower-crash-3d/"},
+{"id":"tower-crash-3d","name":"Tower Crash 3D","categories":["Strategy"],"ranking":1214,"img":"/thumbs/tower-crash-3d.webp","src":"https://icons-6.us/strategy-games/tower-crash-3d/"},
 {"id":"trivia-crack","name":"Trivia Crack","categories":["Action"],"ranking":1215,"img":"https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Trivia_Crack_Logo.png/330px-Trivia_Crack_Logo.png","src":"/iframe/163.html"},
 {"id":"turbo-stars","name":"Turbo Stars","categories":["Action"],"ranking":1216,"img":"https://cdn.jsdelivr.net/gh/bubbls/youtube-playables@f86d947cd3a8c7271fc251ae687bb8c9ffd2a170/turbo-stars/logo.png","src":"/iframe/21.html"},
 {"id":"undertale","name":"Undertale","categories":["Action"],"ranking":1217,"img":"https://cdn.akamai.steamstatic.com/steam/apps/391540/header.jpg","src":"/iframe/184.html"},
