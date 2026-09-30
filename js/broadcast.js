@@ -68,4 +68,34 @@
     bar.querySelector('.gv-bc-text').textContent = item.message;
     if (!bar.isConnected) document.body.appendChild(bar);
   }
+
+  // The newest broadcast this tab should see and has not dismissed. Anything
+  // stopped or expired simply stops coming back, and the bar goes with it.
+  function poll() {
+    if (document.hidden) return;
+    fetch(URL_, {
+      method: 'POST',
+      headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' },
+      body: '{}'
+    }).then(function (r) { return r.ok ? r.json() : null; }).then(function (data) {
+      if (!data) return;
+      var arrived = arrival();
+      if (!arrived) {
+        arrived = data.now;
+        try { sessionStorage.setItem(ARRIVAL_KEY, arrived); } catch (e) {}
+      }
+      var dismissed = seen();
+      var pick = null;
+      data.items.forEach(function (it) {
+        if (dismissed.indexOf(it.id) === -1 && meant(it, arrived)) pick = it;
+      });
+      if (pick) show(pick);
+      else if (bar) { bar.remove(); bar = null; }
+    }).catch(function () {});
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', poll);
+  else poll();
+  setInterval(poll, POLL_MS);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) poll(); });
 })();
