@@ -4022,6 +4022,16 @@ function initPolytrackNotice() {
 
 bootCatalog();
 
+// Some games registered service workers for their own /games/<id>/ folder.
+// Those folders moved to the vaults, and a leftover worker would keep
+// answering from its cache. PolyTrack still lives there.
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => {
+    const p = new URL(r.scope).pathname;
+    if (p.startsWith('/games/') && !p.startsWith('/games/polytrack/')) r.unregister();
+  })).catch(() => {});
+}
+
 // ═══════════════════════════════════════════════════════
 // GAMEVAULT AUTH + PROFILE SYSTEM
 // ═══════════════════════════════════════════════════════
