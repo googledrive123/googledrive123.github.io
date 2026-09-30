@@ -207,9 +207,12 @@
 
   proxyInput.value = readProxy();
   document.getElementById('proxySave').addEventListener('click', function () {
-    var v = proxyInput.value.trim();
+    var typed = proxyInput.value.trim();
+    var v = httpsOnly(typed);
     writeProxy(v === DEFAULT_PROXY ? '' : v);
-    say('proxy saved');
+    proxyInput.value = v || DEFAULT_PROXY;
+    if (v || !typed) say('proxy saved');
+    else say('a proxy has to start with https:// · using the default', true);
   });
   document.getElementById('proxyReset').addEventListener('click', function () {
     writeProxy('');
