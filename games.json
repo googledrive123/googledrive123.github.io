@@ -351,7 +351,7 @@
 {"id":"stickmanclimb","name":"Stickman Climb","categories":["Platformer"],"ranking":459,"img":"/thumbs/stickmanclimb.webp","src":null,"site":6,"added":"2026-05-13"},
 {"id":"stickslasher","name":"Stick Slasher","categories":["Action"],"ranking":461,"img":"https://img.y8.com/cloud/v2-y8-thumbs-big-thumbnails-001/128822/big.gif","src":null,"site":6,"added":"2026-05-13"},
 {"id":"subway-surfers-ny","name":"Subway Surfers NY","categories":["Action","Arcade"],"ranking":463,"img":"https://upload.wikimedia.org/wikipedia/en/thumb/a/a3/Subway_Surfers_logo.svg/330px-Subway_Surfers_logo.svg.png","src":null,"site":6,"added":"2026-05-13"},
-{"id":"superhot","name":"SUPERHOT","categories":["Action","Shooter"],"ranking":464,"img":"https://icons-6.us/action-games/superhot/hot.jpg","src":"https://icons-6.us/action-games/superhot/","local":true},
+{"id":"superhot","name":"SUPERHOT","categories":["Action","Shooter"],"ranking":464,"img":"/thumbs/superhot.webp","src":"https://icons-6.us/action-games/superhot/","site":6,"added":"2026-05-13"},
 {"id":"supermeatboy","name":"Super Meat Boy","categories":["Platformer"],"ranking":465,"img":"/games/supermeatboy/icon.png","src":null},
 {"id":"supersmashbros","name":"Super Smash Bros","categories":["Action"],"ranking":466,"img":"/games/supersmashbros/logo.jpg","src":null},
 {"id":"supersmashflash","name":"Super Smash Flash","categories":["Action"],"ranking":467,"img":"https://upload.wikimedia.org/wikipedia/commons/c/ce/Super_Smash_Flash_logo.png","src":null},
