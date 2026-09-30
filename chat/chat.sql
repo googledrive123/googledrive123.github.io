@@ -8,3 +8,21 @@
 --
 -- Apply against project dxwjxzmlezfyursysays, after sql/rude.sql. Every
 -- statement is safe to run twice. Applied on 30 September 2026.
+
+
+create table if not exists public.gv_chat_messages (
+  id         bigserial primary key,
+  user_id    uuid not null references auth.users (id) on delete cascade,
+  -- The name as it was when the message was sent, so a later rename does not
+  -- rewrite what people already read.
+  username   text not null,
+  body       text not null,
+  created_at timestamptz not null default now(),
+  -- Removed by the owner. Kept rather than dropped so the dashboard still
+  -- shows what was said.
+  deleted    boolean not null default false
+);
+
+-- Slow mode looks up one account's latest messages on every send.
+create index if not exists gv_chat_messages_user_created
+  on public.gv_chat_messages (user_id, created_at desc);
