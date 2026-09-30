@@ -299,7 +299,7 @@
 {"id":"lowsadventures2","name":"\"Low's Adventures 2\"","categories":["Platformer"],"ranking":370,"img":"/thumbs/lowsadventures2.webp","src":null,"site":5,"added":"2026-05-13"},
 {"id":"madalin-cars-multiplayer","name":"Madalin Cars Multiplayer","categories":["Racing"],"ranking":371,"img":"https://imgs.crazygames.com/games/madalin-cars-multiplayer/cover_16x9-1695112368258.png?metadata=none&quality=100&width=1200&height=630&fit=crop","src":null,"site":5,"added":"2026-05-13"},
 {"id":"minecraft-tower-defence-2","name":"Minecraft Tower Defence 2","categories":["Strategy"],"ranking":377,"img":"https://cdn2.y8.com/cloudimage/111855/file/w380h285_retina_webp-6b63fc2d1ab0650f3059c417dd7dea4d.webp","src":null,"site":5,"added":"2026-05-13"},
-{"id":"monkey-mart","name":"Monkey Mart","categories":["Simulation"],"ranking":379,"img":"/games/monkey-mart/bg_loading.png","src":null},
+{"id":"monkey-mart","name":"Monkey Mart","categories":["Simulation"],"ranking":379,"img":"/thumbs/monkey-mart.webp","src":null,"site":5,"added":"2026-05-13"},
 {"id":"monstertracks","name":"Monster Tracks","categories":["Racing","Driving"],"ranking":380,"img":"/games/monstertracks/webapp/cover.jpg","src":null},
 {"id":"motox3m-winter","name":"Moto X3M Winter","categories":["Racing","Driving"],"ranking":384,"img":"https://icons-6.us/action-games/motox3m-winter/download.jpeg","src":"https://icons-6.us/action-games/motox3m-winter/","local":true},
 {"id":"nutsim","name":"Nut Simulator","categories":["Idle","Simulation"],"ranking":385,"img":"https://icons-6.us/casual-games/nut-simulator/NutSimulator.png","src":"https://icons-6.us/casual-games/nut-simulator/","local":true},
