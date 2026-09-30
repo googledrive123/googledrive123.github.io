@@ -50,3 +50,14 @@ drop policy if exists gv_saves_delete on public.gv_saves;
 create policy gv_saves_delete on public.gv_saves
   for delete to authenticated
   using (auth.uid() = user_id);
+
+
+-- Private, JSON only, 45 MB a file: a little under the project's 50 MB cap on
+-- any one upload. The page checks the same number before sending, so a player
+-- hears why a save will not fit instead of watching an upload fail.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('saves', 'saves', false, 47185920, array['application/json'])
+on conflict (id) do update
+  set public = excluded.public,
+      file_size_limit = excluded.file_size_limit,
+      allowed_mime_types = excluded.allowed_mime_types;
