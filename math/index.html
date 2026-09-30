@@ -48,6 +48,59 @@
     .stat.hot { border-color: rgba(255,59,59,0.45); }
     .bump { animation: bump 0.35s ease; }
     @keyframes bump { 40% { transform: scale(1.12); } }
+
+    /* Subject and level pickers */
+    .subjects { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+    .subject {
+      display: grid; grid-template-columns: auto 1fr; column-gap: 0.75rem; row-gap: 0.15rem;
+      align-items: center;
+      padding: 0.7rem 0.8rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font: inherit; text-align: left;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .subject:hover { border-color: var(--border-strong); background: rgba(255,255,255,0.03); }
+    .subject .glyph {
+      grid-row: span 3;
+      display: grid; place-items: center;
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      background: var(--surface-2);
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; font-weight: 600;
+      transition: all 0.15s;
+    }
+    .subject .name { color: var(--text); font-size: 0.88rem; font-weight: 500; line-height: 1.25; }
+    .subject .rec { font-family: 'JetBrains Mono', monospace; font-size: 0.66rem; color: var(--muted-2); }
+    .subject .meter { display: block; height: 3px; border-radius: 3px; background: var(--surface-2); overflow: hidden; margin-top: 0.2rem; }
+    .subject .meter span { display: block; height: 100%; width: 0; background: var(--good); transition: width 0.3s; }
+    .subject.active { border-color: var(--accent); background: rgba(255,59,59,0.07); }
+    .subject.active .glyph { background: var(--accent); color: #fff; }
+
+    .levels {
+      display: inline-flex; gap: 0.25rem;
+      padding: 0.25rem;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      background: var(--bg);
+    }
+    .level {
+      border: 0; border-radius: 100px;
+      background: transparent;
+      color: var(--muted);
+      font: inherit; font-size: 0.84rem;
+      padding: 0.45rem 1rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .level:hover { color: var(--text); }
+    .level .pts { font-family: 'JetBrains Mono', monospace; font-size: 0.64rem; color: var(--muted-2); margin-left: 0.45rem; }
+    .level.active { background: var(--surface-2); color: var(--text); box-shadow: inset 0 0 0 1px var(--border-strong); }
+    .level.active .pts { color: var(--accent); }
   </style>
 </head>
 <body>
@@ -62,6 +115,13 @@
     <div class="stat" id="streakTile"><div class="stat-num" id="statStreak">0</div><span class="boost" id="statBoost"></span><div class="stat-label">Streak</div></div>
     <div class="stat"><div class="stat-num" id="statBest">0</div><div class="stat-label">Best streak</div></div>
     <div class="stat"><div class="stat-num" id="statRight">–</div><div class="stat-label">Right</div></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-label">Subject</div>
+    <div class="subjects" id="subjects"></div>
+    <div class="panel-label" style="margin-top:1.1rem">Difficulty</div>
+    <div class="levels" id="levels"></div>
   </div>
 </main>
 </body>
