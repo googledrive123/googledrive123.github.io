@@ -73,6 +73,34 @@
       .wn-hint .hover { display: none; }
       .wn-hint .tap { display: inline; }
     }
+
+    /* The winner, out of sight until the card is gone. */
+    .wn-result {
+      max-width: 36rem;
+      text-align: center;
+      visibility: hidden;
+      opacity: 0;
+    }
+    .wn-stage.shown .wn-card { visibility: hidden; }
+    .wn-stage.shown .wn-result { visibility: visible; opacity: 1; }
+    .wn-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--muted-2);
+    }
+    .wn-name {
+      margin-top: 0.5rem;
+      font-size: clamp(2.4rem, 9vw, 4.25rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.05;
+      color: var(--text);
+      overflow-wrap: anywhere;
+    }
+    .page .wn-result p { margin-top: 0.8rem; color: var(--muted); }
+    .page .wn-result p.wn-you { margin-top: 0.5rem; color: #5ce08a; font-weight: 600; }
+    .wn-result .btn { margin-top: 1.25rem; }
+
+    .page p.wn-empty { max-width: 34rem; margin: 0 auto; text-align: center; font-size: 0.9rem; }
+    .wn-links { justify-content: center; }
+    .page .wn-links a.btn { text-decoration: none; }
   </style>
 </head>
 <body>
@@ -89,7 +117,131 @@
         <span class="hover">Hover to reveal the winner</span><span class="tap">Tap to reveal the winner</span>
       </span>
     </button>
+    <div class="wn-result" id="wnResult" aria-live="polite">
+      <div class="wn-label" id="wnLabel"></div>
+      <div class="wn-name" id="wnName"></div>
+      <p id="wnWhat"></p>
+      <p class="wn-you" id="wnYou" hidden>That is you! The site owner adds the prize to your account.</p>
+    </div>
   </div>
+
+  <p class="wn-empty" id="wnEmpty" hidden>No winner yet. The first one shows up here after a
+  giveaway is drawn or a monthly challenge ends.</p>
+  <div class="btn-row wn-links">
+    <a class="btn" href="/giveaway/">Giveaway</a>
+    <a class="btn" href="/challenge/">Monthly challenge</a>
+  </div>
+
+<script>
+(function () {
+  'use strict';
+
+  var SUPA_URL = 'https://dxwjxzmlezfyursysays.supabase.co';
+  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
+
+  function $(id) { return document.getElementById(id); }
+
+  var stage = $('wnStage');
+  var card = $('wnCard');
+  var winner = null;
+
+  // '2026-09-01' as "September 2026", read as UTC so it never slips a month.
+  function monthName(day, opts) {
+    var p = String(day || '').split('-');
+    var d = new Date(Date.UTC(+p[0], +p[1] - 1, 1));
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleDateString(undefined, opts || { month: 'long', year: 'numeric', timeZone: 'UTC' });
+  }
+
+  // Whichever came last: the latest giveaway draw, or the latest challenge
+  // month the owner has closed. A month still being checked has no winner yet.
+  function latest(giveaway, months) {
+    var g = giveaway && giveaway.last_winner;
+    var m = null;
+    (months || []).some(function (x) {
+      if (x.closed && x.winner) { m = x; return true; }
+      return false;
+    });
+    var a = g && {
+      key: 'g' + g.id,
+      at: Date.parse(g.drawn_at),
+      kind: 'Giveaway',
+      label: 'Giveaway winner',
+      // No name comes back when the winner's account is gone or its name is
+      // not fit to show.
+      name: g.winner_name || 'A GameVault player',
+      what: g.title + ' · ' + g.prize_text,
+      you: !!g.won
+    };
+    var b = m && {
+      key: 'c' + m.month,
+      at: Date.parse(m.closed_at),
+      kind: 'Challenge · ' + monthName(m.month, { month: 'long', timeZone: 'UTC' }),
+      label: monthName(m.month) + ' challenge winner',
+      name: m.winner.nickname,
+      what: m.title + ' in ' + m.winner.time,
+      you: false
+    };
+    if (!a || !b) return a || b || null;
+    return b.at > a.at ? b : a;
+  }
+
+  function reveal() {
+    if (!winner || stage.classList.contains('shown')) return;
+    $('wnLabel').textContent = winner.label;
+    $('wnName').textContent = winner.name;
+    $('wnWhat').textContent = winner.what;
+    $('wnYou').hidden = !winner.you;
+    stage.classList.add('shown');
+  }
+
+  function ready(w) {
+    winner = w;
+    if (!w) {
+      $('wnKind').textContent = 'No winner yet';
+      $('wnHint').textContent = 'Check back soon';
+      $('wnEmpty').hidden = false;
+      return;
+    }
+    $('wnKind').textContent = w.kind;
+    card.disabled = false;
+  }
+
+  card.addEventListener('click', reveal);
+  // Hovering is enough where there is a mouse; a touch screen taps.
+  card.addEventListener('mouseenter', function () {
+    if (window.matchMedia('(hover: hover)').matches) reveal();
+  });
+
+  document.addEventListener('DOMContentLoaded', function () {
+    if (!window.supabase) {
+      $('wnHint').textContent = 'Could not load. Refresh to try again.';
+      return;
+    }
+    // With the home page's session, if there is one, so the giveaway can say
+    // when the winner is the one looking.
+    var sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+    var quiet = function (p) {
+      return p.then(function (r) {
+        if (r.error) throw r.error;
+        return r.data;
+      }).catch(function (err) {
+        console.error(err);
+        return undefined;
+      });
+    };
+    sb.auth.getSession().then(function () {
+      return Promise.all([quiet(sb.rpc('gv_giveaway_current')), quiet(sb.rpc('gv_challenge_history'))]);
+    }).then(function (r) {
+      if (r[0] === undefined && r[1] === undefined) {
+        $('wnHint').textContent = 'Could not load. Refresh to try again.';
+        return;
+      }
+      ready(latest(r[0], r[1]));
+    });
+  });
+})();
+</script>
 </main>
 </body>
 </html>
