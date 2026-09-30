@@ -1924,6 +1924,9 @@
     }
     .stat-card.full { grid-column: 1 / -1; }
     .level-card { display: flex; align-items: center; gap: 0.75rem; }
+    .coin-card { text-decoration: none; color: inherit; display: block; }
+    .coin-card:hover { border-color: var(--accent); }
+    .profile-title { font-size: 0.72rem; color: var(--accent); margin-top: 0.15rem; font-family: 'JetBrains Mono', monospace; }
     .user-lv {
       margin-left: 0.4rem; padding: 0.05rem 0.4rem; border-radius: 100px;
       font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; font-weight: 600;
@@ -5796,6 +5799,7 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
       </div>
       <div>
         <div class="profile-name" id="profileName">Guest</div>
+        <div class="profile-title" id="profileTitle" hidden></div>
         <div class="profile-email" id="profileEmail" style="display:none"></div>
       </div>
     </div>
@@ -5835,6 +5839,10 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
             <div class="stat-card-lbl" id="levelNext">0 / 50 XP to level 2</div>
           </div>
         </div>
+        <a class="stat-card full coin-card" id="coinCard" href="/shop/" hidden>
+          <div class="stat-card-val" id="coinCount">0 coins</div>
+          <div class="stat-card-lbl" id="coinToday">0 of 120 today · open the shop</div>
+        </a>
         <div class="stat-card full">
           <div class="stat-card-icon">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 12"/></svg>
