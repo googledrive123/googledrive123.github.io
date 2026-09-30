@@ -224,6 +224,68 @@
         eyes(35, 5.5, 2.6) +
         p('M29.5 41 H34.5 L32 43.8 Z', INK) +
         s('M29 46.5 Q30.5 48 32 46.3 Q33.5 48 35 46.5', INK, 1.3);
+    }],
+    ['Octopus', '#ffe08a', function () {
+      var skin = '#f15bb5';
+      return s('M20 46 Q12 54 16 62 M27 50 Q24 58 27 64 M37 50 Q40 58 37 64 M44 46 Q52 54 48 62', skin, 6) +
+        p('M12 40 Q12 12 32 12 Q52 12 52 40 Q52 52 32 52 Q12 52 12 40 Z', skin) +
+        c(22, 22, 2.2, '#f78fd0') + c(42, 20, 1.6, '#f78fd0') + c(45, 27, 1.2, '#f78fd0') +
+        eyes(35, 7, 3.2) + cheeks(41, 12.5, '#ffd1ea') +
+        s('M28.5 42 Q32 45.5 35.5 42', INK, 1.8);
+    }],
+    ['Dino', '#ff9f9f', function () {
+      var skin = '#57cc99', dark = '#2d6a4f', spike = '#f9844a';
+      return p('M19 24 L21 12 L28 20 Z', spike) + p('M27.5 20 L32 8 L36.5 20 Z', spike) + p('M36 20 L43 12 L45 24 Z', spike) +
+        shoulders(skin) + e(32, 39, 19, 18, skin) +
+        e(32, 47, 12, 7, '#b8f2cf') +
+        c(18, 36, 2, '#80ed99') + c(46, 31, 2.4, '#80ed99') +
+        eyes(33, 8.5, 3) +
+        c(29, 40, 1, dark) + c(35, 40, 1, dark) +
+        s('M23 45 Q32 53 41 45', dark, 2);
+    }],
+    ['Unicorn', '#8f7fe0', function () {
+      var coat = '#fff7fb';
+      return c(15, 29, 7, '#ff99c8') + c(14, 39, 6, '#c77dff') + c(17, 48, 5.5, '#7ee8fa') +
+        p('M20 27 L21 14 L28 22 Z', coat) + p('M44 27 L43 14 L36 22 Z', coat) +
+        p('M28.5 21 L32 3 L35.5 21 Z', '#ffd166') + s('M29.7 16 L34 14.2 M30.6 11 L33.4 9.8', '#f4a261', 1.3) +
+        shoulders(coat) + c(32, 38, 17, coat) +
+        c(27, 23, 4.5, '#ff99c8') + c(33.5, 22, 4, '#c77dff') +
+        s('M22 37 Q25 34 28 37 M36 37 Q39 34 42 37', INK, 2) +
+        cheeks(42, 11, '#ff99c8') +
+        s('M28.5 44 Q32 47 35.5 44', INK, 1.7);
+    }],
+    ['Tiger', '#2d7ff9', function () {
+      var fur = '#fb8500', stripe = '#3d2314', white = '#fff1e6';
+      return both(function (x) { return c(x, 22, 6.5, fur) + c(x, 22, 3.2, white); }, 17) +
+        shoulders(fur) + e(32, 38, 19, 17, fur) +
+        s('M32 21.5 V27 M27 22.5 L28.5 26.5 M37 22.5 L35.5 26.5', stripe, 2) +
+        s('M13.5 36 H19 M14 41 L19.5 40 M50.5 36 H45 M50 41 L44.5 40', stripe, 2) +
+        e(27.5, 44, 5.5, 4.5, white) + e(36.5, 44, 5.5, 4.5, white) +
+        eyes(34, 7.5, 2.9) +
+        p('M29.5 40.5 H34.5 L32 43.3 Z', '#ff7b8a') +
+        s('M30 46 Q32 47.5 34 46', INK, 1.3);
+    }],
+    ['Monkey', '#f2b8ff', function () {
+      var fur = '#7f5539', face = '#e6ccb2';
+      return both(function (x) { return c(x, 37, 6.5, fur) + c(x, 37, 3.8, face); }, 13) +
+        shoulders(fur) + c(32, 37, 19, fur) +
+        p('M29 19 Q31 13 35 14 Q32 16 34 19 Z', fur) +
+        c(26.5, 34, 7, face) + c(37.5, 34, 7, face) + e(32, 44, 11, 8, face) +
+        eyes(34, 5.8, 2.6) +
+        c(30.5, 42, 0.9, INK) + c(33.5, 42, 0.9, INK) +
+        s('M26.5 45.5 Q32 51 37.5 45.5', INK, 1.7);
+    }],
+    ['Cow', '#9bd36b', function () {
+      var hide = '#f5f5f5', spot = '#2b2b2b', nose = '#ffb3c6';
+      return p('M18 22 Q12 18 13 11 Q18 18 23 19 Z', '#f1e3c8') + p('M46 22 Q52 18 51 11 Q46 18 41 19 Z', '#f1e3c8') +
+        e(12, 31, 7, 3.5, hide, 20) + e(52, 31, 7, 3.5, hide, -20) +
+        e(12, 31, 4, 1.8, nose, 20) + e(52, 31, 4, 1.8, nose, -20) +
+        shoulders(hide) + e(32, 36, 17, 17, hide) +
+        e(22, 27, 5, 4, spot, -20) + e(42.5, 24, 3.5, 3, spot) + e(25, 62, 4, 3, spot) +
+        eyes(34, 7.5, 2.8) +
+        e(32, 46, 12, 8, nose) +
+        e(27.5, 45.5, 1.8, 2.3, '#c9184a') + e(36.5, 45.5, 1.8, 2.3, '#c9184a') +
+        s('M29 50 Q32 52 35 50', '#c9184a', 1.4);
     }]
   ];
 
