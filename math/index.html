@@ -222,6 +222,32 @@
 
     .page .hint { font-size: 0.8rem; color: #f0c04a; margin-top: 0.6rem; }
     .page .hint:empty { display: none; }
+
+    /* Feedback */
+    .feedback { margin-top: 1.1rem; padding: 0.9rem 1rem; border-radius: 12px; border: 1px solid var(--border); }
+    .feedback.right { border-color: rgba(92,224,138,0.35); background: rgba(92,224,138,0.06); }
+    .feedback.wrong { border-color: rgba(255,59,59,0.35); background: rgba(255,59,59,0.06); }
+    .fb-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0.3rem 0.7rem; }
+    .fb-title { font-weight: 600; }
+    .feedback.right .fb-title { color: var(--good); }
+    .feedback.wrong .fb-title { color: var(--accent); }
+    .fb-points { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--good); }
+    .fb-answer { margin-top: 0.45rem; color: var(--text); font-size: 0.92rem; }
+    .fb-answer .m { font-family: 'JetBrains Mono', monospace; }
+    .fb-answer .typed { color: var(--muted-2); font-size: 0.8rem; margin-left: 0.5rem; }
+    .page .fb-why { margin-top: 0.3rem; color: var(--muted); font-size: 0.88rem; line-height: 1.6; }
+
+    .quiz-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; margin-top: 1.2rem; }
+    .quiz-actions #next { margin-left: auto; }
+    .quiz .btn:focus-visible, .choice:focus-visible, .subject:focus-visible, .level:focus-visible {
+      outline: 2px solid rgba(255,255,255,0.55); outline-offset: 2px;
+    }
+    kbd {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.62rem;
+      padding: 0.08rem 0.35rem;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.4);
+    }
   </style>
 </head>
 <body>
@@ -264,6 +290,15 @@
     </form>
     <div class="choices" id="choices" hidden></div>
     <p class="hint" id="hint" role="status"></p>
+    <div class="feedback" id="feedback" aria-live="polite" hidden>
+      <div class="fb-head"><span class="fb-title" id="fbTitle"></span><span class="fb-points" id="fbPoints"></span></div>
+      <div class="fb-answer" id="fbAnswer"></div>
+      <p class="fb-why" id="fbWhy"></p>
+    </div>
+    <div class="quiz-actions">
+      <button class="btn" type="button" id="reveal">Show answer</button>
+      <button class="btn btn-primary" type="button" id="next" hidden>Next question <kbd>Enter</kbd></button>
+    </div>
   </section>
 </main>
 </body>
