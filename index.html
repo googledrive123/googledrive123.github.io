@@ -1871,6 +1871,11 @@
     }
     .stat-card.full { grid-column: 1 / -1; }
     .level-card { display: flex; align-items: center; gap: 0.75rem; }
+    .user-lv {
+      margin-left: 0.4rem; padding: 0.05rem 0.4rem; border-radius: 100px;
+      font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; font-weight: 600;
+      color: var(--accent); border: 1px solid rgba(255,59,59,0.35);
+    }
     .level-badge {
       flex-shrink: 0;
       width: 44px; height: 44px; border-radius: 50%;
@@ -4550,6 +4555,12 @@ function updateUserUI() {
     }
     lbl.textContent = name;
     if (verifiedAt) lbl.insertAdjacentHTML('beforeend', BADGE_SVG);
+    if (window._level > 1) {
+      const lv = document.createElement('span');
+      lv.className = 'user-lv';
+      lv.textContent = 'Lv ' + window._level;
+      lbl.appendChild(lv);
+    }
   });
 }
 
