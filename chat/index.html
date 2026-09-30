@@ -93,6 +93,8 @@
       font-size: 0.64rem; color: var(--muted-2);
       pointer-events: none;
     }
+    .chat-count.near { color: #f0c04a; }
+    .chat-count.full { color: var(--accent); }
     .chat-send { min-width: 5.2rem; flex-shrink: 0; }
     .chat-status {
       min-height: 1.3rem;
@@ -147,6 +149,7 @@
   var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
   // Where supabase-js keeps the session the home page signed in with.
   var TOKEN_KEY = 'sb-dxwjxzmlezfyursysays-auth-token';
+  var MAX = 300;
   var POLL_MS = 4000;
   var KEEP = 300;
 
@@ -155,6 +158,8 @@
   var log = document.getElementById('chatLog');
   var empty = document.getElementById('chatEmpty');
   var jump = document.getElementById('chatJump');
+  var input = document.getElementById('chatInput');
+  var count = document.getElementById('chatCount');
   var status = document.getElementById('chatStatus');
 
   var sb = null;
@@ -279,10 +284,21 @@
     else if (sb && !chat.hidden) startPolling();
   });
 
+  function paintCount() {
+    var n = input.value.length;
+    count.textContent = n + '/' + MAX;
+    count.classList.toggle('near', n >= MAX - 30 && n < MAX);
+    count.classList.toggle('full', n >= MAX);
+  }
+
+  input.addEventListener('input', paintCount);
+
   log.addEventListener('scroll', function () {
     if (nearBottom()) jump.hidden = true;
   });
   jump.addEventListener('click', toBottom);
+
+  paintCount();
 
   // No session at all needs no network to know, so guests see the sign-in
   // note straight away.
