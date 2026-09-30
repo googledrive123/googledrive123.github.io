@@ -111,3 +111,69 @@ $function$;
 
 revoke all on function public.gv_avatar_set_preset(integer) from public, anon;
 grant execute on function public.gv_avatar_set_preset(integer) to authenticated;
+
+
+-- Sends a picture for review. Only a WebP, PNG or JPEG is taken, and the
+-- first bytes have to agree with the type the URL names, so nothing but a
+-- plain picture is ever stored and handed to other players' pages.
+create or replace function public.gv_avatar_upload(p_data text)
+returns json
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+  v_type text;
+  v_bytes bytea;
+  v_last timestamptz;
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'not from this origin';
+  end if;
+  if v_user is null then
+    raise exception 'sign in first';
+  end if;
+  if p_data is null or char_length(p_data) > 61440 then
+    raise exception 'That picture is too big. Pictures can be up to 60 KB.';
+  end if;
+
+  v_type := substring(p_data from '^data:image/(webp|png|jpeg);base64,[A-Za-z0-9+/]+={0,2}$');
+  if v_type is null then
+    raise exception 'That is not a picture that can be used here.';
+  end if;
+  begin
+    v_bytes := decode(substring(p_data from position(',' in p_data) + 1), 'base64');
+  exception when others then
+    raise exception 'That is not a picture that can be used here.';
+  end;
+  if not coalesce(case v_type
+      when 'webp' then substring(v_bytes from 1 for 4) = '\x52494646'::bytea
+                   and substring(v_bytes from 9 for 4) = '\x57454250'::bytea
+      when 'png' then substring(v_bytes from 1 for 8) = '\x89504e470d0a1a0a'::bytea
+      else substring(v_bytes from 1 for 3) = '\xffd8ff'::bytea
+    end, false) then
+    raise exception 'That is not a picture that can be used here.';
+  end if;
+
+  select uploaded_at into v_last from gv_avatars where user_id = v_user;
+  if v_last > now() - interval '10 seconds' then
+    raise exception 'Wait a few seconds before sending another picture.';
+  end if;
+
+  insert into gv_avatars (user_id, upload, upload_status, uploaded_at)
+  values (v_user, p_data, 'pending', now())
+  on conflict (user_id) do update
+    set upload = excluded.upload,
+        -- Sending the approved picture again needs no second look.
+        upload_status = case when gv_avatars.approved_upload = excluded.upload
+                             then 'approved' else 'pending' end,
+        uploaded_at = now(),
+        updated_at = now();
+
+  return public.gv_avatar_mine();
+end;
+$function$;
+
+revoke all on function public.gv_avatar_upload(text) from public, anon;
+grant execute on function public.gv_avatar_upload(text) to authenticated;
