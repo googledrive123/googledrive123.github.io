@@ -1512,4 +1512,16 @@
       choose(+e.key - 1);
     }
   });
+
+  $('reset').addEventListener('click', function () {
+    if (!window.confirm('Reset your points, streaks and scores? This cannot be undone.')) return;
+    var keep = { subject: state.subject, level: state.level };
+    state = fresh();
+    state.subject = keep.subject;
+    state.level = keep.level;
+    save();
+    paintStats();
+    paintPickers();
+    next(false);
+  });
 })();
