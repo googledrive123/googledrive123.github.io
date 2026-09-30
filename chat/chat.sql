@@ -130,12 +130,16 @@ begin
     raise exception 'That message has words we do not allow here. Try saying it another way.';
   end if;
 
-  -- The profile name, or the name the account signed up with.
+  -- The profile name, or the name the account signed up with. A rude one is
+  -- not put in front of everyone; the owner still sees the account.
   select nullif(btrim(p.username), '') into v_name from profiles p where p.id = v_user;
   if v_name is null then
     select split_part(u.email, '@', 1) into v_name from auth.users u where u.id = v_user;
   end if;
   v_name := left(coalesce(nullif(v_name, ''), 'player'), 30);
+  if public.gv_is_rude(v_name) then
+    v_name := 'player ' || left(v_user::text, 4);
+  end if;
 
   insert into gv_chat_messages (user_id, username, body)
   values (v_user, v_name, v_body)
