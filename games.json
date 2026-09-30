@@ -14,7 +14,7 @@
 {"id":"bit-planes","name":"Bit Planes","categories":["Action","Shooter"],"ranking":12,"img":"/games/bit-planes/bitplanes.png","src":null},
 {"id":"clash-of-vikings","name":"Clash Of Vikings","categories":["Strategy"],"ranking":13,"img":"https://cdn.jsdelivr.net/gh/bubbls/UGS-Assets@main/clashofvikings/media/graphics/splash/mobile/cover-start.jpg","src":"https://genizymath.github.io/iframe/545.html"},
 {"id":"drifthunters","name":"Drift Hunters","categories":["Racing","Driving"],"ranking":14,"img":"/games/drifthunters/icon.png","src":null},
-{"id":"angry-sharks","name":"Angry Sharks","categories":["Arcade","Action"],"ranking":15,"img":"https://icons-6.us/action-games/angry-sharks/assets/favicon/icon-512x512.png","src":"https://icons-6.us/action-games/angry-sharks/","local":true},
+{"id":"angry-sharks","name":"Angry Sharks","categories":["Arcade","Action"],"ranking":15,"img":"/thumbs/angry-sharks.webp","src":"https://icons-6.us/action-games/angry-sharks/","site":2,"added":"2026-05-13"},
 {"id":"wordle","name":"Wordle","categories":["Puzzle"],"ranking":16,"img":"https://icons-6.us/strategy-games/wordle/img/logo_192x192.png","src":"https://icons-6.us/strategy-games/wordle/","local":true},
 {"id":"aquapark-slides","name":"Aquapark Slides","categories":["Arcade","Racing"],"ranking":17,"img":"https://icons-6.us/driving-games/aquapark-slides/splash.png","src":"https://icons-6.us/driving-games/aquapark-slides/","local":true},
 {"id":"fnaf","name":"\"Five Nights at Freddy's\"","categories":["Horror"],"ranking":18,"img":"/games/fnaf/splash.jpg","src":null},
