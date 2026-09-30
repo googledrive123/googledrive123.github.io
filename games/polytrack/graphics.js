@@ -231,6 +231,25 @@
 
   setInterval(sample, 1000);
 
+  // ── Max performance ───────────────────────────────────────────────────
+  // One tap on the main menu for a game that is struggling, since the people
+  // it struggles for are the least likely to go looking in Settings. It saves
+  // the Very low preset, holds the frame rate to 60 if it was unlimited, and
+  // turns auto resolution back on if it was off. The game only reads its
+  // settings as it starts, so it then starts again.
+  //
+  // Picking any other Quality preset undoes it. The preset brings its own
+  // picture, and the frame rate and auto resolution go back to what they
+  // were, unless the player has changed them since.
+
+  var LIGHTEST = PRESETS[0];
+  var UNDO_KEY = 'gv.graphics.maxPerformanceUndo';
+
+  function maxPerformanceOn() {
+    var fps = maxFrameRate();
+    return presetSaved(LIGHTEST) && fps > 0 && fps <= 60 && autoOn();
+  }
+
   // ── The Settings screen ───────────────────────────────────────────────
   // Rows at the top of the game's own Graphics section, built the way the
   // game builds its rows so they look like part of it. Quality works by
