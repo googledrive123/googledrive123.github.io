@@ -126,3 +126,14 @@ create table if not exists public.gv_inventory (
 );
 
 alter table public.gv_inventory enable row level security;
+
+-- One item per kind. The second key means only an owned item can be worn.
+create table if not exists public.gv_equipped (
+  user_id uuid not null references auth.users (id) on delete cascade,
+  kind text not null,
+  item_id text not null references public.gv_items (id),
+  primary key (user_id, kind),
+  foreign key (user_id, item_id) references public.gv_inventory (user_id, item_id) on delete cascade
+);
+
+alter table public.gv_equipped enable row level security;
