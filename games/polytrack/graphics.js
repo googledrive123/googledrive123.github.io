@@ -399,6 +399,15 @@
     });
   }
 
+  // ── The main menu ─────────────────────────────────────────────────────
+  // Max performance sits in the bar along the bottom, beside Fullscreen and
+  // Music, built the way the game builds those. The game has no icon for it,
+  // so it brings a lightning bolt in the same white.
+
+  var BOLT = 'data:image/svg+xml,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">' +
+    '<path fill="#fff" d="M14 0 3 14h7l-2 10 13-15h-7l2-9z"/></svg>');
+
   function watchSettings() {
     new MutationObserver(fillSettings).observe(document.body, { childList: true, subtree: true });
     fillSettings();
