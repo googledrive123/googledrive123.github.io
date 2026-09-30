@@ -3458,6 +3458,27 @@ const picks = {
   }
 };
 
+// Saves live with the address a game ran from. Someone who played a game on
+// the host it came from, before it had a vault copy, keeps playing it there,
+// or they would start over. The list is taken once, before anything runs
+// from a vault.
+const OLD_HOST_KEY = 'gv.oldhost';
+const oldHost = (function () {
+  try {
+    const kept = localStorage.getItem(OLD_HOST_KEY);
+    if (kept) return new Set(JSON.parse(kept));
+    const played = new Set(JSON.parse(localStorage.getItem('gv.recent.v1') || '[]'));
+    JSON.parse(localStorage.getItem('gv.sessions') || '[]').forEach(s => {
+      if (s && s.gameId) played.add(s.gameId);
+    });
+    // A game switched to the copy here was played here, not there.
+    JSON.parse(localStorage.getItem('gv.offline') || '[]').forEach(id => played.delete(id));
+    localStorage.setItem(OLD_HOST_KEY, JSON.stringify([...played]));
+    localStorage.removeItem('gv.offline');
+    return played;
+  } catch (e) { return new Set(); }
+})();
+
 function localUrl(g) { return '/games/' + g.id + '/'; }
 // A choice made while a game still had a copy here outlives the copy.
 function isOffline(g) { return !g.src || (!!g.local && prefs.offline().has(g.id)); }
