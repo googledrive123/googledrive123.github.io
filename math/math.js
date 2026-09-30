@@ -1036,5 +1036,59 @@
           'Check with the power rule: the derivative of ' + term(c, n) + ' is ' + term(c * n, n - 1) + '.');
       }
     ],
+    medium: [
+      function () {
+        var a = nz(-3, 3), b = ri(-5, 5), c = ri(-9, 9), d = ri(-9, 9), k = ri(-3, 3), r = 3 * a * k * k + 2 * b * k + c;
+        return num('Find f′(' + s(k) + ').', 'f(x) = ' + poly([a, b, c, d]), r, s(r),
+          'f′(x) = ' + poly([3 * a, 2 * b, c]) + ', so f′(' + s(k) + ') = ' + s(r) + '.');
+      },
+      function () {
+        var a = nz(-6, 6), b = ri(-6, 6);
+        return num('Find the limit.', lim(s(a), fr(poly([1, b - a, -a * b]), poly([1, -a]))), a + b, s(a + b),
+          'Putting x = ' + s(a) + ' in gives 0/0, so factor: (' + poly([1, -a]) + ')(' + poly([1, b]) + ') over (' + poly([1, -a]) +
+          ') is ' + poly([1, b]) + ', which is ' + s(a + b) + ' at x = ' + s(a) + '.');
+      },
+      function () {
+        var form = ri(0, 2), a = nz(-9, 9), c = ri(1, 9), b = ri(-9, 9), d = ri(-9, 9), top, bottom, ans, why;
+        if (form === 0) { top = poly([a, 0, b]); bottom = poly([c, 0, d]); }
+        else if (form === 1) { top = poly([a, b]); bottom = poly([c, 0, d]); }
+        else { top = poly([a, 0, b, 0]); bottom = poly([c, 0, 0, d]); }
+        if (form === 1) { ans = 0; why = 'The bottom grows faster (x² beats x), so the fraction shrinks towards 0.'; }
+        else { ans = a / c; why = 'For huge x only the highest powers matter, and they match, so the limit is ' + s(a) + ' ÷ ' + c + ' = ' + ft(a, c) + '.'; }
+        return num('Find the limit.', lim('∞', fr(top, bottom)), ans, form === 1 ? '0' : ft(a, c), why);
+      },
+      function () {
+        var n = ri(1, 6), m = ri(1, 4), a = m * (n + 1);
+        return choice('Which is the antiderivative?', integral(null, null, term(a, n)), term(m, n + 1) + ' + C',
+          [term(a * n, n - 1) + ' + C', term(a, n + 1) + ' + C', term(m, n) + ' + C', term(a * (n + 1), n + 1) + ' + C'],
+          'Raise the power by one and divide by the new power: ' + a + ' ÷ ' + (n + 1) + ' = ' + m + ', power ' + (n + 1) + '.');
+      },
+      function () {
+        var form = ri(0, 2), a, b, k, c;
+        if (form === 0) {
+          a = ri(0, 3); b = ri(a + 1, 6);
+          return num('Work it out.', integral(a, b, '2x'), b * b - a * a, s(b * b - a * a),
+            'An antiderivative of 2x is x², so ' + sup(b, 2) + ' − ' + sup(a, 2) + ' = ' + (b * b - a * a) + '.');
+        }
+        if (form === 1) {
+          k = ri(1, 4);
+          return num('Work it out.', integral(0, k, '3x<sup>2</sup>'), k * k * k, s(k * k * k),
+            'An antiderivative of 3x² is x³, so ' + sup(k, 3) + ' − 0 = ' + k * k * k + '.');
+        }
+        c = ri(2, 9); a = ri(0, 4); b = ri(a + 1, 8);
+        return num('Work it out.', integral(a, b, String(c)), c * (b - a), s(c * (b - a)),
+          'It is a rectangle ' + c + ' tall and ' + (b - a) + ' wide: ' + c + ' × ' + (b - a) + ' = ' + c * (b - a) + '.');
+      },
+      function () {
+        var b = nz(-6, 6), c = ri(-9, 9), k = ri(-4, 4);
+        return num('What is the slope of the tangent line at x = ' + s(k) + '?', 'y = ' + poly([1, b, c]), 2 * k + b, s(2 * k + b),
+          'y′ = ' + poly([2, b]) + ', and at x = ' + s(k) + ' that is ' + s(2 * k + b) + '.');
+      },
+      function () {
+        var a = ri(1, 5), b = ri(0, 12), k = ri(1, 6), v = 2 * a * k + b;
+        return num('A ball\'s position is s(t) = ' + poly([a, b, 0], 't') + ' metres after t seconds. How fast is it going at t = ' + k + '?', '',
+          v, v + ' m/s', 'Velocity is s′(t) = ' + poly([2 * a, b], 't') + ', which is ' + v + ' m/s at t = ' + k + '.', { unit: 'm/s' });
+      }
+    ],
   };
 })();
