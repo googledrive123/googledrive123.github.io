@@ -39,7 +39,7 @@
 {"id":"flappyplane","name":"Flappy Plane","categories":["Arcade","Skill"],"ranking":37,"img":"/games/flappyplane/assets/thumb.png","src":null},
 {"id":"adventure-capitalist","name":"Adventure Capitalist","categories":["Idle"],"ranking":38,"img":"/thumbs/adventure-capitalist.webp","src":null,"site":2,"added":"2026-05-13"},
 {"id":"1v1lol","name":"1v1.LOL","categories":["Action","Shooter"],"ranking":39,"img":"/thumbs/1v1lol.webp","src":"https://icons-6.us/action-games/1v1lol/","site":2,"added":"2026-05-13"},
-{"id":"awesometanks2","name":"Awesome Tanks 2","categories":["Action","Shooter"],"ranking":40,"img":"https://icons-6.us/action-games/awesome-tanks-2/logo.jpg","src":"https://icons-6.us/action-games/awesome-tanks-2/","local":true},
+{"id":"awesometanks2","name":"Awesome Tanks 2","categories":["Action","Shooter"],"ranking":40,"img":"/thumbs/awesometanks2.webp","src":"https://icons-6.us/action-games/awesome-tanks-2/","site":2,"added":"2026-05-13"},
 {"id":"60sburgerrun","name":"60s Burger Run","categories":["Arcade"],"ranking":41,"img":"/thumbs/60sburgerrun.webp","src":null,"site":2,"added":"2026-05-13"},
 {"id":"vex7","name":"Vex 7","categories":["Platformer"],"ranking":42,"img":"https://icons-6.us/action-games/vex7/assets/icon.jpeg","src":"https://icons-6.us/action-games/vex7/","local":true},
 {"id":"minesweeper","name":"Minesweeper","categories":["Puzzle"],"ranking":43,"img":"https://icons-6.us/strategy-games/minesweeper/img/minesweeper.png","src":"https://icons-6.us/strategy-games/minesweeper/","local":true},
