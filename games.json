@@ -285,7 +285,7 @@
 {"id":"holeio","name":"Hole.io","categories":["Arcade","Multiplayer"],"ranking":351,"img":"https://cdn2.y8.com/cloudimage/225521/file/w380h285_retina_webp-1d7993de91256bc93944938066ec0614.webp","src":null,"site":5,"added":"2026-05-13"},
 {"id":"icy-purple-head-2","name":"Icy Purple Head 2","categories":["Puzzle"],"ranking":353,"img":"/thumbs/icy-purple-head-2.webp","src":"https://icons-6.us/strategy-games/icy-head-2/","site":5,"added":"2026-05-13"},
 {"id":"icy-purple-head-3","name":"Icy Purple Head 3","categories":["Puzzle"],"ranking":354,"img":"/thumbs/icy-purple-head-3.webp","src":"https://icons-6.us/strategy-games/icy-head-3/","site":5,"added":"2026-05-13"},
-{"id":"idle-breakout","name":"Idle Breakout","categories":["Idle"],"ranking":355,"img":"https://icons-6.us/casual-games/idle-breakout/img/thumbnail.png","src":"https://icons-6.us/casual-games/idle-breakout/","local":true},
+{"id":"idle-breakout","name":"Idle Breakout","categories":["Idle"],"ranking":355,"img":"/thumbs/idle-breakout.webp","src":"https://icons-6.us/casual-games/idle-breakout/","site":5,"added":"2026-05-13"},
 {"id":"infiltratingtheairship","name":"Infiltrating the Airship","categories":["Action","Adventure"],"ranking":356,"img":"https://icons-6.us/strategy-games/infiltrating-airship/logo.jpg","src":"https://icons-6.us/strategy-games/infiltrating-airship/","local":true},
 {"id":"iwbtc","name":"I Wanna Be the Coin","categories":["Platformer"],"ranking":357,"img":"/games/iwbtc/icon.png","src":null},
 {"id":"jacksmith","name":"Jacksmith","categories":["Simulation","Strategy"],"ranking":358,"img":"https://flipline.com/gamefiles/jacksmith/game_app_page_lg.jpg","src":null},
