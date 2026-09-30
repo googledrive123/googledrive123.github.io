@@ -710,5 +710,50 @@
           'Solve ' + poly([a, b]) + ' = ' + s(r) + ': ' + a + 'x = ' + s(r - b) + ', so x = ' + s(x) + '.');
       }
     ],
+    medium: [
+      function () {
+        var a = nz(-5, 5), b = nz(-9, 9), c = nz(-5, 5), d = nz(-9, 9), k = ri(-4, 5), gk = c * k + d, r = a * gk + b;
+        return num('Find f(g(' + s(k) + ')).', lines('f(x) = ' + poly([a, b]), 'g(x) = ' + poly([c, d])), r, s(r),
+          'Inside first: g(' + s(k) + ') = ' + s(gk) + '. Then f(' + s(gk) + ') = ' + s(r) + '.');
+      },
+      function () {
+        var a = nz(-6, 9), b = nz(-10, 10), x = ri(-6, 9), r = a * x + b;
+        return num('Find f<sup>−1</sup>(' + s(r) + ').', 'f(x) = ' + poly([a, b]), x, s(x),
+          'f<sup>−1</sup>(' + s(r) + ') is the x that f sends to ' + s(r) + ': ' + poly([a, b]) + ' = ' + s(r) + ' gives x = ' + s(x) + '.');
+      },
+      function () {
+        var a = nz(-8, 8), b = nz(-12, 12);
+        return num('Where does the graph cross the x-axis? Give the x-value.', 'f(x) = ' + poly([a, b]), -b / a, ft(-b, a),
+          'Set f(x) = 0: ' + poly([a, 0]) + ' = ' + s(-b) + ', so x = ' + ft(-b, a) + '.');
+      },
+      function () {
+        var h = nz(-6, 6), c = ri(-10, 10);
+        return num('At what x-value is the vertex?', 'f(x) = ' + poly([1, -2 * h, c]), h, s(h),
+          'The vertex is at x = −b ÷ 2a = ' + s(2 * h) + ' ÷ 2 = ' + s(h) + '.');
+      },
+      function () {
+        var a = nz(-9, 9);
+        return num('Which value of x is not allowed?', 'f(x) = ' + fr('1', poly([1, -a])), a, s(a),
+          'You cannot divide by zero, and ' + poly([1, -a]) + ' = 0 when x = ' + s(a) + '.');
+      },
+      function () {
+        var m = nz(-5, 5), b = nz(-9, 9), x1 = ri(-3, 2), x2 = x1 + ri(1, 4), y1 = m * x1 + b, y2 = m * x2 + b;
+        return choice('Which line goes through both points?', xy(x1, y1) + ' and ' + xy(x2, y2), 'y = ' + poly([m, b]),
+          ['y = ' + poly([-m, b]), 'y = ' + poly([m, -b]), 'y = ' + poly([m, b + m]), 'y = ' + poly([b, m])],
+          'Slope = ' + s(y2 - y1) + ' ÷ ' + s(x2 - x1) + ' = ' + s(m) + ', and putting in ' + xy(x1, y1) + ' gives b = ' + s(b) + '.');
+      },
+      function () {
+        var a = nz(-3, 3), b = nz(-6, 6), c = ri(-9, 9), k = nz(-4, 4), r = a * k * k + b * k + c;
+        return num('Find f(' + s(k) + ').', 'f(x) = ' + poly([a, b, c]), r, s(r),
+          s(a) + ' × ' + sup(p(k), 2) + ' + ' + p(b) + ' × ' + p(k) + ' + ' + p(c) + ' = ' +
+          s(a * k * k) + ' + ' + p(b * k) + ' + ' + p(c) + ' = ' + s(r) + '.');
+      },
+      function () {
+        var a = ri(-3, 4), b = a + ri(1, 5);
+        return num('Find the average rate of change from x = ' + s(a) + ' to x = ' + s(b) + '.', 'f(x) = x<sup>2</sup>', a + b, s(a + b),
+          '(f(' + s(b) + ') − f(' + s(a) + ')) ÷ (' + s(b) + ' − ' + p(a) + ') = (' + b * b + ' − ' + a * a + ') ÷ ' + (b - a) +
+          ' = ' + s(a + b) + '.');
+      }
+    ],
   };
 })();
