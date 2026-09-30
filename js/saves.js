@@ -11,9 +11,9 @@
  * copy on their account: the gv_saves table and the private 'saves' bucket,
  * set up in /saves/saves.sql.
  *
- * Left out on purpose: the sign-in session, the visitor id, the dashboard
- * secret and the tab disguise belong to this browser and not to a game, and
- * PolyTrack already syncs its own save with the account.
+ * Left out on purpose: this browser's sign-in and settings, which belong to
+ * it and not to a game, and PolyTrack, which syncs its own save with the
+ * account. skipKey has the list.
  *
  * Public surface: window.GV.saves.
  */
@@ -34,16 +34,24 @@
   // own, and nothing a player would miss.
   var SKIP_DBS = ['gamevault', 'UnityCache', 'EM_PRELOAD_CACHE', 'firebaseLocalStorageDb'];
 
-  /* gv.saves.* is this browser's own record of what it backed up and when,
-     so a file made somewhere else must not overwrite it either. */
+  /* A save file carries game progress, never how this browser is set up, so
+     a restore neither writes nor deletes any of these: the sign-in (every
+     sb- key), the visitor ids and dashboard secret, the tab disguise and
+     panic key, the site's settings and seen-it flags, and gv.saves.*, this
+     browser's own record of what it backed up and when. PolyTrack syncs its
+     save with the account, so it stays out too. gv.math is progress and
+     stays in. */
+  var SKIP_KEYS = ['gv.analytics.secret', 'gv.vid', 'gv.anon',
+    'panicKey', 'panicRedirectUrl', 'panicEnabled', 'verificationEnabled',
+    'gv.noanalytics', 'gv.proxy', 'gv.username', 'gv.starred.for', 'gv.theme',
+    'gv.skipwelcome', 'gv.tilesize', 'gv.source', 'gv.oldhost', 'gv.carried',
+    'gv.intro.seen', 'gv.broadcasts.seen', 'gv.arrival', 'gv.avatar', 'gv.watch'];
+  var SKIP_PREFIXES = ['sb-', 'gv.cloak.', 'gv.hide.', 'gv.fun.', 'gv.saves.', 'polytrack_v5_prod_'];
+
   function skipKey(key) {
-    return (key.indexOf('sb-') === 0 && /-auth-token$/.test(key))
-      || key === 'gv.analytics.secret'
-      || key === 'gv.vid'
-      || key === 'gv.anon'
-      || key.indexOf('gv.cloak.') === 0
-      || key.indexOf('polytrack_v5_prod_') === 0
-      || key.indexOf('gv.saves.') === 0;
+    return SKIP_KEYS.indexOf(key) !== -1 || SKIP_PREFIXES.some(function (p) {
+      return key.indexOf(p) === 0;
+    });
   }
 
   function read(key) {
