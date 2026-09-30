@@ -4763,6 +4763,7 @@ async function openProfile() {
   if (verifiedAt) document.getElementById('profileName').insertAdjacentHTML('beforeend', BADGE_SVG);
   document.getElementById('profileEmail').style.display = 'none';
   document.getElementById('profileSignout').style.display = signed ? '' : 'none';
+  document.getElementById('profileDelete').style.display = signed ? '' : 'none';
   document.getElementById('profileSigninBtn').style.display = signed ? 'none' : '';
   document.getElementById('profileEditSection').style.display = signed ? '' : 'none';
 
@@ -4783,6 +4784,27 @@ document.getElementById('profileBackdrop').addEventListener('click', closeProfil
 document.getElementById('profileSignout').addEventListener('click', async () => {
   await sb.auth.signOut();
   closeProfile();
+});
+// Deleting is for good: the account, its stats, stars, saves, chat and its
+// PolyTrack times. Typing the username is the confirmation.
+document.getElementById('profileDelete').addEventListener('click', async () => {
+  if (!currentUser) return;
+  const name = displayName();
+  const typed = prompt('This deletes your account for good: stats, stars, cloud saves, chat messages and your PolyTrack times.\n\nType your username (' + name + ') to delete it.');
+  if (typed === null) return;
+  if (typed.trim().toLowerCase() !== name.toLowerCase()) { alert('That was not your username, so nothing was deleted.'); return; }
+  const msg = document.getElementById('profileMsg');
+  msg.textContent = 'Deleting…';
+  // Storage files cannot be removed from SQL, so they go first, from here.
+  try {
+    const { data: files } = await sb.storage.from('saves').list(currentUser.id);
+    if (files && files.length) await sb.storage.from('saves').remove(files.map(f => currentUser.id + '/' + f.name));
+  } catch (e) {}
+  const { error } = await sb.rpc('gv_delete_account');
+  if (error) { msg.textContent = 'Could not delete: ' + error.message; return; }
+  await sb.auth.signOut({ scope: 'local' });
+  closeProfile();
+  alert('Your account is deleted.');
 });
 document.getElementById('profileSigninBtn').addEventListener('click', () => {
   closeProfile(); openAuth('signin');
