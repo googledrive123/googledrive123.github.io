@@ -390,3 +390,41 @@ $function$;
 
 revoke all on function public.gv_open_crate(text) from public, anon;
 grant execute on function public.gv_open_crate(text) to authenticated;
+
+
+-- Wears an owned item in its kind's slot, replacing whatever was there.
+-- Both return the whole wallet, so the page redraws from one shape.
+create or replace function public.gv_equip(p_item_id text)
+returns json
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+  v_kind text;
+begin
+  if v_user is null then
+    raise exception 'sign in first';
+  end if;
+  if not public.gv_origin_allowed() then
+    raise exception 'not from this origin';
+  end if;
+
+  select i.kind into v_kind
+  from gv_inventory v
+  join gv_items i on i.id = v.item_id
+  where v.user_id = v_user and v.item_id = p_item_id;
+  if not found then
+    raise exception 'you do not own that item';
+  end if;
+
+  insert into gv_equipped (user_id, kind, item_id) values (v_user, v_kind, p_item_id)
+  on conflict (user_id, kind) do update set item_id = excluded.item_id;
+
+  return public.gv_wallet_json(v_user);
+end;
+$function$;
+
+revoke all on function public.gv_equip(text) from public, anon;
+grant execute on function public.gv_equip(text) to authenticated;
