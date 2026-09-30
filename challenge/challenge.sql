@@ -88,3 +88,20 @@ as $function$
 $function$;
 
 revoke all on function public.gv_challenge_time(integer) from public, anon, authenticated;
+
+-- A month's runs in finishing order. A tie goes to whoever drove it first.
+create or replace function public.gv_challenge_ranked(p_month date)
+returns table (
+  rank bigint, player_key text, nickname text, user_id uuid, frames integer, at timestamptz
+)
+language sql
+stable
+set search_path to 'public'
+as $function$
+  select row_number() over (order by r.frames, r.at, r.player_key),
+         r.player_key, r.nickname, r.user_id, r.frames, r.at
+  from gv_challenge_runs r
+  where r.month = p_month;
+$function$;
+
+revoke all on function public.gv_challenge_ranked(date) from public, anon, authenticated;
