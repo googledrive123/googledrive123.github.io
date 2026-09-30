@@ -25,14 +25,14 @@
     '.gv-apps{position:relative;flex-shrink:0}' +
     '.gv-apps-btn{width:38px;height:38px;display:grid;place-items:center;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:color .15s,border-color .15s}' +
     '.gv-apps-btn:hover,.gv-apps-btn[aria-expanded="true"]{color:var(--text);border-color:var(--border-strong)}' +
-    '.gv-apps-panel{position:absolute;top:calc(100% + 8px);right:0;z-index:600;width:300px;padding:10px;border-radius:16px;background:var(--surface);border:1px solid var(--border-strong);box-shadow:0 20px 50px rgba(0,0,0,.55);display:grid;grid-template-columns:repeat(3,1fr);gap:4px}' +
+    '.gv-apps-panel{position:fixed;z-index:600;width:300px;padding:10px;border-radius:16px;background:var(--surface);border:1px solid var(--border-strong);box-shadow:0 20px 50px rgba(0,0,0,.55);display:grid;grid-template-columns:repeat(3,1fr);gap:4px}' +
     '.gv-apps-panel[hidden]{display:none}' +
     '.gv-app{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;border-radius:12px;color:var(--muted);text-decoration:none;font-size:.74rem;transition:background .15s,color .15s}' +
     '.gv-app:hover,.gv-app[aria-current="page"]{background:var(--surface-2);color:var(--text)}' +
     '.gv-app svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}' +
     '.gv-apps-scrim{display:none}' +
     '@media (max-width:700px){' +
-      '.gv-apps-panel{position:fixed;top:0;right:0;bottom:0;width:min(78vw,300px);border-radius:0;grid-template-columns:repeat(2,1fr);align-content:start;padding:72px 12px 12px;transform:translateX(0);animation:gvAppsIn .22s ease}' +
+      '.gv-apps-panel{top:0!important;right:0!important;bottom:0;width:min(78vw,300px);border-radius:0;grid-template-columns:repeat(2,1fr);align-content:start;padding:72px 12px 12px;transform:translateX(0);animation:gvAppsIn .22s ease}' +
       '.gv-apps-scrim{display:block;position:fixed;inset:0;z-index:599;background:rgba(0,0,0,.5)}' +
       '.gv-apps-scrim[hidden]{display:none}' +
     '}' +
@@ -73,14 +73,24 @@
     var btn = box.querySelector('.gv-apps-btn');
     var panel = box.querySelector('.gv-apps-panel');
     var scrim = box.querySelector('.gv-apps-scrim');
+    // Headers use backdrop-filter, which makes a fixed child fixed to the
+    // header instead of the screen. The panel lives on <body> and is placed
+    // under its button each time it opens.
+    document.body.append(scrim, panel);
     function set(open) {
+      if (open) {
+        var r = btn.getBoundingClientRect();
+        panel.style.top = (r.bottom + 8) + 'px';
+        panel.style.right = Math.max(8, innerWidth - r.right) + 'px';
+      }
       panel.hidden = !open;
       scrim.hidden = !open;
       btn.setAttribute('aria-expanded', open ? 'true' : 'false');
     }
     btn.addEventListener('click', function (e) { e.stopPropagation(); set(panel.hidden); });
     scrim.addEventListener('click', function () { set(false); });
-    document.addEventListener('click', function (e) { if (!box.contains(e.target)) set(false); });
+    document.addEventListener('click', function (e) { if (!box.contains(e.target) && !panel.contains(e.target)) set(false); });
+    addEventListener('resize', function () { set(false); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') set(false); });
   }
 
