@@ -72,7 +72,7 @@
 {"id":"pokemon-emerald","name":"Pokémon Emerald","categories":["RPG","Adventure"],"ranking":71,"img":"https://icons-6.us/action-games/pokemon-emerald/logo.jpg","src":"https://icons-6.us/action-games/pokemon-emerald/","local":true},
 {"id":"timeshooter1","name":"Time Shooter","categories":["Action","Shooter"],"ranking":72,"img":"/games/timeshooter1/logo.png","src":null},
 {"id":"ninja-vs-evilcorp","name":"Ninja vs EvilCorp","categories":["Action"],"ranking":73,"img":"https://icons-6.us/action-games/ninjavsevilcorp/splash.png","src":"https://icons-6.us/action-games/ninjavsevilcorp/","local":true},
-{"id":"fluidsim","name":"Fluid Simulation","categories":["Simulation"],"ranking":74,"img":"/games/fluidsim/icon.png","src":null},
+{"id":"fluidsim","name":"Fluid Simulation","categories":["Simulation"],"ranking":74,"img":"/thumbs/fluidsim.webp","src":null,"site":3,"added":"2026-05-13"},
 {"id":"riddleschool3","name":"Riddle School 3","categories":["Puzzle"],"ranking":75,"img":"https://icons-6.us/strategy-games/riddleschool3/riddleschool3.png","src":"https://icons-6.us/strategy-games/riddleschool3/","local":true},
 {"id":"slope3","name":"Slope 3","categories":["Action"],"ranking":76,"img":"/games/slope3/cover.svg","src":null},
 {"id":"need-for-speed-most-wanted","name":"Need For Speed Most Wanted","categories":["Racing"],"ranking":77,"img":"https://upload.wikimedia.org/wikipedia/en/thumb/9/99/Need_for_Speed_Most_Wanted_cover.jpg/330px-Need_for_Speed_Most_Wanted_cover.jpg","src":"https://genizymath.github.io/iframe/811.html"},
