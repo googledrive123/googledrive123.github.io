@@ -458,7 +458,7 @@
 
   function friendly(err) {
     var text = String((err && (err.message || err.error)) || err || '');
-    if (/exceeded the maximum allowed size|payload too large|413/i.test(text)) {
+    if (String(err && err.statusCode) === '413' || /maximum allowed size|payload too large/i.test(text)) {
       return new Error('That save is over the 45 MB a cloud slot holds. Download it as a file instead.');
     }
     if (/failed to fetch|networkerror|load failed/i.test(text)) {
