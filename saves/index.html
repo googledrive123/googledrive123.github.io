@@ -350,6 +350,37 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     });
   }
+
+  function loadFrom(slot, wrap) {
+    ask(wrap, {
+      title: 'This replaces the game progress in this browser',
+      body: 'Every game goes back to how it was in ' + slotLabel(slot) + ', saved '
+        + when(rows[slot].updated_at) + '. Anything played since then is lost, unless you save it first.',
+      yes: 'Load this save'
+    }).then(function (ok) {
+      if (ok) putBack(function () { return saves.cloudLoad(slot); }, noteFor(slot));
+    });
+  }
+
+  function remove(slot, wrap) {
+    ask(wrap, {
+      title: 'Delete ' + slotLabel(slot) + '?',
+      body: 'The save is gone for good. The progress in this browser is not touched.',
+      yes: 'Delete'
+    }).then(function (ok) {
+      if (!ok) return;
+      setBusy(true);
+      return saves.cloudDelete(slot).then(function () {
+        delete rows[slot];
+        note(noteFor(slot), 'Deleted.', 'good');
+      }, function (err) {
+        note(noteFor(slot), message(err), 'bad');
+      }).then(function () {
+        setBusy(false);
+        render();
+      });
+    });
+  }
 });
 </script>
 </main>
