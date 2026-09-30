@@ -852,6 +852,38 @@
     #search:focus { border-color: var(--accent); background: var(--surface-2); }
     #search::placeholder { color: var(--muted-2); }
 
+    /* Top matches under the search box, one click to play. */
+    .quick-pick {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0; right: 0;
+      z-index: 300;
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: 14px;
+      padding: 0.35rem;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.55);
+    }
+    .quick-pick[hidden] { display: none; }
+    .qp-item {
+      display: flex; align-items: center; gap: 0.7rem;
+      width: 100%;
+      padding: 0.4rem 0.5rem;
+      border: 0; border-radius: 10px;
+      background: transparent;
+      color: var(--text);
+      font: inherit; font-size: 0.86rem;
+      text-align: left;
+      cursor: pointer;
+    }
+    .qp-item.on, .qp-item:hover { background: var(--surface-2); }
+    .qp-thumb {
+      width: 44px; height: 33px; flex-shrink: 0;
+      border-radius: 6px;
+      background: var(--surface-2) center / cover no-repeat;
+    }
+    .qp-cat { margin-left: auto; font-size: 0.7rem; color: var(--muted); }
+
     .cat-bar {
       position: sticky;
       top: 64px;
