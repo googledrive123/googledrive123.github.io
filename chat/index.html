@@ -215,7 +215,7 @@
   }
 
   function poll() {
-    if (polling) return;
+    if (polling || document.hidden) return;
     polling = true;
     sb.rpc('gv_chat_recent', { p_after_id: lastId }).then(function (res) {
       polling = false;
@@ -242,6 +242,11 @@
     clearInterval(timer);
     timer = null;
   }
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) stopPolling();
+    else if (sb && !chat.hidden) startPolling();
+  });
 
   // No session at all needs no network to know, so guests see the sign-in
   // note straight away.
