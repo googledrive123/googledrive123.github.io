@@ -3296,7 +3296,11 @@ let sortMode = 'default'; // default | popular | newest | alpha | random
 let shuffleSeed = Math.random();
 function sortGames(arr) {
   if (sortMode === 'popular') {
-    return arr.slice().sort((a, b) => a.ranking - b.ranking);
+    // This week's real counts first, then the catalog's own ranking, which is
+    // also all there is when the counts could not be read.
+    const pos = new Map(popular.map((id, i) => [id, i]));
+    const at = g => pos.has(g.id) ? pos.get(g.id) : popular.length + g.ranking;
+    return arr.slice().sort((a, b) => at(a) - at(b));
   }
   if (sortMode === 'newest') {
     // Games with no date are the oldest. A batch added on one day goes A to Z.
