@@ -438,18 +438,24 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  function autoStatus() {
-    if (!saves.autoOn()) return 'Off in this browser. Your last auto-save stays until you delete it.';
+  function nextDue() {
     var at = Date.parse(saves.autoAt() || '');
-    if (!at && rows.auto) return 'On. Load or skip the auto-save above first, so this browser does not replace it.';
-    if (!at) return 'On. The first auto-save happens the next time you open GameVault.';
-    return 'On. The next auto-save is due after ' + when(new Date(at + 24 * 60 * 60 * 1000)) + '.';
+    return 'The next auto-save is due after ' + when(new Date(at + 24 * 60 * 60 * 1000)) + '.';
+  }
+
+  function autoStatus() {
+    if (!saves.autoOn()) {
+      return rows.auto ? 'Off in this browser. The last auto-save stays until you delete it.' : 'Off in this browser.';
+    }
+    if (saves.autoAt()) return 'On. ' + nextDue();
+    if (rows.auto) return 'On. Load or skip the auto-save above first, so this browser does not replace it.';
+    return 'On. The first auto-save happens the next time you open GameVault.';
   }
 
   function runAuto() {
     return saves.autoSaveIfDue().then(function (saved) {
       if (!saved) { note(autoNote, autoStatus()); return; }
-      return refresh().then(function () { note(autoNote, 'Auto-saved just now. ' + autoStatus(), 'good'); });
+      return refresh().then(function () { note(autoNote, 'Auto-saved just now. ' + nextDue(), 'good'); });
     });
   }
 
