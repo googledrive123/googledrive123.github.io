@@ -5402,7 +5402,8 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
   let lastSaved = 0;
   window.addEventListener('message', e => {
     if (e.origin !== 'https://vidlink.pro' || !watching) return;
-    const m = e.data;
+    let m = e.data;
+    if (typeof m === 'string') { try { m = JSON.parse(m); } catch (err) { return; } }
     if (!m || m.type !== 'PLAYER_EVENT' || !m.data) return;
     const d = m.data;
     const now = Date.now();
@@ -5468,6 +5469,7 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
 
   // ── Close ──
   function closeMoviePlayer(silent) {
+    watching = null;
     overlay.classList.remove('visible');
     setTimeout(() => {
       overlay.classList.remove('open');
