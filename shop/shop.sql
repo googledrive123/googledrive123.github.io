@@ -183,3 +183,74 @@ as $function$
 $function$;
 
 revoke all on function public.gv_wallet_json(uuid) from public, anon, authenticated;
+
+
+-- Turns play into coins: one per full minute of each finished session that
+-- ended since the last grant, up to the daily cap. A session over three hours
+-- is left out whole (a tab left open, or a made-up row), and play past the cap
+-- is not saved for tomorrow. Sessions ending in the future are skipped until
+-- they are not, so a fast clock cannot move granted_through past them.
+--
+-- A new account's first grant counts all its earlier play, still capped.
+create or replace function public.gv_grant_coins()
+returns json
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+  v_today date := (now() at time zone 'utc')::date;
+  v_cap integer := public.gv_coins_per_day();
+  v_wallet gv_wallet;
+  v_minutes integer;
+  v_through timestamptz;
+  v_earned integer;
+begin
+  if v_user is null then
+    raise exception 'sign in first';
+  end if;
+  if not public.gv_origin_allowed() then
+    raise exception 'not from this origin';
+  end if;
+
+  insert into gv_wallet (user_id) values (v_user) on conflict (user_id) do nothing;
+  -- Locked so two tabs granting at once cannot both pay the same minutes.
+  select * into v_wallet from gv_wallet where user_id = v_user for update;
+  if v_wallet.day is distinct from v_today then
+    v_wallet.earned_today := 0;
+  end if;
+
+  select coalesce(sum(floor(extract(epoch from s.ended_at - s.started_at) / 60))
+                    filter (where s.ended_at - s.started_at <= interval '3 hours'), 0),
+         max(s.ended_at)
+    into v_minutes, v_through
+  from play_sessions s
+  where s.user_id = v_user
+    and s.ended_at is not null
+    and s.ended_at <= now()
+    and s.ended_at >= s.started_at
+    and s.ended_at > coalesce(v_wallet.granted_through, '-infinity'::timestamptz);
+
+  v_earned := least(v_minutes, greatest(v_cap - v_wallet.earned_today, 0));
+
+  update gv_wallet
+     set coins = coins + v_earned,
+         earned_today = v_wallet.earned_today + v_earned,
+         day = v_today,
+         granted_through = greatest(granted_through, v_through)
+   where user_id = v_user
+  returning * into v_wallet;
+
+  return json_build_object(
+    'coins', v_wallet.coins,
+    'earned', v_earned,
+    'capped', v_wallet.earned_today >= v_cap,
+    'earned_today', v_wallet.earned_today,
+    'daily_cap', v_cap
+  );
+end;
+$function$;
+
+revoke all on function public.gv_grant_coins() from public, anon;
+grant execute on function public.gv_grant_coins() to authenticated;
