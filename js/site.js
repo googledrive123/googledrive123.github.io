@@ -136,13 +136,20 @@
   }
 
   // Scripts every page shares, loaded from here so a new page cannot miss one.
+  function load(src, then) {
+    if (document.querySelector('script[src="' + src + '"]')) { if (then) then(); return; }
+    var s = document.createElement('script');
+    s.src = src;
+    s.defer = true;
+    if (then) s.onload = then;
+    document.head.appendChild(s);
+  }
   function extras() {
-    ['/js/broadcast.js', '/js/fun.js'].forEach(function (src) {
-      if (document.querySelector('script[src="' + src + '"]')) return;
-      var s = document.createElement('script');
-      s.src = src;
-      s.defer = true;
-      document.head.appendChild(s);
+    load('/js/broadcast.js');
+    load('/js/fun.js');
+    load('/js/apps.js', function () {
+      var h = document.querySelector('.site-header');
+      if (h && window.GV && GV.apps) GV.apps.mount(h);
     });
   }
 
