@@ -344,7 +344,7 @@
 {"id":"skibiditoiletattack","name":"Skibidi Toilet Attack","categories":["Arcade","Shooter"],"ranking":441,"img":"/games/skibiditoiletattack/logo.png","src":null},
 {"id":"sm64","name":"Super Mario 64","categories":["Platformer"],"ranking":446,"img":"/thumbs/sm64.webp","src":"https://icons-6.us/action-games/sm64/","site":6,"added":"2026-05-13"},
 {"id":"soldier-legend","name":"Soldier Legend","categories":["Action","Shooter"],"ranking":450,"img":"/thumbs/soldier-legend.webp","src":"https://icons-6.us/action-games/soldier-legend/","site":6,"added":"2026-05-13"},
-{"id":"solitaire","name":"Solitaire","categories":["Puzzle"],"ranking":451,"img":"https://icons-6.us/strategy-games/solitaire/logo.jpg","src":"https://icons-6.us/strategy-games/solitaire/","local":true},
+{"id":"solitaire","name":"Solitaire","categories":["Puzzle"],"ranking":451,"img":"/thumbs/solitaire.webp","src":"https://icons-6.us/strategy-games/solitaire/","site":6,"added":"2026-05-13"},
 {"id":"space","name":"Space","categories":["Action","Shooter"],"ranking":453,"img":"https://upload.wikimedia.org/wikipedia/en/0/0f/Space_Invaders_flyer%2C_1978.jpg","src":null},
 {"id":"stealingthediamond","name":"Stealing the Diamond","categories":["Action","Adventure"],"ranking":456,"img":"https://icons-6.us/strategy-games/stealingthediamond/stealingthediamond.jpg","src":"https://icons-6.us/strategy-games/stealingthediamond/","local":true},
 {"id":"stickmanboost","name":"Stickman Boost","categories":["Platformer"],"ranking":458,"img":"https://icons-6.us/action-games/stickman-boost/base/img1.jpg","src":"https://icons-6.us/action-games/stickman-boost/","local":true},
