@@ -980,7 +980,7 @@
 {"id":"papers-please","name":"Papers, Please","categories":["Action"],"ranking":1177,"img":"https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Papers_Please_-_Title_Logo.png/330px-Papers_Please_-_Title_Logo.png","src":"/iframe/187.html"},
 {"id":"parking-rush","name":"Parking Rush","categories":["Action"],"ranking":1178,"img":"/thumbs/parking-rush.webp","src":"/iframe/159.html","site":45},
 {"id":"playjs","name":"Play!.js","categories":["Action"],"ranking":1179,"img":"/thumbs/playjs.webp","src":"/iframe/296.html","site":45},
-{"id":"ragdoll-archers","name":"Ragdoll Archers","categories":["Action"],"ranking":1182,"img":"/thumbs/ragdoll-archers.webp","src":"/iframe/186.html"},
+{"id":"ragdoll-archers","name":"Ragdoll Archers","categories":["Action"],"ranking":1182,"img":"/thumbs/ragdoll-archers.webp","src":"/iframe/186.html","site":45},
 {"id":"ragdoll-hit","name":"Ragdoll Hit","categories":["Action"],"ranking":1183,"img":"https://cdn.jsdelivr.net/gh/genizy/google-class@main/ragdoll-hit/thumbnail.png","src":"/iframe/44-fix.html"},
 {"id":"road-of-fury","name":"Road of Fury","categories":["Action"],"ranking":1185,"img":"/thumbs/road-of-fury.webp","src":"/iframe/42.html"},
 {"id":"ruffle","name":"Ruffle","categories":["Apps","Action"],"ranking":1186,"img":"/thumbs/ruffle.webp","src":"/iframe/113.html","site":7,"added":"2026-05-13"},
