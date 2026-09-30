@@ -187,3 +187,34 @@ $function$;
 
 revoke all on function public.gv_submission_create(text, text, text, text, bigint) from public, anon;
 grant execute on function public.gv_submission_create(text, text, text, text, bigint) to authenticated;
+
+
+-- What a player has sent and where each one stands. Never the file itself.
+create or replace function public.gv_submission_mine()
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'Submissions only work on GameVault.';
+  end if;
+  if v_user is null then
+    raise exception 'Sign in to see what you sent.';
+  end if;
+
+  return coalesce((
+    select json_agg(json_build_object('id', s.id, 'title', s.title, 'status', s.status,
+                                      'size_bytes', s.size_bytes, 'created_at', s.created_at)
+                    order by s.id desc)
+    from (select * from gv_submissions where user_id = v_user order by id desc limit 50) s
+  ), '[]'::json);
+end;
+$function$;
+
+revoke all on function public.gv_submission_mine() from public, anon;
+grant execute on function public.gv_submission_mine() to authenticated;
