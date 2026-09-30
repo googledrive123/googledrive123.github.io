@@ -1,0 +1,26 @@
+-- Giveaways.
+--
+-- Now and then the site owner gives a site thing, like a badge, a crate or a
+-- name color, to one account picked at random. Signed-in players press Enter
+-- on /giveaway/, once each, and the owner draws the winner from the analytics
+-- dashboard. Only the username is ever used or shown. Prizes are never money,
+-- gift cards or anything posted, and gv_giveaway_create turns away a prize
+-- that reads like one.
+--
+-- Apply against project dxwjxzmlezfyursysays, after sql/rude.sql. Every
+-- statement is safe to run twice. Applied on 30 September 2026.
+
+
+create table if not exists public.gv_giveaways (
+  id          serial primary key,
+  title       text not null check (char_length(title) between 1 and 80),
+  prize_text  text not null check (char_length(prize_text) between 1 and 200),
+  ends_at     timestamptz not null,
+  created_at  timestamptz not null default now(),
+  -- Filled in by the draw. Left empty, not cascaded, if the winner later
+  -- deletes their account, so the giveaway still reads as drawn.
+  winner_user uuid references auth.users (id) on delete set null,
+  -- The username at the draw, so a later rename does not change who won.
+  winner_name text,
+  drawn_at    timestamptz
+);
