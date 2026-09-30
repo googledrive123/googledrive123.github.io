@@ -268,6 +268,18 @@
     return true;
   }
 
+  // Each value goes back only if it is still what max performance left.
+  function undoMaxPerformance() {
+    var undo = null;
+    try {
+      undo = JSON.parse(localStorage.getItem(UNDO_KEY));
+      localStorage.removeItem(UNDO_KEY);
+    } catch (e) {}
+    if (!undo) return;
+    if (typeof undo.maxFps === 'number' && maxFrameRate() === 60) setMaxFrameRate(undo.maxFps);
+    if (undo.auto === false && autoOn()) setAuto(false);
+  }
+
   // ── The Settings screen ───────────────────────────────────────────────
   // Rows at the top of the game's own Graphics section, built the way the
   // game builds its rows so they look like part of it. Quality works by
