@@ -1924,6 +1924,8 @@
     }
     .stat-card.full { grid-column: 1 / -1; }
     .level-card { display: flex; align-items: center; gap: 0.75rem; }
+    .profile-link { display: block; text-align: center; text-decoration: none; margin-top: 0.5rem; }
+    .profile-link[hidden] { display: none; }
     .coin-card { text-decoration: none; color: inherit; display: block; }
     .coin-card:hover { border-color: var(--accent); }
     .profile-title { font-size: 0.72rem; color: var(--accent); margin-top: 0.15rem; font-family: 'JetBrains Mono', monospace; }
@@ -5907,7 +5909,7 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
       <div id="statTopGames"></div>
     </div>
 
-    <a class="profile-save" id="profileTestLink" href="/test/" hidden style="display:block;text-align:center;text-decoration:none;margin-top:0.5rem">Test new games</a>
+    <a class="profile-save profile-link" id="profileTestLink" href="/test/" hidden>Test new games</a>
     <button class="profile-signout" id="profileSignout" style="display:none">Sign Out</button>
     <button class="profile-delete" id="profileDelete" style="display:none">Delete account</button>
     <button class="auth-submit" id="profileSigninBtn" style="margin-top:0.5rem">Sign In / Sign Up</button>
