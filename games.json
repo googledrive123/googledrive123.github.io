@@ -1363,5 +1363,6 @@
 {"id":"ultimate-tactics","name":"Ultimate Tactics","categories":["Strategy"],"img":"/thumbs/ultimate-tactics.webp","src":null,"site":8,"path":"flash/?swf=ultimatetactics.swf","added":"2026-09-30","ranking":1516},
 {"id":"unfair-mario","name":"Unfair Mario","categories":["Platformer"],"img":"/thumbs/unfair-mario.webp","src":null,"site":8,"path":"flash/?swf=unfairmario.swf","added":"2026-09-30","ranking":1517},
 {"id":"warfare-1917","name":"Warfare 1917","categories":["Strategy"],"img":"/thumbs/warfare-1917.webp","src":null,"site":8,"path":"flash/?swf=warfare1917.swf","added":"2026-09-30","ranking":1518},
-{"id":"warfare-1944","name":"Warfare 1944","categories":["Strategy"],"img":"/thumbs/warfare-1944.webp","src":null,"site":8,"path":"flash/?swf=warfare1944.swf","added":"2026-09-30","ranking":1519}
+{"id":"warfare-1944","name":"Warfare 1944","categories":["Strategy"],"img":"/thumbs/warfare-1944.webp","src":null,"site":8,"path":"flash/?swf=warfare1944.swf","added":"2026-09-30","ranking":1519},
+{"id":"xtreme-cliff-diving","name":"Xtreme Cliff Diving","categories":["Sports"],"img":"/thumbs/xtreme-cliff-diving.webp","src":null,"site":8,"path":"flash/?swf=xtremecliffdiving.swf","added":"2026-09-30","ranking":1520}
 ]}
