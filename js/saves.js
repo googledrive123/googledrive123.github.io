@@ -314,17 +314,23 @@
     if (!names.length) { db.close(); return Promise.resolve(); }
     return new Promise(function (resolve, reject) {
       var tx = db.transaction(names, 'readwrite');
-      names.forEach(function (storeName) {
-        var s = dump.stores[storeName];
-        var store = tx.objectStore(storeName);
-        var inline = isInline(s.keyPath);
-        (s.records || []).forEach(function (r) {
-          if (inline) store.put(decode(r[1]));
-          else store.put(decode(r[1]), decode(r[0]));
-        });
-      });
       tx.oncomplete = function () { db.close(); resolve(); };
       tx.onabort = function () { db.close(); reject(tx.error || new Error('A game database could not be written.')); };
+      // A record put() refuses outright would otherwise leave half a database.
+      try {
+        names.forEach(function (storeName) {
+          var s = dump.stores[storeName];
+          var store = tx.objectStore(storeName);
+          var inline = isInline(s.keyPath);
+          (s.records || []).forEach(function (r) {
+            if (inline) store.put(decode(r[1]));
+            else store.put(decode(r[1]), decode(r[0]));
+          });
+        });
+      } catch (err) {
+        reject(err);
+        tx.abort();
+      }
     });
   }
 
