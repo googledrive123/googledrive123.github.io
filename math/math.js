@@ -1215,4 +1215,25 @@
     dec += point < 0 ? 0 : t.length - point - 1;
     return { v: parseFloat(t) * scale, dec: pi ? Infinity : dec, frac: false, pi: pi };
   }
+
+  /* Equal, or equal once the right answer is rounded to as many decimal places
+     as were typed (at least minDec of them, so 0.3 does not pass for 1/3). */
+  function close(v, target, dec, minDec) {
+    var eps = 1e-9 * Math.max(1, Math.abs(target));
+    if (Math.abs(v - target) <= eps) return true;
+    if (dec === Infinity || dec < minDec) return false;
+    return Math.abs(v - target) <= 0.5 * Math.pow(10, -dec) + eps;
+  }
+
+  // true, false, or a string explaining why the answer could not be read.
+  function judge(q, text) {
+    if (!String(text).trim()) return 'Type an answer first.';
+    var got = parse(text, q.unit);
+    if (!got || !isFinite(got.v)) return 'That does not look like a number. Try something like 12, −3, 0.5 or 3/4.';
+    if (q.noFrac && got.frac) return 'Write it as a decimal, like 0.75.';
+    if (close(got.v, q.ans, got.dec, 2)) return true;
+    // 28.27 is a fine answer to "9π" when someone worked it out on a calculator.
+    if (q.unit === 'π' && !got.pi && close(got.v, q.ans * Math.PI, got.dec, 1)) return true;
+    return false;
+  }
 })();
