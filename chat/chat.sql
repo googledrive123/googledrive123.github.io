@@ -34,3 +34,14 @@ create table if not exists public.gv_chat_bans (
   until      timestamptz,
   created_at timestamptz not null default now()
 );
+
+create table if not exists public.gv_chat_reports (
+  id         bigserial primary key,
+  message_id bigint not null references public.gv_chat_messages (id) on delete cascade,
+  reporter   uuid not null references auth.users (id) on delete cascade,
+  reason     text,
+  created_at timestamptz not null default now(),
+  resolved   boolean not null default false,
+  -- One report per person per message, so a crowd of reports means a crowd.
+  unique (message_id, reporter)
+);
