@@ -209,6 +209,23 @@ document.addEventListener('DOMContentLoaded', function () {
       if (!q.quiet) yes.focus();
     });
   }
+
+  var fileNote = $('fileNote');
+  var downloadBtn = $('downloadBtn');
+
+  downloadBtn.addEventListener('click', function () {
+    setBusy(true);
+    downloadBtn.textContent = 'Packing your save…';
+    note(fileNote, '');
+    saves.download().then(function (bytes) {
+      note(fileNote, 'Downloaded, ' + size(bytes) + '. Keep the file somewhere safe.', 'good');
+    }, function (err) {
+      note(fileNote, message(err), 'bad');
+    }).then(function () {
+      downloadBtn.textContent = 'Download save file';
+      setBusy(false);
+    });
+  });
 });
 </script>
 </main>
