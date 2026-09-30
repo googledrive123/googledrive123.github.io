@@ -398,3 +398,20 @@ begin
   return row_to_json(v_row);
 end;
 $function$;
+
+
+create or replace function public.gv_chat_unban(p_secret text, p_user_id uuid)
+returns boolean
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+
+  delete from gv_chat_bans where user_id = p_user_id;
+  return found;
+end;
+$function$;
