@@ -30,8 +30,42 @@
   }
 
   function meant(item, arrived) {
-    if (item.mode === 'now') return item.created_at > arrived;
-    if (item.mode === 'later') return item.created_at <= arrived;
+    var sent = Date.parse(item.created_at), came = Date.parse(arrived);
+    if (item.mode === 'now') return sent > came;
+    if (item.mode === 'later') return sent <= came;
     return true;
+  }
+
+  var bar = null;
+  function show(item) {
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'gvBroadcast';
+      bar.setAttribute('role', 'status');
+      bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:2000;display:flex;align-items:center;gap:0.75rem;' +
+        'padding:0.6rem 1rem;background:linear-gradient(90deg,#2a0d0d,#1a1a20);border-bottom:1px solid #ff3b3b;' +
+        'color:#f4f4f6;font:500 0.88rem/1.4 "Space Grotesk",system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,0.5)';
+      var tag = document.createElement('span');
+      tag.textContent = 'MESSAGE';
+      tag.style.cssText = 'flex-shrink:0;font:600 0.6rem "JetBrains Mono",monospace;letter-spacing:0.18em;color:#ff3b3b';
+      var text = document.createElement('span');
+      text.className = 'gv-bc-text';
+      text.style.cssText = 'flex:1;min-width:0;overflow-wrap:anywhere';
+      var close = document.createElement('button');
+      close.type = 'button';
+      close.setAttribute('aria-label', 'Dismiss');
+      close.textContent = '✕';
+      close.style.cssText = 'flex-shrink:0;background:none;border:0;color:#8a8a96;font-size:1rem;cursor:pointer;padding:0.2rem 0.4rem';
+      bar.append(tag, text, close);
+      close.addEventListener('click', function () {
+        markSeen(Number(bar.dataset.id));
+        bar.remove();
+        bar = null;
+        poll();
+      });
+    }
+    bar.dataset.id = item.id;
+    bar.querySelector('.gv-bc-text').textContent = item.message;
+    if (!bar.isConnected) document.body.appendChild(bar);
   }
 })();
