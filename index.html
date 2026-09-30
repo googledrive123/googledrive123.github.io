@@ -3812,6 +3812,7 @@ function openSettings() {
   document.getElementById('panicKeyInput').value = security.key();
   document.getElementById('panicUrlInput').value = security.url();
   document.getElementById('confirmCloseInput').checked = security.confirmClose();
+  document.getElementById('skipWelcomeInput').checked = GV.layout.skipWelcome();
 }
 function closeSettings() { settingsOverlay.classList.remove('show'); }
 
@@ -3821,6 +3822,9 @@ document.getElementById('settingsClose').addEventListener('click', closeSettings
 settingsOverlay.addEventListener('click', (e) => { if (e.target === settingsOverlay) closeSettings(); });
 document.getElementById('settingsBtnWelcome').addEventListener('click', openSettings);
 document.getElementById('settingsBtnBrowse').addEventListener('click', openSettings);
+document.getElementById('skipWelcomeInput').addEventListener('change', (e) => {
+  GV.layout.setSkipWelcome(e.target.checked);
+});
 
 document.getElementById('cloakApplyCustom').addEventListener('click', () => {
   const title = document.getElementById('cloakCustomTitle').value.trim();
