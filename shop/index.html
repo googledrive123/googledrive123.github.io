@@ -110,6 +110,58 @@
     .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
     .shop-status { min-height: 1.4em; margin-top: 0.75rem; font-size: 0.85rem; color: var(--muted); }
     .shop-status.bad { color: #ff7a7a; }
+    .kind { margin-top: 1.25rem; }
+    .kind-head { display: flex; align-items: baseline; gap: 0.6rem; margin-bottom: 0.6rem; }
+    .page .kind-head h3 { margin: 0; }
+    .kind-count { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--muted-2); }
+    .items { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 0.6rem; }
+    .item {
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      padding: 0.85rem 0.6rem 0.7rem;
+    }
+    .item.wearing { border-color: color-mix(in srgb, var(--r) 55%, transparent); }
+    .item.locked .item-look, .item.locked .item-name { opacity: 0.35; }
+    .item-look { height: 58px; display: grid; place-items: center; width: 100%; }
+    .item-name { font-size: 0.84rem; font-weight: 600; margin-top: 0.45rem; }
+    .item-meta {
+      display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+      margin-top: 0.2rem;
+      font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--muted-2);
+    }
+    .item-meta .rar { color: var(--r); }
+    .item-missing { margin-top: 0.6rem; padding: 0.35rem 0; font-size: 0.74rem; color: var(--muted-2); }
+    .item .btn { margin-top: 0.6rem; padding: 0.35rem 0.8rem; font-size: 0.76rem; }
+    .item .btn[aria-pressed="true"] { border-color: var(--r); }
+
+    /* The four kinds of preview, used in the collection and on the reveal cards. */
+    .pv-name { font-weight: 700; font-size: 1.05rem; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pv-avatar {
+      display: grid; place-items: center;
+      width: 38px; height: 38px; border-radius: 50%;
+      background: var(--surface-2); border: 1px solid var(--border-strong);
+      font-weight: 700; font-size: 0.78rem;
+    }
+    .pv-tile {
+      position: relative;
+      width: 70px; height: 46px; border-radius: 9px;
+      background: linear-gradient(135deg, var(--surface-2), #0c0c10);
+      border: 1.5px solid var(--tile-accent, var(--border-strong));
+      box-shadow: 0 0 16px -6px var(--tile-accent, transparent);
+    }
+    .pv-tile::after {
+      content: ''; position: absolute; left: 8px; right: 22px; bottom: 7px;
+      height: 5px; border-radius: 3px;
+      background: var(--tile-accent, var(--muted-2));
+    }
+    .pv-title {
+      padding: 0.3rem 0.6rem; border-radius: 100px;
+      border: 1px solid var(--border-strong);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--text); white-space: nowrap;
+    }
   </style>
 </head>
 <body>
@@ -148,6 +200,9 @@
   <h2>Crates</h2>
   <div class="crates" id="crates"></div>
   <p class="shop-status" id="shopStatus" role="status"></p>
+
+  <h2 id="itemsHeading">Everything in the crates</h2>
+  <div id="collection"></div>
 
 <script>
 // Waits for DOMContentLoaded so supabase-js and js/cosmetics.js (both
@@ -278,9 +333,82 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
+  var KINDS = [
+    { id: 'name_color',   label: 'Name colors' },
+    { id: 'avatar_frame', label: 'Avatar rings' },
+    { id: 'tile_theme',   label: 'Tile colors' },
+    { id: 'title',        label: 'Titles' }
+  ];
+
+  // The part of an item that shows what it does, drawn the way the site will.
+  function preview(item) {
+    var one = {};
+    one[item.kind] = item;
+    var node;
+    if (item.kind === 'name_color') {
+      node = el('span', 'pv-name', state.name);
+      if (cos) cos.applyName(node, one);
+    } else if (item.kind === 'avatar_frame') {
+      node = el('span', 'pv-avatar', initials(state.name));
+      if (cos) cos.applyAvatar(node, one);
+    } else if (item.kind === 'tile_theme') {
+      node = el('span', 'pv-tile');
+      if (cos) cos.applyTiles(node, one);
+    } else {
+      node = el('span', 'pv-title', (item.value && item.value.text) || item.name);
+    }
+    var look = el('div', 'item-look');
+    look.appendChild(node);
+    return look;
+  }
+
+  function renderCollection() {
+    var owned = {};
+    var worn = {};
+    if (state.wallet) {
+      state.wallet.inventory.forEach(function (i) { owned[i.id] = i.qty; });
+      worn = state.wallet.equipped || {};
+    }
+    document.getElementById('itemsHeading').textContent = state.user ? 'Your items' : 'Everything in the crates';
+
+    var box = document.getElementById('collection');
+    box.innerHTML = '';
+    KINDS.forEach(function (kind) {
+      var items = state.items.filter(function (i) { return i.kind === kind.id; });
+      if (!items.length) return;
+      var have = items.filter(function (i) { return owned[i.id]; }).length;
+
+      var section = el('section', 'kind');
+      var head = el('div', 'kind-head');
+      head.appendChild(el('h3', null, kind.label));
+      head.appendChild(el('span', 'kind-count', state.user ? have + ' / ' + items.length : items.length + ' to find'));
+      section.appendChild(head);
+
+      var grid = el('div', 'items');
+      items.forEach(function (item) {
+        var qty = owned[item.id] || 0;
+        var wearing = worn[item.kind] === item.id;
+        // Dimmed only for a signed-in player who has not found it; for a guest
+        // this is the catalog.
+        var card = el('div', 'item r-' + item.rarity + (state.user && !qty ? ' locked' : '') + (wearing ? ' wearing' : ''));
+        card.appendChild(preview(item));
+        card.appendChild(el('div', 'item-name', item.name));
+        var meta = el('div', 'item-meta');
+        meta.appendChild(el('span', 'rar', cap(item.rarity)));
+        if (qty > 1) meta.appendChild(el('span', null, '×' + qty));
+        card.appendChild(meta);
+        if (state.user && !qty) card.appendChild(el('div', 'item-missing', 'Not found yet'));
+        grid.appendChild(card);
+      });
+      section.appendChild(grid);
+      box.appendChild(section);
+    });
+  }
+
   function render() {
     renderCrates();
     renderWallet();
+    renderCollection();
   }
 
   // Signed in: pay out any play since last time, then read the wallet. The
