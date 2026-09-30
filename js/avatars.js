@@ -479,10 +479,18 @@
 
   function name(i) { return ART[index(i)][0]; }
 
+  // An account that never picked one still gets its own, from its id.
+  function defaultFor(id) {
+    var h = 5381, str = String(id || '');
+    for (var k = 0; k < str.length; k++) h = ((h * 33) ^ str.charCodeAt(k)) >>> 0;
+    return h % COUNT;
+  }
+
   window.GV = window.GV || {};
   window.GV.avatars = {
     count: COUNT,
     svg: svg,
-    name: name
+    name: name,
+    defaultFor: defaultFor
   };
 })();
