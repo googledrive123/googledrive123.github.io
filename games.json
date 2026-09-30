@@ -51,7 +51,7 @@
 {"id":"blackjack","name":"Blackjack","categories":["Action"],"ranking":50,"img":"https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/BlackJackGame.jpg/330px-BlackJackGame.jpg","src":"https://genizymath.github.io/iframe/312.html"},
 {"id":"geometrydash","name":"Geometry Dash","categories":["Platformer","Skill"],"ranking":51,"img":"/games/geometrydash/icon.png","src":null},
 {"id":"hollow-knight-silksong","name":"Hollow Knight Silksong","categories":["RPG"],"ranking":52,"img":"https://upload.wikimedia.org/wikipedia/en/0/05/Silksong.jpg","src":"https://genizymath.github.io/iframe/771-z.html"},
-{"id":"1on1soccer","name":"1 on 1 Soccer","categories":["Sports"],"ranking":53,"img":"https://icons-6.us/driving-games/1v1-soccer/logo.jpg","src":"https://icons-6.us/driving-games/1v1-soccer/","local":true},
+{"id":"1on1soccer","name":"1 on 1 Soccer","categories":["Sports"],"ranking":53,"img":"/thumbs/1on1soccer.webp","src":"https://icons-6.us/driving-games/1v1-soccer/","site":2,"added":"2026-05-13"},
 {"id":"basketball-frvr","name":"Basketball Frvr","categories":["Sports"],"ranking":54,"img":"https://img.gamepix.com/games/basketball-frvr/cover/basketball-frvr.png","src":"/iframe/28.html"},
 {"id":"basket-battle","name":"Basket Battle","categories":["Sports"],"ranking":55,"img":"https://img.gamepix.com/games/basket-battle-1/cover/basket-battle-1.png","src":"/iframe/25.html"},
 {"id":"adventure-drivers","name":"Adventure Drivers","categories":["Racing","Driving"],"ranking":56,"img":"https://icons-6.us/driving-games/adventure-drivers/splash.png","src":"https://icons-6.us/driving-games/adventure-drivers/","local":true},
