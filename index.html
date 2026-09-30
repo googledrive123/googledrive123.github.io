@@ -2243,6 +2243,9 @@
     }
     @media (prefers-reduced-motion: reduce) {
       .newest { animation: none; border-color: var(--accent); }
+      .tile, .tile-name { transition: none; }
+      .tile:hover { transform: none; }
+      .tile-name { transform: none; }
     }
     @media (max-width: 560px) {
       .newest { flex-wrap: wrap; }
