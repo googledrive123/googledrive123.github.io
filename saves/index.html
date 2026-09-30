@@ -25,6 +25,20 @@
   <h1>Save backup</h1>
   <p class="lede">Keep a copy of your game progress, as a file or on your account, and put it
   back in any browser.</p>
+
+  <div class="panel">
+    <div class="panel-label">Save file</div>
+    <p class="panel-note" style="margin-top:0">One file with the progress of every game you have
+    played here. Keep it somewhere safe, then upload it after clearing your history, or in another
+    browser, to pick up where you left off.</p>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="downloadBtn" type="button">Download save file</button>
+      <button class="btn" id="uploadBtn" type="button">Upload save file</button>
+      <input type="file" id="uploadInput" accept=".json,application/json" hidden>
+    </div>
+    <div id="fileConfirm"></div>
+    <p class="save-note" id="fileNote" role="status" aria-live="polite"></p>
+  </div>
 </main>
 </body>
 </html>
