@@ -313,7 +313,7 @@
 {"id":"papa-louie-3","name":"Papa Louie 3","categories":["Platformer"],"ranking":394,"img":"https://flipline.com/gamefiles/papalouie3/game_app_page_lg.jpg","src":null,"site":6,"added":"2026-05-13"},
 {"id":"papas-burgeria-main","name":"\"Papa's Burgeria\"","categories":["Simulation"],"ranking":395,"img":"https://flipline.com/gamefiles/papasburgeria/game_app_page_lg.jpg","src":null},
 {"id":"papas-pizzaria-main","name":"\"Papa's Pizzeria\"","categories":["Simulation"],"ranking":396,"img":"https://flipline.com/gamefiles/papaspizzeria/game_app_page_lg.jpg","src":null,"site":6,"added":"2026-05-13"},
-{"id":"papas-wingeria","name":"\"Papa's Wingeria\"","categories":["Simulation"],"ranking":397,"img":"https://icons-6.us/casual-games/papas-wing/logo.jpg","src":"https://icons-6.us/casual-games/papas-wing/","local":true},
+{"id":"papas-wingeria","name":"\"Papa's Wingeria\"","categories":["Simulation"],"ranking":397,"img":"/thumbs/papas-wingeria.webp","src":"https://icons-6.us/casual-games/papas-wing/","site":6,"added":"2026-05-13"},
 {"id":"papasfreezeria","name":"\"Papa's Freezeria\"","categories":["Simulation"],"ranking":398,"img":"https://flipline.com/gamefiles/papasfreezeria/game_app_page_lg.jpg","src":null},
 {"id":"parking-fury","name":"Parking Fury","categories":["Racing","Driving"],"ranking":401,"img":"https://icons-6.us/driving-games/parking-fury/logo.jpg","src":"https://icons-6.us/driving-games/parking-fury/","local":true},
 {"id":"parking-fury-2","name":"Parking Fury 2","categories":["Racing","Driving"],"ranking":402,"img":"https://icons-6.us/driving-games/parking-fury-2/logo.jpg","src":"https://icons-6.us/driving-games/parking-fury-2/","local":true},
