@@ -200,12 +200,45 @@
     });
   }
 
+  /* The other half, on /mirrors/?receive. Listens only to the tab that
+     opened this one, and only when that tab is on the main address or a
+     listed one. Resolves with {data, from}: the progress, its addresses
+     already pointed here, and where it came from. null when no tab opened
+     this one, so nothing is coming. */
+  function receive() {
+    var opener = window.opener;
+    if (!opener) return null;
+
+    return new Promise(function (resolve, reject) {
+      var trusted = list().then(function (items) {
+        return items.map(function (i) { return i.origin; });
+      });
+      trusted.catch(reject);
+
+      function on(e) {
+        if (e.source !== opener || !e.data || e.data.gv !== 'saves') return;
+        if (!e.data.data || typeof e.data.data !== 'object') return;
+        trusted.then(function (origins) {
+          if (e.origin === location.origin || origins.indexOf(e.origin) === -1) return;
+          window.removeEventListener('message', on);
+          opener.postMessage({ gv: 'received' }, e.origin);
+          resolve({ data: rewrite(e.data.data, e.origin, location.origin), from: e.origin });
+        }, function () {});
+      }
+      window.addEventListener('message', on);
+      // Nothing private in it, and this tab cannot know the sender's address
+      // before it answers, so it goes to whoever opened the tab.
+      opener.postMessage({ gv: 'ready' }, '*');
+    });
+  }
+
   window.GV = window.GV || {};
   window.GV.mirrors = {
     MAIN: MAIN,
     list: list,
     check: check,
     rewrite: rewrite,
-    moveSaves: moveSaves
+    moveSaves: moveSaves,
+    receive: receive
   };
 })();
