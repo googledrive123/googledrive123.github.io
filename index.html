@@ -4051,6 +4051,40 @@ function quickPicks(q) {
     .slice(0, QP_MAX);
 }
 
+function paintQuickPick() {
+  qpItems = quickPicks(searchInput.value);
+  qpOn = -1;
+  quickPick.innerHTML = '';
+  qpItems.forEach((g, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'qp-item';
+    b.setAttribute('role', 'option');
+    const th = document.createElement('span');
+    th.className = 'qp-thumb';
+    if (g.img) th.style.backgroundImage = 'url("' + g.img.replace(/"/g, '%22') + '")';
+    const nm = document.createElement('span');
+    nm.textContent = g.name;
+    const ct = document.createElement('span');
+    ct.className = 'qp-cat';
+    ct.textContent = g.categories[0] || '';
+    b.append(th, nm, ct);
+    // mousedown, not click: the input's blur would hide the list first.
+    b.addEventListener('mousedown', (e) => { e.preventDefault(); pickQuick(i); });
+    quickPick.appendChild(b);
+  });
+  quickPick.hidden = !qpItems.length;
+}
+
+function pickQuick(i) {
+  const g = qpItems[i];
+  if (!g) return;
+  quickPick.hidden = true;
+  searchInput.blur();
+  addRecent(g.id);
+  openGame(g);
+}
+
 // ───── Sort menu ─────
 const sortBtn = document.getElementById('sortBtn');
 const sortMenu = document.getElementById('sortMenu');
