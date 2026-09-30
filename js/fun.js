@@ -38,4 +38,46 @@
     var d = new Date(), m = d.getMonth(), day = d.getDate();
     return (m === 9 && day >= 20) || (m === 10 && day === 1);
   }
+
+  // ── Modes ───────────────────────────────────────────────────────────────
+  // Each running mode keeps a list of undo steps, so switching it off takes
+  // back every node, listener and timer it added.
+
+  var modes = {};
+
+  function run(name, start) {
+    if (modes[name]) return false;
+    modes[name] = [];
+    try { start(modes[name]); } catch (e) {}
+    return true;
+  }
+
+  function halt(name) {
+    var undo = modes[name];
+    if (!undo) return false;
+    delete modes[name];
+    while (undo.length) { try { undo.pop()(); } catch (e) {} }
+    return true;
+  }
+
+  function place(undo, el, parent) {
+    (parent || document.body).appendChild(el);
+    undo.push(function () { if (el.parentNode) el.parentNode.removeChild(el); });
+    return el;
+  }
+
+  function listen(undo, target, type, fn, opts) {
+    target.addEventListener(type, fn, opts);
+    undo.push(function () { target.removeEventListener(type, fn, opts); });
+  }
+
+  function later(undo, fn, ms) {
+    var id = setTimeout(fn, ms);
+    undo.push(function () { clearTimeout(id); });
+  }
+
+  function flag(undo, cls) {
+    document.documentElement.classList.add(cls);
+    undo.push(function () { document.documentElement.classList.remove(cls); });
+  }
 })();
