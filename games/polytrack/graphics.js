@@ -250,6 +250,16 @@
     return presetSaved(LIGHTEST) && fps > 0 && fps <= 60 && autoOn();
   }
 
+  // True when the picture settings changed, which only a restart shows.
+  function maxPerformance() {
+    var fps = maxFrameRate();
+    if (fps === 0 || fps > 60) setMaxFrameRate(60);
+    if (!autoOn()) setAuto(true);
+    if (presetSaved(LIGHTEST)) return false;
+    writePreset(LIGHTEST);
+    return true;
+  }
+
   // ── The Settings screen ───────────────────────────────────────────────
   // Rows at the top of the game's own Graphics section, built the way the
   // game builds its rows so they look like part of it. Quality works by
