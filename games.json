@@ -786,7 +786,7 @@
 {"id":"scratch-inc","name":"Scratch Inc","categories":["Action"],"ranking":963,"img":"/thumbs/scratch-inc.webp","src":"https://genizymath.github.io/iframe/781.html","site":37},
 {"id":"seat-jam-3d","name":"Seat Jam 3D","categories":["Action"],"ranking":964,"img":"/thumbs/seat-jam-3d.webp","src":"https://genizymath.github.io/iframe/404.html","site":37},
 {"id":"serial-experiments-lain","name":"Serial Experiments Lain","categories":["Action"],"ranking":965,"img":"/thumbs/serial-experiments-lain.webp","src":"https://genizymath.github.io/iframe/778.html","site":37},
-{"id":"shapezio","name":"Shapezio","categories":["Action"],"ranking":966,"img":"/thumbs/shapezio.webp","src":"https://genizymath.github.io/iframe/595.html"},
+{"id":"shapezio","name":"Shapezio","categories":["Action"],"ranking":966,"img":"/thumbs/shapezio.webp","src":null,"site":37},
 {"id":"shipoio","name":"Shipo.io","categories":["Action"],"ranking":968,"img":"/thumbs/shipoio.webp","src":"https://genizymath.github.io/iframe/306.html"},
 {"id":"shooting-master","name":"Shooting Master","categories":["Action"],"ranking":969,"img":"/thumbs/shooting-master.webp","src":"https://genizymath.github.io/iframe/405.html"},
 {"id":"shovel-3d","name":"Shovel 3D","categories":["Action"],"ranking":970,"img":"/thumbs/shovel-3d.webp","src":"https://genizymath.github.io/iframe/575.html"},
