@@ -1137,11 +1137,40 @@
         return '<div class="bc-item"><span class="when">' + esc(monthName(c.month)) + '</span>'
           + '<span class="msg"><b>' + esc(c.title) + '</b>' + (c.note ? ' · ' + esc(c.note) : '') + (podium ? '<br>' + podium : '') + '</span>'
           + '<span class="st' + (c.ended ? '' : ' on') + '">' + c.runners + ' racers · ' + (c.closed_at ? 'badges given' : c.ended ? 'ended' : 'ends ' + esc(new Date(c.ends_at).toLocaleDateString())) + '</span>'
-          + '<button class="btn" type="button" data-chboard="' + esc(c.month) + '">Board</button></div>';
+          + '<button class="btn" type="button" data-chboard="' + esc(c.month) + '">Board</button>'
+          + (c.ended && c.runners ? '<button class="btn" type="button" data-chclose="' + esc(c.month) + '">' + (c.closed_at ? 'Give again' : 'Give badges') + '</button>' : '') + '</div>';
       }).join('') : '<div class="empty">No challenges yet.</div>';
     }).catch(function (e) { $('chMsg').textContent = 'Could not load challenges: ' + e.message; });
   }
 
+  function loadChallengeBoard(month) {
+    return rpc('gv_challenge_board', { p_secret: state.secret, p_month: month }).then(function (rows) {
+      $('chBoardH').hidden = false;
+      $('chBoardH').textContent = 'Board for ' + monthName(month);
+      $('chBoard').innerHTML = (rows || []).length ? rows.map(function (r) {
+        return '<div class="bc-item"><span class="when">#' + r.rank + '</span>'
+          + '<span class="msg">' + esc(r.nickname || 'a guest') + (r.user_id ? '' : ' <span class="kind">guest</span>') + '</span>'
+          + '<span class="st">' + esc(r.time) + ' \u00b7 ' + esc(new Date(r.at).toLocaleDateString()) + '</span>'
+          + '<button class="btn" type="button" data-chrm="' + esc(r.player_key) + '" data-month="' + esc(month) + '">Remove</button></div>';
+      }).join('') : '<div class="empty">Nobody has raced it yet.</div>';
+    }).catch(function (e) { $('chMsg').textContent = 'Could not load the board: ' + e.message; });
+  }
+  function chAction(e) {
+    var b = e.target.closest('button'); if (!b) return;
+    var call;
+    if (b.dataset.chboard) return loadChallengeBoard(b.dataset.chboard);
+    if (b.dataset.chclose) {
+      if (!confirm('Give the badges for ' + monthName(b.dataset.chclose) + ' to its top three?')) return;
+      call = rpc('gv_challenge_close', { p_secret: state.secret, p_month: b.dataset.chclose }).then(function (top) {
+        $('chMsg').textContent = (top || []).length ? 'Badges given: ' + top.map(function (p) { return (p.nickname || 'a guest') + ' (' + p.time + ')'; }).join(', ') + '.' : 'Nobody to give badges to.';
+      });
+    } else if (b.dataset.chrm) {
+      if (!confirm('Take this time off the challenge? It stays on the PolyTrack board.')) return;
+      call = rpc('gv_challenge_remove', { p_secret: state.secret, p_month: b.dataset.month, p_player_key: b.dataset.chrm })
+        .then(function () { $('chMsg').textContent = 'Removed.'; return loadChallengeBoard(b.dataset.month); });
+    }
+    if (call) call.then(loadChallenges).catch(function (err) { $('chMsg').textContent = 'Could not do that: ' + err.message; });
+  }
   function loadChallengeTracks() {
     return rpc('gv_challenge_tracks', { p_secret: state.secret }).then(function (list) {
       $('chTrack').innerHTML = (list || []).length ? list.map(function (t) {
@@ -1440,6 +1469,7 @@
       .catch(function (e) { $('gaMsg').textContent = 'Could not start it: ' + e.message; })
       .then(function () { $('gaCreate').disabled = false; });
   });
+  ['chList', 'chBoard'].forEach(function (id) { $(id).addEventListener('click', chAction); });
   $('chTrack').addEventListener('change', function () {
     var name = $('chTrack').selectedOptions[0] && $('chTrack').selectedOptions[0].dataset.name;
     if (name && !$('chTitle').value.trim()) $('chTitle').value = name;
