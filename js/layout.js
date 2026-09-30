@@ -35,7 +35,15 @@
     // Home rows someone chose to hide: 'popular', 'starred', 'recent'.
     ROWS: ['popular', 'starred', 'recent'],
     hidden: function (row) { return read('gv.hide.' + row, '0') === '1'; },
-    setHidden: function (row, on) { write('gv.hide.' + row, on ? '1' : '0'); }
+    setHidden: function (row, on) { write('gv.hide.' + row, on ? '1' : '0'); },
+
+    // 'dark' or 'light'. js/mimicry.js applies it before the first paint.
+    theme: function () { return read('gv.theme', 'dark') === 'light' ? 'light' : 'dark'; },
+    setTheme: function (t) {
+      write('gv.theme', t === 'light' ? 'light' : 'dark');
+      if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
+      else document.documentElement.removeAttribute('data-theme');
+    }
   };
 
   window.GV = window.GV || {};
