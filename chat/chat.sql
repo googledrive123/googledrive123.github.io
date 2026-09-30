@@ -200,3 +200,46 @@ $function$;
 
 revoke all on function public.gv_chat_recent(bigint) from public, anon;
 grant execute on function public.gv_chat_recent(bigint) to authenticated;
+
+
+-- Flags a message for the owner. Reporting the same message again changes
+-- nothing and says so: false instead of true.
+create or replace function public.gv_chat_report(p_message_id bigint, p_reason text)
+returns boolean
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+  v_author uuid;
+  v_id bigint;
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'Chat only works on GameVault.';
+  end if;
+  if v_user is null then
+    raise exception 'Sign in to report a message.';
+  end if;
+
+  select user_id into v_author
+    from gv_chat_messages
+   where id = p_message_id and not deleted;
+  if not found then
+    raise exception 'That message is already gone.';
+  end if;
+  if v_author = v_user then
+    raise exception 'You cannot report your own message.';
+  end if;
+
+  insert into gv_chat_reports (message_id, reporter, reason)
+  values (p_message_id, v_user, left(nullif(btrim(coalesce(p_reason, '')), ''), 200))
+  on conflict (message_id, reporter) do nothing
+  returning id into v_id;
+
+  return v_id is not null;
+end;
+$function$;
+
+revoke all on function public.gv_chat_report(bigint, text) from public, anon;
+grant execute on function public.gv_chat_report(bigint, text) to authenticated;
