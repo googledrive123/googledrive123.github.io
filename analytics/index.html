@@ -125,6 +125,7 @@
   .mod-h { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin: 14px 0 4px; font-weight: 600; }
   .mod-scroll { max-height: 320px; overflow: auto; }
   .bc-item.gone .msg { text-decoration: line-through; opacity: 0.5; }
+  .av-img { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; background: var(--bg); flex-shrink: 0; }
   .verify-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 0.76rem; padding: 4px 4px 4px 8px; border: 1px solid var(--border); border-radius: 999px; }
   .verify-chip .kind { color: var(--muted-2); font-size: 0.68rem; }
   .verify-chip button { background: none; border: 0; color: var(--muted); font: inherit; font-size: 0.9rem; line-height: 1; padding: 2px 6px; cursor: pointer; }
@@ -244,6 +245,16 @@
       <div class="verify-list" id="chatBans"></div>
       <h3 class="mod-h">Latest messages</h3>
       <div class="verify-list mod-scroll" id="chatRecent"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Pictures waiting <small>profile uploads only show once approved</small></h2>
+    <div class="card">
+      <div class="verify-msg" id="avMsg"></div>
+      <div class="verify-list" id="avQueue"></div>
+      <h3 class="mod-h">Showing now</h3>
+      <div class="verify-list" id="avShowing"></div>
     </div>
   </section>
 
