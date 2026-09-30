@@ -8,6 +8,9 @@
 (function () {
   'use strict';
 
+  // A page that lists this script twice would otherwise get two of everything.
+  if (window.GV && window.GV.fun) return;
+
   var PRANKS_KEY = 'gv.fun.pranks';     // 'off' once someone turns pranks off
   var SEASONAL_KEY = 'gv.fun.seasonal'; // 'off' once someone turns decorations off
   var FORCE_KEY = 'gv.fun.forceUntil';  // ms timestamp, set by the secret menu toy
