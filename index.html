@@ -77,8 +77,8 @@
       left: -25%; right: -25%;
       top: 0; bottom: -50%;
       background-image:
-        linear-gradient(rgba(255,255,255,0.07) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.07) 1px, transparent 1px);
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
       background-size: 80px 80px;
       transform: perspective(700px) rotateX(60deg);
       transform-origin: center top;
@@ -454,7 +454,7 @@
       display: none;
       align-items: center;
       justify-content: center;
-      background: rgba(8,8,10,0.86);
+      background: var(--glass);
       backdrop-filter: blur(14px);
       animation: fadeIn 0.2s ease;
     }
@@ -799,7 +799,7 @@
       position: sticky;
       top: 0;
       z-index: 200;
-      background: rgba(8,8,10,0.82);
+      background: var(--glass);
       backdrop-filter: blur(16px) saturate(1.2);
       border-bottom: 1px solid var(--border);
       padding: 1rem 1rem;
@@ -912,7 +912,7 @@
       position: sticky;
       top: 64px;
       z-index: 100;
-      background: rgba(8,8,10,0.82);
+      background: var(--glass);
       backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border);
       padding: 0.75rem 1rem;
@@ -1754,7 +1754,7 @@
     .auth-overlay {
       position: fixed; inset: 0; z-index: 2000;
       display: none; align-items: center; justify-content: center;
-      background: rgba(8,8,10,0.88);
+      background: var(--glass);
       backdrop-filter: blur(14px);
       animation: fadeIn 0.2s ease;
     }
@@ -1962,7 +1962,7 @@
       align-items: center;
       gap: 1rem;
       padding: 0.9rem 1.5rem;
-      background: rgba(8,8,10,0.85);
+      background: var(--glass);
       backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border);
     }
@@ -2180,7 +2180,7 @@
     .movie-player-bar {
       display: flex; align-items: center; gap: 1rem;
       padding: 0.75rem 1.25rem;
-      background: rgba(8,8,10,0.9);
+      background: var(--glass);
       border-bottom: 1px solid var(--border);
       flex-shrink: 0;
     }
