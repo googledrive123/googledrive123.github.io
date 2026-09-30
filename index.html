@@ -4034,6 +4034,23 @@ searchInput.addEventListener('input', e => {
 searchInput.addEventListener('focus', () => searchWrap.classList.add('focused'));
 searchInput.addEventListener('blur', () => searchWrap.classList.remove('focused'));
 
+// ───── Search quick picks ─────
+// The best few matches drop down under the box, so someone who knows what they
+// want can open it without scrolling the grid. Names that start with what was
+// typed come first, then the most played.
+const quickPick = document.getElementById('quickPick');
+const QP_MAX = 7;
+let qpItems = [];
+let qpOn = -1;
+
+function quickPicks(q) {
+  q = q.toLowerCase().trim();
+  if (!q) return [];
+  return GAMES.filter(g => matchesSearch(g, q))
+    .sort((a, b) => (b.name.toLowerCase().startsWith(q) - a.name.toLowerCase().startsWith(q)) || a.ranking - b.ranking)
+    .slice(0, QP_MAX);
+}
+
 // ───── Sort menu ─────
 const sortBtn = document.getElementById('sortBtn');
 const sortMenu = document.getElementById('sortMenu');
