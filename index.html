@@ -3862,12 +3862,28 @@ const oldHost = (function () {
       if (s && s.gameId) played.add(s.gameId);
     });
     // A game switched to the copy here was played here, not there.
-    JSON.parse(localStorage.getItem('gv.offline') || '[]').forEach(id => played.delete(id));
+    const offline = JSON.parse(localStorage.getItem('gv.offline') || '[]');
+    offline.forEach(id => played.delete(id));
     localStorage.setItem(OLD_HOST_KEY, JSON.stringify([...played]));
+    localStorage.setItem(OLD_HOST_KEY + '.skip', JSON.stringify(offline));
+    localStorage.setItem(OLD_HOST_KEY + '.at', new Date().toISOString());
     localStorage.removeItem('gv.offline');
     return played;
   } catch (e) { return new Set(); }
 })();
+
+// A signed-in player's older history lives on the account, not in this
+// browser's lists (those are emptied as sessions upload). Games the account
+// played before this browser first saw the vaults count as played there too.
+function noteOldHost(ids) {
+  let skip = [];
+  try { skip = JSON.parse(localStorage.getItem(OLD_HOST_KEY + '.skip') || '[]'); } catch (e) {}
+  ids.forEach(id => { if (!skip.includes(id)) oldHost.add(id); });
+  try { localStorage.setItem(OLD_HOST_KEY, JSON.stringify([...oldHost])); } catch (e) {}
+}
+function oldHostSince() {
+  try { return localStorage.getItem(OLD_HOST_KEY + '.at'); } catch (e) { return null; }
+}
 
 // Where a game runs from: 'vault' (/vault<site>/), 'src' (the host it came
 // from) or 'main' (/games/ here, only PolyTrack now).
