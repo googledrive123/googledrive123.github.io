@@ -373,6 +373,7 @@
       matchingPreset(menu), function (name) {
         applyPreset(menu, presetNamed(name));
         markSelected(quality, matchingPreset(menu));
+        if (name !== LIGHTEST.name) undoMaxPerformance();
       });
     var auto = choiceRow('gv-auto-resolution', 'Auto resolution', ['Off', 'On'],
       autoOn() ? 'On' : 'Off', function (choice) {
