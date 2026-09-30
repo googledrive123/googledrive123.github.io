@@ -128,7 +128,7 @@
     .then(function (r) { return r.json(); })
     .then(function (data) {
       // Most played first, so the fallback suggestions are ones people want.
-      games = data.games.filter(function (g) { return !g.hidden; })
+      games = data.games.filter(function (g) { return !g.hidden && !g.staging; })
         .sort(function (a, b) { return a.ranking - b.ranking; });
       run();
       search.addEventListener('input', run);
