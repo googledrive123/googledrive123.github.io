@@ -420,6 +420,14 @@
     button.appendChild(label);
     function say(text) { label.textContent = ' ' + text; }
     say(maxPerformanceOn() ? 'Max performance: On' : 'Max performance');
+    var restarting = false;
+    button.addEventListener('click', function () {
+      if (restarting || maxPerformanceOn()) return;
+      restarting = maxPerformance();
+      say(restarting ? 'Max performance: On, restarting' : 'Max performance: On');
+      // Long enough to read that it worked before the loading screen.
+      if (restarting) setTimeout(function () { location.reload(); }, 900);
+    });
     bar.insertBefore(button, bar.querySelector(':scope > .right'));
   }
 
