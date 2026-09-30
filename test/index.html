@@ -102,6 +102,10 @@
     .verdict-desc { font-size: 0.72rem; color: var(--muted-2); line-height: 1.35; }
     .note-box { margin-top: 0.6rem; resize: vertical; min-height: 4.5rem; line-height: 1.5; }
 
+    /* Scrolls sideways on a phone rather than squeezing notes a word a line. */
+    table.reports { min-width: 34rem; }
+    table.reports td:last-child { white-space: nowrap; }
+
     @media (max-width: 560px) {
       .verdicts { grid-template-columns: 1fr; }
       .verdict { flex-direction: row; align-items: baseline; gap: 0.6rem; }
@@ -174,7 +178,7 @@
     <div class="panel">
       <div class="panel-label">Your reports</div>
       <div class="table-wrap">
-        <table class="gv">
+        <table class="gv reports">
           <thead><tr><th>Game</th><th>Verdict</th><th>Note</th><th>When</th></tr></thead>
           <tbody id="reportRows"></tbody>
         </table>
