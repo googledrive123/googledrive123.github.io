@@ -2956,7 +2956,8 @@ function renderNewest() {
   if (!box || !NEWS.length) return;
   const item = NEWS[0];
   document.getElementById('newestLabel').textContent = item.label;
-  document.getElementById('newestMeta').textContent = item.meta;
+  document.getElementById('newestMeta').textContent =
+    (item.date ? newsDate(item.date) + ' · ' : '') + item.meta;
   box.hidden = false;
 }
 
