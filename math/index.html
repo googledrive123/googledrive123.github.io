@@ -187,6 +187,39 @@
     .answer-box.bump { animation: nudge 0.3s ease; }
     @keyframes nudge { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
 
+    /* Multiple choice */
+    .choices { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+    .choice {
+      display: flex; align-items: center; gap: 0.8rem;
+      min-height: 58px;
+      padding: 0.7rem 1rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace; font-size: 1.02rem;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .choice:hover:not(:disabled) { border-color: var(--border-strong); background: var(--surface-2); }
+    .choice:disabled { cursor: default; }
+    .choice .key {
+      flex-shrink: 0;
+      display: grid; place-items: center;
+      width: 1.6rem; height: 1.6rem;
+      border-radius: 7px;
+      border: 1px solid var(--border-strong);
+      font-size: 0.7rem; color: var(--muted);
+    }
+    .choice .body { line-height: 1.5; }
+    .choice .frac { font-size: 0.9em; }
+    .choice.right { border-color: var(--good); background: rgba(92,224,138,0.08); }
+    .choice.right .key { border-color: var(--good); color: var(--good); }
+    .choice.wrong { border-color: var(--accent); background: rgba(255,59,59,0.08); }
+    .choice.wrong .key { border-color: var(--accent); color: var(--accent); }
+    .choice.dim { opacity: 0.4; }
+
     .page .hint { font-size: 0.8rem; color: #f0c04a; margin-top: 0.6rem; }
     .page .hint:empty { display: none; }
   </style>
@@ -229,6 +262,7 @@
       </div>
       <button class="btn btn-primary" type="submit">Check</button>
     </form>
+    <div class="choices" id="choices" hidden></div>
     <p class="hint" id="hint" role="status"></p>
   </section>
 </main>
