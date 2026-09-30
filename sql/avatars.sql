@@ -263,3 +263,43 @@ begin
   ), '[]'::json);
 end;
 $function$;
+
+
+-- Approves or turns down the picture waiting for p_user_id. Pass the
+-- uploaded_at the queue showed: if the player has sent another picture since,
+-- nothing happens, so a picture nobody looked at is never approved. Returns
+-- the new status, or null when there was nothing (or something newer) waiting.
+-- A turned-down picture is thrown away; the approved one keeps showing.
+create or replace function public.gv_avatar_review(
+  p_secret text,
+  p_user_id uuid,
+  p_approve boolean,
+  p_uploaded_at timestamptz default null
+) returns text
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_status text;
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+  if p_approve is null then
+    raise exception 'say whether to approve';
+  end if;
+
+  update gv_avatars
+     set approved_upload = case when p_approve then upload else approved_upload end,
+         upload = case when p_approve then upload end,
+         upload_status = case when p_approve then 'approved' else 'rejected' end,
+         updated_at = now()
+   where user_id = p_user_id
+     and upload_status = 'pending'
+     and (p_uploaded_at is null or uploaded_at = p_uploaded_at)
+  returning upload_status into v_status;
+
+  return v_status;
+end;
+$function$;
