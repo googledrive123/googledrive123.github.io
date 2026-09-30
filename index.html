@@ -2746,6 +2746,9 @@
 // GAMES from inside a function, never at parse time.
 let CATS = ['All'];
 let GAMES = [];
+// Every entry, including `hidden` ones: pages that are not listed anywhere but
+// still open in the player (emulators, old folders people bookmarked).
+let ALL_GAMES = [];
 
 // ───── Particle background (drifting dots) ─────
 (function particles() {
@@ -4066,7 +4069,8 @@ async function bootCatalog() {
     if (!res.ok) throw new Error('games.json returned ' + res.status);
     const data = await res.json();
     CATS = data.cats;
-    GAMES = data.games;
+    ALL_GAMES = data.games;
+    GAMES = ALL_GAMES.filter(g => !g.hidden);
   } catch (err) {
     console.error('Could not load the game catalog', err);
     const grid = document.getElementById('grid');
@@ -4074,7 +4078,7 @@ async function bootCatalog() {
       '<div class="empty"><div class="big">Catalog did not load</div>Refresh the page to try again.</div>';
     return;
   }
-  gamesById = Object.fromEntries(GAMES.map(g => [g.id, g]));
+  gamesById = Object.fromEntries(ALL_GAMES.map(g => [g.id, g]));
   updateWelcomeStats();
   document.getElementById('footerCount').textContent = GAMES.length;
   buildCatBar();
