@@ -10,6 +10,12 @@
  *
  * Public surface: window.GV.cloak and window.GV.security.
  */
+// Light or dark. This file loads before the first paint on every page, so it
+// sets the theme too, and nothing flashes dark first.
+try {
+  if (localStorage.getItem('gv.theme') === 'light') document.documentElement.setAttribute('data-theme', 'light');
+} catch (e) {}
+
 (function () {
   'use strict';
 
