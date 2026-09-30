@@ -703,7 +703,7 @@
 {"id":"nijikas-ahoge","name":"Nijikas Ahoge","categories":["Action"],"ranking":867,"img":"/thumbs/nijikas-ahoge.webp","src":"https://genizymath.github.io/iframe/447-e.html","site":34},
 {"id":"nubbys-number-factory","name":"Nubbys Number Factory","categories":["Action"],"ranking":868,"img":"https://cdn.jsdelivr.net/gh/genizy/biologyexams@main/nubbys-number-factory/runner.svg","src":"https://genizymath.github.io/iframe/517.html"},
 {"id":"off","name":"Off","categories":["RPG"],"ranking":869,"img":"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/OFF_game_logo_black.svg/330px-OFF_game_logo_black.svg.png","src":"https://genizymath.github.io/iframe/629.html","site":34},
-{"id":"office-fight","name":"Office Fight","categories":["Action"],"ranking":870,"img":"https://cdn.jsdelivr.net/gh/genizy/brainrot@main/office-fight/logo.png","src":"https://genizymath.github.io/iframe/402.html"},
+{"id":"office-fight","name":"Office Fight","categories":["Action"],"ranking":870,"img":"https://cdn.jsdelivr.net/gh/genizy/brainrot@main/office-fight/logo.png","src":null,"site":34},
 {"id":"om-nom-run","name":"Om Nom Run","categories":["Arcade"],"ranking":871,"img":"/thumbs/om-nom-run.webp","src":"https://genizymath.github.io/iframe/328.html"},
 {"id":"omori","name":"Omori","categories":["RPG"],"ranking":872,"img":"/thumbs/omori.webp","src":"https://genizymath.github.io/iframe/427-z.html"},
 {"id":"oneshot-legacy","name":"Oneshot Legacy","categories":["RPG"],"ranking":873,"img":"https://upload.wikimedia.org/wikipedia/en/thumb/8/81/OneShot_cover_art.png/330px-OneShot_cover_art.png","src":"https://genizymath.github.io/iframe/622.html"},
