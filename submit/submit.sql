@@ -218,3 +218,64 @@ $function$;
 
 revoke all on function public.gv_submission_mine() from public, anon;
 grant execute on function public.gv_submission_mine() to authenticated;
+
+
+-- Owner only, behind the dashboard secret: the last 300 submissions, newest
+-- first. path is what the gv-submission-url Edge Function signs; the
+-- dashboard asks it by id and never needs the path itself.
+create or replace function public.gv_submissions_list(p_secret text)
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+
+  return coalesce((
+    select json_agg(json_build_object(
+             'id', s.id,
+             'title', s.title,
+             'link', s.link,
+             'notes', s.notes,
+             'size_bytes', s.size_bytes,
+             'status', s.status,
+             'created_at', s.created_at,
+             'user_id', s.user_id,
+             'username', case when s.user_id is null then 'Deleted account'
+                              else coalesce(nullif(btrim(p.username), ''), 'Account ' || left(s.user_id::text, 8)) end,
+             'path', s.path
+           ) order by s.id desc)
+    from (select * from gv_submissions order by id desc limit 300) s
+    left join profiles p on p.id = s.user_id
+  ), '[]'::json);
+end;
+$function$;
+
+
+create or replace function public.gv_submission_set(p_secret text, p_id bigint, p_status text)
+returns json
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_row gv_submissions;
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+  if p_status is null or p_status not in ('pending', 'approved', 'rejected') then
+    raise exception 'status must be pending, approved or rejected';
+  end if;
+
+  update gv_submissions set status = p_status where id = p_id returning * into v_row;
+  if not found then
+    raise exception 'no such submission';
+  end if;
+  return json_build_object('id', v_row.id, 'status', v_row.status);
+end;
+$function$;
