@@ -234,7 +234,7 @@
 {"id":"circloo","name":"Circloo","categories":["Puzzle"],"ranking":272,"img":"/thumbs/circloo.webp","src":null,"site":4,"added":"2026-05-13"},
 {"id":"civiballs","name":"Civiballs","categories":["Puzzle"],"ranking":273,"img":"/thumbs/civiballs.webp","src":null,"site":4,"added":"2026-05-13"},
 {"id":"civiballs-2","name":"Civiballs 2","categories":["Puzzle"],"ranking":274,"img":"/thumbs/civiballs-2.webp","src":null,"site":4,"added":"2026-05-13"},
-{"id":"clickerheroes","name":"Clicker Heroes","categories":["Idle"],"ranking":275,"img":"https://icons-6.us/casual-games/clicker-heroes/thumb.jpg","src":"https://icons-6.us/casual-games/clicker-heroes/","local":true},
+{"id":"clickerheroes","name":"Clicker Heroes","categories":["Idle"],"ranking":275,"img":"/thumbs/clickerheroes.webp","src":"https://icons-6.us/casual-games/clicker-heroes/","site":4,"added":"2026-05-13"},
 {"id":"commodoreclicker","name":"Commodore Clicker","categories":["Idle"],"ranking":278,"img":"/games/commodoreclicker/img/cclicker.png","src":null},
 {"id":"ctr","name":"Crash Team Racing","categories":["Racing"],"ranking":283,"img":"/games/ctr/logo.png","src":null},
 {"id":"ctr-holiday","name":"CTR Holiday","categories":["Racing"],"ranking":284,"img":"/games/ctr-holiday/Holiday_Gift.webp","src":null},
