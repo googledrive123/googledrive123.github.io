@@ -239,7 +239,7 @@
 {"id":"ctr","name":"Crash Team Racing","categories":["Racing"],"ranking":283,"img":"/thumbs/ctr.webp","src":null,"site":4,"added":"2026-05-13"},
 {"id":"ctr-holiday","name":"CTR Holiday","categories":["Racing"],"ranking":284,"img":"/games/ctr-holiday/Holiday_Gift.webp","src":null},
 {"id":"ctr-tr","name":"CTR Team Racing","categories":["Racing"],"ranking":285,"img":"/thumbs/ctr-tr.webp","src":null,"site":4,"added":"2026-05-13"},
-{"id":"cubefield","name":"Cubefield","categories":["Arcade","Skill"],"ranking":286,"img":"https://icons-6.us/action-games/cubefield/assets/unnamed.png","src":"https://icons-6.us/action-games/cubefield/","local":true},
+{"id":"cubefield","name":"Cubefield","categories":["Arcade","Skill"],"ranking":286,"img":"/thumbs/cubefield.webp","src":"https://icons-6.us/action-games/cubefield/","site":4,"added":"2026-05-13"},
 {"id":"dadish","name":"Dadish","categories":["Platformer"],"ranking":289,"img":"https://upload.wikimedia.org/wikipedia/commons/3/35/Dadishlogo.jpg","src":null},
 {"id":"dadish2","name":"Dadish 2","categories":["Platformer"],"ranking":290,"img":"https://upload.wikimedia.org/wikipedia/commons/3/35/Dadishlogo.jpg","src":null},
 {"id":"dadish3","name":"Dadish 3","categories":["Platformer"],"ranking":291,"img":"/games/dadish3/splash.png","src":null},
