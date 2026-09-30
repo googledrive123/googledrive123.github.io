@@ -14,7 +14,7 @@
     // player looked, never a page to show. See inPlayer() below.
     if (inPlayer()) { toVault(); return; }
     var path = location.pathname + location.search;
-    var spa = /^\/(games(\/|$)|movie(\/|$)|tv(\/|$))/.test(location.pathname);
+    var spa = /^\/(games(\/|$)|movies?(\/|$)|tv(\/|$))/.test(location.pathname);
     try {
       sessionStorage.setItem(spa ? 'gv.redirect' : 'gv.missing', path);
     } catch (e) {}
