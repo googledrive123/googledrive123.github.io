@@ -412,3 +412,82 @@ end;
 $function$;
 
 grant execute on function public.gv_badges_for(text[]) to anon, authenticated;
+
+
+-- Owner only, behind the dashboard secret.
+--
+-- Sets a month's track, ahead of time or for the month under way. A new track
+-- starts that month's board again from the times already set on it that
+-- month, which is also how a month set after it began gets its board.
+create or replace function public.gv_challenge_set(
+  p_secret text,
+  p_month date,
+  p_track_id text,
+  p_title text,
+  p_note text default null
+) returns json
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_month date := date_trunc('month', p_month::timestamp)::date;
+  v_track text := btrim(coalesce(p_track_id, ''));
+  v_title text := btrim(coalesce(p_title, ''));
+  v_note  text := nullif(btrim(coalesce(p_note, '')), '');
+  v_old   gv_challenges;
+  v_row   gv_challenges;
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+  if v_month is null then
+    raise exception 'pick a month';
+  end if;
+  if char_length(v_track) not between 1 and 120 then
+    raise exception 'track id must be 1 to 120 characters';
+  end if;
+  if char_length(v_title) not between 1 and 80 then
+    raise exception 'title must be 1 to 80 characters';
+  end if;
+  if char_length(v_note) > 300 then
+    raise exception 'note must be 300 characters or fewer';
+  end if;
+  if public.gv_is_rude(v_title) or public.gv_is_rude(v_note) then
+    raise exception 'the title or note has a word the site does not allow';
+  end if;
+
+  select * into v_old from gv_challenges where month = v_month for update;
+  if v_old.closed_at is not null then
+    raise exception 'that month is closed and its badges are given out';
+  end if;
+
+  insert into gv_challenges (month, track_id, title, note)
+  values (v_month, v_track, v_title, v_note)
+  on conflict (month) do update
+    set track_id = excluded.track_id,
+        title    = excluded.title,
+        note     = excluded.note
+  returning * into v_row;
+
+  if v_old.month is null or v_old.track_id <> v_row.track_id then
+    delete from gv_challenge_runs where month = v_month;
+    -- updated_at is the date of each player's best ever, so this finds the
+    -- players whose best on the track was set this month.
+    insert into gv_challenge_runs (month, track_id, player_key, nickname, user_id, frames, at)
+    select v_month, s.track_id, s.player_key, s.nickname, s.user_id, s.frames, s.updated_at
+    from polytrack_scores s
+    where s.track_id = v_row.track_id
+      and s.updated_at >= v_month::timestamp at time zone 'utc'
+      and s.updated_at < (v_month + interval '1 month') at time zone 'utc';
+  end if;
+
+  return json_build_object(
+    'month', v_row.month,
+    'track_id', v_row.track_id,
+    'title', v_row.title,
+    'note', v_row.note,
+    'runners', (select count(*) from gv_challenge_runs r where r.month = v_month)
+  );
+end;
+$function$;
