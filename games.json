@@ -400,7 +400,7 @@
 {"id":"3d-bowling","name":"3D Bowling","categories":["Sports"],"ranking":525,"img":"/thumbs/3d-bowling.webp","src":"https://icons-6.us/driving-games/3d-bowling/"},
 {"id":"64-in-1-nes","name":"64 In 1 NES","categories":["Action"],"ranking":526,"img":"/thumbs/64-in-1-nes.webp","src":"https://genizymath.github.io/iframe/732.html"},
 {"id":"99-balls","name":"99 Balls","categories":["Arcade"],"ranking":527,"img":"/thumbs/99-balls.webp","src":"https://genizymath.github.io/iframe/431.html","site":14},
-{"id":"a-game-about-feeding-a-black-hole","name":"A Game About Feeding A Black Hole","categories":["Puzzle"],"ranking":530,"img":"https://cdn.jsdelivr.net/gh/genizy/google-class@main/a-game-black-hole/index.png","src":"https://genizymath.github.io/iframe/719.html"},
+{"id":"a-game-about-feeding-a-black-hole","name":"A Game About Feeding A Black Hole","categories":["Puzzle"],"ranking":530,"img":"https://cdn.jsdelivr.net/gh/genizy/google-class@main/a-game-black-hole/index.png","src":null,"site":14},
 {"id":"abandoned","name":"Abandoned","categories":["Action"],"ranking":532,"img":"/thumbs/abandoned.webp","src":"https://genizymath.github.io/iframe/432.html"},
 {"id":"ace-attorney-investigations--miles-edgeworth","name":"Ace Attorney Investigations: Miles Edgeworth","categories":["RPG"],"ranking":533,"img":"/thumbs/ace-attorney-investigations--miles-edgeworth.webp","src":"https://genizymath.github.io/iframe/823-fix.html"},
 {"id":"achievement-unlocked","name":"Achievement Unlocked","categories":["Puzzle"],"ranking":534,"img":"/thumbs/achievement-unlocked.webp","src":"https://icons-6.us/strategy-games/achievementunlocked/"},
