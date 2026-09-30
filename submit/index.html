@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Send a game · GameVault</title>
+  <meta name="description" content="Send the GameVault owner a game as a .zip file.">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="/favicon.svg">
+  <!-- Blocking on purpose: the cloak has to land before the first paint. -->
+  <script src="/js/mimicry.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/site.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
+  <script src="/js/identity.js" defer></script>
+  <script src="/js/analytics.js" defer></script>
+  <script src="/js/site.js" defer></script>
+  <script src="/js/player.js" defer></script>
+  <style>
+  </style>
+</head>
+<body>
+<main class="page">
+  <div class="page-kicker">submit</div>
+  <h1>Send a game</h1>
+  <p class="lede">Made a game, or know one GameVault should have? Send it as a .zip and the site
+  owner will take a look.</p>
+
+  <p class="panel-note" id="gate">Checking your account…</p>
+
+  <div class="panel" id="signedOut" hidden>
+    <p>Sign in to send a game, so the owner can tell who it came from.</p>
+    <div class="btn-row">
+      <a class="btn" href="/">Sign in on the home page</a>
+    </div>
+  </div>
+
+  <form class="panel" id="form" hidden novalidate>
+    <div class="panel-label">Your game</div>
+    <p class="warn">Only the site owner sees uploads. Never upload games you don't have the right
+    to share.</p>
+
+    <label class="form-field">
+      <span class="form-label">Name</span>
+      <input class="field" id="title" maxlength="80" autocomplete="off" required>
+    </label>
+    <label class="form-field">
+      <span class="form-label">Link <span class="form-hint">optional</span></span>
+      <input class="field" id="link" type="url" maxlength="300" autocomplete="off"
+        placeholder="https://… where it comes from or runs now">
+    </label>
+    <label class="form-field">
+      <span class="form-label">Notes <span class="form-hint">optional</span></span>
+      <textarea class="field" id="notes" maxlength="1000" rows="4"
+        placeholder="How to play, who made it, anything the owner should know"></textarea>
+    </label>
+
+    <div class="form-field">
+      <span class="form-label">Game files</span>
+      <label class="drop" id="drop">
+        <input type="file" id="file" accept=".zip,application/zip,application/x-zip-compressed">
+        <span class="drop-main" id="dropMain">Choose a .zip file</span>
+        <span class="drop-sub" id="dropSub">or drop it here · 50 MB at most</span>
+      </label>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="sendBtn" type="submit">Send game</button>
+    </div>
+    <p class="send-note" id="sendNote" role="status" aria-live="polite"></p>
+  </form>
+
+  <div class="panel" id="minePanel" hidden>
+    <div class="panel-label">What you sent</div>
+    <div class="mine" id="mine"></div>
+  </div>
+
+<script>
+</script>
+</main>
+</body>
+</html>
