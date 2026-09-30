@@ -141,7 +141,7 @@
 {"id":"fears-to-fathom-home-alone","name":"Fears To Fathom Home Alone","categories":["Horror"],"ranking":140,"img":"https://cdn.akamai.steamstatic.com/steam/apps/1671340/header.jpg","src":"https://genizymath.github.io/iframe/460.html"},
 {"id":"flappybird","name":"Flappy Bird","categories":["Arcade","Skill"],"ranking":141,"img":"/thumbs/flappybird.webp","src":"https://icons-6.us/casual-games/flappy-bird/","site":3,"added":"2026-05-13"},
 {"id":"friday-night-funkin-gumballs","name":"FNF: Gumballs","categories":["Rhythm"],"ranking":142,"img":"/games/fridaynightfunkin/assets/images/logo.png","src":"https://genizymath.github.io/iframe/621.html"},
-{"id":"funnyshooter","name":"Funny Shooter","categories":["Action","Shooter"],"ranking":143,"img":"/games/funnyshooter/icon.jpeg","src":null},
+{"id":"funnyshooter","name":"Funny Shooter","categories":["Action","Shooter"],"ranking":143,"img":"/thumbs/funnyshooter.webp","src":null,"site":3,"added":"2026-05-13"},
 {"id":"funnyshooter2","name":"Funny Shooter 2","categories":["Action","Shooter"],"ranking":144,"img":"https://icons-6.us/action-games/funnyshooter2/thumb.png","src":"https://icons-6.us/action-games/funnyshooter2/","local":true},
 {"id":"fused-240","name":"Fused 240","categories":["Action"],"ranking":145,"img":"https://img.gamepix.com/games/fused-240/cover/fused-240.png","src":"https://genizymath.github.io/iframe/722.html"},
 {"id":"giant-wanted","name":"Giant Wanted","categories":["Action"],"ranking":146,"img":"https://rawcdn.githack.com/genizy/brainrot/main/giant-wanted/logo.png","src":"https://genizymath.github.io/iframe/393.html"},
