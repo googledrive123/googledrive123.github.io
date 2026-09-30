@@ -80,7 +80,7 @@
       line.appendChild(code);
       // A missing game deep link is the likeliest way to land here, so seed the
       // search with the slug that failed.
-      var slug = missing.replace(/^\/games\//, '').replace(/[\/?#].*$/, '');
+      var slug = missing.replace(/^\/(games|vault\d+)\//, '').replace(/[\/?#].*$/, '');
       if (slug && slug !== missing) search.value = slug.replace(/-/g, ' ');
     }
   } catch (e) {}
