@@ -11,6 +11,7 @@
   <meta property="og:image" content="https://googledrive123.github.io/icons/share.png">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="/favicon.svg">
+  <script src="/js/carry.js"></script>
   <script>
   // GitHub Pages serves this file for anything it cannot find on disk, which is
   // both how the app's deep links survive a refresh and how a genuine typo
@@ -34,10 +35,14 @@
   function toVault() {
     var m = /^\/games\/([^\/]+)\/(.*)$/.exec(location.pathname);
     if (!m) return missing();
-    fetch('/games.json').then(function (res) { return res.json(); }).then(function (data) {
+    fetch('/games.json', { cache: 'no-cache' }).then(function (res) { return res.json(); }).then(function (data) {
       var g = data.games.filter(function (x) { return x.id === m[1]; })[0];
       if (!g || !g.site) return missing();
-      location.replace('/vault' + g.site + '/' + m[1] + '/' + m[2] + location.search);
+      // The old page never carried this game's saves over (js/carry.js).
+      var carry = window.GV && GV.carry ? GV.carry(g) : Promise.resolve();
+      carry.then(function () {
+        location.replace('/vault' + g.site + '/' + m[1] + '/' + m[2] + location.search);
+      });
     }).catch(missing);
   }
 
