@@ -809,7 +809,7 @@
 {"id":"sonic-the-hedgehog-2-communitys-cut","name":"Sonic 2: Community's Cut","categories":["Action"],"ranking":988,"img":"/thumbs/sonic-the-hedgehog-2-communitys-cut.webp","src":"https://genizymath.github.io/iframe/549.html","site":38},
 {"id":"sonic-the-hedgehog-3-angel-island-remastered","name":"Sonic 3: Angel Island","categories":["Action"],"ranking":989,"img":"/thumbs/sonic-the-hedgehog-3-angel-island-remastered.webp","src":"https://genizymath.github.io/iframe/550.html","site":38},
 {"id":"sonicexe","name":"Sonic.exe","categories":["Horror"],"ranking":990,"img":"/thumbs/sonicexe.webp","src":"https://genizymath.github.io/iframe/598.html","site":38},
-{"id":"sonicexe-original","name":"Sonic.exe (Original)","categories":["Horror"],"ranking":991,"img":"https://cdn.jsdelivr.net/gh/genizy/web-port@latest/sonic.exe/runner.svg","src":"https://genizymath.github.io/iframe/606-e.html"},
+{"id":"sonicexe-original","name":"Sonic.exe (Original)","categories":["Horror"],"ranking":991,"img":"https://cdn.jsdelivr.net/gh/genizy/web-port@latest/sonic.exe/runner.svg","src":null,"site":38},
 {"id":"space-funeral","name":"Space Funeral","categories":["RPG"],"ranking":992,"img":"https://upload.wikimedia.org/wikipedia/en/thumb/9/9c/Space_Funeral_game_title_screen.png/330px-Space_Funeral_game_title_screen.png","src":"https://genizymath.github.io/iframe/630.html"},
 {"id":"spacebar-clicker","name":"Spacebar Clicker","categories":["Idle"],"ranking":993,"img":"/thumbs/spacebar-clicker.webp","src":"https://icons-6.us/casual-games/space-bar-clicker/"},
 {"id":"spaceflight-simulator","name":"Spaceflight Simulator","categories":["Simulation"],"ranking":994,"img":"/thumbs/spaceflight-simulator.webp","src":"https://genizymath.github.io/iframe/808.html"},
