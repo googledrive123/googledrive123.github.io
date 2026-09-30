@@ -150,6 +150,7 @@
       <div class="wn-name" id="wnName"></div>
       <p id="wnWhat"></p>
       <p class="wn-you" id="wnYou" hidden>That is you! The site owner adds the prize to your account.</p>
+      <button class="btn" id="wnReplay" type="button">Hide it again</button>
     </div>
   </div>
 
@@ -168,6 +169,10 @@
   var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
 
   function $(id) { return document.getElementById(id); }
+
+  // The last winner this browser has seen revealed. Coming back to the same
+  // one skips the spin; a new winner gets the card again.
+  var SEEN_KEY = 'gv.winner.seen';
 
   var stage = $('wnStage');
   var card = $('wnCard');
@@ -214,6 +219,10 @@
     return b.at > a.at ? b : a;
   }
 
+  function seen() {
+    try { return localStorage.getItem(SEEN_KEY); } catch (e) { return null; }
+  }
+
   function fill() {
     $('wnLabel').textContent = winner.label;
     $('wnName').textContent = winner.name;
@@ -224,6 +233,7 @@
   function reveal() {
     if (!winner || stage.classList.contains('spinning') || stage.classList.contains('shown')) return;
     fill();
+    try { localStorage.setItem(SEEN_KEY, winner.key); } catch (e) {}
     // The shared stylesheet stops every animation for reduced motion, so
     // there is no spin to wait for.
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -251,9 +261,17 @@
     }
     $('wnKind').textContent = w.kind;
     card.disabled = false;
+    if (seen() === w.key) {
+      fill();
+      stage.classList.add('shown');
+    }
   }
 
   card.addEventListener('click', reveal);
+  $('wnReplay').addEventListener('click', function () {
+    stage.classList.remove('shown');
+    card.focus();
+  });
   // Hovering is enough where there is a mouse; a touch screen taps.
   card.addEventListener('mouseenter', function () {
     if (window.matchMedia('(hover: hover)').matches) reveal();
