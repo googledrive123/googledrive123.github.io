@@ -5343,6 +5343,21 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
     }
   }
 
+  // ── Where you left off ──
+  // vidlink.pro reports progress with postMessage and can start at a time
+  // (?startAt=seconds). Progress is kept per movie and per episode, and the
+  // last episode per show, so a show opens where it was left.
+  const PROGRESS_KEY = 'gv.watch';
+  function progressAll() {
+    try { return JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}') || {}; } catch (e) { return {}; }
+  }
+  function progressSave(all) {
+    // Oldest first out, so the list cannot grow without end.
+    const keys = Object.keys(all).sort((a, b) => (all[a].at || 0) - (all[b].at || 0));
+    while (keys.length > 200) delete all[keys.shift()];
+    try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(all)); } catch (e) {}
+  }
+
   function loadTVFrame(id, season, episode) {
     playerFrame.innerHTML = `<iframe src="${EMBED_TV}${id}/${season}/${episode}" frameborder="0" allowfullscreen></iframe>`;
   }
