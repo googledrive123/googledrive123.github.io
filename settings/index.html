@@ -203,6 +203,30 @@
   </div>
 
   <div class="panel">
+    <div class="panel-label">Fun</div>
+    <div class="toggle-row">
+      <div>
+        <div class="label">April Fools pranks</div>
+        <div class="desc">Only on April 1. Harmless, and one tap turns them off.</div>
+      </div>
+      <label class="switch"><input type="checkbox" id="funPranks"><span class="track"></span></label>
+    </div>
+    <div class="toggle-row">
+      <div>
+        <div class="label">Seasonal decorations</div>
+        <div class="desc">Cobwebs and bats around Halloween.</div>
+      </div>
+      <label class="switch"><input type="checkbox" id="funSeasonal"><span class="track"></span></label>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-label">Account and saves</div>
+    <p class="panel-note" style="margin-top:0">Sign in, pick an avatar, rename or delete your account from your profile on the <a href="/?profile">home page</a>.
+    Back up your game progress, or keep it in the cloud, on the <a href="/saves/">Saves</a> page.</p>
+  </div>
+
+  <div class="panel">
     <div class="panel-label">Analytics</div>
     <div class="toggle-row">
       <div>
@@ -419,6 +443,18 @@
   document.querySelectorAll('[data-row]').forEach(function (el) {
     el.checked = !layout.hidden(el.dataset.row);
     el.addEventListener('change', function () { layout.setHidden(el.dataset.row, !el.checked); });
+  });
+
+  // fun.js is deferred, so it is ready once the page has loaded.
+  document.addEventListener('DOMContentLoaded', function () {
+    var fun = window.GV && window.GV.fun;
+    if (!fun) return;
+    var pranks = document.getElementById('funPranks');
+    var seasonal = document.getElementById('funSeasonal');
+    pranks.checked = fun.pranksOn();
+    seasonal.checked = fun.seasonalOn();
+    pranks.addEventListener('change', function () { fun.setPranks(pranks.checked); });
+    seasonal.addEventListener('change', function () { fun.setSeasonal(seasonal.checked); });
   });
 
   paintState();
