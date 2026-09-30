@@ -4434,7 +4434,7 @@ let popular = [];
 const POPULAR_ROW = 20;
 function loadPopular() {
   publicRpc('gv_popular', { p_days: 7, p_limit: 50 }).then(list => {
-    popular = list.map(x => x.id).filter(id => gamesById[id] && !gamesById[id].hidden);
+    popular = list.map(x => x.id).filter(id => gamesById[id] && !gamesById[id].hidden && !gamesById[id].staging);
     render();
   }).catch(() => {});
 }
