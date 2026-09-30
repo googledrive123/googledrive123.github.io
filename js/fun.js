@@ -129,7 +129,15 @@
     'padding:0.75rem 1.4rem;border-radius:100px;border:0;background:var(--accent,#ff3b3b);color:#fff;cursor:pointer;',
     'font:600 0.92rem/1 "Space Grotesk",system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,0.55)}',
     '.gv-fun-flipback:focus-visible{outline:2px solid #fff;outline-offset:3px}',
-    '.gv-fun-flipback[hidden]{display:none}'
+    '.gv-fun-flipback[hidden]{display:none}',
+
+    // Halloween: the accent warms toward pumpkin and a low orange glow rises
+    // behind the page, above the backdrop layers and below everything else.
+    'html.gv-fun-halloween{--accent:#ff5a1f}',
+    '.gv-fun-glow{position:fixed;inset:0;z-index:-1;pointer-events:none;',
+    'background:radial-gradient(ellipse 75% 45% at 50% 100%,rgba(255,110,30,0.16),transparent 70%),',
+    'radial-gradient(ellipse 40% 30% at 0 0,rgba(255,110,30,0.06),transparent 70%),',
+    'radial-gradient(ellipse 40% 30% at 100% 0,rgba(255,110,30,0.06),transparent 70%)}'
   ];
 
   function styles() {
@@ -277,6 +285,10 @@
   function startHalloween(undo) {
     styles();
     flag(undo, 'gv-fun-halloween');
+    var glow = document.createElement('div');
+    glow.className = 'gv-fun-glow';
+    glow.setAttribute('aria-hidden', 'true');
+    place(undo, glow);
   }
 
   // ── Secret corner ───────────────────────────────────────────────────────
