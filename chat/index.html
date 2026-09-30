@@ -38,6 +38,8 @@
       padding: 0.6rem 0.75rem;
       display: flex; flex-direction: column; gap: 0.1rem;
     }
+    /* A short conversation sits at the bottom, next to the box. */
+    .chat-log > .msg:first-child { margin-top: auto; }
     .chat-empty {
       position: absolute; inset: 0;
       display: flex; align-items: center; justify-content: center;
@@ -199,7 +201,16 @@
     return el;
   }
 
-  function add(list) {
+  function nearBottom() {
+    return log.scrollHeight - log.scrollTop - log.clientHeight < 80;
+  }
+
+  function toBottom() {
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function add(list, stick) {
+    var follow = stick || nearBottom();
     list.forEach(function (m) {
       if (byId[m.id]) return;
       var el = render(m);
@@ -212,11 +223,13 @@
     }
     empty.textContent = 'No messages yet. Say hi.';
     empty.hidden = log.children.length > 0;
+    if (follow) toBottom();
   }
 
   function poll() {
     if (polling || document.hidden) return;
     polling = true;
+    var before = lastId;
     sb.rpc('gv_chat_recent', { p_after_id: lastId }).then(function (res) {
       polling = false;
       if (res.error) {
@@ -226,7 +239,7 @@
       if (status.dataset.kind === 'wait') say('');
       var list = res.data || [];
       list.forEach(function (m) { if (m.id > lastId) lastId = m.id; });
-      add(list);
+      add(list, before === 0);
     }, function () {
       polling = false;
     });
