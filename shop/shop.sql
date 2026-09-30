@@ -72,3 +72,20 @@ insert into public.gv_items (id, kind, name, rarity, value) values
 on conflict (id) do update
   set kind = excluded.kind, name = excluded.name,
       rarity = excluded.rarity, value = excluded.value;
+
+
+-- The crates, with their chances in percent. They must add up to 100.
+create table if not exists public.gv_crate_tiers (
+  id text primary key,
+  name text not null,
+  price integer not null check (price > 0),
+  sort integer not null default 0,
+  common numeric(5, 2) not null,
+  uncommon numeric(5, 2) not null,
+  rare numeric(5, 2) not null,
+  epic numeric(5, 2) not null,
+  legendary numeric(5, 2) not null,
+  check (common + uncommon + rare + epic + legendary = 100)
+);
+
+alter table public.gv_crate_tiers enable row level security;
