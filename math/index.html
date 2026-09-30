@@ -161,6 +161,34 @@
     .fig { display: block; width: 100%; max-width: 280px; height: auto; color: var(--muted); }
     .fig text { font-family: 'JetBrains Mono', monospace; font-size: 13px; fill: var(--muted); }
     .fig text.len { fill: var(--text); font-weight: 600; }
+
+    /* Typed answers */
+    .answer { display: flex; gap: 0.5rem; max-width: 480px; }
+    .answer-box {
+      flex: 1; min-width: 0;
+      display: flex; align-items: center; gap: 0.35rem;
+      padding: 0 0.9rem;
+      border: 1px solid var(--border-strong);
+      border-radius: 12px;
+      background: var(--bg);
+      transition: border-color 0.15s;
+    }
+    .answer-box:focus-within { border-color: var(--muted); }
+    .answer-box.right { border-color: var(--good); }
+    .answer-box.wrong { border-color: var(--accent); }
+    .answer-box .field {
+      border: 0; border-radius: 0; background: transparent;
+      padding: 0.75rem 0;
+      font-family: 'JetBrains Mono', monospace; font-size: 1.1rem;
+    }
+    .adorn { font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; color: var(--muted); }
+    .adorn:empty { display: none; }
+    .answer .btn { padding: 0 1.3rem; }
+    .answer-box.bump { animation: nudge 0.3s ease; }
+    @keyframes nudge { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+
+    .page .hint { font-size: 0.8rem; color: #f0c04a; margin-top: 0.6rem; }
+    .page .hint:empty { display: none; }
   </style>
 </head>
 <body>
@@ -192,6 +220,16 @@
     </div>
     <p class="ask" id="ask"></p>
     <div class="expr" id="expr"></div>
+    <form class="answer" id="answerForm" autocomplete="off">
+      <div class="answer-box" id="answerBox">
+        <span class="adorn" id="prefix"></span>
+        <input class="field" id="answer" type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false"
+          placeholder="Your answer" aria-label="Your answer">
+        <span class="adorn" id="suffix"></span>
+      </div>
+      <button class="btn btn-primary" type="submit">Check</button>
+    </form>
+    <p class="hint" id="hint" role="status"></p>
   </section>
 </main>
 </body>
