@@ -2968,7 +2968,7 @@ function renderNews() {
     const linked = !!item.id;
     const node = document.createElement(linked ? 'a' : 'div');
     node.className = 'news-item ' + (linked ? 'linked' : 'locked');
-    if (linked) node.href = 'games/' + item.id + '/';
+    if (linked) node.href = '/games/' + item.id;
 
     const info = document.createElement('div');
     info.className = 'news-info';
