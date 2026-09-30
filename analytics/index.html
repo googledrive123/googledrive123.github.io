@@ -980,7 +980,7 @@
           + '<button class="btn" type="button" data-av="' + esc(a.user_id) + '" data-at="' + esc(a.uploaded_at) + '" data-ok="">Turn down</button></div>';
       }).join('') : '<div class="empty">Nothing waiting.</div>';
       $('avShowing').innerHTML = on.length ? on.map(function (a) {
-        return '<div class="bc-item">' + avImg(a.upload || a.approved) + '<span class="msg"><b>' + esc(a.username) + '</b></span>'
+        return '<div class="bc-item">' + avImg(a.approved || a.upload) + '<span class="msg"><b>' + esc(a.username) + '</b></span>'
           + '<button class="btn" type="button" data-avdown="' + esc(a.user_id) + '">Take down</button></div>';
       }).join('') : '<div class="empty">No uploaded pictures showing.</div>';
     }).catch(function (e) { $('avMsg').textContent = 'Could not load pictures: ' + e.message; });
