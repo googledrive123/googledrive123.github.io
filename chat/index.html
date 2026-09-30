@@ -44,6 +44,27 @@
       color: var(--muted-2); font-size: 0.85rem;
       pointer-events: none;
     }
+    .chat-empty[hidden] { display: none; }
+
+    .msg { padding: 0.45rem 0.55rem; border-radius: 10px; }
+    .msg:hover { background: rgba(255,255,255,0.025); }
+    .msg-head { display: flex; align-items: baseline; gap: 0.5rem; min-width: 0; }
+    .msg-name {
+      font-size: 0.84rem; font-weight: 600;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .msg.mine .msg-name { color: var(--accent); }
+    .msg-time {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.64rem; color: var(--muted-2);
+      white-space: nowrap;
+    }
+    .msg-body {
+      margin-top: 0.1rem;
+      font-size: 0.9rem; line-height: 1.5;
+      color: #d8d8de;
+      overflow-wrap: anywhere;
+    }
 
     .chat-form {
       display: flex; gap: 0.5rem; align-items: center;
@@ -65,6 +86,7 @@
       font-size: 0.8rem; line-height: 1.45;
       color: var(--muted);
     }
+    .chat-status.wait { color: #f0c04a; }
 
     .chat-out a.btn { color: #fff; text-decoration: none; }
   </style>
@@ -110,12 +132,18 @@
   var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
   // Where supabase-js keeps the session the home page signed in with.
   var TOKEN_KEY = 'sb-dxwjxzmlezfyursysays-auth-token';
+  var KEEP = 300;
 
   var chat = document.getElementById('chat');
   var out = document.getElementById('chatOut');
+  var log = document.getElementById('chatLog');
   var empty = document.getElementById('chatEmpty');
+  var status = document.getElementById('chatStatus');
 
   var sb = null;
+  var byId = {};
+  var lastId = 0;
+  var polling = false;
 
   function savedSession() {
     try {
@@ -127,6 +155,78 @@
   function signedOut() {
     chat.hidden = true;
     out.hidden = false;
+  }
+
+  function say(text, kind) {
+    status.textContent = text || '';
+    status.className = 'chat-status' + (kind ? ' ' + kind : '');
+    status.dataset.kind = kind || '';
+  }
+
+  function when(iso) {
+    var d = new Date(iso);
+    var t = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    if (d.toDateString() === new Date().toDateString()) return t;
+    return d.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ', ' + t;
+  }
+
+  function render(m) {
+    var el = document.createElement('div');
+    el.className = 'msg' + (m.mine ? ' mine' : '');
+    el.dataset.id = m.id;
+
+    var head = document.createElement('div');
+    head.className = 'msg-head';
+    var name = document.createElement('span');
+    name.className = 'msg-name';
+    name.textContent = m.username;
+    var time = document.createElement('time');
+    time.className = 'msg-time';
+    time.dateTime = m.created_at;
+    time.textContent = when(m.created_at);
+    head.appendChild(name);
+    head.appendChild(time);
+
+    var body = document.createElement('div');
+    body.className = 'msg-body';
+    body.textContent = m.body;
+
+    el.appendChild(head);
+    el.appendChild(body);
+    return el;
+  }
+
+  function add(list) {
+    list.forEach(function (m) {
+      if (byId[m.id]) return;
+      var el = render(m);
+      log.appendChild(el);
+      byId[m.id] = el;
+    });
+    while (log.children.length > KEEP) {
+      delete byId[log.firstElementChild.dataset.id];
+      log.removeChild(log.firstElementChild);
+    }
+    empty.textContent = 'No messages yet. Say hi.';
+    empty.hidden = log.children.length > 0;
+  }
+
+  function poll() {
+    if (polling) return;
+    polling = true;
+    sb.rpc('gv_chat_recent', { p_after_id: lastId }).then(function (res) {
+      polling = false;
+      if (res.error) {
+        say('Chat lost its connection. Trying again…', 'wait');
+        return;
+      }
+      if (status.dataset.kind === 'wait') say('');
+      var list = res.data || [];
+      list.forEach(function (m) { if (m.id > lastId) lastId = m.id; });
+      add(list);
+    }, function () {
+      polling = false;
+    });
   }
 
   // No session at all needs no network to know, so guests see the sign-in
@@ -148,6 +248,7 @@
     });
     sb.auth.getSession().then(function (r) {
       if (!r.data.session) return signedOut();
+      poll();
     });
   });
 })();
