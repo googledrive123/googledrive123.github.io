@@ -478,8 +478,8 @@ document.addEventListener('DOMContentLoaded', function () {
     showName(user);
     return refresh().then(function () {
       note(autoNote, autoStatus());
-      return offerAuto();
-    }).then(function () {
+      // Not waited on: the offer stays up until answered.
+      offerAuto();
       if (saves.autoOn()) return runAuto();
     });
   }).catch(function (err) {
