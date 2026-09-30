@@ -23,3 +23,22 @@ create table if not exists public.gv_challenges (
   -- When the badges were handed out. Empty until gv_challenge_close.
   closed_at timestamptz
 );
+
+-- Each player's best run on the month's track, during that month. The board
+-- keeps a player's best ever, which can be older than the month; this keeps
+-- the month's best alone. player_key is the board's own key: an account's
+-- user id, or 'guest:' and the browser's visitor id.
+create table if not exists public.gv_challenge_runs (
+  month      date not null references public.gv_challenges (month) on delete cascade,
+  track_id   text not null,
+  player_key text not null,
+  nickname   text not null,
+  -- Deleting an account takes its runs with it, as it does its board times.
+  user_id    uuid references auth.users (id) on delete cascade,
+  frames     integer not null check (frames > 0),
+  at         timestamptz not null default now(),
+  primary key (month, player_key)
+);
+
+create index if not exists gv_challenge_runs_order
+  on public.gv_challenge_runs (month, frames, at);
