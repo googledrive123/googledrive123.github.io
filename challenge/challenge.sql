@@ -42,3 +42,15 @@ create table if not exists public.gv_challenge_runs (
 
 create index if not exists gv_challenge_runs_order
   on public.gv_challenge_runs (month, frames, at);
+
+-- Badges, keyed the same way as the board so it can show them beside a time.
+-- month is the challenge that earned the badge.
+create table if not exists public.gv_badges (
+  player_key text not null,
+  badge      text not null check (badge ~ '^[a-z0-9-]{1,40}$'),
+  month      date not null,
+  -- So deleting an account takes its badges too. Empty for a guest.
+  user_id    uuid references auth.users (id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (player_key, badge, month)
+);
