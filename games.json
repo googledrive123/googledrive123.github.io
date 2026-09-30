@@ -245,7 +245,7 @@
 {"id":"dadish3","name":"Dadish 3","categories":["Platformer"],"ranking":291,"img":"/thumbs/dadish3.webp","src":null,"site":4,"added":"2026-05-13"},
 {"id":"death-run-3d","name":"Death Run 3D","categories":["Action","Skill"],"ranking":292,"img":"/thumbs/death-run-3d.webp","src":"https://icons-6.us/action-games/death-run-3d/","site":4,"added":"2026-05-13"},
 {"id":"dino","name":"Dino Game","categories":["Arcade"],"ranking":293,"img":"/thumbs/dino.webp","src":null,"site":4,"added":"2026-05-13"},
-{"id":"dogeminer","name":"Doge Miner","categories":["Idle"],"ranking":294,"img":"https://icons-6.us/casual-games/DogeMiner/img/dogeminer_300x300.png","src":"https://icons-6.us/casual-games/DogeMiner/","local":true},
+{"id":"dogeminer","name":"Doge Miner","categories":["Idle"],"ranking":294,"img":"/thumbs/dogeminer.webp","src":"https://icons-6.us/casual-games/DogeMiner/","site":4,"added":"2026-05-13"},
 {"id":"doodle-jump","name":"Doodle Jump","categories":["Arcade","Platformer"],"ranking":295,"img":"https://icons-6.us/casual-games/doodle-jump/doodle.png","src":"https://icons-6.us/casual-games/doodle-jump/","local":true},
 {"id":"dragonballdevolution","name":"Dragon Ball Devolution","categories":["Action"],"ranking":297,"img":"/games/dragonballdevolution/images.jpeg","src":null},
 {"id":"drift-boss","name":"Drift Boss","categories":["Racing","Driving"],"ranking":299,"img":"https://icons-6.us/driving-games/drift-boss/drift-boss.png","src":"https://icons-6.us/driving-games/drift-boss/","local":true},
