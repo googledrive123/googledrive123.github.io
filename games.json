@@ -965,7 +965,7 @@
 {"id":"harvestio","name":"Harvest.io","categories":["Action"],"ranking":1161,"img":"/thumbs/harvestio.webp","src":"/iframe/156.html","site":44},
 {"id":"hide-n-seek","name":"Hide N Seek","categories":["Action"],"ranking":1162,"img":"/thumbs/hide-n-seek.webp","src":"/iframe/16.html","site":44},
 {"id":"highway-racer-2","name":"Highway Racer 2","categories":["Racing"],"ranking":1163,"img":"/thumbs/highway-racer-2.webp","src":"/iframe/92.html"},
-{"id":"hill-climb-racing-lite","name":"Hill Climb Racing Lite","categories":["Action"],"ranking":1164,"img":"/thumbs/hill-climb-racing-lite.webp","src":"/iframe/157.html"},
+{"id":"hill-climb-racing-lite","name":"Hill Climb Racing Lite","categories":["Action"],"ranking":1164,"img":"/thumbs/hill-climb-racing-lite.webp","src":"/iframe/157.html","site":44},
 {"id":"journey-downhill","name":"Journey Downhill","categories":["Action"],"ranking":1166,"img":"/thumbs/journey-downhill.webp","src":"/iframe/94.html"},
 {"id":"laceys-flash-games","name":"Lacey's Flash Games","categories":["Action"],"ranking":1167,"img":"https://cdn.jsdelivr.net/gh/genizy/web-port@main/lacysflashgames/Lacey%27s%20Flash%20Games.png","src":"/iframe/463.html"},
 {"id":"magic-tiles-3","name":"Magic Tiles 3","categories":["Action"],"ranking":1168,"img":"/thumbs/magic-tiles-3.webp","src":"/iframe/17.html"},
