@@ -12,6 +12,26 @@
 --
 -- Apply against project dxwjxzmlezfyursysays. Every statement is safe to run
 -- twice. Applied on 30 September 2026.
+--
+-- Quick self-test. Every row should say true:
+--
+--   select t, public.gv_is_rude(t) = want as ok
+--   from (values
+--     ('class', false), ('pass', false), ('assassin', false),
+--     ('Cassidy', false), ('Scunthorpe', false), ('hello', false),
+--     ('shiitake', false), ('cockpit', false), ('grape', false),
+--     ('therapist', false), ('analysis', false), ('assess', false),
+--     ('as if', false), ('Niger', false), ('sniggered', false),
+--     ('rapping', false), ('Sussex', false), ('pussycat', false),
+--     ('document', false), ('Shiite', false), ('a bit chilly', false),
+--     ('I scored 4 5 5', false),
+--     ('fuck', true), ('FUUUCK off', true), ('f u c k', true),
+--     ('f.u.c.k', true), ('motherfucker', true), ('sh1t', true),
+--     ('sh!t', true), ('bullshit', true), ('a$$', true),
+--     ('dumbass', true), ('b1tch', true), ('ubitch', true),
+--     ('p0rn', true), ('s3xy', true), ('kys', true),
+--     ('kill yourself', true), ('fu' || chr(8203) || 'ck', true)
+--   ) v(t, want);
 
 
 create or replace function public.gv_is_rude(p_text text)
