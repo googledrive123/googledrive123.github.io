@@ -61,3 +61,20 @@ on conflict (id) do update
   set public = excluded.public,
       file_size_limit = excluded.file_size_limit,
       allowed_mime_types = excluded.allowed_mime_types;
+
+
+-- The four files a player's slots can be: one per slot, in a folder named
+-- after their own account. Any other name, even inside that folder, is
+-- refused, so the bucket holds saves and cannot become general file storage.
+create or replace function public.gv_saves_own_file(p_name text)
+returns boolean
+language sql
+stable
+set search_path to 'public', 'pg_temp'
+as $function$
+  select auth.uid() is not null
+     and p_name in (auth.uid()::text || '/1.json',
+                    auth.uid()::text || '/2.json',
+                    auth.uid()::text || '/3.json',
+                    auth.uid()::text || '/auto.json');
+$function$;
