@@ -32,3 +32,9 @@ create table if not exists public.gv_giveaway_entries (
   created_at  timestamptz not null default now(),
   primary key (giveaway_id, user_id)
 );
+
+-- Everything goes through the functions below, so there is no policy to
+-- write and a direct PostgREST request reads and writes nothing.
+alter table public.gv_giveaways enable row level security;
+alter table public.gv_giveaway_entries enable row level security;
+revoke all on table public.gv_giveaways, public.gv_giveaway_entries from anon, authenticated;
