@@ -79,3 +79,24 @@ create trigger gv_profiles_name_guard_upd
   before update of username on public.profiles
   for each row when (old.username is distinct from new.username)
   execute function public.gv_profiles_name_guard();
+
+
+-- PolyTrack leaderboard names come from the game (a guest can type anything),
+-- and everyone sees them. A rude one is saved as "Player" instead.
+create or replace function public.gv_scores_name_guard()
+returns trigger
+language plpgsql
+set search_path to 'public'
+as $function$
+begin
+  if public.gv_name_rude(new.nickname) then
+    new.nickname := 'Player';
+  end if;
+  return new;
+end;
+$function$;
+
+drop trigger if exists gv_scores_name_guard on public.polytrack_scores;
+create trigger gv_scores_name_guard
+  before insert or update of nickname on public.polytrack_scores
+  for each row execute function public.gv_scores_name_guard();
