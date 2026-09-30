@@ -30,3 +30,45 @@ create table if not exists public.gv_items (
 -- Every path in and out is a security definer function, so there is no
 -- policy to write and a direct PostgREST request reads and writes nothing.
 alter table public.gv_items enable row level security;
+
+-- value by kind, as js/cosmetics.js reads it:
+--   name_color    color, plus gradient (two colors) for the fancier ones
+--   avatar_frame  ring (colors from the inside out, 2px each), optional glow
+--   tile_theme    accent
+--   title         text
+-- Every rarity needs at least one item, or a roll that lands on it finds
+-- nothing. Rerunning this updates the items in place.
+insert into public.gv_items (id, kind, name, rarity, value) values
+  ('color-ember',        'name_color',   'Ember',               'common',    '{"color": "#ff8a5c"}'),
+  ('color-mint',         'name_color',   'Mint',                'common',    '{"color": "#5ce0a0"}'),
+  ('color-sky',          'name_color',   'Sky',                 'common',    '{"color": "#6ab8ff"}'),
+  ('color-lilac',        'name_color',   'Lilac',               'uncommon',  '{"color": "#b9a2ff"}'),
+  ('color-sunflower',    'name_color',   'Sunflower',           'uncommon',  '{"color": "#ffd45c"}'),
+  ('color-rose',         'name_color',   'Rose',                'rare',      '{"color": "#ff7ab6"}'),
+  ('color-aurora',       'name_color',   'Aurora',              'epic',      '{"color": "#7af0d0", "gradient": ["#7af0d0", "#9b8cff"]}'),
+  ('color-molten',       'name_color',   'Molten Gold',         'legendary', '{"color": "#ffc94a", "gradient": ["#ffe27a", "#ff8a3c"]}'),
+  ('frame-line',         'avatar_frame', 'Thin Line',           'common',    '{"ring": ["#8a8a96"]}'),
+  ('frame-mint',         'avatar_frame', 'Mint Ring',           'common',    '{"ring": ["#5ce0a0"]}'),
+  ('frame-sky',          'avatar_frame', 'Sky Ring',            'uncommon',  '{"ring": ["#6ab8ff"]}'),
+  ('frame-double',       'avatar_frame', 'Double Ring',         'uncommon',  '{"ring": ["#f4f4f6", "#08080a", "#f4f4f6"]}'),
+  ('frame-sunset',       'avatar_frame', 'Sunset Ring',         'rare',      '{"ring": ["#ffd45c", "#ff6a3d"]}'),
+  ('frame-neon',         'avatar_frame', 'Neon Glow',           'epic',      '{"ring": ["#7af0d0"], "glow": "#7af0d0"}'),
+  ('frame-vault',        'avatar_frame', 'Vault Gold',          'legendary', '{"ring": ["#ffe27a", "#08080a", "#ffb13c"], "glow": "#ffb13c"}'),
+  ('tiles-ocean',        'tile_theme',   'Ocean',               'common',    '{"accent": "#3aa0ff"}'),
+  ('tiles-forest',       'tile_theme',   'Forest',              'common',    '{"accent": "#3ec77a"}'),
+  ('tiles-grape',        'tile_theme',   'Grape',               'uncommon',  '{"accent": "#9b6bff"}'),
+  ('tiles-dusk',         'tile_theme',   'Dusk',                'uncommon',  '{"accent": "#ff8a3c"}'),
+  ('tiles-ice',          'tile_theme',   'Ice',                 'rare',      '{"accent": "#8fe3ff"}'),
+  ('tiles-toxic',        'tile_theme',   'Toxic',               'epic',      '{"accent": "#b6ff3c"}'),
+  ('tiles-gold',         'tile_theme',   'Gold Rush',           'legendary', '{"accent": "#ffc94a"}'),
+  ('title-masher',       'title',        'Button Masher',       'common',    '{"text": "Button Masher"}'),
+  ('title-night-owl',    'title',        'Night Owl',           'common',    '{"text": "Night Owl"}'),
+  ('title-pixel-pusher', 'title',        'Pixel Pusher',        'uncommon',  '{"text": "Pixel Pusher"}'),
+  ('title-high-scorer',  'title',        'High Scorer',         'uncommon',  '{"text": "High Scorer"}'),
+  ('title-speedrunner',  'title',        'Speedrunner',         'rare',      '{"text": "Speedrunner"}'),
+  ('title-completionist','title',        'Completionist',       'rare',      '{"text": "Completionist"}'),
+  ('title-vault-keeper', 'title',        'Vault Keeper',        'epic',      '{"text": "Vault Keeper"}'),
+  ('title-legend',       'title',        'Legend of the Vault', 'legendary', '{"text": "Legend of the Vault"}')
+on conflict (id) do update
+  set kind = excluded.kind, name = excluded.name,
+      rarity = excluded.rarity, value = excluded.value;
