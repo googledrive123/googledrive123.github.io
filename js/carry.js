@@ -83,12 +83,16 @@
     let done;
     try { done = new Set(JSON.parse(localStorage.getItem(CARRIED_KEY) || '[]')); }
     catch (e) { done = new Set(); }
-    if (done.has(g.id)) return Promise.resolve();
+    if (!g || !g.site || done.has(g.id)) return Promise.resolve();
     // Flash games share one folder and name the SWF in `path`.
     const dir = (g.path || g.id + '/').split(/[\/?]/)[0];
     const oldPath = '/games/' + dir + '/', newPath = '/vault' + g.site + '/' + dir + '/';
     carryKeys(oldPath, newPath);
-    const unity = carryUnity(location.origin + oldPath.slice(0, -1), location.origin + newPath.slice(0, -1));
+    // Some games run their Unity build from a page in a subfolder (Duck Life
+    // opens unity/index.html), and Unity hashes that folder instead.
+    const subs = ['', '/unity', '/game', '/webgl', '/html5'];
+    const unity = subs.reduce((p, sub) => p.then(() => carryUnity(
+      location.origin + oldPath.slice(0, -1) + sub, location.origin + newPath.slice(0, -1) + sub)), Promise.resolve());
     const work = unity.then(() => {
       done.add(g.id);
       try { localStorage.setItem(CARRIED_KEY, JSON.stringify([...done])); } catch (e) {}
