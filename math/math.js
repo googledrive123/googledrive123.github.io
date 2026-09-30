@@ -669,4 +669,46 @@
       }
     ]
   };
+
+  // ── Functions ───────────────────────────────────────────────────────────
+
+  function table(xs, ys) {
+    function row(head, list) { return '<tr><th>' + head + '</th>' + list.map(function (v) { return '<td>' + s(v) + '</td>'; }).join('') + '</tr>'; }
+    return '<table class="vals">' + row('x', xs) + row('y', ys) + '</table>';
+  }
+
+  var functions = {
+    easy: [
+      function () {
+        var a = nz(-9, 9), b = nz(-12, 12), k = ri(-5, 9), r = a * k + b;
+        return num('Find f(' + s(k) + ').', 'f(x) = ' + poly([a, b]), r, s(r),
+          'Put ' + s(k) + ' in for x: ' + s(a) + ' × ' + p(k) + ' ' + signed(b) + ' = ' + s(r) + '.');
+      },
+      function () {
+        var c = nz(-10, 10), k = nz(-6, 6), r = k * k + c;
+        return num('Find f(' + s(k) + ').', 'f(x) = ' + poly([1, 0, c]), r, s(r),
+          sup(p(k), 2) + ' = ' + k * k + ', and ' + k * k + ' ' + signed(c) + ' = ' + s(r) + '.');
+      },
+      function () {
+        var m = nz(-9, 9), b = nz(-12, 12);
+        if (coin()) {
+          return num('What is the slope?', 'y = ' + poly([m, b]), m, s(m), 'In y = mx + b the number in front of x is the slope: ' + s(m) + '.');
+        }
+        return num('Where does the line cross the y-axis? Give the y-value.', 'y = ' + poly([m, b]), b, s(b),
+          'On the y-axis x = 0, so y = ' + s(b) + '.');
+      },
+      function () {
+        var a = ri(2, 5), b = ri(-5, 9), xs = [0, 1, 2, 3];
+        var ys = xs.map(function (x) { return a * x + b; });
+        return choice('Which rule makes this table?', table(xs, ys), 'y = ' + poly([a, b]),
+          ['y = ' + poly([a + 1, b]), 'y = ' + poly([a - 1, b]), 'y = ' + poly([a + 1, b - 1]), 'y = ' + poly([a, b + a])],
+          'Each step in x adds ' + a + ' to y, and y = ' + s(b) + ' when x = 0, so y = ' + poly([a, b]) + '.');
+      },
+      function () {
+        var a = ri(2, 9), b = nz(-10, 10), x = ri(-5, 10), r = a * x + b;
+        return num('For which x is f(x) = ' + s(r) + '?', 'f(x) = ' + poly([a, b]), x, s(x),
+          'Solve ' + poly([a, b]) + ' = ' + s(r) + ': ' + a + 'x = ' + s(r - b) + ', so x = ' + s(x) + '.');
+      }
+    ],
+  };
 })();
