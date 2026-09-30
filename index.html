@@ -4825,6 +4825,21 @@ function renderLocalStats() {
   computeAndShowStats(sessions);
 }
 
+// ─── Levels ───
+// 10 XP for every minute played. Each level needs a bit more than the last:
+// 50 XP at first, 20% more every five levels up to level 50, then a flat 200
+// more every five levels after that.
+const XP_PER_MIN = 10;
+function levelFromXp(xp) {
+  let level = 1, need = 50;
+  while (xp >= need) {
+    xp -= need;
+    if (level % 5 === 0) need = level < 50 ? Math.round(need * 1.2) : need + 200;
+    level++;
+  }
+  return { level, into: xp, need };
+}
+
 function computeAndShowStats(sessions) {
   // Use duration_seconds if stored, otherwise compute from timestamps
   const withDur = sessions.map(s => ({
