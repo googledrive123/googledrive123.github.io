@@ -114,6 +114,13 @@
       </div>
       <label class="switch"><input type="checkbox" id="skipWelcome"><span class="track"></span></label>
     </div>
+    <div class="toggle-row">
+      <div>
+        <div class="label">Light theme</div>
+        <div class="desc">A light page instead of the dark one, on every page.</div>
+      </div>
+      <label class="switch"><input type="checkbox" id="lightTheme"><span class="track"></span></label>
+    </div>
     <div class="toggle-row" style="display:block">
       <div class="label">Tile size</div>
       <input type="range" id="tileSize" min="130" max="300" step="10" aria-label="Tile size" style="width:100%;accent-color:var(--accent);margin-top:0.5rem">
@@ -435,6 +442,10 @@
   var skipWelcome = document.getElementById('skipWelcome');
   skipWelcome.checked = layout.skipWelcome();
   skipWelcome.addEventListener('change', function () { layout.setSkipWelcome(skipWelcome.checked); });
+
+  var lightTheme = document.getElementById('lightTheme');
+  lightTheme.checked = layout.theme() === 'light';
+  lightTheme.addEventListener('change', function () { layout.setTheme(lightTheme.checked ? 'light' : 'dark'); });
 
   var tileSize = document.getElementById('tileSize');
   tileSize.value = layout.tileSize();
