@@ -101,3 +101,19 @@ on conflict (id) do update
   set name = excluded.name, price = excluded.price, sort = excluded.sort,
       common = excluded.common, uncommon = excluded.uncommon, rare = excluded.rare,
       epic = excluded.epic, legendary = excluded.legendary;
+
+
+-- One row per account, made the first time it earns or spends.
+--
+-- granted_through is the latest ended_at already paid out, so a session is
+-- only ever counted once. earned_today and day hold the daily cap: a new day
+-- starts earned_today from 0 again (UTC days).
+create table if not exists public.gv_wallet (
+  user_id uuid primary key references auth.users (id) on delete cascade,
+  coins integer not null default 0 check (coins >= 0),
+  granted_through timestamptz,
+  earned_today integer not null default 0,
+  day date
+);
+
+alter table public.gv_wallet enable row level security;
