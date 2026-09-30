@@ -491,3 +491,46 @@ begin
   );
 end;
 $function$;
+
+-- Every challenge, newest first, with its podium and the players' keys, so the
+-- owner can see what closing it will hand out.
+create or replace function public.gv_challenge_list(p_secret text)
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+
+  return coalesce((
+    select json_agg(json_build_object(
+             'month', c.month,
+             'track_id', c.track_id,
+             'title', c.title,
+             'note', c.note,
+             'ends_at', (c.month + interval '1 month') at time zone 'utc',
+             'ended', (c.month + interval '1 month') at time zone 'utc' <= now(),
+             'closed_at', c.closed_at,
+             'runners', (select count(*) from gv_challenge_runs r where r.month = c.month),
+             'podium', coalesce((
+               select json_agg(json_build_object(
+                        'rank', p.rank,
+                        'player_key', p.player_key,
+                        'user_id', p.user_id,
+                        'nickname', p.nickname,
+                        'frames', p.frames,
+                        'time', gv_challenge_time(p.frames),
+                        'at', p.at
+                      ) order by p.rank)
+               from gv_challenge_ranked(c.month) p
+               where p.rank <= 3
+             ), '[]'::json)
+           ) order by c.month desc)
+    from (select * from gv_challenges order by month desc limit 24) c
+  ), '[]'::json);
+end;
+$function$;
