@@ -1172,4 +1172,47 @@
     geometry: geometry,
     calculus: calculus
   };
+
+  // ── Checking a typed answer ─────────────────────────────────────────────
+
+  /* Reads what someone typed into { v, dec, frac, pi } or null. dec is how many
+     decimal places they gave, Infinity for exact forms like 3/4. Units, "x =",
+     "$" and "%" are peeled off first. */
+  function parse(text, unit) {
+    var t = String(text).toLowerCase().trim().replace(/[−–—]/g, '-').replace(/\s+/g, ' ');
+    var scale = 1, dec = 0, pi = false;
+    t = t.replace(/^[a-z]\s*(\([^)]*\))?\s*=\s*/, '');
+    t = t.replace(/^\$\s*/, '').replace(/^(-)\s*\$/, '$1').replace(/\s*\$$/, '');
+    t = t.replace(/\s*(cm²|cm³|cm\^?[23]|cm|m\/s|°|degrees?|deg|units?)$/, '');
+    var m = t.match(/^(.*?)\s*\*?\s*(π|pi)$/) || t.match(/^(.*?)\s*(π|pi)\s*(\/\s*\d+)$/);
+    if (m) {
+      pi = true;
+      t = (m[1] === '' || m[1] === '+' ? '1' : m[1] === '-' ? '-1' : m[1]).replace(/^\((.*)\)$/, '$1') + (m[3] || '');
+      if (unit !== 'π') scale *= Math.PI;
+    }
+    if (/%$/.test(t)) {
+      t = t.slice(0, -1).trim();
+      if (unit !== '%') { scale /= 100; dec += 2; }
+    }
+    t = t.replace(/^(.*\d)\s*[a-z]+$/, '$1');
+
+    var mixedForm = t.match(/^([+-]?)(\d+) (\d+) ?\/ ?(\d+)$/);
+    if (mixedForm) {
+      if (+mixedForm[4] === 0) return null;
+      var whole = +mixedForm[2] + mixedForm[3] / mixedForm[4];
+      return { v: (mixedForm[1] === '-' ? -whole : whole) * scale, dec: Infinity, frac: true, pi: pi };
+    }
+    t = t.replace(/ /g, '');
+    if (/^[+-]?\d{1,3}(,\d{3})+(\.\d*)?$/.test(t)) t = t.replace(/,/g, '');
+    var number = '[+-]?(?:\\d+\\.?\\d*|\\.\\d+)';
+    var f = t.match(new RegExp('^(' + number + ')/(' + number + ')$'));
+    if (f) {
+      if (+f[2] === 0) return null;
+      return { v: f[1] / f[2] * scale, dec: Infinity, frac: true, pi: pi };
+    }
+    if (!new RegExp('^' + number + '$').test(t)) return null;
+    var point = t.indexOf('.');
+    dec += point < 0 ? 0 : t.length - point - 1;
+    return { v: parseFloat(t) * scale, dec: pi ? Infinity : dec, frac: false, pi: pi };
+  }
 })();
