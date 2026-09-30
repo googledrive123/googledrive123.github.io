@@ -3543,6 +3543,13 @@ function checkVault(g, url, token) {
   }).catch(() => {});
 }
 
+// The 404 page says so when it lands in the game frame (see /404.html).
+window.addEventListener('message', (e) => {
+  if (e.origin !== location.origin || !e.data || e.data.gv !== 'missing') return;
+  if (e.source !== gameFrame.contentWindow || !mounted) return;
+  if (mountedFrom === 'vault' && mounted.src) mountGame(mounted, 'src');
+});
+
 function toggleOffline() {
   if (!canSwap(mounted)) return;
   prefs.flip(mounted.id);
