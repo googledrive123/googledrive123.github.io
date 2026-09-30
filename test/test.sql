@@ -174,3 +174,38 @@ begin
   ), '[]'::json);
 end;
 $function$;
+
+
+-- Makes an account a tester or stops it being one, found by its username the
+-- way the dashboard shows it. Adding one twice keeps the first date.
+create or replace function public.gv_tester_set(p_secret text, p_username text, p_on boolean)
+returns json
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid;
+  v_name text;
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+
+  select id, username into v_user, v_name
+  from profiles
+  where lower(btrim(username)) = lower(btrim(coalesce(p_username, '')))
+  limit 1;
+  if v_user is null then
+    raise exception 'no such account';
+  end if;
+
+  if coalesce(p_on, false) then
+    insert into gv_testers (user_id) values (v_user) on conflict (user_id) do nothing;
+  else
+    delete from gv_testers where user_id = v_user;
+  end if;
+
+  return json_build_object('user_id', v_user, 'username', v_name, 'tester', coalesce(p_on, false));
+end;
+$function$;
