@@ -374,6 +374,8 @@
         applyPreset(menu, presetNamed(name));
         markSelected(quality, matchingPreset(menu));
         if (name !== LIGHTEST.name) undoMaxPerformance();
+        markSelected(auto, autoOn() ? 'On' : 'Off');
+        markSelected(fps, fpsLabel(maxFrameRate()));
       });
     var auto = choiceRow('gv-auto-resolution', 'Auto resolution', ['Off', 'On'],
       autoOn() ? 'On' : 'Off', function (choice) {
