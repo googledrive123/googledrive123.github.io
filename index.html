@@ -4684,6 +4684,26 @@ function displayName() {
 }
 
 // ─── Update all user buttons ───
+// ─── Avatars ───
+// An approved picture or a picked avatar (js/avatars.js). An account that has
+// not picked one keeps its initials; a guest keeps the person icon.
+let myAvatar = null;
+const PERSON_SVG = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
+function paintAvatar(el) {
+  const A = window.GV && GV.avatars;
+  if (currentUser) {
+    if (A && myAvatar && (myAvatar.approved || myAvatar.preset != null)) {
+      A.render(el, { preset: myAvatar.preset, upload: myAvatar.approved, id: currentUser.id });
+    } else {
+      el.textContent = initials(displayName());
+    }
+  } else if (A && A.localPreset() != null) {
+    A.render(el, {});
+  } else {
+    el.innerHTML = PERSON_SVG;
+  }
+}
+
 function updateUserUI() {
   const signed = !!currentUser;
   const name = displayName();
