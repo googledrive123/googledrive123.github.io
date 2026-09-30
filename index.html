@@ -3172,6 +3172,33 @@ function showWelcome() {
 document.getElementById('enterBtn').addEventListener('click', showBrowse);
 document.getElementById('logoBtn').addEventListener('click', showWelcome);
 
+// ───── Intro ─────
+// The name slams in and flies apart, about three seconds. Runs over the page
+// (a first visit) or over the game frame (each game, once it has loaded).
+function playIntro(host) {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return null;
+  const el = document.createElement('div');
+  el.className = 'gv-intro' + (host ? ' in-frame' : '');
+  el.setAttribute('aria-hidden', 'true');
+  el.innerHTML = '<span class="w1">GAME</span><span class="w2">VAULT</span>';
+  const done = () => {
+    if (!el.isConnected) return;
+    el.classList.add('leaving');
+    setTimeout(() => el.remove(), 650);
+  };
+  el.addEventListener('click', done);
+  setTimeout(done, 3000);
+  (host || document.body).appendChild(el);
+  return el;
+}
+
+const INTRO_KEY = 'gv.intro.seen';
+(function siteIntro() {
+  let seen = true;
+  try { seen = localStorage.getItem(INTRO_KEY) === '1'; localStorage.setItem(INTRO_KEY, '1'); } catch (e) {}
+  if (!seen && location.pathname === '/') playIntro(null);
+})();
+
 // Skipping the welcome screen should not flash it while the catalog loads.
 if ((location.pathname === '/' || location.pathname === '') && GV.layout.skipWelcome()) {
   document.getElementById('welcome').classList.add('hidden');
