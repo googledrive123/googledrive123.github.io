@@ -152,7 +152,8 @@
     '.gv-fun-bat circle{fill:#ffb040}',
     '@keyframes gvFunFly{0%{transform:translate(-10vw,0)}25%{transform:translate(20vw,-5vh)}',
     '50%{transform:translate(50vw,3vh)}75%{transform:translate(80vw,-4vh)}100%{transform:translate(110vw,0)}}',
-    '@keyframes gvFunFlap{from{transform:scaleY(1)}to{transform:scaleY(0.5)}}'
+    '@keyframes gvFunFlap{from{transform:scaleY(1)}to{transform:scaleY(0.5)}}',
+    '@media (prefers-reduced-motion:reduce){.gv-fun-bat{display:none}}'
   ];
 
   function styles() {
@@ -350,7 +351,8 @@
     layer.className = 'gv-fun-spooky';
     layer.setAttribute('aria-hidden', 'true');
     layer.innerHTML = cobweb('left') + cobweb('right');
-    bats(layer);
+    // The webs and the glow hold still, so they stay. The bats only fly.
+    if (!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) bats(layer);
     place(undo, layer);
   }
 
