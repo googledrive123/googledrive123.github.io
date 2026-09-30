@@ -157,3 +157,46 @@ $function$;
 
 revoke all on function public.gv_chat_send(text) from public, anon;
 grant execute on function public.gv_chat_send(text) to authenticated;
+
+
+-- The newest 100 messages still up, oldest first, or only those after the
+-- last one a page already has.
+create or replace function public.gv_chat_recent(p_after_id bigint default 0)
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'Chat only works on GameVault.';
+  end if;
+  if v_user is null then
+    raise exception 'Sign in to chat.';
+  end if;
+
+  return coalesce((
+    select json_agg(json_build_object(
+             'id', m.id,
+             'username', m.username,
+             'body', m.body,
+             'created_at', m.created_at,
+             'mine', m.user_id = v_user
+           ) order by m.id)
+      from (
+        select *
+          from gv_chat_messages
+         where not deleted
+           and id > coalesce(p_after_id, 0)
+         order by id desc
+         limit 100
+      ) m
+  ), '[]'::json);
+end;
+$function$;
+
+revoke all on function public.gv_chat_recent(bigint) from public, anon;
+grant execute on function public.gv_chat_recent(bigint) to authenticated;
