@@ -77,7 +77,7 @@ declare
   v_text text := lower(coalesce(p_text, ''));
 begin
   -- Invisible characters would otherwise cut a word in two.
-  v_text := regexp_replace(v_text, '[­​-‏⁠﻿]', '', 'g');
+  v_text := regexp_replace(v_text, '[\u00ad\u200b-\u200f\u2060\ufeff]', '', 'g');
   -- sh!t and b|tch: between two letters, ! and | stand for an i.
   v_text := regexp_replace(v_text, '([a-z])[!|]+(?=[a-z])', '\1i', 'g');
   v_text := regexp_replace(v_text, '[^a-z0-9@$]+', ' ', 'g');
