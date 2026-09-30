@@ -135,11 +135,23 @@
     tick();
   }
 
+  // Scripts every page shares, loaded from here so a new page cannot miss one.
+  function extras() {
+    ['/js/broadcast.js'].forEach(function (src) {
+      if (document.querySelector('script[src="' + src + '"]')) return;
+      var s = document.createElement('script');
+      s.src = src;
+      s.defer = true;
+      document.head.appendChild(s);
+    });
+  }
+
   function build() {
     backdrop();
     header();
     footer();
     particles();
+    extras();
   }
 
   if (document.readyState === 'loading') {
