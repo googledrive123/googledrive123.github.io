@@ -1201,7 +1201,10 @@
       padding-right: 1.8rem; /* so long names don't run under the star */
       overflow-wrap: anywhere;
       hyphens: auto;
+      transform: translateY(6px);
+      transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
+    .tile:hover .tile-name { transform: translateY(0); }
     .tile-play {
       margin-top: 0.55rem;
       display: inline-flex;
