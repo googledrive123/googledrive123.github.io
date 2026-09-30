@@ -38,3 +38,24 @@ create index if not exists gv_game_reports_user_created
 
 alter table public.gv_game_reports enable row level security;
 revoke all on table public.gv_game_reports from anon, authenticated;
+
+
+-- Asked by /test/ to decide what to show. Signed out is simply not a tester.
+create or replace function public.gv_is_tester()
+returns boolean
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'Testing only works on GameVault.';
+  end if;
+
+  return exists (select 1 from gv_testers where user_id = auth.uid());
+end;
+$function$;
+
+revoke all on function public.gv_is_tester() from public, anon;
+grant execute on function public.gv_is_tester() to authenticated;
