@@ -302,6 +302,29 @@ document.addEventListener('DOMContentLoaded', function () {
     $('queueEmpty').hidden = queue.length > 0;
   }
 
+  function renderReports() {
+    var body = $('reportRows');
+    body.textContent = '';
+    if (!reports.length) {
+      var empty = el('td', 'test-empty', 'Nothing yet. Your reports show up here.');
+      empty.colSpan = 4;
+      body.appendChild(el('tr')).appendChild(empty);
+      return;
+    }
+    reports.forEach(function (r) {
+      var g = byId[r.game_id];
+      var tr = el('tr');
+      tr.appendChild(el('td', '', g ? g.name : r.game_id));
+      tr.appendChild(el('td')).appendChild(badge(r.verdict));
+      tr.appendChild(el('td', '', r.note || ''));
+      var at = el('td', '', when(r.created_at));
+      // Resolved means the owner has dealt with it.
+      if (r.resolved) at.appendChild(el('div', 'queue-meta', 'Dealt with'));
+      tr.appendChild(at);
+      body.appendChild(tr);
+    });
+  }
+
   // The same places the home page plays a game from: its vault copy, the
   // host it came from, or /games/ here.
   function urlFor(g) {
@@ -366,6 +389,31 @@ document.addEventListener('DOMContentLoaded', function () {
     if (stage.requestFullscreen) stage.requestFullscreen().catch(function () {});
   });
 
+  $('sendBtn').addEventListener('click', function () {
+    if (!current || !chosen) return;
+    var g = current;
+    var btns = document.querySelectorAll('#bench button, #note');
+    btns.forEach(function (b) { b.disabled = true; });
+    note('Sending…');
+    rpc('gv_test_report', { p_game_id: g.id, p_verdict: chosen, p_note: $('note').value })
+      .then(function (row) {
+        reports.unshift(row);
+        renderReports();
+        if (current === g) {
+          $('note').value = '';
+          pick(null);
+          note('Sent. Thanks for testing ' + (g.name || g.id) + '.', 'good');
+        }
+        renderQueue();
+      }, function (err) {
+        note(message(err), 'bad');
+      })
+      .then(function () {
+        btns.forEach(function (b) { b.disabled = false; });
+        $('sendBtn').disabled = !chosen;
+      });
+  });
+
   function load() {
     return Promise.all([
       fetch('/games.json').then(function (r) {
@@ -379,6 +427,7 @@ document.addEventListener('DOMContentLoaded', function () {
       reports = got[1] || [];
       queue = waiting(catalog);
       renderQueue();
+      renderReports();
     });
   }
 
