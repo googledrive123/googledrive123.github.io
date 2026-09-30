@@ -242,7 +242,7 @@
 {"id":"cubefield","name":"Cubefield","categories":["Arcade","Skill"],"ranking":286,"img":"/thumbs/cubefield.webp","src":"https://icons-6.us/action-games/cubefield/","site":4,"added":"2026-05-13"},
 {"id":"dadish","name":"Dadish","categories":["Platformer"],"ranking":289,"img":"https://upload.wikimedia.org/wikipedia/commons/3/35/Dadishlogo.jpg","src":null,"site":4,"added":"2026-05-13"},
 {"id":"dadish2","name":"Dadish 2","categories":["Platformer"],"ranking":290,"img":"https://upload.wikimedia.org/wikipedia/commons/3/35/Dadishlogo.jpg","src":null,"site":4,"added":"2026-05-13"},
-{"id":"dadish3","name":"Dadish 3","categories":["Platformer"],"ranking":291,"img":"/games/dadish3/splash.png","src":null},
+{"id":"dadish3","name":"Dadish 3","categories":["Platformer"],"ranking":291,"img":"/thumbs/dadish3.webp","src":null,"site":4,"added":"2026-05-13"},
 {"id":"death-run-3d","name":"Death Run 3D","categories":["Action","Skill"],"ranking":292,"img":"https://icons-6.us/action-games/death-run-3d/img/death.png","src":"https://icons-6.us/action-games/death-run-3d/","local":true},
 {"id":"dino","name":"Dino Game","categories":["Arcade"],"ranking":293,"img":"/games/dino/icon.png","src":null},
 {"id":"dogeminer","name":"Doge Miner","categories":["Idle"],"ranking":294,"img":"https://icons-6.us/casual-games/DogeMiner/img/dogeminer_300x300.png","src":"https://icons-6.us/casual-games/DogeMiner/","local":true},
