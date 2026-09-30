@@ -1333,4 +1333,54 @@
   }
 
   function worth() { return Math.round(POINTS[state.level] * boost(state.streak + 1)); }
+
+  function unitSides(unit) {
+    if (unit === '$') return ['$', ''];
+    return ['', unit || ''];
+  }
+
+  function show(focus) {
+    answered = false;
+    asked++;
+    var sub = SUBJECTS.filter(function (x) { return x.id === state.subject; })[0];
+    $('quizLabel').textContent = sub.name + ' · ' + state.level.charAt(0).toUpperCase() + state.level.slice(1);
+    $('quizCount').textContent = 'Question ' + asked;
+    $('quizWorth').textContent = '+' + worth();
+    $('ask').innerHTML = q.ask;
+    $('ask').classList.toggle('big', !q.expr);
+    $('expr').innerHTML = q.expr || '';
+    $('hint').textContent = '';
+    $('feedback').hidden = true;
+    $('feedback').className = 'feedback';
+    nextBtn.hidden = true;
+    revealBtn.hidden = false;
+    quiz.classList.remove('is-right', 'is-wrong');
+
+    if (q.type === 'num') {
+      var sides = unitSides(q.unit);
+      $('prefix').textContent = sides[0];
+      $('suffix').textContent = sides[1];
+      form.hidden = false;
+      choicesEl.hidden = true;
+      choicesEl.innerHTML = '';
+      input.value = '';
+      input.readOnly = false;
+      box.className = 'answer-box';
+      if (focus) input.focus({ preventScroll: true });
+    } else {
+      form.hidden = true;
+      choicesEl.hidden = false;
+      choicesEl.innerHTML = q.choices.map(function (c, i) {
+        return '<button type="button" class="choice" data-i="' + i + '"><span class="key">' + (i + 1) + '</span>' +
+          '<span class="body">' + c + '</span></button>';
+      }).join('');
+      // Focus the card, not a choice, so a second Enter cannot pick answer 1.
+      if (focus) quiz.focus({ preventScroll: true });
+    }
+  }
+
+  function next(focus) {
+    q = make(state.subject, state.level);
+    show(focus);
+  }
 })();
