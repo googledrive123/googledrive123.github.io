@@ -51,6 +51,20 @@
       padding-top: 1rem; border-top: 1px solid var(--border);
       font-size: 0.82rem; color: var(--muted); line-height: 1.55;
     }
+    /* How other players see you: the ring, the name color and the title. */
+    .look { display: flex; align-items: center; gap: 0.85rem; }
+    .look-avatar {
+      display: grid; place-items: center; flex-shrink: 0;
+      width: 46px; height: 46px; border-radius: 50%;
+      background: var(--surface-2); border: 1px solid var(--border-strong);
+      font-weight: 700; font-size: 0.95rem;
+    }
+    .look-name { font-weight: 600; font-size: 1.05rem; }
+    .look-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--muted); margin-top: 0.25rem;
+    }
     .crates { display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: 0.75rem; }
     .crate {
       --tier: #a0a0aa;
@@ -118,6 +132,16 @@
       Sign in on the home page to earn coins.
       <div class="btn-row"><a class="btn btn-primary" href="/?profile">Sign in</a></div>
     </div>
+    <div id="lookBox" hidden>
+      <div class="panel-label">How others see you</div>
+      <div class="look">
+        <span class="look-avatar" id="lookAvatar"></span>
+        <div>
+          <div class="look-name"><span id="lookName"></span></div>
+          <div class="look-title" id="lookTitle" hidden></div>
+        </div>
+      </div>
+    </div>
     <p class="shop-note">Coins come only from playing. They can't be bought, and items only change how things look.</p>
   </section>
 
@@ -138,6 +162,8 @@ document.addEventListener('DOMContentLoaded', function () {
   var cos = window.GV && GV.cosmetics;
 
   var state = { tiers: [], items: [], wallet: null, user: null, name: 'Player', busy: false };
+  var sb = null;
+  try { sb = window.supabase.createClient(SUPA_URL, SUPA_KEY); } catch (e) { console.error(e); }
 
   function el(tag, cls, text) {
     var node = document.createElement(tag);
@@ -163,6 +189,16 @@ document.addEventListener('DOMContentLoaded', function () {
       body: JSON.stringify(args || {})
     }).then(function (r) { return r.ok ? r.json() : Promise.reject(new Error(name + ' ' + r.status)); });
   }
+
+  function rpc(name, args) {
+    if (!sb) return Promise.reject(new Error('supabase-js did not load'));
+    return sb.rpc(name, args || {}).then(function (r) {
+      if (r.error) throw r.error;
+      return r.data;
+    });
+  }
+
+  function coins() { return state.wallet ? state.wallet.coins : 0; }
 
   function renderCrates() {
     var box = document.getElementById('crates');
@@ -206,8 +242,62 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  function initials(name) {
+    return (name || '?').split(/[\s_]+/).map(function (w) { return w.charAt(0); }).join('').toUpperCase().slice(0, 2);
+  }
+
+  function renderWallet() {
+    var signed = !!state.user;
+    document.getElementById('walletSigned').hidden = !signed;
+    document.getElementById('walletGuest').hidden = signed;
+    document.getElementById('lookBox').hidden = !signed;
+    if (!signed || !state.wallet) return;
+
+    var w = state.wallet;
+    document.getElementById('coinCount').textContent = w.coins.toLocaleString();
+    var today = document.getElementById('coinToday');
+    today.innerHTML = '';
+    if (w.earned_today >= w.daily_cap) {
+      today.appendChild(document.createTextNode('That is all ' + w.daily_cap + ' for today. More tomorrow.'));
+    } else {
+      var b = el('b', null, w.earned_today + ' of ' + w.daily_cap);
+      today.appendChild(b);
+      today.appendChild(document.createTextNode(' earned today. 1 coin a minute of play.'));
+    }
+    document.getElementById('coinMeter').style.width = Math.min(100, 100 * w.earned_today / w.daily_cap) + '%';
+
+    var worn = cos ? cos.fromWallet(w) : {};
+    var avatar = document.getElementById('lookAvatar');
+    avatar.textContent = initials(state.name);
+    var name = document.getElementById('lookName');
+    name.textContent = state.name;
+    if (cos) {
+      cos.applyAvatar(avatar, worn);
+      cos.applyName(name, worn);
+      cos.applyTitle(document.getElementById('lookTitle'), worn);
+    }
+  }
+
   function render() {
     renderCrates();
+    renderWallet();
+  }
+
+  // Signed in: pay out any play since last time, then read the wallet. The
+  // grant is what makes coins appear, so it runs on every visit.
+  function loadWallet(session) {
+    state.user = session.user;
+    var email = session.user.email || '';
+    state.name = email.split('@')[0] || 'Player';
+    var nameRead = sb.from('profiles').select('username').eq('id', state.user.id).maybeSingle()
+      .then(function (r) { if (r.data && r.data.username) state.name = r.data.username; })
+      .catch(function () {});
+    return rpc('gv_grant_coins').then(function (grant) {
+      return Promise.all([rpc('gv_wallet_get'), nameRead]).then(function (res) {
+        state.wallet = res[0];
+        if (grant.earned > 0) say('+' + grant.earned + ' coins from your play since last time.');
+      });
+    });
   }
 
   publicRpc('gv_crates').then(function (data) {
@@ -218,6 +308,20 @@ document.addEventListener('DOMContentLoaded', function () {
     console.error(err);
     say('Could not load the shop. Refresh to try again.', true);
   });
+
+  if (sb) {
+    sb.auth.getSession().then(function (r) {
+      var session = r.data && r.data.session;
+      if (!session) return;
+      return loadWallet(session).then(render);
+    }).catch(function (err) {
+      console.error(err);
+      state.user = null;
+      state.wallet = null;
+      render();
+      say('Could not load your coins. Refresh to try again.', true);
+    });
+  }
 });
 </script>
 </main>
