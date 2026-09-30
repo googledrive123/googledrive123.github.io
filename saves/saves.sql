@@ -39,3 +39,9 @@ drop policy if exists gv_saves_insert on public.gv_saves;
 create policy gv_saves_insert on public.gv_saves
   for insert to authenticated
   with check (auth.uid() = user_id);
+
+drop policy if exists gv_saves_update on public.gv_saves;
+create policy gv_saves_update on public.gv_saves
+  for update to authenticated
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
