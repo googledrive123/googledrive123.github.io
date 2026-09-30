@@ -3425,6 +3425,7 @@ function makeTile(g, opts = {}) {
   const a = document.createElement('a');
   a.className = 'tile' + (opts.featured ? ' featured' : '');
   a.href = '/games/' + g.id;
+  a.dataset.id = g.id;
   const p = hashPos(g.id);
   a.style.setProperty('--bx', p.x + '%');
   a.style.setProperty('--by', p.y + '%');
