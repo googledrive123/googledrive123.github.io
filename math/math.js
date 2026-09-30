@@ -1285,4 +1285,52 @@
     last[key] = i;
     return list[i]();
   }
+
+  function buildPickers() {
+    $('subjects').innerHTML = SUBJECTS.map(function (sub) {
+      return '<button type="button" class="subject" data-id="' + sub.id + '" aria-pressed="false">' +
+        '<span class="glyph" aria-hidden="true">' + sub.glyph + '</span><span class="name">' + sub.name + '</span>' +
+        '<span class="rec"></span><span class="meter" aria-hidden="true"><span></span></span></button>';
+    }).join('');
+    $('levels').innerHTML = LEVELS.map(function (l) {
+      return '<button type="button" class="level" data-id="' + l.id + '" aria-pressed="false">' + l.name +
+        '<span class="pts">' + POINTS[l.id] + ' pts</span></button>';
+    }).join('');
+  }
+
+  function paintPickers() {
+    Array.prototype.forEach.call(document.querySelectorAll('.subject'), function (el) {
+      var id = el.getAttribute('data-id'), r = state.subjects[id], on = id === state.subject;
+      el.classList.toggle('active', on);
+      el.setAttribute('aria-pressed', on ? 'true' : 'false');
+      el.querySelector('.rec').textContent = r && r.total ? r.correct + ' / ' + r.total + ' right' : 'Not tried yet';
+      el.querySelector('.meter span').style.width = r && r.total ? Math.round(r.correct / r.total * 100) + '%' : '0';
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.level'), function (el) {
+      var on = el.getAttribute('data-id') === state.level;
+      el.classList.toggle('active', on);
+      el.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  }
+
+  function bump(el) {
+    el.classList.remove('bump');
+    void el.offsetWidth;
+    el.classList.add('bump');
+  }
+
+  function paintStats(changed) {
+    var right = 0, total = 0;
+    SUBJECTS.forEach(function (sub) { var r = state.subjects[sub.id]; if (r) { right += r.correct; total += r.total; } });
+    $('statPoints').textContent = state.points.toLocaleString('en-US');
+    $('statStreak').textContent = state.streak;
+    $('statBest').textContent = state.best;
+    $('statRight').textContent = total ? Math.round(right / total * 100) + '%' : '–';
+    var lift = boost(state.streak);
+    $('statBoost').textContent = lift > 1 ? lift + '×' : '';
+    $('streakTile').classList.toggle('hot', lift > 1);
+    if (changed) bump($('statPoints'));
+  }
+
+  function worth() { return Math.round(POINTS[state.level] * boost(state.streak + 1)); }
 })();
