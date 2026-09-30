@@ -194,3 +194,60 @@ end;
 $function$;
 
 revoke all on function public.gv_challenge_rekey(text, text, uuid) from public, anon, authenticated;
+
+-- Keeps runs and badges with the board rows they came from, when a row
+-- changes hands or name without a new run:
+--   polytrack_claim moves a guest's rows to the account they signed in with.
+--     Where the account already had a faster time on a track, it deletes the
+--     guest's row instead of moving it, so that counts as a move too;
+--   polytrack_set_name, and every submission, rewrite the name on a row, so
+--     turning anonymous mode on takes the name off the challenge too.
+create or replace function public.gv_challenge_follow()
+returns trigger
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid;
+begin
+  if tg_op = 'DELETE' then
+    -- Only polytrack_claim deletes a guest's row from a signed-in session,
+    -- and only when that account has a time on the same track at least as
+    -- fast. Anything else, like the owner removing a time, is left alone.
+    v_user := auth.uid();
+    if old.user_id is null and v_user is not null and exists (
+         select 1 from polytrack_scores u
+         where u.user_id = v_user and u.track_id = old.track_id and u.frames <= old.frames) then
+      perform gv_challenge_rekey(old.player_key, v_user::text, v_user);
+    end if;
+    return null;
+  end if;
+
+  if new.player_key is distinct from old.player_key then
+    perform gv_challenge_rekey(old.player_key, new.player_key, new.user_id);
+  end if;
+
+  if new.nickname is distinct from old.nickname then
+    update gv_challenge_runs
+       set nickname = new.nickname
+     where player_key = new.player_key
+       and nickname is distinct from new.nickname;
+  end if;
+  return null;
+exception when others then
+  -- Nor may it stop a sign-in claiming a guest's times, or a rename.
+  return null;
+end;
+$function$;
+
+revoke all on function public.gv_challenge_follow() from public, anon, authenticated;
+
+drop trigger if exists gv_challenge_follow on public.polytrack_scores;
+create trigger gv_challenge_follow
+  after update of user_id, visitor_id, nickname on public.polytrack_scores
+  for each row
+  when (old.user_id is distinct from new.user_id
+        or old.visitor_id is distinct from new.visitor_id
+        or old.nickname is distinct from new.nickname)
+  execute function public.gv_challenge_follow();
