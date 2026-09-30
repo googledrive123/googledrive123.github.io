@@ -4699,7 +4699,18 @@ async function loadUsername() {
 }
 
 // ─── Upload local sessions to Supabase after sign-in ───
-async function uploadLocalSessions() {
+// Runs on every sign-in event and after every game, sometimes in two tabs at
+// once, so uploads take turns (a Web Lock covers other tabs too) and only the
+// sessions that were sent are taken off the list. Otherwise one session could
+// be sent twice, and play time, levels and coins would count it twice.
+let uploading = Promise.resolve();
+function uploadLocalSessions() {
+  const run = () => sendLocalSessions();
+  const next = uploading.then(() => (navigator.locks ? navigator.locks.request('gv-sessions', run) : run()));
+  uploading = next.catch(() => {});
+  return next;
+}
+async function sendLocalSessions() {
   if (!currentUser) return;
   const arr = localSessions().filter(s => s.endedAt);
   if (!arr.length) return;
@@ -4709,8 +4720,10 @@ async function uploadLocalSessions() {
     started_at: s.startedAt,
     ended_at: s.endedAt
   }));
-  await sb.from('play_sessions').insert(rows);
-  saveLocalSessions([]);
+  const { error } = await sb.from('play_sessions').insert(rows);
+  if (error) return;
+  const sent = new Set(arr.map(s => s.gameId + '|' + s.startedAt));
+  saveLocalSessions(localSessions().filter(s => !sent.has(s.gameId + '|' + s.startedAt)));
 }
 
 // ─── Coins and cosmetics (shop/) ───
