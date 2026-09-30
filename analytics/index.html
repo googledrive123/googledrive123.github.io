@@ -1421,7 +1421,9 @@
   // and a copy an older version left in localStorage is moved over and wiped.
   var saved = null;
   try {
-    saved = sessionStorage.getItem(SECRET_KEY) || localStorage.getItem(SECRET_KEY);
+    saved = sessionStorage.getItem(SECRET_KEY);
+    var old = localStorage.getItem(SECRET_KEY);
+    if (!saved && old) { saved = old; sessionStorage.setItem(SECRET_KEY, old); }
     localStorage.removeItem(SECRET_KEY);
   } catch (e) {}
   var qs = new URLSearchParams(location.search).get('key');
