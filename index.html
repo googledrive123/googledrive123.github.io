@@ -4852,6 +4852,19 @@ function levelFromXp(xp) {
   return { level, into: xp, need };
 }
 
+function paintLevel(totalSec) {
+  const xp = Math.floor(totalSec / 60) * XP_PER_MIN;
+  const lv = levelFromXp(xp);
+  const pct = Math.round(lv.into / lv.need * 100);
+  const card = document.getElementById('levelCard');
+  card.style.setProperty('--pct', pct);
+  document.getElementById('levelBadge').textContent = lv.level;
+  document.getElementById('levelTitle').textContent = 'Level ' + lv.level + ' · ' + xp.toLocaleString() + ' XP';
+  document.getElementById('levelNext').textContent = lv.into + ' / ' + lv.need + ' XP to level ' + (lv.level + 1);
+  window._level = lv.level;
+  updateUserUI();
+}
+
 function computeAndShowStats(sessions) {
   // Use duration_seconds if stored, otherwise compute from timestamps
   const withDur = sessions.map(s => ({
@@ -4861,6 +4874,7 @@ function computeAndShowStats(sessions) {
       : (s.ended_at ? Math.round((new Date(s.ended_at) - new Date(s.started_at)) / 1000) : 0)
   }));
 
+  paintLevel(withDur.reduce((t, r) => t + (r.duration_seconds || 0), 0));
   if (!withDur.length) {
     document.getElementById('statTime').textContent = '0s';
     document.getElementById('statPeriods').textContent = '0';
