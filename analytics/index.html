@@ -846,6 +846,34 @@
   // name ("Anonymous" most of all), so each carries a slice of its id.
   var people = [];
   function kindLabel(p) { return p.kind === 'account' ? 'account' : 'guest ' + p.key.slice(6, 12); }
+  // ── broadcasts ──
+  var BC_MODE = { now: 'on the site then', later: 'arriving after', both: 'everyone' };
+  function loadBroadcasts() {
+    return rpc('gv_broadcast_list', { p_secret: state.secret }).then(function (list) {
+      var now = Date.now();
+      $('bcList').innerHTML = (list || []).length ? list.map(function (b) {
+        var live = !b.stopped && Date.parse(b.expires_at) > now;
+        return '<div class="bc-item"><span class="when">' + esc(new Date(b.created_at).toLocaleString()) + '</span>'
+          + '<span class="msg">' + esc(b.message) + '</span>'
+          + '<span class="st' + (live ? ' on' : '') + '">' + (live ? 'showing' : b.stopped ? 'stopped' : 'ended') + ' · ' + esc(BC_MODE[b.mode] || b.mode) + '</span>'
+          + (live ? '<button class="btn" type="button" data-stop="' + b.id + '">Stop</button>' : '') + '</div>';
+      }).join('') : '<div class="empty">Nothing sent yet.</div>';
+    }).catch(function (e) { $('bcMsg').textContent = 'Could not load broadcasts: ' + e.message; });
+  }
+  function sendBroadcast() {
+    var text = $('bcText').value.trim();
+    if (!text) { $('bcMsg').textContent = 'Write a message first.'; return; }
+    $('bcSend').disabled = true;
+    rpc('gv_broadcast_send', { p_secret: state.secret, p_message: text, p_mode: $('bcMode').value, p_hours: +$('bcHours').value })
+      .then(function () { $('bcText').value = ''; $('bcMsg').textContent = 'Sent. Open pages pick it up within a minute.'; return loadBroadcasts(); })
+      .catch(function (e) { $('bcMsg').textContent = 'Could not send: ' + e.message; })
+      .then(function () { $('bcSend').disabled = false; });
+  }
+  function stopBroadcast(id) {
+    rpc('gv_broadcast_stop', { p_secret: state.secret, p_id: id }).then(loadBroadcasts)
+      .catch(function (e) { $('bcMsg').textContent = 'Could not stop it: ' + e.message; });
+  }
+
   function loadPeople() {
     return rpc('gv_verify_candidates', { p_secret: state.secret }).then(function (list) {
       people = Array.isArray(list) ? list : [];
