@@ -330,3 +330,46 @@ end;
 $function$;
 
 grant execute on function public.gv_challenge_current(text) to anon, authenticated;
+
+
+-- Every month that has ended, newest first, with its winner. closed says
+-- whether the owner has checked the times and handed out the badges yet;
+-- until then the winner is only who is in front.
+create or replace function public.gv_challenge_history()
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'not read from this origin';
+  end if;
+
+  return coalesce((
+    select json_agg(json_build_object(
+             'month', c.month,
+             'track_id', c.track_id,
+             'title', c.title,
+             'ended_at', (c.month + interval '1 month') at time zone 'utc',
+             'closed', c.closed_at is not null,
+             'closed_at', c.closed_at,
+             'runners', (select count(*) from gv_challenge_runs r where r.month = c.month),
+             'winner', (
+               select json_build_object(
+                        'nickname', w.nickname,
+                        'frames', w.frames,
+                        'time', gv_challenge_time(w.frames))
+               from gv_challenge_ranked(c.month) w
+               where w.rank = 1)
+           ) order by c.month desc)
+    from (select * from gv_challenges
+          where month < gv_challenge_month()
+          order by month desc
+          limit 24) c
+  ), '[]'::json);
+end;
+$function$;
+
+grant execute on function public.gv_challenge_history() to anon, authenticated;
