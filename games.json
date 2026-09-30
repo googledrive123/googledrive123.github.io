@@ -158,7 +158,7 @@
 {"id":"knifehit","name":"Knife Hit","categories":["Arcade","Skill"],"ranking":157,"img":"/thumbs/knifehit.webp","src":null,"site":3,"added":"2026-05-13"},
 {"id":"learn-to-fly-3","name":"Learn To Fly 3","categories":["Action"],"ranking":158,"img":"http://www.coolmathgames.com/sites/default/files/learn-to-fly-3.jpg","src":"https://genizymath.github.io/iframe/342.html"},
 {"id":"learntofly","name":"Learn to Fly","categories":["Simulation","Arcade"],"ranking":159,"img":"/thumbs/learntofly.webp","src":"https://icons-6.us/casual-games/learntofly/","site":3,"added":"2026-05-13"},
-{"id":"learntoflyidle","name":"Learn to Fly Idle","categories":["Idle"],"ranking":160,"img":"/games/learntoflyidle/icon.jpg","src":null},
+{"id":"learntoflyidle","name":"Learn to Fly Idle","categories":["Idle"],"ranking":160,"img":"/thumbs/learntoflyidle.webp","src":null,"site":3,"added":"2026-05-13"},
 {"id":"lethal-ape","name":"Lethal Ape","categories":["Action"],"ranking":161,"img":"https://img.gamepix.com/games/lethal-ape/cover/lethal-ape.png","src":"https://genizymath.github.io/iframe/793.html"},
 {"id":"mario","name":"Mario","categories":["Platformer"],"ranking":162,"img":"https://icons-6.us/action-games/mario/Theme/Mario.gif","src":"https://icons-6.us/action-games/mario/","local":true},
 {"id":"mc-classic","name":"Minecraft Classic","categories":["Simulation","Sandbox"],"ranking":163,"img":"https://icons-6.us/action-games/minecraft-classic/pack.png","src":"https://icons-6.us/action-games/minecraft-classic/","local":true},
