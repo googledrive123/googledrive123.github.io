@@ -32,7 +32,7 @@
 {"id":"madalincars","name":"Madalin Cars","categories":["Racing","Driving"],"ranking":30,"img":"/thumbs/madalincars.webp","src":null,"site":2,"added":"2026-05-13"},
 {"id":"snowrider3d","name":"Snow Rider 3D","categories":["Action","Driving"],"ranking":31,"img":"/thumbs/snowrider3d.webp","src":"https://icons-6.us/action-games/snow-ride/","site":2,"added":"2026-05-13"},
 {"id":"badtimesimulator","name":"Bad Time Simulator","categories":["Action","Skill"],"ranking":32,"img":"/thumbs/badtimesimulator.webp","src":null,"site":2,"added":"2026-05-13"},
-{"id":"blocky-snakes","name":"Blocky Snakes","categories":["Action"],"ranking":33,"img":"https://cdn.jsdelivr.net/gh/waycrosspublicmedia/whatver/blocky-snakes/icon.png","src":"/iframe/168.html"},
+{"id":"blocky-snakes","name":"Blocky Snakes","categories":["Action"],"ranking":33,"img":"/thumbs/blocky-snakes.webp","src":"/iframe/168.html"},
 {"id":"fifa-10","name":"Fifa 10","categories":["Action"],"ranking":34,"img":"https://upload.wikimedia.org/wikipedia/en/2/24/FIFA_10_Cover.jpg","src":"https://genizymath.github.io/iframe/686.html"},
 {"id":"2drocketleague","name":"2D Rocket League","categories":["Sports"],"ranking":35,"img":"/thumbs/2drocketleague.webp","src":null,"site":2,"added":"2026-05-13"},
 {"id":"cuphead","name":"Cuphead","categories":["Action"],"ranking":36,"img":"https://upload.wikimedia.org/wikipedia/en/e/eb/Cuphead_%28artwork%29.png","src":"https://genizymath.github.io/iframe/465-fix.html"},
