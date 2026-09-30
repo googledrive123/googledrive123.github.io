@@ -3243,6 +3243,13 @@ function initRoute() {
 
   if (p === '/games' || p === '/games/') {
     revealBrowse();
+    // /games?q=slope lands on a search (search engines and shared links).
+    const q = new URLSearchParams(location.search).get('q');
+    if (q) {
+      searchInput.value = searchQ = q.slice(0, 80);
+      searchWrap.classList.add('has-value');
+      render();
+    }
     return;
   }
   if ((p === '/' || p === '') && GV.layout.skipWelcome()) {
