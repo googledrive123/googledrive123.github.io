@@ -2975,6 +2975,12 @@ function renderNews() {
     const meta = document.createElement('div');
     meta.className = 'news-meta';
     meta.textContent = item.meta;
+    if (item.date) {
+      const when = document.createElement('span');
+      when.className = 'news-date';
+      when.textContent = newsDate(item.date);
+      meta.prepend(when);
+    }
     info.append(nm, meta);
 
     const badge = document.createElement('span');
