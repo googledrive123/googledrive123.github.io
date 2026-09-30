@@ -47,6 +47,18 @@
       pointer-events: none;
     }
     .chat-empty[hidden] { display: none; }
+    .chat-jump {
+      position: absolute; left: 50%; bottom: 0.75rem; transform: translateX(-50%);
+      padding: 0.35rem 0.85rem;
+      border-radius: 100px;
+      border: 1px solid var(--border-strong);
+      background: var(--surface-2);
+      color: var(--text);
+      font: inherit; font-size: 0.75rem;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.45);
+    }
+    .chat-jump:hover { border-color: var(--accent); }
 
     .msg { padding: 0.45rem 0.55rem; border-radius: 10px; }
     .msg:hover { background: rgba(255,255,255,0.025); }
@@ -107,6 +119,7 @@
     <div class="chat-wrap">
       <div class="chat-log" id="chatLog" role="log" aria-live="polite" aria-label="Chat messages"></div>
       <div class="chat-empty" id="chatEmpty">Loading chat…</div>
+      <button class="chat-jump" id="chatJump" type="button" hidden>New messages ↓</button>
     </div>
     <form class="chat-form" id="chatForm" autocomplete="off">
       <div class="chat-box">
@@ -141,6 +154,7 @@
   var out = document.getElementById('chatOut');
   var log = document.getElementById('chatLog');
   var empty = document.getElementById('chatEmpty');
+  var jump = document.getElementById('chatJump');
   var status = document.getElementById('chatStatus');
 
   var sb = null;
@@ -207,15 +221,18 @@
 
   function toBottom() {
     log.scrollTop = log.scrollHeight;
+    jump.hidden = true;
   }
 
   function add(list, stick) {
     var follow = stick || nearBottom();
+    var others = 0;
     list.forEach(function (m) {
       if (byId[m.id]) return;
       var el = render(m);
       log.appendChild(el);
       byId[m.id] = el;
+      if (!m.mine) others++;
     });
     while (log.children.length > KEEP) {
       delete byId[log.firstElementChild.dataset.id];
@@ -224,6 +241,7 @@
     empty.textContent = 'No messages yet. Say hi.';
     empty.hidden = log.children.length > 0;
     if (follow) toBottom();
+    else if (others) jump.hidden = false;
   }
 
   function poll() {
@@ -260,6 +278,11 @@
     if (document.hidden) stopPolling();
     else if (sb && !chat.hidden) startPolling();
   });
+
+  log.addEventListener('scroll', function () {
+    if (nearBottom()) jump.hidden = true;
+  });
+  jump.addEventListener('click', toBottom);
 
   // No session at all needs no network to know, so guests see the sign-in
   // note straight away.
