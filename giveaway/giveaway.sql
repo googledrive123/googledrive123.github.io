@@ -38,3 +38,32 @@ create table if not exists public.gv_giveaway_entries (
 alter table public.gv_giveaways enable row level security;
 alter table public.gv_giveaway_entries enable row level security;
 revoke all on table public.gv_giveaways, public.gv_giveaway_entries from anon, authenticated;
+
+
+-- One giveaway as pages see it. A winner whose account is gone, or whose
+-- username is rude, is shown with no name: the page says "a GameVault
+-- player" instead. The owner still sees the real name in gv_giveaway_list.
+create or replace function public.gv_giveaway_json(p_row public.gv_giveaways, p_user uuid)
+returns json
+language sql
+stable
+set search_path to 'public'
+as $function$
+  select json_build_object(
+    'id', p_row.id,
+    'title', p_row.title,
+    'prize_text', p_row.prize_text,
+    'ends_at', p_row.ends_at,
+    'status', case when p_row.drawn_at is not null then 'drawn'
+                   when p_row.ends_at <= now() then 'closed'
+                   else 'open' end,
+    'entries', (select count(*) from gv_giveaway_entries e where e.giveaway_id = p_row.id),
+    'entered', p_user is not null and exists (
+      select 1 from gv_giveaway_entries e where e.giveaway_id = p_row.id and e.user_id = p_user),
+    'winner_name', case when p_row.winner_user is null or public.gv_is_rude(p_row.winner_name) then null
+                        else p_row.winner_name end,
+    'drawn_at', p_row.drawn_at
+  );
+$function$;
+
+revoke all on function public.gv_giveaway_json(public.gv_giveaways, uuid) from public, anon, authenticated;
