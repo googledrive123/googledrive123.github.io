@@ -404,6 +404,12 @@
       animation: skeletonPulse 1.2s ease-in-out infinite;
     }
     @keyframes skeletonPulse { 50% { opacity: 0.45; } }
+    .tile.skeleton {
+      cursor: default;
+      background: var(--surface-2);
+      animation: skeletonPulse 1.2s ease-in-out infinite;
+    }
+    .tile.skeleton:hover { transform: none; box-shadow: none; border-color: var(--border); }
     .stat .lbl {
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.62rem;
