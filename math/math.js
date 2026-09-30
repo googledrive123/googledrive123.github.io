@@ -1470,4 +1470,17 @@
     paintPickers();
     next(true);
   });
+
+  form.addEventListener('submit', function (e) { e.preventDefault(); check(); });
+  input.addEventListener('input', function () { $('hint').textContent = ''; });
+
+  choicesEl.addEventListener('click', function (e) {
+    var el = e.target.closest('.choice');
+    if (el) choose(+el.getAttribute('data-i'));
+  });
+
+  revealBtn.addEventListener('click', function () {
+    if (!answered) finish(false, -1, null);
+  });
+  nextBtn.addEventListener('click', function () { next(true); });
 })();
