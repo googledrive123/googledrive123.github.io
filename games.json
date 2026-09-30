@@ -166,7 +166,7 @@
 {"id":"newgrounds-rumble","name":"Newgrounds Rumble","categories":["Action"],"ranking":165,"img":"/thumbs/newgrounds-rumble.webp","src":"https://genizymath.github.io/iframe/587.html"},
 {"id":"osu","name":"osu!","categories":["Rhythm"],"ranking":166,"img":"/thumbs/osu.webp","src":null,"site":3,"added":"2026-05-13"},
 {"id":"paperio2","name":"Paper.io 2","categories":["Arcade","Multiplayer"],"ranking":167,"img":"/thumbs/paperio2.webp","src":null,"site":3,"added":"2026-05-13"},
-{"id":"picos-school","name":"Picos School","categories":["Horror"],"ranking":168,"img":"https://upload.wikimedia.org/wikipedia/en/thumb/5/52/Pico%27s_School_%281999%29_screenshot.png/330px-Pico%27s_School_%281999%29_screenshot.png","src":"https://genizymath.github.io/iframe/687.html"},
+{"id":"picos-school","name":"Picos School","categories":["Horror"],"ranking":168,"img":"https://upload.wikimedia.org/wikipedia/en/thumb/5/52/Pico%27s_School_%281999%29_screenshot.png/330px-Pico%27s_School_%281999%29_screenshot.png","src":"https://genizymath.github.io/iframe/687.html","site":12},
 {"id":"plague-inc","name":"Plague Inc","categories":["Strategy"],"ranking":169,"img":"/thumbs/plague-inc.webp","src":"https://genizymath.github.io/iframe/805.html"},
 {"id":"plinko","name":"Plinko","categories":["Puzzle"],"ranking":170,"img":"https://cdn.jsdelivr.net/gh/bubbls/UGS-Assets@main/plinko/_app/immutable/assets/og_image.PzHn9Bxz.jpg","src":"https://genizymath.github.io/iframe/544.html"},
 {"id":"pokemon-fire","name":"Pokémon FireRed","categories":["RPG","Adventure"],"ranking":171,"img":"/thumbs/pokemon-fire.webp","src":null,"site":3,"added":"2026-05-13"},
