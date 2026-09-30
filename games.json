@@ -267,7 +267,7 @@
 {"id":"flappySquidward","name":"Flappy Squidward","categories":["Arcade","Skill"],"ranking":323,"img":"https://img.gamepix.com/games/flappy-squidward/cover/flappy-squidward.png","src":null,"site":5,"added":"2026-05-13"},
 {"id":"fleeingthecomplex","name":"Fleeing the Complex","categories":["Action","Adventure"],"ranking":324,"img":"/thumbs/fleeingthecomplex.webp","src":"https://icons-6.us/strategy-games/fleeing-complex/","site":5,"added":"2026-05-13"},
 {"id":"flippyfish","name":"Flippy Fish","categories":["Arcade","Skill"],"ranking":325,"img":"/thumbs/flippyfish.webp","src":null,"site":5,"added":"2026-05-13"},
-{"id":"fnaf2","name":"\"Five Nights at Freddy's 2\"","categories":["Horror"],"ranking":328,"img":"/games/fnaf2/project/splash.webp","src":null},
+{"id":"fnaf2","name":"\"Five Nights at Freddy's 2\"","categories":["Horror"],"ranking":328,"img":"/thumbs/fnaf2.webp","src":null,"site":5,"added":"2026-05-13"},
 {"id":"fnaf3","name":"\"Five Nights at Freddy's 3\"","categories":["Horror"],"ranking":329,"img":"/games/fnaf3/project/splash.webp","src":null},
 {"id":"fnaf4","name":"\"Five Nights at Freddy's 4\"","categories":["Horror"],"ranking":330,"img":"/games/fnaf4/project/splash.webp","src":null},
 {"id":"fridaynightfunkin","name":"Friday Night Funkin","categories":["Rhythm"],"ranking":331,"img":"/games/fridaynightfunkin/assets/images/logo.png","src":null},
