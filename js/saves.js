@@ -303,10 +303,23 @@
 
   function isInline(keyPath) { return keyPath !== null && keyPath !== undefined; }
 
+  /* A game in another tab can make the database again between the delete
+     and this open. Holding a lower version and not letting go blocks the
+     upgrade; making it at this very version leaves no upgrade to build the
+     stores in. Either way it counts as held, and nothing is left open here. */
   function createDb(name, dump) {
     return new Promise(function (resolve, reject) {
       var req = indexedDB.open(name, Math.max(1, dump.version || 1));
+      var built = false;
+      var gaveUp = false;
+      var timer = null;
+      req.onblocked = function () {
+        timer = setTimeout(function () { gaveUp = true; reject(heldError(name)); }, 4000);
+      };
       req.onupgradeneeded = function () {
+        clearTimeout(timer);
+        if (gaveUp) { req.transaction.abort(); return; }
+        built = true;
         var db = req.result;
         Object.keys(dump.stores || {}).forEach(function (storeName) {
           var s = dump.stores[storeName];
@@ -318,8 +331,13 @@
           });
         });
       };
-      req.onsuccess = function () { resolve(req.result); };
-      req.onerror = function () { reject(req.error); };
+      req.onsuccess = function () {
+        clearTimeout(timer);
+        if (built) { resolve(req.result); return; }
+        req.result.close();
+        reject(heldError(name));
+      };
+      req.onerror = function () { clearTimeout(timer); reject(req.error); };
     });
   }
 
