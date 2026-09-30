@@ -818,6 +818,9 @@
 
   // ── Geometry ────────────────────────────────────────────────────────────
 
+  var TRIPLES = [[3, 4, 5], [5, 12, 13], [8, 15, 17], [7, 24, 25], [6, 8, 10], [9, 12, 15], [20, 21, 29], [9, 40, 41]];
+  var SHAPES = { 3: 'equilateral triangle', 4: 'square', 5: 'pentagon', 6: 'hexagon', 8: 'octagon', 9: 'nonagon', 10: 'decagon', 12: 'dodecagon' };
+
   var geometry = {
     easy: [
       function () {
@@ -865,6 +868,59 @@
         }
         return num('A circle has a diameter of ' + 2 * r + ' cm. What is its radius?', '', r, r + ' cm',
           'The radius is half the diameter: ' + 2 * r + ' ÷ 2 = ' + r + ' cm.', { unit: 'cm' });
+      }
+    ],
+    medium: [
+      function () {
+        var t = pick(TRIPLES), k = t[2] > 17 ? 1 : ri(1, 3), a = t[0] * k, b = t[1] * k, c = t[2] * k;
+        if (coin(0.6)) {
+          return num('A right triangle has legs of ' + a + ' and ' + b + '. How long is the hypotenuse?', '', c, s(c),
+            sup(a, 2) + ' + ' + sup(b, 2) + ' = ' + a * a + ' + ' + b * b + ' = ' + c * c + ', and ' + root(c * c) + ' = ' + c + '.');
+        }
+        return num('A right triangle has a hypotenuse of ' + c + ' and one leg of ' + a + '. How long is the other leg?', '', b, s(b),
+          sup(c, 2) + ' − ' + sup(a, 2) + ' = ' + c * c + ' − ' + a * a + ' = ' + b * b + ', and ' + root(b * b) + ' = ' + b + '.');
+      },
+      function () {
+        var r = ri(2, 12), form = ri(0, 2);
+        if (form === 0) {
+          return num('A circle has a radius of ' + r + '. What is its area? Answer in terms of π.', '', r * r, r * r + 'π',
+            'Area = πr² = π × ' + sup(r, 2) + ' = ' + r * r + 'π.', { unit: 'π' });
+        }
+        if (form === 1) {
+          return num('A circle has a radius of ' + r + '. What is its circumference? Answer in terms of π.', '', 2 * r, 2 * r + 'π',
+            'Circumference = 2πr = 2 × ' + r + ' × π = ' + 2 * r + 'π.', { unit: 'π' });
+        }
+        return num('A circle has a diameter of ' + 2 * r + '. What is its area? Answer in terms of π.', '', r * r, r * r + 'π',
+          'The radius is half of ' + 2 * r + ', so ' + r + ', and πr² = ' + r * r + 'π.', { unit: 'π' });
+      },
+      function () {
+        var l = ri(2, 12), w = ri(2, 10), h = ri(2, 10), v = l * w * h;
+        return num('A box is ' + l + ' cm long, ' + w + ' cm wide and ' + h + ' cm tall. What is its volume?', '', v, v + ' cm³',
+          l + ' × ' + w + ' × ' + h + ' = ' + v + ' cm³.', { unit: 'cm³' });
+      },
+      function () {
+        var n = ri(5, 12), total = (n - 2) * 180;
+        return num('What do the inside angles of a polygon with ' + n + ' sides add up to?', '', total, total + '°',
+          '(sides − 2) × 180° = ' + (n - 2) + ' × 180 = ' + total + '°.', { unit: '°' });
+      },
+      function () {
+        var n = pick([3, 4, 5, 6, 8, 9, 10, 12]), total = (n - 2) * 180, each = total / n;
+        return num('What is each inside angle of a regular ' + SHAPES[n] + ' (' + n + ' sides)?', '', each, each + '°',
+          'They add to ' + total + '°, shared by ' + n + ' equal angles: ' + total + ' ÷ ' + n + ' = ' + each + '°.', { unit: '°' });
+      },
+      function () {
+        var t = pick(TRIPLES.slice(0, 5)), across = coin(), dx = (across ? t[0] : t[1]) * (coin() ? 1 : -1), dy = (across ? t[1] : t[0]) * (coin() ? 1 : -1);
+        var x1 = ri(-5, 5), y1 = ri(-5, 5);
+        return num('How far apart are these points?', xy(x1, y1) + ' and ' + xy(x1 + dx, y1 + dy), t[2], s(t[2]),
+          'They are ' + Math.abs(dx) + ' across and ' + Math.abs(dy) + ' up or down, so ' + root(sup(Math.abs(dx), 2) + ' + ' + sup(Math.abs(dy), 2)) +
+          ' = ' + root(t[2] * t[2]) + ' = ' + t[2] + '.');
+      },
+      function () {
+        var a = ri(3, 12), b = ri(a + 1, 18), h = ri(2, 10);
+        if ((a + b) * h % 2) h += 1;
+        var area = (a + b) * h / 2;
+        return num('A trapezoid has parallel sides of ' + a + ' cm and ' + b + ' cm, and a height of ' + h + ' cm. What is its area?', '',
+          area, area + ' cm²', 'Area = ½ × (' + a + ' + ' + b + ') × ' + h + ' = ' + area + ' cm².', { unit: 'cm²' });
       }
     ],
   };
