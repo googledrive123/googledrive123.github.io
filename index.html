@@ -3534,6 +3534,15 @@ function mountGame(g) {
   }, 60);
 }
 
+// A vault copy that is missing falls back to the host the game came from,
+// without asking. Only a definite 404 counts: a slow or blocked request says
+// nothing about the copy, and the host may be the thing that is blocked.
+function checkVault(g, url, token) {
+  fetch(url.split('?')[0], { method: 'HEAD', cache: 'no-cache' }).then(res => {
+    if (res.status === 404 && token === mountToken) mountGame(g, 'src');
+  }).catch(() => {});
+}
+
 function toggleOffline() {
   if (!canSwap(mounted)) return;
   prefs.flip(mounted.id);
