@@ -413,6 +413,55 @@
         '<path d="' + starPath(32, 35, 23, 11, 5) + '" fill="' + gold + '" stroke="' + gold + '" stroke-width="4" stroke-linejoin="round"/>' +
         eyes(34, 6, 2.8) + cheeks(39.5, 10) +
         s('M28.5 40 Q32 43.5 35.5 40', INK, 1.8);
+    }],
+    ['Moon', '#0b2545', function () {
+      var glow = '#fff3b0', crater = '#f1dd8a';
+      return c(10, 14, 1.1, '#fff') + c(55, 12, 1.3, '#fff') + c(56, 50, 0.9, '#fff') + c(9, 50, 1, '#fff') +
+        c(32, 34, 20, glow) +
+        c(22, 25, 3, crater) + c(43, 44, 4, crater) + c(41, 22, 2, crater) +
+        s('M22 34 Q25 37 28 34 M36 34 Q39 37 42 34', INK, 1.8) +
+        cheeks(40, 12, '#ffb4a2') +
+        s('M29.5 42 Q32 44 34.5 42', INK, 1.5);
+    }],
+    ['Cloud', '#48b8e4', function () {
+      var puff = '#fff';
+      return p('M20 55 Q22 59 20 61 Q18 59 20 55 Z M32 57 Q34 61 32 63 Q30 61 32 57 Z M44 55 Q46 59 44 61 Q42 59 44 55 Z', '#dff6ff') +
+        c(21, 38, 11, puff) + c(32, 30, 13, puff) + c(43, 37, 11, puff) + r(12, 36, 40, 14, 7, puff) +
+        eyes(38, 6, 2.6) + cheeks(42, 11) +
+        s('M29 43 Q32 46 35 43', INK, 1.6);
+    }],
+    ['Sun', '#ff8fc0', function () {
+      var out = '';
+      for (var k = 0; k < 12; k++) {
+        var a = k * Math.PI / 6, w = 0.16;
+        out += p('M' + n(32 + 18 * Math.cos(a - w)) + ' ' + n(32 + 18 * Math.sin(a - w)) +
+          ' L' + n(32 + 29 * Math.cos(a)) + ' ' + n(32 + 29 * Math.sin(a)) +
+          ' L' + n(32 + 18 * Math.cos(a + w)) + ' ' + n(32 + 18 * Math.sin(a + w)) + ' Z', '#ffb703');
+      }
+      return out + c(32, 32, 17, '#ffd166') +
+        r(19, 26, 11, 7, 3, INK) + r(34, 26, 11, 7, 3, INK) + s('M30 28.5 H34', INK, 1.8) +
+        s('M21.5 28.5 L24 27.5 M36.5 28.5 L39 27.5', '#fff', 1) +
+        cheeks(37, 11.5, '#ff7b54') +
+        s('M26 38.5 Q32 44 38 38.5', INK, 1.8);
+    }],
+    ['Ninja', '#e9c46a', function () {
+      var suit = '#22223b', band = '#d62828';
+      return p('M47 25 L60 19 L57 26 Z', band) + p('M47 27 L59 31 L54 34 Z', band) +
+        shoulders(suit) + c(32, 36, 19, suit) +
+        r(15, 29, 34, 11, 5.5, '#f1c27d') +
+        p('M14.5 27 Q32 19 49.5 27 L49 22.5 Q32 14.5 15 22.5 Z', band) +
+        r(29, 19.5, 6, 4, 1, '#adb5bd') +
+        eyes(34.5, 7, 2.6);
+    }],
+    ['Snowman', '#e76f51', function () {
+      var snow = '#fff';
+      return c(32, 70, 20, snow) +
+        c(32, 36, 15, snow) +
+        r(16, 48, 32, 6, 3, '#2a9d8f') + r(38, 50, 6, 12, 2, '#2a9d8f') +
+        r(20, 20, 24, 4, 2, INK) + r(24, 6, 16, 16, 2, INK) + r(24, 16, 16, 3, 0, '#e63946') +
+        eyes(34, 5.5, 2.4) + cheeks(40.5, 9) +
+        p('M32 38 L43 40.5 L32 41.5 Z', '#fb8500') +
+        c(27, 44.5, 1, INK) + c(30, 46, 1, INK) + c(34, 46, 1, INK) + c(37, 44.5, 1, INK);
     }]
   ];
 
