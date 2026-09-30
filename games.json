@@ -1345,5 +1345,6 @@
 {"id":"quadro-barrel-defence","name":"Quadro Barrel Defence","categories":["Shooter"],"img":"/thumbs/quadro-barrel-defence.webp","src":null,"site":8,"path":"flash/?swf=quadrobarreldefence.swf","added":"2026-09-30","ranking":1498},
 {"id":"redshift","name":"Redshift","categories":["Arcade"],"img":"/thumbs/redshift.webp","src":null,"site":8,"path":"flash/?swf=redshift.swf","added":"2026-09-30","ranking":1499},
 {"id":"revenant-2","name":"Revenant 2","categories":["RPG"],"img":"/thumbs/revenant-2.webp","src":null,"site":8,"path":"flash/?swf=revenant2.swf","added":"2026-09-30","ranking":1500},
-{"id":"sift-heads-2","name":"Sift Heads 2","categories":["Shooter"],"img":"/thumbs/sift-heads-2.webp","src":null,"site":8,"path":"flash/?swf=siftheads2.swf","added":"2026-09-30","ranking":1501}
+{"id":"sift-heads-2","name":"Sift Heads 2","categories":["Shooter"],"img":"/thumbs/sift-heads-2.webp","src":null,"site":8,"path":"flash/?swf=siftheads2.swf","added":"2026-09-30","ranking":1501},
+{"id":"sift-heads-3","name":"Sift Heads 3","categories":["Shooter"],"img":"/thumbs/sift-heads-3.webp","src":null,"site":8,"path":"flash/?swf=siftheads3.swf","added":"2026-09-30","ranking":1502}
 ]}
