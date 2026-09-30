@@ -1067,6 +1067,22 @@
       height: 1px;
       background: linear-gradient(to right, var(--border) 0%, transparent 100%);
     }
+    /* One scrolling line of tiles instead of a wrapping grid. */
+    .grid.strip {
+      grid-template-columns: none;
+      grid-auto-flow: column;
+      grid-auto-columns: var(--tile-min, 190px);
+      overflow-x: auto;
+      padding: 8px 4px 12px;
+      margin: -8px -4px 0;
+      scroll-snap-type: x proximity;
+    }
+    .grid.strip .tile { scroll-snap-align: start; }
+    .popular-rank {
+      position: absolute; right: 0.8rem; bottom: 0.7rem; z-index: 2;
+      font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; font-weight: 700;
+      color: rgba(255,255,255,0.18);
+    }
 
     /* ───────────── TILES (uniform, smaller) ───────────── */
     .grid {
