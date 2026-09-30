@@ -40,4 +40,16 @@
     return a;
   }
   function lcm(a, b) { return a / gcd(a, b) * b; }
+
+  // ── Writing numbers and maths ───────────────────────────────────────────
+
+  /* A tidy number with a real minus sign. Rounding to six places hides float
+     noise like 0.1 + 0.2. */
+  function s(x) {
+    var t = String(Math.round(x * 1e6) / 1e6);
+    return t.charAt(0) === '-' ? '−' + t.slice(1) : t;
+  }
+  function p(x) { return x < 0 ? '(' + s(x) + ')' : s(x); }
+  function signed(x) { return x < 0 ? '− ' + s(-x) : '+ ' + s(x); }
+  function money(x) { return '$' + s(x); }
 })();
