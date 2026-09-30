@@ -3507,30 +3507,34 @@ function paintSwap(g, where) {
   loaderSwap.textContent = label;
 }
 
-function mountGame(g) {
+function mountGame(g, where) {
   mounted = g;
-  const url = gameUrl(g);
+  where = where || sourceFor(g);
+  mountedFrom = where;
+  // A slower answer about an earlier game must not touch this one.
+  const token = ++mountToken;
+  const url = urlFor(g, where);
   gameTitle.textContent = g.name;
   // ?solo keeps a game page from sending itself back into the player.
-  gameNewTab.href = isOffline(g) ? url + '?solo' : url;
+  gameNewTab.href = where === 'src' ? url : url + (url.includes('?') ? '&' : '?') + 'solo';
   gameLoaderText.textContent = 'Loading game…';
   gameLoader.classList.remove('hidden');
-  paintSwap(g);
+  paintSwap(g, where);
   clearTimeout(stallTimer);
   expectLoad = false;
   gameFrame.src = '';
+  if (where === 'vault' && g.src) checkVault(g, url, token);
   setTimeout(() => {
+    if (token !== mountToken) return;
     expectLoad = true;
     gameFrame.src = url;
     // A cross-origin frame fires `load` even for the browser's own error page,
     // so a game that never finishes loading is the only failure this can see.
-    if (canSwap(g) && !isOffline(g)) {
-      stallTimer = setTimeout(() => {
-        if (gameLoader.classList.contains('hidden')) return;
-        gameLoaderText.textContent = 'Still loading…';
-        loaderSwap.hidden = false;
-      }, STALL_MS);
-    }
+    stallTimer = setTimeout(() => {
+      if (token !== mountToken || gameLoader.classList.contains('hidden')) return;
+      gameLoaderText.textContent = 'Still loading…';
+      loaderSwap.hidden = !canSwap(g);
+    }, STALL_MS);
   }, 60);
 }
 
