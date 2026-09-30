@@ -3494,11 +3494,13 @@ function urlFor(g, where) {
 // Only a game with both a vault copy and a host to go back to can swap.
 function canSwap(g) { return !!(g && g.site && g.src); }
 
-function paintSwap(g) {
+function paintSwap(g, where) {
   loaderSwap.hidden = true;
   gameSwap.hidden = !canSwap(g);
   if (!canSwap(g)) return;
-  gameSwap.innerHTML = isOffline(g) ? '&#8646; Use online copy' : '&#8646; Use offline copy';
+  const label = where === 'vault' ? 'Use the original host' : 'Use our copy';
+  gameSwap.innerHTML = '&#8646; ' + label;
+  loaderSwap.textContent = label;
 }
 
 function mountGame(g) {
