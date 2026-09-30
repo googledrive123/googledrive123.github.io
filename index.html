@@ -3423,7 +3423,7 @@ function render() {
 
   // ─── Starred (or empty hint) ───
   starredGrid.innerHTML = '';
-  if (isDefaultView) {
+  if (isDefaultView && !GV.layout.hidden('starred')) {
     starredSection.style.display = '';
     if (starred.size > 0) {
       const starredList = GAMES.filter(g => starred.has(g.id));
