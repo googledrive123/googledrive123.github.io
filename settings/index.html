@@ -106,6 +106,33 @@
   </div>
 
   <div class="panel">
+    <div class="panel-label">Home page</div>
+    <div class="toggle-row">
+      <div>
+        <div class="label">Skip the welcome screen</div>
+        <div class="desc">Open straight on the games.</div>
+      </div>
+      <label class="switch"><input type="checkbox" id="skipWelcome"><span class="track"></span></label>
+    </div>
+    <div class="toggle-row" style="display:block">
+      <div class="label">Tile size</div>
+      <input type="range" id="tileSize" min="130" max="300" step="10" aria-label="Tile size" style="width:100%;accent-color:var(--accent);margin-top:0.5rem">
+    </div>
+    <div class="toggle-row">
+      <div class="label">Show the Popular now row</div>
+      <label class="switch"><input type="checkbox" data-row="popular"><span class="track"></span></label>
+    </div>
+    <div class="toggle-row">
+      <div class="label">Show the Starred row</div>
+      <label class="switch"><input type="checkbox" data-row="starred"><span class="track"></span></label>
+    </div>
+    <div class="toggle-row">
+      <div class="label">Show the Continue row</div>
+      <label class="switch"><input type="checkbox" data-row="recent"><span class="track"></span></label>
+    </div>
+  </div>
+
+  <div class="panel">
     <div class="panel-label">Panic key</div>
     <div class="toggle-row">
       <div>
