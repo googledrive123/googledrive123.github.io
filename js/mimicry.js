@@ -293,7 +293,7 @@
      player the same way it opens any deep link. */
   function intoPlayer() {
     if (window.top !== window.self) return false;
-    var match = /^\/games\/([^\/]+)\/(index\.html)?$/.exec(location.pathname);
+    var match = /^\/(?:games|vault\d+)\/([^\/]+)\/(index\.html)?$/.exec(location.pathname);
     if (!match) return false;
     // New Tab (?solo) and the dashboard's creator tab (#gv-creator-wait) open
     // a game on its own on purpose.
