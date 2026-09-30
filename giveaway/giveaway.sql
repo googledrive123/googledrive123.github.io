@@ -196,3 +196,34 @@ begin
   return row_to_json(v_row);
 end;
 $function$;
+
+-- Every giveaway, newest first, with its entry count and the winner's real
+-- name and account id, so the owner knows whom to give the prize to.
+create or replace function public.gv_giveaway_list(p_secret text)
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+
+  return coalesce((
+    select json_agg(json_build_object(
+             'id', g.id,
+             'title', g.title,
+             'prize_text', g.prize_text,
+             'ends_at', g.ends_at,
+             'created_at', g.created_at,
+             'entries', (select count(*) from gv_giveaway_entries e where e.giveaway_id = g.id),
+             'winner_user', g.winner_user,
+             'winner_name', g.winner_name,
+             'drawn_at', g.drawn_at
+           ) order by g.id desc)
+    from (select * from gv_giveaways order by id desc limit 50) g
+  ), '[]'::json);
+end;
+$function$;
