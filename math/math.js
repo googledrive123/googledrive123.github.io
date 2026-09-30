@@ -1001,4 +1001,40 @@
       }
     ]
   };
+
+  // ── Calculus basics ─────────────────────────────────────────────────────
+
+  var calculus = {
+    easy: [
+      function () {
+        var k = ri(-4, 5), b = nz(-9, 9), body, r;
+        if (coin()) { var a = nz(-6, 6); body = poly([a, b]); r = a * k + b; }
+        else { body = poly([1, 0, b]); r = k * k + b; }
+        return num('Find the limit.', lim(s(k), '(' + body + ')'), r, s(r),
+          'Nothing breaks at x = ' + s(k) + ', so put it straight in: ' + s(r) + '.');
+      },
+      function () {
+        var a = nz(-9, 9), b = nz(-20, 20);
+        return num('Find the derivative.', ddx(poly([a, b])), a, s(a),
+          'A straight line has the same slope everywhere, ' + s(a) + ', and the constant ' + s(b) + ' adds nothing to it.');
+      },
+      function () {
+        var n = ri(2, 9), c = ri(1, 6);
+        return choice('Find the derivative.', ddx(term(c, n)), term(c * n, n - 1),
+          [term(c, n - 1), term(c * n, n), term(c * n, n + 1), term(c * (n - 1), n - 1)],
+          'Power rule: bring the power down and lower it by one. ' + c + ' × ' + n + ' = ' + c * n + ', and the power becomes ' + (n - 1) + '.');
+      },
+      function () {
+        var a = nz(-5, 5), k = ri(-4, 5), r = 2 * a * k;
+        return num('Find f′(' + s(k) + ').', 'f(x) = ' + poly([a, 0, 0]), r, s(r),
+          'f′(x) = ' + poly([2 * a, 0]) + ', so f′(' + s(k) + ') = ' + s(2 * a) + ' × ' + p(k) + ' = ' + s(r) + '.');
+      },
+      function () {
+        var n = ri(2, 6), c = ri(1, 4);
+        return choice('Which function has this derivative?', term(c * n, n - 1), term(c, n),
+          [term(c * n, n), term(c, n - 1), term(c * n * (n - 1), n - 2), term(c * n, n + 1)],
+          'Check with the power rule: the derivative of ' + term(c, n) + ' is ' + term(c * n, n - 1) + '.');
+      }
+    ],
+  };
 })();
