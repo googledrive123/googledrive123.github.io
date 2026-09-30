@@ -317,3 +317,76 @@ end;
 $function$;
 
 grant execute on function public.gv_crates() to anon, authenticated;
+
+
+-- Pays for a crate and rolls its three items. The wallet row is locked
+-- before the balance is checked, so two quick clicks cannot spend the same
+-- coins twice. Each roll picks a rarity by the tier's published chances, then
+-- any item of that rarity with equal chance. A duplicate just adds to qty.
+--
+-- Returns the new balance and the three items, each marked new when it is
+-- the first of its kind the account owns.
+create or replace function public.gv_open_crate(p_tier text)
+returns json
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+  v_tier gv_crate_tiers;
+  v_coins integer;
+  v_roll numeric;
+  v_rarity text;
+  v_item gv_items;
+  v_qty integer;
+  v_items jsonb := '[]'::jsonb;
+begin
+  if v_user is null then
+    raise exception 'sign in first';
+  end if;
+  if not public.gv_origin_allowed() then
+    raise exception 'not from this origin';
+  end if;
+
+  select * into v_tier from gv_crate_tiers where id = p_tier;
+  if not found then
+    raise exception 'no such crate';
+  end if;
+
+  insert into gv_wallet (user_id) values (v_user) on conflict (user_id) do nothing;
+  select coins into v_coins from gv_wallet where user_id = v_user for update;
+  if v_coins < v_tier.price then
+    raise exception 'not enough coins';
+  end if;
+  update gv_wallet set coins = coins - v_tier.price
+   where user_id = v_user
+  returning coins into v_coins;
+
+  for n in 1..3 loop
+    v_roll := random() * 100;
+    v_rarity := case
+      when v_roll < v_tier.common then 'common'
+      when v_roll < v_tier.common + v_tier.uncommon then 'uncommon'
+      when v_roll < v_tier.common + v_tier.uncommon + v_tier.rare then 'rare'
+      when v_roll < v_tier.common + v_tier.uncommon + v_tier.rare + v_tier.epic then 'epic'
+      else 'legendary'
+    end;
+
+    select * into v_item from gv_items where rarity = v_rarity order by random() limit 1;
+
+    insert into gv_inventory (user_id, item_id, qty) values (v_user, v_item.id, 1)
+    on conflict (user_id, item_id) do update set qty = gv_inventory.qty + 1
+    returning qty into v_qty;
+
+    v_items := v_items || jsonb_build_object(
+      'id', v_item.id, 'kind', v_item.kind, 'name', v_item.name,
+      'rarity', v_item.rarity, 'value', v_item.value, 'new', v_qty = 1);
+  end loop;
+
+  return json_build_object('coins', v_coins, 'items', v_items);
+end;
+$function$;
+
+revoke all on function public.gv_open_crate(text) from public, anon;
+grant execute on function public.gv_open_crate(text) to authenticated;
