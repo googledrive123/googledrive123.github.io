@@ -987,7 +987,7 @@
 {"id":"slice-it-all","name":"Slice it All","categories":["Action"],"ranking":1187,"img":"/thumbs/slice-it-all.webp","src":"/iframe/128.html"},
 {"id":"solar-smash","name":"Solar Smash","categories":["Action"],"ranking":1188,"img":"/thumbs/solar-smash.webp","src":"/iframe/118.html","site":45},
 {"id":"soundboard","name":"Soundboard","categories":["Action"],"ranking":1189,"img":"/thumbs/soundboard.webp","src":"/iframe/179-a.html","site":7,"added":"2026-05-13"},
-{"id":"space-waves","name":"Space Waves","categories":["Action"],"ranking":1190,"img":"/thumbs/space-waves.webp","src":"/iframe/117-fix.html"},
+{"id":"space-waves","name":"Space Waves","categories":["Action"],"ranking":1190,"img":"/thumbs/space-waves.webp","src":"/iframe/117-fix.html","site":45},
 {"id":"sprunki","name":"Sprunki","categories":["Action"],"ranking":1191,"img":"/thumbs/sprunki.webp","src":"/iframe/9.html"},
 {"id":"stacky-dash","name":"Stacky Dash","categories":["Action"],"ranking":1192,"img":"/thumbs/stacky-dash.webp","src":"/iframe/18.html"},
 {"id":"stateio","name":"State.io","categories":["Action"],"ranking":1193,"img":"/thumbs/stateio.webp","src":"/iframe/161.html"},
