@@ -71,6 +71,12 @@
 
   // The game stores its settings as a list of [name, value] pairs and fills
   // in its own defaults for anything the list leaves out.
+  function savedSettings() {
+    var pairs = null;
+    try { pairs = JSON.parse(localStorage.getItem(SETTINGS_KEY)); } catch (e) {}
+    return Array.isArray(pairs) ? pairs : [];
+  }
+
   function writePreset(preset) {
     var pairs = Object.keys(preset.values).map(function (name) {
       return [name, preset.values[name]];
