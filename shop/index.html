@@ -51,6 +51,51 @@
       padding-top: 1rem; border-top: 1px solid var(--border);
       font-size: 0.82rem; color: var(--muted); line-height: 1.55;
     }
+    .crates { display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: 0.75rem; }
+    .crate {
+      --tier: #a0a0aa;
+      display: flex; flex-direction: column;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+      padding: 1rem;
+    }
+    .crate[data-tier="rare"]      { --tier: #6aa8ff; }
+    .crate[data-tier="epic"]      { --tier: #b58cff; }
+    .crate[data-tier="legendary"] { --tier: #f0c04a; }
+    .crate-top { display: flex; align-items: center; gap: 0.8rem; }
+    /* A small box with a lid and a latch, in the crate's color. */
+    .crate-art {
+      position: relative; flex-shrink: 0;
+      width: 46px; height: 38px; border-radius: 7px;
+      border: 1.5px solid var(--tier);
+      background: linear-gradient(180deg, color-mix(in srgb, var(--tier) 30%, #1a1a20), color-mix(in srgb, var(--tier) 10%, #121216));
+    }
+    .crate-art::before { content: ''; position: absolute; left: 0; right: 0; top: 11px; height: 1.5px; background: var(--tier); }
+    .crate-art::after {
+      content: ''; position: absolute; left: 50%; top: 7px;
+      width: 9px; height: 9px; margin-left: -4.5px; border-radius: 2px;
+      background: var(--tier);
+    }
+    .page .crate h3 { margin: 0; font-size: 0.95rem; }
+    .crate-price { display: flex; align-items: center; gap: 0.35rem; margin-top: 0.2rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .odds-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--muted-2); margin: 1rem 0 0.4rem;
+    }
+    .page .odds { list-style: none; margin: 0 0 1rem; }
+    .page .odds li {
+      display: flex; align-items: center; gap: 0.5rem;
+      margin: 0; padding: 0.18rem 0;
+      font-size: 0.8rem; color: var(--muted); line-height: 1.4;
+    }
+    .odds .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--r); flex-shrink: 0; }
+    .odds .pct { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text); }
+    .page .odds li.none { color: var(--muted-2); }
+    .odds li.none .pct { color: var(--muted-2); }
+    .crate .btn { margin-top: auto; width: 100%; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    .shop-status { min-height: 1.4em; margin-top: 0.75rem; font-size: 0.85rem; color: var(--muted); }
+    .shop-status.bad { color: #ff7a7a; }
   </style>
 </head>
 <body>
@@ -75,6 +120,106 @@
     </div>
     <p class="shop-note">Coins come only from playing. They can't be bought, and items only change how things look.</p>
   </section>
+
+  <h2>Crates</h2>
+  <div class="crates" id="crates"></div>
+  <p class="shop-status" id="shopStatus" role="status"></p>
+
+<script>
+// Waits for DOMContentLoaded so supabase-js and js/cosmetics.js (both
+// deferred) are in. Everything that spends or earns goes through the
+// functions in shop/shop.sql; this page only draws what they answer.
+document.addEventListener('DOMContentLoaded', function () {
+  'use strict';
+
+  var SUPA_URL = 'https://dxwjxzmlezfyursysays.supabase.co';
+  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
+  var RARITIES = ['common', 'uncommon', 'rare', 'epic', 'legendary'];
+  var cos = window.GV && GV.cosmetics;
+
+  var state = { tiers: [], items: [], wallet: null, user: null, name: 'Player', busy: false };
+
+  function el(tag, cls, text) {
+    var node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text != null) node.textContent = text;
+    return node;
+  }
+  function cap(word) { return word.charAt(0).toUpperCase() + word.slice(1); }
+  // 70 -> "70%", 1.8 -> "1.8%": exactly what the server rolls with.
+  function pct(n) { return String(Number(n)) + '%'; }
+  function say(text, bad) {
+    var box = document.getElementById('shopStatus');
+    box.textContent = text || '';
+    box.classList.toggle('bad', !!bad);
+  }
+
+  // Crates and items are public, so they come by plain fetch and still show
+  // when supabase-js does not load.
+  function publicRpc(name, args) {
+    return fetch(SUPA_URL + '/rest/v1/rpc/' + name, {
+      method: 'POST',
+      headers: { apikey: SUPA_KEY, Authorization: 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify(args || {})
+    }).then(function (r) { return r.ok ? r.json() : Promise.reject(new Error(name + ' ' + r.status)); });
+  }
+
+  function renderCrates() {
+    var box = document.getElementById('crates');
+    box.innerHTML = '';
+    state.tiers.forEach(function (tier) {
+      var card = el('article', 'crate');
+      card.dataset.tier = tier.id;
+
+      var top = el('div', 'crate-top');
+      top.appendChild(el('div', 'crate-art'));
+      var head = el('div');
+      head.appendChild(el('h3', null, tier.name));
+      var price = el('div', 'crate-price');
+      var coin = el('span', 'coin');
+      coin.setAttribute('aria-hidden', 'true');
+      price.appendChild(coin);
+      price.appendChild(document.createTextNode(tier.price));
+      price.appendChild(el('span', 'sr-only', ' coins'));
+      head.appendChild(price);
+      top.appendChild(head);
+      card.appendChild(top);
+
+      card.appendChild(el('div', 'odds-label', 'Chances'));
+      var list = el('ul', 'odds');
+      RARITIES.forEach(function (r) {
+        var n = Number(tier.odds[r]);
+        var li = el('li', 'r-' + r + (n ? '' : ' none'));
+        li.appendChild(el('span', 'dot'));
+        li.appendChild(document.createTextNode(cap(r)));
+        li.appendChild(el('span', 'pct', pct(n)));
+        list.appendChild(li);
+      });
+      card.appendChild(list);
+
+      var btn = el('button', 'btn');
+      btn.type = 'button';
+      btn.disabled = true;
+      btn.textContent = 'Sign in to open';
+      card.appendChild(btn);
+      box.appendChild(card);
+    });
+  }
+
+  function render() {
+    renderCrates();
+  }
+
+  publicRpc('gv_crates').then(function (data) {
+    state.tiers = data.tiers || [];
+    state.items = data.items || [];
+    render();
+  }).catch(function (err) {
+    console.error(err);
+    say('Could not load the shop. Refresh to try again.', true);
+  });
+});
+</script>
 </main>
 </body>
 </html>
