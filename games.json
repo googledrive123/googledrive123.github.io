@@ -55,7 +55,7 @@
 {"id":"basketball-frvr","name":"Basketball Frvr","categories":["Sports"],"ranking":54,"img":"https://img.gamepix.com/games/basketball-frvr/cover/basketball-frvr.png","src":"/iframe/28.html"},
 {"id":"basket-battle","name":"Basket Battle","categories":["Sports"],"ranking":55,"img":"https://img.gamepix.com/games/basket-battle-1/cover/basket-battle-1.png","src":"/iframe/25.html"},
 {"id":"adventure-drivers","name":"Adventure Drivers","categories":["Racing","Driving"],"ranking":56,"img":"/thumbs/adventure-drivers.webp","src":"https://icons-6.us/driving-games/adventure-drivers/","site":2,"added":"2026-05-13"},
-{"id":"slope-ball","name":"Slope Ball","categories":["Action","Skill"],"ranking":57,"img":"https://icons-6.us/action-games/slope-ball/splash.png","src":"https://icons-6.us/action-games/slope-ball/","local":true},
+{"id":"slope-ball","name":"Slope Ball","categories":["Action","Skill"],"ranking":57,"img":"/thumbs/slope-ball.webp","src":"https://icons-6.us/action-games/slope-ball/","site":2,"added":"2026-05-13"},
 {"id":"fivenightsatepsteins","name":"\"Five Nights at Epstein's\"","categories":["Horror"],"ranking":58,"img":"https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Five_Nights_at_Freddy%27s.svg/330px-Five_Nights_at_Freddy%27s.svg.png","src":null,"site":2,"added":"2026-05-13"},
 {"id":"slime-rancher","name":"Slime Rancher","categories":["Simulation"],"ranking":59,"img":"https://upload.wikimedia.org/wikipedia/en/d/d2/Slime_Rancher_cover_art.png","src":"https://genizymath.github.io/iframe/591-awe.html"},
 {"id":"russiancardriver","name":"Russian Car Driver","categories":["Racing","Driving"],"ranking":60,"img":"/thumbs/russiancardriver.webp","src":null,"site":3,"added":"2026-05-13"},
