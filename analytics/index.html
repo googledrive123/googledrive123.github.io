@@ -276,6 +276,33 @@
   </section>
 
   <section>
+    <h2>Giveaways <small>site prizes only, never money</small></h2>
+    <div class="card">
+      <div class="verify-bar">
+        <input type="text" id="gaTitle" placeholder="Title" maxlength="80">
+        <input type="text" id="gaPrize" placeholder="Prize (a badge, a crate, a name colour)" maxlength="200">
+        <input type="datetime-local" id="gaEnds" aria-label="Ends">
+        <button class="btn" id="gaCreate" type="button">Start giveaway</button>
+      </div>
+      <div class="verify-msg" id="gaMsg"></div>
+      <div class="verify-list" id="gaList"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Backup addresses <small>mirror sites, see mirrors/SETUP.md</small></h2>
+    <div class="card">
+      <div class="verify-bar">
+        <input type="text" id="mirrorOrigin" placeholder="https://name.github.io" autocomplete="off">
+        <input type="text" id="mirrorLabel" placeholder="Label (optional)" maxlength="60">
+        <button class="btn" id="mirrorAdd" type="button">Add</button>
+      </div>
+      <div class="verify-msg" id="mirrorMsg"></div>
+      <div class="verify-list" id="mirrorList"></div>
+    </div>
+  </section>
+
+  <section>
     <h2>Overview <small id="rangeLabel"></small></h2>
     <div class="kpis" id="kpis"></div>
   </section>
