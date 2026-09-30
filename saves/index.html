@@ -263,6 +263,69 @@ document.addEventListener('DOMContentLoaded', function () {
       note(fileNote, message(err), 'bad');
     });
   });
+
+  var cloudNote = $('cloudNote');
+  var autoNote = $('autoNote');
+  var rows = {};
+
+  function noteFor(slot) { return slot === 'auto' ? autoNote : cloudNote; }
+
+  function slotLabel(slot) {
+    if (slot === 'auto') return 'your auto-save';
+    var row = rows[slot];
+    return row && row.title ? '"' + row.title + '"' : 'slot ' + slot;
+  }
+
+  function button(text, cls, onClick) {
+    var b = el('button', 'btn btn-sm' + (cls ? ' ' + cls : ''), text);
+    b.type = 'button';
+    b.addEventListener('click', onClick);
+    return b;
+  }
+
+  function slotRow(slot) {
+    var row = rows[slot];
+    var isAuto = slot === 'auto';
+    var wrap = el('div', 'slot' + (row ? '' : ' empty'));
+    var info = el('div', 'slot-info');
+    var name = el('div', 'slot-name', row
+      ? (isAuto ? 'Latest auto-save' : row.title || 'Untitled save')
+      : (isAuto ? 'None yet' : 'Empty'));
+    info.appendChild(el('div', 'slot-num', isAuto ? 'Auto-save' : 'Slot ' + slot));
+    info.appendChild(name);
+    if (row) info.appendChild(el('div', 'slot-meta', size(row.size_bytes) + ' · ' + when(row.updated_at)));
+    wrap.appendChild(info);
+
+    var actions = el('div', 'slot-actions');
+    if (!isAuto) {
+      actions.appendChild(button('Save here', row ? '' : 'btn-primary', function () { saveTo(slot, wrap); }));
+    }
+    if (row) {
+      actions.appendChild(button('Load', '', function () { loadFrom(slot, wrap); }));
+      if (!isAuto) actions.appendChild(button('Rename', '', function () { rename(slot, info, name); }));
+      actions.appendChild(button('Delete', 'btn-danger', function () { remove(slot, wrap); }));
+    }
+    wrap.appendChild(actions);
+    return wrap;
+  }
+
+  function render() {
+    var list = $('slotList');
+    list.textContent = '';
+    ['1', '2', '3'].forEach(function (slot) { list.appendChild(slotRow(slot)); });
+    var auto = $('autoSlot');
+    auto.textContent = '';
+    auto.appendChild(slotRow('auto'));
+  }
+
+  function refresh() {
+    return saves.cloudList().then(function (list) {
+      rows = {};
+      list.forEach(function (r) { rows[r.slot] = r; });
+      render();
+      return list;
+    });
+  }
 });
 </script>
 </main>
