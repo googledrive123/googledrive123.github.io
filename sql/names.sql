@@ -54,7 +54,9 @@ set search_path to 'public'
 as $function$
 begin
   if public.gv_name_rude(new.username) then
-    if tg_op = 'INSERT' then
+    -- An upsert on an existing profile (the rename form) arrives as an
+    -- INSERT first; that is a rename, so it is refused like one.
+    if tg_op = 'INSERT' and not exists (select 1 from public.profiles where id = new.id) then
       new.username := 'player-' || left(replace(new.id::text, '-', ''), 8);
     else
       raise exception 'That username is not allowed. Try another.';
