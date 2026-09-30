@@ -179,6 +179,36 @@ document.addEventListener('DOMContentLoaded', function () {
   function setBusy(on) {
     document.querySelectorAll('.page button, .page input').forEach(function (b) { b.disabled = on; });
   }
+
+  /* One question on screen at a time. Resolves true or false with the
+     answer, or null when another question took its place, which is not a no. */
+  var closeOpen = null;
+  function ask(host, q) {
+    if (closeOpen) closeOpen(null);
+    return new Promise(function (resolve) {
+      var box = el('div', 'confirm' + (q.tone ? ' ' + q.tone : ''));
+      box.setAttribute('role', 'alertdialog');
+      box.appendChild(el('div', 'confirm-title', q.title));
+      if (q.body) box.appendChild(el('p', '', q.body));
+      var row = el('div', 'btn-row');
+      var yes = el('button', 'btn btn-primary btn-sm', q.yes);
+      var no = el('button', 'btn btn-sm', q.no || 'Cancel');
+      yes.type = no.type = 'button';
+      row.append(yes, no);
+      box.appendChild(row);
+      host.appendChild(box);
+
+      function finish(answer) {
+        box.remove();
+        if (closeOpen === finish) closeOpen = null;
+        resolve(answer);
+      }
+      closeOpen = finish;
+      yes.addEventListener('click', function () { finish(true); });
+      no.addEventListener('click', function () { finish(false); });
+      if (!q.quiet) yes.focus();
+    });
+  }
 });
 </script>
 </main>
