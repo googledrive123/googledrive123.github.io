@@ -24,6 +24,30 @@
     .save-note.bad { color: var(--accent); }
     .save-note.good { color: #5ce08a; }
     .who { color: var(--text); }
+
+    .slots { margin-top: 0.9rem; border-top: 1px solid var(--border); }
+    .slots:empty { display: none; }
+    .slot {
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+      gap: 0.6rem 1rem;
+      padding: 0.85rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .slot-info { min-width: 0; flex: 1 1 14rem; }
+    .slot-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.64rem; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--muted-2);
+    }
+    .slot-name { font-size: 0.92rem; color: var(--text); margin-top: 0.15rem; overflow-wrap: anywhere; }
+    .slot.empty .slot-name { color: var(--muted); }
+    .slot-meta { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--muted-2); margin-top: 0.25rem; }
+    .slot-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .btn-sm { padding: 0.38rem 0.8rem; font-size: 0.78rem; }
+    .btn-danger { color: var(--accent); border-color: rgba(255,59,59,0.45); }
+    .btn-danger:hover { background: rgba(255,59,59,0.08); }
+    .slot-rename { display: flex; gap: 0.4rem; margin-top: 0.4rem; max-width: 24rem; }
+    .slot-rename .field { padding: 0.4rem 0.7rem; font-size: 0.85rem; }
   </style>
 </head>
 <body>
