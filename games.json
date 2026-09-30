@@ -218,7 +218,7 @@
 {"id":"boxing-random","name":"Boxing Random","categories":["Sports"],"ranking":252,"img":"/thumbs/boxing-random.webp","src":"https://icons-6.us/driving-games/boxing-random/","site":4,"added":"2026-05-13"},
 {"id":"boxingphysics2","name":"Boxing Physics 2","categories":["Sports"],"ranking":253,"img":"/thumbs/boxingphysics2.webp","src":null,"site":4,"added":"2026-05-13"},
 {"id":"breakingthebank","name":"Breaking the Bank","categories":["Action","Adventure"],"ranking":254,"img":"/thumbs/breakingthebank.webp","src":"https://icons-6.us/strategy-games/breakingthebank/","site":4,"added":"2026-05-13"},
-{"id":"btd","name":"Bloons Tower Defense","categories":["Strategy"],"ranking":255,"img":"/games/btd/logo.webp","src":null},
+{"id":"btd","name":"Bloons Tower Defense","categories":["Strategy"],"ranking":255,"img":"/thumbs/btd.webp","src":null,"site":4,"added":"2026-05-13"},
 {"id":"btd2","name":"Bloons TD 2","categories":["Strategy"],"ranking":256,"img":"https://icons-6.us/strategy-games/bloonstd2/bloonstd2.png","src":"https://icons-6.us/strategy-games/bloonstd2/","local":true},
 {"id":"btd3","name":"Bloons TD 3","categories":["Strategy"],"ranking":257,"img":"/games/btd3/icon.png","src":null},
 {"id":"btd4","name":"Bloons TD 4","categories":["Strategy"],"ranking":258,"img":"https://icons-6.us/strategy-games/bloonstd4/logo.jpg","src":"https://icons-6.us/strategy-games/bloonstd4/","local":true},
