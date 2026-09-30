@@ -983,7 +983,7 @@
 {"id":"ragdoll-archers","name":"Ragdoll Archers","categories":["Action"],"ranking":1182,"img":"/thumbs/ragdoll-archers.webp","src":"/iframe/186.html","site":45},
 {"id":"ragdoll-hit","name":"Ragdoll Hit","categories":["Action"],"ranking":1183,"img":"https://cdn.jsdelivr.net/gh/genizy/google-class@main/ragdoll-hit/thumbnail.png","src":"/iframe/44-fix.html","site":45},
 {"id":"road-of-fury","name":"Road of Fury","categories":["Action"],"ranking":1185,"img":"/thumbs/road-of-fury.webp","src":"/iframe/42.html","site":45},
-{"id":"ruffle","name":"Ruffle","categories":["Apps","Action"],"ranking":1186,"img":"/thumbs/ruffle.webp","src":"/iframe/113.html","site":7,"added":"2026-05-13"},
+{"id":"ruffle","name":"Ruffle","categories":["Apps","Action"],"ranking":1186,"img":"/thumbs/ruffle.webp","src":"/iframe/113.html","site":45,"added":"2026-05-13"},
 {"id":"slice-it-all","name":"Slice it All","categories":["Action"],"ranking":1187,"img":"/thumbs/slice-it-all.webp","src":"/iframe/128.html"},
 {"id":"solar-smash","name":"Solar Smash","categories":["Action"],"ranking":1188,"img":"/thumbs/solar-smash.webp","src":"/iframe/118.html"},
 {"id":"soundboard","name":"Soundboard","categories":["Action"],"ranking":1189,"img":"/thumbs/soundboard.webp","src":"/iframe/179-a.html","site":7,"added":"2026-05-13"},
