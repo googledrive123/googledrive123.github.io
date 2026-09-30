@@ -135,3 +135,55 @@ $function$;
 
 revoke all on function public.gv_submission_check(text, text, text, bigint) from public, anon;
 grant execute on function public.gv_submission_check(text, text, text, bigint) to authenticated;
+
+
+-- Records a zip the player has just uploaded. The file has to be theirs and
+-- really in the bucket, and its size is read from Storage rather than taken
+-- from the page.
+create or replace function public.gv_submission_create(
+  p_title text,
+  p_link text,
+  p_notes text,
+  p_path text,
+  p_size bigint
+) returns json
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+  v_clean json;
+  v_size bigint;
+  v_row gv_submissions;
+begin
+  if v_user is null then
+    raise exception 'Sign in to send a game.';
+  end if;
+  if p_path is null or p_path not like v_user::text || '/%' then
+    raise exception 'That upload is not yours.';
+  end if;
+
+  select coalesce((o.metadata ->> 'size')::bigint, p_size) into v_size
+  from storage.objects o
+  where o.bucket_id = 'submissions' and o.name = p_path;
+  if not found then
+    raise exception 'The zip did not arrive. Try sending it again.';
+  end if;
+  if exists (select 1 from gv_submissions where path = p_path) then
+    raise exception 'That zip was already sent.';
+  end if;
+
+  v_clean := public.gv_submission_check(p_title, p_link, p_notes, v_size);
+
+  insert into gv_submissions (user_id, title, link, notes, path, size_bytes)
+  values (v_user, v_clean ->> 'title', v_clean ->> 'link', v_clean ->> 'notes', p_path, v_size)
+  returning * into v_row;
+
+  return json_build_object('id', v_row.id, 'title', v_row.title, 'status', v_row.status,
+                           'size_bytes', v_row.size_bytes, 'created_at', v_row.created_at);
+end;
+$function$;
+
+revoke all on function public.gv_submission_create(text, text, text, text, bigint) from public, anon;
+grant execute on function public.gv_submission_create(text, text, text, text, bigint) to authenticated;
