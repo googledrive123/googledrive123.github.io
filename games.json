@@ -930,7 +930,7 @@
 {"id":"attack-hole","name":"Attack Hole","categories":["Action"],"ranking":1117,"img":"/thumbs/attack-hole.webp","src":"/iframe/13.html","site":43},
 {"id":"bad-parenting-1","name":"Bad Parenting 1","categories":["Action"],"ranking":1118,"img":"/thumbs/bad-parenting-1.webp","src":"/iframe/166.html","site":43},
 {"id":"ball-blast","name":"Ball Blast","categories":["Action"],"ranking":1119,"img":"/thumbs/ball-blast.webp","src":"/iframe/149.html"},
-{"id":"bazooka-boy","name":"Bazooka Boy","categories":["Action"],"ranking":1122,"img":"/thumbs/bazooka-boy.webp","src":"/iframe/29.html"},
+{"id":"bazooka-boy","name":"Bazooka Boy","categories":["Action"],"ranking":1122,"img":"/thumbs/bazooka-boy.webp","src":"/iframe/29.html","site":43},
 {"id":"blade-ball","name":"Blade Ball","categories":["Action"],"ranking":1124,"img":"/thumbs/blade-ball.webp","src":"/iframe/167.html"},
 {"id":"block-blast","name":"Block Blast","categories":["Action"],"ranking":1125,"img":"/thumbs/block-blast.webp","src":"/iframe/6.html"},
 {"id":"bowmasters","name":"Bowmasters","categories":["Action"],"ranking":1128,"img":"/thumbs/bowmasters.webp","src":"/iframe/0.html"},
