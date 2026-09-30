@@ -4299,6 +4299,17 @@ function publicRpc(name, args) {
   }).then(r => r.ok ? r.json() : Promise.reject(new Error(name + ' ' + r.status)));
 }
 
+// The games most people opened this week, best first. Filled after the
+// catalog loads; empty (and the row hidden) if the count cannot be read.
+let popular = [];
+const POPULAR_ROW = 20;
+function loadPopular() {
+  publicRpc('gv_popular', { p_days: 7, p_limit: 50 }).then(list => {
+    popular = list.map(x => x.id).filter(id => gamesById[id] && !gamesById[id].hidden);
+    render();
+  }).catch(() => {});
+}
+
 // ───── Boot ─────
 // Nothing on screen needs the catalog until this resolves, so the shell paints
 // first and the grid fills in behind it.
@@ -4324,6 +4335,7 @@ async function bootCatalog() {
   render();
   initRoute();
   initPolytrackNotice();
+  loadPopular();
 }
 // ───── PolyTrack update notice ─────
 // Appears once for people who have played PolyTrack here before, pointing them
