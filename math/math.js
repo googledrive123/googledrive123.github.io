@@ -112,4 +112,26 @@
     });
     return out || '0';
   }
+
+  // ── Question shapes ─────────────────────────────────────────────────────
+
+  /* A typed answer. ans is the exact value, show is how the answer is written
+     back, and opt can carry a unit ('%', 'π', '$', '°', 'cm²'…) or noFrac for
+     "write it as a decimal" questions. */
+  function num(ask, expr, ans, show, why, opt) {
+    var q = { type: 'num', ask: ask, expr: expr, ans: ans, show: show, why: why };
+    for (var k in opt) q[k] = opt[k];
+    return q;
+  }
+  // Multiple choice. Duplicates are dropped, so wrongs can over-supply.
+  function choice(ask, expr, right, wrongs, why) {
+    var list = [right];
+    wrongs.forEach(function (w) { if (list.length < 4 && list.indexOf(w) < 0) list.push(w); });
+    shuffle(list);
+    return { type: 'mc', ask: ask, expr: expr, choices: list, answer: list.indexOf(right), show: right, why: why };
+  }
+  // Multiple choice whose options read in a fixed order, like None, One, Two.
+  function fixed(ask, expr, options, answer, why) {
+    return { type: 'mc', ask: ask, expr: expr, choices: options, answer: answer, show: options[answer], why: why };
+  }
 })();
