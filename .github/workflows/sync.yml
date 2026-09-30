@@ -2,8 +2,8 @@
 #
 # Meant for forks. Each backup address listed on /mirrors/ is a fork of this
 # repo (renamed to <user>.github.io) plus a fork of every vaultN repo. Once a
-# day this brings in everything new from the googledrive123 original. It
-# does nothing in the originals themselves.
+# day this brings in everything new from the googledrive123 original, then
+# asks GitHub Pages to rebuild. It does nothing in the originals themselves.
 # Setting one up: mirrors/SETUP.md.
 name: Sync from GameVault
 
@@ -14,6 +14,7 @@ on:
 
 permissions:
   contents: write
+  pages: write
 
 jobs:
   sync:
@@ -34,3 +35,10 @@ jobs:
           echo "$result"
           echo "type=$(jq -r .merge_type <<< "$result")" >> "$GITHUB_OUTPUT"
 
+      # A branch updated from Actions does not reliably start a Pages build,
+      # so one is asked for: whenever something came in, and on a manual run.
+      - name: Rebuild Pages
+        if: steps.merge.outputs.type != 'none' || github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X POST "repos/$GITHUB_REPOSITORY/pages/builds"
