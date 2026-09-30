@@ -592,5 +592,81 @@
           'Take off the fee: ' + total + ' − ' + fee + ' = ' + (total - fee) + ', then ' + (total - fee) + ' ÷ ' + cost + ' = ' + n + ' tickets.');
       }
     ],
+    hard: [
+      function () {
+        var x = ri(-6, 9), y = ri(-6, 9);
+        if (coin()) {
+          return num('Solve the pair of equations. What is x?', lines('x + y = ' + s(x + y), 'x − y = ' + s(x - y)), x, s(x),
+            'Add the equations to cancel y: 2x = ' + s(2 * x) + ', so x = ' + s(x) + ' (and y = ' + s(y) + ').');
+        }
+        var m, a; do { m = nz(-4, 4); a = ri(1, 5); } while (a + m === 0);
+        var b = y - m * x, c = a * x + y;
+        return num('Solve the pair of equations. What is x?', lines('y = ' + poly([m, b]), poly([a, 0]) + ' + y = ' + s(c)), x, s(x),
+          'Put the first into the second: ' + poly([a + m, b]) + ' = ' + s(c) + ', so x = ' + s(x) + ' (and y = ' + s(y) + ').');
+      },
+      function () {
+        var r1, r2; do { r1 = nz(-9, 9); r2 = nz(-9, 9); } while (r1 === r2 || r1 === -r2);
+        return choice('Solve.', poly([1, -(r1 + r2), r1 * r2]) + ' = 0', either(r1, r2),
+          [either(-r1, -r2), either(r1, -r2), either(-r1, r2)],
+          'It factors as (' + poly([1, -r1]) + ')(' + poly([1, -r2]) + ') = 0, and a product is zero only when one of its parts is.');
+      },
+      function () {
+        var a, b; do { a = nz(-9, 9); b = nz(-9, 9); } while (a === b || a === -b);
+        function pair(u, v) { return '(' + poly([1, u]) + ')(' + poly([1, v]) + ')'; }
+        return choice('Factor.', poly([1, a + b, a * b]), pair(a, b), [pair(-a, -b), pair(a, -b), pair(-a, b)],
+          'Find two numbers that multiply to ' + s(a * b) + ' and add to ' + s(a + b) + ': ' + s(a) + ' and ' + s(b) + '.');
+      },
+      function () {
+        var a, b; do { a = nz(-9, 9); b = nz(-9, 9); } while (a + b === 0);
+        return choice('Expand.', '(' + poly([1, a]) + ')(' + poly([1, b]) + ')', poly([1, a + b, a * b]),
+          [poly([1, a * b, a + b]), poly([1, 0, a * b]), poly([1, a + b, -a * b]), poly([1, -(a + b), a * b])],
+          'Multiply every term by every term: x² + ' + s(a) + 'x + ' + p(b) + 'x + ' + p(a) + ' × ' + p(b) + ' = ' +
+          poly([1, a + b, a * b]) + '.');
+      },
+      function () {
+        var a = ri(2, 9), b = ri(2, 9);
+        function pw(e) { return e === 1 ? 'x' : sup('x', e); }
+        if (coin()) {
+          var c = ri(1, a + b - 1), e = a + b - c;
+          return choice('Simplify.', fr(pw(a) + ' · ' + pw(b), pw(c)), pw(e),
+            [a * b - c, a + b + c, a + b, a * b].filter(function (k) { return k > 0 && k !== e; }).map(pw),
+            'Add powers when multiplying and subtract when dividing: ' + a + ' + ' + b + ' − ' + c + ' = ' + e + '.');
+        }
+        return choice('Simplify.', '(' + pw(a) + ')<sup>' + b + '</sup>', pw(a * b),
+          [a + b, a * b + 1, Math.pow(a, b) <= 99 ? Math.pow(a, b) : a * b - 1, a * b - 1].filter(function (k) { return k !== a * b; }).map(pw),
+          'A power of a power multiplies: ' + a + ' × ' + b + ' = ' + a * b + '.');
+      },
+      function () {
+        var a = nz(-9, 9), b = ri(1, 12);
+        return choice('Solve.', '|' + poly([1, -a]) + '| = ' + b, either(a - b, a + b),
+          [either(-a - b, b - a), 'x = ' + s(a + b), either(b, -b)],
+          'Either ' + poly([1, -a]) + ' = ' + b + ' or ' + poly([1, -a]) + ' = −' + b + ', so x = ' + s(a + b) + ' or x = ' + s(a - b) + '.');
+      },
+      function () {
+        var kind = ri(0, 2), a = ri(1, 3), b, c, d;
+        if (kind === 0) {
+          do { b = nz(-9, 9); c = nz(-9, 9); d = b * b - 4 * a * c; } while (d <= 0);
+        } else if (kind === 1) {
+          var r = nz(-5, 5); b = -2 * a * r; c = a * r * r; d = 0;
+        } else {
+          do { b = ri(-6, 6); c = ri(1, 12); d = b * b - 4 * a * c; } while (d >= 0);
+        }
+        return fixed('How many real solutions does this have?', poly([a, b, c]) + ' = 0', ['None', 'One', 'Two'], [2, 1, 0][kind],
+          'b² − 4ac = ' + sup(p(b), 2) + ' − 4 × ' + a + ' × ' + p(c) + ' = ' + s(d) + ', which is ' +
+          (d > 0 ? 'positive, so two.' : d === 0 ? 'zero, so one.' : 'negative, so none.'));
+      },
+      function () {
+        var f = pick([
+          { eq: 'A = lw', of: 'w', right: fr('A', 'l'), wrongs: [fr('l', 'A'), 'A − l', 'Al'], why: 'Divide both sides by l.' },
+          { eq: 'P = 2l + 2w', of: 'l', right: fr('P − 2w', '2'), wrongs: [fr('P + 2w', '2'), 'P − 2w', fr('P', '2') + ' − 2w'], why: 'Subtract 2w, then divide by 2.' },
+          { eq: 'y = mx + b', of: 'x', right: fr('y − b', 'm'), wrongs: [fr('y + b', 'm'), fr('y', 'm') + ' − b', 'm(y − b)'], why: 'Subtract b, then divide by m.' },
+          { eq: 'C = 2πr', of: 'r', right: fr('C', '2π'), wrongs: [fr('2π', 'C'), 'C − 2π', '2πC'], why: 'Divide both sides by 2π.' },
+          { eq: 'd = rt', of: 't', right: fr('d', 'r'), wrongs: [fr('r', 'd'), 'dr', 'd − r'], why: 'Divide both sides by r.' },
+          { eq: 'V = lwh', of: 'h', right: fr('V', 'lw'), wrongs: [fr('lw', 'V'), 'V − lw', 'Vlw'], why: 'Divide both sides by lw.' }
+        ]);
+        return choice('Solve for ' + f.of + '.', f.eq, f.of + ' = ' + f.right,
+          f.wrongs.map(function (w) { return f.of + ' = ' + w; }), f.why);
+      }
+    ]
   };
 })();
