@@ -108,3 +108,24 @@ begin
   return row_to_json(v_row);
 end;
 $function$;
+
+create or replace function public.gv_mirror_remove(p_secret text, p_origin text)
+returns boolean
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_origin text := regexp_replace(lower(btrim(coalesce(p_origin, ''))), '/+$', '');
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+
+  if v_origin !~ '^[a-z]+://' then
+    v_origin := 'https://' || v_origin;
+  end if;
+  delete from gv_mirrors where origin = v_origin;
+  return found;
+end;
+$function$;
