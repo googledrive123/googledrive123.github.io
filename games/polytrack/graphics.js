@@ -252,9 +252,17 @@
 
   // True when the picture settings changed, which only a restart shows.
   function maxPerformance() {
+    var undo = {};
     var fps = maxFrameRate();
-    if (fps === 0 || fps > 60) setMaxFrameRate(60);
-    if (!autoOn()) setAuto(true);
+    if (fps === 0 || fps > 60) {
+      undo.maxFps = fps;
+      setMaxFrameRate(60);
+    }
+    if (!autoOn()) {
+      undo.auto = false;
+      setAuto(true);
+    }
+    try { localStorage.setItem(UNDO_KEY, JSON.stringify(undo)); } catch (e) {}
     if (presetSaved(LIGHTEST)) return false;
     writePreset(LIGHTEST);
     return true;
