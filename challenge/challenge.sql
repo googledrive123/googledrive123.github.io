@@ -709,3 +709,13 @@ insert into public.gv_challenges (month, track_id, title) values
   ('2026-09-01', '5803f9e963625804e3de3246d043dc7dde847aa32e991f7f7326b0453f1fa038', 'Summer 1'),
   ('2026-10-01', '148826aa16ffaa23dbc453b32cff05e025ddbce1773fc7733cc13d218926515a', 'Summer 3')
 on conflict (month) do nothing;
+
+insert into public.gv_challenge_runs (month, track_id, player_key, nickname, user_id, frames, at)
+select c.month, s.track_id, s.player_key, s.nickname, s.user_id, s.frames, s.updated_at
+from public.gv_challenges c
+join public.polytrack_scores s
+  on s.track_id = c.track_id
+ and s.updated_at >= c.month::timestamp at time zone 'utc'
+ and s.updated_at < (c.month + interval '1 month') at time zone 'utc'
+where c.month = '2026-09-01'
+on conflict (month, player_key) do nothing;
