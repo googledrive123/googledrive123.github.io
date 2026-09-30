@@ -221,6 +221,10 @@
 
   var SUPA_URL = 'https://dxwjxzmlezfyursysays.supabase.co';
   var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
+  // Where supabase-js keeps the session the home page signed in with.
+  var TOKEN_KEY = 'sb-dxwjxzmlezfyursysays-auth-token';
+  // Often enough that the entry count moves while the page is open.
+  var REFRESH_MS = 60 * 1000;
   var LABELS = { open: 'Open now', closed: 'Entries closed', drawn: 'Winner drawn' };
 
   function $(id) { return document.getElementById(id); }
@@ -410,6 +414,15 @@
     });
   }
 
+  // Signing in or out on the home page in another tab shows here too.
+  window.addEventListener('storage', function (e) {
+    if (e.key === TOKEN_KEY) location.reload();
+  });
+
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden && sb) load();
+  });
+
   document.addEventListener('DOMContentLoaded', function () {
     if (!window.supabase) {
       $('gwState').textContent = 'Offline';
@@ -425,6 +438,7 @@
       load();
     });
     setInterval(paintClock, 1000);
+    setInterval(function () { if (!document.hidden) load(); }, REFRESH_MS);
   });
 })();
 </script>
