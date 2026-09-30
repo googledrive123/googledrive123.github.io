@@ -335,9 +335,12 @@
       return;
     }
     var wait = /wait=(\d+)/.exec(err.hint || '');
+    var until = /until=(\S+)/.exec(err.hint || '');
     if (wait) {
       say(err.message, 'wait');
       cooldown(Number(wait[1]));
+    } else if (until) {
+      say(err.message + ' Try again after ' + when(until[1]) + '.', 'error');
     } else {
       say(err.message, 'error');
     }
