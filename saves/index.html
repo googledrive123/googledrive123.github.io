@@ -326,6 +326,30 @@ document.addEventListener('DOMContentLoaded', function () {
       return list;
     });
   }
+
+  function saveTo(slot, wrap) {
+    var row = rows[slot];
+    var go = row ? ask(wrap, {
+      title: 'Save over ' + slotLabel(slot) + '?',
+      body: 'The save from ' + when(row.updated_at) + ' is replaced with the progress in this browser.',
+      yes: 'Save over it'
+    }) : Promise.resolve(true);
+
+    go.then(function (ok) {
+      if (!ok) return;
+      setBusy(true);
+      note(cloudNote, 'Packing and sending your save…');
+      return saves.cloudSave(slot).then(function (saved) {
+        rows[slot] = saved;
+        note(cloudNote, 'Saved to slot ' + slot + ', ' + size(saved.size_bytes) + '.', 'good');
+      }, function (err) {
+        note(cloudNote, message(err), 'bad');
+      }).then(function () {
+        setBusy(false);
+        render();
+      });
+    });
+  }
 });
 </script>
 </main>
