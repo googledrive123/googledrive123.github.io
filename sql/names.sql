@@ -42,3 +42,35 @@ end;
 $function$;
 
 grant execute on function public.gv_name_ok(text) to anon, authenticated;
+
+
+-- New profiles: swap a rude name for a neutral one rather than fail sign-up.
+-- Renames: refuse. Only fires when the name actually changes, so saving
+-- anything else on an old profile never trips it.
+create or replace function public.gv_profiles_name_guard()
+returns trigger
+language plpgsql
+set search_path to 'public'
+as $function$
+begin
+  if public.gv_name_rude(new.username) then
+    if tg_op = 'INSERT' then
+      new.username := 'player-' || left(replace(new.id::text, '-', ''), 8);
+    else
+      raise exception 'That username is not allowed. Try another.';
+    end if;
+  end if;
+  return new;
+end;
+$function$;
+
+drop trigger if exists gv_profiles_name_guard_ins on public.profiles;
+create trigger gv_profiles_name_guard_ins
+  before insert on public.profiles
+  for each row execute function public.gv_profiles_name_guard();
+
+drop trigger if exists gv_profiles_name_guard_upd on public.profiles;
+create trigger gv_profiles_name_guard_upd
+  before update of username on public.profiles
+  for each row when (old.username is distinct from new.username)
+  execute function public.gv_profiles_name_guard();
