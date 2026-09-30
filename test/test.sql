@@ -145,3 +145,32 @@ $function$;
 
 revoke all on function public.gv_test_my_reports() from public, anon;
 grant execute on function public.gv_test_my_reports() to authenticated;
+
+
+-- Owner only, behind the dashboard secret: every tester with how much they
+-- have reported, newest tester first.
+create or replace function public.gv_testers_list(p_secret text)
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+
+  return coalesce((
+    select json_agg(json_build_object(
+             'user_id', t.user_id,
+             'username', coalesce(nullif(btrim(p.username), ''), 'Account ' || left(t.user_id::text, 8)),
+             'added_at', t.added_at,
+             'reports', (select count(*) from gv_game_reports r where r.user_id = t.user_id),
+             'last_report_at', (select max(created_at) from gv_game_reports r where r.user_id = t.user_id)
+           ) order by t.added_at desc)
+    from gv_testers t
+    left join profiles p on p.id = t.user_id
+  ), '[]'::json);
+end;
+$function$;
