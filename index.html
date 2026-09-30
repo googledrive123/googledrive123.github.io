@@ -80,6 +80,18 @@
       overflow-x: hidden;
     }
 
+    /* Light theme: the glow and scanline layers are made for a dark page. */
+    :root[data-theme="light"] .scanlines,
+    :root[data-theme="light"] .streams,
+    :root[data-theme="light"] .orb,
+    :root[data-theme="light"] .bg::after { display: none; }
+    :root[data-theme="light"] .cat-pill.active .count,
+    :root[data-theme="light"] .cat-pill.active .cat-pin { color: rgba(255,255,255,0.6); }
+    /* A tile's name sits on a dark shade over its picture in either theme. */
+    :root[data-theme="light"] .tile:has(.tile-thumb) .tile-name,
+    :root[data-theme="light"] .tile:has(.tile-thumb) .tile-cat,
+    :root[data-theme="light"] .tile:has(.tile-thumb) .tile-play { color: #fff; }
+
     /* ───────────── BACKGROUND ───────────── */
     .bg {
       position: fixed; inset: 0; z-index: -3;
