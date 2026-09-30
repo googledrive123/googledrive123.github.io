@@ -2,8 +2,8 @@
    secret corner that opens /secret/.
    Runs on the home page and on every subpage, so it looks for what is there
    (the game grid, the game overlay, a header) and skips what is not. Outside
-   April 1 and late October it adds one invisible link and nothing else: no
-   listeners, no timers, no styles.
+   April 1 and late October it adds one invisible link and nothing that runs
+   on its own: no timers, no observers, no styles.
    Public surface: window.GV.fun. */
 (function () {
   'use strict';
@@ -93,6 +93,23 @@
     flag(undo, 'gv-fun-halloween');
   }
 
+  // ── Secret corner ───────────────────────────────────────────────────────
+  // Out of the tab order on purpose: it is there to be found by poking about.
+  // Under the game overlay, so a click in a game's corner stays in the game.
+
+  function secretCorner() {
+    if (!document.body || document.querySelector('.gv-fun-secret')) return;
+    var a = document.createElement('a');
+    a.className = 'gv-fun-secret';
+    a.href = '/secret/';
+    a.tabIndex = -1;
+    a.setAttribute('aria-label', 'Secret');
+    // Inline, so an ordinary day needs no stylesheet at all.
+    a.style.cssText = 'position:fixed;top:0;right:0;width:14px;height:14px;' +
+      'z-index:460;display:block;background:transparent;outline:none';
+    document.body.appendChild(a);
+  }
+
   // ── Switches ────────────────────────────────────────────────────────────
 
   function pranksOn() { return read(PRANKS_KEY) !== 'off'; }
@@ -121,6 +138,7 @@
   }
 
   function boot() {
+    secretCorner();
     apply();
     // Switches flipped in another tab, the secret menu say, land here too.
     window.addEventListener('storage', function (e) {
