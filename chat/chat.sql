@@ -45,3 +45,11 @@ create table if not exists public.gv_chat_reports (
   -- One report per person per message, so a crowd of reports means a crowd.
   unique (message_id, reporter)
 );
+
+-- Everything goes through the functions below, so there is no policy to
+-- write and a direct PostgREST request reads and writes nothing.
+alter table public.gv_chat_messages enable row level security;
+alter table public.gv_chat_bans enable row level security;
+alter table public.gv_chat_reports enable row level security;
+revoke all on table public.gv_chat_messages, public.gv_chat_bans, public.gv_chat_reports
+  from anon, authenticated;
