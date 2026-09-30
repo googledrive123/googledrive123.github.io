@@ -230,6 +230,9 @@
 
   var sb = null;
   var data = null;
+  // Server time minus this device's time, so a wrong clock on a school laptop
+  // does not move the countdown.
+  var skew = 0;
   var loading = false;
 
   function say(text, bad) {
@@ -246,6 +249,26 @@
 
   function plural(n, one, many) {
     return n.toLocaleString() + ' ' + (n === 1 ? one : many);
+  }
+
+  function two(n) { return n < 10 ? '0' + n : String(n); }
+
+  function msLeft(g) {
+    return Date.parse(g.ends_at) - (Date.now() + skew);
+  }
+
+  function paintClock() {
+    var g = data && data.giveaway;
+    if (!g || g.status !== 'open') return;
+    var left = Math.max(0, msLeft(g));
+    var s = Math.floor(left / 1000);
+    $('gwD').textContent = Math.floor(s / 86400);
+    $('gwH').textContent = two(Math.floor(s / 3600) % 24);
+    $('gwM').textContent = two(Math.floor(s / 60) % 60);
+    $('gwS').textContent = two(s % 60);
+    // Ask the server once the clock runs out rather than guessing: it may
+    // already have been drawn.
+    if (left <= 0) load();
   }
 
   function paintEmpty() {
@@ -285,6 +308,8 @@
     else if (drawn) meta.textContent = 'Drawn ' + when(g.drawn_at) + ' from ' + entries;
     else if (!g.entries) meta.textContent = 'Closed ' + when(g.ends_at) + ' with no entries.';
     else meta.textContent = 'Closed ' + when(g.ends_at) + ' with ' + entries + '. The winner is drawn soon.';
+
+    paintClock();
   }
 
   // The latest winner, when it is not already the giveaway on the card.
@@ -313,6 +338,7 @@
     sb.rpc('gv_giveaway_current').then(function (r) {
       loading = false;
       if (r.error) throw r.error;
+      skew = Date.parse(r.data.now) - Date.now();
       data = r.data;
       paint();
     }).catch(function (err) {
@@ -339,6 +365,7 @@
     sb.auth.getSession().then(function (r) {
       load();
     });
+    setInterval(paintClock, 1000);
   });
 })();
 </script>
