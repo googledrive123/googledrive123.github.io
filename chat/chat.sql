@@ -332,3 +332,26 @@ begin
   );
 end;
 $function$;
+
+
+-- Takes a message down for everyone. Its open reports are done with too.
+create or replace function public.gv_chat_delete(p_secret text, p_message_id bigint)
+returns boolean
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+
+  update gv_chat_messages set deleted = true where id = p_message_id;
+  if not found then
+    return false;
+  end if;
+  update gv_chat_reports set resolved = true
+   where message_id = p_message_id and not resolved;
+  return true;
+end;
+$function$;
