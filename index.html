@@ -3134,6 +3134,11 @@ function sortGames(arr) {
   if (sortMode === 'popular') {
     return arr.slice().sort((a, b) => a.ranking - b.ranking);
   }
+  if (sortMode === 'newest') {
+    // Games with no date are the oldest. A batch added on one day goes A to Z.
+    return arr.slice().sort((a, b) =>
+      (b.added || '').localeCompare(a.added || '') || a.name.localeCompare(b.name));
+  }
   if (sortMode === 'alpha') {
     return arr.slice().sort((a, b) => a.name.localeCompare(b.name));
   }
