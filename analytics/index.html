@@ -964,6 +964,35 @@
     if (call) call.then(loadChat).catch(function (err) { $('chatMsg').textContent = 'Could not do that: ' + err.message; });
   }
 
+  // ── pictures ──
+  // Only data:image URLs come back from the database (sql/avatars.sql checks
+  // them), so they can go straight into an <img>.
+  function avImg(src) { return /^data:image\/(webp|png|jpeg);base64,/.test(src || '') ? '<img class="av-img" alt="" src="' + src + '">' : ''; }
+  function loadAvatars() {
+    return Promise.all([
+      rpc('gv_avatar_queue', { p_secret: state.secret }),
+      rpc('gv_avatar_queue', { p_secret: state.secret, p_status: 'approved' })
+    ]).then(function (r) {
+      var q = r[0] || [], on = r[1] || [];
+      $('avQueue').innerHTML = q.length ? q.map(function (a) {
+        return '<div class="bc-item">' + avImg(a.upload) + '<span class="msg"><b>' + esc(a.username) + '</b></span>'
+          + '<button class="btn" type="button" data-av="' + esc(a.user_id) + '" data-at="' + esc(a.uploaded_at) + '" data-ok="1">Approve</button>'
+          + '<button class="btn" type="button" data-av="' + esc(a.user_id) + '" data-at="' + esc(a.uploaded_at) + '" data-ok="">Turn down</button></div>';
+      }).join('') : '<div class="empty">Nothing waiting.</div>';
+      $('avShowing').innerHTML = on.length ? on.map(function (a) {
+        return '<div class="bc-item">' + avImg(a.upload || a.approved) + '<span class="msg"><b>' + esc(a.username) + '</b></span>'
+          + '<button class="btn" type="button" data-avdown="' + esc(a.user_id) + '">Take down</button></div>';
+      }).join('') : '<div class="empty">No uploaded pictures showing.</div>';
+    }).catch(function (e) { $('avMsg').textContent = 'Could not load pictures: ' + e.message; });
+  }
+  function avAction(e) {
+    var b = e.target.closest('button'); if (!b) return;
+    var call = b.dataset.avdown
+      ? rpc('gv_avatar_remove', { p_secret: state.secret, p_user_id: b.dataset.avdown })
+      : rpc('gv_avatar_review', { p_secret: state.secret, p_user_id: b.dataset.av, p_approve: !!b.dataset.ok, p_uploaded_at: b.dataset.at });
+    call.then(loadAvatars).catch(function (err) { $('avMsg').textContent = 'Could not do that: ' + err.message; });
+  }
+
   function loadPeople() {
     return rpc('gv_verify_candidates', { p_secret: state.secret }).then(function (list) {
       people = Array.isArray(list) ? list : [];
@@ -1187,7 +1216,7 @@
   }
 
   // ── auth / wiring ──
-  function showDash() { $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); load(); loadPeople(); loadBroadcasts(); loadLinks(); loadChat(); setTimer(); }
+  function showDash() { $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); load(); loadPeople(); loadBroadcasts(); loadLinks(); loadChat(); loadAvatars(); setTimer(); }
   function setTimer() { clearInterval(state.timer); if ($('autoRefresh').checked) state.timer = setInterval(load, 60000); }
   function tryLogin(secret, remember) {
     $('loginErr').textContent = '';
@@ -1222,6 +1251,8 @@
     rpc('gv_link_reports_fix', { p_secret: state.secret, p_path: b.dataset.fix }).then(loadLinks);
   });
   ['chatReports', 'chatBans', 'chatRecent'].forEach(function (id) { $(id).addEventListener('click', chatAction); });
+  $('avQueue').addEventListener('click', avAction);
+  $('avShowing').addEventListener('click', avAction);
   $('bcSend').addEventListener('click', sendBroadcast);
   $('bcList').addEventListener('click', function (e) { var b = e.target.closest('button[data-stop]'); if (b) stopBroadcast(+b.dataset.stop); });
   $('exportBtn').addEventListener('click', exportCSV);
