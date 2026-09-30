@@ -373,4 +373,36 @@
       restoreLocal(data.localStorage);
     });
   }
+
+  function parse(text) {
+    var data = null;
+    try { data = JSON.parse(text); } catch (e) {}
+    if (!isSave(data)) throw new Error('That is not a GameVault save file.');
+    return data;
+  }
+
+  function readFile(file) {
+    return new Response(file).text().then(parse);
+  }
+
+  function today() {
+    var d = new Date();
+    function two(n) { return (n < 10 ? '0' : '') + n; }
+    return d.getFullYear() + '-' + two(d.getMonth() + 1) + '-' + two(d.getDate());
+  }
+
+  function download() {
+    return collect().then(function (data) {
+      var blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'gamevault-save-' + today() + '.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 30000);
+      return blob.size;
+    });
+  }
 })();
