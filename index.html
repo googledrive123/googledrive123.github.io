@@ -4851,8 +4851,9 @@ sb.auth.getSession().then(({ data: { session } }) => {
   setCurrentUser(session?.user ?? null);
   updateUserUI();
   if (currentUser) loadUsername();
-  // The level next to the name comes from the same numbers as the stats.
-  if (currentUser) renderStats(); else renderLocalStats();
+  // The level next to the name comes from the same numbers as the stats. An
+  // account's is worked out when setCurrentUser sees it arrive.
+  if (!currentUser) renderLocalStats();
 });
 
 // /?profile (the Settings page links here) opens the profile straight away.
