@@ -428,3 +428,27 @@ $function$;
 
 revoke all on function public.gv_equip(text) from public, anon;
 grant execute on function public.gv_equip(text) to authenticated;
+
+create or replace function public.gv_unequip(p_kind text)
+returns json
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+begin
+  if v_user is null then
+    raise exception 'sign in first';
+  end if;
+  if not public.gv_origin_allowed() then
+    raise exception 'not from this origin';
+  end if;
+
+  delete from gv_equipped where user_id = v_user and kind = p_kind;
+  return public.gv_wallet_json(v_user);
+end;
+$function$;
+
+revoke all on function public.gv_unequip(text) from public, anon;
+grant execute on function public.gv_unequip(text) to authenticated;
