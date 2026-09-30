@@ -1082,7 +1082,7 @@
         body: JSON.stringify({ secret: state.secret, id: +b.dataset.get })
       }).then(function (r) { return r.json(); }).then(function (d) {
         if (d.url) location.href = d.url; else $('testMsg').textContent = 'Could not get the file: ' + (d.error || 'unknown');
-      });
+      }).catch(function (err) { $('testMsg').textContent = 'Could not get the file: ' + err.message; });
       return;
     }
     if (call) call.then(loadTesting).catch(function (err) { $('testMsg').textContent = 'Could not do that: ' + err.message; });
@@ -1379,7 +1379,8 @@
   $('verifyBtn').addEventListener('click', function () { var p = picked(); if (p) setVerified(p, !p.verified); });
   $('linkList').addEventListener('click', function (e) {
     var b = e.target.closest('button[data-fix]'); if (!b) return;
-    rpc('gv_link_reports_fix', { p_secret: state.secret, p_path: b.dataset.fix }).then(loadLinks);
+    rpc('gv_link_reports_fix', { p_secret: state.secret, p_path: b.dataset.fix }).then(loadLinks)
+      .catch(function (err) { $('linkMsg').textContent = 'Could not do that: ' + err.message; });
   });
   ['chatReports', 'chatBans', 'chatRecent'].forEach(function (id) { $(id).addEventListener('click', chatAction); });
   ['testerList', 'testReports', 'subList'].forEach(function (id) { $(id).addEventListener('click', testAction); });
@@ -1398,7 +1399,8 @@
   });
   $('mirrorList').addEventListener('click', function (e) {
     var b = e.target.closest('button[data-unmirror]'); if (!b) return;
-    rpc('gv_mirror_remove', { p_secret: state.secret, p_origin: b.dataset.unmirror }).then(loadMirrors);
+    rpc('gv_mirror_remove', { p_secret: state.secret, p_origin: b.dataset.unmirror }).then(loadMirrors)
+      .catch(function (err) { $('mirrorMsg').textContent = 'Could not remove it: ' + err.message; });
   });
   $('mirrorAdd').addEventListener('click', function () {
     rpc('gv_mirror_add', { p_secret: state.secret, p_origin: $('mirrorOrigin').value.trim(), p_label: $('mirrorLabel').value.trim() || null })
