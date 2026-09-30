@@ -1357,5 +1357,6 @@
 {"id":"super-mario-flash-2","name":"Super Mario Flash 2","categories":["Platformer"],"img":"/thumbs/super-mario-flash-2.webp","src":null,"site":8,"path":"flash/?swf=supermarioflash2.swf","added":"2026-09-30","ranking":1510},
 {"id":"tactical-assassin","name":"Tactical Assassin","categories":["Shooter"],"img":"/thumbs/tactical-assassin.webp","src":null,"site":8,"path":"flash/?swf=tacticalassassin.swf","added":"2026-09-30","ranking":1511},
 {"id":"tanks","name":"Tanks","categories":["Shooter"],"img":"/thumbs/tanks.webp","src":null,"site":8,"path":"flash/?swf=tanks.swf","added":"2026-09-30","ranking":1512},
-{"id":"the-game","name":"The Game","categories":["Arcade"],"img":"/thumbs/the-game.webp","src":null,"site":8,"path":"flash/?swf=thegame.swf","added":"2026-09-30","ranking":1513}
+{"id":"the-game","name":"The Game","categories":["Arcade"],"img":"/thumbs/the-game.webp","src":null,"site":8,"path":"flash/?swf=thegame.swf","added":"2026-09-30","ranking":1513},
+{"id":"the-impossible-quiz-2","name":"The Impossible Quiz 2","categories":["Puzzle"],"img":"/thumbs/the-impossible-quiz-2.webp","src":null,"site":8,"path":"flash/?swf=theimpossiblequiz2.swf","added":"2026-09-30","ranking":1514}
 ]}
