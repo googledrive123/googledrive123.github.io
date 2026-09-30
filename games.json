@@ -812,7 +812,7 @@
 {"id":"sonicexe-original","name":"Sonic.exe (Original)","categories":["Horror"],"ranking":991,"img":"https://cdn.jsdelivr.net/gh/genizy/web-port@latest/sonic.exe/runner.svg","src":null,"site":38},
 {"id":"space-funeral","name":"Space Funeral","categories":["RPG"],"ranking":992,"img":"https://upload.wikimedia.org/wikipedia/en/thumb/9/9c/Space_Funeral_game_title_screen.png/330px-Space_Funeral_game_title_screen.png","src":"https://genizymath.github.io/iframe/630.html","site":38},
 {"id":"spacebar-clicker","name":"Spacebar Clicker","categories":["Idle"],"ranking":993,"img":"/thumbs/spacebar-clicker.webp","src":"https://icons-6.us/casual-games/space-bar-clicker/"},
-{"id":"spaceflight-simulator","name":"Spaceflight Simulator","categories":["Simulation"],"ranking":994,"img":"/thumbs/spaceflight-simulator.webp","src":"https://genizymath.github.io/iframe/808.html"},
+{"id":"spaceflight-simulator","name":"Spaceflight Simulator","categories":["Simulation"],"ranking":994,"img":"/thumbs/spaceflight-simulator.webp","src":"https://genizymath.github.io/iframe/808.html","site":38},
 {"id":"spiderdoll","name":"Spiderdoll","categories":["Action"],"ranking":996,"img":"/thumbs/spiderdoll.webp","src":"https://genizymath.github.io/iframe/347.html"},
 {"id":"spiral-roll","name":"Spiral Roll","categories":["Arcade"],"ranking":997,"img":"/thumbs/spiral-roll.webp","src":"https://genizymath.github.io/iframe/349.html"},
 {"id":"split","name":"Split","categories":["Action"],"ranking":998,"img":"/thumbs/split.webp","src":"https://genizymath.github.io/iframe/839.html"},
