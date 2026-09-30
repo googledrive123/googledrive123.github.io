@@ -594,4 +594,41 @@
       return saved;
     });
   }
+
+  /* The account's auto slot, if this browser has never auto-saved or loaded
+     one: /saves/ asks whether to load it. Turning the offer down counts that
+     copy as this browser's last auto-save, so the next one replaces it a day
+     after it was made. */
+  function autoOffer() {
+    if (autoAt()) return Promise.resolve(null);
+    return cloudList().then(function (rows) {
+      return rows.filter(function (r) { return r.slot === 'auto'; })[0] || null;
+    });
+  }
+
+  function dismissAutoOffer(row) {
+    write(AUTO_AT_KEY, (row && row.updated_at) || new Date().toISOString());
+  }
+
+  window.GV = window.GV || {};
+  window.GV.saves = {
+    MAX_BYTES: MAX_BYTES,
+    collect: collect,
+    restore: restore,
+    download: download,
+    readFile: readFile,
+    useClient: useClient,
+    cloudUser: cloudUser,
+    cloudList: cloudList,
+    cloudSave: cloudSave,
+    cloudLoad: cloudLoad,
+    cloudRename: cloudRename,
+    cloudDelete: cloudDelete,
+    autoOn: autoOn,
+    setAuto: setAuto,
+    autoAt: autoAt,
+    autoSaveIfDue: autoSaveIfDue,
+    autoOffer: autoOffer,
+    dismissAutoOffer: dismissAutoOffer
+  };
 })();
