@@ -148,3 +148,38 @@ set search_path to 'public'
 as $function$
   select 120;
 $function$;
+
+
+-- What the shop shows for one account: coins, today's progress, every item
+-- owned and what is worn. Only ever called by the functions below with the
+-- caller's own id, so it is not granted to anyone.
+create or replace function public.gv_wallet_json(p_user uuid)
+returns json
+language sql
+stable
+set search_path to 'public'
+as $function$
+  select json_build_object(
+    'coins', coalesce(w.coins, 0),
+    'earned_today', case when w.day = (now() at time zone 'utc')::date then w.earned_today else 0 end,
+    'daily_cap', public.gv_coins_per_day(),
+    'inventory', coalesce((
+      select json_agg(json_build_object(
+               'id', i.id, 'kind', i.kind, 'name', i.name,
+               'rarity', i.rarity, 'value', i.value, 'qty', v.qty
+             ) order by i.kind, i.name)
+      from gv_inventory v
+      join gv_items i on i.id = v.item_id
+      where v.user_id = p_user
+    ), '[]'::json),
+    'equipped', coalesce((
+      select json_object_agg(e.kind, e.item_id)
+      from gv_equipped e
+      where e.user_id = p_user
+    ), '{}'::json)
+  )
+  from (select 1) one
+  left join gv_wallet w on w.user_id = p_user;
+$function$;
+
+revoke all on function public.gv_wallet_json(uuid) from public, anon, authenticated;
