@@ -3493,6 +3493,7 @@ function makeTile(g, opts = {}) {
   corner.className = 'tile-corner';
 
   a.append(cat, star, name, play, corner);
+  if (playingNow[g.id]) liveBadge(a, playingNow[g.id]);
   return a;
 }
 
@@ -4353,6 +4354,28 @@ function loadPopular() {
   }).catch(() => {});
 }
 
+// How many people have each game open right now, by id. Refreshed every
+// minute while the tab is visible; tiles already on screen are updated in place.
+let playingNow = {};
+function liveBadge(tile, n) {
+  let b = tile.querySelector('.tile-live');
+  if (!n) { if (b) b.remove(); return; }
+  if (!b) {
+    b = document.createElement('span');
+    b.className = 'tile-live';
+    const play = tile.querySelector('.tile-play');
+    if (play) play.before(b); else tile.appendChild(b);
+  }
+  b.textContent = n + ' playing';
+}
+function loadPlayingNow() {
+  if (document.hidden) return;
+  publicRpc('gv_playing_now').then(counts => {
+    playingNow = counts || {};
+    document.querySelectorAll('.tile[data-id]').forEach(t => liveBadge(t, playingNow[t.dataset.id]));
+  }).catch(() => {});
+}
+
 // ───── Boot ─────
 // Nothing on screen needs the catalog until this resolves, so the shell paints
 // first and the grid fills in behind it.
@@ -4379,6 +4402,8 @@ async function bootCatalog() {
   initRoute();
   initPolytrackNotice();
   loadPopular();
+  loadPlayingNow();
+  setInterval(loadPlayingNow, 60000);
 }
 // ───── PolyTrack update notice ─────
 // Appears once for people who have played PolyTrack here before, pointing them
