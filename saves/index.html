@@ -300,7 +300,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var actions = el('div', 'slot-actions');
     if (!isAuto) {
-      actions.appendChild(button('Save here', row ? '' : 'btn-primary', function () { saveTo(slot, wrap); }));
+      actions.appendChild(button('Save here', '', function () { saveTo(slot, wrap); }));
     }
     if (row) {
       actions.appendChild(button('Load', '', function () { loadFrom(slot, wrap); }));
