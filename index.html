@@ -2939,6 +2939,14 @@ const NEWS = [
 
 const BADGE_LABELS = { new: 'NEW', added: 'ADDED', progress: 'IN PROGRESS', soon: 'COMING SOON' };
 
+// '2026-09-21' reads as 'SEP 21' (and gets the year when it is not this one).
+function newsDate(iso) {
+  if (!iso) return '';
+  const [y, m, d] = iso.split('-').map(Number);
+  const s = MONTHS[m - 1] + ' ' + d;
+  return y === new Date().getFullYear() ? s : s + ', ' + y;
+}
+
 // Mirrors the top of NEWS onto the landing page. Reads the same array the
 // modal renders, so adding an entry there updates both.
 function renderNewest() {
