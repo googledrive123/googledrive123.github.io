@@ -118,4 +118,12 @@
     Object.keys(v).forEach(function (key) { out[key] = encode(v[key], blobs); });
     return Object.prototype.hasOwnProperty.call(v, '$gv') ? { $gv: 'object', value: out } : out;
   }
+
+  function fillBlobs(blobs) {
+    return Promise.all(blobs.map(function (pair) {
+      return new Response(pair[1]).arrayBuffer().then(function (buffer) {
+        pair[0].data = toBase64(new Uint8Array(buffer));
+      });
+    }));
+  }
 })();
