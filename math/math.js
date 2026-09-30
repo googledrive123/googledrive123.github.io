@@ -1236,4 +1236,37 @@
     if (q.unit === 'π' && !got.pi && close(got.v, q.ans * Math.PI, got.dec, 1)) return true;
     return false;
   }
+
+  // ── Saved progress ──────────────────────────────────────────────────────
+
+  function fresh() {
+    return { points: 0, streak: 0, best: 0, subject: 'arithmetic', level: 'easy', subjects: {} };
+  }
+
+  function load() {
+    var state = fresh(), saved = null;
+    try { saved = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
+    if (!saved || typeof saved !== 'object') return state;
+    ['points', 'streak', 'best'].forEach(function (k) {
+      if (typeof saved[k] === 'number' && saved[k] >= 0) state[k] = Math.floor(saved[k]);
+    });
+    if (BANK[saved.subject]) state.subject = saved.subject;
+    if (POINTS[saved.level]) state.level = saved.level;
+    SUBJECTS.forEach(function (sub) {
+      var r = saved.subjects && saved.subjects[sub.id];
+      if (r && r.total > 0) state.subjects[sub.id] = { correct: Math.min(+r.correct || 0, +r.total), total: +r.total };
+    });
+    return state;
+  }
+
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
+  function tally(id) {
+    return state.subjects[id] || (state.subjects[id] = { correct: 0, total: 0 });
+  }
+
+  // Five right in a row makes answers worth 1.5×, ten makes them 2×.
+  function boost(streak) { return streak >= 10 ? 2 : streak >= 5 ? 1.5 : 1; }
 })();
