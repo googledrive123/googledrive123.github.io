@@ -452,3 +452,38 @@ $function$;
 
 revoke all on function public.gv_unequip(text) from public, anon;
 grant execute on function public.gv_unequip(text) to authenticated;
+
+
+-- What other players see next to a name: the name color, the avatar ring and
+-- the title each account is wearing, keyed by account id. Tile colors stay
+-- private to the player. Accounts wearing nothing are left out. At most 200
+-- ids a call, which is more than any one page shows.
+create or replace function public.gv_public_cosmetics(p_user_ids uuid[])
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'not read from this origin';
+  end if;
+
+  return coalesce((
+    select json_object_agg(u.user_id, u.worn)
+    from (
+      select e.user_id,
+             json_object_agg(e.kind, json_build_object(
+               'id', i.id, 'name', i.name, 'rarity', i.rarity, 'value', i.value)) as worn
+      from gv_equipped e
+      join gv_items i on i.id = e.item_id
+      where e.user_id = any (p_user_ids[1:200])
+        and e.kind in ('name_color', 'avatar_frame', 'title')
+      group by e.user_id
+    ) u
+  ), '{}'::json);
+end;
+$function$;
+
+grant execute on function public.gv_public_cosmetics(uuid[]) to anon, authenticated;
