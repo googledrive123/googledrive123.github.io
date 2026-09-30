@@ -122,7 +122,7 @@
 {"id":"buster-jam","name":"Buster Jam","categories":["Action"],"ranking":121,"img":"https://img.gamepix.com/games/buster-jam/cover/buster-jam.png","src":"https://genizymath.github.io/iframe/646-fixed.html"},
 {"id":"cannon-basketball-2","name":"Cannon Basketball 2","categories":["Sports"],"ranking":122,"img":"https://img.gamepix.com/games/cannon-basketball-2/cover/cannon-basketball-2.png","src":"https://genizymath.github.io/iframe/80.html"},
 {"id":"carrom-clash","name":"Carrom Clash","categories":["Action"],"ranking":123,"img":"https://img.gamepix.com/games/carrom-clash/cover/carrom-clash.png","src":"https://genizymath.github.io/iframe/202.html"},
-{"id":"celeste","name":"Celeste","categories":["Platformer"],"ranking":124,"img":"/games/celeste/icon.png","src":null},
+{"id":"celeste","name":"Celeste","categories":["Platformer"],"ranking":124,"img":"/thumbs/celeste.webp","src":null,"site":3,"added":"2026-05-13"},
 {"id":"championisland","name":"Champion Island","categories":["Arcade","Adventure"],"ranking":125,"img":"https://icons-6.us/action-games/champion-island/splash.png","src":"https://icons-6.us/action-games/champion-island/","local":true},
 {"id":"chat-bot-ai-ai-gpt","name":"Chat Bot AI (A.I GPT)","categories":["Action"],"ranking":126,"img":"https://img.gamepix.com/games/chat-bot-ai-ai-gpt/cover/chat-bot-ai-ai-gpt.png","src":"/iframe/253-update.html"},
 {"id":"city-defense","name":"City Defense","categories":["Strategy"],"ranking":127,"img":"https://rawcdn.githack.com/genizy/brainrot/main/city-defense/logo.png","src":"https://genizymath.github.io/iframe/380.html"},
