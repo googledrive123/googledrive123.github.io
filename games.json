@@ -279,7 +279,7 @@
 {"id":"golddiggerfrvr","name":"Gold Digger FRVR","categories":["Arcade","Idle"],"ranking":340,"img":"https://cdn2.y8.com/cloudimage/398451/file/w380h285_retina_webp-8c6b5a31c2087a3509cd88089c86d560.webp","src":null},
 {"id":"google-snake","name":"Google Snake","categories":["Arcade"],"ranking":341,"img":"https://cdn2.y8.com/cloudimage/342343/file/w380h285_retina_webp-9647dee8926d91a5853d9f8c1542732c.webp","src":null,"site":5,"added":"2026-05-13"},
 {"id":"gunmayhem","name":"Gun Mayhem","categories":["Action","Shooter"],"ranking":343,"img":"/thumbs/gunmayhem.webp","src":"https://icons-6.us/action-games/gun-mayhem/","site":5,"added":"2026-05-13"},
-{"id":"hexgl","name":"HexGL","categories":["Racing"],"ranking":348,"img":"https://cdn2.y8.com/cloudimage/45147/file/w380h285_retina_webp-f36548424c74ade3f0e4686f0cbea31f.webp","src":null},
+{"id":"hexgl","name":"HexGL","categories":["Racing"],"ranking":348,"img":"https://cdn2.y8.com/cloudimage/45147/file/w380h285_retina_webp-f36548424c74ade3f0e4686f0cbea31f.webp","src":null,"site":5,"added":"2026-05-13"},
 {"id":"hextris","name":"Hextris","categories":["Puzzle"],"ranking":349,"img":"https://icons-6.us/strategy-games/hextris/images/hextris-logo.png","src":"https://icons-6.us/strategy-games/hextris/","local":true},
 {"id":"hillclimbracing2","name":"Hill Climb Racing 2","categories":["Racing","Driving"],"ranking":350,"img":"https://upload.wikimedia.org/wikipedia/commons/f/fb/HillClimbRacingLogoNew.png","src":null},
 {"id":"holeio","name":"Hole.io","categories":["Arcade","Multiplayer"],"ranking":351,"img":"https://cdn2.y8.com/cloudimage/225521/file/w380h285_retina_webp-1d7993de91256bc93944938066ec0614.webp","src":null},
