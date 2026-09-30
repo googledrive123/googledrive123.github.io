@@ -239,5 +239,67 @@
           'Line up the decimal points: ' + (a / 10).toFixed(2) + op + (b / 100).toFixed(2) + ' = ' + (r / 100).toFixed(2) + '.');
       }
     ],
+    hard: [
+      function () {
+        if (coin()) {
+          var a = ri(3, 9), b = ri(2, 6), c = ri(5, 12), d = ri(1, c - 1), e = c - d, r = a * a - b * e;
+          return num('Work it out.', sup(a, 2) + ' − ' + b + ' × (' + c + ' − ' + d + ')', r, s(r),
+            'Brackets give ' + e + ', the power gives ' + a * a + ', then ' + a * a + ' − ' + b + ' × ' + e + ' = ' +
+            a * a + ' − ' + b * e + ' = ' + s(r) + '.');
+        }
+        var x = ri(2, 6), y = ri(2, 9), z = ri(2, 5), w = ri(2, 30), r2 = x * y - z * z + w;
+        return num('Work it out.', x + ' × ' + y + ' − ' + sup(z, 2) + ' + ' + w, r2, s(r2),
+          'Power first (' + z * z + '), then multiply (' + x * y + '), then left to right: ' +
+          x * y + ' − ' + z * z + ' + ' + w + ' = ' + s(r2) + '.');
+      },
+      function () {
+        var a = ri(2, 9), b = ri(2, 9), c = ri(2, 9), d = ri(2, 9), r = a * b + c * d;
+        return num('Work it out.', '(−' + a + ')(−' + b + ') − ' + c + ' × (−' + d + ')', r, s(r),
+          '(−' + a + ')(−' + b + ') = ' + a * b + ' and ' + c + ' × (−' + d + ') = −' + c * d + ', so ' +
+          a * b + ' − (−' + c * d + ') = ' + r + '.');
+      },
+      function () {
+        var x = ri(11, 49), y = ri(2, 9), prod = x * y;
+        return num('Multiply.', (x / 10).toFixed(1) + ' × ' + (y / 10).toFixed(1), prod / 100, s(prod / 100),
+          x + ' × ' + y + ' = ' + prod + ', and there are two decimal places in total, so ' + s(prod / 100) + '.');
+      },
+      function () {
+        var d = pick([[2, 10], [4, 10], [5, 10], [25, 100], [5, 100], [15, 100]]);
+        var q = ri(3, 40), top = q * d[0];
+        return num('Divide.', s(top / d[1]) + ' ÷ ' + s(d[0] / d[1]), q, s(q),
+          'Multiply both by ' + d[1] + ' to clear the decimals: ' + top + ' ÷ ' + d[0] + ' = ' + q + '.');
+      },
+      function () {
+        var g = ri(3, 15), m, n;
+        do { m = ri(2, 9); n = ri(2, 9); } while (m === n || gcd(m, n) !== 1);
+        return num('Find the greatest common factor.', 'GCF(' + g * m + ', ' + g * n + ')', g, s(g),
+          g * m + ' = ' + g + ' × ' + m + ' and ' + g * n + ' = ' + g + ' × ' + n + ', and ' + m + ' and ' + n +
+          ' share no factor, so the GCF is ' + g + '.');
+      },
+      function () {
+        var a, b, l;
+        do { a = ri(4, 18); b = ri(4, 18); l = lcm(a, b); } while (a === b || l > 200 || l === Math.max(a, b));
+        return num('Find the least common multiple.', 'LCM(' + a + ', ' + b + ')', l, s(l),
+          'LCM = ' + a + ' × ' + b + ' ÷ GCF = ' + a * b + ' ÷ ' + gcd(a, b) + ' = ' + l + '.');
+      },
+      function () {
+        var b = pick([2, 3, 5, 10]), x = ri(2, 9), y = ri(2, 9), z = ri(1, x + y - 1), e = x + y - z;
+        return num('Find the missing power.', sup(b, x) + ' × ' + sup(b, y) + ' ÷ ' + sup(b, z) + ' = ' + sup(b, '?'), e, s(e),
+          'Multiplying adds powers and dividing subtracts them: ' + x + ' + ' + y + ' − ' + z + ' = ' + e + '.');
+      },
+      function () {
+        var k = ri(2, 10) * (coin(0.25) ? -1 : 1), n = k * k * k;
+        return num('Find the cube root.', '∛<span class="rad">' + s(n) + '</span>', k, s(k),
+          s(k) + ' × ' + p(k) + ' × ' + p(k) + ' = ' + s(n) + '.');
+      },
+      function () {
+        var m = ri(11, 99), e = ri(3, 7), mant = s(m / 10);
+        var value = (m * Math.pow(10, e - 1)).toLocaleString('en-US');
+        return choice('Which is ' + value + ' in scientific notation?', '',
+          mant + ' × ' + sup(10, e),
+          [m + ' × ' + sup(10, e - 1), mant + ' × ' + sup(10, e - 1), mant + ' × ' + sup(10, e + 1)],
+          'Move the point ' + e + ' places so one digit is left in front: ' + mant + ' × ' + sup(10, e) + '.');
+      }
+    ]
   };
 })();
