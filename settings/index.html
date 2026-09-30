@@ -407,6 +407,20 @@
     } catch (e) {}
   });
 
+  var layout = window.GV.layout;
+  var skipWelcome = document.getElementById('skipWelcome');
+  skipWelcome.checked = layout.skipWelcome();
+  skipWelcome.addEventListener('change', function () { layout.setSkipWelcome(skipWelcome.checked); });
+
+  var tileSize = document.getElementById('tileSize');
+  tileSize.value = layout.tileSize();
+  tileSize.addEventListener('input', function () { layout.setTileSize(+tileSize.value); });
+
+  document.querySelectorAll('[data-row]').forEach(function (el) {
+    el.checked = !layout.hidden(el.dataset.row);
+    el.addEventListener('change', function () { layout.setHidden(el.dataset.row, !el.checked); });
+  });
+
   paintState();
 })();
 </script>
