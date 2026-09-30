@@ -373,3 +373,42 @@ end;
 $function$;
 
 grant execute on function public.gv_challenge_history() to anon, authenticated;
+
+
+-- Badges for the players on a board, by player key, for drawing beside their
+-- names: {"<key>": [{"badge": "challenge-winner", "month": "2026-09-01"}]}.
+-- Keys with no badges are left out.
+create or replace function public.gv_badges_for(p_keys text[])
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'not read from this origin';
+  end if;
+  if p_keys is null or cardinality(p_keys) = 0 then
+    return '{}'::json;
+  end if;
+  -- A board page is 50 rows, so a longer list is not a board.
+  if cardinality(p_keys) > 200 then
+    raise exception 'too many keys';
+  end if;
+
+  return coalesce((
+    select json_object_agg(k.player_key, k.badges)
+    from (
+      select b.player_key,
+             json_agg(json_build_object('badge', b.badge, 'month', b.month)
+                      order by b.month desc, b.badge) as badges
+      from gv_badges b
+      where b.player_key = any (p_keys)
+      group by b.player_key
+    ) k
+  ), '{}'::json);
+end;
+$function$;
+
+grant execute on function public.gv_badges_for(text[]) to anon, authenticated;
