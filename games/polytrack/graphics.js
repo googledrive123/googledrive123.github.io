@@ -408,6 +408,13 @@
     '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">' +
     '<path fill="#fff" d="M14 0 3 14h7l-2 10 13-15h-7l2-9z"/></svg>');
 
+  var restarting = false;
+
+  function menuLabel() {
+    if (restarting) return 'Max performance: On, restarting';
+    return maxPerformanceOn() ? 'Max performance: On' : 'Max performance';
+  }
+
   function fillMenu() {
     var bar = document.querySelector('.menu-ui > .button-bar');
     if (!bar || bar.querySelector('.gv-max-performance')) return;
@@ -416,15 +423,12 @@
     var icon = document.createElement('img');
     icon.src = BOLT;
     button.appendChild(icon);
-    var label = document.createTextNode('');
+    var label = document.createTextNode(' ' + menuLabel());
     button.appendChild(label);
-    function say(text) { label.textContent = ' ' + text; }
-    say(maxPerformanceOn() ? 'Max performance: On' : 'Max performance');
-    var restarting = false;
     button.addEventListener('click', function () {
       if (restarting || maxPerformanceOn()) return;
       restarting = maxPerformance();
-      say(restarting ? 'Max performance: On, restarting' : 'Max performance: On');
+      label.textContent = ' ' + menuLabel();
       // Long enough to read that it worked before the loading screen.
       if (restarting) setTimeout(function () { location.reload(); }, 900);
     });
