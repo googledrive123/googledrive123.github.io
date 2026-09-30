@@ -2335,9 +2335,9 @@
     </div>
 
     <div class="stat-row">
-      <div class="stat"><div class="num" id="sGames">300</div><div class="lbl">games</div></div>
+      <div class="stat"><div class="num loading" id="sGames">0</div><div class="lbl">games</div></div>
       <div class="stat-divider"></div>
-      <div class="stat"><div class="num" id="sCats">13</div><div class="lbl">categories</div></div>
+      <div class="stat"><div class="num loading" id="sCats">0</div><div class="lbl">categories</div></div>
     </div>
 
     <nav class="mini-nav" aria-label="More">
@@ -2810,6 +2810,7 @@ let GAMES = [];
 function updateWelcomeStats() {
   document.getElementById('sGames').textContent = GAMES.length;
   document.getElementById('sCats').textContent = (CATS.length - 1);
+  document.querySelectorAll('.stat .num.loading').forEach(el => el.classList.remove('loading'));
 }
 
 // ───── Bell schedule ─────
