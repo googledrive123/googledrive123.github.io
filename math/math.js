@@ -821,6 +821,16 @@
   var TRIPLES = [[3, 4, 5], [5, 12, 13], [8, 15, 17], [7, 24, 25], [6, 8, 10], [9, 12, 15], [20, 21, 29], [9, 40, 41]];
   var SHAPES = { 3: 'equilateral triangle', 4: 'square', 5: 'pentagon', 6: 'hexagon', 8: 'octagon', 9: 'nonagon', 10: 'decagon', 12: 'dodecagon' };
 
+  // A right triangle with the right angle at C, for the trig question.
+  function triangle(a, b, c) {
+    return '<svg class="fig" viewBox="0 0 240 150" role="img" aria-label="Right triangle ABC with the right angle at C">' +
+      '<path d="M30 120 L210 120 L30 24 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>' +
+      '<path d="M30 106 H44 V120" fill="none" stroke="currentColor" stroke-width="1.5"/>' +
+      '<text x="16" y="136">C</text><text x="216" y="136">A</text><text x="16" y="22">B</text>' +
+      '<text x="120" y="142" class="len">' + b + '</text><text x="12" y="76" class="len">' + a + '</text>' +
+      '<text x="128" y="64" class="len">' + c + '</text></svg>';
+  }
+
   var geometry = {
     easy: [
       function () {
@@ -923,5 +933,72 @@
           area, area + ' cm²', 'Area = ½ × (' + a + ' + ' + b + ') × ' + h + ' = ' + area + ' cm².', { unit: 'cm²' });
       }
     ],
+    hard: [
+      function () {
+        var form = ri(0, 2), r, h, coef, why, what;
+        if (form === 0) {
+          r = ri(2, 8); h = ri(2, 12); coef = r * r * h; what = 'a cylinder with radius ' + r + ' and height ' + h;
+          why = 'V = πr²h = π × ' + sup(r, 2) + ' × ' + h + ' = ' + coef + 'π.';
+        } else if (form === 1) {
+          r = ri(2, 8); do { h = ri(2, 12); } while (r * r * h % 3);
+          coef = r * r * h / 3; what = 'a cone with radius ' + r + ' and height ' + h;
+          why = 'V = ⅓πr²h = ⅓ × ' + r * r + ' × ' + h + ' × π = ' + coef + 'π.';
+        } else {
+          r = ri(1, 6); coef = 4 * r * r * r / 3; what = 'a sphere with radius ' + r;
+          why = 'V = 4/3 × πr³ = 4/3 × ' + r * r * r + ' × π = ' + piText(4 * r * r * r, 3) + '.';
+        }
+        var show = piText(form === 2 ? 4 * r * r * r : coef, form === 2 ? 3 : 1);
+        return num('What is the volume of ' + what + '? Answer in terms of π.', '', coef, show, why, { unit: 'π' });
+      },
+      function () {
+        var r = ri(2, 12), deg = pick([30, 45, 60, 90, 120, 135, 150, 180, 240, 270]);
+        if (coin()) {
+          return num('A circle has radius ' + r + '. How long is the arc cut off by a ' + deg + '° angle at the centre? Answer in terms of π.', '',
+            r * deg / 180, piText(r * deg, 180), 'Arc = ' + deg + '/360 of 2π × ' + r + ' = ' + piText(r * deg, 180) + '.', { unit: 'π' });
+        }
+        return num('A circle has radius ' + r + '. What is the area of a ' + deg + '° slice (sector)? Answer in terms of π.', '',
+          r * r * deg / 360, piText(r * r * deg, 360), 'Sector = ' + deg + '/360 of π × ' + sup(r, 2) + ' = ' + piText(r * r * deg, 360) + '.', { unit: 'π' });
+      },
+      function () {
+        var k = pick([2, 3, 4, 1.5, 2.5]), a, b;
+        do { a = ri(2, 9); b = ri(2, 12); } while (a === b || (k % 1 && (a % 2 || b % 2)));
+        return num('Two triangles are similar. The small one has sides of ' + a + ' and ' + b + '. On the big one the side matching ' + a +
+          ' is ' + s(a * k) + '. How long is the side matching ' + b + '?', '', b * k, s(b * k),
+          'The scale factor is ' + s(a * k) + ' ÷ ' + a + ' = ' + s(k) + ', so ' + b + ' × ' + s(k) + ' = ' + s(b * k) + '.');
+      },
+      function () {
+        var n = ri(2, 12), form = ri(0, 2);
+        if (form === 0) {
+          return choice('A right triangle has two equal legs of ' + n + '. How long is the hypotenuse?', '', rt(n, 2),
+            [rt(n, 3), s(2 * n), rt(2 * n, 2), s(n)], 'In a 45-45-90 triangle the hypotenuse is a leg × √2, so ' + n + '√2.');
+        }
+        if (form === 1) {
+          return choice('A 30-60-90 triangle has a short leg of ' + n + '. How long is the long leg?', '', rt(n, 3),
+            [rt(n, 2), s(2 * n), rt(2 * n, 3)], 'The long leg is the short leg × √3, so ' + n + '√3.');
+        }
+        return choice('A 30-60-90 triangle has a hypotenuse of ' + 2 * n + '. How long is the long leg?', '', rt(n, 3),
+          [rt(2 * n, 3), rt(n, 2), s(n)], 'The short leg is half the hypotenuse, ' + n + ', and the long leg is that × √3: ' + n + '√3.');
+      },
+      function () {
+        var t = pick(TRIPLES.slice(0, 6)), swap = coin(), a = swap ? t[1] : t[0], b = swap ? t[0] : t[1], c = t[2];
+        var fn = pick(['sin', 'cos', 'tan']);
+        var right = { sin: [a, c], cos: [b, c], tan: [a, b] }[fn];
+        var rule = { sin: 'opposite ÷ hypotenuse', cos: 'adjacent ÷ hypotenuse', tan: 'opposite ÷ adjacent' }[fn];
+        return choice('Find ' + fn + ' A.', triangle(a, b, c), frac(right[0], right[1]),
+          [[a, c], [b, c], [a, b], [b, a]].map(function (f) { return frac(f[0], f[1]); }),
+          'From A, BC = ' + a + ' is opposite, AC = ' + b + ' is adjacent and AB = ' + c + ' is the hypotenuse, so ' + fn + ' A = ' +
+          rule + ' = ' + right[0] + '/' + right[1] + (gcd(right[0], right[1]) > 1 ? ' = ' + ft(right[0], right[1]) : '') + '.');
+      },
+      function () {
+        var n = pick([3, 4, 5, 6, 8, 9, 10, 12, 15, 18, 20, 24, 30, 36]);
+        return num('What is each outside (exterior) angle of a regular polygon with ' + n + ' sides?', '', 360 / n, 360 / n + '°',
+          'The exterior angles of any polygon add to 360°: 360 ÷ ' + n + ' = ' + 360 / n + '°.', { unit: '°' });
+      },
+      function () {
+        var l = ri(2, 10), w = ri(2, 10), h = ri(2, 10), area = 2 * (l * w + l * h + w * h);
+        return num('A box is ' + l + ' × ' + w + ' × ' + h + ' cm. What is its total surface area?', '', area, area + ' cm²',
+          'Three pairs of faces: 2 × (' + l * w + ' + ' + l * h + ' + ' + w * h + ') = ' + area + ' cm².', { unit: 'cm²' });
+      }
+    ]
   };
 })();
