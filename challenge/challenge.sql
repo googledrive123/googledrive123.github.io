@@ -105,3 +105,56 @@ as $function$
 $function$;
 
 revoke all on function public.gv_challenge_ranked(date) from public, anon, authenticated;
+
+
+-- Every run sent to the board passes through here on its way in.
+--
+-- It has to be BEFORE INSERT. polytrack_submit upserts, so by the time the
+-- row is written, and so in any AFTER trigger, frames holds the player's best
+-- ever, which can be a time from an earlier month. Only the proposed row
+-- carries the time just driven, and BEFORE INSERT fires for every proposed
+-- row, including the ones the upsert then turns into an update.
+--
+-- Triggers run in name order, so this one runs before gv_scores_name_guard
+-- and does the same name check itself.
+create or replace function public.gv_challenge_capture()
+returns trigger
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_key   text;
+  v_month date;
+begin
+  v_key := coalesce(new.user_id::text, 'guest:' || new.visitor_id);
+  v_month := gv_challenge_month();
+  if v_key is null or coalesce(new.frames, 0) <= 0
+     or not exists (select 1 from gv_challenges c
+                    where c.month = v_month and c.track_id = new.track_id) then
+    return new;
+  end if;
+
+  insert into gv_challenge_runs (month, track_id, player_key, nickname, user_id, frames)
+  values (v_month, new.track_id, v_key,
+          case when gv_name_rude(new.nickname) then 'Player'
+               else coalesce(nullif(btrim(new.nickname), ''), 'Player') end,
+          new.user_id, new.frames)
+  on conflict (month, player_key) do update
+    set nickname = excluded.nickname,
+        frames   = least(excluded.frames, gv_challenge_runs.frames),
+        at       = case when excluded.frames < gv_challenge_runs.frames
+                        then excluded.at else gv_challenge_runs.at end;
+  return new;
+exception when others then
+  -- The challenge must never cost a player their time on the board.
+  return new;
+end;
+$function$;
+
+revoke all on function public.gv_challenge_capture() from public, anon, authenticated;
+
+drop trigger if exists gv_challenge_capture on public.polytrack_scores;
+create trigger gv_challenge_capture
+  before insert on public.polytrack_scores
+  for each row execute function public.gv_challenge_capture();
