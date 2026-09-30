@@ -1044,8 +1044,8 @@
   function tryLogin(secret, remember) {
     $('loginErr').textContent = '';
     rpc('analytics_check', { p_secret: secret }).then(function (ok) {
-      if (ok === true) { state.secret = secret; if (remember) try { localStorage.setItem(SECRET_KEY, secret); } catch (e) {} showDash(); }
-      else { $('loginErr').textContent = 'Wrong secret.'; try { localStorage.removeItem(SECRET_KEY); } catch (e) {} }
+      if (ok === true) { state.secret = secret; if (remember) try { sessionStorage.setItem(SECRET_KEY, secret); } catch (e) {} showDash(); }
+      else { $('loginErr').textContent = 'Wrong secret.'; try { sessionStorage.removeItem(SECRET_KEY); } catch (e) {} }
     }).catch(function (e) { $('loginErr').textContent = 'Could not reach Supabase: ' + e.message; });
   }
   $('loginBtn').addEventListener('click', function () { tryLogin($('secretInput').value.trim(), true); });
