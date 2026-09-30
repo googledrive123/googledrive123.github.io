@@ -81,3 +81,57 @@ create index if not exists gv_submissions_user_created
 
 alter table public.gv_submissions enable row level security;
 revoke all on table public.gv_submissions from anon, authenticated;
+
+
+-- Everything about a submission except the file, checked before the upload
+-- and again when it is recorded. Every refusal is a sentence the page shows
+-- as it is. Returns the text as it will be kept: trimmed, and with control
+-- characters that could hide words taken out.
+create or replace function public.gv_submission_check(p_title text, p_link text, p_notes text, p_size bigint)
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+  v_title text := btrim(regexp_replace(coalesce(p_title, ''), '[[:space:][:cntrl:]]+', ' ', 'g'));
+  v_link text := nullif(btrim(coalesce(p_link, '')), '');
+  v_notes text := nullif(btrim(regexp_replace(coalesce(p_notes, ''), '[\u0001-\u0009\u000b-\u001f\u007f]+', ' ', 'g')), '');
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'Submissions only work on GameVault.';
+  end if;
+  if v_user is null then
+    raise exception 'Sign in to send a game.';
+  end if;
+  if v_title = '' then
+    raise exception 'Give the game a name.';
+  end if;
+  if char_length(v_title) > 80 then
+    raise exception 'Names can be up to 80 characters.';
+  end if;
+  if v_link is not null and (char_length(v_link) > 300 or v_link !~ '^https?://[^[:space:]]+$') then
+    raise exception 'The link has to be a web address starting with https://.';
+  end if;
+  if char_length(v_notes) > 1000 then
+    raise exception 'Notes can be up to 1000 characters.';
+  end if;
+  if public.gv_is_rude(v_title) or public.gv_is_rude(v_link) or public.gv_is_rude(v_notes) then
+    raise exception 'That has words we do not allow here. Try saying it another way.';
+  end if;
+  if p_size is null or p_size < 1 or p_size > 52428800 then
+    raise exception 'The zip has to be 50 MB or smaller.';
+  end if;
+  if (select count(*) from gv_submissions
+       where user_id = v_user and created_at > now() - interval '1 day') >= 3 then
+    raise exception 'You can send 3 games a day. Try again tomorrow.';
+  end if;
+
+  return json_build_object('title', v_title, 'link', v_link, 'notes', v_notes);
+end;
+$function$;
+
+revoke all on function public.gv_submission_check(text, text, text, bigint) from public, anon;
+grant execute on function public.gv_submission_check(text, text, text, bigint) to authenticated;
