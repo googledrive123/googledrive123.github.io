@@ -529,6 +529,23 @@
     }
   }
 
+  // ─── Picking one ───
+  var styled = false;
+  function addStyle() {
+    if (styled) return;
+    styled = true;
+    var st = document.createElement('style');
+    st.textContent =
+      '.gv-av-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:8px}' +
+      '.gv-av-opt{aspect-ratio:1;padding:0;border:0;border-radius:50%;background:none;cursor:pointer;overflow:hidden;' +
+        'transition:transform .12s,box-shadow .12s}' +
+      '.gv-av-opt:hover{transform:scale(1.07)}' +
+      '.gv-av-opt[aria-pressed="true"]{box-shadow:0 0 0 2px var(--bg,#0a0a0c),0 0 0 4px var(--accent,#ff3b3b)}' +
+      '.gv-av-opt:focus-visible{outline:2px solid var(--text,#f4f4f6);outline-offset:3px}' +
+      '@media (prefers-reduced-motion:reduce){.gv-av-opt{transition:none}.gv-av-opt:hover{transform:none}}';
+    document.head.appendChild(st);
+  }
+
   window.GV = window.GV || {};
   window.GV.avatars = {
     count: COUNT,
