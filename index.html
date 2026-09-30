@@ -4686,6 +4686,8 @@ sb.auth.getSession().then(({ data: { session } }) => {
   setCurrentUser(session?.user ?? null);
   updateUserUI();
   if (currentUser) loadUsername();
+  // The level next to the name comes from the same numbers as the stats.
+  if (currentUser) renderStats(); else renderLocalStats();
 });
 
 // ─── User button → always open profile ───
