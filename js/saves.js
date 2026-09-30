@@ -56,4 +56,19 @@
       else localStorage.setItem(key, value);
     } catch (e) {}
   }
+
+  function toBase64(bytes) {
+    var parts = [];
+    for (var i = 0; i < bytes.length; i += 0x8000) {
+      parts.push(String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)));
+    }
+    return btoa(parts.join(''));
+  }
+
+  function fromBase64(text) {
+    var raw = atob(text);
+    var bytes = new Uint8Array(raw.length);
+    for (var i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+    return bytes;
+  }
 })();
