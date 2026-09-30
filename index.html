@@ -4844,6 +4844,8 @@ document.getElementById('suSubmit').addEventListener('click', async () => {
   const errEl = document.getElementById('authError');
   if (!username || !pw) { errEl.textContent = 'Fill in all fields.'; return; }
   if (username.length < 3) { errEl.textContent = 'Username must be at least 3 characters.'; return; }
+  const nameOk = await sb.rpc('gv_name_ok', { p_name: username });
+  if (nameOk.data === false) { errEl.textContent = 'That username is not allowed. Try another.'; return; }
   if (pw.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; return; }
   const { data, error } = await sb.auth.signUp({ email: username + '@gamevault.app', password: pw });
   if (error) { errEl.textContent = error.message.includes('already') ? 'Username already taken.' : error.message; return; }
