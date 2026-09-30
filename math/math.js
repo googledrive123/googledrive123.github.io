@@ -1451,6 +1451,19 @@
     finish(i === q.answer, i, q.choices[i].replace(/<[^>]+>/g, ''));
   }
 
+  /* The answer box keeps focus nearly all the time, and mimicry.js ignores the
+     panic key inside text boxes. A key that can never be part of an answer
+     still gets you out. */
+  function panicFromBox(e) {
+    var sec = window.GV && window.GV.security;
+    if (!sec || !sec.enabled() || e.ctrlKey || e.metaKey || e.altKey) return;
+    var key = sec.key();
+    if (e.key !== key || /^[\w.,\/%$°π+\- =()*^]$/i.test(key)) return;
+    e.preventDefault();
+    try { sessionStorage.setItem('panicActivation', 'true'); } catch (err) {}
+    window.location.replace(sec.url());
+  }
+
   buildPickers();
 
   $('subjects').addEventListener('click', function (e) {
@@ -1472,6 +1485,7 @@
   });
 
   form.addEventListener('submit', function (e) { e.preventDefault(); check(); });
+  input.addEventListener('keydown', panicFromBox);
   input.addEventListener('input', function () { $('hint').textContent = ''; });
 
   choicesEl.addEventListener('click', function (e) {
