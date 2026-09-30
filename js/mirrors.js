@@ -89,10 +89,63 @@
     });
   }
 
+  function escapeRe(text) {
+    return text.replace(/[.*+?^${}()|[\]\\\/]/g, '\\$&');
+  }
+
+  function parts(origin) {
+    var m = /^([a-z][a-z0-9+.-]*):\/\/([^:\/]+)(?::(\d+))?$/i.exec(String(origin || ''));
+    return m && { scheme: m[1], host: m[2], port: m[3] || '' };
+  }
+
+  // A colon or slash as written plainly, URL-encoded (once or more), or, for
+  // a slash, escaped with backslashes by one or more rounds of JSON.
+  var COLON = '(:|%(?:25)*3a)';
+  var SLASH = '(\\\\*/|%(?:25)*2f)';
+
+  /* Progress sometimes holds full addresses: a link back to a game, a frame
+     source, a JSON blob inside a localStorage string, often JSON inside JSON.
+     Each one that points at the old address is pointed at the new one, in
+     every string at any depth, keys included, keeping however it was
+     escaped or encoded. Bytes are left alone: a binary save can hold lengths
+     that a longer or shorter address would break. */
+  function rewrite(value, from, to) {
+    var a = parts(from);
+    var b = parts(to);
+    if (!a || !b || from === to) return value;
+    // The old address has to end where the match does, so localhost:8000
+    // leaves localhost:80001 and a longer host name alone.
+    var re = new RegExp(escapeRe(a.scheme) + COLON + SLASH + SLASH + escapeRe(a.host)
+      + (a.port ? COLON + a.port : '') + '(?![\\w.-])', 'gi');
+
+    function swap(text) {
+      return text.replace(re, function (m, colon, slash1, slash2, portColon) {
+        // With no port in the old address there is no fifth group, and that
+        // argument is the match's offset instead.
+        if (!a.port) portColon = colon;
+        var out = b.scheme + colon + slash1 + slash2 + b.host;
+        return b.port ? out + portColon + b.port : out;
+      });
+    }
+
+    function walk(v) {
+      if (typeof v === 'string') return swap(v);
+      if (Array.isArray(v)) return v.map(walk);
+      if (v === null || typeof v !== 'object') return v;
+      if (v.$gv === 'bytes' || v.$gv === 'blob') return v;
+      var out = {};
+      Object.keys(v).forEach(function (key) { out[swap(key)] = walk(v[key]); });
+      return out;
+    }
+
+    return walk(value);
+  }
+
   window.GV = window.GV || {};
   window.GV.mirrors = {
     MAIN: MAIN,
     list: list,
-    check: check
+    check: check,
+    rewrite: rewrite
   };
 })();
