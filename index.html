@@ -3798,6 +3798,25 @@ function toggleSource() {
 gameSwap.addEventListener('click', toggleSource);
 loaderSwap.addEventListener('click', toggleSource);
 
+// ───── More like this ─────
+// Games that share the open game's first category, most played first. The
+// strip starts at a different spot for each game so neighbours do not all
+// suggest the same ten.
+const gameMore = document.getElementById('gameMore');
+const gameMoreBtn = document.getElementById('gameMoreBtn');
+const MORE_COUNT = 10;
+
+function similarGames(g) {
+  const cat = g.categories[0];
+  const same = GAMES.filter(x => x.id !== g.id && x.categories.includes(cat))
+    .sort((a, b) => a.ranking - b.ranking)
+    .slice(0, MORE_COUNT * 3);
+  if (same.length <= MORE_COUNT) return same;
+  const start = g.id.split('').reduce((n, c) => n + c.charCodeAt(0), 0) % same.length;
+  return same.slice(start).concat(same.slice(0, start)).slice(0, MORE_COUNT);
+}
+
+
 function openGame(g) {
   gameOverlay.classList.add('show');
   document.body.style.overflow = 'hidden';
