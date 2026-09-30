@@ -20,4 +20,30 @@
     { href: '/status/',    label: 'Requests', icon: '<path d="M5 5h14v14H5z"/><path d="M8 10l2 2 4-4M8 15h8"/>' },
     { href: '/settings/',  label: 'Settings', icon: '<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/>' }
   ];
+
+  var CSS =
+    '.gv-apps{position:relative;flex-shrink:0}' +
+    '.gv-apps-btn{width:38px;height:38px;display:grid;place-items:center;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:color .15s,border-color .15s}' +
+    '.gv-apps-btn:hover,.gv-apps-btn[aria-expanded="true"]{color:var(--text);border-color:var(--border-strong)}' +
+    '.gv-apps-panel{position:absolute;top:calc(100% + 8px);right:0;z-index:600;width:300px;padding:10px;border-radius:16px;background:var(--surface);border:1px solid var(--border-strong);box-shadow:0 20px 50px rgba(0,0,0,.55);display:grid;grid-template-columns:repeat(3,1fr);gap:4px}' +
+    '.gv-apps-panel[hidden]{display:none}' +
+    '.gv-app{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;border-radius:12px;color:var(--muted);text-decoration:none;font-size:.74rem;transition:background .15s,color .15s}' +
+    '.gv-app:hover,.gv-app[aria-current="page"]{background:var(--surface-2);color:var(--text)}' +
+    '.gv-app svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}' +
+    '.gv-apps-scrim{display:none}' +
+    '@media (max-width:700px){' +
+      '.gv-apps-panel{position:fixed;top:0;right:0;bottom:0;width:min(78vw,300px);border-radius:0;grid-template-columns:repeat(2,1fr);align-content:start;padding:72px 12px 12px;transform:translateX(0);animation:gvAppsIn .22s ease}' +
+      '.gv-apps-scrim{display:block;position:fixed;inset:0;z-index:599;background:rgba(0,0,0,.5)}' +
+      '.gv-apps-scrim[hidden]{display:none}' +
+    '}' +
+    '@keyframes gvAppsIn{from{transform:translateX(100%)}}' +
+    '@media (prefers-reduced-motion:reduce){.gv-apps-panel{animation:none}}';
+
+  function style() {
+    if (document.getElementById('gvAppsCss')) return;
+    var st = document.createElement('style');
+    st.id = 'gvAppsCss';
+    st.textContent = CSS;
+    document.head.appendChild(st);
+  }
 })();
