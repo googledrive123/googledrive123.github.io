@@ -4599,6 +4599,19 @@ async function uploadLocalSessions() {
   saveLocalSessions([]);
 }
 
+// ─── Stars on the account ───
+// Guests keep stars in this browser only. Signed in, the account's list is the
+// real one: the first time a browser signs in to an account the two lists are
+// merged, and after that every star and unstar goes to the account as well.
+const STAR_SYNCED_KEY = 'gv.starred.for';
+window._starSync = function (id, on) {
+  if (!currentUser) return;
+  const q = on
+    ? sb.from('starred_games').upsert({ user_id: currentUser.id, game_id: id })
+    : sb.from('starred_games').delete().eq('user_id', currentUser.id).eq('game_id', id);
+  q.then(() => {}, () => {});
+};
+
 // ─── Auth state ───
 // Every token refresh hands over a new user object. What was looked up about
 // the same user carries over, or the name drops back to the email's first half.
