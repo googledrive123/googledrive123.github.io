@@ -3033,7 +3033,7 @@ function initRoute() {
 
   var id = p.slice(7).replace(/\/$/, '');
   // A typed address comes in whatever case it was typed in.
-  var g = gamesById[id] || GAMES.find(function (x) {
+  var g = gamesById[id] || ALL_GAMES.find(function (x) {
     return x.id.toLowerCase() === id.toLowerCase();
   });
   // Set by /js/mimicry.js when a game page opened on its own sent itself here.
@@ -3799,7 +3799,7 @@ window.addEventListener('popstate', function() {
     if (gameOverlay.classList.contains('show')) { if (window._trackClose) window._trackClose(); clearTimeout(stallTimer); expectLoad = false; mounted = null; gameOverlay.classList.remove('show'); gameFrame.src = ''; document.body.style.overflow = ''; }
   } else if (p.startsWith('/games/')) {
     var id = p.slice(7).replace(/\/$/, '');
-    var g = GAMES.find(function(x){return x.id===id;});
+    var g = gamesById[id];
     if (g && !gameOverlay.classList.contains('show')) {
       gameOverlay.classList.add('show');
       document.body.style.overflow = 'hidden';
