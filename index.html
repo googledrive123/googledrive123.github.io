@@ -4808,7 +4808,13 @@ function setCurrentUser(user) {
     user._username = currentUser._username;
     user._nameLoaded = currentUser._nameLoaded;
   }
+  const changed = (user ? user.id : null) !== (currentUser ? currentUser.id : null);
   currentUser = user;
+  // A different person has a different level; work it out again.
+  if (changed) {
+    window._level = null;
+    if (user) renderStats(); else renderLocalStats();
+  }
 }
 
 sb.auth.onAuthStateChange(async (event, session) => {
