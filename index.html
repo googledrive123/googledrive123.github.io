@@ -2892,6 +2892,13 @@
         </div>
         <label class="sec-switch"><input type="checkbox" id="skipWelcomeInput"><span class="sec-track"></span></label>
       </div>
+      <div class="sec-row">
+        <div>
+          <div class="sec-label">Light theme</div>
+          <div class="sec-desc">A light page instead of the dark one.</div>
+        </div>
+        <label class="sec-switch"><input type="checkbox" id="lightThemeInput"><span class="sec-track"></span></label>
+      </div>
       <div class="sec-row" style="display:block">
         <div class="sec-label">Tile size</div>
         <input class="sec-range" type="range" id="tileSizeInput" min="130" max="300" step="10" aria-label="Tile size">
@@ -4212,6 +4219,7 @@ function openSettings() {
   document.getElementById('confirmCloseInput').checked = security.confirmClose();
   document.getElementById('skipWelcomeInput').checked = GV.layout.skipWelcome();
   document.getElementById('tileSizeInput').value = GV.layout.tileSize();
+  document.getElementById('lightThemeInput').checked = GV.layout.theme() === 'light';
   settingsOverlay.querySelectorAll('[data-row]').forEach(el => {
     el.checked = !GV.layout.hidden(el.dataset.row);
   });
@@ -4226,6 +4234,9 @@ document.getElementById('settingsBtnWelcome').addEventListener('click', openSett
 document.getElementById('settingsBtnBrowse').addEventListener('click', openSettings);
 document.getElementById('skipWelcomeInput').addEventListener('change', (e) => {
   GV.layout.setSkipWelcome(e.target.checked);
+});
+document.getElementById('lightThemeInput').addEventListener('change', (e) => {
+  GV.layout.setTheme(e.target.checked ? 'light' : 'dark');
 });
 document.getElementById('tileSizeInput').addEventListener('input', (e) => {
   GV.layout.setTileSize(+e.target.value);
