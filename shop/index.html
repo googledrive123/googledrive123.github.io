@@ -398,11 +398,39 @@ document.addEventListener('DOMContentLoaded', function () {
         if (qty > 1) meta.appendChild(el('span', null, '×' + qty));
         card.appendChild(meta);
         if (state.user && !qty) card.appendChild(el('div', 'item-missing', 'Not found yet'));
+        if (qty) card.appendChild(wearButton(item, wearing));
         grid.appendChild(card);
       });
       section.appendChild(grid);
       box.appendChild(section);
     });
+  }
+
+  function wearButton(item, wearing) {
+    var btn = el('button', 'btn', wearing ? 'Take off' : 'Wear');
+    btn.type = 'button';
+    btn.setAttribute('aria-pressed', wearing ? 'true' : 'false');
+    btn.setAttribute('aria-label', (wearing ? 'Take off ' : 'Wear ') + item.name);
+    btn.addEventListener('click', function () {
+      if (state.busy) return;
+      state.busy = true;
+      btn.disabled = true;
+      var call = wearing ? rpc('gv_unequip', { p_kind: item.kind }) : rpc('gv_equip', { p_item_id: item.id });
+      call.then(function (wallet) {
+        state.wallet = wallet;
+        // So this page's own lookups (and a chat open in another tab, within
+        // a minute) show the change.
+        if (cos) cos.forget(state.user.id);
+        say(wearing ? 'Took off ' + item.name + '.' : 'Now wearing ' + item.name + '.');
+      }).catch(function (err) {
+        console.error(err);
+        say('Could not change that. Try again.', true);
+      }).then(function () {
+        state.busy = false;
+        render();
+      });
+    });
+    return btn;
   }
 
   function render() {
