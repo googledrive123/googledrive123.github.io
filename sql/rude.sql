@@ -48,12 +48,21 @@ declare
     'wetback(s)?', 'beaner(s)?', 'raghead(s)?', 'towelhead(s)?', 'coon(s)?',
     'paki(s)?', 'shemale(s)?'
   ];
+  -- Matched anywhere, even inside a longer word. Only words that no
+  -- ordinary word contains belong here.
+  v_inside text[] := array[
+    'fuck', 'bitch', 'nigga', 'faggot', 'whore', 'slut', 'porn', 'dildo',
+    'blowjob', 'handjob', 'asshole', 'cocksucker'
+  ];
   v_text text := lower(coalesce(p_text, ''));
 begin
   v_text := regexp_replace(v_text, '[^a-z]+', ' ', 'g');
 
   return v_text ~ ('\m(' || array_to_string(array(
            select regexp_replace(w, '([a-z])', '\1+', 'g') from unnest(v_words) w
-         ), '|') || ')\M');
+         ), '|') || ')\M')
+      or v_text ~ ('(' || array_to_string(array(
+           select regexp_replace(w, '([a-z])', '\1+', 'g') from unnest(v_inside) w
+         ), '|') || ')');
 end;
 $function$;
