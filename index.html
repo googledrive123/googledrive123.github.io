@@ -3524,7 +3524,8 @@ function mountGame(g, where) {
   expectLoad = false;
   gameFrame.src = '';
   if (where === 'vault' && g.src) checkVault(g, url, token);
-  setTimeout(() => {
+  const ready = where === 'vault' ? carrySaves(g) : Promise.resolve();
+  setTimeout(() => ready.then(() => {
     if (token !== mountToken) return;
     expectLoad = true;
     gameFrame.src = url;
@@ -3535,7 +3536,7 @@ function mountGame(g, where) {
       gameLoaderText.textContent = 'Still loading…';
       loaderSwap.hidden = !canSwap(g);
     }, STALL_MS);
-  }, 60);
+  }), 60);
 }
 
 // A vault copy that is missing falls back to the host the game came from,
