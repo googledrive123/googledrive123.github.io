@@ -52,4 +52,30 @@
   function p(x) { return x < 0 ? '(' + s(x) + ')' : s(x); }
   function signed(x) { return x < 0 ? '− ' + s(-x) : '+ ' + s(x); }
   function money(x) { return '$' + s(x); }
+
+  function fr(n, d) { return '<span class="frac"><span>' + n + '</span><span>' + d + '</span></span>'; }
+  function frac(n, d) {
+    if (d < 0) { n = -n; d = -d; }
+    var g = gcd(n, d) || 1; n /= g; d /= g;
+    if (d === 1) return s(n);
+    return (n < 0 ? '−' : '') + fr(Math.abs(n), d);
+  }
+  // The same fraction as someone would type it, for answers and explanations.
+  function ft(n, d) {
+    if (d < 0) { n = -n; d = -d; }
+    var g = gcd(n, d) || 1; n /= g; d /= g;
+    return d === 1 ? s(n) : s(n) + '/' + d;
+  }
+  function mixed(n, d) {
+    var g = gcd(n, d) || 1; n /= g; d /= g;
+    var w = Math.floor(n / d), r = n % d;
+    if (!r) return String(w);
+    return w ? w + ' ' + r + '/' + d : r + '/' + d;
+  }
+  // A multiple of π; brackets keep 33/4 of π from reading as 33 over 4π.
+  function piText(n, d) {
+    var t = ft(n, d);
+    return t === '1' ? 'π' : t.indexOf('/') < 0 ? t + 'π' : '(' + t + ')π';
+  }
+  function mix(w, n, d) { return w + '<span class="gap"></span>' + fr(n, d); }
 })();
