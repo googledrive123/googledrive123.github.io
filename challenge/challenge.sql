@@ -617,3 +617,30 @@ begin
   ), '[]'::json);
 end;
 $function$;
+
+-- Takes a suspicious time off a month's board. It stays on the PolyTrack
+-- board, where the owner removes it separately. A closed month is closed
+-- again, so the badges follow the board.
+create or replace function public.gv_challenge_remove(p_secret text, p_month date, p_player_key text)
+returns boolean
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_month date := date_trunc('month', p_month::timestamp)::date;
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+
+  delete from gv_challenge_runs where month = v_month and player_key = p_player_key;
+  if not found then
+    return false;
+  end if;
+  if exists (select 1 from gv_challenges where month = v_month and closed_at is not null) then
+    perform gv_challenge_close(p_secret, v_month);
+  end if;
+  return true;
+end;
+$function$;
