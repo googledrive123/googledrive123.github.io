@@ -431,13 +431,18 @@
     bar.insertBefore(button, bar.querySelector(':scope > .right'));
   }
 
-  function watchSettings() {
-    new MutationObserver(fillSettings).observe(document.body, { childList: true, subtree: true });
+  function fill() {
     fillSettings();
+    fillMenu();
   }
 
-  if (document.body) watchSettings();
-  else document.addEventListener('DOMContentLoaded', watchSettings);
+  function watchScreens() {
+    new MutationObserver(fill).observe(document.body, { childList: true, subtree: true });
+    fill();
+  }
+
+  if (document.body) watchScreens();
+  else document.addEventListener('DOMContentLoaded', watchScreens);
 
   window.GV = window.GV || {};
   window.GV.graphics = {
