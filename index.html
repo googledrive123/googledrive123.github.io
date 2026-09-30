@@ -4792,9 +4792,12 @@ async function syncStars() {
     add.forEach(r => remote.add(r.game_id));
     try { localStorage.setItem(STAR_SYNCED_KEY, currentUser.id); } catch (e) {}
   }
+  // This runs on every sign-in event, including each return to the tab, so
+  // only redraw (which resets the scrolled grid) when the stars really moved.
+  const same = remote.size === starred.size && [...remote].every(id => starred.has(id));
   starred = remote;
   saveStars(starred);
-  render();
+  if (!same && GAMES.length) render();
 }
 
 // ─── Auth state ───
