@@ -137,7 +137,14 @@
     '.gv-fun-glow{position:fixed;inset:0;z-index:-1;pointer-events:none;',
     'background:radial-gradient(ellipse 75% 45% at 50% 100%,rgba(255,110,30,0.16),transparent 70%),',
     'radial-gradient(ellipse 40% 30% at 0 0,rgba(255,110,30,0.06),transparent 70%),',
-    'radial-gradient(ellipse 40% 30% at 100% 0,rgba(255,110,30,0.06),transparent 70%)}'
+    'radial-gradient(ellipse 40% 30% at 100% 0,rgba(255,110,30,0.06),transparent 70%)}',
+
+    // Decorations share one layer: never catches a click, under the game and dialogs.
+    '.gv-fun-spooky{position:fixed;inset:0;z-index:450;pointer-events:none;overflow:hidden}',
+    '.gv-fun-web{position:absolute;top:0;width:150px;height:150px;color:rgba(255,255,255,0.2)}',
+    '.gv-fun-web-left{left:0}',
+    '.gv-fun-web-right{right:0;transform:scaleX(-1)}',
+    '@media (max-width:640px){.gv-fun-web{width:96px;height:96px}}'
   ];
 
   function styles() {
@@ -282,6 +289,27 @@
 
   // ── Halloween ───────────────────────────────────────────────────────────
 
+  // A cobweb spun out from the top left corner. The right hand one is the
+  // same drawing, mirrored in CSS.
+  function cobweb(side) {
+    var R = 150, spokes = [0, 16, 34, 52, 71, 90], rings = [30, 58, 90, 124];
+    function pt(r, deg) {
+      var a = deg * Math.PI / 180;
+      return (r * Math.cos(a)).toFixed(1) + ' ' + (r * Math.sin(a)).toFixed(1);
+    }
+    var d = '';
+    spokes.forEach(function (s) { d += 'M0 0L' + pt(R, s); });
+    rings.forEach(function (r) {
+      for (var i = 1; i < spokes.length; i++) {
+        var a = spokes[i - 1], b = spokes[i];
+        // Each thread sags a little toward the corner between two spokes.
+        d += 'M' + pt(r, a) + 'Q' + pt(r * 0.84, (a + b) / 2) + ' ' + pt(r, b);
+      }
+    });
+    return '<svg class="gv-fun-web gv-fun-web-' + side + '" viewBox="0 0 150 150">' +
+      '<path d="' + d + '" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>';
+  }
+
   function startHalloween(undo) {
     styles();
     flag(undo, 'gv-fun-halloween');
@@ -289,6 +317,12 @@
     glow.className = 'gv-fun-glow';
     glow.setAttribute('aria-hidden', 'true');
     place(undo, glow);
+
+    var layer = document.createElement('div');
+    layer.className = 'gv-fun-spooky';
+    layer.setAttribute('aria-hidden', 'true');
+    layer.innerHTML = cobweb('left') + cobweb('right');
+    place(undo, layer);
   }
 
   // ── Secret corner ───────────────────────────────────────────────────────
