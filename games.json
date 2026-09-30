@@ -305,7 +305,7 @@
 {"id":"nutsim","name":"Nut Simulator","categories":["Idle","Simulation"],"ranking":385,"img":"/thumbs/nutsim.webp","src":"https://icons-6.us/casual-games/nut-simulator/","site":5,"added":"2026-05-13"},
 {"id":"offlineparadise","name":"Offline Paradise","categories":["Idle"],"ranking":386,"img":"/thumbs/offlineparadise.webp","src":"https://icons-6.us/action-games/OfflineParadise/","site":5,"added":"2026-05-13"},
 {"id":"osumania","name":"osu!mania","categories":["Rhythm"],"ranking":388,"img":"/thumbs/osumania.webp","src":null,"site":6,"added":"2026-05-13"},
-{"id":"ovo","name":"OvO","categories":["Platformer"],"ranking":389,"img":"https://icons-6.us/action-games/ovo/ovo.png","src":"https://icons-6.us/action-games/ovo/","local":true},
+{"id":"ovo","name":"OvO","categories":["Platformer"],"ranking":389,"img":"/thumbs/ovo.webp","src":"https://icons-6.us/action-games/ovo/","site":6,"added":"2026-05-13"},
 {"id":"pacman","name":"Pac-Man","categories":["Arcade"],"ranking":390,"img":"https://icons-6.us/action-games/pacman/logo.png","src":"https://icons-6.us/action-games/pacman/","local":true},
 {"id":"pandemic","name":"Pandemic","categories":["Strategy"],"ranking":391,"img":"https://imgs.crazygames.com/games/pandemic/cover-1592219629676.png","src":null},
 {"id":"pandemic2","name":"Pandemic 2","categories":["Strategy"],"ranking":392,"img":"https://icons-6.us/strategy-games/pandemic2/pandemic2.png","src":"https://icons-6.us/strategy-games/pandemic2/","local":true},
