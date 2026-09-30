@@ -1393,9 +1393,11 @@
   $('gaList').addEventListener('click', gaAction);
   $('gaCreate').addEventListener('click', function () {
     var ends = $('gaEnds').value;
+    $('gaCreate').disabled = true;
     rpc('gv_giveaway_create', { p_secret: state.secret, p_title: $('gaTitle').value.trim(), p_prize_text: $('gaPrize').value.trim(), p_ends_at: ends ? new Date(ends).toISOString() : null })
       .then(function () { $('gaTitle').value = $('gaPrize').value = ''; $('gaMsg').textContent = 'Started.'; return loadGiveaways(); })
-      .catch(function (e) { $('gaMsg').textContent = 'Could not start it: ' + e.message; });
+      .catch(function (e) { $('gaMsg').textContent = 'Could not start it: ' + e.message; })
+      .then(function () { $('gaCreate').disabled = false; });
   });
   $('mirrorList').addEventListener('click', function (e) {
     var b = e.target.closest('button[data-unmirror]'); if (!b) return;
