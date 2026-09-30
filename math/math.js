@@ -543,5 +543,54 @@
           'Subtract ' + b + ': ' + a + 'x = ' + (c - b) + '. Divide by ' + a + ': x = ' + x + '.');
       }
     ],
+    medium: [
+      function () {
+        var a; do { a = ri(-9, 9); } while (Math.abs(a) < 2);
+        var x = ri(-10, 10), b = nz(-20, 20), c = a * x + b;
+        return num('Solve for x.', poly([a, b]) + ' = ' + s(c), x, s(x),
+          (b > 0 ? 'Subtract ' + b : 'Add ' + -b) + ' on both sides: ' + poly([a, 0]) + ' = ' + s(c - b) +
+          '. Divide by ' + s(a) + ': x = ' + s(x) + '.');
+      },
+      function () {
+        var a, c; do { a = ri(2, 9); c = ri(2, 9); } while (a === c);
+        var x = ri(-8, 8), b = ri(-15, 15), d = a * x + b - c * x;
+        return num('Solve for x.', poly([a, b]) + ' = ' + poly([c, d]), x, s(x),
+          'Gather the x terms on one side: ' + poly([a - c, 0]) + ' = ' + s(d - b) + ', so x = ' + s(x) + '.');
+      },
+      function () {
+        var a = ri(2, 9), b = nz(-9, 9), x = ri(-9, 12), c = a * (x + b);
+        return num('Solve for x.', a + '(' + poly([1, b]) + ') = ' + s(c), x, s(x),
+          'Divide both sides by ' + a + ': ' + poly([1, b]) + ' = ' + s(x + b) + ', then x = ' + s(x) + '.');
+      },
+      function () {
+        var a; do { a = ri(-6, 9); } while (Math.abs(a) < 2);
+        var b = ri(2, 9), c = nz(-9, 9);
+        return choice('Expand.', s(a) + '(' + poly([b, c]) + ')', poly([a * b, a * c]),
+          [poly([a * b, c]), poly([a + b, a * c]), poly([a * b, -a * c]), poly([b, a * c])],
+          'Multiply each term inside by ' + s(a) + ': ' + s(a) + ' × ' + b + 'x = ' + poly([a * b, 0]) +
+          ' and ' + s(a) + ' × ' + p(c) + ' = ' + s(a * c) + '.');
+      },
+      function () {
+        var x1 = ri(-6, 6), x2; do { x2 = ri(-6, 6); } while (x2 === x1);
+        var y1 = ri(-9, 9), y2 = ri(-9, 9), dy = y2 - y1, dx = x2 - x1;
+        return num('What is the slope of the line through these points?', xy(x1, y1) + ' and ' + xy(x2, y2), dy / dx, ft(dy, dx),
+          'Slope = rise ÷ run = (' + s(y2) + ' − ' + p(y1) + ') ÷ (' + s(x2) + ' − ' + p(x1) + ') = ' + s(dy) + ' ÷ ' + p(dx) +
+          (Math.abs(gcd(dy, dx)) !== 1 || dx < 0 ? ' = ' + ft(dy, dx) : '') + '.');
+      },
+      function () {
+        var a = ri(2, 9), x = ri(-6, 10), b = nz(-15, 15), c = a * x + b, sym = pick(['<', '>', '≤', '≥']);
+        var flip = { '<': '>', '>': '<', '≤': '≥', '≥': '≤' }[sym], other = a * x !== x ? a * x : x + 2;
+        return choice('Solve.', poly([a, b]) + ' ' + ineq(sym) + ' ' + s(c), 'x ' + ineq(sym) + ' ' + s(x),
+          ['x ' + ineq(flip) + ' ' + s(x), 'x ' + ineq(sym) + ' ' + s(other), 'x ' + ineq(flip) + ' ' + s(other)],
+          (b > 0 ? 'Subtract ' + b : 'Add ' + -b) + ': ' + a + 'x ' + ineq(sym) + ' ' + s(c - b) + '. Dividing by ' + a +
+          ' (a positive number) keeps the sign: x ' + ineq(sym) + ' ' + s(x) + '.');
+      },
+      function () {
+        var cost = ri(3, 15), fee = ri(2, 10), n = ri(2, 12), total = cost * n + fee;
+        return num('Tickets cost ' + money(cost) + ' each, plus a ' + money(fee) + ' booking fee. The total was ' + money(total) +
+          '. How many tickets were bought?', '', n, s(n),
+          'Take off the fee: ' + total + ' − ' + fee + ' = ' + (total - fee) + ', then ' + (total - fee) + ' ÷ ' + cost + ' = ' + n + ' tickets.');
+      }
+    ],
   };
 })();
