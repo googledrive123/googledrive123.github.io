@@ -3441,18 +3441,20 @@ let stallTimer = null;
 let expectLoad = false;
 let mounted = null;
 
-// Which games this browser has been told to run locally. Survives reloads, so
-// someone on a network that blocks the host picks once and it stays picked.
-const prefs = {
-  key: 'gv.offline',
-  offline() {
-    try { return new Set(JSON.parse(localStorage.getItem(this.key) || '[]')); }
-    catch (e) { return new Set(); }
+// Which copy this browser has been told to run, by game id: 'vault' or 'src'.
+// Survives reloads, so someone on a network that blocks one picks once and it
+// stays picked.
+const picks = {
+  key: 'gv.source',
+  all() {
+    try { return JSON.parse(localStorage.getItem(this.key) || '{}') || {}; }
+    catch (e) { return {}; }
   },
-  flip(id) {
-    const set = this.offline();
-    if (set.has(id)) set.delete(id); else set.add(id);
-    try { localStorage.setItem(this.key, JSON.stringify([...set])); } catch (e) {}
+  get(id) { return this.all()[id] || null; },
+  set(id, where) {
+    const all = this.all();
+    all[id] = where;
+    try { localStorage.setItem(this.key, JSON.stringify(all)); } catch (e) {}
   }
 };
 
