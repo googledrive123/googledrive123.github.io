@@ -1339,5 +1339,6 @@
 {"id":"papa-louie","name":"Papa Louie","categories":["Platformer"],"img":"/thumbs/papa-louie.webp","src":null,"site":8,"path":"flash/?swf=papalouie.swf","added":"2026-09-30","ranking":1492},
 {"id":"picos-school-2","name":"Pico's School 2","categories":["Adventure"],"img":"/thumbs/picos-school-2.webp","src":null,"site":8,"path":"flash/?swf=picosschool2.swf","added":"2026-09-30","ranking":1493},
 {"id":"pirates","name":"Pirates","categories":["Strategy"],"img":"/thumbs/pirates.webp","src":null,"site":8,"path":"flash/?swf=pirates.swf","added":"2026-09-30","ranking":1494},
-{"id":"polar-jump","name":"Polar Jump","categories":["Platformer"],"img":"/thumbs/polar-jump.webp","src":null,"site":8,"path":"flash/?swf=polarjump.swf","added":"2026-09-30","ranking":1495}
+{"id":"polar-jump","name":"Polar Jump","categories":["Platformer"],"img":"/thumbs/polar-jump.webp","src":null,"site":8,"path":"flash/?swf=polarjump.swf","added":"2026-09-30","ranking":1495},
+{"id":"pong","name":"Pong","categories":["Arcade"],"img":"/thumbs/pong.webp","src":null,"site":8,"path":"flash/?swf=pong.swf","added":"2026-09-30","ranking":1496}
 ]}
