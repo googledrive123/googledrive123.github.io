@@ -4892,12 +4892,14 @@ sb.auth.onAuthStateChange(async (event, session) => {
     loadAvatar();
     await uploadLocalSessions();
     // Play time turns into shop coins (shop/shop.sql caps it per day).
-    sb.rpc('gv_grant_coins').then(() => {}, () => {});
+    sb.rpc('gv_grant_coins').then(loadWallet, loadWallet);
     syncStars();
     // A daily cloud backup of game saves, if this person switched it on.
     if (window.GV && GV.saves) GV.saves.autoSaveIfDue(sb);
   } else if (event === 'SIGNED_OUT') {
     myAvatar = null;
+    myWallet = null;
+    paintCosmetics();
     // The stars belong to the account now. Leaving them would hand them to
     // whoever signs in next on a shared computer.
     let synced = null;
