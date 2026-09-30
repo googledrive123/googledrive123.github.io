@@ -1163,4 +1163,13 @@
       }
     ]
   };
+
+  var BANK = {
+    arithmetic: arithmetic,
+    fractions: fractions,
+    algebra: algebra,
+    functions: functions,
+    geometry: geometry,
+    calculus: calculus
+  };
 })();
