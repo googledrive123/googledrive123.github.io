@@ -47,3 +47,28 @@ as $function$
   ] || coalesce((select array_agg(m.origin order by m.origin) from gv_mirrors m where m.active), '{}'::text[]);
 $function$;
 
+
+-- What /mirrors/ lists, oldest first. The main site is not in the table; the
+-- page adds it itself.
+create or replace function public.gv_mirrors_list()
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'not read from this origin';
+  end if;
+
+  return coalesce((
+    select json_agg(json_build_object('origin', origin, 'label', label) order by added_at, origin)
+    from gv_mirrors
+    where active
+  ), '[]'::json);
+end;
+$function$;
+
+grant execute on function public.gv_mirrors_list() to anon, authenticated;
+
