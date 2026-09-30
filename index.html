@@ -4085,6 +4085,10 @@ function pickQuick(i) {
   openGame(g);
 }
 
+searchInput.addEventListener('input', paintQuickPick);
+searchInput.addEventListener('focus', paintQuickPick);
+searchInput.addEventListener('blur', () => { quickPick.hidden = true; });
+
 // ───── Sort menu ─────
 const sortBtn = document.getElementById('sortBtn');
 const sortMenu = document.getElementById('sortMenu');
