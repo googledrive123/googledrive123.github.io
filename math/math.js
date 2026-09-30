@@ -1450,4 +1450,24 @@
     if (answered || q.type !== 'mc' || i < 0 || i >= q.choices.length) return;
     finish(i === q.answer, i, q.choices[i].replace(/<[^>]+>/g, ''));
   }
+
+  buildPickers();
+
+  $('subjects').addEventListener('click', function (e) {
+    var el = e.target.closest('.subject');
+    if (!el || el.getAttribute('data-id') === state.subject) return;
+    state.subject = el.getAttribute('data-id');
+    save();
+    paintPickers();
+    next(true);
+  });
+
+  $('levels').addEventListener('click', function (e) {
+    var el = e.target.closest('.level');
+    if (!el || el.getAttribute('data-id') === state.level) return;
+    state.level = el.getAttribute('data-id');
+    save();
+    paintPickers();
+    next(true);
+  });
 })();
