@@ -394,6 +394,16 @@
       letter-spacing: -0.02em;
       color: var(--text);
     }
+    /* Until the catalog loads the real counts, a pulsing bar instead of a
+       made-up number. */
+    .stat .num.loading {
+      color: transparent;
+      min-width: 3ch;
+      border-radius: 6px;
+      background: var(--surface-2);
+      animation: skeletonPulse 1.2s ease-in-out infinite;
+    }
+    @keyframes skeletonPulse { 50% { opacity: 0.45; } }
     .stat .lbl {
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.62rem;
