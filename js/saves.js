@@ -338,4 +338,39 @@
     return deleteDb(name).then(function () { return createDb(name, dump); })
       .then(function (db) { return fillDb(db, dump); });
   }
+
+  // Keys the file does not have go too: a restore puts the browser back to
+  // exactly the moment the file was made, not a mix of then and now.
+  function restoreLocal(saved) {
+    localKeys().forEach(function (key) {
+      if (!Object.prototype.hasOwnProperty.call(saved, key)) localStorage.removeItem(key);
+    });
+    Object.keys(saved).forEach(function (key) {
+      if (!skipKey(key) && typeof saved[key] === 'string') localStorage.setItem(key, saved[key]);
+    });
+  }
+
+  function isSave(data) {
+    return !!data && data.v === 1
+      && typeof data.localStorage === 'object' && data.localStorage !== null
+      && typeof data.indexedDB === 'object' && data.indexedDB !== null;
+  }
+
+  /* Databases first: they are the step that can be refused, by another tab
+     holding one open. localStorage is only touched once they are all in. The
+     caller reloads afterwards, so no game keeps running on the old progress. */
+  function restore(data) {
+    if (!isSave(data)) return Promise.reject(new Error('That is not a GameVault save file.'));
+    var incoming = Object.keys(data.indexedDB).filter(function (name) {
+      return SKIP_DBS.indexOf(name) === -1;
+    });
+    return listDbs().then(function (here) {
+      var gone = here.filter(function (name) { return incoming.indexOf(name) === -1; });
+      return eachInTurn(gone, deleteDb);
+    }).then(function () {
+      return eachInTurn(incoming, function (name) { return rebuildDb(name, data.indexedDB[name]); });
+    }).then(function () {
+      restoreLocal(data.localStorage);
+    });
+  }
 })();
