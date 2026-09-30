@@ -39,6 +39,27 @@
     <div id="fileConfirm"></div>
     <p class="save-note" id="fileNote" role="status" aria-live="polite"></p>
   </div>
+
+  <div class="panel">
+    <div class="panel-label">Cloud slots</div>
+    <p class="panel-note" id="cloudLoading" style="margin-top:0">Checking your account…</p>
+
+    <div id="cloudOut" hidden>
+      <p class="panel-note" style="margin-top:0">Sign in to keep up to three saves on your GameVault
+      account, plus a daily auto-save, and load them in any browser you sign in on.</p>
+      <div class="btn-row">
+        <a class="btn" href="/">Sign in on the home page</a>
+      </div>
+    </div>
+
+    <div id="cloudIn" hidden>
+      <p class="panel-note" style="margin-top:0">Signed in as <span class="who" id="cloudWho"></span>.
+      Each slot holds one save. Saving over a slot replaces what was in it.</p>
+      <div id="autoOfferBox"></div>
+      <div class="slots" id="slotList"></div>
+      <p class="save-note" id="cloudNote" role="status" aria-live="polite"></p>
+    </div>
+  </div>
 </main>
 </body>
 </html>
