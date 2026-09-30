@@ -32,6 +32,16 @@ on conflict (id) do update
 -- gv_submission_create records, so a failed attempt can be tried again but
 -- the bucket cannot be filled by uploading around the page.
 --
+-- The free plan holds 1 GB of files for the whole project, and saves share
+-- it (saves/saves.sql). So the bucket also takes nothing new once it holds
+-- more than 600 MB (629145600 bytes), until the owner clears reviewed games
+-- out; one last 50 MB zip can take it to 650 MB at most. And it takes at most
+-- 40 new files a day from every account together, far more than real
+-- submissions, so a crowd of new accounts at five files each cannot fill it
+-- in one go. The 600 MB here and the 800 MB on saves add up to more than
+-- 1 GB: each one stops its own bucket filling the project alone, and the
+-- two together are not promised to fit.
+--
 -- Security definer only to count files, which players cannot see.
 create or replace function public.gv_submission_new_file(p_name text)
 returns boolean
@@ -45,7 +55,12 @@ as $function$
      and (select count(*) from storage.objects o
            where o.bucket_id = 'submissions'
              and o.name like auth.uid()::text || '/%'
-             and o.created_at > now() - interval '1 day') < 5;
+             and o.created_at > now() - interval '1 day') < 5
+     and (select coalesce(sum((o.metadata ->> 'size')::bigint), 0) from storage.objects o
+           where o.bucket_id = 'submissions') <= 629145600
+     and (select count(*) from storage.objects o
+           where o.bucket_id = 'submissions'
+             and o.created_at > now() - interval '1 day') < 40;
 $function$;
 
 revoke all on function public.gv_submission_new_file(text) from public, anon;
