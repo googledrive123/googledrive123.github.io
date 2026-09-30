@@ -364,7 +364,7 @@
 {"id":"tetris","name":"Tetris","categories":["Puzzle"],"ranking":475,"img":"/thumbs/tetris.webp","src":null,"site":7,"added":"2026-05-13"},
 {"id":"thefinalearth2","name":"The Final Earth 2","categories":["Strategy"],"ranking":476,"img":"/thumbs/thefinalearth2.webp","src":null,"site":7,"added":"2026-05-13"},
 {"id":"theimpossiblegame","name":"The Impossible Game","categories":["Platformer","Skill"],"ranking":477,"img":"https://upload.wikimedia.org/wikipedia/en/thumb/6/62/The_Impossible_Game_logo.jpg/330px-The_Impossible_Game_logo.jpg","src":null,"site":7,"added":"2026-05-13"},
-{"id":"theimpossiblequiz","name":"The Impossible Quiz","categories":["Puzzle"],"ranking":478,"img":"https://cdn2.y8.com/cloudimage/2025/file/w380h285_retina_webp-9ff1f17c74c26ba1e4f22da9a06ed607.webp","src":null,"site":7,"added":"2026-05-13"},
+{"id":"theimpossiblequiz","name":"The Impossible Quiz","categories":["Puzzle"],"ranking":478,"img":"/thumbs/theimpossiblequiz.webp","src":null,"site":7,"added":"2026-05-13"},
 {"id":"there-is-no-game","name":"There Is No Game","categories":["Puzzle"],"ranking":479,"img":"/thumbs/there-is-no-game.webp","src":"https://icons-6.us/strategy-games/there-is-no-game/","site":7,"added":"2026-05-13"},
 {"id":"tinyfishing","name":"Tiny Fishing","categories":["Simulation","Idle"],"ranking":485,"img":"/thumbs/tinyfishing.webp","src":"https://icons-6.us/action-games/tiny-fishing/","site":7,"added":"2026-05-13"},
 {"id":"townscaper","name":"Townscaper","categories":["Simulation","Sandbox"],"ranking":486,"img":"/thumbs/townscaper.webp","src":"https://icons-6.us/casual-games/townscaper/","site":7,"added":"2026-05-13"},
