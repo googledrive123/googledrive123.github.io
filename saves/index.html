@@ -435,6 +435,29 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     });
   }
+
+  function autoStatus() {
+    if (!saves.autoOn()) return 'Off in this browser. Your last auto-save stays until you delete it.';
+    var at = Date.parse(saves.autoAt() || '');
+    if (!at) return 'On. Load or skip the auto-save above first, so this browser does not replace it.';
+    return 'On. The next auto-save is due after ' + when(new Date(at + 24 * 60 * 60 * 1000)) + '.';
+  }
+
+  function runAuto() {
+    return saves.autoSaveIfDue().then(function (saved) {
+      if (!saved) { note(autoNote, autoStatus()); return; }
+      return refresh().then(function () { note(autoNote, 'Auto-saved just now. ' + autoStatus(), 'good'); });
+    });
+  }
+
+  var autoSwitch = $('autoSwitch');
+  autoSwitch.checked = saves.autoOn();
+  autoSwitch.addEventListener('change', function () {
+    saves.setAuto(autoSwitch.checked);
+    if (!autoSwitch.checked) { note(autoNote, autoStatus()); return; }
+    note(autoNote, 'On. Checking whether an auto-save is due…');
+    runAuto();
+  });
 });
 </script>
 </main>
