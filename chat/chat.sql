@@ -56,7 +56,8 @@ revoke all on table public.gv_chat_messages, public.gv_chat_bans, public.gv_chat
 
 
 -- Sends a message as the signed-in account. Every refusal is a sentence the
--- page shows as it is.
+-- page shows as it is. A ban's end also comes back in the hint as
+-- until=<time>, for the page to show in the reader's own time.
 create or replace function public.gv_chat_send(p_body text)
 returns json
 language plpgsql
@@ -68,6 +69,7 @@ declare
   -- Line breaks and other control characters would let one message fill
   -- the screen.
   v_body text := btrim(regexp_replace(coalesce(p_body, ''), '[[:space:][:cntrl:]]+', ' ', 'g'));
+  v_ban gv_chat_bans;
   v_name text;
   v_row gv_chat_messages;
 begin
@@ -82,6 +84,18 @@ begin
   end if;
   if char_length(v_body) > 300 then
     raise exception 'Messages can be up to 300 characters.';
+  end if;
+
+  select * into v_ban
+    from gv_chat_bans
+   where user_id = v_user
+     and (until is null or until > now());
+  if found then
+    if v_ban.until is null then
+      raise exception 'You cannot send messages in chat.';
+    end if;
+    raise exception 'You cannot send messages in chat for now.'
+      using hint = 'until=' || to_char(v_ban.until at time zone 'utc', 'YYYY-MM-DD"T"HH24:MI:SS"Z"');
   end if;
 
   if public.gv_is_rude(v_body) then
