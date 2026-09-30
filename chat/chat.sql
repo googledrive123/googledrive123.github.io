@@ -232,6 +232,13 @@ begin
     raise exception 'You cannot report your own message.';
   end if;
 
+  -- Enough for anyone reporting in good faith, and a cap on burying the
+  -- owner's list.
+  if (select count(*) from gv_chat_reports
+       where reporter = v_user and created_at > now() - interval '1 hour') >= 30 then
+    raise exception 'You have sent a lot of reports. Try again later.';
+  end if;
+
   insert into gv_chat_reports (message_id, reporter, reason)
   values (p_message_id, v_user, left(nullif(btrim(coalesce(p_reason, '')), ''), 200))
   on conflict (message_id, reporter) do nothing
