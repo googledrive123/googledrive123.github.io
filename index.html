@@ -4649,6 +4649,13 @@ sb.auth.onAuthStateChange(async (event, session) => {
   if (currentUser) {
     await loadUsername();
     await uploadLocalSessions();
+    syncStars();
+  } else if (event === 'SIGNED_OUT') {
+    // The stars belong to the account now. Leaving them would hand them to
+    // whoever signs in next on a shared computer.
+    let synced = null;
+    try { synced = localStorage.getItem(STAR_SYNCED_KEY); localStorage.removeItem(STAR_SYNCED_KEY); } catch (e) {}
+    if (synced) { starred = new Set(); saveStars(starred); render(); }
   }
   if (document.getElementById('profileOverlay').classList.contains('show')) openProfile();
 });
