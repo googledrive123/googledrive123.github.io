@@ -48,7 +48,7 @@
 {"id":"8ball","name":"8 Ball Pool","categories":["Sports"],"ranking":47,"img":"/thumbs/8ball.webp","src":"https://icons-6.us/driving-games/8-ball/","site":2,"added":"2026-05-13"},
 {"id":"draw-the-hill","name":"Draw the Hill","categories":["Puzzle","Driving"],"ranking":48,"img":"/thumbs/draw-the-hill.webp","src":"https://icons-6.us/driving-games/draw-the-hill/","site":2,"added":"2026-05-13"},
 {"id":"thisistheonlylevel2","name":"This Is The Only Level 2","categories":["Platformer"],"ranking":49,"img":"/thumbs/thisistheonlylevel2.webp","src":null,"site":2,"added":"2026-05-13"},
-{"id":"blackjack","name":"Blackjack","categories":["Action"],"ranking":50,"img":"https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/BlackJackGame.jpg/330px-BlackJackGame.jpg","src":"https://genizymath.github.io/iframe/312.html"},
+{"id":"blackjack","name":"Blackjack","categories":["Action"],"ranking":50,"img":"https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/BlackJackGame.jpg/330px-BlackJackGame.jpg","src":"https://genizymath.github.io/iframe/312.html","site":9},
 {"id":"geometrydash","name":"Geometry Dash","categories":["Platformer","Skill"],"ranking":51,"img":"/thumbs/geometrydash.webp","src":null,"site":2,"added":"2026-05-13"},
 {"id":"hollow-knight-silksong","name":"Hollow Knight Silksong","categories":["RPG"],"ranking":52,"img":"/thumbs/hollow-knight-silksong.webp","src":"https://genizymath.github.io/iframe/771-z.html"},
 {"id":"1on1soccer","name":"1 on 1 Soccer","categories":["Sports"],"ranking":53,"img":"/thumbs/1on1soccer.webp","src":"https://icons-6.us/driving-games/1v1-soccer/","site":2,"added":"2026-05-13"},
