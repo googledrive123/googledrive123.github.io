@@ -1272,5 +1272,6 @@
 {"id":"adarkroom","name":"Adarkroom","categories":[],"ranking":9999,"img":null,"src":null,"hidden":true,"site":7},
 {"id":"basketrandom","name":"Basketrandom","categories":[],"ranking":9999,"img":null,"src":null,"hidden":true,"site":7},
 {"id":"boxingrandom","name":"Boxingrandom","categories":[],"ranking":9999,"img":null,"src":null,"hidden":true,"site":7},
-{"id":"browserkiller","name":"Browserkiller","categories":[],"ranking":9999,"img":null,"src":null,"hidden":true,"site":7}
+{"id":"browserkiller","name":"Browserkiller","categories":[],"ranking":9999,"img":null,"src":null,"hidden":true,"site":7},
+{"id":"btts","name":"Btts","categories":[],"ranking":9999,"img":null,"src":null,"hidden":true,"site":7}
 ]}
