@@ -272,7 +272,7 @@
 {"id":"fnaf4","name":"\"Five Nights at Freddy's 4\"","categories":["Horror"],"ranking":330,"img":"/thumbs/fnaf4.webp","src":null,"site":5,"added":"2026-05-13"},
 {"id":"fridaynightfunkin","name":"Friday Night Funkin","categories":["Rhythm"],"ranking":331,"img":"/thumbs/fridaynightfunkin.webp","src":null,"site":5,"added":"2026-05-13"},
 {"id":"friendlyfire","name":"Friendly Fire","categories":["Action","Shooter"],"ranking":332,"img":"/thumbs/friendlyfire.webp","src":null,"site":5,"added":"2026-05-13"},
-{"id":"fruitninja","name":"Fruit Ninja","categories":["Arcade","Skill"],"ranking":333,"img":"https://icons-6.us/casual-games/fruit-ninja/logo.jpg","src":"https://icons-6.us/casual-games/fruit-ninja/","local":true},
+{"id":"fruitninja","name":"Fruit Ninja","categories":["Arcade","Skill"],"ranking":333,"img":"/thumbs/fruitninja.webp","src":"https://icons-6.us/casual-games/fruit-ninja/","site":5,"added":"2026-05-13"},
 {"id":"full-screen-mario","name":"Full Screen Mario","categories":["Platformer"],"ranking":334,"img":"https://upload.wikimedia.org/wikipedia/en/thumb/9/90/Full_Screen_Mario_Title_Screen.jpg/330px-Full_Screen_Mario_Title_Screen.jpg","src":null},
 {"id":"geometryrash","name":"Geometry Rash","categories":["Platformer","Skill"],"ranking":338,"img":"/games/geometryrash/icon-114.png","src":null},
 {"id":"getaway-shootout","name":"Getaway Shootout","categories":["Action","Shooter"],"ranking":339,"img":"https://icons-6.us/action-games/getaway-shootout/img/images.jpg","src":"https://icons-6.us/action-games/getaway-shootout/","local":true},
