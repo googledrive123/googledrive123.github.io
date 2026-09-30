@@ -10,6 +10,7 @@
 
   var PRANKS_KEY = 'gv.fun.pranks';     // 'off' once someone turns pranks off
   var SEASONAL_KEY = 'gv.fun.seasonal'; // 'off' once someone turns decorations off
+  var FORCE_KEY = 'gv.fun.forceUntil';  // ms timestamp, set by the secret menu toy
 
   function read(k) {
     try { return localStorage.getItem(k); } catch (e) { return null; }
@@ -26,8 +27,13 @@
   var forced = '';
   try { forced = new URLSearchParams(location.search).get('fun') || ''; } catch (e) {}
 
+  function forcedUntil() {
+    var n = parseInt(read(FORCE_KEY), 10);
+    return n > Date.now() ? n : 0;
+  }
+
   function isAprilFools() {
-    if (forced === 'april') return true;
+    if (forced === 'april' || forcedUntil()) return true;
     var d = new Date();
     return d.getMonth() === 3 && d.getDate() === 1;
   }
@@ -294,6 +300,9 @@
     shyTiles(undo);
     homeworkToast(undo);
     flipPlayer(undo);
+    // A forced minute ends by itself.
+    var until = forcedUntil();
+    if (until) later(undo, apply, until - Date.now() + 50);
   }
 
   // ── Halloween ───────────────────────────────────────────────────────────
@@ -379,7 +388,9 @@
   function seasonalOn() { return read(SEASONAL_KEY) !== 'off'; }
 
   // A forced mode wins over the switch, so a test link always shows something.
-  function aprilWanted() { return forced === 'april' || (pranksOn() && isAprilFools()); }
+  function aprilWanted() {
+    return forced === 'april' || !!forcedUntil() || (pranksOn() && isAprilFools());
+  }
   function halloweenWanted() { return forced === 'halloween' || (seasonalOn() && isHalloween()); }
 
   function apply() {
@@ -390,13 +401,25 @@
 
   function setPranks(on) {
     write(PRANKS_KEY, on ? 'on' : 'off');
-    if (!on && forced === 'april') forced = '';
+    if (!on) {
+      write(FORCE_KEY, null);
+      if (forced === 'april') forced = '';
+    }
     apply();
   }
 
   function setSeasonal(on) {
     write(SEASONAL_KEY, on ? 'on' : 'off');
     if (!on && forced === 'halloween') forced = '';
+    apply();
+  }
+
+  // Kept in localStorage rather than memory, so the minute carries over to the
+  // home page when someone goes to see what it does.
+  function forceAprilFools(ms) {
+    write(FORCE_KEY, String(Date.now() + (ms || 60000)));
+    try { sessionStorage.removeItem(TOAST_SEEN); } catch (e) {}
+    halt('april'); // start over, so the toast and the end timer are fresh
     apply();
   }
 
@@ -416,7 +439,10 @@
     seasonalOn: seasonalOn,
     setSeasonal: setSeasonal,
     isAprilFools: isAprilFools,
-    isHalloween: isHalloween
+    isHalloween: isHalloween,
+    // For the secret menu.
+    forceAprilFools: forceAprilFools,
+    forcedUntil: forcedUntil
   };
 
   if (document.readyState === 'loading') {
