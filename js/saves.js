@@ -518,4 +518,18 @@
       });
     });
   }
+
+  // Loading the auto slot counts as this browser's latest auto-save: what it
+  // holds now is exactly that copy.
+  function cloudLoad(slot) {
+    return withUser(function (c, user) {
+      return c.storage.from(BUCKET).download(filePath(user, slot)).then(check)
+        .then(function (blob) { return new Response(blob).text(); })
+        .then(parse)
+        .then(restore)
+        .then(function () {
+          if (slot === 'auto') write(AUTO_AT_KEY, new Date().toISOString());
+        });
+    });
+  }
 })();
