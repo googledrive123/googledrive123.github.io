@@ -5441,7 +5441,8 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
   // ── Init route ──
   (function() {
     const p = location.pathname;
-    if (p === '/movie' || p === '/movie/') {
+    // The section itself pushes /movies; a shared /movie means the same.
+    if (p === '/movie' || p === '/movie/' || p === '/movies' || p === '/movies/') {
       showSection(true); switchMode('movies', true);
     } else if (p.startsWith('/movie/')) {
       const id = p.slice(7).replace(/\/$/, '');
