@@ -493,4 +493,55 @@
       }
     ]
   };
+
+  // ── Algebra ─────────────────────────────────────────────────────────────
+
+  function either(u, v) {
+    var lo = Math.min(u, v), hi = Math.max(u, v);
+    return 'x = ' + s(lo) + ' or x = ' + s(hi);
+  }
+  function ineq(sym) { return sym === '<' ? '&lt;' : sym === '>' ? '&gt;' : sym; }
+
+  var algebra = {
+    easy: [
+      function () {
+        var form = ri(0, 3), x = ri(1, 20), a, expr, why;
+        if (form === 0) {
+          a = ri(2, 30); expr = 'x + ' + a + ' = ' + (x + a);
+          why = 'Subtract ' + a + ' from both sides: x = ' + (x + a) + ' − ' + a + ' = ' + x + '.';
+        } else if (form === 1) {
+          a = ri(2, 30); expr = 'x − ' + a + ' = ' + s(x - a);
+          why = 'Add ' + a + ' to both sides: x = ' + s(x - a) + ' + ' + a + ' = ' + x + '.';
+        } else if (form === 2) {
+          a = ri(2, 12); x = ri(2, 12); expr = a + 'x = ' + a * x;
+          why = 'Divide both sides by ' + a + ': x = ' + a * x + ' ÷ ' + a + ' = ' + x + '.';
+        } else {
+          a = ri(2, 9); var b = ri(2, 12); x = a * b; expr = fr('x', a) + ' = ' + b;
+          why = 'Multiply both sides by ' + a + ': x = ' + b + ' × ' + a + ' = ' + x + '.';
+        }
+        return num('Solve for x.', expr, x, s(x), why);
+      },
+      function () {
+        var a = ri(2, 9), b = ri(1, 15), k = ri(1, 9), minus = coin(0.3), r = minus ? a * k - b : a * k + b;
+        return num('Find the value when x = ' + k + '.', poly([a, minus ? -b : b]), r, s(r),
+          a + ' × ' + k + (minus ? ' − ' : ' + ') + b + ' = ' + a * k + (minus ? ' − ' : ' + ') + b + ' = ' + s(r) + '.');
+      },
+      function () {
+        var a = ri(2, 6), b = ri(2, 6), m = ri(1, 9), n = ri(1, 9), r = a * m + b * n;
+        return num('Find the value when a = ' + m + ' and b = ' + n + '.', a + 'a + ' + b + 'b', r, s(r),
+          a + ' × ' + m + ' + ' + b + ' × ' + n + ' = ' + a * m + ' + ' + b * n + ' = ' + r + '.');
+      },
+      function () {
+        var a = ri(2, 9), c = ri(2, 9), b = ri(1, 12);
+        return choice('Simplify.', a + 'x + ' + b + ' + ' + c + 'x', poly([a + c, b]),
+          [poly([a + b + c, 0]), poly([a + c, 0]), poly([a * c, b]), poly([a + c, 0, b])],
+          'Only like terms combine: ' + a + 'x + ' + c + 'x = ' + (a + c) + 'x, and the ' + b + ' stays as it is.');
+      },
+      function () {
+        var a = ri(2, 6), b = ri(1, 10), x = ri(2, 10), c = a * x + b;
+        return num('Solve for x.', poly([a, b]) + ' = ' + c, x, s(x),
+          'Subtract ' + b + ': ' + a + 'x = ' + (c - b) + '. Divide by ' + a + ': x = ' + x + '.');
+      }
+    ],
+  };
 })();
