@@ -4801,6 +4801,32 @@ async function uploadLocalSessions() {
   saveLocalSessions([]);
 }
 
+// ─── Coins and cosmetics (shop/) ───
+// What the account owns and wears: a name colour, an avatar frame, a title
+// and a tile accent, all painted from the wallet.
+let myWallet = null;
+async function loadWallet() {
+  if (!currentUser) { myWallet = null; paintCosmetics(); return; }
+  const { data, error } = await sb.rpc('gv_wallet_get');
+  if (!error) myWallet = data;
+  paintCosmetics();
+}
+function paintCosmetics() {
+  const C = window.GV && GV.cosmetics;
+  if (!C) return;
+  const worn = myWallet ? C.fromWallet(myWallet) : {};
+  ['userAvatarWelcome', 'userAvatarHeader', 'profileAvatarLg'].forEach(id => C.applyAvatar(document.getElementById(id), worn));
+  document.querySelectorAll('.user-name-text').forEach(el => C.applyName(el, worn));
+  C.applyTitle(document.getElementById('profileTitle'), worn);
+  C.applyTiles(document.documentElement, worn);
+  const card = document.getElementById('coinCard');
+  card.hidden = !myWallet;
+  if (myWallet) {
+    document.getElementById('coinCount').textContent = myWallet.coins.toLocaleString() + ' coins';
+    document.getElementById('coinToday').textContent = myWallet.earned_today + ' of ' + myWallet.daily_cap + ' today · open the shop';
+  }
+}
+
 // The account's picture. A guest who picked one before signing up keeps it.
 async function loadAvatar() {
   const A = window.GV && GV.avatars;
