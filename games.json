@@ -938,7 +938,7 @@
 {"id":"bridge-race","name":"Bridge Race","categories":["Racing"],"ranking":1130,"img":"https://cdn.akamai.steamstatic.com/steam/apps/3645460/header.jpg","src":"/iframe/14.html","site":43},
 {"id":"cannon-balls-3d","name":"Cannon Balls 3D","categories":["Action"],"ranking":1131,"img":"/thumbs/cannon-balls-3d.webp","src":"/iframe/150.html","site":43},
 {"id":"cheese-chompers-3d","name":"Cheese Chompers 3D","categories":["Action"],"ranking":1134,"img":"/thumbs/cheese-chompers-3d.webp","src":"/iframe/165.html","site":43},
-{"id":"chess-classic","name":"Chess Classic","categories":["Puzzle"],"ranking":1135,"img":"/thumbs/chess-classic.webp","src":"/iframe/151.html"},
+{"id":"chess-classic","name":"Chess Classic","categories":["Puzzle"],"ranking":1135,"img":"/thumbs/chess-classic.webp","src":"/iframe/151.html","site":43},
 {"id":"clover-pit","name":"Clover Pit","categories":["Action"],"ranking":1136,"img":"/thumbs/clover-pit.webp","src":"/iframe/716-fix2.html"},
 {"id":"code-editor","name":"Code Editor","categories":["Action"],"ranking":1137,"img":"/thumbs/code-editor.webp","src":"/iframe/429-f.html"},
 {"id":"color-match","name":"Color Match","categories":["Action"],"ranking":1138,"img":"/thumbs/color-match.webp","src":"/iframe/31.html"},
