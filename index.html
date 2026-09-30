@@ -5446,6 +5446,14 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
     <div class="profile-section">
       <div class="profile-section-label">Playtime Stats</div>
       <div class="stat-cards" id="statCards">
+        <div class="stat-card full level-card" id="levelCard">
+          <div class="level-badge" id="levelBadge">1</div>
+          <div style="flex:1;min-width:0">
+            <div class="stat-card-val" id="levelTitle">Level 1</div>
+            <div class="level-bar"><span id="levelBarFill"></span></div>
+            <div class="stat-card-lbl" id="levelNext">0 / 50 XP to level 2</div>
+          </div>
+        </div>
         <div class="stat-card full">
           <div class="stat-card-icon">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 12"/></svg>
