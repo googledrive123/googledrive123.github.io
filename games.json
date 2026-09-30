@@ -1,5 +1,5 @@
 {"cats":["All","Action","Adventure","Arcade","Driving","Horror","Idle","Multiplayer","Platformer","Puzzle","Racing","Rhythm","RPG","Sandbox","Shooter","Simulation","Skill","Sports","Strategy","Apps"],"games":[
-{"id":"polytrack","name":"PolyTrack","categories":["Racing"],"ranking":0,"img":"https://imgs.crazygames.com/polytrack_16x9/20260310095956/polytrack_16x9-cover","src":null},
+{"id":"polytrack","name":"PolyTrack","categories":["Racing"],"ranking":0,"img":"/thumbs/polytrack.webp","src":null},
 {"id":"basketball-stars","name":"Basketball Stars","categories":["Sports"],"ranking":1,"img":"/thumbs/basketball-stars.webp","src":"https://icons-6.us/driving-games/basketball-stars/","site":2,"added":"2026-05-13"},
 {"id":"amazing-rope-police","name":"Amazing Rope Police","categories":["Action"],"ranking":2,"img":"/thumbs/amazing-rope-police.webp","src":null,"site":2,"added":"2026-05-13"},
 {"id":"ice-dodo","name":"Ice Dodo","categories":["Arcade","Skill"],"ranking":3,"img":"/thumbs/ice-dodo.webp","src":null,"site":2,"added":"2026-05-13"},
