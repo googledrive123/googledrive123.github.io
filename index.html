@@ -1264,7 +1264,7 @@
     }
     .tile:hover {
       transform: translateY(-6px) scale(1.04);
-      border-color: var(--accent);
+      border-color: var(--tile-accent, var(--accent)); /* a tile theme from the shop */
       box-shadow: 0 16px 40px rgba(0,0,0,0.55),
                   0 0 24px rgba(255,59,59,0.35),
                   0 0 0 1px rgba(255,59,59,0.15) inset;
