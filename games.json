@@ -926,7 +926,7 @@
 {"id":"achievement-unlocked-3","name":"Achievement Unlocked 3","categories":["Action"],"ranking":1112,"img":"/thumbs/achievement-unlocked-3.webp","src":"/iframe/62.html"},
 {"id":"amaze","name":"Amaze","categories":["Action"],"ranking":1113,"img":"https://cdn.jsdelivr.net/gh/bubbls/youtube-playables@149c5018a75690eac83f052bfc6601e31ec0459b/amaze/assets/core/mosu_logo.png","src":"/iframe/26.html","site":43},
 {"id":"angry-birds-showdown","name":"Angry Birds Showdown","categories":["Action"],"ranking":1115,"img":"/thumbs/angry-birds-showdown.webp","src":"/iframe/147.html","site":43},
-{"id":"archery-world-tour","name":"Archery World Tour","categories":["Action"],"ranking":1116,"img":"/thumbs/archery-world-tour.webp","src":"/iframe/148.html"},
+{"id":"archery-world-tour","name":"Archery World Tour","categories":["Action"],"ranking":1116,"img":"/thumbs/archery-world-tour.webp","src":"/iframe/148.html","site":43},
 {"id":"attack-hole","name":"Attack Hole","categories":["Action"],"ranking":1117,"img":"/thumbs/attack-hole.webp","src":"/iframe/13.html"},
 {"id":"bad-parenting-1","name":"Bad Parenting 1","categories":["Action"],"ranking":1118,"img":"/thumbs/bad-parenting-1.webp","src":"/iframe/166.html"},
 {"id":"ball-blast","name":"Ball Blast","categories":["Action"],"ranking":1119,"img":"/thumbs/ball-blast.webp","src":"/iframe/149.html"},
