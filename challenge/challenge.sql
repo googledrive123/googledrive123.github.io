@@ -534,3 +534,32 @@ begin
   ), '[]'::json);
 end;
 $function$;
+
+-- A month's whole board with the players' keys, for finding a suspicious
+-- time to remove.
+create or replace function public.gv_challenge_board(p_secret text, p_month date)
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+
+  return coalesce((
+    select json_agg(json_build_object(
+             'rank', r.rank,
+             'player_key', r.player_key,
+             'user_id', r.user_id,
+             'nickname', r.nickname,
+             'frames', r.frames,
+             'time', gv_challenge_time(r.frames),
+             'at', r.at
+           ) order by r.rank)
+    from gv_challenge_ranked(date_trunc('month', p_month::timestamp)::date) r
+  ), '[]'::json);
+end;
+$function$;
