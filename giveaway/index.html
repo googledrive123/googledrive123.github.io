@@ -16,6 +16,19 @@
   <script src="/js/analytics.js" defer></script>
   <script src="/js/site.js" defer></script>
   <script src="/js/player.js" defer></script>
+  <style>
+    .gw-rules { counter-reset: rule; list-style: none; }
+    .page ul.gw-rules { margin: 0; }
+    .gw-rules li { position: relative; padding-left: 2rem; font-size: 0.86rem; }
+    .gw-rules li::before {
+      counter-increment: rule;
+      content: counter(rule, decimal-leading-zero);
+      position: absolute; left: 0; top: 0.1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem; color: var(--muted-2);
+    }
+    .gw-rules strong { color: var(--text); font-weight: 600; }
+  </style>
 </head>
 <body>
 <main class="page">
@@ -23,6 +36,22 @@
   <h1>Giveaway</h1>
   <p class="lede">Enter with your GameVault account for a chance at a prize on the site: a badge,
   a crate or a name color. It is free, it is one entry each, and it is never money.</p>
+
+  <div class="panel">
+    <div class="panel-label">How it works</div>
+    <ul class="gw-rules">
+      <li><strong>Free, one entry per account.</strong> Pressing Enter again does not add a second.</li>
+      <li><strong>Only your username is used.</strong> You need a GameVault account to enter, and
+      GameVault never asks for your email, real name, address or phone number.</li>
+      <li><strong>The winner is picked at random</strong> by the server when the clock runs out,
+      and their username is shown on this page.</li>
+      <li><strong>Prizes are site things:</strong> a badge, a crate, a name color. Never money,
+      gift cards, game currency, or anything sent to your home.</li>
+      <li><strong>The site owner adds the prize to the winning account.</strong> Nobody from
+      GameVault will message you asking for details, a password or a payment to claim it. If
+      someone does, it is not us.</li>
+    </ul>
+  </div>
 </main>
 </body>
 </html>
