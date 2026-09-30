@@ -4843,6 +4843,11 @@ sb.auth.onAuthStateChange(async (event, session) => {
   if (currentUser) {
     await loadUsername();
     loadAvatar();
+    const since = oldHostSince();
+    if (since) {
+      sb.from('play_sessions').select('game_id').eq('user_id', currentUser.id).lt('started_at', since)
+        .then(({ data }) => { if (data) noteOldHost([...new Set(data.map(r => r.game_id))]); }, () => {});
+    }
     // Testers get a link to the review page (test/test.sql).
     sb.rpc('gv_is_tester').then(({ data }) => {
       document.getElementById('profileTestLink').hidden = data !== true;
