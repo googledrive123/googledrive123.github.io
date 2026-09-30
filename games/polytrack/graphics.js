@@ -418,6 +418,7 @@
   function menuButton() {
     var button = document.createElement('button');
     button.className = 'button gv-max-performance';
+    button.title = 'The lightest graphics, for a smoother game. Pick a Quality in Settings to go back.';
     var icon = document.createElement('img');
     icon.src = BOLT;
     button.appendChild(icon);
