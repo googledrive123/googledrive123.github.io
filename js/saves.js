@@ -126,4 +126,42 @@
       });
     }));
   }
+
+  function decodeObject(v) {
+    var out = {};
+    Object.keys(v).forEach(function (key) { out[key] = decode(v[key]); });
+    return out;
+  }
+
+  function decode(v) {
+    if (Array.isArray(v)) return v.map(decode);
+    if (v === null || typeof v !== 'object') return v;
+    if (!Object.prototype.hasOwnProperty.call(v, '$gv')) return decodeObject(v);
+
+    switch (v.$gv) {
+      case 'object': return decodeObject(v.value);
+      case 'undefined': return undefined;
+      case 'number': return Number(v.value);
+      case 'bigint': return BigInt(v.value);
+      case 'date': return new Date(v.value);
+      case 'regexp': return new RegExp(v.source, v.flags);
+      case 'set': return new Set(v.values.map(decode));
+      case 'map':
+        return new Map(v.entries.map(function (e) { return [decode(e[0]), decode(e[1])]; }));
+      case 'bytes': {
+        var bytes = fromBase64(v.data);
+        if (!v.view) return bytes.buffer;
+        if (VIEWS.indexOf(v.view) === -1) return bytes;
+        return new window[v.view](bytes.buffer);
+      }
+      case 'blob': {
+        var parts = [fromBase64(v.data)];
+        if (typeof v.name === 'string') {
+          return new File(parts, v.name, { type: v.type, lastModified: v.lastModified });
+        }
+        return new Blob(parts, { type: v.type });
+      }
+    }
+    return decodeObject(v);
+  }
 })();
