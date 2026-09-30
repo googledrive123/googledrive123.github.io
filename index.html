@@ -3407,6 +3407,17 @@ function appendPage() {
   }
 }
 
+// "1v1 lol" should find 1v1lol, and "shooter" should find the shooters.
+function matchesSearch(g, q) {
+  if (!q) return true;
+  const qLoose = q.replace(/[^a-z0-9]+/g, '');
+  return g.name.toLowerCase().includes(q)
+    || g.id.toLowerCase().includes(q)
+    || g.categories.some(c => c.toLowerCase().includes(q))
+    || (!!qLoose && (g.name.toLowerCase().replace(/[^a-z0-9]+/g, '').includes(qLoose)
+                  || g.id.toLowerCase().replace(/[^a-z0-9]+/g, '').includes(qLoose)));
+}
+
 function render() {
   const grid = document.getElementById('grid');
   const label = document.getElementById('countLabel');
@@ -3419,17 +3430,9 @@ function render() {
   const recentCount = document.getElementById('recentCount');
   const q = searchQ.toLowerCase().trim();
 
-  // "1v1 lol" should find 1v1lol, and "shooter" should find the shooters.
-  const qLoose = q.replace(/[^a-z0-9]+/g, '');
   const filtered = GAMES.filter(g => {
     const catOk = activeCat === 'All' || g.categories.includes(activeCat);
-    const searchOk = !q
-      || g.name.toLowerCase().includes(q)
-      || g.id.toLowerCase().includes(q)
-      || g.categories.some(c => c.toLowerCase().includes(q))
-      || (qLoose && (g.name.toLowerCase().replace(/[^a-z0-9]+/g, '').includes(qLoose)
-                  || g.id.toLowerCase().replace(/[^a-z0-9]+/g, '').includes(qLoose)));
-    return catOk && searchOk;
+    return catOk && matchesSearch(g, q);
   });
   renderList = sortGames(filtered);
   renderOffset = 0;
