@@ -3479,12 +3479,20 @@ const oldHost = (function () {
   } catch (e) { return new Set(); }
 })();
 
-function localUrl(g) { return '/games/' + g.id + '/'; }
-// A choice made while a game still had a copy here outlives the copy.
-function isOffline(g) { return !g.src || (!!g.local && prefs.offline().has(g.id)); }
-function gameUrl(g) { return isOffline(g) ? localUrl(g) : g.src; }
-// Games with no `src` are already local, so they get no button to press.
-function canSwap(g) { return !!(g && g.src && g.local); }
+// Where a game runs from: 'vault' (/vault<site>/), 'src' (the host it came
+// from) or 'main' (/games/ here, only PolyTrack now).
+function sourceFor(g) {
+  if (!g.site) return g.src ? 'src' : 'main';
+  if (!g.src) return 'vault';
+  return picks.get(g.id) || (oldHost.has(g.id) ? 'src' : 'vault');
+}
+function urlFor(g, where) {
+  if (where === 'src') return g.src;
+  const rel = g.path || g.id + '/';
+  return where === 'vault' ? '/vault' + g.site + '/' + rel : '/games/' + rel;
+}
+// Only a game with both a vault copy and a host to go back to can swap.
+function canSwap(g) { return !!(g && g.site && g.src); }
 
 function paintSwap(g) {
   loaderSwap.hidden = true;
