@@ -3696,6 +3696,18 @@ gameFS.addEventListener('click', () => {
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && gameOverlay.classList.contains('show')) closeGame();
 });
+// F goes fullscreen, but only while this page has the keys: once someone
+// clicks into the game, the game gets them (and many games use F). Never
+// while typing, and never when F is the panic key.
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'f' && e.key !== 'F') return;
+  if (!gameOverlay.classList.contains('show') || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.target.matches('input, textarea, select, [contenteditable]')) return;
+  const panic = window.GV && GV.security && GV.security.enabled() && GV.security.key();
+  if (panic && panic.toLowerCase() === 'f') return;
+  e.preventDefault();
+  gameFS.click();
+});
 
 
 // ─── Popstate (back/forward) ───
