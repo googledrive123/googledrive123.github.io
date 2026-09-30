@@ -181,7 +181,16 @@ $function$;
 -- match that ignores case and spaces at either end is used only when there
 -- is just one, so "sam" never picks between Sam and SAM. Adding one twice
 -- keeps the first date.
-create or replace function public.gv_tester_set(p_secret text, p_username text, p_on boolean)
+--
+-- Or found by p_user_id, which wins over the name (pass p_username null):
+-- the dashboard's tester list has every id, even for an account without a
+-- username. The name sent back is the one that list shows.
+--
+-- p_user_id came after the first version, which had three arguments; that
+-- one goes so a call with three is not ambiguous between the two.
+drop function if exists public.gv_tester_set(text, text, boolean);
+
+create or replace function public.gv_tester_set(p_secret text, p_username text, p_on boolean, p_user_id uuid default null)
 returns json
 language plpgsql
 security definer
@@ -197,7 +206,9 @@ begin
     raise exception 'not allowed';
   end if;
 
-  if v_in <> '' then
+  if p_user_id is not null then
+    select array_agg(id) into v_ids from auth.users where id = p_user_id;
+  elsif v_in <> '' then
     select array_agg(id) into v_ids from profiles where username = v_in;
     if v_ids is null then
       select array_agg(id) into v_ids from profiles where lower(btrim(username)) = lower(v_in);
@@ -210,7 +221,8 @@ begin
   if v_user is null then
     raise exception 'no such account';
   end if;
-  select username into v_name from profiles where id = v_user;
+  v_name := coalesce(nullif(btrim((select username from profiles where id = v_user)), ''),
+                     'Account ' || left(v_user::text, 8));
 
   if coalesce(p_on, false) then
     insert into gv_testers (user_id) values (v_user) on conflict (user_id) do nothing;
