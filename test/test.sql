@@ -113,3 +113,35 @@ $function$;
 
 revoke all on function public.gv_test_report(text, text, text) from public, anon;
 grant execute on function public.gv_test_report(text, text, text) to authenticated;
+
+
+-- The tester's own last 200 reports, newest first, so /test/ can show what
+-- they already said about each game.
+create or replace function public.gv_test_my_reports()
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'Testing only works on GameVault.';
+  end if;
+  if v_user is null or not exists (select 1 from gv_testers where user_id = v_user) then
+    raise exception 'Only testers can read reports.';
+  end if;
+
+  return coalesce((
+    select json_agg(json_build_object('id', r.id, 'game_id', r.game_id, 'verdict', r.verdict,
+                                      'note', r.note, 'created_at', r.created_at,
+                                      'resolved', r.resolved) order by r.id desc)
+    from (select * from gv_game_reports where user_id = v_user order by id desc limit 200) r
+  ), '[]'::json);
+end;
+$function$;
+
+revoke all on function public.gv_test_my_reports() from public, anon;
+grant execute on function public.gv_test_my_reports() to authenticated;
