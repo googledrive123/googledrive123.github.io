@@ -33,6 +33,17 @@
       box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 28px rgba(255,59,59,0.35);
     }
     .rr-sound[hidden] { display: none; }
+    .rr-back {
+      position: fixed; left: 1rem; bottom: 1rem; z-index: 2;
+      padding: 0.35rem 0.8rem;
+      border-radius: 100px;
+      border: 1px solid var(--border-strong);
+      background: rgba(8,8,10,0.75);
+      color: var(--muted);
+      font-size: 0.78rem;
+      text-decoration: none;
+    }
+    .rr-back:hover { color: var(--text); }
   </style>
 </head>
 <body>
@@ -44,6 +55,7 @@
   referrerpolicy="strict-origin-when-cross-origin"
   allowfullscreen></iframe>
 <button class="btn btn-primary rr-sound" id="rrSound" type="button">Tap for sound</button>
+<a class="rr-back" id="rrBack" href="/">&larr; Back</a>
 
 <script>
 (function () {
@@ -53,6 +65,15 @@
   sound.addEventListener('click', function () {
     video.src = video.src.replace('mute=1', 'mute=0');
     sound.hidden = true;
+  });
+
+  // Straight back to wherever on GameVault they came from, else home.
+  document.getElementById('rrBack').addEventListener('click', function (e) {
+    var fromHere = document.referrer.indexOf(location.origin + '/') === 0;
+    if (fromHere && history.length > 1) {
+      e.preventDefault();
+      history.back();
+    }
   });
 })();
 </script>
