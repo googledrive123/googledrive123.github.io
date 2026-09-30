@@ -128,7 +128,7 @@
 {"id":"city-defense","name":"City Defense","categories":["Strategy"],"ranking":127,"img":"https://rawcdn.githack.com/genizy/brainrot/main/city-defense/logo.png","src":"https://genizymath.github.io/iframe/380.html"},
 {"id":"colorswitch","name":"Color Switch","categories":["Arcade","Skill"],"ranking":128,"img":"/thumbs/colorswitch.webp","src":null,"site":3,"added":"2026-05-13"},
 {"id":"craftmine","name":"Craftmine","categories":["Simulation","Sandbox"],"ranking":129,"img":"/thumbs/craftmine.webp","src":"https://icons-6.us/action-games/craftmine/","site":3,"added":"2026-05-13"},
-{"id":"csgoclicker","name":"CSGO Clicker","categories":["Idle"],"ranking":130,"img":"https://icons-6.us/casual-games/csgo-clicker/images/case1.png","src":"https://icons-6.us/casual-games/csgo-clicker/","local":true},
+{"id":"csgoclicker","name":"CSGO Clicker","categories":["Idle"],"ranking":130,"img":"/thumbs/csgoclicker.webp","src":"https://icons-6.us/casual-games/csgo-clicker/","site":3,"added":"2026-05-13"},
 {"id":"cuttherope","name":"Cut the Rope","categories":["Puzzle"],"ranking":131,"img":"https://icons-6.us/strategy-games/ctr/logo.png","src":"https://icons-6.us/strategy-games/ctr/","local":true},
 {"id":"dimension-incident","name":"Dimension Incident","categories":["Action"],"ranking":132,"img":"https://img.gamepix.com/games/dimension-incident/cover/dimension-incident.png","src":"https://genizymath.github.io/iframe/727.html"},
 {"id":"doki-doki-literature-club","name":"Doki Doki Literature Club","categories":["Action"],"ranking":133,"img":"https://upload.wikimedia.org/wikipedia/en/7/7c/Doki_Doki_Literature_Club_Cover.jpg","src":"/iframe/189.html"},
