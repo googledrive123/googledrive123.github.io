@@ -415,3 +415,27 @@ begin
   return found;
 end;
 $function$;
+
+
+-- Marks a report handled, along with every other open report on the same
+-- message, so one click clears a message from the list. Returns how many.
+create or replace function public.gv_chat_resolve(p_secret text, p_report_id bigint)
+returns integer
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_count integer;
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+
+  update gv_chat_reports set resolved = true
+   where not resolved
+     and message_id = (select message_id from gv_chat_reports where id = p_report_id);
+  get diagnostics v_count = row_count;
+  return v_count;
+end;
+$function$;
