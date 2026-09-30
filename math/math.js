@@ -78,4 +78,38 @@
     return t === '1' ? 'π' : t.indexOf('/') < 0 ? t + 'π' : '(' + t + ')π';
   }
   function mix(w, n, d) { return w + '<span class="gap"></span>' + fr(n, d); }
+  function sup(b, e) { return b + '<sup>' + e + '</sup>'; }
+  function root(x) { return '√<span class="rad">' + x + '</span>'; }
+  function rt(k, n) { return (k === 1 ? '' : s(k)) + root(n); }
+  function lim(to, body) { return '<span class="lim">lim<span>x→' + to + '</span></span> ' + body; }
+  // With no limits it is the plain ∫ ... dx of an antiderivative.
+  function integral(a, b, body) {
+    var ends = a == null ? '' : '<span class="ends"><span>' + b + '</span><span>' + a + '</span></span>';
+    return '<span class="int"><span class="sign">∫</span>' + ends + '</span>' + body + ' dx';
+  }
+  function ddx(body) { return fr('d', 'dx') + '(' + body + ')'; }
+  function lines() {
+    return Array.prototype.map.call(arguments, function (l) { return '<div>' + l + '</div>'; }).join('');
+  }
+  function xy(x, y) { return '(' + s(x) + ', ' + s(y) + ')'; }
+
+  // One term like 3x², −x or 7.
+  function term(c, n, v) {
+    v = v || 'x';
+    if (n === 0) return s(c);
+    var body = n === 1 ? v : v + '<sup>' + n + '</sup>';
+    if (c === 1) return body;
+    if (c === -1) return '−' + body;
+    return s(c) + body;
+  }
+  // Coefficients from the highest power down: [3, 0, -2] is 3x² − 2.
+  function poly(cs, v) {
+    var deg = cs.length - 1, out = '';
+    cs.forEach(function (c, i) {
+      if (!c) return;
+      var t = term(Math.abs(c), deg - i, v);
+      out += out ? (c < 0 ? ' − ' : ' + ') + t : (c < 0 ? '−' : '') + t;
+    });
+    return out || '0';
+  }
 })();
