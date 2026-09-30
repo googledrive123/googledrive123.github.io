@@ -115,6 +115,13 @@
     .gw-note:empty { display: none; }
     .gw-note.bad { color: #ff7a7a; }
 
+    .gw-last { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.3rem 0.75rem; }
+    .gw-last-name { font-size: 1.05rem; color: var(--text); font-weight: 600; overflow-wrap: anywhere; }
+    .gw-last-name.anon { color: var(--muted); }
+    .gw-last-date { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--muted-2); }
+    .gw-last + .gw-prize { margin-top: 0.35rem; }
+    .gw-last + .gw-prize .gw-prize-text { font-size: 0.88rem; color: var(--muted); }
+
     .gw-rules { counter-reset: rule; list-style: none; }
     .page ul.gw-rules { margin: 0; }
     .gw-rules li { position: relative; padding-left: 2rem; font-size: 0.86rem; }
@@ -177,6 +184,18 @@
       </div>
     </div>
     <div class="gw-note" id="gwNote" role="status"></div>
+  </div>
+
+  <div class="panel" id="gwLastPanel" hidden>
+    <div class="panel-label">Last winner</div>
+    <div class="gw-last">
+      <span class="gw-last-name" id="gwLastName"></span>
+      <span class="gw-last-date" id="gwLastDate"></span>
+    </div>
+    <div class="gw-prize">
+      <span class="gw-prize-tag">Won</span>
+      <span class="gw-prize-text" id="gwLastPrize"></span>
+    </div>
   </div>
 
   <div class="panel">
