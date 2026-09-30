@@ -61,3 +61,16 @@ alter table public.gv_challenges enable row level security;
 alter table public.gv_challenge_runs enable row level security;
 alter table public.gv_badges enable row level security;
 revoke all on table public.gv_challenges, public.gv_challenge_runs, public.gv_badges from anon, authenticated;
+
+
+-- This month, by UTC.
+create or replace function public.gv_challenge_month()
+returns date
+language sql
+stable
+set search_path to 'public'
+as $function$
+  select date_trunc('month', now() at time zone 'utc')::date;
+$function$;
+
+revoke all on function public.gv_challenge_month() from public, anon, authenticated;
