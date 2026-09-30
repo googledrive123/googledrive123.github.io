@@ -23,3 +23,14 @@ create table if not exists public.gv_saves (
   updated_at timestamptz not null default now(),
   primary key (user_id, slot)
 );
+
+-- The page reads and writes these rows straight through PostgREST, so the
+-- policies are the whole of the protection: a player sees and changes their
+-- own slots and nobody else's. Signed-out visitors have no slots at all.
+alter table public.gv_saves enable row level security;
+revoke all on table public.gv_saves from anon;
+
+drop policy if exists gv_saves_select on public.gv_saves;
+create policy gv_saves_select on public.gv_saves
+  for select to authenticated
+  using (auth.uid() = user_id);
