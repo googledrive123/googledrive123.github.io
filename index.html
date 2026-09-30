@@ -3128,7 +3128,7 @@ function addRecent(id) {
 }
 
 // ───── Sort ─────
-let sortMode = 'default'; // default | popular | alpha | random
+let sortMode = 'default'; // default | popular | newest | alpha | random
 let shuffleSeed = Math.random();
 function sortGames(arr) {
   if (sortMode === 'popular') {
@@ -3918,7 +3918,7 @@ searchInput.addEventListener('blur', () => searchWrap.classList.remove('focused'
 const sortBtn = document.getElementById('sortBtn');
 const sortMenu = document.getElementById('sortMenu');
 const sortLabel = document.getElementById('sortLabel');
-const SORT_LABELS = { default: 'Default', popular: 'Most played', alpha: 'A → Z', random: 'Random' };
+const SORT_LABELS = { default: 'Default', popular: 'Most played', newest: 'Newest', alpha: 'A → Z', random: 'Random' };
 sortBtn.addEventListener('click', (e) => {
   e.stopPropagation();
   sortMenu.classList.toggle('show');
