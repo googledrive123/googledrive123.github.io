@@ -4940,8 +4940,13 @@ document.getElementById('profileSaveBtn').addEventListener('click', async () => 
   const pw = document.getElementById('profilePwInput').value;
   msgEl.textContent = '';
   if (username && username !== userName()) {
+    const nameOk = await sb.rpc('gv_name_ok', { p_name: username });
+    if (nameOk.data === false) { msgEl.textContent = 'That username is not allowed. Try another.'; return; }
     const { error } = await sb.from('profiles').upsert({ id: currentUser.id, username });
-    if (error) { msgEl.textContent = 'Error saving username.'; return; }
+    if (error) {
+      msgEl.textContent = /not allowed/.test(error.message) ? 'That username is not allowed. Try another.' : 'Error saving username.';
+      return;
+    }
     currentUser._username = username;
     currentUser._nameLoaded = true;
     updateUserUI();
