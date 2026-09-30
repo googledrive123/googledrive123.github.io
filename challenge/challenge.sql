@@ -54,3 +54,10 @@ create table if not exists public.gv_badges (
   created_at timestamptz not null default now(),
   primary key (player_key, badge, month)
 );
+
+-- Everything goes through the functions below, so there is no policy to
+-- write and a direct PostgREST request reads and writes nothing.
+alter table public.gv_challenges enable row level security;
+alter table public.gv_challenge_runs enable row level security;
+alter table public.gv_badges enable row level security;
+revoke all on table public.gv_challenges, public.gv_challenge_runs, public.gv_badges from anon, authenticated;
