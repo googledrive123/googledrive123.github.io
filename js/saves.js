@@ -364,16 +364,49 @@
       && typeof data.indexedDB === 'object' && data.indexedDB !== null;
   }
 
+  /* Would a game open in another tab hold up deleting or replacing this
+     database? Asks for the upgrade a rebuild needs and aborts it in
+     onupgradeneeded, which leaves the database exactly as it was. A tab that
+     will not let go keeps the request waiting (onblocked), so after a few
+     seconds without an answer the database counts as held. The request left
+     waiting aborts the same way whenever that tab closes. */
+  function checkFree(name) {
+    return new Promise(function (resolve, reject) {
+      var gaveUp = false;
+      var timer = setTimeout(function () {
+        gaveUp = true;
+        reject(new Error('A game open in another tab is using its save (' + name + '), so nothing was '
+          + 'restored and nothing changed. Close every other GameVault tab, then restore again.'));
+      }, 4000);
+      function settle(fn, value) { clearTimeout(timer); fn(value); }
+      openExisting(name).then(function (db) {
+        if (!db) { settle(resolve); return; }
+        var version = db.version;
+        db.close();
+        if (gaveUp) return;
+        var req = indexedDB.open(name, version + 1);
+        req.onupgradeneeded = function () { req.transaction.abort(); };
+        req.onsuccess = function () { req.result.close(); settle(resolve); };
+        req.onerror = function () { settle(resolve); };
+      }, function (err) { settle(reject, err); });
+    });
+  }
+
   /* Databases first: they are the step that can be refused, by another tab
-     holding one open. localStorage is only touched once they are all in. The
-     caller reloads afterwards, so no game keeps running on the old progress. */
+     holding one open, so every one the restore deletes or replaces is checked
+     before any is touched. localStorage is only touched once they are all in.
+     The caller reloads afterwards, so no game keeps running on the old
+     progress. */
   function restore(data) {
     if (!isSave(data)) return Promise.reject(new Error('That is not a GameVault save file.'));
     var incoming = Object.keys(data.indexedDB).filter(function (name) {
       return SKIP_DBS.indexOf(name) === -1;
     });
+    var gone = [];
     return listDbs().then(function (here) {
-      var gone = here.filter(function (name) { return incoming.indexOf(name) === -1; });
+      gone = here.filter(function (name) { return incoming.indexOf(name) === -1; });
+      return eachInTurn(gone.concat(incoming), checkFree);
+    }).then(function () {
       return eachInTurn(gone, deleteDb);
     }).then(function () {
       return eachInTurn(incoming, function (name) { return rebuildDb(name, data.indexedDB[name]); });
