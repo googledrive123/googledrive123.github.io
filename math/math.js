@@ -421,5 +421,76 @@
           dec + ' = ' + digits + '/' + scale + ', which simplifies to ' + ft(f[0], f[1]) + '.');
       }
     ],
+    hard: [
+      function () {
+        function one() {
+          var b = ri(2, 6), a; do { a = ri(1, b - 1); } while (gcd(a, b) !== 1);
+          return { w: ri(1, 4), a: a, b: b };
+        }
+        var m = one(), k = one(), n1 = m.w * m.b + m.a, n2 = k.w * k.b + k.a, l = lcm(m.b, k.b);
+        var x = n1 * l / m.b, y = n2 * l / k.b, minus = coin(0.4) && x > y, top = minus ? x - y : x + y, op = minus ? ' − ' : ' + ';
+        var show = mixed(top, l) + (top > l && top % l ? ' (or ' + ft(top, l) + ')' : '');
+        return num(minus ? 'Subtract.' : 'Add.', mix(m.w, m.a, m.b) + op + mix(k.w, k.a, k.b), top / l, show,
+          'As improper fractions: ' + n1 + '/' + m.b + op + n2 + '/' + k.b + ' = ' + x + '/' + l + op + y + '/' + l +
+          ' = ' + top + '/' + l + (mixed(top, l) !== top + '/' + l ? ' = ' + mixed(top, l) : '') + '.');
+      },
+      function () {
+        var a = pick([20, 40, 50, 80, 120, 200, 250, 400]), up = coin(), pc, b;
+        do { pc = pick([5, 10, 15, 20, 25, 30, 40, 50, 60, 75]); b = a * (100 + (up ? pc : -pc)) / 100; }
+        while (b !== Math.round(b));
+        var change = Math.abs(b - a);
+        return num('A price goes from ' + money(a) + ' to ' + money(b) + '. By what percent did it go ' + (up ? 'up' : 'down') + '?',
+          '', pc, pc + '%', 'The change is ' + money(change) + ', and ' + change + ' ÷ ' + a + ' = ' + s(change / a) + ' = ' + pc + '%.',
+          { unit: '%' });
+      },
+      function () {
+        var was = ri(2, 20) * 20, pc, now;
+        do { pc = pick([10, 20, 25, 30, 40, 50]); now = was * (100 - pc) / 100; } while (now !== Math.round(now));
+        return num('After ' + pc + '% off, a pair of headphones costs ' + money(now) + '. What was the price before the sale?', '',
+          was, money(was), money(now) + ' is ' + (100 - pc) + '% of the old price, so ' + now + ' ÷ ' + s((100 - pc) / 100) +
+          ' = ' + money(was) + '.', { unit: '$' });
+      },
+      function () {
+        var start = ri(2, 9) * 100, pc = pick([10, 20, 30, 50]);
+        var mid = start * (100 + pc) / 100, end = mid * (100 - pc) / 100;
+        return num('A ' + money(start) + ' price goes up ' + pc + '%, then the new price goes down ' + pc + '%. What is the final price?', '',
+          end, money(end), 'Up: ' + start + ' × ' + s(1 + pc / 100) + ' = ' + mid + '. Down: ' + mid + ' × ' + s(1 - pc / 100) +
+          ' = ' + s(end) + '. It does not get back to ' + money(start) + '.', { unit: '$' });
+      },
+      function () {
+        var amount = ri(2, 20) * 100, rate = ri(2, 8), years = ri(2, 5), earned = amount * rate * years / 100;
+        return num('How much simple interest does ' + money(amount) + ' earn at ' + rate + '% a year for ' + years + ' years?', '',
+          earned, money(earned), 'Interest = ' + amount + ' × ' + s(rate / 100) + ' × ' + years + ' = ' + money(earned) + '.',
+          { unit: '$' });
+      },
+      function () {
+        var a, b, c, d;
+        do { b = ri(2, 6); a = ri(1, b - 1); } while (gcd(a, b) !== 1);
+        do { d = ri(2, 6); c = ri(1, d - 1); } while (gcd(c, d) !== 1);
+        var w = b * d * ri(1, 4), inner = w * c / d, ans = inner * a / b;
+        return num('Work it out.', fr(a, b) + ' of ' + fr(c, d) + ' of ' + w, ans, s(ans),
+          c + '/' + d + ' of ' + w + ' is ' + inner + ', and ' + a + '/' + b + ' of ' + inner + ' is ' + ans + '.');
+      },
+      function () {
+        var list = [], seen = {};
+        while (list.length < 4) {
+          var d = ri(3, 12), n = ri(Math.ceil(d / 2), d - 1), key = (n / d).toFixed(3);
+          if (gcd(n, d) !== 1 || seen[key]) continue;
+          seen[key] = 1; list.push([n, d]);
+        }
+        var best = list.slice().sort(function (x, y) { return y[0] / y[1] - x[0] / x[1]; })[0];
+        return choice('Which fraction is the largest?', '', frac(best[0], best[1]),
+          list.filter(function (f) { return f !== best; }).map(function (f) { return frac(f[0], f[1]); }),
+          'As decimals: ' + list.map(function (f) { return f[0] + '/' + f[1] + ' ≈ ' + (f[0] / f[1]).toFixed(3); }).join(', ') +
+          '. The biggest is ' + best[0] + '/' + best[1] + '.');
+      },
+      function () {
+        var a, b; do { a = ri(1, 5); b = ri(a + 1, 9); } while (gcd(a, b) !== 1);
+        var each = ri(2, 12), total = (a + b) * each;
+        return num('Share ' + money(total) + ' in the ratio ' + a + ' : ' + b + '. How big is the larger share?', '',
+          b * each, money(b * each), a + ' + ' + b + ' = ' + (a + b) + ' parts, each worth ' + total + ' ÷ ' + (a + b) + ' = ' +
+          each + ', so the larger share is ' + b + ' × ' + each + ' = ' + money(b * each) + '.', { unit: '$' });
+      }
+    ]
   };
 })();
