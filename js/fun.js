@@ -115,8 +115,8 @@
     'body.gv-playing .gv-fun-chip{bottom:82px}',
 
     // Shy tiles: the page's own tile transitions, plus a quick one for the dodge.
-    'html.gv-fun-april .tile{transition:transform 0.2s cubic-bezier(0.2,0.8,0.2,1),box-shadow 0.25s,',
-    'border-color 0.2s,translate 0.12s ease-out}',
+    '@media (prefers-reduced-motion:no-preference){html.gv-fun-april .tile{',
+    'transition:transform 0.2s cubic-bezier(0.2,0.8,0.2,1),box-shadow 0.25s,border-color 0.2s,translate 0.12s ease-out}}',
 
     // The homework toast sits under the header, clear of the chip and the music bar.
     '.gv-fun-toast{position:fixed;left:50%;top:80px;z-index:450;transform:translateX(-50%);',
@@ -164,6 +164,10 @@
     '@keyframes gvFunFlap{from{transform:scaleY(1)}to{transform:scaleY(0.6)}}',
     '@media (prefers-reduced-motion:reduce){.gv-fun-bat{display:none}}'
   ];
+
+  function stillness() {
+    return !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }
 
   function styles() {
     if (document.getElementById('gv-fun-css')) return;
@@ -215,6 +219,7 @@
   // finger has nothing to dodge until it has already tapped.
   function shyTiles(undo) {
     if (!document.getElementById('grid') && !document.querySelector('.tile')) return;
+    if (stillness()) return;
     var MAX = 10, EDGE = 6;
     var tile = null, x = 0, y = 0, frame = 0;
 
@@ -364,7 +369,7 @@
     layer.setAttribute('aria-hidden', 'true');
     layer.innerHTML = cobweb('left') + cobweb('right');
     // The webs and the glow hold still, so they stay. The bats only fly.
-    if (!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) bats(layer);
+    if (!stillness()) bats(layer);
     place(undo, layer);
   }
 
