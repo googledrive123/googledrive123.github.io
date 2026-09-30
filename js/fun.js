@@ -92,7 +92,18 @@
     'html.gv-fun-april .header,html.gv-fun-april .site-header,html.gv-fun-april .welcome-top{',
     'transform:rotate(-1deg);transform-origin:50% 0}',
     'html.gv-fun-april .logo-mark,html.gv-fun-april .site-brand .mark{transform:scaleX(-1)}',
-    'html.gv-fun-april h1,html.gv-fun-april h2,html.gv-fun-april h3{font-family:' + SILLY + '}'
+    'html.gv-fun-april h1,html.gv-fun-april h2,html.gv-fun-april h3{font-family:' + SILLY + '}',
+
+    // The way out. Under the game overlay and every dialog, above the page.
+    '.gv-fun-chip{position:fixed;left:16px;bottom:16px;z-index:450;display:inline-flex;align-items:center;gap:0.55rem;',
+    'padding:0.5rem 0.9rem;border-radius:100px;border:1px solid var(--border-strong,rgba(255,255,255,0.16));',
+    'background:var(--surface,#121216);color:var(--text,#f4f4f6);cursor:pointer;',
+    'font:500 0.8rem/1 "Space Grotesk",system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,0.45)}',
+    '.gv-fun-chip:hover{border-color:var(--accent,#ff3b3b)}',
+    '.gv-fun-chip:focus-visible{outline:2px solid var(--accent,#ff3b3b);outline-offset:2px}',
+    '.gv-fun-chip b{font:600 0.6rem/1 "JetBrains Mono",monospace;letter-spacing:0.14em;text-transform:uppercase;',
+    'color:var(--accent,#ff3b3b)}',
+    'body.gv-playing .gv-fun-chip{bottom:82px}'
   ];
 
   function styles() {
@@ -105,9 +116,20 @@
 
   // ── April Fools ─────────────────────────────────────────────────────────
 
+  // On screen the whole time pranks run, so nobody has to hunt for the way out.
+  function offChip(undo) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'gv-fun-chip';
+    b.innerHTML = '<b>April Fools</b>Turn off pranks';
+    b.addEventListener('click', function () { setPranks(false); });
+    place(undo, b);
+  }
+
   function startApril(undo) {
     styles();
     flag(undo, 'gv-fun-april');
+    offChip(undo);
   }
 
   // ── Halloween ───────────────────────────────────────────────────────────
