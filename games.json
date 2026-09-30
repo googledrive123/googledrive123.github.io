@@ -1369,5 +1369,6 @@
 {"id":"n64-emulator","name":"N64 Emulator","categories":["Apps"],"img":null,"src":null,"site":7,"path":"emulators/n-64/","added":"2026-09-30","ranking":1522},
 {"id":"linux-vm","name":"Linux VM","categories":["Apps"],"img":null,"src":null,"site":7,"path":"emulators/vm-linux/","added":"2026-09-30","ranking":1523},
 {"id":"webretro","name":"Web Retro","categories":["Apps"],"img":"/thumbs/webretro.webp","src":null,"site":45,"added":"2026-09-30","ranking":1524},
-{"id":"discord","name":"Discord","categories":["Apps"],"img":null,"src":"/unblocker/?url=https://discord.com/app","added":"2026-09-30","ranking":1525}
+{"id":"discord","name":"Discord","categories":["Apps"],"img":null,"src":"/unblocker/?url=https://discord.com/app","added":"2026-09-30","ranking":1525},
+{"id":"amazon","name":"Amazon","categories":["Apps"],"img":null,"src":"/unblocker/?url=https://www.amazon.com","added":"2026-09-30","ranking":1526}
 ]}
