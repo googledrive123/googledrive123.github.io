@@ -56,6 +56,10 @@ declare
   ];
   v_text text := lower(coalesce(p_text, ''));
 begin
+  v_text := regexp_replace(v_text, '[^a-z0-9@$]+', ' ', 'g');
+  -- f u c k and f.u.c.k: letters typed one at a time go back together. Done
+  -- before the digits turn into letters, so a score like 4 5 5 stays apart.
+  v_text := regexp_replace(v_text, '\m([a-z]) (?=[a-z]\M)', '\1', 'g');
   v_text := translate(v_text, '013457@$', 'oieastas');
   v_text := regexp_replace(v_text, '[^a-z]+', ' ', 'g');
 
