@@ -657,6 +657,16 @@
     });
   }
 
+  // ─── Talking to the server ───
+  // The signed-in calls take the page's Supabase client, resolve to the data
+  // and reject with the server's own message.
+  function call(sb, fn, args) {
+    return sb.rpc(fn, args || {}).then(function (res) {
+      if (res.error) throw new Error(res.error.message);
+      return res.data;
+    });
+  }
+
   window.GV = window.GV || {};
   window.GV.avatars = {
     count: COUNT,
@@ -667,6 +677,9 @@
     picker: picker,
     resizeToDataUrl: resizeToDataUrl,
     localPreset: localPreset,
-    setLocalPreset: setLocalPreset
+    setLocalPreset: setLocalPreset,
+    mine: function (sb) { return call(sb, 'gv_avatar_mine'); },
+    setPreset: function (sb, i) { return call(sb, 'gv_avatar_set_preset', { p_preset: i }); },
+    upload: function (sb, dataUrl) { return call(sb, 'gv_avatar_upload', { p_data: dataUrl }); }
   };
 })();
