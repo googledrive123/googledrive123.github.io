@@ -20,7 +20,7 @@
 {"id":"fnaf","name":"\"Five Nights at Freddy's\"","categories":["Horror"],"ranking":18,"img":"/games/fnaf/splash.jpg","src":null},
 {"id":"subway-surfers","name":"Subway Surfers","categories":["Action","Arcade"],"ranking":19,"img":"https://icons-6.us/action-games/subway-surfers/img/splash.jpg","src":"https://icons-6.us/action-games/subway-surfers/","local":true},
 {"id":"grand-theft-auto-vice-city","name":"Grand Theft Auto Vice City","categories":["Action"],"ranking":20,"img":"https://upload.wikimedia.org/wikipedia/en/c/ce/Vice-city-cover.jpg","src":"https://genizymath.github.io/iframe/652.html"},
-{"id":"backrooms","name":"The Backrooms","categories":["Horror"],"ranking":21,"img":"https://icons-6.us/action-games/backrooms/img/splash.jpg","src":"https://icons-6.us/action-games/backrooms/","local":true},
+{"id":"backrooms","name":"The Backrooms","categories":["Horror"],"ranking":21,"img":"/thumbs/backrooms.webp","src":"https://icons-6.us/action-games/backrooms/","site":2,"added":"2026-05-13"},
 {"id":"slope2","name":"Slope 2","categories":["Action","Skill"],"ranking":22,"img":"https://icons-6.us/action-games/slope-2/slope-2-logo.png","src":"https://icons-6.us/action-games/slope-2/","local":true},
 {"id":"cluster-rush","name":"Cluster Rush","categories":["Action","Skill"],"ranking":23,"img":"https://icons-6.us/driving-games/cluster-rush/splash.png","src":"https://icons-6.us/driving-games/cluster-rush/","local":true},
 {"id":"fifa-11","name":"Fifa 11","categories":["Action"],"ranking":24,"img":"https://upload.wikimedia.org/wikipedia/en/f/f5/Fifa11_Game_Cover.jpg","src":"https://genizymath.github.io/iframe/685.html"},
