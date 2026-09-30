@@ -415,9 +415,7 @@
     return maxPerformanceOn() ? 'Max performance: On' : 'Max performance';
   }
 
-  function fillMenu() {
-    var bar = document.querySelector('.menu-ui > .button-bar');
-    if (!bar || bar.querySelector('.gv-max-performance')) return;
+  function menuButton() {
     var button = document.createElement('button');
     button.className = 'button gv-max-performance';
     var icon = document.createElement('img');
@@ -432,7 +430,18 @@
       // Long enough to read that it worked before the loading screen.
       if (restarting) setTimeout(function () { location.reload(); }, 900);
     });
-    bar.insertBefore(button, bar.querySelector(':scope > .right'));
+    return button;
+  }
+
+  // The game takes its own buttons out of the bar and puts them back, after
+  // Settings for one, which would leave this one first instead of beside
+  // Music.
+  function fillMenu() {
+    var bar = document.querySelector('.menu-ui > .button-bar');
+    if (!bar) return;
+    var button = bar.querySelector('.gv-max-performance') || menuButton();
+    var right = bar.querySelector(':scope > .right');
+    if (button.parentNode !== bar || button.nextElementSibling !== right) bar.insertBefore(button, right);
   }
 
   function fill() {
