@@ -237,6 +237,7 @@
   var sb = null;
   var data = null;
   var visitorId = null;
+  var signedIn = false;
   // Server time minus this device's time, so a wrong clock on a school laptop
   // does not move the countdown.
   var skew = 0;
@@ -403,6 +404,43 @@
       rows.appendChild(gap);
       rows.appendChild(row({ rank: you.rank, nickname: you.nickname, time: you.time, you: true }));
     }
+    paintStanding(c, you);
+  }
+
+  function bold(parent, text) {
+    var b = document.createElement('b');
+    b.textContent = text;
+    parent.appendChild(b);
+  }
+
+  // Where the visitor stands, in words, and the name their runs go up under.
+  function paintStanding(c, you) {
+    var el = $('chStanding');
+    el.textContent = '';
+    var add = function (text) { el.appendChild(document.createTextNode(text)); };
+    if (you) {
+      add('You are ');
+      bold(el, '#' + you.rank);
+      add(' of ' + plural(c.runners, 'racer', 'racers') + ' with ');
+      bold(el, you.time);
+      add('.');
+    } else {
+      add('No time from you on ' + c.title + ' this month yet.');
+    }
+    var identity = window.GV && window.GV.identity;
+    if (identity) {
+      add(' You race as ');
+      bold(el, identity.publicName());
+      add('.');
+    }
+    if (!signedIn) {
+      add(' ');
+      var link = document.createElement('a');
+      link.href = '/';
+      link.textContent = 'Sign in';
+      el.appendChild(link);
+      add(' to keep a badge with your account.');
+    }
   }
 
   function paint() {
@@ -429,6 +467,17 @@
     });
   }
 
+  // A signed-in player's runs go up under their username, which the home
+  // page leaves in identity.js. Looked up here too, for a visit that starts
+  // on this page.
+  function loadName(identity, user) {
+    sb.from('profiles').select('username').eq('id', user.id).maybeSingle().then(function (r) {
+      var name = (r.data && r.data.username) || (user.email || '').split('@')[0];
+      if (name && name !== identity.accountName()) identity.setAccountName(name);
+      if (data && data.challenge) paintBoard();
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     if (!window.supabase) {
       $('chTitle').textContent = 'The challenge could not load';
@@ -443,8 +492,11 @@
       sb.auth.getSession(),
       identity ? identity.ready : Promise.resolve(null)
     ]).then(function (r) {
+      var session = r[0].data && r[0].data.session;
+      signedIn = !!session;
       visitorId = r[1] || null;
       load();
+      if (session && identity) loadName(identity, session.user);
     });
     setInterval(paintClock, 1000);
   });
