@@ -2979,6 +2979,11 @@ function initRoute() {
     revealBrowse();
     return;
   }
+  if ((p === '/' || p === '') && GV.layout.skipWelcome()) {
+    revealBrowse();
+    history.replaceState({page:'browse'}, '', '/games');
+    return;
+  }
   if (!p.startsWith('/games/')) return;
 
   var id = p.slice(7).replace(/\/$/, '');
