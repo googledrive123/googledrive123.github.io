@@ -978,7 +978,7 @@
 {"id":"ovo-3-dimensions","name":"OvO 3 Dimensions","categories":["Action"],"ranking":1175,"img":"/thumbs/ovo-3-dimensions.webp","src":"/iframe/3.html","site":45},
 {"id":"pac-man-superfast","name":"Pac-Man Superfast","categories":["Action"],"ranking":1176,"img":"/thumbs/pac-man-superfast.webp","src":"/iframe/158.html","site":45},
 {"id":"papers-please","name":"Papers, Please","categories":["Action"],"ranking":1177,"img":"https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Papers_Please_-_Title_Logo.png/330px-Papers_Please_-_Title_Logo.png","src":"/iframe/187.html"},
-{"id":"parking-rush","name":"Parking Rush","categories":["Action"],"ranking":1178,"img":"/thumbs/parking-rush.webp","src":"/iframe/159.html"},
+{"id":"parking-rush","name":"Parking Rush","categories":["Action"],"ranking":1178,"img":"/thumbs/parking-rush.webp","src":"/iframe/159.html","site":45},
 {"id":"playjs","name":"Play!.js","categories":["Action"],"ranking":1179,"img":"/thumbs/playjs.webp","src":"/iframe/296.html"},
 {"id":"ragdoll-archers","name":"Ragdoll Archers","categories":["Action"],"ranking":1182,"img":"/thumbs/ragdoll-archers.webp","src":"/iframe/186.html"},
 {"id":"ragdoll-hit","name":"Ragdoll Hit","categories":["Action"],"ranking":1183,"img":"https://cdn.jsdelivr.net/gh/genizy/google-class@main/ragdoll-hit/thumbnail.png","src":"/iframe/44-fix.html"},
