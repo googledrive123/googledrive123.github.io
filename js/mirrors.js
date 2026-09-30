@@ -21,6 +21,9 @@
   var MAIN = 'https://googledrive123.github.io';
   var CACHE_KEY = 'gv.mirrors.list';
   var CHECK_MS = 5000;
+  // A school network can take a while to load a whole page at a new address.
+  var READY_MS = 30000;
+  var ANSWER_MS = 10000;
 
   function rpc(name, args) {
     return fetch(SUPA_URL + '/rest/v1/rpc/' + name, {
@@ -165,11 +168,44 @@
     });
   }
 
+  /* Opens the other address at /mirrors/?receive, waits for it to say it is
+     ready, and posts it this browser's progress, addressed to that origin
+     only. Resolves once that tab has it; the player finishes over there.
+     Call it straight from a click: the tab is opened before anything else,
+     or a pop-up blocker stops it. */
+  function moveSaves(target) {
+    target = String(target || '').replace(/\/+$/, '');
+    if (!/^https?:\/\/[^\/]+$/.test(target)) return Promise.reject(new Error('That is not a web address.'));
+    if (target === location.origin) return Promise.reject(new Error('Your saves are already at this address.'));
+    var saves = window.GV && window.GV.saves;
+    if (!saves) return Promise.reject(new Error('Saves are not loaded on this page.'));
+
+    var win = window.open(target + '/mirrors/?receive', '_blank');
+    if (!win) return Promise.reject(new Error('Your browser blocked the new tab. Allow pop-ups here, then try again.'));
+
+    return Promise.all([
+      waitFor(win, target, 'ready', READY_MS,
+        host(target) + ' did not open. It may be blocked here too, so try another address.'),
+      saves.collect()
+    ]).then(function (both) {
+      var answered = waitFor(win, target, 'received', ANSWER_MS,
+        host(target) + ' did not take your saves. Close that tab and try again.');
+      win.postMessage({ gv: 'saves', data: both[1] }, target);
+      return answered;
+    }).then(function () {
+      return host(target);
+    }, function (err) {
+      try { if (!win.closed) win.close(); } catch (e) {}
+      throw err;
+    });
+  }
+
   window.GV = window.GV || {};
   window.GV.mirrors = {
     MAIN: MAIN,
     list: list,
     check: check,
-    rewrite: rewrite
+    rewrite: rewrite,
+    moveSaves: moveSaves
   };
 })();
