@@ -164,4 +164,22 @@
     }
     return decodeObject(v);
   }
+
+  function done(req) {
+    return new Promise(function (resolve, reject) {
+      req.onsuccess = function () { resolve(req.result); };
+      req.onerror = function () { reject(req.error); };
+    });
+  }
+
+  /* Every database on this origin except the skipped ones. A browser with no
+     way to list them (Firefox before 126) backs up localStorage alone. */
+  function listDbs() {
+    if (!window.indexedDB || typeof indexedDB.databases !== 'function') return Promise.resolve([]);
+    return indexedDB.databases().then(function (list) {
+      return list.map(function (d) { return d.name; }).filter(function (name) {
+        return name && SKIP_DBS.indexOf(name) === -1;
+      });
+    }, function () { return []; });
+  }
 })();
