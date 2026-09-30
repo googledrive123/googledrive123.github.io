@@ -1242,8 +1242,12 @@
   function gameTab(visitor, solo) {
     var at = Date.now();
     try { localStorage.removeItem(JOIN_KEY); } catch (e) {}
+    // A tab opened like this starts with a copy of this tab's sessionStorage,
+    // which holds the secret. Take it out for that moment.
+    try { sessionStorage.removeItem(SECRET_KEY); } catch (e) {}
     var tab = window.open('/games/polytrack/#gv-creator-wait=' + encodeURIComponent(displayName(visitor))
       + (solo ? '&solo=1' : '') + '&t=' + at, '_blank');
+    try { sessionStorage.setItem(SECRET_KEY, state.secret); } catch (e) {}
     if (!tab) $('playingMsg').textContent = 'The browser blocked the new tab. Allow popups for this page and try again.';
     return !!tab;
   }
