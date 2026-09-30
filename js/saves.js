@@ -488,4 +488,34 @@
       return c.from('gv_saves').select(COLUMNS).order('slot').then(check);
     });
   }
+
+  function cleanTitle(title) {
+    return String(title || '').replace(/\s+/g, ' ').trim().slice(0, 40) || null;
+  }
+
+  function mb(bytes) { return (bytes / (1024 * 1024)).toFixed(1) + ' MB'; }
+
+  /* The file goes up first and the row after, so a slot never lists a save
+     that is not there. Leaving title out keeps the slot's current name.
+     cacheControl 0: a slot is overwritten in place, and a cached copy of the
+     old file would load yesterday's progress. */
+  function cloudSave(slot, title) {
+    return withUser(function (c, user) {
+      return collect().then(function (data) {
+        var blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+        if (blob.size > MAX_BYTES) {
+          throw new Error('This save is ' + mb(blob.size) + ', over the 45 MB a cloud slot holds. '
+            + 'Download it as a file instead.');
+        }
+        return c.storage.from(BUCKET)
+          .upload(filePath(user, slot), blob, { upsert: true, contentType: 'application/json', cacheControl: '0' })
+          .then(check)
+          .then(function () {
+            var row = { user_id: user.id, slot: slot, size_bytes: blob.size, updated_at: new Date().toISOString() };
+            if (title !== undefined) row.title = cleanTitle(title);
+            return c.from('gv_saves').upsert(row).select(COLUMNS).single().then(check);
+          });
+      });
+    });
+  }
 })();
