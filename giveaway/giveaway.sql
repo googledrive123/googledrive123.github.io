@@ -227,3 +227,63 @@ begin
   ), '[]'::json);
 end;
 $function$;
+
+-- Picks the winner. random() runs here, on the server, so no browser has a
+-- say in who wins. Drawing before the end time closes entries there and then.
+-- A giveaway is drawn once: a second draw is refused rather than quietly
+-- picking someone else.
+create or replace function public.gv_giveaway_draw(p_secret text, p_id integer)
+returns json
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_row gv_giveaways;
+  v_user uuid;
+  v_name text;
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+
+  select * into v_row from gv_giveaways where id = p_id for update;
+  if not found then
+    raise exception 'no such giveaway';
+  end if;
+  if v_row.drawn_at is not null then
+    raise exception 'already drawn';
+  end if;
+
+  select e.user_id, coalesce(nullif(btrim(p.username), ''), split_part(u.email, '@', 1))
+  into v_user, v_name
+  from gv_giveaway_entries e
+  join auth.users u on u.id = e.user_id
+  left join profiles p on p.id = e.user_id
+  where e.giveaway_id = p_id
+  order by random()
+  limit 1;
+
+  if v_user is null then
+    raise exception 'no entries to draw from';
+  end if;
+
+  update gv_giveaways
+     set winner_user = v_user,
+         winner_name = v_name,
+         drawn_at = now(),
+         ends_at = least(ends_at, now())
+   where id = p_id
+  returning * into v_row;
+
+  return json_build_object(
+    'id', v_row.id,
+    'winner_user', v_row.winner_user,
+    'winner_name', v_row.winner_name,
+    'drawn_at', v_row.drawn_at,
+    'entries', (select count(*) from gv_giveaway_entries e where e.giveaway_id = p_id),
+    -- The page will not show this name, so the dashboard can say why.
+    'name_hidden', public.gv_is_rude(v_row.winner_name)
+  );
+end;
+$function$;
