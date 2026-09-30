@@ -844,7 +844,7 @@
 {"id":"supermarket-3d","name":"Supermarket 3D","categories":["Action"],"ranking":1026,"img":"https://cdn.jsdelivr.net/gh/genizy/brainrot@main/supermarket-3d/logo.png","src":"https://genizymath.github.io/iframe/406.html"},
 {"id":"survive-to-victory","name":"Survive To Victory","categories":["Action"],"ranking":1027,"img":"https://cdn.jsdelivr.net/gh/genizy/brainrot@main/survive-to-victory/logo.png","src":"https://genizymath.github.io/iframe/407.html"},
 {"id":"survivorio","name":"Survivor.io","categories":["Action"],"ranking":1028,"img":"https://cdn.jsdelivr.net/gh/genizy/survivor@main/thumb_2.jpg","src":"https://genizymath.github.io/iframe/709-fixagain.html"},
-{"id":"sushi-roll","name":"Sushi Roll","categories":["Action"],"ranking":1029,"img":"https://cdn.jsdelivr.net/gh/bubbls/youtube-playables@main/sushi-roll/assets/images/logo.png","src":"https://genizymath.github.io/iframe/322.html"},
+{"id":"sushi-roll","name":"Sushi Roll","categories":["Action"],"ranking":1029,"img":"/thumbs/sushi-roll.webp","src":"https://genizymath.github.io/iframe/322.html"},
 {"id":"svolley-random","name":"Svolley Random","categories":["Sports"],"ranking":1030,"img":"https://img.gamepix.com/games/svolley-random/cover/svolley-random.png","src":"https://genizymath.github.io/iframe/786.html"},
 {"id":"swordfight","name":"Swordfight","categories":["Action"],"ranking":1031,"img":"https://img.gamepix.com/games/swordfight/cover/swordfight.png","src":"https://genizymath.github.io/iframe/513.html"},
 {"id":"t-t-cubed","name":"T-T Cubed","categories":["Action"],"ranking":1032,"img":"https://img.gamepix.com/games/t-t-cubed/cover/t-t-cubed.png","src":"https://genizymath.github.io/iframe/818.html"},
