@@ -1360,5 +1360,6 @@
 {"id":"the-game","name":"The Game","categories":["Arcade"],"img":"/thumbs/the-game.webp","src":null,"site":8,"path":"flash/?swf=thegame.swf","added":"2026-09-30","ranking":1513},
 {"id":"the-impossible-quiz-2","name":"The Impossible Quiz 2","categories":["Puzzle"],"img":"/thumbs/the-impossible-quiz-2.webp","src":null,"site":8,"path":"flash/?swf=theimpossiblequiz2.swf","added":"2026-09-30","ranking":1514},
 {"id":"ultimate-flash-sonic","name":"Ultimate Flash Sonic","categories":["Platformer"],"img":"/thumbs/ultimate-flash-sonic.webp","src":null,"site":8,"path":"flash/?swf=ultimateflashsonic.swf","added":"2026-09-30","ranking":1515},
-{"id":"ultimate-tactics","name":"Ultimate Tactics","categories":["Strategy"],"img":"/thumbs/ultimate-tactics.webp","src":null,"site":8,"path":"flash/?swf=ultimatetactics.swf","added":"2026-09-30","ranking":1516}
+{"id":"ultimate-tactics","name":"Ultimate Tactics","categories":["Strategy"],"img":"/thumbs/ultimate-tactics.webp","src":null,"site":8,"path":"flash/?swf=ultimatetactics.swf","added":"2026-09-30","ranking":1516},
+{"id":"unfair-mario","name":"Unfair Mario","categories":["Platformer"],"img":"/thumbs/unfair-mario.webp","src":null,"site":8,"path":"flash/?swf=unfairmario.swf","added":"2026-09-30","ranking":1517}
 ]}
