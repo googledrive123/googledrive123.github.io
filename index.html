@@ -3413,7 +3413,7 @@ function render() {
   // ─── Recently played ───
   recentGrid.innerHTML = '';
   const recentGames = recent.map(id => gamesById[id]).filter(Boolean);
-  if (isDefaultView && recentGames.length > 0) {
+  if (isDefaultView && recentGames.length > 0 && !GV.layout.hidden('recent')) {
     recentSection.style.display = '';
     recentCount.textContent = recentGames.length;
     recentGames.forEach(g => recentGrid.appendChild(makeTile(g)));
