@@ -840,7 +840,7 @@
 {"id":"super-mario-bros","name":"Super Mario Bros","categories":["Platformer"],"ranking":1022,"img":"/thumbs/super-mario-bros.webp","src":"https://genizymath.github.io/iframe/508.html","site":39},
 {"id":"super-mario-bros-remastered","name":"Super Mario Bros Remastered","categories":["Platformer"],"ranking":1023,"img":"/thumbs/super-mario-bros-remastered.webp","src":"https://genizymath.github.io/iframe/736.html","site":39},
 {"id":"super-monkey-ball-12","name":"Super Monkey Ball 12","categories":["Action"],"ranking":1024,"img":"/thumbs/super-monkey-ball-12.webp","src":"https://genizymath.github.io/iframe/749.html"},
-{"id":"super-star-car","name":"Super Star Car","categories":["Racing"],"ranking":1025,"img":"/thumbs/super-star-car.webp","src":"https://genizymath.github.io/iframe/579.html"},
+{"id":"super-star-car","name":"Super Star Car","categories":["Racing"],"ranking":1025,"img":"/thumbs/super-star-car.webp","src":null,"site":39},
 {"id":"supermarket-3d","name":"Supermarket 3D","categories":["Action"],"ranking":1026,"img":"https://cdn.jsdelivr.net/gh/genizy/brainrot@main/supermarket-3d/logo.png","src":"https://genizymath.github.io/iframe/406.html"},
 {"id":"survive-to-victory","name":"Survive To Victory","categories":["Action"],"ranking":1027,"img":"https://cdn.jsdelivr.net/gh/genizy/brainrot@main/survive-to-victory/logo.png","src":"https://genizymath.github.io/iframe/407.html"},
 {"id":"survivorio","name":"Survivor.io","categories":["Action"],"ranking":1028,"img":"https://cdn.jsdelivr.net/gh/genizy/survivor@main/thumb_2.jpg","src":"https://genizymath.github.io/iframe/709-fixagain.html"},
