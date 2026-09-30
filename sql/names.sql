@@ -20,9 +20,12 @@ language sql
 immutable
 set search_path to 'public'
 as $function$
+  -- Two roots the shared check only takes as whole words (for shiitake and
+  -- Scunthorpe) are taken anywhere in a name, where they hide joined up.
   select public.gv_is_rude(p_name)
       or public.gv_is_rude(regexp_replace(regexp_replace(coalesce(p_name, ''),
-           '([a-z])([A-Z])', '\1 \2', 'g'), '[^A-Za-z]+', ' ', 'g'));
+           '([a-z])([A-Z])', '\1 \2', 'g'), '[^A-Za-z]+', ' ', 'g'))
+      or lower(coalesce(p_name, '')) ~ '(sh[i1!]t|c[u*]nt)';
 $function$;
 
 -- For the sign-up and rename forms.
