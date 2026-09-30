@@ -1870,6 +1870,18 @@
       border-radius: 12px; padding: 0.75rem;
     }
     .stat-card.full { grid-column: 1 / -1; }
+    .level-card { display: flex; align-items: center; gap: 0.75rem; }
+    .level-badge {
+      flex-shrink: 0;
+      width: 44px; height: 44px; border-radius: 50%;
+      display: grid; place-items: center;
+      font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 1rem;
+      color: var(--text);
+      background: conic-gradient(var(--accent) calc(var(--pct, 0) * 1%), var(--surface) 0);
+      box-shadow: inset 0 0 0 4px var(--surface-2);
+    }
+    .level-bar { height: 6px; border-radius: 100px; background: var(--surface); overflow: hidden; margin-top: 0.4rem; }
+    .level-bar > span { display: block; height: 100%; width: calc(var(--pct, 0) * 1%); background: var(--accent); transition: width 0.4s; }
     .stat-card-icon { color: var(--muted); margin-bottom: 0.35rem; }
     .stat-card-val {
       font-family: 'JetBrains Mono', monospace;
