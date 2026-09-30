@@ -290,6 +290,23 @@
   </section>
 
   <section>
+    <h2>Monthly challenge <small>PolyTrack track of the month, badges for the top three</small></h2>
+    <div class="card">
+      <div class="verify-bar">
+        <input type="month" id="chMonth" aria-label="Month">
+        <select id="chTrack" aria-label="Track"></select>
+        <input type="text" id="chTitle" placeholder="Title" maxlength="80">
+        <input type="text" id="chNote" placeholder="Note (optional)" maxlength="300">
+        <button class="btn" id="chSet" type="button">Set track</button>
+      </div>
+      <div class="verify-msg" id="chMsg"></div>
+      <div class="verify-list" id="chList"></div>
+      <h3 class="mod-h" id="chBoardH" hidden></h3>
+      <div class="verify-list mod-scroll" id="chBoard"></div>
+    </div>
+  </section>
+
+  <section>
     <h2>Backup addresses <small>mirror sites, see mirrors/SETUP.md</small></h2>
     <div class="card">
       <div class="verify-bar">
