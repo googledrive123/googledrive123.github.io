@@ -5324,8 +5324,10 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
       <div class="movie-detail-overview" id="detailOverview"></div>
       <div class="tv-picker" id="tvPicker"><div class="tv-picker-loading">Loading seasons…</div></div>`;
 
-    tvState = { id: show.id, season: 1, episode: 1, seasons: [] };
-    loadTVFrame(show.id, 1, 1);
+    // Back to the last episode watched, if there was one.
+    const last = progressAll()['show:' + show.id];
+    tvState = { id: show.id, season: last ? last.s : 1, episode: last ? last.e : 1, seasons: [] };
+    loadTVFrame(show.id, tvState.season, tvState.episode);
     openOverlay();
 
     try {
@@ -5359,7 +5361,11 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
   }
 
   function loadTVFrame(id, season, episode) {
-    playerFrame.innerHTML = `<iframe src="${EMBED_TV}${id}/${season}/${episode}" frameborder="0" allowfullscreen></iframe>`;
+    const all = progressAll();
+    all['show:' + id] = { s: season, e: episode, at: Date.now() };
+    progressSave(all);
+    watching = 'tv:' + id + ':' + season + ':' + episode;
+    offerResume(`${EMBED_TV}${id}/${season}/${episode}`);
   }
 
   function renderTVPicker() {
