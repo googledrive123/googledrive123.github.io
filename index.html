@@ -4612,6 +4612,25 @@ window._starSync = function (id, on) {
   q.then(() => {}, () => {});
 };
 
+async function syncStars() {
+  if (!currentUser) return;
+  const { data, error } = await sb.from('starred_games').select('game_id').eq('user_id', currentUser.id);
+  if (error || !currentUser) return;
+  const remote = new Set(data.map(r => r.game_id));
+  let first = true;
+  try { first = localStorage.getItem(STAR_SYNCED_KEY) !== currentUser.id; } catch (e) {}
+  if (first) {
+    const add = [...starred].filter(id => !remote.has(id))
+      .map(id => ({ user_id: currentUser.id, game_id: id }));
+    if (add.length) await sb.from('starred_games').upsert(add);
+    add.forEach(r => remote.add(r.game_id));
+    try { localStorage.setItem(STAR_SYNCED_KEY, currentUser.id); } catch (e) {}
+  }
+  starred = remote;
+  saveStars(starred);
+  render();
+}
+
 // ─── Auth state ───
 // Every token refresh hands over a new user object. What was looked up about
 // the same user carries over, or the name drops back to the email's first half.
