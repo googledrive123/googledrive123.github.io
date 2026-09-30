@@ -303,3 +303,29 @@ begin
   return v_status;
 end;
 $function$;
+
+
+-- Takes down an approved picture that should not have been. The account goes
+-- back to its built-in avatar and sees its picture as turned down.
+create or replace function public.gv_avatar_remove(p_secret text, p_user_id uuid)
+returns boolean
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+
+  update gv_avatars
+     set approved_upload = null,
+         upload = case when upload_status = 'pending' then upload end,
+         upload_status = case when upload_status = 'pending' then 'pending' else 'rejected' end,
+         updated_at = now()
+   where user_id = p_user_id
+     and approved_upload is not null;
+
+  return found;
+end;
+$function$;
