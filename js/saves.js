@@ -182,4 +182,57 @@
       });
     }, function () { return []; });
   }
+
+  /* Opening without a version never changes an existing database. If it has
+     gone since it was listed, the open would make an empty one, so that is
+     cancelled and the database skipped. */
+  function openExisting(name) {
+    return new Promise(function (resolve, reject) {
+      var req = indexedDB.open(name);
+      var created = false;
+      req.onupgradeneeded = function () { created = true; req.transaction.abort(); };
+      req.onsuccess = function () { resolve(req.result); };
+      req.onerror = function () {
+        if (created) { resolve(null); return; }
+        reject(req.error);
+      };
+    });
+  }
+
+  function dumpDb(name) {
+    return openExisting(name).then(function (db) {
+      if (!db) return null;
+      var out = { version: db.version, stores: {} };
+      var names = Array.prototype.slice.call(db.objectStoreNames);
+      if (!names.length) { db.close(); return out; }
+
+      var blobs = [];
+      var tx = db.transaction(names, 'readonly');
+      return Promise.all(names.map(function (storeName) {
+        var store = tx.objectStore(storeName);
+        // Read now: the store's details are gone once the transaction ends.
+        var entry = {
+          keyPath: store.keyPath,
+          autoIncrement: store.autoIncrement,
+          indexes: Array.prototype.map.call(store.indexNames, function (indexName) {
+            var index = store.index(indexName);
+            return { name: index.name, keyPath: index.keyPath, unique: index.unique, multiEntry: index.multiEntry };
+          }),
+          records: []
+        };
+        out.stores[storeName] = entry;
+        return Promise.all([done(store.getAllKeys()), done(store.getAll())]).then(function (r) {
+          entry.records = r[0].map(function (key, i) {
+            return [encode(key, blobs), encode(r[1][i], blobs)];
+          });
+        });
+      })).then(function () {
+        db.close();
+        return fillBlobs(blobs);
+      }, function (err) {
+        db.close();
+        throw err;
+      }).then(function () { return out; });
+    });
+  }
 })();
