@@ -4892,6 +4892,10 @@ sb.auth.onAuthStateChange(async (event, session) => {
   if (currentUser) {
     await loadUsername();
     loadAvatar();
+    // Testers get a link to the review page (test/test.sql).
+    sb.rpc('gv_is_tester').then(({ data }) => {
+      document.getElementById('profileTestLink').hidden = data !== true;
+    }, () => {});
     await uploadLocalSessions();
     // Play time turns into shop coins (shop/shop.sql caps it per day).
     sb.rpc('gv_grant_coins').then(loadWallet, loadWallet);
@@ -4901,6 +4905,7 @@ sb.auth.onAuthStateChange(async (event, session) => {
   } else if (event === 'SIGNED_OUT') {
     myAvatar = null;
     myWallet = null;
+    document.getElementById('profileTestLink').hidden = true;
     paintCosmetics();
     // The stars belong to the account now. Leaving them would hand them to
     // whoever signs in next on a shared computer.
@@ -5902,6 +5907,7 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
       <div id="statTopGames"></div>
     </div>
 
+    <a class="profile-save" id="profileTestLink" href="/test/" hidden style="display:block;text-align:center;text-decoration:none;margin-top:0.5rem">Test new games</a>
     <button class="profile-signout" id="profileSignout" style="display:none">Sign Out</button>
     <button class="profile-delete" id="profileDelete" style="display:none">Delete account</button>
     <button class="auth-submit" id="profileSigninBtn" style="margin-top:0.5rem">Sign In / Sign Up</button>
