@@ -7,8 +7,9 @@
 // people here play on.
 //
 // All of those are already settings in the game. This file adds a Quality
-// row that sets them together, starts weaker devices on a lighter one, and
-// lowers the resolution on its own when the frame rate drops.
+// row that sets them together, starts weaker devices on a lighter one,
+// lowers the resolution on its own when the frame rate drops, and puts a Max
+// performance button on the main menu that picks the lightest in one tap.
 //
 // The game also draws a frame for every refresh of the display, 120 a second
 // on a MacBook Pro, which is where the fan noise comes from. It is held to 60
