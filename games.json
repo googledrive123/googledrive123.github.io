@@ -293,7 +293,7 @@
 {"id":"jetpackjoyride","name":"Jetpack Joyride","categories":["Action","Arcade"],"ranking":360,"img":"/thumbs/jetpackjoyride.webp","src":"https://icons-6.us/action-games/jetpack-joyride/","site":5,"added":"2026-05-13"},
 {"id":"lasthorizon","name":"Last Horizon","categories":["Action","Shooter"],"ranking":363,"img":"/thumbs/lasthorizon.webp","src":null,"site":5,"added":"2026-05-13"},
 {"id":"lazyjump3d","name":"Lazy Jump 3D","categories":["Arcade","Skill"],"ranking":364,"img":"/thumbs/lazyjump3d.webp","src":null,"site":5,"added":"2026-05-13"},
-{"id":"learntofly2","name":"Learn to Fly 2","categories":["Simulation","Arcade"],"ranking":366,"img":"https://icons-6.us/casual-games/learn-to-fly-2/logo.jpeg","src":"https://icons-6.us/casual-games/learn-to-fly-2/","local":true},
+{"id":"learntofly2","name":"Learn to Fly 2","categories":["Simulation","Arcade"],"ranking":366,"img":"/thumbs/learntofly2.webp","src":"https://icons-6.us/casual-games/learn-to-fly-2/","site":5,"added":"2026-05-13"},
 {"id":"linerider","name":"Line Rider","categories":["Simulation","Sandbox"],"ranking":368,"img":"https://upload.wikimedia.org/wikipedia/en/2/25/Line_Rider_Beta_2.PNG","src":null},
 {"id":"littlealchemy","name":"Little Alchemy","categories":["Puzzle"],"ranking":369,"img":"/games/littlealchemy/images/screenshot.png","src":null},
 {"id":"lowsadventures2","name":"\"Low's Adventures 2\"","categories":["Platformer"],"ranking":370,"img":"/games/lowsadventures2/icon.png","src":null},
