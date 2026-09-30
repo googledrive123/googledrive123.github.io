@@ -486,6 +486,14 @@ document.addEventListener('DOMContentLoaded', function () {
     $('cloudLoading').hidden = false;
     $('cloudLoading').textContent = message(err);
   });
+
+  // Counted from the list rather than written down, so it shrinks as games move.
+  fetch('/games.json').then(function (r) { return r.json(); }).then(function (data) {
+    var outside = (data.games || []).filter(function (g) {
+      return /^https?:\/\/(genizymath\.github\.io|icons-6\.us)\//.test(g.src || '');
+    }).length;
+    if (outside) $('outsideCount').textContent = 'Right now that is ' + outside.toLocaleString() + ' games. ';
+  }).catch(function () {});
 });
 </script>
 </main>
