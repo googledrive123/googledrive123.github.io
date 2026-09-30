@@ -251,3 +251,10 @@ create trigger gv_challenge_follow
         or old.visitor_id is distinct from new.visitor_id
         or old.nickname is distinct from new.nickname)
   execute function public.gv_challenge_follow();
+
+drop trigger if exists gv_challenge_follow_claim on public.polytrack_scores;
+create trigger gv_challenge_follow_claim
+  after delete on public.polytrack_scores
+  for each row
+  when (old.user_id is null)
+  execute function public.gv_challenge_follow();
