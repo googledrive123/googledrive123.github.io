@@ -80,4 +80,67 @@
     document.documentElement.classList.add(cls);
     undo.push(function () { document.documentElement.classList.remove(cls); });
   }
+
+  // ── April Fools ─────────────────────────────────────────────────────────
+
+  function startApril(undo) {
+    flag(undo, 'gv-fun-april');
+  }
+
+  // ── Halloween ───────────────────────────────────────────────────────────
+
+  function startHalloween(undo) {
+    flag(undo, 'gv-fun-halloween');
+  }
+
+  // ── Switches ────────────────────────────────────────────────────────────
+
+  function pranksOn() { return read(PRANKS_KEY) !== 'off'; }
+  function seasonalOn() { return read(SEASONAL_KEY) !== 'off'; }
+
+  // A forced mode wins over the switch, so a test link always shows something.
+  function aprilWanted() { return forced === 'april' || (pranksOn() && isAprilFools()); }
+  function halloweenWanted() { return forced === 'halloween' || (seasonalOn() && isHalloween()); }
+
+  function apply() {
+    var changed = aprilWanted() ? run('april', startApril) : halt('april');
+    changed = (halloweenWanted() ? run('halloween', startHalloween) : halt('halloween')) || changed;
+    if (changed) { try { document.dispatchEvent(new CustomEvent('gv:fun')); } catch (e) {} }
+  }
+
+  function setPranks(on) {
+    write(PRANKS_KEY, on ? 'on' : 'off');
+    if (!on && forced === 'april') forced = '';
+    apply();
+  }
+
+  function setSeasonal(on) {
+    write(SEASONAL_KEY, on ? 'on' : 'off');
+    if (!on && forced === 'halloween') forced = '';
+    apply();
+  }
+
+  function boot() {
+    apply();
+    // Switches flipped in another tab, the secret menu say, land here too.
+    window.addEventListener('storage', function (e) {
+      if (e.key === null || String(e.key).indexOf('gv.fun.') === 0) apply();
+    });
+  }
+
+  window.GV = window.GV || {};
+  window.GV.fun = {
+    pranksOn: pranksOn,
+    setPranks: setPranks,
+    seasonalOn: seasonalOn,
+    setSeasonal: setSeasonal,
+    isAprilFools: isAprilFools,
+    isHalloween: isHalloween
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot, { once: true });
+  } else {
+    boot();
+  }
 })();
