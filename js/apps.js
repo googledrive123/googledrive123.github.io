@@ -46,4 +46,44 @@
     st.textContent = CSS;
     document.head.appendChild(st);
   }
+
+  var DOTS = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
+    [5, 12, 19].map(function (y) { return [5, 12, 19].map(function (x) { return '<circle cx="' + x + '" cy="' + y + '" r="2"/>'; }).join(''); }).join('') +
+    '</svg>';
+
+  function here(href) {
+    var p = location.pathname;
+    return href === '/games' ? (p === '/' || p.indexOf('/games') === 0) : p.indexOf(href) === 0;
+  }
+
+  function mount(container) {
+    if (!container || container.querySelector('.gv-apps')) return;
+    style();
+    var box = document.createElement('div');
+    box.className = 'gv-apps';
+    box.innerHTML =
+      '<button class="gv-apps-btn" type="button" aria-label="Apps" aria-expanded="false">' + DOTS + '</button>' +
+      '<div class="gv-apps-scrim" hidden></div>' +
+      '<nav class="gv-apps-panel" aria-label="Apps" hidden>' + APPS.map(function (a) {
+        return '<a class="gv-app" href="' + a.href + '"' + (here(a.href) ? ' aria-current="page"' : '') + '>' +
+          '<svg viewBox="0 0 24 24" aria-hidden="true">' + a.icon + '</svg>' + a.label + '</a>';
+      }).join('') + '</nav>';
+    container.appendChild(box);
+
+    var btn = box.querySelector('.gv-apps-btn');
+    var panel = box.querySelector('.gv-apps-panel');
+    var scrim = box.querySelector('.gv-apps-scrim');
+    function set(open) {
+      panel.hidden = !open;
+      scrim.hidden = !open;
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+    btn.addEventListener('click', function (e) { e.stopPropagation(); set(panel.hidden); });
+    scrim.addEventListener('click', function () { set(false); });
+    document.addEventListener('click', function (e) { if (!box.contains(e.target)) set(false); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') set(false); });
+  }
+
+  window.GV = window.GV || {};
+  window.GV.apps = { mount: mount, list: APPS };
 })();
