@@ -74,3 +74,17 @@ as $function$
 $function$;
 
 revoke all on function public.gv_challenge_month() from public, anon, authenticated;
+
+-- A time the way the game writes it. Frames are milliseconds.
+create or replace function public.gv_challenge_time(p_frames integer)
+returns text
+language sql
+immutable
+set search_path to 'public'
+as $function$
+  select lpad((p_frames / 60000)::text, 2, '0') || ':'
+      || lpad((p_frames / 1000 % 60)::text, 2, '0') || '.'
+      || lpad((p_frames % 1000)::text, 3, '0');
+$function$;
+
+revoke all on function public.gv_challenge_time(integer) from public, anon, authenticated;
