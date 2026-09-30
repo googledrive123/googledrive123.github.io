@@ -72,3 +72,39 @@ $function$;
 
 grant execute on function public.gv_mirrors_list() to anon, authenticated;
 
+
+-- Owner only, behind the dashboard secret. Takes an address as it is usually
+-- copied, "name.github.io" or "https://name.github.io/", and stores the bare
+-- origin. Adding one that is already there renames it and turns it back on.
+create or replace function public.gv_mirror_add(p_secret text, p_origin text, p_label text default null)
+returns json
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_origin text := regexp_replace(lower(btrim(coalesce(p_origin, ''))), '/+$', '');
+  v_row gv_mirrors;
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+
+  if v_origin !~ '^[a-z]+://' then
+    v_origin := 'https://' || v_origin;
+  end if;
+  if v_origin !~ '^https://[a-z0-9.-]+$' then
+    raise exception 'give an https address with no path, like https://name.github.io';
+  end if;
+  if v_origin = 'https://googledrive123.github.io' then
+    raise exception 'that is the main site';
+  end if;
+
+  insert into gv_mirrors (origin, label)
+  values (v_origin, nullif(left(btrim(coalesce(p_label, '')), 60), ''))
+  on conflict (origin) do update set label = excluded.label, active = true
+  returning * into v_row;
+
+  return row_to_json(v_row);
+end;
+$function$;
