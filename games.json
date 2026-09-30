@@ -110,7 +110,7 @@
 {"id":"awesometanks","name":"Awesome Tanks","categories":["Action","Shooter"],"ranking":109,"img":"/thumbs/awesometanks.webp","src":null,"site":3,"added":"2026-05-13"},
 {"id":"ballisticchickens","name":"Ballistic Chickens","categories":["Action","Shooter"],"ranking":110,"img":"/thumbs/ballisticchickens.webp","src":null,"site":3,"added":"2026-05-13"},
 {"id":"basket-random","name":"Basket Random","categories":["Sports"],"ranking":111,"img":"/thumbs/basket-random.webp","src":"https://icons-6.us/driving-games/basket-random/","site":3,"added":"2026-05-13"},
-{"id":"bendy-and-the-ink-machine","name":"Bendy And The Ink Machine","categories":["Horror"],"ranking":112,"img":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Bendy_and_the_Ink_Machine_logo.svg/330px-Bendy_and_the_Ink_Machine_logo.svg.png","src":"https://genizymath.github.io/iframe/215.html"},
+{"id":"bendy-and-the-ink-machine","name":"Bendy And The Ink Machine","categories":["Horror"],"ranking":112,"img":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Bendy_and_the_Ink_Machine_logo.svg/330px-Bendy_and_the_Ink_Machine_logo.svg.png","src":null,"site":10},
 {"id":"big-neon-tower-tiny-square","name":"Big Neon Tower Tiny Square","categories":["Platformer"],"ranking":113,"img":"/thumbs/big-neon-tower-tiny-square.webp","src":"https://genizymath.github.io/iframe/68.html"},
 {"id":"bitgunio","name":"BitGun.io","categories":["Action"],"ranking":114,"img":"/thumbs/bitgunio.webp","src":"https://genizymath.github.io/iframe/561.html"},
 {"id":"bloodtournament","name":"Blood Tournament","categories":["Action"],"ranking":115,"img":"/thumbs/bloodtournament.webp","src":null,"site":3,"added":"2026-05-13"},
