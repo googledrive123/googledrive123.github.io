@@ -37,3 +37,37 @@ create table if not exists public.gv_avatars (
 
 -- Every path in and out is a security definer function below.
 alter table public.gv_avatars enable row level security;
+
+
+-- The account's own state, for the profile panel. pending is the account's
+-- own picture waiting for review, so the panel can show it to them alone.
+create or replace function public.gv_avatar_mine()
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+  v_row gv_avatars;
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'not from this origin';
+  end if;
+  if v_user is null then
+    raise exception 'sign in first';
+  end if;
+
+  select * into v_row from gv_avatars where user_id = v_user;
+  return json_build_object(
+    'preset', v_row.preset,
+    'status', coalesce(v_row.upload_status, 'none'),
+    'pending', case when v_row.upload_status = 'pending' then v_row.upload end,
+    'approved', v_row.approved_upload
+  );
+end;
+$function$;
+
+revoke all on function public.gv_avatar_mine() from public, anon;
+grant execute on function public.gv_avatar_mine() to authenticated;
