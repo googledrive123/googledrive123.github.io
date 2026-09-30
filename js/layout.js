@@ -30,7 +30,12 @@
     },
     applyTileSize: function () {
       document.documentElement.style.setProperty('--tile-min', layout.tileSize() + 'px');
-    }
+    },
+
+    // Home rows someone chose to hide: 'popular', 'starred', 'recent'.
+    ROWS: ['popular', 'starred', 'recent'],
+    hidden: function (row) { return read('gv.hide.' + row, '0') === '1'; },
+    setHidden: function (row, on) { write('gv.hide.' + row, on ? '1' : '0'); }
   };
 
   window.GV = window.GV || {};
