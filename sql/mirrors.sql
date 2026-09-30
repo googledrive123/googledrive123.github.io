@@ -26,3 +26,24 @@ create table if not exists public.gv_mirrors (
 -- Every path in and out is a security definer function, so there is no
 -- policy to write and a direct PostgREST request reads and writes nothing.
 alter table public.gv_mirrors enable row level security;
+
+
+-- Every origin the public functions answer, read by gv_origin_allowed() and
+-- through it by nearly every public function and the analytics insert
+-- policy. It used to be a fixed list and IMMUTABLE; it now reads gv_mirrors,
+-- so it is STABLE, and security definer because the anon role cannot read
+-- that table. Name, arguments and return type are unchanged.
+create or replace function public.gv_allowed_origins()
+returns text[]
+language sql
+stable
+security definer
+set search_path to 'public', 'pg_temp'
+as $function$
+  select array[
+    'https://googledrive123.github.io',
+    'http://127.0.0.1:8000',
+    'http://localhost:8000'
+  ] || coalesce((select array_agg(m.origin order by m.origin) from gv_mirrors m where m.active), '{}'::text[]);
+$function$;
+
