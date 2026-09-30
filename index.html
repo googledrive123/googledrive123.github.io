@@ -3829,6 +3829,7 @@ function openSettings() {
   document.getElementById('panicUrlInput').value = security.url();
   document.getElementById('confirmCloseInput').checked = security.confirmClose();
   document.getElementById('skipWelcomeInput').checked = GV.layout.skipWelcome();
+  document.getElementById('tileSizeInput').value = GV.layout.tileSize();
 }
 function closeSettings() { settingsOverlay.classList.remove('show'); }
 
@@ -3840,6 +3841,9 @@ document.getElementById('settingsBtnWelcome').addEventListener('click', openSett
 document.getElementById('settingsBtnBrowse').addEventListener('click', openSettings);
 document.getElementById('skipWelcomeInput').addEventListener('change', (e) => {
   GV.layout.setSkipWelcome(e.target.checked);
+});
+document.getElementById('tileSizeInput').addEventListener('input', (e) => {
+  GV.layout.setTileSize(+e.target.value);
 });
 
 document.getElementById('cloakApplyCustom').addEventListener('click', () => {
