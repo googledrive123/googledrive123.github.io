@@ -1,0 +1,10 @@
+-- Site chat.
+--
+-- One room for everyone signed in, read and written through /chat/. Kept
+-- safe for school: only accounts can talk, rude words never get in (see
+-- sql/rude.sql), a slow mode stops floods, and anyone can report a message
+-- to the site owner, who deletes messages and mutes accounts from the
+-- analytics dashboard.
+--
+-- Apply against project dxwjxzmlezfyursysays, after sql/rude.sql. Every
+-- statement is safe to run twice. Applied on 30 September 2026.
