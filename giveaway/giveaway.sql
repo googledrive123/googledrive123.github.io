@@ -24,3 +24,11 @@ create table if not exists public.gv_giveaways (
   winner_name text,
   drawn_at    timestamptz
 );
+
+-- One entry per account per giveaway. Deleting the account takes its entries.
+create table if not exists public.gv_giveaway_entries (
+  giveaway_id integer not null references public.gv_giveaways (id) on delete cascade,
+  user_id     uuid not null references auth.users (id) on delete cascade,
+  created_at  timestamptz not null default now(),
+  primary key (giveaway_id, user_id)
+);
