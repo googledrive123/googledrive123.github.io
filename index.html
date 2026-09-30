@@ -1078,6 +1078,16 @@
       scroll-snap-type: x proximity;
     }
     .grid.strip .tile { scroll-snap-align: start; }
+    .tile-live {
+      position: absolute; left: 0.9rem; bottom: 0.7rem; z-index: 3;
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      padding: 0.15rem 0.5rem; border-radius: 100px;
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(6px);
+      font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; letter-spacing: 0.08em;
+      color: #7dffa0;
+    }
+    .tile-live::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .tile-live ~ .tile-play { visibility: hidden; }
     .popular-rank {
       position: absolute; right: 0.8rem; bottom: 0.7rem; z-index: 2;
       font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; font-weight: 700;
