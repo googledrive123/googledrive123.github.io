@@ -235,4 +235,38 @@
       }).then(function () { return out; });
     });
   }
+
+  function localKeys() {
+    var keys = [];
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var key = localStorage.key(i);
+        if (key !== null && !skipKey(key)) keys.push(key);
+      }
+    } catch (e) {}
+    return keys;
+  }
+
+  // One database at a time, so a browser full of games is not all in memory twice.
+  function eachInTurn(items, fn) {
+    return items.reduce(function (chain, item) {
+      return chain.then(function () { return fn(item); });
+    }, Promise.resolve());
+  }
+
+  function collect() {
+    var data = {
+      v: 1,
+      made: new Date().toISOString(),
+      origin: location.origin,
+      localStorage: {},
+      indexedDB: {}
+    };
+    localKeys().forEach(function (key) { data.localStorage[key] = read(key); });
+    return listDbs().then(function (names) {
+      return eachInTurn(names, function (name) {
+        return dumpDb(name).then(function (dump) { if (dump) data.indexedDB[name] = dump; });
+      });
+    }).then(function () { return data; });
+  }
 })();
