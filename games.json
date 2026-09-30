@@ -85,7 +85,7 @@
 {"id":"paperio","name":"Paper.io","categories":["Arcade","Multiplayer"],"ranking":84,"img":"/thumbs/paperio.webp","src":null,"site":3,"added":"2026-05-13"},
 {"id":"pixel-gun-survival","name":"Pixel Gun Survival","categories":["Action"],"ranking":85,"img":"https://icons-6.us/action-games/pixel-gun-survival/512x512.png","src":"https://icons-6.us/action-games/pixel-gun-survival/"},
 {"id":"plants-vs-zombies","name":"Plants VS Zombies","categories":["Action"],"ranking":86,"img":"https://icons-6.us/strategy-games/plants-vs-zombies/PlantsVsZombies.png","src":"https://icons-6.us/strategy-games/plants-vs-zombies/"},
-{"id":"worldhardestgame2","name":"\"World's Hardest Game 2\"","categories":["Platformer","Skill"],"ranking":87,"img":"https://icons-6.us/action-games/worlds-hardest-game-2/the-worlds-hardest-game-2.jpg","src":"https://icons-6.us/action-games/worlds-hardest-game-2/","local":true},
+{"id":"worldhardestgame2","name":"\"World's Hardest Game 2\"","categories":["Platformer","Skill"],"ranking":87,"img":"/thumbs/worldhardestgame2.webp","src":"https://icons-6.us/action-games/worlds-hardest-game-2/","site":3,"added":"2026-05-13"},
 {"id":"riddleschool","name":"Riddle School","categories":["Puzzle"],"ranking":88,"img":"https://imgs.crazygames.com/riddleschool.png","src":null},
 {"id":"cookie-clicker","name":"Cookie Clicker","categories":["Idle"],"ranking":89,"img":"/thumbs/cookie-clicker.webp","src":"https://icons-6.us/casual-games/cookie-clicker/","site":3,"added":"2026-05-13"},
 {"id":"escape-road","name":"Escape Road","categories":["Racing"],"ranking":90,"img":"https://cdn.jsdelivr.net/gh/bubbls/escape-road@45b2d69c626dc365753f6922d2c48c4075683ef5/drive.google.com/escape%20road/loading.png","src":"https://genizymath.github.io/iframe/264.html"},
