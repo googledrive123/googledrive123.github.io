@@ -405,4 +405,39 @@
       return blob.size;
     });
   }
+
+  /* A page that already has a Supabase client hands it over with useClient,
+     so there is one client per page: two would both try to refresh the same
+     session. Anywhere else one is made from the stored sign-in. */
+  var client = null;
+  var clientReady = null;
+
+  function useClient(existing) {
+    if (existing) client = existing;
+  }
+
+  function loadLibrary() {
+    if (window.supabase && window.supabase.createClient) return Promise.resolve(window.supabase);
+    return new Promise(function (resolve, reject) {
+      var s = document.createElement('script');
+      s.src = SUPA_JS;
+      s.onload = function () { resolve(window.supabase); };
+      s.onerror = function () { reject(new Error('Could not reach the save server. Check your connection and try again.')); };
+      document.head.appendChild(s);
+    });
+  }
+
+  function getClient() {
+    if (client) return Promise.resolve(client);
+    if (!clientReady) {
+      clientReady = loadLibrary().then(function (lib) {
+        if (!client) client = lib.createClient(SUPA_URL, SUPA_KEY);
+        return client;
+      }, function (err) {
+        clientReady = null;
+        throw err;
+      });
+    }
+    return clientReady;
+  }
 })();
