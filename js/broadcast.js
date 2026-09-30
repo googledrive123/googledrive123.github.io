@@ -23,4 +23,15 @@
     list.push(id);
     try { localStorage.setItem(SEEN_KEY, JSON.stringify(list.slice(-50))); } catch (e) {}
   }
+
+  // The server time this tab first heard from the site, or null before that.
+  function arrival() {
+    try { return sessionStorage.getItem(ARRIVAL_KEY); } catch (e) { return null; }
+  }
+
+  function meant(item, arrived) {
+    if (item.mode === 'now') return item.created_at > arrived;
+    if (item.mode === 'later') return item.created_at <= arrived;
+    return true;
+  }
 })();
