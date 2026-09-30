@@ -1433,4 +1433,21 @@
   function escapeHtml(t) {
     return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
   }
+
+  function check() {
+    if (answered || q.type !== 'num') return;
+    var verdict = judge(q, input.value);
+    if (typeof verdict === 'string') {
+      $('hint').textContent = verdict;
+      bump(box);
+      input.focus();
+      return;
+    }
+    finish(verdict, -1, input.value.trim());
+  }
+
+  function choose(i) {
+    if (answered || q.type !== 'mc' || i < 0 || i >= q.choices.length) return;
+    finish(i === q.answer, i, q.choices[i].replace(/<[^>]+>/g, ''));
+  }
 })();
