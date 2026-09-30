@@ -5418,7 +5418,7 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
   // ── Popstate ──
   window.addEventListener('popstate', function() {
     const p = location.pathname;
-    if (p === '/movie' || p === '/movie/') {
+    if (p === '/movie' || p === '/movie/' || p === '/movies' || p === '/movies/') {
       showSection(true); switchMode('movies', true);
       closeMoviePlayer(true);
     } else if (p.startsWith('/movie/')) {
