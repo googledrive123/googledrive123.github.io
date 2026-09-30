@@ -107,7 +107,21 @@
 
     // Shy tiles: the page's own tile transitions, plus a quick one for the dodge.
     'html.gv-fun-april .tile{transition:transform 0.2s cubic-bezier(0.2,0.8,0.2,1),box-shadow 0.25s,',
-    'border-color 0.2s,translate 0.12s ease-out}'
+    'border-color 0.2s,translate 0.12s ease-out}',
+
+    // The homework toast sits under the header, clear of the chip and the music bar.
+    '.gv-fun-toast{position:fixed;left:50%;top:80px;z-index:450;transform:translateX(-50%);',
+    'width:min(320px,calc(100vw - 32px));padding:0.8rem 1rem;border-radius:12px;',
+    'border:1px solid var(--border-strong,rgba(255,255,255,0.16));background:var(--surface,#121216);',
+    'color:var(--text,#f4f4f6);font:500 0.85rem/1.4 "Space Grotesk",system-ui,sans-serif;',
+    'box-shadow:0 12px 32px rgba(0,0,0,0.5);transition:opacity 0.4s}',
+    '.gv-fun-toast.out{opacity:0}',
+    '.gv-fun-toast-bar{display:block;height:4px;margin-top:0.6rem;border-radius:2px;overflow:hidden;',
+    'background:var(--surface-2,#1a1a20)}',
+    '.gv-fun-toast-bar i{display:block;height:100%;width:99%;background:var(--accent,#ff3b3b);',
+    'animation:gvFunLoad 3.2s cubic-bezier(0.1,0.7,0.2,1) both}',
+    '.gv-fun-toast.done .gv-fun-toast-bar{display:none}',
+    '@keyframes gvFunLoad{from{width:0}to{width:99%}}'
   ];
 
   function styles() {
@@ -128,6 +142,31 @@
     b.innerHTML = '<b>April Fools</b>Turn off pranks';
     b.addEventListener('click', function () { setPranks(false); });
     place(undo, b);
+  }
+
+  var TOAST_SEEN = 'gv.fun.homework'; // sessionStorage
+
+  // A progress toast that gives itself up at 99%. Once per tab, so clicking
+  // through pages on April 1 does not bring it back every time.
+  function homeworkToast(undo) {
+    try {
+      if (sessionStorage.getItem(TOAST_SEEN)) return;
+      sessionStorage.setItem(TOAST_SEEN, '1');
+    } catch (e) {}
+    var t = document.createElement('div');
+    t.className = 'gv-fun-toast';
+    t.setAttribute('role', 'status');
+    t.innerHTML = '<span class="gv-fun-toast-text">Loading your homework…</span>' +
+      '<span class="gv-fun-toast-bar"><i></i></span>';
+    later(undo, function () {
+      place(undo, t);
+      later(undo, function () {
+        t.querySelector('.gv-fun-toast-text').textContent = 'Just kidding. Happy April Fools!';
+        t.classList.add('done');
+      }, 3400);
+      later(undo, function () { t.classList.add('out'); }, 6400);
+      later(undo, function () { if (t.parentNode) t.parentNode.removeChild(t); }, 6900);
+    }, 1200);
   }
 
   // Tiles slide a few px away from the mouse but never out from under it, so
@@ -186,6 +225,7 @@
     flag(undo, 'gv-fun-april');
     offChip(undo);
     shyTiles(undo);
+    homeworkToast(undo);
   }
 
   // ── Halloween ───────────────────────────────────────────────────────────
