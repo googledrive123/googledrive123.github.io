@@ -10,6 +10,7 @@
      applyName(el, cosmetics)   colors the element's text
      applyAvatar(el, cosmetics) rings the element (it should be round already)
      applyTitle(el, cosmetics)  puts the title in el, hides el when there is none
+     applyTiles(el, cosmetics)  sets --tile-accent on el
 
    A cosmetics object is keyed by kind, each an item as the server sends it:
      { name_color: { id, name, rarity, value }, avatar_frame: {...}, title: {...} }
@@ -142,12 +143,24 @@
     el.hidden = !text;
   }
 
+  // Tile colors are not shared with other players, so this only ever gets the
+  // player's own, through fromWallet. The page's tile CSS decides what
+  // --tile-accent colors (a border, a glow on hover).
+  function applyTiles(el, cosmetics) {
+    if (!el) return;
+    var item = cosmetics && cosmetics.tile_theme;
+    var accent = item && item.value && hex(item.value.accent);
+    if (accent) el.style.setProperty('--tile-accent', accent);
+    else el.style.removeProperty('--tile-accent');
+  }
+
   window.GV = window.GV || {};
   window.GV.cosmetics = {
     load: load,
     forget: forget,
     applyName: applyName,
     applyAvatar: applyAvatar,
-    applyTitle: applyTitle
+    applyTitle: applyTitle,
+    applyTiles: applyTiles
   };
 })();
