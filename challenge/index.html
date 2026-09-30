@@ -133,6 +133,25 @@
     .ch-standing:empty { display: none; }
     .ch-standing b { color: var(--muted); font-weight: 500; }
 
+    .ch-past-list { list-style: none; }
+    .page ol.ch-past-list { margin: 0; }
+    .page .ch-past-list li {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+      gap: 0.35rem 1rem;
+      margin: 0;
+      padding: 0.75rem 0;
+      border-top: 1px solid var(--border);
+    }
+    .page .ch-past-list li:first-child { border-top: none; padding-top: 0.1rem; }
+    .ch-past-month { font-size: 0.95rem; font-weight: 600; color: var(--text); }
+    .ch-past-track { margin-top: 0.1rem; font-size: 0.78rem; color: var(--muted-2); }
+    .ch-past-win { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.6rem; }
+    .ch-past-time { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--muted); }
+    .ch-past-win .ch-crown svg { width: 16px; height: 16px; }
+    .ch-past-win.pending .ch-name { color: var(--muted); }
+    .ch-past-none { font-size: 0.8rem; color: var(--muted-2); }
+    .page .ch-past p.ch-past-empty { font-size: 0.86rem; }
+
     .ch-rules { counter-reset: rule; list-style: none; }
     .page ul.ch-rules { margin: 0; }
     .ch-rules li { position: relative; padding-left: 2rem; font-size: 0.86rem; }
@@ -192,6 +211,14 @@
       </table>
     </div>
     <div class="ch-standing" id="chStanding"></div>
+  </div>
+
+  <div class="panel ch-past" id="chPast" hidden>
+    <div class="panel-label">Past winners</div>
+    <ol class="ch-past-list" id="chPastList"></ol>
+    <p class="ch-past-empty" id="chPastEmpty" hidden>No month has finished yet. The first winner
+    shows up here when this month ends.</p>
+    <p class="panel-note"><a href="/winner/">See the latest winner revealed</a></p>
   </div>
 
   <div class="panel">
@@ -456,6 +483,9 @@
       loading = false;
       if (r.error) throw r.error;
       skew = Date.parse(r.data.now) - Date.now();
+      // A new month moves the last one into the past winners.
+      var month = r.data.challenge && r.data.challenge.month;
+      if (!data || month !== (data.challenge && data.challenge.month)) loadPast();
       data = r.data;
       say('');
       paint();
@@ -464,6 +494,69 @@
       console.error(err);
       if (!data) $('chTitle').textContent = 'The challenge could not load';
       say('Could not reach GameVault. Refresh to try again.');
+    });
+  }
+
+  // Finished months, newest first. Until the owner has checked a month's
+  // times and handed out its badges, its leader is only in front.
+  function paintPast(months) {
+    var list = $('chPastList');
+    list.textContent = '';
+    $('chPast').hidden = false;
+    $('chPastEmpty').hidden = months.length > 0;
+    months.forEach(function (m) {
+      var li = document.createElement('li');
+
+      var left = document.createElement('div');
+      var month = document.createElement('div');
+      month.className = 'ch-past-month';
+      month.textContent = monthName(m.month);
+      var track = document.createElement('div');
+      track.className = 'ch-past-track';
+      track.textContent = m.title + ' · ' + plural(m.runners, 'racer', 'racers');
+      left.appendChild(month);
+      left.appendChild(track);
+      li.appendChild(left);
+
+      var right = document.createElement('div');
+      right.className = 'ch-past-win' + (m.closed ? '' : ' pending');
+      if (!m.winner) {
+        var none = document.createElement('span');
+        none.className = 'ch-past-none';
+        none.textContent = 'Nobody raced it';
+        right.appendChild(none);
+      } else {
+        if (m.closed) {
+          var crown = document.createElement('span');
+          crown.className = 'ch-crown';
+          crown.innerHTML = CROWN_SVG;
+          right.appendChild(crown);
+        } else {
+          var tag = document.createElement('span');
+          tag.className = 'badge progress';
+          tag.textContent = 'Checking times';
+          right.appendChild(tag);
+        }
+        var name = document.createElement('span');
+        name.className = 'ch-name';
+        name.textContent = m.winner.nickname;
+        right.appendChild(name);
+        var time = document.createElement('span');
+        time.className = 'ch-past-time';
+        time.textContent = m.winner.time;
+        right.appendChild(time);
+      }
+      li.appendChild(right);
+      list.appendChild(li);
+    });
+  }
+
+  function loadPast() {
+    sb.rpc('gv_challenge_history').then(function (r) {
+      if (r.error) throw r.error;
+      paintPast(r.data || []);
+    }).catch(function (err) {
+      console.error(err);
     });
   }
 
