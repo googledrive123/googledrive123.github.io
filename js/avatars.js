@@ -10,6 +10,7 @@
 
   var COUNT = 42;
   var LOCAL_KEY = 'gv.avatar';
+  var SIZE = 128;
   // The whole data: URL, which is what the server measures.
   var MAX_CHARS = 60 * 1024;
   var UPLOAD_RE = /^data:image\/(webp|png|jpeg);base64,[A-Za-z0-9+/]+={0,2}$/;
@@ -601,6 +602,61 @@
     return { el: grid, set: set };
   }
 
+  // ─── Uploading one ───
+  function encode(canvas, type) {
+    for (var q = 0.9; q > 0.25; q -= 0.15) {
+      var out = canvas.toDataURL(type, q);
+      // A browser that cannot write this type quietly hands back a PNG.
+      if (out.indexOf('data:' + type + ';base64,') !== 0) return null;
+      if (out.length <= MAX_CHARS) return out;
+    }
+    return null;
+  }
+
+  // Any picture file, cut to the middle square and shrunk to 128x128 WebP
+  // (JPEG where the browser cannot write WebP), small enough to send.
+  function resizeToDataUrl(file) {
+    return new Promise(function (resolve, reject) {
+      if (!file || !/^image\//.test(file.type || '')) return reject(new Error('Pick a picture file.'));
+      if (file.size > 20 * 1024 * 1024) return reject(new Error('That picture is too big. Try one under 20 MB.'));
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onerror = function () {
+        URL.revokeObjectURL(url);
+        reject(new Error('That file could not be opened as a picture.'));
+      };
+      img.onload = function () {
+        URL.revokeObjectURL(url);
+        var w = img.naturalWidth, h = img.naturalHeight, side = Math.min(w, h);
+        if (!side) return reject(new Error('That file could not be opened as a picture.'));
+        var from = img, sx = (w - side) / 2, sy = (h - side) / 2;
+        // Halving in steps keeps a big photo from going grainy at 128px.
+        while (side / 2 >= SIZE * 2) {
+          var half = document.createElement('canvas');
+          half.width = half.height = Math.round(side / 2);
+          half.getContext('2d').drawImage(from, sx, sy, side, side, 0, 0, half.width, half.width);
+          from = half; sx = sy = 0; side = half.width;
+        }
+        var canvas = document.createElement('canvas');
+        canvas.width = canvas.height = SIZE;
+        var ctx = canvas.getContext('2d');
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(from, sx, sy, side, side, 0, 0, SIZE, SIZE);
+        var out = encode(canvas, 'image/webp');
+        if (!out) {
+          // JPEG has no see-through parts; put them on the site's own dark.
+          ctx.globalCompositeOperation = 'destination-over';
+          ctx.fillStyle = '#16161b';
+          ctx.fillRect(0, 0, SIZE, SIZE);
+          out = encode(canvas, 'image/jpeg');
+        }
+        if (out) resolve(out);
+        else reject(new Error('Could not shrink that picture. Try another one.'));
+      };
+      img.src = url;
+    });
+  }
+
   window.GV = window.GV || {};
   window.GV.avatars = {
     count: COUNT,
@@ -609,6 +665,7 @@
     defaultFor: defaultFor,
     render: render,
     picker: picker,
+    resizeToDataUrl: resizeToDataUrl,
     localPreset: localPreset,
     setLocalPreset: setLocalPreset
   };
