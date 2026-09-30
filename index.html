@@ -1366,6 +1366,31 @@
       flex-direction: column;
     }
     .game-overlay.show { display: flex; }
+    /* A strip of similar games under the bar, opened from "More like this". */
+    .game-more {
+      display: flex; gap: 0.6rem;
+      padding: 0.6rem 1rem;
+      overflow-x: auto;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .game-more[hidden] { display: none; }
+    .gm-item {
+      flex: 0 0 150px;
+      display: flex; flex-direction: column; gap: 0.35rem;
+      padding: 0; border: 0; background: transparent;
+      color: var(--text); font: inherit; font-size: 0.78rem; text-align: left;
+      cursor: pointer;
+    }
+    .gm-thumb {
+      aspect-ratio: 4 / 3; border-radius: 10px;
+      background: var(--surface-2) center / cover no-repeat;
+      border: 1px solid var(--border);
+      transition: border-color 0.15s, transform 0.15s;
+    }
+    .gm-item:hover .gm-thumb { border-color: var(--accent); transform: translateY(-2px); }
+    .gm-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .game-bar {
       height: 48px;
       background: var(--surface);
