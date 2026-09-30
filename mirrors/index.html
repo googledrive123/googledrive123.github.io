@@ -18,8 +18,50 @@
   <script src="/js/analytics.js" defer></script>
   <script src="/js/site.js" defer></script>
   <script src="/js/player.js" defer></script>
+  <script src="/js/saves.js" defer></script>
+  <script src="/js/mirrors.js" defer></script>
   <style>
     .page .panel > p:not([class]) { font-size: 0.85rem; line-height: 1.6; }
+    .save-note { font-size: 0.8rem; color: var(--muted); margin-top: 0.75rem; line-height: 1.5; }
+    .save-note:empty { display: none; }
+    .save-note.bad { color: var(--accent); }
+    .save-note.good { color: #5ce08a; }
+    .btn-sm { padding: 0.38rem 0.8rem; font-size: 0.78rem; }
+
+    .mirrors { border-top: 1px solid var(--border); }
+    .mirror {
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+      gap: 0.6rem 1rem;
+      padding: 0.85rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .mirror-info { display: flex; align-items: flex-start; gap: 0.75rem; min-width: 0; flex: 1 1 14rem; }
+    .mirror-name { font-size: 0.92rem; color: var(--text); overflow-wrap: anywhere; }
+    .mirror-meta {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--muted-2);
+      margin-top: 0.25rem; overflow-wrap: anywhere;
+    }
+    .mirror-here {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--muted); margin-left: 0.4rem;
+      padding: 0.1rem 0.4rem; border: 1px solid var(--border-strong); border-radius: 999px;
+      vertical-align: 0.1em;
+    }
+
+    /* Up, blocked or no answer, from this browser on this network. The word
+       next to it says the same, so the colour is never the only clue. */
+    .dot {
+      width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+      margin-top: 0.35rem;
+      background: var(--muted-2);
+    }
+    .dot.up { background: #5ce08a; box-shadow: 0 0 0 3px rgba(92,224,138,0.15); }
+    .dot.blocked { background: var(--accent); box-shadow: 0 0 0 3px rgba(255,59,59,0.15); }
+    .dot.checking { animation: dot-pulse 1.2s ease-in-out infinite; }
+    @keyframes dot-pulse { 50% { opacity: 0.3; } }
+    @media (prefers-reduced-motion: reduce) { .dot.checking { animation: none; } }
+    .mirror-state.up { color: #5ce08a; }
+    .mirror-state.blocked { color: var(--accent); }
   </style>
 </head>
 <body>
@@ -29,6 +71,17 @@
   <p class="lede">GameVault also runs at other addresses. Schools block sites one address at a
   time, so when one stops working another usually still does. Bookmark a couple now, before you
   need them.</p>
+
+  <div class="panel">
+    <div class="panel-label">Addresses</div>
+    <div class="mirrors" id="mirrorList"></div>
+    <p class="panel-note" id="mirrorEmpty" hidden>No backup addresses yet. The owner is setting
+    some up, so check back here soon.</p>
+    <p class="save-note" id="listNote" role="status" aria-live="polite"></p>
+    <div class="btn-row">
+      <button class="btn btn-sm" id="recheckBtn" type="button">Check again</button>
+    </div>
+  </div>
 
   <div class="panel">
     <div class="panel-label">How it works</div>
@@ -42,6 +95,96 @@
     replacing whatever progress was there before.</p>
   </div>
 
+<script>
+/* mirrors.js is deferred like the rest of the chrome, and deferred
+   scripts run before DOMContentLoaded, so it is ready by then. */
+document.addEventListener('DOMContentLoaded', function () {
+  var mirrors = window.GV.mirrors;
+  var here = location.origin;
+
+  function $(id) { return document.getElementById(id); }
+
+  function el(tag, cls, text) {
+    var node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text) node.textContent = text;
+    return node;
+  }
+
+  function note(target, text, tone) {
+    target.textContent = text || '';
+    target.className = 'save-note' + (tone ? ' ' + tone : '');
+  }
+
+  function message(err) {
+    return (err && err.message) || 'Something went wrong. Try again.';
+  }
+
+  function host(origin) { return origin.replace(/^https?:\/\//, ''); }
+
+  var STATES = { checking: 'checking…', up: 'works here', blocked: 'blocked here', unknown: 'no answer' };
+  var rows = [];
+
+  function setState(r, state) {
+    r.dot.className = 'dot ' + state;
+    r.state.className = 'mirror-state ' + state;
+    r.state.textContent = STATES[state];
+  }
+
+  function mirrorRow(item) {
+    var wrap = el('div', 'mirror');
+    var info = el('div', 'mirror-info');
+    var dot = el('span', 'dot');
+    dot.setAttribute('aria-hidden', 'true');
+    var text = el('div');
+    var name = el('div', 'mirror-name', item.label || host(item.origin));
+    if (item.origin === here) name.appendChild(el('span', 'mirror-here', 'You are here'));
+    // An address with no label is already named by its host.
+    var meta = el('div', 'mirror-meta', item.label ? host(item.origin) + ' · ' : '');
+    var state = el('span', 'mirror-state');
+    meta.appendChild(state);
+    text.append(name, meta);
+    info.append(dot, text);
+    wrap.appendChild(info);
+    return { item: item, wrap: wrap, dot: dot, state: state };
+  }
+
+  // The address this page is on answered already, by loading. An answer
+  // from before Check again was pressed is dropped for the newer one.
+  function checkAll() {
+    rows.forEach(function (r) {
+      if (r.item.origin === here) { setState(r, 'up'); return; }
+      var ticket = r.ticket = {};
+      setState(r, 'checking');
+      mirrors.check(r.item.origin).then(function (state) {
+        if (r.ticket === ticket) setState(r, state);
+      });
+    });
+  }
+
+  function render(items) {
+    var list = $('mirrorList');
+    list.textContent = '';
+    rows = items.map(mirrorRow);
+    rows.forEach(function (r) { list.appendChild(r.wrap); });
+    $('mirrorEmpty').hidden = items.length > 1;
+    checkAll();
+  }
+
+  mirrors.list().then(function (items) {
+    render(items);
+    if (items.stale) {
+      note($('listNote'), 'Could not reach the list just now, so this is the one from your last visit.');
+    }
+  }, function () {
+    render([{ origin: mirrors.MAIN, label: 'Main address', main: true }]);
+    $('mirrorEmpty').hidden = true;
+    note($('listNote'), 'Could not load the backup addresses. Check your connection, then reload.', 'bad');
+  });
+
+  $('recheckBtn').addEventListener('click', checkAll);
+});
+</script>
 </main>
 </body>
 </html>
