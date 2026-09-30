@@ -1383,4 +1383,54 @@
     q = make(state.subject, state.level);
     show(focus);
   }
+
+  function finish(ok, picked, typed) {
+    answered = true;
+    var r = tally(state.subject), gained = 0, lift = 1;
+    r.total++;
+    if (ok) {
+      r.correct++;
+      state.streak++;
+      if (state.streak > state.best) state.best = state.streak;
+      lift = boost(state.streak);
+      gained = Math.round(POINTS[state.level] * lift);
+      state.points += gained;
+    } else {
+      state.streak = 0;
+    }
+    save();
+
+    var fb = $('feedback');
+    fb.className = 'feedback ' + (ok ? 'right' : 'wrong');
+    fb.hidden = false;
+    $('fbTitle').textContent = ok
+      ? (state.streak >= 3 ? 'Correct · ' + state.streak + ' in a row' : 'Correct')
+      : typed === null ? 'Here is how it goes' : 'Not quite';
+    $('fbPoints').textContent = ok ? '+' + gained + (lift > 1 ? ' (' + lift + '× streak)' : '') : '';
+    $('fbAnswer').innerHTML = 'Answer: <span class="m">' + q.show + '</span>' +
+      (!ok && typed && q.type === 'num' ? ' <span class="typed">You wrote ' + escapeHtml(typed) + '</span>' : '');
+    $('fbWhy').innerHTML = q.why;
+    quiz.classList.add(ok ? 'is-right' : 'is-wrong');
+
+    if (q.type === 'num') {
+      input.readOnly = true;
+      box.className = 'answer-box ' + (ok ? 'right' : 'wrong');
+    } else {
+      Array.prototype.forEach.call(choicesEl.querySelectorAll('.choice'), function (el, i) {
+        el.disabled = true;
+        if (i === q.answer) el.classList.add('right');
+        else if (i === picked) el.classList.add('wrong');
+        else el.classList.add('dim');
+      });
+    }
+    revealBtn.hidden = true;
+    nextBtn.hidden = false;
+    nextBtn.focus({ preventScroll: true });
+    paintStats(ok);
+    paintPickers();
+  }
+
+  function escapeHtml(t) {
+    return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
+  }
 })();
