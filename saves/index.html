@@ -48,6 +48,22 @@
     .btn-danger:hover { background: rgba(255,59,59,0.08); }
     .slot-rename { display: flex; gap: 0.4rem; margin-top: 0.4rem; max-width: 24rem; }
     .slot-rename .field { padding: 0.4rem 0.7rem; font-size: 0.85rem; }
+
+    /* Anything that overwrites progress asks here first, in the page, so it
+       reads the same in a disguised tab where pop-up dialogs look out of place. */
+    .confirm {
+      flex-basis: 100%;
+      margin-top: 0.9rem;
+      padding: 0.9rem 1rem;
+      border-radius: 10px;
+      border: 1px solid rgba(255,59,59,0.45);
+      background: rgba(255,59,59,0.06);
+    }
+    .slot .confirm { margin-top: 0.2rem; }
+    .confirm-title { color: var(--text); font-size: 0.9rem; font-weight: 600; }
+    .page .confirm p { font-size: 0.82rem; margin-top: 0.3rem; line-height: 1.5; }
+    .confirm .btn-row { margin-top: 0.75rem; }
+    .confirm.offer { border-color: var(--border-strong); background: var(--surface-2); }
   </style>
 </head>
 <body>
