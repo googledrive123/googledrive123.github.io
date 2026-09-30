@@ -1350,5 +1350,6 @@
 {"id":"sift-heads-4","name":"Sift Heads 4","categories":["Shooter"],"img":"/thumbs/sift-heads-4.webp","src":null,"site":8,"path":"flash/?swf=siftheads4.swf","added":"2026-09-30","ranking":1503},
 {"id":"sift-heads-5","name":"Sift Heads 5","categories":["Shooter"],"img":"/thumbs/sift-heads-5.webp","src":null,"site":8,"path":"flash/?swf=siftheads5.swf","added":"2026-09-30","ranking":1504},
 {"id":"sniper-assassin-4","name":"Sniper Assassin 4","categories":["Shooter"],"img":"/thumbs/sniper-assassin-4.webp","src":null,"site":8,"path":"flash/?swf=sniperassassin4.swf","added":"2026-09-30","ranking":1505},
-{"id":"stick-rpg","name":"Stick RPG","categories":["RPG"],"img":"/thumbs/stick-rpg.webp","src":null,"site":8,"path":"flash/?swf=stickrpg.swf","added":"2026-09-30","ranking":1506}
+{"id":"stick-rpg","name":"Stick RPG","categories":["RPG"],"img":"/thumbs/stick-rpg.webp","src":null,"site":8,"path":"flash/?swf=stickrpg.swf","added":"2026-09-30","ranking":1506},
+{"id":"stick-war","name":"Stick War","categories":["Strategy"],"img":"/thumbs/stick-war.webp","src":null,"site":8,"path":"flash/?swf=stickwar.swf","added":"2026-09-30","ranking":1507}
 ]}
