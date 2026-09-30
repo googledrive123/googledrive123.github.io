@@ -6,8 +6,8 @@
     { "name": "Hollow Knight: Silksong", "status": "added", "note": "Loads from an external host, so it can be slow." },
     { "name": "Geometry Dash (full version)", "status": "progress", "note": "Working build, still fighting the save file." },
     { "name": "Roblox", "status": "denied", "note": "Needs a native client. Nothing to embed." },
-    { "name": "Fortnite", "status": "denied", "note": "Same reason as Roblox." },
+    { "name": "Fortnite", "status": "denied", "note": "Needs a native client and an online account. Nothing to embed." },
     { "name": "More FNAF spin-offs", "status": "soon", "note": "Sources found, not packaged yet." },
-    { "name": "A music / soundboard page", "status": "soon", "note": "Planned after the schedule page settles." }
+    { "name": "A music / soundboard page", "status": "added", "note": "Live at /music/." }
   ]
 }
