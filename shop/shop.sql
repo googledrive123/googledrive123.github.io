@@ -137,3 +137,14 @@ create table if not exists public.gv_equipped (
 );
 
 alter table public.gv_equipped enable row level security;
+
+
+-- The daily cap, in one place for the grant and for what the page shows.
+create or replace function public.gv_coins_per_day()
+returns integer
+language sql
+immutable
+set search_path to 'public'
+as $function$
+  select 120;
+$function$;
