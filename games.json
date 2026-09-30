@@ -38,7 +38,7 @@
 {"id":"cuphead","name":"Cuphead","categories":["Action"],"ranking":36,"img":"https://upload.wikimedia.org/wikipedia/en/e/eb/Cuphead_%28artwork%29.png","src":"https://genizymath.github.io/iframe/465-fix.html"},
 {"id":"flappyplane","name":"Flappy Plane","categories":["Arcade","Skill"],"ranking":37,"img":"/games/flappyplane/assets/thumb.png","src":null},
 {"id":"adventure-capitalist","name":"Adventure Capitalist","categories":["Idle"],"ranking":38,"img":"/games/adventure-capitalist/logo.webp","src":null},
-{"id":"1v1lol","name":"1v1.LOL","categories":["Action","Shooter"],"ranking":39,"img":"https://icons-6.us/action-games/1v1lol/splash.png","src":"https://icons-6.us/action-games/1v1lol/","local":true},
+{"id":"1v1lol","name":"1v1.LOL","categories":["Action","Shooter"],"ranking":39,"img":"/thumbs/1v1lol.webp","src":"https://icons-6.us/action-games/1v1lol/","site":2,"added":"2026-05-13"},
 {"id":"awesometanks2","name":"Awesome Tanks 2","categories":["Action","Shooter"],"ranking":40,"img":"https://icons-6.us/action-games/awesome-tanks-2/logo.jpg","src":"https://icons-6.us/action-games/awesome-tanks-2/","local":true},
 {"id":"60sburgerrun","name":"60s Burger Run","categories":["Arcade"],"ranking":41,"img":"/games/60sburgerrun/icon.png","src":null},
 {"id":"vex7","name":"Vex 7","categories":["Platformer"],"ranking":42,"img":"https://icons-6.us/action-games/vex7/assets/icon.jpeg","src":"https://icons-6.us/action-games/vex7/","local":true},
