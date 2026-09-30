@@ -9,6 +9,7 @@
      forget(userId)             drops a cached entry, e.g. after equipping
      applyName(el, cosmetics)   colors the element's text
      applyAvatar(el, cosmetics) rings the element (it should be round already)
+     applyTitle(el, cosmetics)  puts the title in el, hides el when there is none
 
    A cosmetics object is keyed by kind, each an item as the server sends it:
      { name_color: { id, name, rarity, value }, avatar_frame: {...}, title: {...} }
@@ -133,11 +134,20 @@
     el.dataset.gvFrame = item.id || 'on';
   }
 
+  function applyTitle(el, cosmetics) {
+    if (!el) return;
+    var item = cosmetics && cosmetics.title;
+    var text = item && item.value && typeof item.value.text === 'string' ? item.value.text : (item && item.name) || '';
+    el.textContent = text;
+    el.hidden = !text;
+  }
+
   window.GV = window.GV || {};
   window.GV.cosmetics = {
     load: load,
     forget: forget,
     applyName: applyName,
-    applyAvatar: applyAvatar
+    applyAvatar: applyAvatar,
+    applyTitle: applyTitle
   };
 })();
