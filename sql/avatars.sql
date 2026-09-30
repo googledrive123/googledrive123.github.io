@@ -177,3 +177,54 @@ $function$;
 
 revoke all on function public.gv_avatar_upload(text) from public, anon;
 grant execute on function public.gv_avatar_upload(text) to authenticated;
+
+
+-- Names and pictures for other players: chat, leaderboards, anywhere a list
+-- of accounts is shown. profiles can only be read by its own account, so
+-- this is the one public way to read a name.
+--
+-- The name is the profile's username, or for an account made on the site
+-- the name it signed up with. A rude name is not shown, as in chat. Only an
+-- approved picture ever comes back. Ids with no account are left out.
+create or replace function public.gv_public_profiles(p_ids uuid[])
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'not read from this origin';
+  end if;
+
+  return coalesce((
+    with asked as (
+      select t.id, min(t.ord) as ord
+      from unnest(p_ids[1:100]) with ordinality as t (id, ord)
+      group by t.id
+    ), named as (
+      select a.id, a.ord,
+             left(coalesce(
+               nullif(btrim(p.username), ''),
+               case when u.email like '%@gamevault.app' then split_part(u.email, '@', 1) end,
+               'player'
+             ), 30) as name
+      from asked a
+      join auth.users u on u.id = a.id
+      left join profiles p on p.id = a.id
+    )
+    select json_agg(json_build_object(
+             'id', n.id,
+             'username', case when public.gv_is_rude(n.name)
+                              then 'player ' || left(n.id::text, 4) else n.name end,
+             'preset', v.preset,
+             'upload', v.approved_upload
+           ) order by n.ord)
+    from named n
+    left join gv_avatars v on v.user_id = n.id
+  ), '[]'::json);
+end;
+$function$;
+
+grant execute on function public.gv_public_profiles(uuid[]) to anon, authenticated;
