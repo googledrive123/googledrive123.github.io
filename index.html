@@ -2966,6 +2966,12 @@ function showWelcome() {
 document.getElementById('enterBtn').addEventListener('click', showBrowse);
 document.getElementById('logoBtn').addEventListener('click', showWelcome);
 
+// Skipping the welcome screen should not flash it while the catalog loads.
+if ((location.pathname === '/' || location.pathname === '') && GV.layout.skipWelcome()) {
+  document.getElementById('welcome').classList.add('hidden');
+  document.getElementById('browse').classList.add('visible');
+}
+
 function initRoute() {
   var p = location.pathname;
   // Set the classes directly rather than calling showBrowse(): this runs on a
