@@ -134,6 +134,13 @@
       font-size: 0.68rem; color: var(--muted-2);
     }
     .gw-rules strong { color: var(--text); font-weight: 600; }
+
+    @media (max-width: 480px) {
+      .gw-cell { min-width: 0; flex: 1; padding: 0.5rem 0.25rem 0.4rem; }
+      .gw-num { font-size: 1.25rem; }
+      .gw-time, .gw-clock, .gw-action { width: 100%; }
+      .gw-enter { width: 100%; }
+    }
   </style>
 </head>
 <body>
