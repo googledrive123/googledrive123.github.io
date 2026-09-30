@@ -163,6 +163,10 @@ document.addEventListener('DOMContentLoaded', function () {
     var actions = el('div', 'mirror-actions');
     r.copy = button('Copy link', function () { copyLink(r); });
     actions.appendChild(r.copy);
+    if (item.origin !== here) {
+      r.move = button('Move my saves there', function () { move(r); });
+      actions.appendChild(r.move);
+    }
     wrap.append(actions, r.note);
     return r;
   }
@@ -234,6 +238,26 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   $('recheckBtn').addEventListener('click', checkAll);
+
+  // One move at a time: each one opens a tab and packs every save.
+  function setMoving(on) {
+    rows.forEach(function (r) { if (r.move) r.move.disabled = on; });
+  }
+
+  // Straight from the click, so the new tab opens before anything async.
+  function move(r) {
+    var there = host(r.item.origin);
+    rows.forEach(function (other) { note(other.note, ''); });
+    setMoving(true);
+    note(r.note, 'Opening ' + there + ' and packing your saves. Keep this tab open.');
+    mirrors.moveSaves(r.item.origin).then(function () {
+      note(r.note, 'Your saves are in the ' + there + ' tab. Say yes there to finish.', 'good');
+    }, function (err) {
+      note(r.note, message(err), 'bad');
+    }).then(function () {
+      setMoving(false);
+    });
+  }
 });
 </script>
 </main>
