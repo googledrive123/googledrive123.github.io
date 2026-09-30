@@ -1333,5 +1333,6 @@
 {"id":"my-angel","name":"My Angel","categories":["Puzzle"],"img":"/thumbs/my-angel.webp","src":null,"site":8,"path":"flash/?swf=myangel.swf","added":"2026-09-30","ranking":1486},
 {"id":"nanotube","name":"Nanotube","categories":["Skill"],"img":"/thumbs/nanotube.webp","src":null,"site":8,"path":"flash/?swf=nanotube.swf","added":"2026-09-30","ranking":1487},
 {"id":"new-york-shark","name":"New York Shark","categories":["Action"],"img":"/thumbs/new-york-shark.webp","src":null,"site":8,"path":"flash/?swf=newyorkshark.swf","added":"2026-09-30","ranking":1488},
-{"id":"nucleus","name":"Nucleus","categories":["Arcade"],"img":"/thumbs/nucleus.webp","src":null,"site":8,"path":"flash/?swf=nucleus.swf","added":"2026-09-30","ranking":1489}
+{"id":"nucleus","name":"Nucleus","categories":["Arcade"],"img":"/thumbs/nucleus.webp","src":null,"site":8,"path":"flash/?swf=nucleus.swf","added":"2026-09-30","ranking":1489},
+{"id":"one-man-army-2","name":"One Man Army 2","categories":["Shooter"],"img":"/thumbs/one-man-army-2.webp","src":null,"site":8,"path":"flash/?swf=onemanarmy2.swf","added":"2026-09-30","ranking":1490}
 ]}
