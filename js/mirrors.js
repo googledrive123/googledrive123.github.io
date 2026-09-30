@@ -19,6 +19,7 @@
   var SUPA_URL = 'https://dxwjxzmlezfyursysays.supabase.co';
   var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
   var MAIN = 'https://googledrive123.github.io';
+  var CACHE_KEY = 'gv.mirrors.list';
 
   function rpc(name, args) {
     return fetch(SUPA_URL + '/rest/v1/rpc/' + name, {
@@ -31,24 +32,37 @@
     });
   }
 
-  function withMain(rows) {
+  function remember(rows) {
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify(rows)); } catch (e) {}
+  }
+
+  function remembered() {
+    try { return JSON.parse(localStorage.getItem(CACHE_KEY) || 'null'); } catch (e) { return null; }
+  }
+
+  function withMain(rows, stale) {
     var items = [{ origin: MAIN, label: 'Main address', main: true }];
     (rows || []).forEach(function (r) {
       if (r && r.origin && r.origin !== MAIN) items.push({ origin: r.origin, label: r.label || '', main: false });
     });
+    items.stale = stale;
     return items;
   }
 
   /* The main address first, then every one the owner added: [{origin, label,
-     main}]. */
+     main}]. The database can be blocked too, so when it cannot be reached the
+     last list this browser saw stands in, with stale set on the array. */
   var listing = null;
   function list() {
     if (!listing) {
       listing = rpc('gv_mirrors_list').then(function (rows) {
-        return withMain(rows);
+        remember(rows);
+        return withMain(rows, false);
       }, function (err) {
         listing = null;
-        throw err;
+        var old = remembered();
+        if (!old) throw err;
+        return withMain(old, true);
       });
     }
     return listing;
