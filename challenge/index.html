@@ -163,6 +163,14 @@
       font-size: 0.68rem; color: var(--muted-2);
     }
     .ch-rules strong { color: var(--text); font-weight: 600; }
+
+    @media (max-width: 480px) {
+      .ch-cell { min-width: 0; flex: 1; padding: 0.5rem 0.25rem 0.4rem; }
+      .ch-num { font-size: 1.25rem; }
+      .ch-time, .ch-clock, .ch-race { width: 100%; }
+      .ch-board table.gv th, .ch-board table.gv td { padding-left: 0.5rem; padding-right: 0.5rem; }
+      .ch-pos { width: 2.5rem; }
+    }
   </style>
 </head>
 <body>
