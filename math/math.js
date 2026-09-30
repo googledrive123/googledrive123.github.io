@@ -359,5 +359,67 @@
           'Divide the top and bottom by ' + k + ': ' + n * k + '/' + d * k + ' = ' + n + '/' + d + '.');
       }
     ],
+    medium: [
+      function () {
+        var b, d; do { b = ri(2, 9); d = ri(2, 9); } while (b === d);
+        var a = ri(1, b - 1), c = ri(1, d - 1), l = lcm(b, d), x = a * l / b, y = c * l / d, minus = coin(0.4) && x !== y;
+        if (minus && x < y) { var t = a; a = c; c = t; t = b; b = d; d = t; t = x; x = y; y = t; }
+        var top = minus ? x - y : x + y, op = minus ? ' − ' : ' + ';
+        return num(minus ? 'Subtract.' : 'Add.', fr(a, b) + op + fr(c, d), top / l, ft(top, l),
+          'Use a common bottom of ' + l + ': ' + x + '/' + l + op + y + '/' + l + ' = ' + top + '/' + l +
+          (gcd(top, l) > 1 ? ' = ' + ft(top, l) : '') + '.');
+      },
+      function () {
+        var a = ri(1, 8), b = ri(a + 1, 9), c = ri(1, 8), d = ri(c + 1, 9), t = a * c, u = b * d;
+        return num('Multiply.', fr(a, b) + ' × ' + fr(c, d), t / u, ft(t, u),
+          'Multiply the tops and the bottoms: ' + t + '/' + u + (gcd(t, u) > 1 ? ' = ' + ft(t, u) : '') + '.');
+      },
+      function () {
+        var a = ri(1, 8), b = ri(a + 1, 9), c = ri(1, 8), d = ri(c + 1, 9), t = a * d, u = b * c;
+        return num('Divide.', fr(a, b) + ' ÷ ' + fr(c, d), t / u, ft(t, u),
+          'Flip the second fraction and multiply: ' + a + '/' + b + ' × ' + d + '/' + c + ' = ' + t + '/' + u +
+          (gcd(t, u) > 1 ? ' = ' + ft(t, u) : '') + '.');
+      },
+      function () {
+        var pc = ri(1, 19) * 5, w = ri(1, 20) * 20, ans = pc * w / 100;
+        return num('Work it out.', pc + '% of ' + w, ans, s(ans),
+          '1% of ' + w + ' is ' + s(w / 100) + ', so ' + pc + '% is ' + s(w / 100) + ' × ' + pc + ' = ' + s(ans) + '.');
+      },
+      function () {
+        var w = pick([20, 25, 40, 50, 80, 200, 250, 400, 500]), pc, part;
+        do { pc = ri(1, 19) * 5; part = w * pc / 100; } while (part !== Math.round(part));
+        return num('What percent of ' + w + ' is ' + part + '?', '', pc, pc + '%',
+          part + ' ÷ ' + w + ' = ' + s(part / w) + ', and ' + s(part / w) + ' × 100 = ' + pc + '%.', { unit: '%' });
+      },
+      function () {
+        var price, pc, up = coin(), change;
+        do { price = ri(2, 30) * 10; pc = pick([10, 15, 20, 25, 30, 40, 50]); change = price * pc / 100; }
+        while (change !== Math.round(change));
+        var ans = up ? price + change : price - change;
+        return num('A ' + money(price) + ' ' + pick(['jacket', 'game', 'skateboard', 'concert ticket']) + ' goes ' +
+          (up ? 'up' : 'down') + ' by ' + pc + '%. What is the new price?', '', ans, money(ans),
+          pc + '% of ' + money(price) + ' is ' + money(change) + ', so ' + price + (up ? ' + ' : ' − ') + change + ' = ' + money(ans) + '.',
+          { unit: '$' });
+      },
+      function () {
+        var d = ri(2, 9), r; do { r = ri(1, d - 1); } while (gcd(r, d) !== 1);
+        var w = ri(1, 5), n = w * d + r;
+        if (coin()) {
+          return choice('Write it as a mixed number.', fr(n, d), mix(w, r, d),
+            [mix(w + 1, r, d), mix(w, d - r, d), mix(w > 1 ? w - 1 : w + 2, r, d), mix(w, r, d + 1)],
+            n + ' ÷ ' + d + ' = ' + w + ' remainder ' + r + ', so ' + n + '/' + d + ' = ' + w + ' ' + r + '/' + d + '.');
+        }
+        return choice('Write it as an improper fraction.', mix(w, r, d), fr(n, d),
+          [fr(w * d - r, d), fr(w + r, d), fr(w * r + d, d), fr(n + d, d)],
+          w + ' × ' + d + ' + ' + r + ' = ' + n + ', so ' + w + ' ' + r + '/' + d + ' = ' + n + '/' + d + '.');
+      },
+      function () {
+        var f = pick([[1, 8], [3, 8], [5, 8], [7, 8], [2, 5], [3, 5], [4, 5], [7, 20], [9, 20], [3, 4], [1, 4], [3, 25], [6, 25]]);
+        var dec = s(f[0] / f[1]), digits = dec.slice(2), scale = Math.pow(10, digits.length);
+        return choice('Which fraction equals ' + dec + '?', '', frac(f[0], f[1]),
+          fracWrongs(f[0], f[1], [[f[0] + 1, f[1]], [f[0], f[1] + 1], [+digits, scale * 10], [f[0], 10], [f[0] + 1, f[1] + 1]]),
+          dec + ' = ' + digits + '/' + scale + ', which simplifies to ' + ft(f[0], f[1]) + '.');
+      }
+    ],
   };
 })();
