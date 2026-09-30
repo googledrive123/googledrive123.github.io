@@ -700,3 +700,12 @@ begin
   ), '[]'::json);
 end;
 $function$;
+
+-- The first two months, both on official tracks, which every player has.
+-- September is the most raced track on the board and October the next most
+-- raced, so the new month brings a new track. September's board is filled in
+-- from the times set on its track during September.
+insert into public.gv_challenges (month, track_id, title) values
+  ('2026-09-01', '5803f9e963625804e3de3246d043dc7dde847aa32e991f7f7326b0453f1fa038', 'Summer 1'),
+  ('2026-10-01', '148826aa16ffaa23dbc453b32cff05e025ddbce1773fc7733cc13d218926515a', 'Summer 3')
+on conflict (month) do nothing;
