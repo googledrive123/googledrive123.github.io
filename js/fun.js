@@ -81,15 +81,39 @@
     undo.push(function () { document.documentElement.classList.remove(cls); });
   }
 
+  // ── Styles ──────────────────────────────────────────────────────────────
+  // One sheet, added the first time a mode starts and then left alone. Every
+  // rule hangs off a class on <html>, so it matches nothing once a mode ends.
+
+  var SILLY = '"Comic Sans MS","Comic Neue","Chalkboard SE","Comic Sans","Marker Felt",cursive';
+
+  var CSS = [
+    // April Fools: a crooked header, a backwards logo and silly headings.
+    'html.gv-fun-april .header,html.gv-fun-april .site-header,html.gv-fun-april .welcome-top{',
+    'transform:rotate(-1deg);transform-origin:50% 0}',
+    'html.gv-fun-april .logo-mark,html.gv-fun-april .site-brand .mark{transform:scaleX(-1)}',
+    'html.gv-fun-april h1,html.gv-fun-april h2,html.gv-fun-april h3{font-family:' + SILLY + '}'
+  ];
+
+  function styles() {
+    if (document.getElementById('gv-fun-css')) return;
+    var s = document.createElement('style');
+    s.id = 'gv-fun-css';
+    s.textContent = CSS.join('');
+    (document.head || document.documentElement).appendChild(s);
+  }
+
   // ── April Fools ─────────────────────────────────────────────────────────
 
   function startApril(undo) {
+    styles();
     flag(undo, 'gv-fun-april');
   }
 
   // ── Halloween ───────────────────────────────────────────────────────────
 
   function startHalloween(undo) {
+    styles();
     flag(undo, 'gv-fun-halloween');
   }
 
