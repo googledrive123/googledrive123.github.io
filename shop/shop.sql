@@ -117,3 +117,12 @@ create table if not exists public.gv_wallet (
 );
 
 alter table public.gv_wallet enable row level security;
+
+create table if not exists public.gv_inventory (
+  user_id uuid not null references auth.users (id) on delete cascade,
+  item_id text not null references public.gv_items (id),
+  qty integer not null default 1 check (qty > 0),
+  primary key (user_id, item_id)
+);
+
+alter table public.gv_inventory enable row level security;
