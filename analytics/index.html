@@ -882,6 +882,19 @@
       .catch(function (e) { $('bcMsg').textContent = 'Could not stop it: ' + e.message; });
   }
 
+  // ── broken links ──
+  function loadLinks() {
+    return rpc('gv_link_reports_list', { p_secret: state.secret }).then(function (list) {
+      $('linkList').innerHTML = (list || []).length ? list.map(function (r) {
+        return '<div class="bc-item"><span class="when">' + esc(new Date(r.last_seen).toLocaleString()) + '</span>'
+          + '<span class="msg"><code>' + esc(r.path) + '</code>'
+          + (r.referrers && r.referrers.length ? ' <span class="st">from ' + r.referrers.map(esc).join(', ') + '</span>' : '') + '</span>'
+          + '<span class="st">' + r.reports + ' report' + (r.reports === 1 ? '' : 's') + '</span>'
+          + '<button class="btn" type="button" data-fix="' + esc(r.path) + '">Fixed</button></div>';
+      }).join('') : '<div class="empty">No open reports.</div>';
+    }).catch(function (e) { $('linkMsg').textContent = 'Could not load reports: ' + e.message; });
+  }
+
   function loadPeople() {
     return rpc('gv_verify_candidates', { p_secret: state.secret }).then(function (list) {
       people = Array.isArray(list) ? list : [];
@@ -1105,7 +1118,7 @@
   }
 
   // ── auth / wiring ──
-  function showDash() { $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); load(); loadPeople(); loadBroadcasts(); setTimer(); }
+  function showDash() { $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); load(); loadPeople(); loadBroadcasts(); loadLinks(); setTimer(); }
   function setTimer() { clearInterval(state.timer); if ($('autoRefresh').checked) state.timer = setInterval(load, 60000); }
   function tryLogin(secret, remember) {
     $('loginErr').textContent = '';
@@ -1135,6 +1148,10 @@
     if (p) setVerified(p, false);
   });
   $('verifyBtn').addEventListener('click', function () { var p = picked(); if (p) setVerified(p, !p.verified); });
+  $('linkList').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-fix]'); if (!b) return;
+    rpc('gv_link_reports_fix', { p_secret: state.secret, p_path: b.dataset.fix }).then(loadLinks);
+  });
   $('bcSend').addEventListener('click', sendBroadcast);
   $('bcList').addEventListener('click', function (e) { var b = e.target.closest('button[data-stop]'); if (b) stopBroadcast(+b.dataset.stop); });
   $('exportBtn').addEventListener('click', exportCSV);
