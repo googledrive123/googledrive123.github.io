@@ -19,6 +19,8 @@
     { href: '/schedule/',  label: 'Schedule', icon: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>' },
     { href: '/unblocker/', label: 'Browser',  icon: '<circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c2.5 2.5 2.5 13.5 0 16M12 4c-2.5 2.5-2.5 13.5 0 16"/>' },
     { href: '/status/',    label: 'Requests', icon: '<path d="M5 5h14v14H5z"/><path d="M8 10l2 2 4-4M8 15h8"/>' },
+    { href: '/submit/',    label: 'Send a game', icon: '<path d="M12 16V4M7 9l5-5 5 5"/><path d="M5 14v5h14v-5"/>' },
+    { href: '/mirrors/',   label: 'Backups',  icon: '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>' },
     { href: '/settings/',  label: 'Settings', icon: '<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/>' }
   ];
 
