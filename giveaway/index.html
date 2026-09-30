@@ -17,6 +17,104 @@
   <script src="/js/site.js" defer></script>
   <script src="/js/player.js" defer></script>
   <style>
+    /* Buttons, rows and the clock all set their own display, which would
+       otherwise beat the hidden attribute. */
+    .page [hidden] { display: none !important; }
+
+    /* The prize card is a ticket: details on top, a torn line, then the clock
+       and the button. */
+    .gw-card { padding: 0; overflow: hidden; }
+    .gw-top { padding: 1.25rem 1.25rem 1.15rem; }
+    .gw-top .panel-label { display: flex; align-items: center; gap: 0.5rem; }
+    .gw-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted-2); }
+    .gw-card[data-status="open"] .gw-dot { background: #5ce08a; }
+    .gw-card[data-status="closed"] .gw-dot { background: #f0c04a; }
+    .gw-card[data-status="drawn"] .gw-dot { background: var(--accent); }
+    .gw-title { font-size: 1.35rem; font-weight: 600; letter-spacing: -0.01em; color: var(--text); overflow-wrap: anywhere; }
+    .gw-prize { display: flex; align-items: baseline; gap: 0.6rem; margin-top: 0.6rem; }
+    .gw-prize-tag {
+      flex-shrink: 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--accent);
+    }
+    .gw-prize-text { font-size: 0.98rem; color: var(--text); line-height: 1.5; overflow-wrap: anywhere; }
+    .page .gw-top p.gw-empty { margin-top: 0.4rem; font-size: 0.88rem; }
+
+    .gw-tear { position: relative; border-top: 1px dashed var(--border-strong); }
+    .gw-tear::before, .gw-tear::after {
+      content: '';
+      position: absolute; top: -10px;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+    }
+    .gw-tear::before { left: -11px; }
+    .gw-tear::after { right: -11px; }
+
+    .gw-bottom {
+      display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between;
+      gap: 1rem 1.5rem;
+      padding: 1.15rem 1.25rem 1.25rem;
+    }
+    .gw-clock { display: flex; gap: 0.45rem; }
+    .gw-cell {
+      min-width: 3.5rem;
+      padding: 0.55rem 0.5rem 0.45rem;
+      border-radius: 10px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+    .gw-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.5rem; font-weight: 600; line-height: 1.1;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+    .gw-unit {
+      margin-top: 0.2rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.56rem; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--muted-2);
+    }
+    .gw-meta { margin-top: 0.55rem; font-size: 0.78rem; color: var(--muted-2); }
+    .gw-meta b { color: var(--muted); font-weight: 500; }
+    .gw-card[data-status="closed"] .gw-meta { margin-top: 0; }
+
+    .gw-action { display: flex; flex-direction: column; align-items: flex-start; gap: 0.45rem; }
+    .gw-enter { min-width: 8.5rem; }
+    .gw-in {
+      display: inline-flex; align-items: center; gap: 0.45rem;
+      padding: 0.6rem 1.05rem;
+      border-radius: 100px;
+      border: 1px solid rgba(92,224,138,0.45);
+      color: #5ce08a;
+      font-size: 0.85rem; font-weight: 600;
+    }
+    .gw-in svg { width: 14px; height: 14px; }
+    .gw-who { font-size: 0.75rem; color: var(--muted-2); }
+    .gw-who b { color: var(--muted); font-weight: 500; }
+    .page .gw-card a.btn { color: #fff; text-decoration: none; }
+
+    .gw-won-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--muted-2);
+    }
+    .gw-won-name {
+      margin-top: 0.2rem;
+      font-size: clamp(1.4rem, 4vw, 1.9rem); font-weight: 700; letter-spacing: -0.01em;
+      color: var(--text);
+      overflow-wrap: anywhere;
+    }
+    .gw-won-name.anon { color: var(--muted); font-weight: 600; }
+    .gw-you { margin-top: 0.4rem; font-size: 0.85rem; color: #5ce08a; }
+
+    .gw-note { min-height: 1.2rem; padding: 0 1.25rem 1rem; font-size: 0.8rem; color: var(--muted); }
+    .gw-note:empty { display: none; }
+    .gw-note.bad { color: #ff7a7a; }
+
     .gw-rules { counter-reset: rule; list-style: none; }
     .page ul.gw-rules { margin: 0; }
     .gw-rules li { position: relative; padding-left: 2rem; font-size: 0.86rem; }
@@ -36,6 +134,50 @@
   <h1>Giveaway</h1>
   <p class="lede">Enter with your GameVault account for a chance at a prize on the site: a badge,
   a crate or a name color. It is free, it is one entry each, and it is never money.</p>
+
+  <div class="panel gw-card" id="gwCard" data-status="loading" aria-live="polite">
+    <div class="gw-top">
+      <div class="panel-label"><span class="gw-dot" aria-hidden="true"></span><span id="gwState">Loading</span></div>
+      <div class="gw-title" id="gwTitle">Checking for a giveaway…</div>
+      <div class="gw-prize" id="gwPrizeRow" hidden>
+        <span class="gw-prize-tag">Prize</span>
+        <span class="gw-prize-text" id="gwPrize"></span>
+      </div>
+      <p class="gw-empty" id="gwEmpty" hidden>The next one shows up here. Prizes are always things on
+      the site, like a badge, a crate or a name color.</p>
+    </div>
+
+    <div id="gwTicket" hidden>
+      <div class="gw-tear" aria-hidden="true"></div>
+      <div class="gw-bottom">
+        <div class="gw-time">
+          <div class="gw-clock" id="gwClock" role="timer" aria-label="Time left to enter">
+            <div class="gw-cell"><div class="gw-num" id="gwD">0</div><div class="gw-unit">days</div></div>
+            <div class="gw-cell"><div class="gw-num" id="gwH">00</div><div class="gw-unit">hrs</div></div>
+            <div class="gw-cell"><div class="gw-num" id="gwM">00</div><div class="gw-unit">min</div></div>
+            <div class="gw-cell"><div class="gw-num" id="gwS">00</div><div class="gw-unit">sec</div></div>
+          </div>
+          <div id="gwWon" hidden>
+            <div class="gw-won-label">Won by</div>
+            <div class="gw-won-name" id="gwWonName"></div>
+            <div class="gw-you" id="gwYou" hidden>That is you! The site owner adds the prize to your account.</div>
+          </div>
+          <div class="gw-meta" id="gwMeta"></div>
+        </div>
+
+        <div class="gw-action" id="gwAction">
+          <button class="btn btn-primary gw-enter" id="gwEnter" type="button" hidden>Enter</button>
+          <span class="gw-in" id="gwIn" hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+            You are in
+          </span>
+          <a class="btn btn-primary" id="gwSignIn" href="/" hidden>Sign in to enter</a>
+          <span class="gw-who" id="gwWho"></span>
+        </div>
+      </div>
+    </div>
+    <div class="gw-note" id="gwNote" role="status"></div>
+  </div>
 
   <div class="panel">
     <div class="panel-label">How it works</div>
