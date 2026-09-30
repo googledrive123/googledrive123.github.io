@@ -619,6 +619,7 @@
     download: download,
     readFile: readFile,
     useClient: useClient,
+    client: getClient,
     cloudUser: cloudUser,
     cloudList: cloudList,
     cloudSave: cloudSave,
