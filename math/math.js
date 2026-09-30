@@ -1497,4 +1497,19 @@
     if (!answered) finish(false, -1, null);
   });
   nextBtn.addEventListener('click', function () { next(true); });
+
+  document.addEventListener('keydown', function (e) {
+    if (!q || e.altKey || e.ctrlKey || e.metaKey) return;
+    var t = e.target;
+    if (t !== document.body && !quiz.contains(t)) return;
+    if (e.key === 'Enter' && answered) {
+      e.preventDefault();
+      next(true);
+      return;
+    }
+    if (!answered && q.type === 'mc' && /^[1-9]$/.test(e.key)) {
+      e.preventDefault();
+      choose(+e.key - 1);
+    }
+  });
 })();
