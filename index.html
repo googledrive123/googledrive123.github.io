@@ -3440,6 +3440,10 @@ const STALL_MS = 8000;
 let stallTimer = null;
 let expectLoad = false;
 let mounted = null;
+// Which copy the mounted game came from, and a count that tells a stale
+// answer about an earlier mount from one about this one.
+let mountedFrom = null;
+let mountToken = 0;
 
 // Which copy this browser has been told to run, by game id: 'vault' or 'src'.
 // Survives reloads, so someone on a network that blocks one picks once and it
