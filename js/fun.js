@@ -20,4 +20,22 @@
       else localStorage.setItem(k, v);
     } catch (e) {}
   }
+
+  // ?fun=april or ?fun=halloween shows that mode for this page load only.
+  // Read now, before anything on the page tidies the address bar.
+  var forced = '';
+  try { forced = new URLSearchParams(location.search).get('fun') || ''; } catch (e) {}
+
+  function isAprilFools() {
+    if (forced === 'april') return true;
+    var d = new Date();
+    return d.getMonth() === 3 && d.getDate() === 1;
+  }
+
+  // October 20 through November 1, both counted, in the visitor's own time.
+  function isHalloween() {
+    if (forced === 'halloween') return true;
+    var d = new Date(), m = d.getMonth(), day = d.getDate();
+    return (m === 9 && day >= 20) || (m === 10 && day === 1);
+  }
 })();
