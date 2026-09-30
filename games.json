@@ -184,7 +184,7 @@
 {"id":"rooftop-snipers","name":"Rooftop Snipers","categories":["Action","Shooter"],"ranking":183,"img":"/thumbs/rooftop-snipers.webp","src":"https://icons-6.us/action-games/rooftop-snipers/","site":3,"added":"2026-05-13"},
 {"id":"scrapmetal3","name":"Scrap Metal 3","categories":["Racing","Driving"],"ranking":184,"img":"/thumbs/scrapmetal3.webp","src":"https://icons-6.us/driving-games/scrapmetal/","site":3,"added":"2026-05-13"},
 {"id":"shift-at-midnight","name":"Shift At Midnight","categories":["Horror"],"ranking":185,"img":"https://img.gamepix.com/games/shift-at-midnight/cover/shift-at-midnight.png","src":"https://genizymath.github.io/iframe/721.html"},
-{"id":"slope","name":"Slope","categories":["Action","Skill"],"ranking":186,"img":"https://icons-6.us/action-games/slope/slope4.jpeg","src":"https://icons-6.us/action-games/slope/","local":true},
+{"id":"slope","name":"Slope","categories":["Action","Skill"],"ranking":186,"img":"/thumbs/slope.webp","src":"https://icons-6.us/action-games/slope/","site":3,"added":"2026-05-13"},
 {"id":"snake","name":"Snake","categories":["Arcade"],"ranking":187,"img":"https://upload.wikimedia.org/wikipedia/en/thumb/0/04/Snake_trs-80.jpg/330px-Snake_trs-80.jpg","src":null},
 {"id":"soccer-random","name":"Soccer Random","categories":["Sports"],"ranking":188,"img":"https://icons-6.us/driving-games/soccer-random/unnamed.png","src":"https://icons-6.us/driving-games/soccer-random/","local":true},
 {"id":"sprinter","name":"Sprinter","categories":["Sports"],"ranking":189,"img":"/games/sprinter/icon.jpeg","src":null},
