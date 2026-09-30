@@ -64,6 +64,8 @@
       font-size: 0.8rem; line-height: 1.45;
       color: var(--muted);
     }
+
+    .chat-out a.btn { color: #fff; text-decoration: none; }
   </style>
 </head>
 <body>
@@ -90,6 +92,45 @@
     </form>
     <div class="chat-status" id="chatStatus" aria-live="polite"></div>
   </div>
+
+  <div class="panel chat-out" id="chatOut" hidden>
+    <div class="panel-label">Accounts only</div>
+    <p>Sign in on the home page to chat.</p>
+    <div class="btn-row">
+      <a class="btn btn-primary" href="/">Go to the home page</a>
+    </div>
+  </div>
+
+<script>
+(function () {
+  'use strict';
+
+  // Where supabase-js keeps the session the home page signed in with.
+  var TOKEN_KEY = 'sb-dxwjxzmlezfyursysays-auth-token';
+
+  var chat = document.getElementById('chat');
+  var out = document.getElementById('chatOut');
+
+  function savedSession() {
+    try {
+      var s = JSON.parse(localStorage.getItem(TOKEN_KEY) || 'null');
+      return s && s.access_token ? s : null;
+    } catch (e) { return null; }
+  }
+
+  function signedOut() {
+    chat.hidden = true;
+    out.hidden = false;
+  }
+
+  // No session at all needs no network to know, so guests see the sign-in
+  // note straight away.
+  if (!savedSession()) {
+    signedOut();
+    return;
+  }
+})();
+</script>
 </main>
 </body>
 </html>
