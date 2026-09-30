@@ -14,6 +14,8 @@
   // The whole data: URL, which is what the server measures.
   var MAX_CHARS = 60 * 1024;
   var UPLOAD_RE = /^data:image\/(webp|png|jpeg);base64,[A-Za-z0-9+/]+={0,2}$/;
+  var RPC = 'https://dxwjxzmlezfyursysays.supabase.co/rest/v1/rpc/';
+  var KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
 
   // ─── Drawing ───
   // Every avatar is drawn on a 64x64 square and shown in a circle, so
@@ -667,6 +669,37 @@
     });
   }
 
+  // Everyone asked about so far, for the life of the page. null means no such
+  // account, so it is not asked about again either.
+  var known = {};
+  var UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+  // Names and pictures for any number of account ids, asked 100 at a time and
+  // returned in the order given. Needs no session.
+  function publicProfiles(ids) {
+    var list = (ids || []).map(function (id) { return String(id).toLowerCase(); }).filter(function (id, k, all) {
+      return UUID.test(id) && all.indexOf(id) === k;
+    });
+    var want = list.filter(function (id) { return !known.hasOwnProperty(id); });
+    var asks = [];
+    for (var k = 0; k < want.length; k += 100) asks.push(want.slice(k, k + 100));
+    return Promise.all(asks.map(function (chunk) {
+      return fetch(RPC + 'gv_public_profiles', {
+        method: 'POST',
+        headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ p_ids: chunk })
+      }).then(function (res) {
+        if (!res.ok) throw new Error('gv_public_profiles ' + res.status);
+        return res.json();
+      }).then(function (rows) {
+        chunk.forEach(function (id) { known[id] = null; });
+        rows.forEach(function (row) { known[row.id] = row; });
+      });
+    })).then(function () {
+      return list.map(function (id) { return known[id]; }).filter(Boolean);
+    });
+  }
+
   window.GV = window.GV || {};
   window.GV.avatars = {
     count: COUNT,
@@ -680,6 +713,7 @@
     setLocalPreset: setLocalPreset,
     mine: function (sb) { return call(sb, 'gv_avatar_mine'); },
     setPreset: function (sb, i) { return call(sb, 'gv_avatar_set_preset', { p_preset: i }); },
-    upload: function (sb, dataUrl) { return call(sb, 'gv_avatar_upload', { p_data: dataUrl }); }
+    upload: function (sb, dataUrl) { return call(sb, 'gv_avatar_upload', { p_data: dataUrl }); },
+    publicProfiles: publicProfiles
   };
 })();
