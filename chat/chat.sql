@@ -26,3 +26,11 @@ create table if not exists public.gv_chat_messages (
 -- Slow mode looks up one account's latest messages on every send.
 create index if not exists gv_chat_messages_user_created
   on public.gv_chat_messages (user_id, created_at desc);
+
+-- A ban with no end date is for good.
+create table if not exists public.gv_chat_bans (
+  user_id    uuid primary key references auth.users (id) on delete cascade,
+  reason     text,
+  until      timestamptz,
+  created_at timestamptz not null default now()
+);
