@@ -286,10 +286,9 @@
 
   // ── Player ──────────────────────────────────────────────────────────────
 
-  /* Every game with a folder under /games/ has a real page at /games/<id>/,
-     so GitHub Pages answers /games/<id> with the bare game instead of the
-     player around it. A reload, a typed address, or Chrome bringing back a tab
-     it put to sleep all land there, and the Back bar is gone. A game page with
+  /* Every game has a real page at /games/<id>/ or /vault<N>/<id>/, and a
+     New Tab, a shared link, or Chrome bringing back a tab it put to sleep can
+     land on it with no player around it and no Back bar. A game page with
      nothing around it hands its address to index.html, which opens it in the
      player the same way it opens any deep link. */
   function intoPlayer() {
