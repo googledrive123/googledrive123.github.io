@@ -21,6 +21,11 @@
     // Inside the player's game frame this is a game that is not where the
     // player looked, never a page to show. See inPlayer() below.
     if (inPlayer()) { toVault(); return; }
+    // An old link to a page inside a moved game, or with its own query
+    // (?solo from New Tab, ?swf= for a Flash game), goes to that page in the
+    // game's vault. A bare /games/<id> is the player's own address.
+    var sub = /^\/games\/([^\/]+)\/(.*)$/.exec(location.pathname);
+    if (sub && (sub[2] || location.search)) { toVaultTop(sub[1], sub[2]); return; }
     var path = location.pathname + location.search;
     var spa = /^\/(games(\/|$)|movies?(\/|$)|tv(\/|$))/.test(location.pathname);
     try {
@@ -44,6 +49,20 @@
         location.replace('/vault' + g.site + '/' + m[1] + '/' + m[2] + location.search);
       });
     }).catch(missing);
+  }
+
+  function toVaultTop(id, rest) {
+    fetch('/games.json', { cache: 'no-cache' }).then(function (res) { return res.json(); }).then(function (data) {
+      var g = data.games.filter(function (x) { return x.id === id; })[0];
+      if (!g || !g.site) throw new Error('not moved');
+      var carry = window.GV && GV.carry ? GV.carry(g) : Promise.resolve();
+      return carry.then(function () {
+        location.replace('/vault' + g.site + '/' + id + '/' + rest + location.search);
+      });
+    }).catch(function () {
+      try { sessionStorage.setItem('gv.missing', location.pathname + location.search); } catch (e) {}
+      location.replace('/404/');
+    });
   }
 
   function missing() {
