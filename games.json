@@ -64,7 +64,7 @@
 {"id":"mindustry","name":"Mindustry","categories":["Strategy"],"ranking":63,"img":"/games/mindustry/assets/sprites/icon.png","src":null},
 {"id":"big-tower-tiny-square","name":"Big Tower Tiny Square","categories":["Platformer"],"ranking":64,"img":"https://icons-6.us/strategy-games/btts/images.png","src":"https://icons-6.us/strategy-games/btts/","local":true},
 {"id":"motox3m-pool","name":"Moto X3M Pool Party","categories":["Racing","Driving"],"ranking":65,"img":"/thumbs/motox3m-pool.webp","src":"https://icons-6.us/action-games/motox3m-pool/","site":3,"added":"2026-05-13"},
-{"id":"tu95","name":"TU-95","categories":["Simulation"],"ranking":66,"img":"/games/tu95/tu-95.webp","src":null},
+{"id":"tu95","name":"TU-95","categories":["Simulation"],"ranking":66,"img":"/thumbs/tu95.webp","src":null,"site":3,"added":"2026-05-13"},
 {"id":"gunmayhem2","name":"Gun Mayhem 2","categories":["Action","Shooter"],"ranking":67,"img":"/thumbs/gunmayhem2.webp","src":"https://icons-6.us/action-games/gun-mayhem-2/","site":3,"added":"2026-05-13"},
 {"id":"spelunky-classic-hd","name":"Spelunky Classic HD","categories":["Platformer"],"ranking":68,"img":"https://upload.wikimedia.org/wikipedia/en/thumb/5/5b/Spelunky.jpg/330px-Spelunky.jpg","src":"https://genizymath.github.io/iframe/635.html"},
 {"id":"riddleschool2","name":"Riddle School 2","categories":["Puzzle"],"ranking":69,"img":"https://icons-6.us/strategy-games/riddleschool2/riddleschool2.png","src":"https://icons-6.us/strategy-games/riddleschool2/","local":true},
