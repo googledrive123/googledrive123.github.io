@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Challenge · GameVault</title>
+  <meta name="description" content="One PolyTrack track a month. Set the fastest time on it before the month ends and win the Challenge winner badge.">
+  <link rel="icon" href="/favicon.svg">
+  <!-- Blocking on purpose: the cloak has to land before the first paint. -->
+  <script src="/js/mimicry.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/site.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
+  <script src="/js/identity.js" defer></script>
+  <script src="/js/analytics.js" defer></script>
+  <script src="/js/site.js" defer></script>
+  <script src="/js/player.js" defer></script>
+  <style>
+    .ch-rules { counter-reset: rule; list-style: none; }
+    .page ul.ch-rules { margin: 0; }
+    .ch-rules li { position: relative; padding-left: 2rem; font-size: 0.86rem; }
+    .ch-rules li::before {
+      counter-increment: rule;
+      content: counter(rule, decimal-leading-zero);
+      position: absolute; left: 0; top: 0.1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem; color: var(--muted-2);
+    }
+    .ch-rules strong { color: var(--text); font-weight: 600; }
+  </style>
+</head>
+<body>
+<main class="page">
+  <div class="page-kicker">challenge</div>
+  <h1>Monthly challenge</h1>
+  <p class="lede">One PolyTrack track a month. Set the fastest time on it before the month ends
+  and the Challenge winner badge is yours.</p>
+
+  <div class="panel">
+    <div class="panel-label">Rules</div>
+    <ul class="ch-rules">
+      <li><strong>The prize is a badge.</strong> First place gets the Challenge winner badge,
+      second and third get the Top 3 badge. Never money, gift cards, game currency, or anything
+      sent to your home.</li>
+      <li><strong>Times come from the PolyTrack leaderboard.</strong> Race the month's track in
+      PolyTrack here on GameVault, and your best time set during the month counts. Times from
+      before the month started do not.</li>
+      <li><strong>Suspicious times get removed.</strong> A time that looks impossible, or came from
+      a cheat or a glitch, is taken off and cannot win.</li>
+      <li><strong>The month ends at midnight UTC.</strong> A tie goes to whoever set the time
+      first.</li>
+      <li><strong>Only your leaderboard name is shown.</strong> Guests can race too; sign in to
+      keep your badge with your account. Anonymous mode keeps your name off this page as well.</li>
+    </ul>
+  </div>
+</main>
+</body>
+</html>
