@@ -10,6 +10,9 @@
 
   var COUNT = 42;
   var LOCAL_KEY = 'gv.avatar';
+  // The whole data: URL, which is what the server measures.
+  var MAX_CHARS = 60 * 1024;
+  var UPLOAD_RE = /^data:image\/(webp|png|jpeg);base64,[A-Za-z0-9+/]+={0,2}$/;
 
   // ─── Drawing ───
   // Every avatar is drawn on a 64x64 square and shown in a circle, so
@@ -497,12 +500,42 @@
     try { localStorage.setItem(LOCAL_KEY, String(index(i))); } catch (err) {}
   }
 
+  // ─── Showing one ───
+  // Only a plain picture is ever put on the page, whatever a row holds.
+  function safeUpload(src) {
+    return typeof src === 'string' && src.length <= MAX_CHARS && UPLOAD_RE.test(src) ? src : null;
+  }
+
+  // opts: { preset, upload, id }. An approved upload wins, then the preset,
+  // then one worked out from the id, then the guest's own pick, so nobody is
+  // ever left blank.
+  function render(el, opts) {
+    if (!el) return;
+    opts = opts || {};
+    var src = safeUpload(opts.upload);
+    var pick = opts.preset != null ? opts.preset : opts.id != null ? defaultFor(opts.id) : localPreset();
+    el.textContent = '';
+    el.style.overflow = 'hidden';
+    el.style.padding = '0';
+    if (src) {
+      var img = document.createElement('img');
+      img.alt = '';
+      img.decoding = 'async';
+      img.style.cssText = 'display:block;width:100%;height:100%;object-fit:cover';
+      img.src = src;
+      el.appendChild(img);
+    } else {
+      el.innerHTML = svg(pick == null ? 0 : pick);
+    }
+  }
+
   window.GV = window.GV || {};
   window.GV.avatars = {
     count: COUNT,
     svg: svg,
     name: name,
     defaultFor: defaultFor,
+    render: render,
     localPreset: localPreset,
     setLocalPreset: setLocalPreset
   };
