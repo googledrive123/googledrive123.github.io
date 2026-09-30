@@ -339,7 +339,7 @@
 {"id":"sand","name":"Sand","categories":["Simulation","Sandbox"],"ranking":435,"img":"/thumbs/sand.webp","src":null,"site":6,"added":"2026-05-13"},
 {"id":"sand-game","name":"Sand Game","categories":["Simulation","Sandbox"],"ranking":436,"img":"/thumbs/sand-game.webp","src":null,"site":6,"added":"2026-05-13"},
 {"id":"sandtrix","name":"Sandtrix","categories":["Puzzle"],"ranking":437,"img":"/thumbs/sandtrix.webp","src":null,"site":6,"added":"2026-05-13"},
-{"id":"sans-fight","name":"Sans Fight","categories":["Action","Skill"],"ranking":438,"img":"/games/sans-fight/icon-114.png","src":null},
+{"id":"sans-fight","name":"Sans Fight","categories":["Action","Skill"],"ranking":438,"img":"/thumbs/sans-fight.webp","src":null,"site":6,"added":"2026-05-13"},
 {"id":"skibiditoilet","name":"Skibidi Toilet","categories":["Arcade","Action"],"ranking":440,"img":"/games/skibiditoilet/logo.png","src":null},
 {"id":"skibiditoiletattack","name":"Skibidi Toilet Attack","categories":["Arcade","Shooter"],"ranking":441,"img":"/games/skibiditoiletattack/logo.png","src":null},
 {"id":"sm64","name":"Super Mario 64","categories":["Platformer"],"ranking":446,"img":"https://icons-6.us/action-games/sm64/logo.png","src":"https://icons-6.us/action-games/sm64/","local":true},
