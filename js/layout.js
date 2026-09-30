@@ -13,7 +13,24 @@
   var layout = {
     // Open straight on the game grid instead of the welcome screen.
     skipWelcome: function () { return read('gv.skipwelcome', '0') === '1'; },
-    setSkipWelcome: function (on) { write('gv.skipwelcome', on ? '1' : '0'); }
+    setSkipWelcome: function (on) { write('gv.skipwelcome', on ? '1' : '0'); },
+
+    // Smallest width of a game tile, in px. The grid fits as many as it can.
+    TILE_MIN: 130,
+    TILE_MAX: 300,
+    TILE_DEFAULT: 190,
+    tileSize: function () {
+      var n = parseInt(read('gv.tilesize', ''), 10);
+      if (!(n >= layout.TILE_MIN && n <= layout.TILE_MAX)) n = layout.TILE_DEFAULT;
+      return n;
+    },
+    setTileSize: function (n) {
+      write('gv.tilesize', String(Math.round(n)));
+      layout.applyTileSize();
+    },
+    applyTileSize: function () {
+      document.documentElement.style.setProperty('--tile-min', layout.tileSize() + 'px');
+    }
   };
 
   window.GV = window.GV || {};
