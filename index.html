@@ -3430,12 +3430,12 @@ function notePlaying() {
 new MutationObserver(notePlaying).observe(gameOverlay, { attributes: true, attributeFilter: ['class'] });
 notePlaying();
 
-// ───── Offline copies ─────
-// The games marked `local` in the catalog run off someone else's host now, but
-// the build they used to run is still sitting in /games/<id>/. When that host
-// is blocked or the build is broken, these buttons move that one game over to
-// the copy in this repo. Nothing switches on its own — a slow game is not a
-// broken one, and swapping a frame out from under someone mid-load is worse.
+// ───── Which copy runs ─────
+// Game files live in the vault sites (/vault<N>/<id>/, one repo each, so no
+// single Pages build gets too big). `src` is the host a game came from, kept as
+// a way back. When a host is blocked or a copy is broken, the swap buttons move
+// that one game to the other copy. Only a missing vault copy switches on its
+// own: a slow game is not a broken one.
 const STALL_MS = 8000;
 let stallTimer = null;
 let expectLoad = false;
