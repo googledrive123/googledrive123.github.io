@@ -278,6 +278,14 @@
     }).then(function () { return data; });
   }
 
+  // Another tab would not let go of this database. restore() tells this
+  // apart from any other failure by .held.
+  function heldError(name) {
+    var err = new Error('A game open in another tab is using its save (' + name + ').');
+    err.held = name;
+    return err;
+  }
+
   /* A game open in another tab holds its database, and the delete waits
      until that tab lets go. Waiting forever looks like a hang, so after a few
      seconds the player is told what is in the way. */
@@ -288,9 +296,7 @@
       req.onsuccess = function () { clearTimeout(timer); resolve(); };
       req.onerror = function () { clearTimeout(timer); reject(req.error); };
       req.onblocked = function () {
-        timer = setTimeout(function () {
-          reject(new Error('A game is still open in another tab. Close it, then try again.'));
-        }, 4000);
+        timer = setTimeout(function () { reject(heldError(name)); }, 4000);
       };
     });
   }
@@ -394,9 +400,10 @@
 
   /* Databases first: they are the step that can be refused, by another tab
      holding one open, so every one the restore deletes or replaces is checked
-     before any is touched. localStorage is only touched once they are all in.
-     The caller reloads afterwards, so no game keeps running on the old
-     progress. */
+     before any is touched. A tab can still take one back in the meantime,
+     and then the player has to know the restore is half done. localStorage
+     is only touched once the databases are all in. The caller reloads
+     afterwards, so no game keeps running on the old progress. */
   function restore(data) {
     if (!isSave(data)) return Promise.reject(new Error('That is not a GameVault save file.'));
     var incoming = Object.keys(data.indexedDB).filter(function (name) {
@@ -407,9 +414,14 @@
       gone = here.filter(function (name) { return incoming.indexOf(name) === -1; });
       return eachInTurn(gone.concat(incoming), checkFree);
     }).then(function () {
-      return eachInTurn(gone, deleteDb);
-    }).then(function () {
-      return eachInTurn(incoming, function (name) { return rebuildDb(name, data.indexedDB[name]); });
+      return eachInTurn(gone, deleteDb).then(function () {
+        return eachInTurn(incoming, function (name) { return rebuildDb(name, data.indexedDB[name]); });
+      }).catch(function (err) {
+        if (!err || !err.held) throw err;
+        throw new Error('Part of the restore already happened, but a game in another tab took hold of '
+          + 'its save (' + err.held + ') partway through. Close every other GameVault tab, then '
+          + 'restore again.');
+      });
     }).then(function () {
       restoreLocal(data.localStorage);
     });
