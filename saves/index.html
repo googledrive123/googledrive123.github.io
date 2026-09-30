@@ -439,7 +439,8 @@ document.addEventListener('DOMContentLoaded', function () {
   function autoStatus() {
     if (!saves.autoOn()) return 'Off in this browser. Your last auto-save stays until you delete it.';
     var at = Date.parse(saves.autoAt() || '');
-    if (!at) return 'On. Load or skip the auto-save above first, so this browser does not replace it.';
+    if (!at && rows.auto) return 'On. Load or skip the auto-save above first, so this browser does not replace it.';
+    if (!at) return 'On. The first auto-save happens the next time you open GameVault.';
     return 'On. The next auto-save is due after ' + when(new Date(at + 24 * 60 * 60 * 1000)) + '.';
   }
 
