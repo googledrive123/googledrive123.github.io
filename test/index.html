@@ -37,11 +37,14 @@
     }
     .queue-row.current { background: linear-gradient(90deg, rgba(255,59,59,0.07), transparent 60%); }
     .queue-thumb {
+      display: block;
       width: 64px; height: 36px; flex-shrink: 0;
-      border-radius: 6px; object-fit: cover;
+      border-radius: 6px;
+      overflow: hidden;
       background: var(--surface-2);
       border: 1px solid var(--border);
     }
+    .queue-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
     .queue-info { min-width: 0; flex: 1; }
     .queue-name { font-size: 0.9rem; color: var(--text); overflow-wrap: anywhere; }
     .queue-meta {
@@ -262,11 +265,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function queueRow(g) {
     var row = el('div', 'queue-row' + (g.missing ? ' queue-missing' : '') + (current === g ? ' current' : ''));
-    var thumb = el('img', 'queue-thumb');
-    thumb.alt = '';
-    thumb.loading = 'lazy';
-    if (g.img) thumb.src = g.img;
-    thumb.addEventListener('error', function () { thumb.removeAttribute('src'); });
+    // An image that fails is removed, not left as a broken-image icon.
+    var thumb = el('span', 'queue-thumb');
+    if (g.img) {
+      var img = el('img');
+      img.alt = '';
+      img.loading = 'lazy';
+      img.addEventListener('error', function () { img.remove(); });
+      img.src = g.img;
+      thumb.appendChild(img);
+    }
     row.appendChild(thumb);
 
     var info = el('div', 'queue-info');
