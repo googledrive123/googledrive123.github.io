@@ -12,7 +12,7 @@
   (function () {
     // Inside the player's game frame this is a game that is not where the
     // player looked, never a page to show. See inPlayer() below.
-    if (inPlayer()) return;
+    if (inPlayer()) { toVault(); return; }
     var path = location.pathname + location.search;
     var spa = /^\/(games(\/|$)|movie(\/|$)|tv(\/|$))/.test(location.pathname);
     try {
@@ -20,6 +20,23 @@
     } catch (e) {}
     location.replace(spa ? '/' : '/404/');
   })();
+
+  // A tab left open from before the games moved still looks in /games/. The
+  // game now lives in a vault site, so go there. Anything else tells the
+  // player it is missing, and the player falls back to the original host.
+  function toVault() {
+    var m = /^\/games\/([^\/]+)\/(.*)$/.exec(location.pathname);
+    if (!m) return missing();
+    fetch('/games.json').then(function (res) { return res.json(); }).then(function (data) {
+      var g = data.games.filter(function (x) { return x.id === m[1]; })[0];
+      if (!g || !g.site) return missing();
+      location.replace('/vault' + g.site + '/' + m[1] + '/' + m[2] + location.search);
+    }).catch(missing);
+  }
+
+  function missing() {
+    parent.postMessage({ gv: 'missing' }, location.origin);
+  }
 
   function inPlayer() {
     try {
