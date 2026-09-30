@@ -90,10 +90,38 @@
     }
     .wn-name {
       margin-top: 0.5rem;
+      padding-bottom: 0.1em;
       font-size: clamp(2.4rem, 9vw, 4.25rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.05;
-      color: var(--text);
       overflow-wrap: anywhere;
+      background: linear-gradient(90deg, #ff3b3b, #ff9f1a, #ffd43b, #3ddc84, #3ba7ff, #8a5cff, #ff4fd8, #ff3b3b);
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: wn-rainbow 4s linear infinite;
     }
+    /* Deeper colors, so the yellow still reads on white. */
+    :root[data-theme="light"] .wn-name {
+      background-image: linear-gradient(90deg, #e0262f, #e67700, #c99a00, #1f9d55, #1c7ed6, #6741d9, #c2255c, #e0262f);
+    }
+
+    /* The reveal: the card spins twice as it turns edge-on and falls away,
+       then the name fades in where it was. */
+    @keyframes wn-spin {
+      to { transform: rotate(720deg) rotateY(90deg) scale(0.4); opacity: 0; }
+    }
+    @keyframes wn-in {
+      from { opacity: 0; transform: scale(0.85); }
+      to { opacity: 1; transform: none; }
+    }
+    @keyframes wn-rainbow {
+      to { background-position: 200% 0; }
+    }
+    .wn-stage.spinning .wn-card {
+      animation: wn-spin 2.6s cubic-bezier(.65,-0.15,.38,.93) forwards;
+      pointer-events: none;
+    }
+    .wn-stage.spinning .wn-result { visibility: visible; animation: wn-in 0.7s 2.2s both; }
     .page .wn-result p { margin-top: 0.8rem; color: var(--muted); }
     .page .wn-result p.wn-you { margin-top: 0.5rem; color: #5ce08a; font-weight: 600; }
     .wn-result .btn { margin-top: 1.25rem; }
@@ -186,13 +214,31 @@
     return b.at > a.at ? b : a;
   }
 
-  function reveal() {
-    if (!winner || stage.classList.contains('shown')) return;
+  function fill() {
     $('wnLabel').textContent = winner.label;
     $('wnName').textContent = winner.name;
     $('wnWhat').textContent = winner.what;
     $('wnYou').hidden = !winner.you;
-    stage.classList.add('shown');
+  }
+
+  function reveal() {
+    if (!winner || stage.classList.contains('spinning') || stage.classList.contains('shown')) return;
+    fill();
+    // The shared stylesheet stops every animation for reduced motion, so
+    // there is no spin to wait for.
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      stage.classList.add('shown');
+      return;
+    }
+    stage.classList.add('spinning');
+    var done = function () {
+      if (!stage.classList.contains('spinning')) return;
+      stage.classList.remove('spinning');
+      stage.classList.add('shown');
+    };
+    $('wnResult').addEventListener('animationend', done, { once: true });
+    // In case the animation never gets to end, in a tab put in the background.
+    setTimeout(done, 3400);
   }
 
   function ready(w) {
