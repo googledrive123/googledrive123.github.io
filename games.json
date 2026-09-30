@@ -1313,5 +1313,6 @@
 {"id":"xp","name":"Xp","categories":[],"ranking":9999,"img":null,"src":null,"hidden":true,"site":8},
 {"id":"basketbros","name":"Basketbros","categories":[],"ranking":9999,"img":null,"src":null,"hidden":true,"site":7},
 {"id":"emulators","name":"Emulators","categories":[],"ranking":9999,"img":null,"src":null,"hidden":true,"site":7},
-{"id":"retrobowl","name":"Retrobowl","categories":[],"ranking":9999,"img":null,"src":null,"hidden":true,"site":8}
+{"id":"retrobowl","name":"Retrobowl","categories":[],"ranking":9999,"img":null,"src":null,"hidden":true,"site":8},
+{"id":"skills","name":"Skills","categories":[],"ranking":9999,"img":null,"src":null,"hidden":true,"site":8}
 ]}
