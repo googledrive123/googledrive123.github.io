@@ -269,4 +269,21 @@
       });
     }).then(function () { return data; });
   }
+
+  /* A game open in another tab holds its database, and the delete waits
+     until that tab lets go. Waiting forever looks like a hang, so after a few
+     seconds the player is told what is in the way. */
+  function deleteDb(name) {
+    return new Promise(function (resolve, reject) {
+      var req = indexedDB.deleteDatabase(name);
+      var timer = null;
+      req.onsuccess = function () { clearTimeout(timer); resolve(); };
+      req.onerror = function () { clearTimeout(timer); reject(req.error); };
+      req.onblocked = function () {
+        timer = setTimeout(function () {
+          reject(new Error('A game is still open in another tab. Close it, then try again.'));
+        }, 4000);
+      };
+    });
+  }
 })();
