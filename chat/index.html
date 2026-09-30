@@ -43,6 +43,27 @@
       color: var(--muted-2); font-size: 0.85rem;
       pointer-events: none;
     }
+
+    .chat-form {
+      display: flex; gap: 0.5rem; align-items: center;
+      padding: 0.85rem 1.25rem 0.5rem;
+      border-top: 1px solid var(--border);
+    }
+    .chat-box { position: relative; flex: 1; min-width: 0; }
+    .chat-box .field { padding-right: 4.4rem; }
+    .chat-count {
+      position: absolute; right: 0.8rem; top: 50%; transform: translateY(-50%);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.64rem; color: var(--muted-2);
+      pointer-events: none;
+    }
+    .chat-send { min-width: 5.2rem; flex-shrink: 0; }
+    .chat-status {
+      min-height: 1.3rem;
+      padding: 0 1.25rem 0.75rem;
+      font-size: 0.8rem; line-height: 1.45;
+      color: var(--muted);
+    }
   </style>
 </head>
 <body>
@@ -60,6 +81,14 @@
       <div class="chat-log" id="chatLog" role="log" aria-live="polite" aria-label="Chat messages"></div>
       <div class="chat-empty" id="chatEmpty">Loading chat…</div>
     </div>
+    <form class="chat-form" id="chatForm" autocomplete="off">
+      <div class="chat-box">
+        <input class="field" id="chatInput" maxlength="300" placeholder="Say something nice…" aria-label="Message" enterkeyhint="send">
+        <span class="chat-count" id="chatCount" aria-hidden="true">0/300</span>
+      </div>
+      <button class="btn btn-primary chat-send" id="chatSend" type="submit">Send</button>
+    </form>
+    <div class="chat-status" id="chatStatus" aria-live="polite"></div>
   </div>
 </main>
 </body>
