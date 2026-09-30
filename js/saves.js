@@ -286,4 +286,26 @@
       };
     });
   }
+
+  function isInline(keyPath) { return keyPath !== null && keyPath !== undefined; }
+
+  function createDb(name, dump) {
+    return new Promise(function (resolve, reject) {
+      var req = indexedDB.open(name, Math.max(1, dump.version || 1));
+      req.onupgradeneeded = function () {
+        var db = req.result;
+        Object.keys(dump.stores || {}).forEach(function (storeName) {
+          var s = dump.stores[storeName];
+          var options = { autoIncrement: !!s.autoIncrement };
+          if (isInline(s.keyPath)) options.keyPath = s.keyPath;
+          var store = db.createObjectStore(storeName, options);
+          (s.indexes || []).forEach(function (i) {
+            store.createIndex(i.name, i.keyPath, { unique: !!i.unique, multiEntry: !!i.multiEntry });
+          });
+        });
+      };
+      req.onsuccess = function () { resolve(req.result); };
+      req.onerror = function () { reject(req.error); };
+    });
+  }
 })();
