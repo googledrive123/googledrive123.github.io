@@ -24,6 +24,15 @@
       border: 0;
       background: #000;
     }
+    /* Held clear of the player's own control bar along the bottom. */
+    .rr-sound {
+      position: fixed; left: 50%; bottom: 5rem; z-index: 2;
+      transform: translateX(-50%);
+      padding: 1rem 2rem;
+      font-size: 1.15rem;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 28px rgba(255,59,59,0.35);
+    }
+    .rr-sound[hidden] { display: none; }
   </style>
 </head>
 <body>
@@ -34,5 +43,18 @@
   allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
   referrerpolicy="strict-origin-when-cross-origin"
   allowfullscreen></iframe>
+<button class="btn btn-primary rr-sound" id="rrSound" type="button">Tap for sound</button>
+
+<script>
+(function () {
+  var video = document.getElementById('rrVideo');
+  var sound = document.getElementById('rrSound');
+  // The tap counts as the user asking for sound, so the reload may play it.
+  sound.addEventListener('click', function () {
+    video.src = video.src.replace('mute=1', 'mute=0');
+    sound.hidden = true;
+  });
+})();
+</script>
 </body>
 </html>
