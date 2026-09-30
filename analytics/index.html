@@ -1050,7 +1050,7 @@
   }
   $('loginBtn').addEventListener('click', function () { tryLogin($('secretInput').value.trim(), true); });
   $('secretInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') tryLogin($('secretInput').value.trim(), true); });
-  $('logoutBtn').addEventListener('click', function () { try { localStorage.removeItem(SECRET_KEY); } catch (e) {} location.reload(); });
+  $('logoutBtn').addEventListener('click', function () { try { sessionStorage.removeItem(SECRET_KEY); localStorage.removeItem(SECRET_KEY); } catch (e) {} location.reload(); });
   $('refreshBtn').addEventListener('click', function () { load(); loadPeople(); });
   $('verifySearch').addEventListener('input', fillSelect);
   $('playingMore').addEventListener('click', openPlaying);
@@ -1076,7 +1076,14 @@
   try { $('excludeMe').checked = localStorage.getItem('gv.noanalytics') === '1'; } catch (e) {}
   $('excludeMe').addEventListener('change', function () { try { if ($('excludeMe').checked) localStorage.setItem('gv.noanalytics', '1'); else localStorage.removeItem('gv.noanalytics'); } catch (e) {} });
 
-  var saved = null; try { saved = localStorage.getItem(SECRET_KEY); } catch (e) {}
+  // Every game page shares this site's address, so anything in localStorage is
+  // readable by all of them. The secret stays in this tab's sessionStorage,
+  // and a copy an older version left in localStorage is moved over and wiped.
+  var saved = null;
+  try {
+    saved = sessionStorage.getItem(SECRET_KEY) || localStorage.getItem(SECRET_KEY);
+    localStorage.removeItem(SECRET_KEY);
+  } catch (e) {}
   var qs = new URLSearchParams(location.search).get('key');
   if (qs) { history.replaceState(null, '', location.pathname); tryLogin(qs, true); }
   else if (saved) tryLogin(saved, false);
