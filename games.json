@@ -9,7 +9,7 @@
 {"id":"retrobowlcollege","name":"Retro Bowl College","categories":["Sports"],"ranking":7,"img":"https://icons-6.us/driving-games/retro-bowl-college/unnamed.png","src":"https://icons-6.us/driving-games/retro-bowl-college/","local":true},
 {"id":"basket-bros","name":"Basket Bros","categories":["Sports"],"ranking":8,"img":"/games/basket-bros/icon.png","src":null},
 {"id":"rocketleague","name":"Rocket League","categories":["Sports"],"ranking":9,"img":"/games/rocketleague/splash.webp","src":null},
-{"id":"2048","name":"2048","categories":["Puzzle"],"ranking":10,"img":"https://icons-6.us/strategy-games/2048/thumb.png","src":"https://icons-6.us/strategy-games/2048/","local":true},
+{"id":"2048","name":"2048","categories":["Puzzle"],"ranking":10,"img":"/thumbs/2048.webp","src":"https://icons-6.us/strategy-games/2048/","site":2,"added":"2026-05-13"},
 {"id":"retro-bowl","name":"Retro Bowl","categories":["Sports"],"ranking":11,"img":"https://icons-6.us/driving-games/retro-bowl/img/icon.jpg","src":"https://icons-6.us/driving-games/retro-bowl/","local":true},
 {"id":"bit-planes","name":"Bit Planes","categories":["Action","Shooter"],"ranking":12,"img":"/games/bit-planes/bitplanes.png","src":null},
 {"id":"clash-of-vikings","name":"Clash Of Vikings","categories":["Strategy"],"ranking":13,"img":"https://cdn.jsdelivr.net/gh/bubbls/UGS-Assets@main/clashofvikings/media/graphics/splash/mobile/cover-start.jpg","src":"https://genizymath.github.io/iframe/545.html"},
