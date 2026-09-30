@@ -19,6 +19,38 @@
   <script src="/js/player.js" defer></script>
   <script src="/js/cosmetics.js" defer></script>
   <style>
+    /* Rarity and crate colors. Kept off the site red, which stays for actions. */
+    .r-common    { --r: #a0a0aa; }
+    .r-uncommon  { --r: #5ce08a; }
+    .r-rare      { --r: #6aa8ff; }
+    .r-epic      { --r: #b58cff; }
+    .r-legendary { --r: #f0c04a; }
+
+    .coin {
+      display: inline-block; flex-shrink: 0;
+      width: 0.85em; height: 0.85em; border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #fff1b8, #f0c04a 45%, #a8760e);
+      box-shadow: inset 0 0 0 0.1em rgba(110, 70, 0, 0.45);
+      vertical-align: -0.08em;
+    }
+
+    .wallet { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 1.25rem 2rem; }
+    .wallet-coins {
+      display: flex; align-items: center; gap: 0.55rem;
+      font-size: 2.4rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .wallet-today { color: var(--muted); font-size: 0.82rem; margin-top: 0.7rem; }
+    .wallet-today b { color: var(--text); font-weight: 600; }
+    .meter { width: 240px; max-width: 100%; height: 6px; border-radius: 6px; background: var(--surface-2); margin-top: 0.5rem; overflow: hidden; }
+    .meter span { display: block; height: 100%; width: 0; border-radius: inherit; background: #f0c04a; transition: width 0.6s ease; }
+    .wallet-guest { color: var(--muted); font-size: 0.9rem; line-height: 1.55; max-width: 44ch; }
+    .wallet-guest .btn-row { margin-top: 0.8rem; }
+    .shop-note {
+      flex-basis: 100%;
+      padding-top: 1rem; border-top: 1px solid var(--border);
+      font-size: 0.82rem; color: var(--muted); line-height: 1.55;
+    }
   </style>
 </head>
 <body>
@@ -27,6 +59,22 @@
   <h1>Crate shop</h1>
   <p class="lede">Play any game to earn coins, then open crates for name colors,
   avatar rings, tile colors and titles.</p>
+
+  <section class="panel wallet" aria-label="Your coins">
+    <div id="walletSigned" hidden>
+      <div class="panel-label">Your coins</div>
+      <div class="wallet-coins"><span class="coin" aria-hidden="true"></span><span id="coinCount">0</span></div>
+      <div class="wallet-today" id="coinToday"></div>
+      <div class="meter" aria-hidden="true"><span id="coinMeter"></span></div>
+    </div>
+    <div class="wallet-guest" id="walletGuest">
+      <div class="panel-label">Coins</div>
+      You get 1 coin for every full minute you play a game, up to 120 a day.
+      Sign in on the home page to earn coins.
+      <div class="btn-row"><a class="btn btn-primary" href="/?profile">Sign in</a></div>
+    </div>
+    <p class="shop-note">Coins come only from playing. They can't be bought, and items only change how things look.</p>
+  </section>
 </main>
 </body>
 </html>
