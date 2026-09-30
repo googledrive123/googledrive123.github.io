@@ -3858,6 +3858,7 @@ function openGame(g) {
 }
 function closeGame() {
   if (window._trackClose) window._trackClose();
+  showMore(false);
   clearTimeout(stallTimer);
   expectLoad = false;
   mounted = null;
