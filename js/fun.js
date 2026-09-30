@@ -103,7 +103,11 @@
     '.gv-fun-chip:focus-visible{outline:2px solid var(--accent,#ff3b3b);outline-offset:2px}',
     '.gv-fun-chip b{font:600 0.6rem/1 "JetBrains Mono",monospace;letter-spacing:0.14em;text-transform:uppercase;',
     'color:var(--accent,#ff3b3b)}',
-    'body.gv-playing .gv-fun-chip{bottom:82px}'
+    'body.gv-playing .gv-fun-chip{bottom:82px}',
+
+    // Shy tiles: the page's own tile transitions, plus a quick one for the dodge.
+    'html.gv-fun-april .tile{transition:transform 0.2s cubic-bezier(0.2,0.8,0.2,1),box-shadow 0.25s,',
+    'border-color 0.2s,translate 0.12s ease-out}'
   ];
 
   function styles() {
@@ -126,10 +130,62 @@
     place(undo, b);
   }
 
+  // Tiles slide a few px away from the mouse but never out from under it, so
+  // a click still lands on the tile it was aimed at. Touch is left alone: a
+  // finger has nothing to dodge until it has already tapped.
+  function shyTiles(undo) {
+    if (!document.getElementById('grid') && !document.querySelector('.tile')) return;
+    var MAX = 10, EDGE = 6;
+    var tile = null, x = 0, y = 0, frame = 0;
+
+    function settle() {
+      if (tile) tile.style.translate = '';
+      tile = null;
+    }
+
+    // How far to move along one axis: nothing at the middle, nothing at the
+    // edge, and never so far that the pointer ends up off the tile.
+    function push(d, half) {
+      var dist = Math.abs(d);
+      var p = Math.min(MAX * dist / half, half - dist - EDGE);
+      return p > 0 ? (d < 0 ? -p : p) : 0;
+    }
+
+    function step() {
+      frame = 0;
+      if (!tile || !tile.isConnected) { tile = null; return; }
+      var r = tile.getBoundingClientRect();
+      // Measure from where the tile sits at rest, not where it has dodged to.
+      var now = String(getComputedStyle(tile).translate || '').split(' ');
+      var nx = parseFloat(now[0]) || 0, ny = parseFloat(now[1]) || 0;
+      var hw = r.width / 2, hh = r.height / 2;
+      var dx = push(r.left + hw - nx - x, hw), dy = push(r.top + hh - ny - y, hh);
+      tile.style.translate = dx.toFixed(1) + 'px ' + dy.toFixed(1) + 'px';
+    }
+
+    listen(undo, document, 'pointermove', function (e) {
+      if (e.pointerType !== 'mouse') return;
+      var t = e.target && e.target.closest ? e.target.closest('.tile') : null;
+      if (t && t.classList.contains('skeleton')) t = null;
+      if (t !== tile) { settle(); tile = t; }
+      if (!tile) return;
+      x = e.clientX;
+      y = e.clientY;
+      if (!frame) frame = requestAnimationFrame(step);
+    }, { passive: true });
+    listen(undo, document.documentElement, 'mouseleave', settle);
+    listen(undo, window, 'scroll', settle, { passive: true });
+    undo.push(function () {
+      if (frame) cancelAnimationFrame(frame);
+      settle();
+    });
+  }
+
   function startApril(undo) {
     styles();
     flag(undo, 'gv-fun-april');
     offChip(undo);
+    shyTiles(undo);
   }
 
   // ── Halloween ───────────────────────────────────────────────────────────
