@@ -200,6 +200,30 @@
   </section>
 
   <section>
+    <h2>Broadcast <small>a message across the top of every page</small></h2>
+    <div class="card">
+      <textarea class="bc-text" id="bcText" maxlength="500" placeholder="What should people see?"></textarea>
+      <div class="verify-bar">
+        <select id="bcMode" aria-label="Who sees it">
+          <option value="both">Everyone: on the site now and arriving later</option>
+          <option value="now">Only people on the site right now</option>
+          <option value="later">Only people who arrive after this</option>
+        </select>
+        <select id="bcHours" aria-label="How long">
+          <option value="1">for 1 hour</option>
+          <option value="6">for 6 hours</option>
+          <option value="24" selected>for 1 day</option>
+          <option value="72">for 3 days</option>
+          <option value="168">for 1 week</option>
+        </select>
+        <button class="btn" id="bcSend">Send</button>
+      </div>
+      <div class="verify-msg" id="bcMsg"></div>
+      <div class="verify-list" id="bcList"></div>
+    </div>
+  </section>
+
+  <section>
     <h2>Overview <small id="rangeLabel"></small></h2>
     <div class="kpis" id="kpis"></div>
   </section>
