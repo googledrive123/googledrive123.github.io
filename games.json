@@ -302,7 +302,7 @@
 {"id":"monkey-mart","name":"Monkey Mart","categories":["Simulation"],"ranking":379,"img":"/thumbs/monkey-mart.webp","src":null,"site":5,"added":"2026-05-13"},
 {"id":"monstertracks","name":"Monster Tracks","categories":["Racing","Driving"],"ranking":380,"img":"/thumbs/monstertracks.webp","src":null,"site":5,"added":"2026-05-13"},
 {"id":"motox3m-winter","name":"Moto X3M Winter","categories":["Racing","Driving"],"ranking":384,"img":"/thumbs/motox3m-winter.webp","src":"https://icons-6.us/action-games/motox3m-winter/","site":5,"added":"2026-05-13"},
-{"id":"nutsim","name":"Nut Simulator","categories":["Idle","Simulation"],"ranking":385,"img":"https://icons-6.us/casual-games/nut-simulator/NutSimulator.png","src":"https://icons-6.us/casual-games/nut-simulator/","local":true},
+{"id":"nutsim","name":"Nut Simulator","categories":["Idle","Simulation"],"ranking":385,"img":"/thumbs/nutsim.webp","src":"https://icons-6.us/casual-games/nut-simulator/","site":5,"added":"2026-05-13"},
 {"id":"offlineparadise","name":"Offline Paradise","categories":["Idle"],"ranking":386,"img":"https://icons-6.us/action-games/OfflineParadise/assets/icon.jpeg","src":"https://icons-6.us/action-games/OfflineParadise/","local":true},
 {"id":"osumania","name":"osu!mania","categories":["Rhythm"],"ranking":388,"img":"/games/osumania/mania.jpg","src":null},
 {"id":"ovo","name":"OvO","categories":["Platformer"],"ranking":389,"img":"https://icons-6.us/action-games/ovo/ovo.png","src":"https://icons-6.us/action-games/ovo/","local":true},
