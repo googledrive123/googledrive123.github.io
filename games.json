@@ -204,7 +204,7 @@
 {"id":"achieveunlocked2","name":"Achieve Unlocked 2","categories":["Puzzle","Platformer"],"ranking":212,"img":"/thumbs/achieveunlocked2.webp","src":null,"site":4,"added":"2026-05-13"},
 {"id":"alienhominid","name":"Alien Hominid","categories":["Action","Shooter"],"ranking":219,"img":"/thumbs/alienhominid.webp","src":"https://icons-6.us/action-games/alienhominid/","site":4,"added":"2026-05-13"},
 {"id":"align-4","name":"Align 4","categories":["Puzzle","Strategy"],"ranking":220,"img":"https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Connect-four.jpg/330px-Connect-four.jpg","src":null,"site":4,"added":"2026-05-13"},
-{"id":"amidst-the-clouds","name":"Amidst the Clouds","categories":["Platformer"],"ranking":222,"img":"https://icons-6.us/action-games/amidst-the-clouds/splash.png","src":"https://icons-6.us/action-games/amidst-the-clouds/","local":true},
+{"id":"amidst-the-clouds","name":"Amidst the Clouds","categories":["Platformer"],"ranking":222,"img":"/thumbs/amidst-the-clouds.webp","src":"https://icons-6.us/action-games/amidst-the-clouds/","site":4,"added":"2026-05-13"},
 {"id":"amongus","name":"Among Us","categories":["Multiplayer"],"ranking":223,"img":"https://icons-6.us/strategy-games/among-us/red.png","src":"https://icons-6.us/strategy-games/among-us/","local":true},
 {"id":"astray","name":"Astray","categories":["Puzzle"],"ranking":226,"img":"/games/astray/splash.png","src":null},
 {"id":"avalanche","name":"Avalanche","categories":["Arcade","Skill"],"ranking":227,"img":"https://icons-6.us/action-games/avalanche/avalanche.png","src":"https://icons-6.us/action-games/avalanche/","local":true},
