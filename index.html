@@ -4284,6 +4284,21 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+// ───── Public counts ─────
+// Popular now and "N playing" come from counts-only functions (see
+// analytics/public.sql). They need no session, so a plain fetch does.
+const SUPA = {
+  url: 'https://dxwjxzmlezfyursysays.supabase.co',
+  key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0'
+};
+function publicRpc(name, args) {
+  return fetch(SUPA.url + '/rest/v1/rpc/' + name, {
+    method: 'POST',
+    headers: { apikey: SUPA.key, Authorization: 'Bearer ' + SUPA.key, 'Content-Type': 'application/json' },
+    body: JSON.stringify(args || {})
+  }).then(r => r.ok ? r.json() : Promise.reject(new Error(name + ' ' + r.status)));
+}
+
 // ───── Boot ─────
 // Nothing on screen needs the catalog until this resolves, so the shell paints
 // first and the grid fills in behind it.
@@ -4366,8 +4381,8 @@ if ('serviceWorker' in navigator) {
 // GAMEVAULT AUTH + PROFILE SYSTEM
 // ═══════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', function() {
-const SUPA_URL = 'https://dxwjxzmlezfyursysays.supabase.co';
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
+const SUPA_URL = SUPA.url;
+const SUPA_KEY = SUPA.key;
 const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
 
 const PERIOD_SECS = 50 * 60;
