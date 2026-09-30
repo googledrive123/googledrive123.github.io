@@ -50,6 +50,24 @@
       margin-top: 0.2rem;
     }
     .queue-missing .queue-name { color: var(--muted); }
+
+    .bench-head {
+      display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap;
+      gap: 0.6rem 1rem; margin-bottom: 0.85rem;
+    }
+    .bench-name { font-size: 1.1rem; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
+    .bench-id { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--muted-2); margin-top: 0.2rem; }
+    .bench-tools { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .stage {
+      position: relative;
+      aspect-ratio: 16 / 9;
+      max-height: 72vh;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #000;
+      border: 1px solid var(--border);
+    }
+    .stage iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
   </style>
 </head>
 <body>
