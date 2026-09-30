@@ -355,3 +355,46 @@ begin
   return true;
 end;
 $function$;
+
+
+-- Mutes an account for p_days days, or for good with no p_days. Banning
+-- again replaces the old ban.
+create or replace function public.gv_chat_ban(
+  p_secret text,
+  p_user_id uuid,
+  p_reason text,
+  p_days integer default null
+) returns json
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_row gv_chat_bans;
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+  if not exists (select 1 from auth.users where id = p_user_id) then
+    raise exception 'no such account';
+  end if;
+  if p_days is not null and p_days < 1 then
+    raise exception 'days must be at least 1';
+  end if;
+
+  insert into gv_chat_bans (user_id, reason, until, created_at)
+  values (
+    p_user_id,
+    left(nullif(btrim(coalesce(p_reason, '')), ''), 200),
+    case when p_days is null then null else now() + make_interval(days => p_days) end,
+    now()
+  )
+  on conflict (user_id) do update
+    set reason = excluded.reason,
+        until = excluded.until,
+        created_at = excluded.created_at
+  returning * into v_row;
+
+  return row_to_json(v_row);
+end;
+$function$;
