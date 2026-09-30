@@ -4857,6 +4857,8 @@ sb.auth.onAuthStateChange(async (event, session) => {
     await loadUsername();
     loadAvatar();
     await uploadLocalSessions();
+    // Play time turns into shop coins (shop/shop.sql caps it per day).
+    sb.rpc('gv_grant_coins').then(() => {}, () => {});
     syncStars();
     // A daily cloud backup of game saves, if this person switched it on.
     if (window.GV && GV.saves) GV.saves.autoSaveIfDue(sb);
@@ -5220,6 +5222,9 @@ window._trackClose = function() {
   activeSession = null;
   addLocalSession({ gameId, startedAt, endedAt, durationSecs });
   if (!currentUser) return;
+  // Send the finished session now rather than on the next visit, so the
+  // coins it earned are there if the shop is opened next.
+  uploadLocalSessions().then(() => sb.rpc('gv_grant_coins')).then(() => {}, () => {});
   // Match by (user_id, game_id, started_at) — avoids supaId race condition
   sb.from('play_sessions')
     .update({ ended_at: endedAt })
