@@ -144,7 +144,15 @@
     '.gv-fun-web{position:absolute;top:0;width:150px;height:150px;color:rgba(255,255,255,0.2)}',
     '.gv-fun-web-left{left:0}',
     '.gv-fun-web-right{right:0;transform:scaleX(-1)}',
-    '@media (max-width:640px){.gv-fun-web{width:96px;height:96px}}'
+    '@media (max-width:640px){.gv-fun-web{width:96px;height:96px}}',
+    '.gv-fun-bat{position:absolute;left:0;opacity:0.85;will-change:transform;',
+    'animation:gvFunFly 44s ease-in-out infinite}',
+    '.gv-fun-bat svg{display:block;width:100%;height:auto;fill:#2e2733;transform-origin:50% 40%;',
+    'filter:drop-shadow(0 0 6px rgba(255,120,40,0.4));animation:gvFunFlap 0.38s ease-in-out infinite alternate}',
+    '.gv-fun-bat circle{fill:#ffb040}',
+    '@keyframes gvFunFly{0%{transform:translate(-10vw,0)}25%{transform:translate(20vw,-5vh)}',
+    '50%{transform:translate(50vw,3vh)}75%{transform:translate(80vw,-4vh)}100%{transform:translate(110vw,0)}}',
+    '@keyframes gvFunFlap{from{transform:scaleY(1)}to{transform:scaleY(0.5)}}'
   ];
 
   function styles() {
@@ -310,6 +318,26 @@
       '<path d="' + d + '" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>';
   }
 
+  var BAT = 'M32 11L34 7L35 11.5Q42 6 52 7Q58 7.5 63 12Q58 13 56 19Q52 15.5 47 18Q43 15.5 39 19' +
+    'Q36 19 34 24L32 25L30 24Q28 19 25 19Q21 15.5 17 18Q12 15.5 8 19Q6 13 1 12Q6 7.5 12 7' +
+    'Q22 6 29 11.5L30 7Z';
+
+  // Height on screen (%), width (px), seconds per crossing and head start (s).
+  // The head start is negative so the bats are already mid-flight on load.
+  var BATS = [[14, 34, 38, -6], [27, 24, 52, -31], [8, 20, 64, -47], [40, 28, 46, -19]];
+
+  function bats(layer) {
+    BATS.forEach(function (b, i) {
+      var el = document.createElement('div');
+      el.className = 'gv-fun-bat';
+      el.style.cssText = 'top:' + b[0] + '%;width:' + b[1] + 'px;animation-duration:' + b[2] + 's;' +
+        'animation-delay:' + b[3] + 's' + (i % 2 ? ';animation-direction:reverse' : '');
+      el.innerHTML = '<svg viewBox="0 0 64 32"><path d="' + BAT + '"/>' +
+        '<circle cx="31" cy="13.6" r="0.9"/><circle cx="33" cy="13.6" r="0.9"/></svg>';
+      layer.appendChild(el);
+    });
+  }
+
   function startHalloween(undo) {
     styles();
     flag(undo, 'gv-fun-halloween');
@@ -322,6 +350,7 @@
     layer.className = 'gv-fun-spooky';
     layer.setAttribute('aria-hidden', 'true');
     layer.innerHTML = cobweb('left') + cobweb('right');
+    bats(layer);
     place(undo, layer);
   }
 
