@@ -93,6 +93,18 @@ body {
     rgba(255,255,255,0.012) 3px, rgba(255,255,255,0.012) 4px);
 }
 
+/* Light theme: the grid goes dark-on-light and the glow layers step aside. */
+:root[data-theme="light"] .bg::before {
+  background-image:
+    linear-gradient(rgba(0,0,0,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.06) 1px, transparent 1px);
+}
+:root[data-theme="light"] .bg::after,
+:root[data-theme="light"] .orb,
+:root[data-theme="light"] .scanlines { display: none; }
+:root[data-theme="light"] .site-footer { background: rgba(255,255,255,0.6); }
+:root[data-theme="light"] .btn:hover { background: rgba(0,0,0,0.05); }
+
 /* ───────────── Header ───────────── */
 .site-header {
   position: sticky; top: 0; z-index: 200;
