@@ -12,6 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/site.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
   <script src="/js/identity.js" defer></script>
   <script src="/js/analytics.js" defer></script>
   <script src="/js/site.js" defer></script>
@@ -213,6 +214,134 @@
       someone does, it is not us.</li>
     </ul>
   </div>
+
+<script>
+(function () {
+  'use strict';
+
+  var SUPA_URL = 'https://dxwjxzmlezfyursysays.supabase.co';
+  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
+  var LABELS = { open: 'Open now', closed: 'Entries closed', drawn: 'Winner drawn' };
+
+  function $(id) { return document.getElementById(id); }
+
+  var card = $('gwCard');
+  var note = $('gwNote');
+
+  var sb = null;
+  var data = null;
+  var loading = false;
+
+  function say(text, bad) {
+    note.textContent = text || '';
+    note.className = 'gw-note' + (bad ? ' bad' : '');
+  }
+
+  function when(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' }) + ', '
+      + d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  }
+
+  function plural(n, one, many) {
+    return n.toLocaleString() + ' ' + (n === 1 ? one : many);
+  }
+
+  function paintEmpty() {
+    card.dataset.status = 'none';
+    $('gwState').textContent = 'No giveaway right now';
+    $('gwTitle').textContent = 'Nothing to enter yet';
+    $('gwPrizeRow').hidden = true;
+    $('gwEmpty').hidden = false;
+    $('gwTicket').hidden = true;
+  }
+
+  function paintGiveaway(g) {
+    card.dataset.status = g.status;
+    $('gwState').textContent = LABELS[g.status] || '';
+    $('gwTitle').textContent = g.title;
+    $('gwPrize').textContent = g.prize_text;
+    $('gwPrizeRow').hidden = false;
+    $('gwEmpty').hidden = true;
+    $('gwTicket').hidden = false;
+
+    var open = g.status === 'open';
+    var drawn = g.status === 'drawn';
+    $('gwClock').hidden = !open;
+    $('gwWon').hidden = !drawn;
+    if (drawn) {
+      var name = $('gwWonName');
+      // No name comes back when the winner's account is gone or its name
+      // is not fit to show.
+      name.textContent = g.winner_name || 'A GameVault player';
+      name.classList.toggle('anon', !g.winner_name);
+      $('gwYou').hidden = !g.won;
+    }
+
+    var entries = plural(g.entries, 'entry', 'entries');
+    var meta = $('gwMeta');
+    if (open) meta.textContent = 'Ends ' + when(g.ends_at) + ' · ' + entries;
+    else if (drawn) meta.textContent = 'Drawn ' + when(g.drawn_at) + ' from ' + entries;
+    else if (!g.entries) meta.textContent = 'Closed ' + when(g.ends_at) + ' with no entries.';
+    else meta.textContent = 'Closed ' + when(g.ends_at) + ' with ' + entries + '. The winner is drawn soon.';
+  }
+
+  // The latest winner, when it is not already the giveaway on the card.
+  function paintLast() {
+    var last = data.last_winner;
+    var g = data.giveaway;
+    var show = !!last && !(g && g.id === last.id);
+    $('gwLastPanel').hidden = !show;
+    if (!show) return;
+    var name = $('gwLastName');
+    name.textContent = last.winner_name || 'A GameVault player';
+    name.classList.toggle('anon', !last.winner_name);
+    $('gwLastPrize').textContent = last.prize_text;
+    $('gwLastDate').textContent = when(last.drawn_at);
+  }
+
+  function paint() {
+    if (data.giveaway) paintGiveaway(data.giveaway);
+    else paintEmpty();
+    paintLast();
+  }
+
+  function load() {
+    if (loading) return;
+    loading = true;
+    sb.rpc('gv_giveaway_current').then(function (r) {
+      loading = false;
+      if (r.error) throw r.error;
+      data = r.data;
+      paint();
+    }).catch(function (err) {
+      loading = false;
+      console.error(err);
+      if (!data) {
+        $('gwState').textContent = 'Offline';
+        $('gwTitle').textContent = 'The giveaway could not load';
+      }
+      say('Could not reach GameVault. Refresh to try again.', true);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    if (!window.supabase) {
+      $('gwState').textContent = 'Offline';
+      $('gwTitle').textContent = 'The giveaway could not load';
+      say('Refresh to try again.', true);
+      return;
+    }
+    // Restores the home page's session, if there is one, and refreshes it
+    // when it runs out. Without one every call goes out as a guest.
+    sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+    sb.auth.getSession().then(function (r) {
+      load();
+    });
+  });
+})();
+</script>
 </main>
 </body>
 </html>
