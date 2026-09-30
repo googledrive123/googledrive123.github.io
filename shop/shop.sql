@@ -279,3 +279,41 @@ $function$;
 
 revoke all on function public.gv_wallet_get() from public, anon;
 grant execute on function public.gv_wallet_get() to authenticated;
+
+
+-- The crates with their exact chances, and every item there is, so anyone
+-- (signed in or not) can see what they would be spending on before they do.
+create or replace function public.gv_crates()
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'not read from this origin';
+  end if;
+
+  return json_build_object(
+    'tiers', coalesce((
+      select json_agg(json_build_object(
+               'id', t.id, 'name', t.name, 'price', t.price,
+               'odds', json_build_object(
+                 'common', t.common, 'uncommon', t.uncommon, 'rare', t.rare,
+                 'epic', t.epic, 'legendary', t.legendary)
+             ) order by t.sort)
+      from gv_crate_tiers t
+    ), '[]'::json),
+    'items', coalesce((
+      select json_agg(json_build_object(
+               'id', i.id, 'kind', i.kind, 'name', i.name,
+               'rarity', i.rarity, 'value', i.value
+             ) order by i.kind, array_position(array['common', 'uncommon', 'rare', 'epic', 'legendary'], i.rarity), i.name)
+      from gv_items i
+    ), '[]'::json)
+  );
+end;
+$function$;
+
+grant execute on function public.gv_crates() to anon, authenticated;
