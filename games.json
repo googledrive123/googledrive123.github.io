@@ -290,7 +290,7 @@
 {"id":"iwbtc","name":"I Wanna Be the Coin","categories":["Platformer"],"ranking":357,"img":"/thumbs/iwbtc.webp","src":null,"site":5,"added":"2026-05-13"},
 {"id":"jacksmith","name":"Jacksmith","categories":["Simulation","Strategy"],"ranking":358,"img":"https://flipline.com/gamefiles/jacksmith/game_app_page_lg.jpg","src":null,"site":5,"added":"2026-05-13"},
 {"id":"jelly-mario","name":"Jelly Mario","categories":["Platformer"],"ranking":359,"img":"/thumbs/jelly-mario.webp","src":null,"site":5,"added":"2026-05-13"},
-{"id":"jetpackjoyride","name":"Jetpack Joyride","categories":["Action","Arcade"],"ranking":360,"img":"https://icons-6.us/action-games/jetpack-joyride/splash.jpg","src":"https://icons-6.us/action-games/jetpack-joyride/","local":true},
+{"id":"jetpackjoyride","name":"Jetpack Joyride","categories":["Action","Arcade"],"ranking":360,"img":"/thumbs/jetpackjoyride.webp","src":"https://icons-6.us/action-games/jetpack-joyride/","site":5,"added":"2026-05-13"},
 {"id":"lasthorizon","name":"Last Horizon","categories":["Action","Shooter"],"ranking":363,"img":"/games/lasthorizon/wogo owo.jpg","src":null},
 {"id":"lazyjump3d","name":"Lazy Jump 3D","categories":["Arcade","Skill"],"ranking":364,"img":"/games/lazyjump3d/icon.png","src":null},
 {"id":"learntofly2","name":"Learn to Fly 2","categories":["Simulation","Arcade"],"ranking":366,"img":"https://icons-6.us/casual-games/learn-to-fly-2/logo.jpeg","src":"https://icons-6.us/casual-games/learn-to-fly-2/","local":true},
