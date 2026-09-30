@@ -3590,6 +3590,33 @@ function md5(str) {
   return [a0, b0, c0, d0].map(v => Array.from({ length: 4 }, (_, i) => ((v >>> (i * 8)) & 255).toString(16).padStart(2, '0')).join('')).join('');
 }
 
+// Copies Unity's save folder for one page folder URL to another, skipping any
+// file the new folder already has.
+function carryUnity(oldDir, newDir) {
+  return new Promise(resolve => {
+    let req;
+    try { req = indexedDB.open('/idbfs'); } catch (e) { return resolve(); }
+    // No database yet means no Unity game ever saved here. Do not create one.
+    req.onupgradeneeded = () => req.transaction.abort();
+    req.onerror = () => resolve();
+    req.onsuccess = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains('FILE_DATA')) { db.close(); return resolve(); }
+      const from = '/idbfs/' + md5(oldDir), to = '/idbfs/' + md5(newDir);
+      const tx = db.transaction('FILE_DATA', 'readwrite');
+      const store = tx.objectStore('FILE_DATA');
+      store.openCursor(IDBKeyRange.bound(from, from + '\uffff')).onsuccess = (e) => {
+        const c = e.target.result;
+        if (!c) return;
+        const add = store.add(c.value, to + String(c.key).slice(from.length));
+        add.onerror = (ev) => { ev.preventDefault(); ev.stopPropagation(); };
+        c.continue();
+      };
+      tx.oncomplete = tx.onabort = () => { db.close(); resolve(); };
+    };
+  });
+}
+
 function toggleSource() {
   if (!canSwap(mounted)) return;
   const next = mountedFrom === 'vault' ? 'src' : 'vault';
