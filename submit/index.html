@@ -229,6 +229,12 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   fileInput.addEventListener('change', showFile);
+  // A refusal stops being true once the words it was about change.
+  ['title', 'link', 'notes'].forEach(function (id) {
+    $(id).addEventListener('input', function () {
+      if ($('sendNote').classList.contains('bad')) note('');
+    });
+  });
   ['dragenter', 'dragover'].forEach(function (t) {
     drop.addEventListener(t, function () { drop.classList.add('over'); });
   });
