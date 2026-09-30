@@ -17,12 +17,20 @@ create table if not exists public.gv_link_reports (
 );
 
 create index if not exists gv_link_reports_open_idx on public.gv_link_reports (path) where fixed_at is null;
+-- Every limit in gv_report_link counts recent reports.
+create index if not exists gv_link_reports_created_idx on public.gv_link_reports (created_at);
 
 -- Written and read only through the functions below.
 alter table public.gv_link_reports enable row level security;
 
 
--- At most five reports an hour from one visitor, and one per address per day.
+-- At most five reports an hour from one visitor, and one per address per
+-- day. Reports without a visitor id all count as one visitor, so leaving it
+-- out is no way around that. The id is whatever the page sends, though, and
+-- a new one every time would still get through, so the whole site also
+-- takes at most 300 reports an hour, and 20 a day about any one address,
+-- whoever sends them. A report over any limit is dropped without a word and
+-- the page thanks the visitor all the same.
 create or replace function public.gv_report_link(p_path text, p_referrer text, p_visitor_id text)
 returns boolean
 language plpgsql
@@ -39,12 +47,15 @@ begin
   if v_path = '' then
     return false;
   end if;
-  if v_visitor is not null and (
-       (select count(*) from gv_link_reports
-         where visitor_id = v_visitor and created_at > now() - interval '1 hour') >= 5
+  if (select count(*) from gv_link_reports
+       where visitor_id is not distinct from v_visitor and created_at > now() - interval '1 hour') >= 5
     or exists (select 1 from gv_link_reports
-         where visitor_id = v_visitor and path = v_path and created_at > now() - interval '1 day')
-  ) then
+       where visitor_id is not distinct from v_visitor and path = v_path and created_at > now() - interval '1 day')
+    or (select count(*) from gv_link_reports
+       where created_at > now() - interval '1 hour') >= 300
+    or (select count(*) from gv_link_reports
+       where path = v_path and created_at > now() - interval '1 day') >= 20
+  then
     return true;
   end if;
 
