@@ -177,7 +177,10 @@ $function$;
 
 
 -- Makes an account a tester or stops it being one, found by its username the
--- way the dashboard shows it. Adding one twice keeps the first date.
+-- way the dashboard shows it. The name has to match exactly; failing that, a
+-- match that ignores case and spaces at either end is used only when there
+-- is just one, so "sam" never picks between Sam and SAM. Adding one twice
+-- keeps the first date.
 create or replace function public.gv_tester_set(p_secret text, p_username text, p_on boolean)
 returns json
 language plpgsql
@@ -185,6 +188,8 @@ security definer
 set search_path to 'public'
 as $function$
 declare
+  v_in text := btrim(coalesce(p_username, ''));
+  v_ids uuid[];
   v_user uuid;
   v_name text;
 begin
@@ -192,13 +197,20 @@ begin
     raise exception 'not allowed';
   end if;
 
-  select id, username into v_user, v_name
-  from profiles
-  where lower(btrim(username)) = lower(btrim(coalesce(p_username, '')))
-  limit 1;
+  if v_in <> '' then
+    select array_agg(id) into v_ids from profiles where username = v_in;
+    if v_ids is null then
+      select array_agg(id) into v_ids from profiles where lower(btrim(username)) = lower(v_in);
+    end if;
+  end if;
+  if cardinality(v_ids) > 1 then
+    raise exception 'more than one account matches that name';
+  end if;
+  v_user := v_ids[1];
   if v_user is null then
     raise exception 'no such account';
   end if;
+  select username into v_name from profiles where id = v_user;
 
   if coalesce(p_on, false) then
     insert into gv_testers (user_id) values (v_user) on conflict (user_id) do nothing;
