@@ -300,8 +300,9 @@
     if (location.search || location.hash) return false;
     try {
       sessionStorage.setItem('gv.redirect', '/games/' + match[1]);
-      // So index.html can send a page it has no catalog entry for back here.
-      sessionStorage.setItem('gv.bounce', match[1]);
+      // So index.html can send a page it has no catalog entry for back here,
+      // to this exact address (it may be in any vault).
+      sessionStorage.setItem('gv.bounce', location.pathname);
     } catch (e) { return false; }
     location.replace('/');
     return true;
