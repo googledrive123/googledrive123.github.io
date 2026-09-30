@@ -348,7 +348,7 @@
 {"id":"space","name":"Space","categories":["Action","Shooter"],"ranking":453,"img":"https://upload.wikimedia.org/wikipedia/en/0/0f/Space_Invaders_flyer%2C_1978.jpg","src":null,"site":6,"added":"2026-05-13"},
 {"id":"stealingthediamond","name":"Stealing the Diamond","categories":["Action","Adventure"],"ranking":456,"img":"/thumbs/stealingthediamond.webp","src":"https://icons-6.us/strategy-games/stealingthediamond/","site":6,"added":"2026-05-13"},
 {"id":"stickmanboost","name":"Stickman Boost","categories":["Platformer"],"ranking":458,"img":"/thumbs/stickmanboost.webp","src":"https://icons-6.us/action-games/stickman-boost/","site":6,"added":"2026-05-13"},
-{"id":"stickmanclimb","name":"Stickman Climb","categories":["Platformer"],"ranking":459,"img":"/games/stickmanclimb/NO-PRESSURE-STUDIOS-LOGO-1.0-SMALL.png","src":null},
+{"id":"stickmanclimb","name":"Stickman Climb","categories":["Platformer"],"ranking":459,"img":"/thumbs/stickmanclimb.webp","src":null,"site":6,"added":"2026-05-13"},
 {"id":"stickslasher","name":"Stick Slasher","categories":["Action"],"ranking":461,"img":"https://img.y8.com/cloud/v2-y8-thumbs-big-thumbnails-001/128822/big.gif","src":null},
 {"id":"subway-surfers-ny","name":"Subway Surfers NY","categories":["Action","Arcade"],"ranking":463,"img":"https://upload.wikimedia.org/wikipedia/en/thumb/a/a3/Subway_Surfers_logo.svg/330px-Subway_Surfers_logo.svg.png","src":null},
 {"id":"superhot","name":"SUPERHOT","categories":["Action","Shooter"],"ranking":464,"img":"https://icons-6.us/action-games/superhot/hot.jpg","src":"https://icons-6.us/action-games/superhot/","local":true},
