@@ -2726,6 +2726,7 @@
     <a href="/status/">Requests</a>
     <a href="/unblocker/">Browser</a>
     <a href="/settings/">Settings</a>
+    <a href="/mirrors/">Backup addresses</a>
   </nav>
   <nav aria-label="Legal">
     <a href="/legal/about/">About</a>
@@ -4551,7 +4552,8 @@ async function bootCatalog() {
     const data = await res.json();
     CATS = data.cats;
     ALL_GAMES = data.games;
-    GAMES = ALL_GAMES.filter(g => !g.hidden);
+    // `staging` games are waiting for testers (/test/) and stay off the grid.
+    GAMES = ALL_GAMES.filter(g => !g.hidden && !g.staging);
   } catch (err) {
     console.error('Could not load the game catalog', err);
     const grid = document.getElementById('grid');
