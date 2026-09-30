@@ -547,7 +547,11 @@
     };
     // A request that never settles would leave `loading` stuck and stop auto-refresh for good.
     try { if (AbortSignal && AbortSignal.timeout) opts.signal = AbortSignal.timeout(45000); } catch (e) {}
-    return fetch(SUPA_URL + '/rest/v1/rpc/' + fn, opts).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+    return fetch(SUPA_URL + '/rest/v1/rpc/' + fn, opts).then(function (r) {
+      if (r.ok) return r.json();
+      // The functions explain a refusal in plain words; show those.
+      return r.json().catch(function () { return {}; }).then(function (b) { throw new Error(b.message || 'HTTP ' + r.status); });
+    });
   }
   // Supabase's PostgREST caps every response at 1000 rows (db-max-rows), whatever
   // p_limit says, so page in 1000s and keep going while a page comes back full.
