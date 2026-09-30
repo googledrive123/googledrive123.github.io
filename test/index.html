@@ -226,6 +226,162 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  var VERDICTS = {
+    works:   { label: 'Works',   badge: 'added' },
+    problem: { label: 'Problem', badge: 'progress' },
+    broken:  { label: 'Broken',  badge: 'denied' }
+  };
+
+  var byId = {};      // the whole catalog, for names in the reports table
+  var queue = [];     // games waiting for a test
+  var reports = [];   // this tester's reports, newest first
+  var current = null; // the game open on the bench
+
+  function badge(verdict) {
+    var v = VERDICTS[verdict];
+    return el('span', 'badge ' + (v ? v.badge : ''), v ? v.label : verdict);
+  }
+
+  // Staged games, then any catalog ids from ?ids=a,b,c, so a game already
+  // live can be checked again after a move.
+  function waiting(catalog) {
+    var list = catalog.filter(function (g) { return g.staging === true; });
+    var asked = (new URLSearchParams(location.search).get('ids') || '').split(',');
+    asked.forEach(function (id) {
+      id = id.trim();
+      if (!id || list.some(function (g) { return g.id === id; })) return;
+      list.push(byId[id] || { id: id, missing: true });
+    });
+    return list;
+  }
+
+  function lastReport(id) {
+    for (var i = 0; i < reports.length; i++) if (reports[i].game_id === id) return reports[i];
+    return null;
+  }
+
+  function queueRow(g) {
+    var row = el('div', 'queue-row' + (g.missing ? ' queue-missing' : '') + (current === g ? ' current' : ''));
+    var thumb = el('img', 'queue-thumb');
+    thumb.alt = '';
+    thumb.loading = 'lazy';
+    if (g.img) thumb.src = g.img;
+    thumb.addEventListener('error', function () { thumb.removeAttribute('src'); });
+    row.appendChild(thumb);
+
+    var info = el('div', 'queue-info');
+    info.appendChild(el('div', 'queue-name', g.missing ? g.id : g.name || g.id));
+    var meta = el('div', 'queue-meta');
+    if (g.missing) {
+      meta.appendChild(el('span', '', 'Not in the catalog'));
+    } else {
+      meta.appendChild(el('span', '', g.id));
+      var last = lastReport(g.id);
+      if (last) {
+        meta.appendChild(badge(last.verdict));
+        meta.appendChild(el('span', '', when(last.created_at)));
+      }
+    }
+    info.appendChild(meta);
+    row.appendChild(info);
+
+    if (!g.missing) {
+      var go = el('button', 'btn btn-sm', current === g ? 'Testing' : lastReport(g.id) ? 'Test again' : 'Test');
+      go.type = 'button';
+      go.disabled = current === g;
+      go.addEventListener('click', function () { openBench(g); });
+      row.appendChild(go);
+    }
+    return row;
+  }
+
+  function renderQueue() {
+    var box = $('queue');
+    box.textContent = '';
+    queue.forEach(function (g) { box.appendChild(queueRow(g)); });
+    $('queueEmpty').hidden = queue.length > 0;
+  }
+
+  // The same places the home page plays a game from: its vault copy, the
+  // host it came from, or /games/ here.
+  function urlFor(g) {
+    var rel = g.path || g.id + '/';
+    if (g.site) return '/vault' + g.site + '/' + rel;
+    return g.src || '/games/' + rel;
+  }
+
+  var frame = $('frame');
+  var chosen = null;
+
+  function note(text, tone) {
+    var n = $('benchNote');
+    n.textContent = text || '';
+    n.className = 'test-note' + (tone ? ' ' + tone : '');
+  }
+
+  function pick(verdict) {
+    chosen = verdict;
+    document.querySelectorAll('.verdict').forEach(function (b) {
+      b.setAttribute('aria-pressed', String(b.getAttribute('data-verdict') === verdict));
+    });
+    $('sendBtn').disabled = !verdict;
+    $('note').placeholder = verdict && verdict !== 'works'
+      ? 'What went wrong? Where did it stop?'
+      : 'Anything worth knowing? (optional)';
+  }
+
+  document.querySelectorAll('.verdict').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var v = b.getAttribute('data-verdict');
+      pick(chosen === v ? null : v);
+    });
+  });
+
+  function openBench(g) {
+    current = g;
+    $('benchName').textContent = g.name || g.id;
+    $('benchId').textContent = g.id;
+    var url = urlFor(g);
+    $('openBtn').href = url;
+    frame.src = url;
+    pick(null);
+    $('note').value = '';
+    note('');
+    $('bench').hidden = false;
+    renderQueue();
+    $('bench').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function closeBench() {
+    current = null;
+    frame.src = 'about:blank';
+    $('bench').hidden = true;
+    renderQueue();
+  }
+
+  $('closeBtn').addEventListener('click', closeBench);
+  $('reloadBtn').addEventListener('click', function () { if (current) frame.src = urlFor(current); });
+  $('fullBtn').addEventListener('click', function () {
+    var stage = frame.parentNode;
+    if (stage.requestFullscreen) stage.requestFullscreen().catch(function () {});
+  });
+
+  function load() {
+    return Promise.all([
+      fetch('/games.json').then(function (r) {
+        if (!r.ok) throw new Error('Could not load the game list. Reload to try again.');
+        return r.json();
+      }),
+      rpc('gv_test_my_reports')
+    ]).then(function (got) {
+      var catalog = got[0].games || [];
+      catalog.forEach(function (g) { byId[g.id] = g; });
+      reports = got[1] || [];
+      queue = waiting(catalog);
+      renderQueue();
+    });
+  }
+
   gate().then(function (who) {
     $('gate').hidden = true;
     if (who !== 'tester') {
@@ -234,7 +390,9 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
     $('tester').hidden = false;
+    return load();
   }).catch(function (err) {
+    $('gate').hidden = false;
     $('gate').textContent = message(err);
   });
 });
