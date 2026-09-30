@@ -335,7 +335,7 @@
 {"id":"rooftopsnipers2","name":"Rooftop Snipers 2","categories":["Action","Shooter"],"ranking":430,"img":"/games/rooftopsnipers2/icon.png","src":null},
 {"id":"run","name":"Run","categories":["Platformer"],"ranking":431,"img":"/thumbs/run.webp","src":null,"site":6,"added":"2026-05-13"},
 {"id":"run2","name":"Run 2","categories":["Platformer"],"ranking":432,"img":"/thumbs/run2.webp","src":"https://icons-6.us/action-games/run-2/","site":6,"added":"2026-05-13"},
-{"id":"run3","name":"Run 3","categories":["Platformer"],"ranking":433,"img":"/games/run3/icon.jpeg","src":null},
+{"id":"run3","name":"Run 3","categories":["Platformer"],"ranking":433,"img":"/thumbs/run3.webp","src":null,"site":6,"added":"2026-05-13"},
 {"id":"sand","name":"Sand","categories":["Simulation","Sandbox"],"ranking":435,"img":"/games/sand/icon.png","src":null},
 {"id":"sand-game","name":"Sand Game","categories":["Simulation","Sandbox"],"ranking":436,"img":"/games/sand-game/sand-game.PNG","src":null},
 {"id":"sandtrix","name":"Sandtrix","categories":["Puzzle"],"ranking":437,"img":"/games/sandtrix/startup-logo.png","src":null},
