@@ -40,4 +40,5 @@
 
   window.GV = window.GV || {};
   window.GV.layout = layout;
+  layout.applyTileSize();
 })();
