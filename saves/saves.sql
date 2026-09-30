@@ -79,16 +79,44 @@ as $function$
                     auth.uid()::text || '/auto.json');
 $function$;
 
+-- Room for a new file. The free plan holds 1 GB of files for the whole
+-- project, and game submissions share it (submit/submit.sql). So once the
+-- bucket holds more than 800 MB (838860800 bytes) it takes no new files;
+-- one last 45 MB save can take it to about 845 MB at most. A slot that
+-- already has a file always has room, so everyone who has saved before can
+-- keep saving over their own slots even when the bucket is full. The 800 MB
+-- here and the 600 MB on submissions add up to more than 1 GB: each one
+-- stops its own bucket filling the project alone, and the two together are
+-- not promised to fit.
+--
+-- Security definer only to add up files, which players cannot see.
+create or replace function public.gv_saves_room(p_name text)
+returns boolean
+language sql
+stable
+security definer
+set search_path to 'public', 'pg_temp'
+as $function$
+  select exists (select 1 from storage.objects o
+                  where o.bucket_id = 'saves' and o.name = p_name)
+      or (select coalesce(sum((o.metadata ->> 'size')::bigint), 0) from storage.objects o
+           where o.bucket_id = 'saves') <= 838860800;
+$function$;
+
+revoke all on function public.gv_saves_room(text) from public, anon;
+grant execute on function public.gv_saves_room(text) to authenticated;
+
 drop policy if exists gv_saves_files_select on storage.objects;
 create policy gv_saves_files_select on storage.objects
   for select to authenticated
   using (bucket_id = 'saves' and public.gv_saves_own_file(name));
 
--- An upload that replaces a slot's file needs insert and update both.
+-- An upload that replaces a slot's file needs insert and update both: an
+-- upsert is checked against this insert policy even when the file is there.
 drop policy if exists gv_saves_files_insert on storage.objects;
 create policy gv_saves_files_insert on storage.objects
   for insert to authenticated
-  with check (bucket_id = 'saves' and public.gv_saves_own_file(name));
+  with check (bucket_id = 'saves' and public.gv_saves_own_file(name) and public.gv_saves_room(name));
 
 drop policy if exists gv_saves_files_update on storage.objects;
 create policy gv_saves_files_update on storage.objects
