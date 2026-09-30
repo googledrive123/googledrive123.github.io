@@ -3816,6 +3816,36 @@ function similarGames(g) {
   return same.slice(start).concat(same.slice(0, start)).slice(0, MORE_COUNT);
 }
 
+function paintMore(g) {
+  gameMore.innerHTML = '';
+  similarGames(g).forEach(x => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'gm-item';
+    const th = document.createElement('span');
+    th.className = 'gm-thumb';
+    if (x.img) th.style.backgroundImage = 'url("' + x.img.replace(/"/g, '%22') + '")';
+    const nm = document.createElement('span');
+    nm.className = 'gm-name';
+    nm.textContent = x.name;
+    b.append(th, nm);
+    b.addEventListener('click', () => {
+      if (window._trackClose) window._trackClose();
+      addRecent(x.id);
+      showMore(false);
+      openGame(x);
+    });
+    gameMore.appendChild(b);
+  });
+}
+
+function showMore(on) {
+  gameMore.hidden = !on;
+  gameMoreBtn.setAttribute('aria-expanded', on ? 'true' : 'false');
+  if (on && mounted) paintMore(mounted);
+}
+gameMoreBtn.addEventListener('click', () => showMore(gameMore.hidden));
+
 
 function openGame(g) {
   gameOverlay.classList.add('show');
