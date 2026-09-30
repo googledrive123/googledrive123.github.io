@@ -442,6 +442,9 @@
     var button = bar.querySelector('.gv-max-performance') || menuButton();
     var right = bar.querySelector(':scope > .right');
     if (button.parentNode !== bar || button.nextElementSibling !== right) bar.insertBefore(button, right);
+    // A preset picked in Settings since may have turned it off.
+    var label = ' ' + menuLabel();
+    if (button.lastChild.textContent !== label) button.lastChild.textContent = label;
   }
 
   function fill() {
