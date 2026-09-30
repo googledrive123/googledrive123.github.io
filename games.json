@@ -275,7 +275,7 @@
 {"id":"fruitninja","name":"Fruit Ninja","categories":["Arcade","Skill"],"ranking":333,"img":"/thumbs/fruitninja.webp","src":"https://icons-6.us/casual-games/fruit-ninja/","site":5,"added":"2026-05-13"},
 {"id":"full-screen-mario","name":"Full Screen Mario","categories":["Platformer"],"ranking":334,"img":"https://upload.wikimedia.org/wikipedia/en/thumb/9/90/Full_Screen_Mario_Title_Screen.jpg/330px-Full_Screen_Mario_Title_Screen.jpg","src":null,"site":5,"added":"2026-05-13"},
 {"id":"geometryrash","name":"Geometry Rash","categories":["Platformer","Skill"],"ranking":338,"img":"/thumbs/geometryrash.webp","src":null,"site":5,"added":"2026-05-13"},
-{"id":"getaway-shootout","name":"Getaway Shootout","categories":["Action","Shooter"],"ranking":339,"img":"https://icons-6.us/action-games/getaway-shootout/img/images.jpg","src":"https://icons-6.us/action-games/getaway-shootout/","local":true},
+{"id":"getaway-shootout","name":"Getaway Shootout","categories":["Action","Shooter"],"ranking":339,"img":"/thumbs/getaway-shootout.webp","src":"https://icons-6.us/action-games/getaway-shootout/","site":5,"added":"2026-05-13"},
 {"id":"golddiggerfrvr","name":"Gold Digger FRVR","categories":["Arcade","Idle"],"ranking":340,"img":"https://cdn2.y8.com/cloudimage/398451/file/w380h285_retina_webp-8c6b5a31c2087a3509cd88089c86d560.webp","src":null},
 {"id":"google-snake","name":"Google Snake","categories":["Arcade"],"ranking":341,"img":"https://cdn2.y8.com/cloudimage/342343/file/w380h285_retina_webp-9647dee8926d91a5853d9f8c1542732c.webp","src":null},
 {"id":"gunmayhem","name":"Gun Mayhem","categories":["Action","Shooter"],"ranking":343,"img":"https://icons-6.us/action-games/gun-mayhem/logo.jpg","src":"https://icons-6.us/action-games/gun-mayhem/","local":true},
