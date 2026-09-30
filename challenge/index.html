@@ -441,7 +441,10 @@
       dots.setAttribute('aria-hidden', 'true');
       gap.appendChild(dots);
       rows.appendChild(gap);
-      rows.appendChild(row({ rank: you.rank, nickname: you.nickname, time: you.time, you: true }));
+      rows.appendChild(row({
+        rank: you.rank, nickname: you.nickname, time: you.time,
+        verified: you.verified, wins: you.wins, you: true
+      }));
     }
     paintStanding(c, you);
   }
