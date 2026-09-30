@@ -71,3 +71,43 @@ $function$;
 
 revoke all on function public.gv_avatar_mine() from public, anon;
 grant execute on function public.gv_avatar_mine() to authenticated;
+
+
+-- Picking a built-in avatar is choosing to show it, so it also drops any
+-- picture, approved or waiting. Otherwise a picture approved later would
+-- replace an avatar picked after it was sent.
+create or replace function public.gv_avatar_set_preset(p_preset integer)
+returns json
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'not from this origin';
+  end if;
+  if v_user is null then
+    raise exception 'sign in first';
+  end if;
+  if p_preset is null or p_preset not between 0 and 41 then
+    raise exception 'There is no avatar %.', p_preset;
+  end if;
+
+  insert into gv_avatars (user_id, preset)
+  values (v_user, p_preset)
+  on conflict (user_id) do update
+    set preset = excluded.preset,
+        upload = null,
+        upload_status = 'none',
+        approved_upload = null,
+        uploaded_at = null,
+        updated_at = now();
+
+  return public.gv_avatar_mine();
+end;
+$function$;
+
+revoke all on function public.gv_avatar_set_preset(integer) from public, anon;
+grant execute on function public.gv_avatar_set_preset(integer) to authenticated;
