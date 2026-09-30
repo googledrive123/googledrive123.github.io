@@ -663,7 +663,7 @@
 {"id":"look-outside","name":"Look Outside","categories":["Horror"],"ranking":824,"img":"https://cdn.akamai.steamstatic.com/steam/apps/3373660/header.jpg","src":"https://genizymath.github.io/iframe/649.html","site":32},
 {"id":"love-letters","name":"Love Letters","categories":["Action"],"ranking":825,"img":"/thumbs/love-letters.webp","src":"https://genizymath.github.io/iframe/538.html","site":33},
 {"id":"madalin-stunt-cars-2","name":"Madalin Stunt Cars 2","categories":["Racing"],"ranking":826,"img":"/thumbs/madalin-stunt-cars-2.webp","src":"https://icons-6.us/driving-games/madalin-stunt-cars-2/"},
-{"id":"madalin-stunt-cars-3","name":"Madalin Stunt Cars 3","categories":["Racing"],"ranking":827,"img":"https://cdn.jsdelivr.net/gh/genizy/assets@main/madalin-stunt-cars-3/img/index.jpg","src":"https://genizymath.github.io/iframe/279.html"},
+{"id":"madalin-stunt-cars-3","name":"Madalin Stunt Cars 3","categories":["Racing"],"ranking":827,"img":"https://cdn.jsdelivr.net/gh/genizy/assets@main/madalin-stunt-cars-3/img/index.jpg","src":"https://genizymath.github.io/iframe/279.html","site":33},
 {"id":"madness-combat-project-nexus-classic","name":"Madness Combat Project Nexus Classic","categories":["Action"],"ranking":828,"img":"/thumbs/madness-combat-project-nexus-classic.webp","src":"https://genizymath.github.io/iframe/471.html"},
 {"id":"make-a-superboat","name":"Make A Superboat","categories":["Action"],"ranking":829,"img":"/thumbs/make-a-superboat.webp","src":"https://genizymath.github.io/iframe/397.html"},
 {"id":"makeover-run","name":"Makeover Run","categories":["Action"],"ranking":830,"img":"/thumbs/makeover-run.webp","src":"https://genizymath.github.io/iframe/398.html"},
