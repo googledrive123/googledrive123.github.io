@@ -277,7 +277,7 @@
 {"id":"geometryrash","name":"Geometry Rash","categories":["Platformer","Skill"],"ranking":338,"img":"/thumbs/geometryrash.webp","src":null,"site":5,"added":"2026-05-13"},
 {"id":"getaway-shootout","name":"Getaway Shootout","categories":["Action","Shooter"],"ranking":339,"img":"/thumbs/getaway-shootout.webp","src":"https://icons-6.us/action-games/getaway-shootout/","site":5,"added":"2026-05-13"},
 {"id":"golddiggerfrvr","name":"Gold Digger FRVR","categories":["Arcade","Idle"],"ranking":340,"img":"https://cdn2.y8.com/cloudimage/398451/file/w380h285_retina_webp-8c6b5a31c2087a3509cd88089c86d560.webp","src":null},
-{"id":"google-snake","name":"Google Snake","categories":["Arcade"],"ranking":341,"img":"https://cdn2.y8.com/cloudimage/342343/file/w380h285_retina_webp-9647dee8926d91a5853d9f8c1542732c.webp","src":null},
+{"id":"google-snake","name":"Google Snake","categories":["Arcade"],"ranking":341,"img":"https://cdn2.y8.com/cloudimage/342343/file/w380h285_retina_webp-9647dee8926d91a5853d9f8c1542732c.webp","src":null,"site":5,"added":"2026-05-13"},
 {"id":"gunmayhem","name":"Gun Mayhem","categories":["Action","Shooter"],"ranking":343,"img":"https://icons-6.us/action-games/gun-mayhem/logo.jpg","src":"https://icons-6.us/action-games/gun-mayhem/","local":true},
 {"id":"hexgl","name":"HexGL","categories":["Racing"],"ranking":348,"img":"https://cdn2.y8.com/cloudimage/45147/file/w380h285_retina_webp-f36548424c74ade3f0e4686f0cbea31f.webp","src":null},
 {"id":"hextris","name":"Hextris","categories":["Puzzle"],"ranking":349,"img":"https://icons-6.us/strategy-games/hextris/images/hextris-logo.png","src":"https://icons-6.us/strategy-games/hextris/","local":true},
