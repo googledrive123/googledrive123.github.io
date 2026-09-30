@@ -88,6 +88,16 @@
     try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(pairs)); } catch (e) {}
   }
 
+  function presetSaved(preset) {
+    var saved = {};
+    savedSettings().forEach(function (pair) {
+      if (Array.isArray(pair)) saved[pair[0]] = pair[1];
+    });
+    return Object.keys(preset.values).every(function (name) {
+      return saved[name] === preset.values[name];
+    });
+  }
+
   try {
     if (localStorage.getItem(SETTINGS_KEY) === null && looksLowEnd()) {
       writePreset(presetNamed('Low'));
