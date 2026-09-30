@@ -1299,5 +1299,6 @@
 {"id":"papasfreezeria-main","name":"Papasfreezeria Main","categories":[],"ranking":9999,"img":null,"src":null,"hidden":true,"site":8},
 {"id":"papaspizzeria","name":"Papaspizzeria","categories":[],"ranking":9999,"img":null,"src":null,"hidden":true,"site":8},
 {"id":"rooftopsnipers","name":"Rooftopsnipers","categories":[],"ranking":9999,"img":null,"src":null,"hidden":true,"site":8},
-{"id":"shadow","name":"Shadow","categories":[],"ranking":9999,"img":null,"src":null,"hidden":true,"site":8}
+{"id":"shadow","name":"Shadow","categories":[],"ranking":9999,"img":null,"src":null,"hidden":true,"site":8},
+{"id":"snow","name":"Snow","categories":[],"ranking":9999,"img":null,"src":null,"hidden":true,"site":8}
 ]}
