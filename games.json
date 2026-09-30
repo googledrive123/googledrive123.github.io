@@ -319,7 +319,7 @@
 {"id":"parking-fury-2","name":"Parking Fury 2","categories":["Racing","Driving"],"ranking":402,"img":"https://icons-6.us/driving-games/parking-fury-2/logo.jpg","src":"https://icons-6.us/driving-games/parking-fury-2/","local":true},
 {"id":"parking-fury-3-main","name":"Parking Fury 3","categories":["Racing","Driving"],"ranking":403,"img":"/thumbs/parking-fury-3-main.webp","src":"https://icons-6.us/driving-games/parking-fury-3/","site":6,"added":"2026-05-13"},
 {"id":"perfect-circle","name":"Perfect Circle","categories":["Puzzle","Skill"],"ranking":404,"img":"https://img.gamepix.com/games/perfect-circle/cover/perfect-circle.png","src":null},
-{"id":"pizzatower","name":"Pizza Tower","categories":["Platformer"],"ranking":405,"img":"https://icons-6.us/action-games/pizza-tower/logo.jpg","src":"https://icons-6.us/action-games/pizza-tower/","local":true},
+{"id":"pizzatower","name":"Pizza Tower","categories":["Platformer"],"ranking":405,"img":"/thumbs/pizzatower.webp","src":"https://icons-6.us/action-games/pizza-tower/","site":6,"added":"2026-05-13"},
 {"id":"pokemon-leaf","name":"Pokémon LeafGreen","categories":["RPG","Adventure"],"ranking":408,"img":"https://upload.wikimedia.org/wikipedia/en/thumb/a/a7/Pokemon_LeafGreen_box.jpg/330px-Pokemon_LeafGreen_box.jpg","src":null},
 {"id":"pool","name":"Pool","categories":["Sports"],"ranking":410,"img":"https://cdn2.y8.com/cloudimage/221113/file/w380h285_retina_webp-43c8edec0c2bf4ed314ed2206677cf6d.webp","src":null},
 {"id":"poom","name":"Poom","categories":["Action","Shooter"],"ranking":411,"img":"https://upload.wikimedia.org/wikipedia/en/5/57/Doom_cover_art.jpg","src":null},
