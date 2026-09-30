@@ -7,6 +7,7 @@
    Public surface: window.GV.cosmetics
      load(userIds)              -> Promise<{ [userId]: cosmetics }>
      forget(userId)             drops a cached entry, e.g. after equipping
+     applyName(el, cosmetics)   colors the element's text
 
    A cosmetics object is keyed by kind, each an item as the server sends it:
      { name_color: { id, name, rarity, value }, avatar_frame: {...}, title: {...} }
@@ -85,9 +86,34 @@
     if (typeof userId === 'string') delete cache[userId.toLowerCase()];
   }
 
+  // Call it on an element that holds only the name: a gradient color reaches
+  // everything inside, badges included.
+  function applyName(el, cosmetics) {
+    if (!el) return;
+    var s = el.style;
+    if (el.dataset.gvName) {
+      s.color = s.backgroundImage = s.webkitBackgroundClip = s.backgroundClip = s.webkitTextFillColor = '';
+      delete el.dataset.gvName;
+    }
+    var item = cosmetics && cosmetics.name_color;
+    var v = item && item.value;
+    if (!v) return;
+    var stops = Array.isArray(v.gradient) ? v.gradient.map(hex).filter(Boolean) : [];
+    var solid = hex(v.color) || stops[0];
+    if (!solid) return;
+    s.color = solid; // also what an underline or a copied name falls back to
+    if (stops.length > 1) {
+      s.backgroundImage = 'linear-gradient(90deg, ' + stops.join(', ') + ')';
+      s.webkitBackgroundClip = s.backgroundClip = 'text';
+      s.webkitTextFillColor = 'transparent';
+    }
+    el.dataset.gvName = item.id || 'on';
+  }
+
   window.GV = window.GV || {};
   window.GV.cosmetics = {
     load: load,
-    forget: forget
+    forget: forget,
+    applyName: applyName
   };
 })();
