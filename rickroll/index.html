@@ -26,15 +26,16 @@
     }
     /* Held clear of the player's own control bar along the bottom. */
     .rr-sound {
-      position: fixed; left: 50%; bottom: 5rem; z-index: 2;
+      position: fixed; left: 50%; bottom: max(5rem, 17vh); z-index: 2;
       transform: translateX(-50%);
       padding: 1rem 2rem;
       font-size: 1.15rem;
       box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 28px rgba(255,59,59,0.35);
     }
     .rr-sound[hidden] { display: none; }
+    /* Top left, over the channel badge rather than the play controls. */
     .rr-back {
-      position: fixed; left: 1rem; bottom: 1rem; z-index: 2;
+      position: fixed; left: 0.75rem; top: 0.75rem; z-index: 2;
       padding: 0.35rem 0.8rem;
       border-radius: 100px;
       border: 1px solid var(--border-strong);
