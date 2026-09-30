@@ -1966,6 +1966,7 @@
     }
     .profile-delete:hover { color: var(--accent); }
     .profile-msg { font-size: 0.75rem; color: var(--muted); margin-top: 0.5rem; min-height: 1rem; }
+    #profileAvatarPicker .gv-av-grid { grid-template-columns: repeat(auto-fill, minmax(34px, 1fr)); }
     .top-game-row {
       display: flex; align-items: center; gap: 0.6rem;
       padding: 0.45rem 0; border-bottom: 1px solid var(--border);
@@ -5729,6 +5730,16 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
       <div>
         <div class="profile-name" id="profileName">Guest</div>
         <div class="profile-email" id="profileEmail" style="display:none"></div>
+      </div>
+    </div>
+
+    <div class="profile-section">
+      <div class="profile-section-label">Picture</div>
+      <div id="profileAvatarPicker"></div>
+      <div id="profileUploadRow" style="display:none">
+        <label class="profile-save" for="profileAvatarFile" style="display:block;text-align:center;margin-top:0.6rem;cursor:pointer">Upload a picture</label>
+        <input type="file" id="profileAvatarFile" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
+        <div class="profile-msg" id="profileAvatarMsg"></div>
       </div>
     </div>
 
