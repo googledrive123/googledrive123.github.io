@@ -408,6 +408,21 @@
     '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">' +
     '<path fill="#fff" d="M14 0 3 14h7l-2 10 13-15h-7l2-9z"/></svg>');
 
+  function fillMenu() {
+    var bar = document.querySelector('.menu-ui > .button-bar');
+    if (!bar || bar.querySelector('.gv-max-performance')) return;
+    var button = document.createElement('button');
+    button.className = 'button gv-max-performance';
+    var icon = document.createElement('img');
+    icon.src = BOLT;
+    button.appendChild(icon);
+    var label = document.createTextNode('');
+    button.appendChild(label);
+    function say(text) { label.textContent = ' ' + text; }
+    say(maxPerformanceOn() ? 'Max performance: On' : 'Max performance');
+    bar.insertBefore(button, bar.querySelector(':scope > .right'));
+  }
+
   function watchSettings() {
     new MutationObserver(fillSettings).observe(document.body, { childList: true, subtree: true });
     fillSettings();
