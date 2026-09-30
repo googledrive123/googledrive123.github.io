@@ -1298,7 +1298,7 @@
       .header { padding: 0.85rem 0.85rem; gap: 0.6rem; }
       .cat-bar { padding: 0.6rem 0.85rem; top: 60px; }
       main { padding: 1.1rem 0.85rem 4rem; }
-      .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.6rem; }
+      .grid { grid-template-columns: repeat(auto-fill, minmax(min(150px, var(--tile-min, 150px)), 1fr)); gap: 0.6rem; }
       .tile-name { font-size: 0.95rem; }
       .stat-row { gap: 1.5rem; }
       .roll-item { font-size: 1.15rem; }
