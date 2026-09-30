@@ -1,0 +1,14 @@
+-- Rude words.
+--
+-- One check for text that other players will see: chat messages now, and
+-- usernames next. True when the text holds a slur, a sexual word or a strong
+-- swear, false for everything else.
+--
+-- The hard part is leaving alone the ordinary words that happen to contain a
+-- bad one: class, assassin, Scunthorpe, cockpit, therapist. So a listed word
+-- only counts when it stands on its own, and only the few that no ordinary
+-- word contains are matched anywhere, which is what catches them joined onto
+-- something else (fuckoff, ubitch).
+--
+-- Apply against project dxwjxzmlezfyursysays. Every statement is safe to run
+-- twice. Applied on 30 September 2026.
