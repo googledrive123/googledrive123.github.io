@@ -222,7 +222,7 @@
 {"id":"btd2","name":"Bloons TD 2","categories":["Strategy"],"ranking":256,"img":"/thumbs/btd2.webp","src":"https://icons-6.us/strategy-games/bloonstd2/","site":4,"added":"2026-05-13"},
 {"id":"btd3","name":"Bloons TD 3","categories":["Strategy"],"ranking":257,"img":"/thumbs/btd3.webp","src":null,"site":4,"added":"2026-05-13"},
 {"id":"btd4","name":"Bloons TD 4","categories":["Strategy"],"ranking":258,"img":"/thumbs/btd4.webp","src":"https://icons-6.us/strategy-games/bloonstd4/","site":4,"added":"2026-05-13"},
-{"id":"btd6","name":"Bloons TD 6","categories":["Strategy"],"ranking":260,"img":"/games/btd5/logo.jpg","src":null},
+{"id":"btd6","name":"Bloons TD 6","categories":["Strategy"],"ranking":260,"img":"/thumbs/btd6.webp","src":null,"site":4,"added":"2026-05-13"},
 {"id":"bubble-tower-3d","name":"Bubble Tower 3D","categories":["Puzzle"],"ranking":261,"img":"/games/bubble-tower-3d/html5games/images/logo.png","src":null},
 {"id":"bubbleshooter","name":"Bubble Shooter","categories":["Puzzle"],"ranking":262,"img":"https://upload.wikimedia.org/wikipedia/en/thumb/8/82/Bubble_Shooter_Logo.png/330px-Bubble_Shooter_Logo.png","src":null},
 {"id":"burgerandfrights","name":"Burger & Frights","categories":["Horror"],"ranking":263,"img":"/games/burgerandfrights/icon.png","src":null},
