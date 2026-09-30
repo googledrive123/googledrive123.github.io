@@ -258,3 +258,75 @@ create trigger gv_challenge_follow_claim
   for each row
   when (old.user_id is null)
   execute function public.gv_challenge_follow();
+
+
+-- What /challenge/ needs: the server's clock (so the countdown never depends
+-- on the visitor's own), this month's challenge, its top ten, and where the
+-- caller stands. The caller is found the way polytrack_board finds them: the
+-- signed-in account, or else the guest's visitor id.
+create or replace function public.gv_challenge_current(p_visitor_id text default null)
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_key   text := coalesce(auth.uid()::text, 'guest:' || nullif(p_visitor_id, ''));
+  v_month date := gv_challenge_month();
+  v_row   gv_challenges;
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'not read from this origin';
+  end if;
+
+  select * into v_row from gv_challenges where month = v_month;
+  if not found then
+    return json_build_object('now', now(), 'challenge', null, 'top', '[]'::json, 'you', null);
+  end if;
+
+  return (
+    with ranked as (select * from gv_challenge_ranked(v_month))
+    select json_build_object(
+      'now', now(),
+      'challenge', json_build_object(
+        'month', v_row.month,
+        'track_id', v_row.track_id,
+        'title', v_row.title,
+        'note', v_row.note,
+        'ends_at', (v_row.month + interval '1 month') at time zone 'utc',
+        'runners', (select count(*) from ranked)
+      ),
+      'top', coalesce((
+        select json_agg(json_build_object(
+                 'rank', r.rank,
+                 'nickname', r.nickname,
+                 'frames', r.frames,
+                 'time', gv_challenge_time(r.frames),
+                 -- The blue check, hidden on anonymous rows as the board does.
+                 'verified', r.nickname <> 'Anonymous'
+                             and exists (select 1 from gv_verified v where v.key = r.player_key),
+                 -- Months this player has won before, for a crown by the name.
+                 'wins', case when r.nickname = 'Anonymous' then 0 else (
+                           select count(*) from gv_badges b
+                           where b.player_key = r.player_key and b.badge = 'challenge-winner') end,
+                 'you', coalesce(r.player_key = v_key, false)
+               ) order by r.rank)
+        from ranked r
+        where r.rank <= 10
+      ), '[]'::json),
+      'you', (
+        select json_build_object(
+                 'rank', r.rank,
+                 'nickname', r.nickname,
+                 'frames', r.frames,
+                 'time', gv_challenge_time(r.frames))
+        from ranked r
+        where r.player_key = v_key
+      )
+    )
+  );
+end;
+$function$;
+
+grant execute on function public.gv_challenge_current(text) to anon, authenticated;
