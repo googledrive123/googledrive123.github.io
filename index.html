@@ -3239,7 +3239,7 @@ function makeTile(g, opts = {}) {
     addRecent(g.id);
     openGame(g);
   });
-  if (g.src) a.setAttribute('data-external', '1');
+  if (sourceFor(g) === 'src') a.setAttribute('data-external', '1');
 
   // Faded first-letter backdrop (shows when no thumbnail image is available)
   const letter = document.createElement('div');
