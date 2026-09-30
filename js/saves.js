@@ -598,11 +598,12 @@
   /* The account's auto slot, if this browser has never auto-saved or loaded
      one: /saves/ asks whether to load it. Turning the offer down counts that
      copy as this browser's last auto-save, so the next one replaces it a day
-     after it was made. */
-  function autoOffer() {
+     after it was made. A caller that already listed the slots passes them in
+     rather than asking the server twice. */
+  function autoOffer(rows) {
     if (autoAt()) return Promise.resolve(null);
-    return cloudList().then(function (rows) {
-      return rows.filter(function (r) { return r.slot === 'auto'; })[0] || null;
+    return (rows ? Promise.resolve(rows) : cloudList()).then(function (list) {
+      return list.filter(function (r) { return r.slot === 'auto'; })[0] || null;
     });
   }
 
