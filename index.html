@@ -4511,7 +4511,7 @@ function renderTopGames(top3) {
   if (!top3.length) { sec.style.display = 'none'; return; }
   sec.style.display = '';
   el.innerHTML = top3.map(([gid, secs], i) => {
-    const game = (typeof GAMES !== 'undefined') ? GAMES.find(g => g.id === gid) : null;
+    const game = gamesById[gid] || null;
     const name = game ? game.name : gid;
     return '<div class="top-game-row">' +
       '<span class="top-game-rank">' + (i + 1) + '</span>' +
