@@ -59,3 +59,57 @@ $function$;
 
 revoke all on function public.gv_is_tester() from public, anon;
 grant execute on function public.gv_is_tester() to authenticated;
+
+
+-- A tester's verdict on one game. Every refusal is a sentence the page shows
+-- as it is. Testing the same game again adds a new report rather than
+-- replacing the old one, so the owner sees a game that broke after working.
+create or replace function public.gv_test_report(p_game_id text, p_verdict text, p_note text default null)
+returns json
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+  v_game text := btrim(coalesce(p_game_id, ''));
+  v_note text := nullif(btrim(coalesce(p_note, '')), '');
+  v_row gv_game_reports;
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'Testing only works on GameVault.';
+  end if;
+  if v_user is null then
+    raise exception 'Sign in to send a report.';
+  end if;
+  if not exists (select 1 from gv_testers where user_id = v_user) then
+    raise exception 'Only testers can send reports.';
+  end if;
+  if v_game !~ '^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$' then
+    raise exception 'That is not a game id.';
+  end if;
+  if p_verdict is null or p_verdict not in ('works', 'broken', 'problem') then
+    raise exception 'Pick works, broken or problem.';
+  end if;
+  if char_length(v_note) > 500 then
+    raise exception 'Notes can be up to 500 characters.';
+  end if;
+  if public.gv_is_rude(v_note) then
+    raise exception 'That note has words we do not allow here. Try saying it another way.';
+  end if;
+  if (select count(*) from gv_game_reports
+       where user_id = v_user and created_at > now() - interval '1 hour') >= 60 then
+    raise exception 'That is a lot of reports. Take a short break before sending more.';
+  end if;
+
+  insert into gv_game_reports (game_id, user_id, verdict, note)
+  values (v_game, v_user, p_verdict, v_note)
+  returning * into v_row;
+
+  return json_build_object('id', v_row.id, 'game_id', v_row.game_id, 'verdict', v_row.verdict,
+                           'note', v_row.note, 'created_at', v_row.created_at);
+end;
+$function$;
+
+revoke all on function public.gv_test_report(text, text, text) from public, anon;
+grant execute on function public.gv_test_report(text, text, text) to authenticated;
