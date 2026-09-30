@@ -2974,8 +2974,8 @@ function initRoute() {
   if (!g) {
     // Not every page under /games/ is in the catalog. One that is not goes
     // straight back, and stays.
-    if (bounced === id) {
-      location.replace('/games/' + id + '/?solo');
+    if (bounced && bounced.split('/')[2] === id) {
+      location.replace(bounced + '?solo');
       return;
     }
     // A deep link to a game that is not in the catalog is a real 404, not a
