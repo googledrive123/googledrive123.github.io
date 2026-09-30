@@ -1128,6 +1128,20 @@
     if (call) call.then(loadGiveaways).catch(function (err) { $('gaMsg').textContent = 'Could not do that: ' + err.message; });
   }
 
+  // ── monthly challenge ──
+  function monthName(m) { return new Date(m + 'T00:00:00Z').toLocaleDateString(undefined, { month: 'long', year: 'numeric', timeZone: 'UTC' }); }
+  function loadChallenges() {
+    return rpc('gv_challenge_list', { p_secret: state.secret }).then(function (list) {
+      $('chList').innerHTML = (list || []).length ? list.map(function (c) {
+        var podium = (c.podium || []).map(function (p) { return '#' + p.rank + ' ' + esc(p.nickname || 'a guest') + ' ' + esc(p.time); }).join(' · ');
+        return '<div class="bc-item"><span class="when">' + esc(monthName(c.month)) + '</span>'
+          + '<span class="msg"><b>' + esc(c.title) + '</b>' + (c.note ? ' · ' + esc(c.note) : '') + (podium ? '<br>' + podium : '') + '</span>'
+          + '<span class="st' + (c.ended ? '' : ' on') + '">' + c.runners + ' racers · ' + (c.closed_at ? 'badges given' : c.ended ? 'ended' : 'ends ' + esc(new Date(c.ends_at).toLocaleDateString())) + '</span>'
+          + '<button class="btn" type="button" data-chboard="' + esc(c.month) + '">Board</button></div>';
+      }).join('') : '<div class="empty">No challenges yet.</div>';
+    }).catch(function (e) { $('chMsg').textContent = 'Could not load challenges: ' + e.message; });
+  }
+
   // ── backup addresses ──
   function loadMirrors() {
     return rpc('gv_mirrors_list', {}).then(function (list) {
@@ -1365,7 +1379,7 @@
   }
 
   // ── auth / wiring ──
-  function showDash() { $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); load(); loadPeople(); loadBroadcasts(); loadLinks(); loadChat(); loadAvatars(); loadTesting(); loadGiveaways(); loadMirrors(); setTimer(); }
+  function showDash() { $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); load(); loadPeople(); loadBroadcasts(); loadLinks(); loadChat(); loadAvatars(); loadTesting(); loadGiveaways(); loadChallenges(); loadMirrors(); setTimer(); }
   function setTimer() { clearInterval(state.timer); if ($('autoRefresh').checked) state.timer = setInterval(load, 60000); }
   function tryLogin(secret, remember) {
     $('loginErr').textContent = '';
