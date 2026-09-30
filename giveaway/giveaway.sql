@@ -110,3 +110,44 @@ end;
 $function$;
 
 grant execute on function public.gv_giveaway_current() to anon, authenticated;
+
+
+-- Enters the signed-in account. Any account can enter, whatever its name;
+-- a rude name only keeps it off the page if it wins. Pressing Enter again is
+-- not a second entry. Refusals are sentences the page shows as they are.
+create or replace function public.gv_giveaway_enter(p_id integer)
+returns json
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+  v_row gv_giveaways;
+begin
+  if v_user is null then
+    raise exception 'Sign in to enter.';
+  end if;
+  if not public.gv_origin_allowed() then
+    raise exception 'not from this origin';
+  end if;
+
+  -- Shared lock: waits out a draw in progress, then sees it as drawn.
+  select * into v_row from gv_giveaways where id = p_id for share;
+  if not found then
+    raise exception 'That giveaway is gone.';
+  end if;
+  if v_row.drawn_at is not null or v_row.ends_at <= now() then
+    raise exception 'This giveaway has closed.';
+  end if;
+
+  insert into gv_giveaway_entries (giveaway_id, user_id)
+  values (p_id, v_user)
+  on conflict do nothing;
+
+  return gv_giveaway_json(v_row, v_user);
+end;
+$function$;
+
+revoke all on function public.gv_giveaway_enter(integer) from public, anon;
+grant execute on function public.gv_giveaway_enter(integer) to authenticated;
