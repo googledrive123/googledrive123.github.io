@@ -184,6 +184,9 @@
   var TOKEN_KEY = 'sb-dxwjxzmlezfyursysays-auth-token';
   var MAX = 300;
   var POLL_MS = 4000;
+  // Every eighth poll asks for the whole window again. That is how a message
+  // the owner removed disappears from pages that already show it.
+  var FULL_EVERY = 8;
   var KEEP = 300;
   var REASONS = ['Mean', 'Rude', 'Personal info', 'Spam'];
 
@@ -201,6 +204,7 @@
   var sb = null;
   var byId = {};
   var lastId = 0;
+  var polls = 0;
   var timer = null;
   var polling = false;
   var sending = false;
@@ -302,6 +306,22 @@
     else if (others) jump.hidden = false;
   }
 
+  // A full poll lists everything still up. Anything on the page in the same
+  // range that it leaves out was removed by the owner.
+  function prune(list, before) {
+    var keep = {};
+    var top = before;
+    list.forEach(function (m) { keep[m.id] = true; if (m.id > top) top = m.id; });
+    var floor = list.length >= 100 ? list[0].id : 0;
+    Object.keys(byId).forEach(function (id) {
+      var n = Number(id);
+      if (n >= floor && n <= top && !keep[id]) {
+        log.removeChild(byId[id]);
+        delete byId[id];
+      }
+    });
+  }
+
   function ours(err) { return err && err.code === 'P0001'; }
 
   // 42501 is PostgREST answering as a guest: the session is gone.
@@ -316,8 +336,9 @@
   function poll() {
     if (polling || document.hidden) return;
     polling = true;
+    var full = polls++ % FULL_EVERY === 0;
     var before = lastId;
-    sb.rpc('gv_chat_recent', { p_after_id: lastId }).then(function (res) {
+    sb.rpc('gv_chat_recent', { p_after_id: full ? 0 : lastId }).then(function (res) {
       polling = false;
       if (res.error) {
         if (!recheck(res.error)) say('Chat lost its connection. Trying again…', 'wait');
@@ -325,6 +346,7 @@
       }
       if (status.dataset.kind === 'wait' && !waitTimer) say('');
       var list = res.data || [];
+      if (full) prune(list, before);
       list.forEach(function (m) { if (m.id > lastId) lastId = m.id; });
       add(list, before === 0);
     }, function () {
