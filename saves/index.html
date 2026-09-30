@@ -459,6 +459,33 @@ document.addEventListener('DOMContentLoaded', function () {
     note(autoNote, 'On. Checking whether an auto-save is due…');
     runAuto();
   });
+
+  function showName(user) {
+    $('cloudWho').textContent = (user.email || '').split('@')[0];
+    // The username can change after sign-up; the email it was made with does not.
+    saves.client().then(function (c) {
+      return c.from('profiles').select('username').eq('id', user.id).maybeSingle();
+    }).then(function (r) {
+      if (r && r.data && r.data.username) $('cloudWho').textContent = r.data.username;
+    }).catch(function () {});
+  }
+
+  saves.cloudUser().then(function (user) {
+    $('cloudLoading').hidden = true;
+    if (!user) { $('cloudOut').hidden = false; return; }
+    $('cloudIn').hidden = false;
+    $('autoPanel').hidden = false;
+    showName(user);
+    return refresh().then(function () {
+      note(autoNote, autoStatus());
+      return offerAuto();
+    }).then(function () {
+      if (saves.autoOn()) return runAuto();
+    });
+  }).catch(function (err) {
+    $('cloudLoading').hidden = false;
+    $('cloudLoading').textContent = message(err);
+  });
 });
 </script>
 </main>
