@@ -3617,6 +3617,19 @@ function carryUnity(oldDir, newDir) {
   });
 }
 
+// Copies localStorage keys that name the old folder (Ruffle's saves do) to
+// the same keys naming the new one.
+function carryKeys(oldPath, newPath) {
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (!k || k.indexOf(oldPath) === -1) continue;
+      const nk = k.split(oldPath).join(newPath);
+      if (localStorage.getItem(nk) === null) localStorage.setItem(nk, localStorage.getItem(k));
+    }
+  } catch (e) {}
+}
+
 function toggleSource() {
   if (!canSwap(mounted)) return;
   const next = mountedFrom === 'vault' ? 'src' : 'vault';
