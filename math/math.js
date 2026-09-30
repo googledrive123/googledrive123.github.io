@@ -1269,4 +1269,20 @@
 
   // Five right in a row makes answers worth 1.5×, ten makes them 2×.
   function boost(streak) { return streak >= 10 ? 2 : streak >= 5 ? 1.5 : 1; }
+
+  // ── Page ────────────────────────────────────────────────────────────────
+
+  var state = load();
+  var q = null, answered = false, asked = 0, last = {};
+
+  function $(id) { return document.getElementById(id); }
+  var quiz = $('quiz'), input = $('answer'), box = $('answerBox'), form = $('answerForm');
+  var choicesEl = $('choices'), nextBtn = $('next'), revealBtn = $('reveal');
+
+  function make(subject, level) {
+    var list = BANK[subject][level], key = subject + level, i;
+    do { i = Math.floor(Math.random() * list.length); } while (list.length > 1 && i === last[key]);
+    last[key] = i;
+    return list[i]();
+  }
 })();
