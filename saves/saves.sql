@@ -95,3 +95,8 @@ create policy gv_saves_files_update on storage.objects
   for update to authenticated
   using (bucket_id = 'saves' and public.gv_saves_own_file(name))
   with check (bucket_id = 'saves' and public.gv_saves_own_file(name));
+
+drop policy if exists gv_saves_files_delete on storage.objects;
+create policy gv_saves_files_delete on storage.objects
+  for delete to authenticated
+  using (bucket_id = 'saves' and public.gv_saves_own_file(name));
