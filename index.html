@@ -1906,6 +1906,12 @@
       cursor: pointer; transition: background 0.15s, border-color 0.15s;
     }
     .profile-signout:hover { background: rgba(255,59,59,0.08); border-color: var(--accent); }
+    .profile-delete {
+      display: block; margin: 0.6rem auto 0; padding: 0.2rem 0.5rem;
+      background: none; border: 0; color: var(--muted-2);
+      font: inherit; font-size: 0.72rem; text-decoration: underline; cursor: pointer;
+    }
+    .profile-delete:hover { color: var(--accent); }
     .profile-msg { font-size: 0.75rem; color: var(--muted); margin-top: 0.5rem; min-height: 1rem; }
     .top-game-row {
       display: flex; align-items: center; gap: 0.6rem;
@@ -5511,6 +5517,7 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
     </div>
 
     <button class="profile-signout" id="profileSignout" style="display:none">Sign Out</button>
+    <button class="profile-delete" id="profileDelete" style="display:none">Delete account</button>
     <button class="auth-submit" id="profileSigninBtn" style="margin-top:0.5rem">Sign In / Sign Up</button>
   </div>
 </div>
