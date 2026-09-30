@@ -287,3 +287,20 @@ begin
   );
 end;
 $function$;
+
+-- For a giveaway made by mistake. Its entries go with it.
+create or replace function public.gv_giveaway_delete(p_secret text, p_id integer)
+returns boolean
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+
+  delete from gv_giveaways where id = p_id;
+  return found;
+end;
+$function$;
