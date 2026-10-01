@@ -1501,5 +1501,6 @@
 {"id":"cubes-king","name":"Cubes King","categories":["Skill"],"ranking":1655,"img":"/thumbs/cubes-king.webp","src":null,"site":54,"added":"2026-09-30"},
 {"id":"darts-pro","name":"Darts Pro","categories":["Sports"],"ranking":1656,"img":"/thumbs/darts-pro.webp","src":null,"site":54,"added":"2026-09-30"},
 {"id":"chicky-farm","name":"Chicky Farm","categories":["Simulation"],"ranking":1657,"img":"/thumbs/chicky-farm.webp","src":null,"site":54,"added":"2026-09-30"},
-{"id":"death-chase","name":"Death Chase","categories":["Driving"],"ranking":1658,"img":"/thumbs/death-chase.webp","src":null,"site":54,"added":"2026-09-30"}
+{"id":"death-chase","name":"Death Chase","categories":["Driving"],"ranking":1658,"img":"/thumbs/death-chase.webp","src":null,"site":54,"added":"2026-09-30"},
+{"id":"jumping-shell","name":"Jumping Shell","categories":["Platformer"],"ranking":1659,"img":"/thumbs/jumping-shell.webp","src":null,"site":54,"added":"2026-09-30"}
 ]}
