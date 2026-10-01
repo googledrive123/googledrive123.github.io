@@ -1809,5 +1809,6 @@
 {"id":"super-santa-kicker","name":"Super Santa Kicker","categories":["Skill"],"ranking":1963,"img":"/thumbs/super-santa-kicker.webp","src":null,"site":60,"added":"2026-09-30"},
 {"id":"sleepy-knight","name":"Sleepy Knight","categories":["Platformer"],"ranking":1964,"img":"/thumbs/sleepy-knight.webp","src":null,"site":60,"added":"2026-09-30"},
 {"id":"greedy-mimic","name":"Greedy Mimic","categories":["Skill"],"ranking":1965,"img":"/thumbs/greedy-mimic.webp","src":null,"site":60,"added":"2026-09-30"},
-{"id":"sticky-sorcerer","name":"Sticky Sorcerer","categories":["Platformer"],"ranking":1966,"img":"/thumbs/sticky-sorcerer.webp","src":null,"site":60,"added":"2026-09-30"}
+{"id":"sticky-sorcerer","name":"Sticky Sorcerer","categories":["Platformer"],"ranking":1966,"img":"/thumbs/sticky-sorcerer.webp","src":null,"site":60,"added":"2026-09-30"},
+{"id":"yarne","name":"Yarne","categories":["Skill"],"ranking":1967,"img":"/thumbs/yarne.webp","src":null,"site":60,"added":"2026-09-30"}
 ]}
