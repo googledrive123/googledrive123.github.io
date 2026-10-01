@@ -1753,5 +1753,6 @@
 {"id":"death-run","name":"Death Run","categories":["Platformer"],"ranking":1907,"img":"/thumbs/death-run.webp","src":null,"site":58,"added":"2026-09-30"},
 {"id":"mirror-madness","name":"Mirror Madness","categories":["Puzzle"],"ranking":1908,"img":"/thumbs/mirror-madness.webp","src":null,"site":58,"added":"2026-09-30"},
 {"id":"red-vs-blue","name":"Red vs Blue","categories":["Action"],"ranking":1909,"img":"/thumbs/red-vs-blue.webp","src":null,"site":58,"added":"2026-09-30"},
-{"id":"fishing-and-lines","name":"Fishing And Lines","categories":["Skill"],"ranking":1910,"img":"/thumbs/fishing-and-lines.webp","src":null,"site":58,"added":"2026-09-30"}
+{"id":"fishing-and-lines","name":"Fishing And Lines","categories":["Skill"],"ranking":1910,"img":"/thumbs/fishing-and-lines.webp","src":null,"site":58,"added":"2026-09-30"},
+{"id":"ngu-idle","name":"NGU Idle","categories":["Idle"],"ranking":1911,"img":"/thumbs/ngu-idle.webp","src":null,"site":58,"added":"2026-09-30"}
 ]}
