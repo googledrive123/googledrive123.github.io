@@ -1956,5 +1956,6 @@
 {"id":"cactus-mccoy-2","name":"Cactus McCoy 2","categories":["Action"],"ranking":2110,"img":"/thumbs/cactus-mccoy-2.webp","src":null,"site":65,"added":"2026-09-30"},
 {"id":"conq-io","name":"Conq.io","categories":["Multiplayer"],"ranking":2111,"img":"/thumbs/conq-io.webp","src":null,"site":65,"added":"2026-09-30"},
 {"id":"traffic-tour","name":"Traffic Tour","categories":["Driving"],"ranking":2112,"img":"/thumbs/traffic-tour.webp","src":null,"site":65,"added":"2026-09-30"},
-{"id":"quake","name":"Quake","categories":["Shooter"],"ranking":2113,"img":"/thumbs/quake.webp","src":null,"site":65,"added":"2026-09-30"}
+{"id":"quake","name":"Quake","categories":["Shooter"],"ranking":2113,"img":"/thumbs/quake.webp","src":null,"site":65,"added":"2026-09-30"},
+{"id":"onion-boy","name":"Onion Boy","categories":["Platformer"],"ranking":2114,"img":"/thumbs/onion-boy.webp","src":null,"site":65,"added":"2026-09-30"}
 ]}
