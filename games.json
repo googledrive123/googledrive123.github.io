@@ -1525,5 +1525,6 @@
 {"id":"highway-bike-simulator","name":"Highway Bike Simulator","categories":["Driving"],"ranking":1679,"img":"/thumbs/highway-bike-simulator.webp","src":null,"site":55,"added":"2026-09-30"},
 {"id":"highway-rider-extreme","name":"Highway Rider Extreme","categories":["Driving"],"ranking":1680,"img":"/thumbs/highway-rider-extreme.webp","src":null,"site":55,"added":"2026-09-30"},
 {"id":"highway-traffic","name":"Highway Traffic","categories":["Driving"],"ranking":1681,"img":"/thumbs/highway-traffic.webp","src":null,"site":55,"added":"2026-09-30"},
-{"id":"pool-club","name":"Pool Club","categories":["Sports"],"ranking":1682,"img":"/thumbs/pool-club.webp","src":null,"site":55,"added":"2026-09-30"}
+{"id":"pool-club","name":"Pool Club","categories":["Sports"],"ranking":1682,"img":"/thumbs/pool-club.webp","src":null,"site":55,"added":"2026-09-30"},
+{"id":"ultimate-car-driving","name":"Ultimate Car Driving","categories":["Driving"],"ranking":1683,"img":"/thumbs/ultimate-car-driving.webp","src":null,"site":55,"added":"2026-09-30"}
 ]}
