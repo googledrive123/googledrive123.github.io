@@ -1710,5 +1710,6 @@
 {"id":"monke","name":"Monke","categories":["Platformer"],"ranking":1864,"img":"/thumbs/monke.webp","src":null,"site":58,"added":"2026-09-30"},
 {"id":"pixel-bear-adventure","name":"Pixel Bear Adventure","categories":["Platformer"],"ranking":1865,"img":"/thumbs/pixel-bear-adventure.webp","src":null,"site":58,"added":"2026-09-30"},
 {"id":"pixel-speedrun","name":"Pixel Speedrun","categories":["Platformer"],"ranking":1866,"img":"/thumbs/pixel-speedrun.webp","src":null,"site":58,"added":"2026-09-30"},
-{"id":"pizza-challenge","name":"Pizza Challenge","categories":["Skill"],"ranking":1867,"img":"/thumbs/pizza-challenge.webp","src":null,"site":58,"added":"2026-09-30"}
+{"id":"pizza-challenge","name":"Pizza Challenge","categories":["Skill"],"ranking":1867,"img":"/thumbs/pizza-challenge.webp","src":null,"site":58,"added":"2026-09-30"},
+{"id":"retro-speed","name":"Retro Speed","categories":["Racing"],"ranking":1868,"img":"/thumbs/retro-speed.webp","src":null,"site":58,"added":"2026-09-30"}
 ]}
