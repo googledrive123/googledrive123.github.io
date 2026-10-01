@@ -1474,5 +1474,6 @@
 {"id":"cannon-strike","name":"Cannon Strike","categories":["Shooter"],"ranking":1628,"img":"/thumbs/cannon-strike.webp","src":null,"site":53,"added":"2026-09-30"},
 {"id":"blobby-clicker","name":"Blobby Clicker","categories":["Idle"],"ranking":1629,"img":"/thumbs/blobby-clicker.webp","src":null,"site":53,"added":"2026-09-30"},
 {"id":"idle-gold-miner","name":"Idle Gold Miner","categories":["Idle"],"ranking":1630,"img":"/thumbs/idle-gold-miner.webp","src":null,"site":53,"added":"2026-09-30"},
-{"id":"parkour-race","name":"Parkour Race","categories":["Racing"],"ranking":1631,"img":"/thumbs/parkour-race.webp","src":null,"site":53,"added":"2026-09-30"}
+{"id":"parkour-race","name":"Parkour Race","categories":["Racing"],"ranking":1631,"img":"/thumbs/parkour-race.webp","src":null,"site":53,"added":"2026-09-30"},
+{"id":"paint-strike","name":"Paint Strike","categories":["Shooter"],"ranking":1632,"img":"/thumbs/paint-strike.webp","src":null,"site":53,"added":"2026-09-30"}
 ]}
