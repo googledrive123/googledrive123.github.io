@@ -1704,5 +1704,6 @@
 {"id":"tv-static","name":"TV Static","categories":["Sandbox"],"ranking":1858,"img":"/thumbs/tv-static.webp","src":null,"site":58,"added":"2026-09-30"},
 {"id":"whac-a-mole","name":"Whac-A-Mole","categories":["Arcade"],"ranking":1859,"img":"/thumbs/whac-a-mole.webp","src":null,"site":58,"added":"2026-09-30"},
 {"id":"legend-of-zelda-maker","name":"Legend of Zelda Maker","categories":["Adventure"],"ranking":1860,"img":"/thumbs/legend-of-zelda-maker.webp","src":null,"site":58,"added":"2026-09-30"},
-{"id":"yet-another-world","name":"Yet Another World","categories":["Platformer"],"ranking":1861,"img":"/thumbs/yet-another-world.webp","src":null,"site":58,"added":"2026-09-30"}
+{"id":"yet-another-world","name":"Yet Another World","categories":["Platformer"],"ranking":1861,"img":"/thumbs/yet-another-world.webp","src":null,"site":58,"added":"2026-09-30"},
+{"id":"afterlife","name":"Afterlife","categories":["Skill"],"ranking":1862,"img":"/thumbs/afterlife.webp","src":null,"site":58,"added":"2026-09-30"}
 ]}
