@@ -1661,5 +1661,6 @@
 {"id":"alien-invasion","name":"Alien Invasion","categories":["Shooter"],"ranking":1815,"img":"/thumbs/alien-invasion.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"appel","name":"Appel","categories":["Platformer"],"ranking":1816,"img":"/thumbs/appel.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"asciispace","name":"Asciispace","categories":["Arcade"],"ranking":1817,"img":"/thumbs/asciispace.webp","src":null,"site":57,"added":"2026-09-30"},
-{"id":"asteroids","name":"Asteroids","categories":["Arcade"],"ranking":1818,"img":"/thumbs/asteroids.webp","src":null,"site":57,"added":"2026-09-30"}
+{"id":"asteroids","name":"Asteroids","categories":["Arcade"],"ranking":1818,"img":"/thumbs/asteroids.webp","src":null,"site":57,"added":"2026-09-30"},
+{"id":"ball-platformer","name":"Ball Platformer","categories":["Platformer"],"ranking":1819,"img":"/thumbs/ball-platformer.webp","src":null,"site":57,"added":"2026-09-30"}
 ]}
