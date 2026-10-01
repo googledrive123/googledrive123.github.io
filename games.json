@@ -1410,5 +1410,6 @@
 {"id":"bad-dolls","name":"Bad Dolls","categories":["Skill"],"ranking":1564,"img":"/thumbs/bad-dolls.webp","src":null,"site":51,"added":"2026-09-30"},
 {"id":"marble-dash","name":"Marble Dash","categories":["Puzzle"],"ranking":1565,"img":"/thumbs/marble-dash.webp","src":null,"site":51,"added":"2026-09-30"},
 {"id":"mob-city","name":"Mob City","categories":["Action"],"ranking":1566,"img":"/thumbs/mob-city.webp","src":null,"site":51,"added":"2026-09-30"},
-{"id":"mystical-birdlink","name":"Mystical Birdlink","categories":["Puzzle"],"ranking":1567,"img":"/thumbs/mystical-birdlink.webp","src":null,"site":51,"added":"2026-09-30"}
+{"id":"mystical-birdlink","name":"Mystical Birdlink","categories":["Puzzle"],"ranking":1567,"img":"/thumbs/mystical-birdlink.webp","src":null,"site":51,"added":"2026-09-30"},
+{"id":"bladers","name":"Bladers","categories":["Action"],"ranking":1568,"img":"/thumbs/bladers.webp","src":null,"site":51,"added":"2026-09-30"}
 ]}
