@@ -1523,5 +1523,6 @@
 {"id":"school-bus-demolition-derby","name":"School Bus Demolition Derby","categories":["Driving"],"ranking":1677,"img":"/thumbs/school-bus-demolition-derby.webp","src":null,"site":55,"added":"2026-09-30"},
 {"id":"hammer-2-reloaded","name":"Hammer 2 Reloaded","categories":["Action"],"ranking":1678,"img":"/thumbs/hammer-2-reloaded.webp","src":null,"site":55,"added":"2026-09-30"},
 {"id":"highway-bike-simulator","name":"Highway Bike Simulator","categories":["Driving"],"ranking":1679,"img":"/thumbs/highway-bike-simulator.webp","src":null,"site":55,"added":"2026-09-30"},
-{"id":"highway-rider-extreme","name":"Highway Rider Extreme","categories":["Driving"],"ranking":1680,"img":"/thumbs/highway-rider-extreme.webp","src":null,"site":55,"added":"2026-09-30"}
+{"id":"highway-rider-extreme","name":"Highway Rider Extreme","categories":["Driving"],"ranking":1680,"img":"/thumbs/highway-rider-extreme.webp","src":null,"site":55,"added":"2026-09-30"},
+{"id":"highway-traffic","name":"Highway Traffic","categories":["Driving"],"ranking":1681,"img":"/thumbs/highway-traffic.webp","src":null,"site":55,"added":"2026-09-30"}
 ]}
