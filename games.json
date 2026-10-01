@@ -1599,5 +1599,6 @@
 {"id":"pixoji","name":"Pixoji","categories":["Puzzle"],"ranking":1753,"img":"/thumbs/pixoji.webp","src":null,"site":56,"added":"2026-09-30"},
 {"id":"pink","name":"Pink","categories":["Puzzle"],"ranking":1754,"img":"/thumbs/pink.webp","src":null,"site":56,"added":"2026-09-30"},
 {"id":"knight-errant","name":"Knight Errant","categories":["RPG"],"ranking":1755,"img":"/thumbs/knight-errant.webp","src":null,"site":56,"added":"2026-09-30"},
-{"id":"hexologic","name":"Hexologic","categories":["Puzzle"],"ranking":1756,"img":"/thumbs/hexologic.webp","src":null,"site":56,"added":"2026-09-30"}
+{"id":"hexologic","name":"Hexologic","categories":["Puzzle"],"ranking":1756,"img":"/thumbs/hexologic.webp","src":null,"site":56,"added":"2026-09-30"},
+{"id":"gragyriss","name":"Gragyriss","categories":["RPG"],"ranking":1757,"img":"/thumbs/gragyriss.webp","src":null,"site":56,"added":"2026-09-30"}
 ]}
