@@ -1871,5 +1871,6 @@
 {"id":"hall-of-palettes","name":"Hall Of Palettes","categories":["Puzzle"],"ranking":2025,"img":"/thumbs/hall-of-palettes.webp","src":null,"site":61,"added":"2026-09-30"},
 {"id":"nova-cloudwalkers","name":"Nova Cloudwalkers","categories":["Skill"],"ranking":2026,"img":"/thumbs/nova-cloudwalkers.webp","src":null,"site":61,"added":"2026-09-30"},
 {"id":"gods-of-defense","name":"Gods Of Defense","categories":["Strategy"],"ranking":2027,"img":"/thumbs/gods-of-defense.webp","src":null,"site":61,"added":"2026-09-30"},
-{"id":"slide-box","name":"Slide Box","categories":["Puzzle"],"ranking":2028,"img":"/thumbs/slide-box.webp","src":null,"site":61,"added":"2026-09-30"}
+{"id":"slide-box","name":"Slide Box","categories":["Puzzle"],"ranking":2028,"img":"/thumbs/slide-box.webp","src":null,"site":61,"added":"2026-09-30"},
+{"id":"sector-01","name":"Sector 01","categories":["Skill"],"ranking":2029,"img":"/thumbs/sector-01.webp","src":null,"site":61,"added":"2026-09-30"}
 ]}
