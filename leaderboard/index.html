@@ -120,6 +120,127 @@
 
   <p class="panel-note">A session saved twice counts once, and one session counts for at most four
   hours, so a tab left open overnight does not win.</p>
+
+<script>
+(function () {
+  'use strict';
+
+  var SUPA_URL = 'https://dxwjxzmlezfyursysays.supabase.co';
+  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
+
+  var sb = null;
+  var data = null;
+  var people = {};   // account id -> { username, preset, upload }
+
+  function $(id) { return document.getElementById(id); }
+
+  // The same levels as the profile on the home page (levelFromXp in
+  // index.html): 10 XP a minute, 50 XP for the first level, 20% more every
+  // five levels up to 50, then 200 more every five levels.
+  function levelFor(sec) {
+    var xp = Math.floor(sec / 60) * 10, level = 1, need = 50;
+    while (xp >= need) {
+      xp -= need;
+      if (level % 5 === 0) need = level < 50 ? Math.round(need * 1.2) : need + 200;
+      level++;
+    }
+    return level;
+  }
+
+  function hours(sec) {
+    var h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60);
+    return h ? h.toLocaleString() + 'h ' + m + 'm' : m + 'm';
+  }
+
+  function td(cls, content) {
+    var c = document.createElement('td');
+    if (cls) c.className = cls;
+    if (content instanceof Node) c.appendChild(content); else c.textContent = content;
+    return c;
+  }
+
+  function who(id, small) {
+    var p = people[id] || {};
+    var box = document.createElement('span');
+    box.className = small ? 'lb-top' : 'lb-who';
+    var av = document.createElement('span');
+    av.className = 'lb-av';
+    if (window.GV && GV.avatars) GV.avatars.render(av, { id: id, preset: p.preset, upload: p.upload });
+    var nm = document.createElement('span');
+    nm.className = 'lb-name';
+    nm.textContent = p.username || 'player';
+    box.append(av, nm);
+    return box;
+  }
+
+  function rankRow(rank, id) {
+    var tr = document.createElement('tr');
+    if (rank <= 3) tr.className = 'top' + rank;
+    if (data.me && data.me.id === id) tr.classList.add('mine');
+    tr.appendChild(td('rank', String(rank)));
+    tr.appendChild(td('', who(id)));
+    return tr;
+  }
+
+  function paintPlayers() {
+    var body = $('lbPlayerRows');
+    body.textContent = '';
+    data.players.forEach(function (p) {
+      var tr = rankRow(p.rank, p.id);
+      var lv = document.createElement('span');
+      lv.className = 'lb-level';
+      lv.textContent = levelFor(p.sec);
+      tr.appendChild(td('num', lv));
+      tr.appendChild(td('num', hours(p.sec)));
+      tr.appendChild(td('num lb-hide-sm', String(p.games)));
+      body.appendChild(tr);
+    });
+  }
+
+  function show(tab) {
+    document.querySelectorAll('.lb-tab').forEach(function (b) {
+      b.setAttribute('aria-selected', b.dataset.tab === tab ? 'true' : 'false');
+    });
+    $('lbPlayers').hidden = tab !== 'players';
+    $('lbWeek').hidden = tab !== 'week';
+    $('lbGames').hidden = tab !== 'games';
+    try { history.replaceState(null, '', tab === 'players' ? location.pathname : '#' + tab); } catch (e) {}
+  }
+
+  function load() {
+    return sb.rpc('gv_leaderboard').then(function (r) {
+      if (r.error) throw new Error(r.error.message);
+      data = r.data;
+      var ids = data.players.map(function (p) { return p.id; });
+      return window.GV && GV.avatars ? GV.avatars.publicProfiles(ids).then(function (rows) {
+        rows.forEach(function (row) { people[row.id] = row; });
+      }).catch(function () {}) : null;
+    }).then(function () {
+      $('lbMsg').textContent = data.players.length ? '' : 'Nobody is on the board yet. Sign in and play a game to be first.';
+      paintPlayers();
+    }).catch(function () {
+      $('lbMsg').textContent = 'The leaderboard could not load. Refresh to try again.';
+    });
+  }
+
+  document.querySelectorAll('.lb-tab').forEach(function (b) {
+    b.addEventListener('click', function () { show(b.dataset.tab); });
+  });
+
+  document.addEventListener('DOMContentLoaded', function () {
+    var start = (location.hash || '').slice(1);
+    show(['week', 'games'].indexOf(start) !== -1 ? start : 'players');
+    if (!window.supabase) {
+      $('lbMsg').textContent = 'The leaderboard could not load. Refresh to try again.';
+      return;
+    }
+    // Restores the home page's session, if any, so the board can say where
+    // a signed-in player stands.
+    sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+    sb.auth.getSession().then(load);
+  });
+})();
+</script>
 </main>
 </body>
 </html>
