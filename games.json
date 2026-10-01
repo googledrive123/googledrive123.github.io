@@ -1896,5 +1896,6 @@
 {"id":"inversion","name":"Inversion","categories":["Skill"],"ranking":2050,"img":"/thumbs/inversion.webp","src":null,"site":62,"added":"2026-09-30"},
 {"id":"dispersal-vectors","name":"Dispersal Vectors","categories":["Skill"],"ranking":2051,"img":"/thumbs/dispersal-vectors.webp","src":null,"site":62,"added":"2026-09-30"},
 {"id":"cata-catapult","name":"Cata Catapult","categories":["Skill"],"ranking":2052,"img":"/thumbs/cata-catapult.webp","src":null,"site":62,"added":"2026-09-30"},
-{"id":"astro-steve-adventure","name":"Astro Steve Adventure","categories":["Adventure"],"ranking":2053,"img":"/thumbs/astro-steve-adventure.webp","src":null,"site":62,"added":"2026-09-30"}
+{"id":"astro-steve-adventure","name":"Astro Steve Adventure","categories":["Adventure"],"ranking":2053,"img":"/thumbs/astro-steve-adventure.webp","src":null,"site":62,"added":"2026-09-30"},
+{"id":"elephant-rave-2","name":"Elephant Rave 2","categories":["Rhythm"],"ranking":2054,"img":"/thumbs/elephant-rave-2.webp","src":null,"site":62,"added":"2026-09-30"}
 ]}
