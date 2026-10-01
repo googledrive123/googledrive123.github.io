@@ -132,6 +132,7 @@
   var data = null;
   var people = {};   // account id -> { username, preset, upload }
   var catalog = {};  // game id -> games.json entry
+  var session = null;
 
   function $(id) { return document.getElementById(id); }
 
@@ -300,6 +301,45 @@
     }).catch(function () { c.textContent = 'Could not load this game\'s players.'; });
   }
 
+  // Where the signed-in player stands, or a nudge to sign in.
+  function paintMe() {
+    var box = $('lbMe');
+    box.textContent = '';
+    var main = document.createElement('div');
+    main.className = 'lb-me-main';
+    var name = document.createElement('div');
+    name.className = 'lb-me-name';
+    var sub = document.createElement('div');
+    sub.className = 'lb-me-sub';
+    main.append(name, sub);
+    if (!session) {
+      name.textContent = 'Not on the board yet';
+      sub.textContent = 'Sign in on the home page and your play time counts from then on.';
+      var a = document.createElement('a');
+      a.className = 'btn';
+      a.href = '/';
+      a.textContent = 'Sign in';
+      box.append(main, a);
+    } else if (!data.me) {
+      name.textContent = (people[session.user.id] || {}).username || 'You';
+      sub.textContent = 'Play a game while signed in to get on the board.';
+      box.append(main);
+    } else {
+      var av = document.createElement('span');
+      av.className = 'lb-av';
+      var p = people[data.me.id] || {};
+      if (window.GV && GV.avatars) GV.avatars.render(av, { id: data.me.id, preset: p.preset, upload: p.upload });
+      name.textContent = p.username || 'You';
+      sub.textContent = 'Level ' + levelFor(data.me.sec) + ' · ' + hours(data.me.sec) + ' played · ' +
+        data.me.games + (data.me.games === 1 ? ' game' : ' games');
+      var rank = document.createElement('div');
+      rank.className = 'lb-me-rank';
+      rank.textContent = '#' + data.me.rank + ' of ' + data.me.of;
+      box.append(av, main, rank);
+    }
+    box.hidden = false;
+  }
+
   function show(tab) {
     document.querySelectorAll('.lb-tab').forEach(function (b) {
       b.setAttribute('aria-selected', b.dataset.tab === tab ? 'true' : 'false');
@@ -315,7 +355,8 @@
       if (r.error) throw new Error(r.error.message);
       data = r.data;
       var ids = data.players.concat(data.week).map(function (p) { return p.id; })
-        .concat(data.games.map(function (g) { return g.top; }));
+        .concat(data.games.map(function (g) { return g.top; }))
+        .concat(session ? [session.user.id] : []);
       return window.GV && GV.avatars ? GV.avatars.publicProfiles(ids).then(function (rows) {
         rows.forEach(function (row) { people[row.id] = row; });
       }).catch(function () {}) : null;
@@ -324,6 +365,7 @@
       paintPlayers();
       paintWeek();
       paintGames();
+      paintMe();
     }).catch(function () {
       $('lbMsg').textContent = 'The leaderboard could not load. Refresh to try again.';
     });
@@ -353,7 +395,10 @@
     var games = fetch('/games.json').then(function (r) { return r.json(); }).then(function (d) {
       (d.games || []).forEach(function (g) { catalog[g.id] = g; });
     }).catch(function () {});
-    Promise.all([games, sb.auth.getSession()]).then(load);
+    Promise.all([games, sb.auth.getSession()]).then(function (r) {
+      session = r[1].data && r[1].data.session;
+      return load();
+    });
   });
 })();
 </script>
