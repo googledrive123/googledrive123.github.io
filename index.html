@@ -5176,13 +5176,22 @@ function paintLevel(totalSec) {
   updateUserUI();
 }
 
+// Play time counts the way the leaderboard counts it (leaderboard.sql): a
+// session saved twice counts once, and one session counts for at most four
+// hours, so a tab left open overnight does not add a day.
+const SESSION_CAP_SECS = 4 * 3600;
 function computeAndShowStats(sessions) {
-  // Use duration_seconds if stored, otherwise compute from timestamps
-  const withDur = sessions.map(s => ({
+  const seen = new Set();
+  const withDur = sessions.filter(s => {
+    const key = s.game_id + '|' + s.started_at;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).map(s => ({
     ...s,
-    duration_seconds: s.duration_seconds != null
+    duration_seconds: Math.min(SESSION_CAP_SECS, Math.max(0, s.duration_seconds != null
       ? s.duration_seconds
-      : (s.ended_at ? Math.round((new Date(s.ended_at) - new Date(s.started_at)) / 1000) : 0)
+      : (s.ended_at ? Math.round((new Date(s.ended_at) - new Date(s.started_at)) / 1000) : 0)))
   }));
 
   paintLevel(withDur.reduce((t, r) => t + (r.duration_seconds || 0), 0));
