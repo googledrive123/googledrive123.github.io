@@ -5179,25 +5179,37 @@ function paintLevel(totalSec) {
   updateUserUI();
 }
 
-// Play time counts the way the leaderboard counts it (leaderboard.sql): a
-// session saved twice counts once, and one session counts for at most four
-// hours, so a tab left open overnight does not add a day.
+// Play time counts the way the leaderboard counts it (leaderboard.sql): only
+// finished sessions that ended in the past (and, for an account, began no more
+// than 60 days before it was made), at most four hours each, with sessions
+// that overlap merged so no minute counts twice.
 const SESSION_CAP_SECS = 4 * 3600;
-function computeAndShowStats(sessions) {
-  const seen = new Set();
-  const withDur = sessions.filter(s => {
-    const key = s.game_id + '|' + s.started_at;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  }).map(s => ({
-    ...s,
-    duration_seconds: Math.min(SESSION_CAP_SECS, Math.max(0, s.duration_seconds != null
-      ? s.duration_seconds
-      : (s.ended_at ? Math.round((new Date(s.ended_at) - new Date(s.started_at)) / 1000) : 0)))
-  }));
+function countedSessions(sessions, createdAt) {
+  const now = Date.now();
+  const floor = createdAt ? new Date(createdAt).getTime() - 60 * 86400000 : -Infinity;
+  return sessions.map(s => {
+    const a = new Date(s.started_at).getTime();
+    const end = s.ended_at ? new Date(s.ended_at).getTime()
+      : (s.duration_seconds != null ? a + s.duration_seconds * 1000 : NaN);
+    return { ...s, a, b: Math.min(end, a + SESSION_CAP_SECS * 1000) };
+  }).filter(s => s.a < s.b && s.b <= now && s.a >= floor);
+}
+// Seconds covered by a list of sessions, overlaps counted once.
+function spanSecs(list) {
+  const r = list.map(s => [s.a, s.b]).sort((x, y) => x[0] - y[0]);
+  let total = 0, cs = 0, ce = -Infinity;
+  for (const [a, b] of r) {
+    if (a > ce) { if (ce > cs) total += ce - cs; cs = a; ce = b; }
+    else if (b > ce) ce = b;
+  }
+  if (ce > cs) total += ce - cs;
+  return Math.round(total / 1000);
+}
+function computeAndShowStats(sessions, createdAt) {
+  const withDur = countedSessions(sessions, createdAt);
+  const totalSec = spanSecs(withDur);
 
-  paintLevel(withDur.reduce((t, r) => t + (r.duration_seconds || 0), 0));
+  paintLevel(totalSec);
   if (!withDur.length) {
     document.getElementById('statTime').textContent = '0s';
     document.getElementById('statPeriods').textContent = '0';
@@ -5205,7 +5217,6 @@ function computeAndShowStats(sessions) {
     renderTopGames([]);
     return;
   }
-  const totalSec = withDur.reduce((s, r) => s + (r.duration_seconds || 0), 0);
   document.getElementById('statTime').textContent = secsToHMS(totalSec);
   document.getElementById('statPeriods').textContent = (totalSec / PERIOD_SECS).toFixed(1);
   const counts = {};
@@ -5220,10 +5231,10 @@ function computeAndShowStats(sessions) {
   document.getElementById('statTopPeriod').textContent = top ? top[0] : '—';
 
   // Top 3 games by total playtime
+  const byGame = {};
+  withDur.forEach(s => { if (s.game_id) (byGame[s.game_id] = byGame[s.game_id] || []).push(s); });
   const gameTimes = {};
-  withDur.forEach(s => {
-    if (s.game_id) gameTimes[s.game_id] = (gameTimes[s.game_id] || 0) + (s.duration_seconds || 0);
-  });
+  Object.keys(byGame).forEach(g => { gameTimes[g] = spanSecs(byGame[g]); });
   const top3 = Object.entries(gameTimes).sort((a, b) => b[1] - a[1]).slice(0, 3);
   renderTopGames(top3);
 }
