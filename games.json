@@ -1371,5 +1371,6 @@
 {"id":"webretro","name":"Web Retro","categories":["Apps"],"img":"/thumbs/webretro.webp","src":null,"site":45,"added":"2026-09-30","ranking":1524},
 {"id":"discord","name":"Discord","categories":["Apps"],"img":null,"src":"/unblocker/?url=https://discord.com/app","added":"2026-09-30","ranking":1525},
 {"id":"amazon","name":"Amazon","categories":["Apps"],"img":null,"src":"/unblocker/?url=https://www.amazon.com","added":"2026-09-30","ranking":1526},
-{"id":"bouncy-basketball","name":"Bouncy Basketball","categories":["Sports"],"ranking":1528,"img":"/thumbs/bouncy-basketball.webp","src":null,"site":50,"added":"2026-09-30"}
+{"id":"bouncy-basketball","name":"Bouncy Basketball","categories":["Sports"],"ranking":1528,"img":"/thumbs/bouncy-basketball.webp","src":null,"site":50,"added":"2026-09-30"},
+{"id":"run-billy-run","name":"Run Billy Run","categories":["Platformer"],"ranking":1529,"img":"/thumbs/run-billy-run.webp","src":null,"site":50,"added":"2026-09-30"}
 ]}
