@@ -1786,5 +1786,6 @@
 {"id":"another-gentlemans-adventure","name":"Another Gentleman's Adventure","categories":["Adventure"],"ranking":1940,"img":"/thumbs/another-gentlemans-adventure.webp","src":null,"site":59,"added":"2026-09-30"},
 {"id":"throw-a-potato","name":"Throw a Potato","categories":["Skill"],"ranking":1941,"img":"/thumbs/throw-a-potato.webp","src":null,"site":59,"added":"2026-09-30"},
 {"id":"westoon","name":"Westoon","categories":["Shooter"],"ranking":1942,"img":"/thumbs/westoon.webp","src":null,"site":59,"added":"2026-09-30"},
-{"id":"thumb-fighter-christmas","name":"Thumb Fighter Christmas","categories":["Action"],"ranking":1943,"img":"/thumbs/thumb-fighter-christmas.webp","src":null,"site":59,"added":"2026-09-30"}
+{"id":"thumb-fighter-christmas","name":"Thumb Fighter Christmas","categories":["Action"],"ranking":1943,"img":"/thumbs/thumb-fighter-christmas.webp","src":null,"site":59,"added":"2026-09-30"},
+{"id":"poker","name":"Poker","categories":["Puzzle"],"ranking":1944,"img":"/thumbs/poker.webp","src":null,"site":59,"added":"2026-09-30"}
 ]}
