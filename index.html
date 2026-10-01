@@ -4999,6 +4999,7 @@ async function openProfile() {
 
   paintAvatar(av);
   paintPicker();
+  loadBoardChoice();
   if (signed) {
     document.getElementById('profileUsernameInput').value = name;
     document.getElementById('profilePwSection').style.display = '';
@@ -5007,6 +5008,22 @@ async function openProfile() {
     renderLocalStats();
   }
 }
+
+// "Show me on the leaderboard" (profiles.hide_on_boards, leaderboard.sql).
+// Accounts start shown; the board picks a change up within a minute.
+async function loadBoardChoice() {
+  const sec = document.getElementById('boardSection');
+  sec.hidden = !currentUser;
+  if (!currentUser) return;
+  const { data } = await sb.from('profiles').select('hide_on_boards').eq('id', currentUser.id).maybeSingle();
+  document.getElementById('boardShow').checked = !(data && data.hide_on_boards);
+}
+document.getElementById('boardShow').addEventListener('change', async (e) => {
+  if (!currentUser) return;
+  const show = e.target.checked;
+  const { error } = await sb.from('profiles').update({ hide_on_boards: !show }).eq('id', currentUser.id);
+  if (error) e.target.checked = !show;
+});
 
 // The 42 built-in pictures, and for an account an upload that waits for the
 // owner to approve it.
