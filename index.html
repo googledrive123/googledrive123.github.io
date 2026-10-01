@@ -1897,6 +1897,9 @@
     .profile-name { font-weight: 600; font-size: 1rem; }
     .profile-email { font-size: 0.72rem; color: var(--muted); margin-top: 0.1rem; word-break: break-all; }
     .profile-section { margin-bottom: 1.25rem; }
+    .board-toggle { display: flex; align-items: center; gap: 0.6rem; font-size: 0.85rem; color: var(--muted); cursor: pointer; }
+    .board-toggle input { accent-color: var(--accent); width: 16px; height: 16px; margin: 0; }
+    .board-toggle a { color: var(--text); }
     .profile-section-label {
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.6rem; letter-spacing: 0.22em; text-transform: uppercase;
@@ -5926,6 +5929,13 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
     <div class="profile-section" id="topGamesSection" style="display:none">
       <div class="profile-section-label">Top 3 Games</div>
       <div id="statTopGames"></div>
+    </div>
+
+    <div class="profile-section" id="boardSection" hidden>
+      <label class="board-toggle">
+        <input type="checkbox" id="boardShow" checked>
+        <span>Show me on the <a href="/leaderboard/">leaderboard</a></span>
+      </label>
     </div>
 
     <a class="profile-save profile-link" id="profileTestLink" href="/test/" hidden>Test new games</a>
