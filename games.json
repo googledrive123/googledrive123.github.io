@@ -1471,5 +1471,6 @@
 {"id":"plactions","name":"Plactions","categories":["Skill"],"ranking":1625,"img":"/thumbs/plactions.webp","src":null,"site":53,"added":"2026-09-30"},
 {"id":"rally-champion","name":"Rally Champion","categories":["Racing"],"ranking":1626,"img":"/thumbs/rally-champion.webp","src":null,"site":53,"added":"2026-09-30"},
 {"id":"flip-runner","name":"Flip Runner","categories":["Platformer"],"ranking":1627,"img":"/thumbs/flip-runner.webp","src":null,"site":53,"added":"2026-09-30"},
-{"id":"cannon-strike","name":"Cannon Strike","categories":["Shooter"],"ranking":1628,"img":"/thumbs/cannon-strike.webp","src":null,"site":53,"added":"2026-09-30"}
+{"id":"cannon-strike","name":"Cannon Strike","categories":["Shooter"],"ranking":1628,"img":"/thumbs/cannon-strike.webp","src":null,"site":53,"added":"2026-09-30"},
+{"id":"blobby-clicker","name":"Blobby Clicker","categories":["Idle"],"ranking":1629,"img":"/thumbs/blobby-clicker.webp","src":null,"site":53,"added":"2026-09-30"}
 ]}
