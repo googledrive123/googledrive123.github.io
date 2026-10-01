@@ -1938,5 +1938,6 @@
 {"id":"pixel-gun-apocalypse-2","name":"Pixel Gun Apocalypse 2","categories":["Shooter"],"ranking":2092,"img":"/thumbs/pixel-gun-apocalypse-2.webp","src":null,"site":64,"added":"2026-09-30"},
 {"id":"running-fred","name":"Running Fred","categories":["Platformer"],"ranking":2093,"img":"/thumbs/running-fred.webp","src":null,"site":64,"added":"2026-09-30"},
 {"id":"skyblock","name":"Skyblock","categories":["Sandbox"],"ranking":2094,"img":"/thumbs/skyblock.webp","src":null,"site":64,"added":"2026-09-30"},
-{"id":"president-simulator","name":"President Simulator","categories":["Simulation"],"ranking":2095,"img":"/thumbs/president-simulator.webp","src":null,"site":64,"added":"2026-09-30"}
+{"id":"president-simulator","name":"President Simulator","categories":["Simulation"],"ranking":2095,"img":"/thumbs/president-simulator.webp","src":null,"site":64,"added":"2026-09-30"},
+{"id":"rocket-soccer-derby","name":"Rocket Soccer Derby","categories":["Sports"],"ranking":2096,"img":"/thumbs/rocket-soccer-derby.webp","src":null,"site":64,"added":"2026-09-30"}
 ]}
