@@ -1979,5 +1979,6 @@
 {"id":"ball-mayhem","name":"Ball Mayhem","categories":["Action"],"ranking":2133,"img":"/thumbs/ball-mayhem.webp","src":null,"site":65,"added":"2026-09-30"},
 {"id":"two-timin-towers","name":"Two Timin' Towers","categories":["Platformer"],"ranking":2134,"img":"/thumbs/two-timin-towers.webp","src":null,"site":65,"added":"2026-09-30"},
 {"id":"slimoban-2","name":"Slimoban 2","categories":["Puzzle"],"ranking":2135,"img":"/thumbs/slimoban-2.webp","src":null,"site":65,"added":"2026-09-30"},
-{"id":"spirit-dungeons","name":"Spirit Dungeons","categories":["RPG"],"ranking":2136,"img":"/thumbs/spirit-dungeons.webp","src":null,"site":65,"added":"2026-09-30"}
+{"id":"spirit-dungeons","name":"Spirit Dungeons","categories":["RPG"],"ranking":2136,"img":"/thumbs/spirit-dungeons.webp","src":null,"site":65,"added":"2026-09-30"},
+{"id":"cognite","name":"Cognite","categories":["Puzzle"],"ranking":2137,"img":"/thumbs/cognite.webp","src":null,"site":65,"added":"2026-09-30"}
 ]}
