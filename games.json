@@ -1869,5 +1869,6 @@
 {"id":"magirune","name":"Magirune","categories":["Skill"],"ranking":2023,"img":"/thumbs/magirune.webp","src":null,"site":61,"added":"2026-09-30"},
 {"id":"logica-emotica","name":"Logica Emotica","categories":["Puzzle"],"ranking":2024,"img":"/thumbs/logica-emotica.webp","src":null,"site":61,"added":"2026-09-30"},
 {"id":"hall-of-palettes","name":"Hall Of Palettes","categories":["Puzzle"],"ranking":2025,"img":"/thumbs/hall-of-palettes.webp","src":null,"site":61,"added":"2026-09-30"},
-{"id":"nova-cloudwalkers","name":"Nova Cloudwalkers","categories":["Skill"],"ranking":2026,"img":"/thumbs/nova-cloudwalkers.webp","src":null,"site":61,"added":"2026-09-30"}
+{"id":"nova-cloudwalkers","name":"Nova Cloudwalkers","categories":["Skill"],"ranking":2026,"img":"/thumbs/nova-cloudwalkers.webp","src":null,"site":61,"added":"2026-09-30"},
+{"id":"gods-of-defense","name":"Gods Of Defense","categories":["Strategy"],"ranking":2027,"img":"/thumbs/gods-of-defense.webp","src":null,"site":61,"added":"2026-09-30"}
 ]}
