@@ -1506,5 +1506,6 @@
 {"id":"lethal-sniper-3d-army-soldier","name":"Lethal Sniper 3D Army Soldier","categories":["Shooter"],"ranking":1660,"img":"/thumbs/lethal-sniper-3d-army-soldier.webp","src":null,"site":54,"added":"2026-09-30"},
 {"id":"slime-laboratory","name":"Slime Laboratory","categories":["Platformer"],"ranking":1661,"img":"/thumbs/slime-laboratory.webp","src":null,"site":54,"added":"2026-09-30"},
 {"id":"slope-city","name":"Slope City","categories":["Skill"],"ranking":1662,"img":"/thumbs/slope-city.webp","src":null,"site":54,"added":"2026-09-30"},
-{"id":"hypersnake","name":"Hypersnake","categories":["Arcade"],"ranking":1663,"img":"/thumbs/hypersnake.webp","src":null,"site":54,"added":"2026-09-30"}
+{"id":"hypersnake","name":"Hypersnake","categories":["Arcade"],"ranking":1663,"img":"/thumbs/hypersnake.webp","src":null,"site":54,"added":"2026-09-30"},
+{"id":"shoot-stickman","name":"Shoot Stickman","categories":["Shooter"],"ranking":1664,"img":"/thumbs/shoot-stickman.webp","src":null,"site":54,"added":"2026-09-30"}
 ]}
