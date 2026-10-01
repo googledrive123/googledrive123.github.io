@@ -1899,5 +1899,6 @@
 {"id":"astro-steve-adventure","name":"Astro Steve Adventure","categories":["Adventure"],"ranking":2053,"img":"/thumbs/astro-steve-adventure.webp","src":null,"site":62,"added":"2026-09-30"},
 {"id":"elephant-rave-2","name":"Elephant Rave 2","categories":["Rhythm"],"ranking":2054,"img":"/thumbs/elephant-rave-2.webp","src":null,"site":62,"added":"2026-09-30"},
 {"id":"the-designer","name":"The Designer","categories":["Puzzle"],"ranking":2055,"img":"/thumbs/the-designer.webp","src":null,"site":62,"added":"2026-09-30"},
-{"id":"stress-chess","name":"Stress Chess","categories":["Puzzle"],"ranking":2056,"img":"/thumbs/stress-chess.webp","src":null,"site":62,"added":"2026-09-30"}
+{"id":"stress-chess","name":"Stress Chess","categories":["Puzzle"],"ranking":2056,"img":"/thumbs/stress-chess.webp","src":null,"site":62,"added":"2026-09-30"},
+{"id":"space-order-mine","name":"Space Order Mine","categories":["Skill"],"ranking":2057,"img":"/thumbs/space-order-mine.webp","src":null,"site":62,"added":"2026-09-30"}
 ]}
