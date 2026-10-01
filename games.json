@@ -1453,5 +1453,6 @@
 {"id":"shape-fold","name":"Shape Fold","categories":["Puzzle"],"ranking":1607,"img":"/thumbs/shape-fold.webp","src":null,"site":53,"added":"2026-09-30"},
 {"id":"dead-tree-defender","name":"Dead Tree Defender","categories":["Strategy"],"ranking":1608,"img":"/thumbs/dead-tree-defender.webp","src":null,"site":53,"added":"2026-09-30"},
 {"id":"territory-war","name":"Territory War","categories":["Strategy"],"ranking":1609,"img":"/thumbs/territory-war.webp","src":null,"site":53,"added":"2026-09-30"},
-{"id":"short-ride","name":"Short Ride","categories":["Driving"],"ranking":1610,"img":"/thumbs/short-ride.webp","src":null,"site":53,"added":"2026-09-30"}
+{"id":"short-ride","name":"Short Ride","categories":["Driving"],"ranking":1610,"img":"/thumbs/short-ride.webp","src":null,"site":53,"added":"2026-09-30"},
+{"id":"short-life","name":"Short Life","categories":["Skill"],"ranking":1611,"img":"/thumbs/short-life.webp","src":null,"site":53,"added":"2026-09-30"}
 ]}
