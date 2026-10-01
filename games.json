@@ -1847,5 +1847,6 @@
 {"id":"incub8","name":"Incub8","categories":["Idle"],"ranking":2001,"img":"/thumbs/incub8.webp","src":null,"site":61,"added":"2026-09-30"},
 {"id":"tryh4rd","name":"Tryh4rd","categories":["Platformer"],"ranking":2002,"img":"/thumbs/tryh4rd.webp","src":null,"site":61,"added":"2026-09-30"},
 {"id":"runick","name":"Runick","categories":["RPG"],"ranking":2003,"img":"/thumbs/runick.webp","src":null,"site":61,"added":"2026-09-30"},
-{"id":"laqueus-escape-chapter-5","name":"Laqueus Escape Chapter 5","categories":["Adventure"],"ranking":2004,"img":"/thumbs/laqueus-escape-chapter-5.webp","src":null,"site":61,"added":"2026-09-30"}
+{"id":"laqueus-escape-chapter-5","name":"Laqueus Escape Chapter 5","categories":["Adventure"],"ranking":2004,"img":"/thumbs/laqueus-escape-chapter-5.webp","src":null,"site":61,"added":"2026-09-30"},
+{"id":"drag-box","name":"Drag Box","categories":["Puzzle"],"ranking":2005,"img":"/thumbs/drag-box.webp","src":null,"site":61,"added":"2026-09-30"}
 ]}
