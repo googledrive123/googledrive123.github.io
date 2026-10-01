@@ -4062,16 +4062,11 @@ function closeGame() {
 gameFrame.addEventListener('load', () => {
   // Blanking the frame between games fires this too. Only the real one counts.
   if (!expectLoad) return;
-  // Once per mount: a game that moves its frame to another page loads again.
-  if (introToken !== mountToken) {
-    introToken = mountToken;
-    const wrap = gameFrame.parentElement;
-    wrap.querySelectorAll('.gv-intro').forEach(el => el.remove());
-    playIntro(wrap);
-  }
   clearTimeout(stallTimer);
   loaderSwap.hidden = true;
   gameLoader.classList.add('hidden');
+  // The game is ready, so nobody waits for the rest of the intro.
+  if (introEl) introEl.end();
 });
 gameBack.addEventListener('click', closeGame);
 gameFS.addEventListener('click', () => {
