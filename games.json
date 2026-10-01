@@ -1850,5 +1850,6 @@
 {"id":"laqueus-escape-chapter-5","name":"Laqueus Escape Chapter 5","categories":["Adventure"],"ranking":2004,"img":"/thumbs/laqueus-escape-chapter-5.webp","src":null,"site":61,"added":"2026-09-30"},
 {"id":"drag-box","name":"Drag Box","categories":["Puzzle"],"ranking":2005,"img":"/thumbs/drag-box.webp","src":null,"site":61,"added":"2026-09-30"},
 {"id":"yarn-untangled","name":"Yarn Untangled","categories":["Puzzle"],"ranking":2006,"img":"/thumbs/yarn-untangled.webp","src":null,"site":61,"added":"2026-09-30"},
-{"id":"towerland","name":"Towerland","categories":["Strategy"],"ranking":2007,"img":"/thumbs/towerland.webp","src":null,"site":61,"added":"2026-09-30"}
+{"id":"towerland","name":"Towerland","categories":["Strategy"],"ranking":2007,"img":"/thumbs/towerland.webp","src":null,"site":61,"added":"2026-09-30"},
+{"id":"the-mage","name":"The Mage","categories":["RPG"],"ranking":2008,"img":"/thumbs/the-mage.webp","src":null,"site":61,"added":"2026-09-30"}
 ]}
