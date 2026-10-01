@@ -2000,5 +2000,6 @@
 {"id":"slis","name":"Slis","categories":["Skill"],"ranking":2154,"img":"/thumbs/slis.webp","src":null,"site":66,"added":"2026-09-30"},
 {"id":"oil-race","name":"Oil Race","categories":["Racing"],"ranking":2155,"img":"/thumbs/oil-race.webp","src":null,"site":66,"added":"2026-09-30"},
 {"id":"plants-vs-zombies-2-flash","name":"Plants vs. Zombies 2 (Flash)","categories":["Strategy"],"ranking":2156,"img":"/thumbs/plants-vs-zombies-2-flash.webp","src":null,"site":66,"added":"2026-09-30"},
-{"id":"planet-life","name":"Planet Life","categories":["Simulation"],"ranking":2157,"img":"/thumbs/planet-life.webp","src":null,"site":66,"added":"2026-09-30"}
+{"id":"planet-life","name":"Planet Life","categories":["Simulation"],"ranking":2157,"img":"/thumbs/planet-life.webp","src":null,"site":66,"added":"2026-09-30"},
+{"id":"skiing-fred","name":"Skiing Fred","categories":["Sports"],"ranking":2158,"img":"/thumbs/skiing-fred.webp","src":null,"site":54,"added":"2026-09-30"}
 ]}
