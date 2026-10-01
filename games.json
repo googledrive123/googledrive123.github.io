@@ -1651,5 +1651,6 @@
 {"id":"comic-book-cody","name":"Comic Book Cody","categories":["Adventure"],"ranking":1805,"img":"/thumbs/comic-book-cody.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"hot-dog-bush","name":"Hot Dog Bush","categories":["Action"],"ranking":1806,"img":"/thumbs/hot-dog-bush.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"minhero-tower-of-sages","name":"MinHero: Tower of Sages","categories":["RPG"],"ranking":1807,"img":"/thumbs/minhero-tower-of-sages.webp","src":null,"site":57,"added":"2026-09-30"},
-{"id":"3-pandas-1","name":"3 Pandas 1","categories":["Puzzle"],"ranking":1808,"img":"/thumbs/3-pandas-1.webp","src":null,"site":57,"added":"2026-09-30"}
+{"id":"3-pandas-1","name":"3 Pandas 1","categories":["Puzzle"],"ranking":1808,"img":"/thumbs/3-pandas-1.webp","src":null,"site":57,"added":"2026-09-30"},
+{"id":"shape-switcher","name":"Shape Switcher","categories":["Puzzle"],"ranking":1809,"img":"/thumbs/shape-switcher.webp","src":null,"site":57,"added":"2026-09-30"}
 ]}
