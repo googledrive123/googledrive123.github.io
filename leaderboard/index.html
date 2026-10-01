@@ -25,8 +25,37 @@
   <p class="lede">Who has played the most. Levels come from play time, so the top level and the
   most play time are the same list. Only signed-in accounts are ranked.</p>
 
+  <div class="lb-me panel" id="lbMe" hidden></div>
+
+  <div class="lb-tabs" role="tablist" aria-label="Boards">
+    <button class="lb-tab" role="tab" type="button" data-tab="players" aria-selected="true">Top players</button>
+    <button class="lb-tab" role="tab" type="button" data-tab="week" aria-selected="false">This week</button>
+    <button class="lb-tab" role="tab" type="button" data-tab="games" aria-selected="false">Games</button>
+  </div>
+
   <div class="panel" id="lbPanel">
     <div class="lb-msg" id="lbMsg" role="status">Loading the leaderboard…</div>
+    <div class="table-wrap" id="lbPlayers" hidden>
+      <table class="gv">
+        <thead><tr><th>#</th><th>Player</th><th class="num">Level</th><th class="num">Play time</th><th class="num">Games</th></tr></thead>
+        <tbody id="lbPlayerRows"></tbody>
+      </table>
+    </div>
+    <div class="table-wrap" id="lbWeek" hidden>
+      <table class="gv">
+        <thead><tr><th>#</th><th>Player</th><th class="num">This week</th></tr></thead>
+        <tbody id="lbWeekRows"></tbody>
+      </table>
+    </div>
+    <div id="lbGames" hidden>
+      <input class="field lb-find" id="lbFind" type="search" placeholder="Find a game" autocomplete="off">
+      <div class="table-wrap">
+        <table class="gv">
+          <thead><tr><th>#</th><th>Game</th><th class="num">Play time</th><th class="num">Players</th><th>Top player</th></tr></thead>
+          <tbody id="lbGameRows"></tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
   <p class="panel-note">A session saved twice counts once, and one session counts for at most four
