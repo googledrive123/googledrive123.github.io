@@ -1440,5 +1440,6 @@
 {"id":"drunken-duel","name":"Drunken Duel","categories":["Action"],"ranking":1594,"img":"/thumbs/drunken-duel.webp","src":null,"site":52,"added":"2026-09-30"},
 {"id":"a-pretty-odd-bunny","name":"A Pretty Odd Bunny","categories":["Platformer"],"ranking":1595,"img":"/thumbs/a-pretty-odd-bunny.webp","src":null,"site":52,"added":"2026-09-30"},
 {"id":"cat-trap","name":"Cat Trap","categories":["Puzzle"],"ranking":1596,"img":"/thumbs/cat-trap.webp","src":null,"site":52,"added":"2026-09-30"},
-{"id":"animal-arena","name":"Animal Arena","categories":["Action"],"ranking":1597,"img":"/thumbs/animal-arena.webp","src":null,"site":52,"added":"2026-09-30"}
+{"id":"animal-arena","name":"Animal Arena","categories":["Action"],"ranking":1597,"img":"/thumbs/animal-arena.webp","src":null,"site":52,"added":"2026-09-30"},
+{"id":"poor-bunny","name":"Poor Bunny","categories":["Arcade"],"ranking":1598,"img":"/thumbs/poor-bunny.webp","src":null,"site":52,"added":"2026-09-30"}
 ]}
