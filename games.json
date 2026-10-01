@@ -1571,5 +1571,6 @@
 {"id":"acid-bunny-2","name":"Acid Bunny 2","categories":["Puzzle"],"ranking":1725,"img":"/thumbs/acid-bunny-2.webp","src":null,"site":56,"added":"2026-09-30"},
 {"id":"acid-bunny","name":"Acid Bunny","categories":["Puzzle"],"ranking":1726,"img":"/thumbs/acid-bunny.webp","src":null,"site":56,"added":"2026-09-30"},
 {"id":"bridge-tactics","name":"Bridge Tactics","categories":["Puzzle"],"ranking":1727,"img":"/thumbs/bridge-tactics.webp","src":null,"site":56,"added":"2026-09-30"},
-{"id":"cursed-winds","name":"Cursed Winds","categories":["Skill"],"ranking":1728,"img":"/thumbs/cursed-winds.webp","src":null,"site":56,"added":"2026-09-30"}
+{"id":"cursed-winds","name":"Cursed Winds","categories":["Skill"],"ranking":1728,"img":"/thumbs/cursed-winds.webp","src":null,"site":56,"added":"2026-09-30"},
+{"id":"eco-ego","name":"Eco Ego","categories":["Skill"],"ranking":1729,"img":"/thumbs/eco-ego.webp","src":null,"site":56,"added":"2026-09-30"}
 ]}
