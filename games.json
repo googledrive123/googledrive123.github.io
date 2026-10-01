@@ -1536,5 +1536,6 @@
 {"id":"tiny-town-racing","name":"Tiny Town Racing","categories":["Racing"],"ranking":1690,"img":"/thumbs/tiny-town-racing.webp","src":null,"site":55,"added":"2026-09-30"},
 {"id":"the-little-giant","name":"The Little Giant","categories":["Platformer"],"ranking":1691,"img":"/thumbs/the-little-giant.webp","src":null,"site":55,"added":"2026-09-30"},
 {"id":"tiger-simulator","name":"Tiger Simulator","categories":["Simulation"],"ranking":1692,"img":"/thumbs/tiger-simulator.webp","src":null,"site":55,"added":"2026-09-30"},
-{"id":"temple-of-boom","name":"Temple Of Boom","categories":["Action"],"ranking":1693,"img":"/thumbs/temple-of-boom.webp","src":null,"site":55,"added":"2026-09-30"}
+{"id":"temple-of-boom","name":"Temple Of Boom","categories":["Action"],"ranking":1693,"img":"/thumbs/temple-of-boom.webp","src":null,"site":55,"added":"2026-09-30"},
+{"id":"supernova","name":"Supernova","categories":["Skill"],"ranking":1694,"img":"/thumbs/supernova.webp","src":null,"site":55,"added":"2026-09-30"}
 ]}
