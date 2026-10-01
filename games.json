@@ -1484,5 +1484,6 @@
 {"id":"dark-runner","name":"Dark Runner","categories":["Platformer"],"ranking":1638,"img":"/thumbs/dark-runner.webp","src":null,"site":53,"added":"2026-09-30"},
 {"id":"mafia-wars","name":"Mafia Wars","categories":["Strategy"],"ranking":1639,"img":"/thumbs/mafia-wars.webp","src":null,"site":53,"added":"2026-09-30"},
 {"id":"puppet-master","name":"Puppet Master","categories":["Skill"],"ranking":1640,"img":"/thumbs/puppet-master.webp","src":null,"site":53,"added":"2026-09-30"},
-{"id":"minecraft-builder","name":"Minecraft Builder","categories":["Sandbox"],"ranking":1641,"img":"/thumbs/minecraft-builder.webp","src":null,"site":53,"added":"2026-09-30"}
+{"id":"minecraft-builder","name":"Minecraft Builder","categories":["Sandbox"],"ranking":1641,"img":"/thumbs/minecraft-builder.webp","src":null,"site":53,"added":"2026-09-30"},
+{"id":"noob-hook","name":"Noob Hook","categories":["Skill"],"ranking":1642,"img":"/thumbs/noob-hook.webp","src":null,"site":53,"added":"2026-09-30"}
 ]}
