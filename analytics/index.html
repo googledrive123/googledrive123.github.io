@@ -540,6 +540,18 @@
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function avg(arr) { return arr.length ? arr.reduce(function (a, b) { return a + b; }, 0) / arr.length : 0; }
   function median(arr) { if (!arr.length) return 0; var a = arr.slice().sort(function (x, y) { return x - y; }); return a[Math.floor(a.length / 2)]; }
+  var PLAY_EVENTS = { ping: 1, game_open: 1, game_load: 1, game_close: 1, hidden: 1, session_end: 1 };
+  // The card shows gv_playing_now, the same numbers the home page shows, which
+  // also counts PolyTrack's own presence beat. Until it answers, the rows'
+  // own count stands in.
+  function paintPlayingNow() {
+    var pc = counter();
+    if (state.playingNow) Object.keys(state.playingNow).forEach(function (id) { pc.add((state.titles && state.titles[id]) || (id === 'polytrack' ? 'PolyTrack' : id), state.playingNow[id]); });
+    else (state.playing || []).forEach(function (r) { pc.add(titleOf(r)); });
+    var top = pc.top();
+    $('livePlaying').textContent = fmt(top.reduce(function (n, p) { return n + p[1]; }, 0));
+    $('livePlayingSub').textContent = top.slice(0, 3).map(function (p) { return p[0] + (p[1] > 1 ? ' ×' + p[1] : ''); }).join(', ') || 'nobody in a game';
+  }
   function titleOf(r) { return r.item_title || (state.titles && state.titles[r.game_id]) || r.game_id; }
   function counter() { var m = Object.create(null); return { add: function (k, n) { if (k == null || k === '') k = '(none)'; m[k] = (m[k] || 0) + (n == null ? 1 : n); }, top: function (n) { return Object.keys(m).map(function (k) { return [k, m[k]]; }).sort(function (a, b) { return b[1] - a[1]; }).slice(0, n || 9999); }, get: function (k) { return m[k] || 0; }, size: function () { return Object.keys(m).length; } }; }
   function uniq(rows, key) { var s = Object.create(null); rows.forEach(function (r) { if (r[key]) s[r[key]] = 1; }); return Object.keys(s).length; }
@@ -662,14 +674,13 @@
     var liveVis = uniq(live, 'visitor_id');
     $('liveVisitors').textContent = fmt(liveVis);
     $('liveSub').textContent = fmt(uniq(rows.filter(function (r) { return now - r.tms < 30 * 60000; }), 'visitor_id')) + ' in last 30 min';
-    // playing now: last game event per visitor in the last 10 min is an open/load/ping-with-game
+    // playing now: the rule gv_playing_now uses (analytics/public.sql), so See
+    // who lists the people the card counts. Last of these events per visitor
+    // in the last 4 min, and it has to be an open, load or ping with a game.
     var lastGame = Object.create(null);
-    rows.forEach(function (r) { if (now - r.tms < 10 * 60000 && (r.event === 'game_open' || r.event === 'game_close' || (r.event === 'ping' && r.game_id) || r.event === 'session_end')) lastGame[r.visitor_id] = r; });
-    var playing = Object.keys(lastGame).map(function (v) { return lastGame[v]; }).filter(function (r) { return r.event === 'game_open' || r.event === 'ping'; });
-    state.playing = playing;
-    $('livePlaying').textContent = fmt(playing.length);
-    var pc = counter(); playing.forEach(function (r) { pc.add(titleOf(r)); });
-    $('livePlayingSub').textContent = pc.top(3).map(function (p) { return p[0] + (p[1] > 1 ? ' ×' + p[1] : ''); }).join(', ') || 'nobody in a game';
+    rows.forEach(function (r) { if (now - r.tms < 4 * 60000 && PLAY_EVENTS[r.event]) lastGame[r.visitor_id] = r; });
+    state.playing = Object.keys(lastGame).map(function (v) { return lastGame[v]; }).filter(function (r) { return r.game_id && (r.event === 'game_open' || r.event === 'game_load' || r.event === 'ping'); });
+    paintPlayingNow();
     var last = rows[rows.length - 1];
     $('lastEventAgo').textContent = last ? ago(last.tms) : '–';
     $('lastEventWhat').textContent = last ? (NICE[last.event] || last.event) + (last.item_title ? ': ' + last.item_title : '') : 'no events in range';
@@ -1329,7 +1340,9 @@
     });
     state.live.forEach(function (p) {
       var row = by[p.visitor_id] || (by[p.visitor_id] = { visitor_id: p.visitor_id, user_id: null, game: 'PolyTrack', presence: null });
+      // As gv_playing_now counts them: in PolyTrack, whatever else they had open.
       row.presence = p;
+      row.game = 'PolyTrack';
       row.user_id = row.user_id || p.user_id;
       // PolyTrack says who it is racing as, which may be all there is to go
       // on for someone who has never set a time.
@@ -1460,8 +1473,8 @@
     loading = true;
     var b = rangeBounds();
     $('status').innerHTML = '<span class="dot"></span>Loading…';
-    Promise.all([fetchAll(b.from, b.to), rpc('analytics_overview', { p_secret: state.secret })]).then(function (res) {
-      state.rows = res[0]; state.overview = res[1];
+    Promise.all([fetchAll(b.from, b.to), rpc('analytics_overview', { p_secret: state.secret }), rpc('gv_playing_now', {}).catch(function () { return null; })]).then(function (res) {
+      state.rows = res[0]; state.overview = res[1]; state.playingNow = res[2];
       render(); renderOverview(res[1]);
       loadNames();
       $('status').innerHTML = '<span class="dot"></span>Updated ' + new Date().toLocaleTimeString();
