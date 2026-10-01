@@ -1982,5 +1982,6 @@
 {"id":"spirit-dungeons","name":"Spirit Dungeons","categories":["RPG"],"ranking":2136,"img":"/thumbs/spirit-dungeons.webp","src":null,"site":65,"added":"2026-09-30"},
 {"id":"cognite","name":"Cognite","categories":["Puzzle"],"ranking":2137,"img":"/thumbs/cognite.webp","src":null,"site":65,"added":"2026-09-30"},
 {"id":"mutual-destruction","name":"Mutual Destruction","categories":["Skill"],"ranking":2138,"img":"/thumbs/mutual-destruction.webp","src":null,"site":65,"added":"2026-09-30"},
-{"id":"keyholder","name":"Keyholder","categories":["Puzzle"],"ranking":2139,"img":"/thumbs/keyholder.webp","src":null,"site":65,"added":"2026-09-30"}
+{"id":"keyholder","name":"Keyholder","categories":["Puzzle"],"ranking":2139,"img":"/thumbs/keyholder.webp","src":null,"site":65,"added":"2026-09-30"},
+{"id":"escape-kid","name":"Escape Kid","categories":["Adventure"],"ranking":2140,"img":"/thumbs/escape-kid.webp","src":null,"site":65,"added":"2026-09-30"}
 ]}
