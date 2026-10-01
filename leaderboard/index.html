@@ -17,6 +17,66 @@
   <script src="/js/analytics.js" defer></script>
   <script src="/js/site.js" defer></script>
   <script src="/js/avatars.js" defer></script>
+  <style>
+    /* Rows set their own display, which would otherwise beat hidden. */
+    .page [hidden] { display: none !important; }
+
+    .lb-tabs { display: flex; gap: 0.4rem; margin-top: 1.5rem; flex-wrap: wrap; }
+    .lb-tab {
+      padding: 0.5rem 1rem; border-radius: 100px;
+      border: 1px solid var(--border); background: transparent;
+      color: var(--muted); font: inherit; font-size: 0.85rem; cursor: pointer;
+      transition: all 0.15s;
+    }
+    .lb-tab:hover { color: var(--text); border-color: var(--border-strong); }
+    .lb-tab[aria-selected="true"] { color: var(--text); background: var(--surface); border-color: var(--border-strong); }
+
+    .lb-msg { font-size: 0.88rem; color: var(--muted); }
+    .lb-msg:empty { display: none; }
+    #lbPanel .table-wrap { margin-top: 0; }
+    table.gv th.num, table.gv td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    table.gv td { vertical-align: middle; }
+    table.gv td.rank { color: var(--muted-2); font-family: 'JetBrains Mono', monospace; width: 2.5rem; }
+    tr.top1 td.rank { color: #f0c04a; }
+    tr.top2 td.rank { color: #c9d1dc; }
+    tr.top3 td.rank { color: #d99a62; }
+    tr.mine td { background: rgba(255,59,59,0.07); }
+
+    .lb-who { display: flex; align-items: center; gap: 0.6rem; min-width: 0; }
+    .lb-av { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; background: var(--surface-2); }
+    .lb-name { color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 16rem; }
+    .lb-level {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 2rem; padding: 0.1rem 0.45rem; border-radius: 100px;
+      border: 1px solid rgba(255,59,59,0.45); color: var(--accent);
+      font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
+    }
+
+    .lb-find { margin-bottom: 0.75rem; max-width: 20rem; }
+    .lb-game { display: flex; align-items: center; gap: 0.6rem; color: var(--text); text-decoration: none; }
+    .page a.lb-game { text-decoration: none; }
+    .lb-thumb { width: 44px; height: 28px; border-radius: 6px; flex-shrink: 0; background: var(--surface-2) center / cover no-repeat; }
+    .lb-top { display: flex; align-items: center; gap: 0.45rem; }
+    .lb-top .lb-av { width: 20px; height: 20px; }
+    .lb-top small { color: var(--muted-2); font-size: 0.75rem; }
+    tr.lb-open-row { cursor: pointer; }
+    tr.lb-open-row:hover td { background: rgba(255,255,255,0.03); }
+    tr.lb-detail td { background: var(--bg); padding: 0.4rem 0.85rem 0.85rem; }
+    .lb-detail-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; }
+    .page .lb-detail-list li { margin: 0; display: flex; align-items: center; justify-content: space-between; gap: 1rem; font-size: 0.82rem; }
+
+    .lb-me { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .lb-me .lb-av { width: 40px; height: 40px; }
+    .lb-me-main { flex: 1; min-width: 12rem; }
+    .lb-me-name { color: var(--text); font-weight: 600; }
+    .lb-me-sub { color: var(--muted); font-size: 0.82rem; margin-top: 0.15rem; }
+    .lb-me-rank { font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; color: var(--text); }
+
+    @media (max-width: 560px) {
+      .lb-hide-sm { display: none; }
+      .lb-name { max-width: 9rem; }
+    }
+  </style>
 </head>
 <body>
 <main class="page">
@@ -37,7 +97,7 @@
     <div class="lb-msg" id="lbMsg" role="status">Loading the leaderboard…</div>
     <div class="table-wrap" id="lbPlayers" hidden>
       <table class="gv">
-        <thead><tr><th>#</th><th>Player</th><th class="num">Level</th><th class="num">Play time</th><th class="num">Games</th></tr></thead>
+        <thead><tr><th>#</th><th>Player</th><th class="num">Level</th><th class="num">Play time</th><th class="num lb-hide-sm">Games</th></tr></thead>
         <tbody id="lbPlayerRows"></tbody>
       </table>
     </div>
@@ -51,7 +111,7 @@
       <input class="field lb-find" id="lbFind" type="search" placeholder="Find a game" autocomplete="off">
       <div class="table-wrap">
         <table class="gv">
-          <thead><tr><th>#</th><th>Game</th><th class="num">Play time</th><th class="num">Players</th><th>Top player</th></tr></thead>
+          <thead><tr><th>#</th><th>Game</th><th class="num">Play time</th><th class="num lb-hide-sm">Players</th><th class="lb-hide-sm">Top player</th></tr></thead>
           <tbody id="lbGameRows"></tbody>
         </table>
       </div>
