@@ -1606,5 +1606,6 @@
 {"id":"cursed-travels-flame","name":"Cursed Travels Flame","categories":["Adventure"],"ranking":1760,"img":"/thumbs/cursed-travels-flame.webp","src":null,"site":56,"added":"2026-09-30"},
 {"id":"clickventure","name":"Clickventure","categories":["Adventure"],"ranking":1761,"img":"/thumbs/clickventure.webp","src":null,"site":56,"added":"2026-09-30"},
 {"id":"beam","name":"Beam","categories":["Puzzle"],"ranking":1762,"img":"/thumbs/beam.webp","src":null,"site":56,"added":"2026-09-30"},
-{"id":"a-grim-love-tale","name":"A Grim Love Tale","categories":["Puzzle"],"ranking":1763,"img":"/thumbs/a-grim-love-tale.webp","src":null,"site":56,"added":"2026-09-30"}
+{"id":"a-grim-love-tale","name":"A Grim Love Tale","categories":["Puzzle"],"ranking":1763,"img":"/thumbs/a-grim-love-tale.webp","src":null,"site":56,"added":"2026-09-30"},
+{"id":"a-grim-chase","name":"A Grim Chase","categories":["Puzzle"],"ranking":1764,"img":"/thumbs/a-grim-chase.webp","src":null,"site":56,"added":"2026-09-30"}
 ]}
