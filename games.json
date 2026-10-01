@@ -1855,5 +1855,6 @@
 {"id":"telepobox-2","name":"Telepobox 2","categories":["Puzzle"],"ranking":2009,"img":"/thumbs/telepobox-2.webp","src":null,"site":61,"added":"2026-09-30"},
 {"id":"snail-trail","name":"Snail Trail","categories":["Arcade"],"ranking":2010,"img":"/thumbs/snail-trail.webp","src":null,"site":61,"added":"2026-09-30"},
 {"id":"robox","name":"Robox","categories":["Puzzle"],"ranking":2011,"img":"/thumbs/robox.webp","src":null,"site":61,"added":"2026-09-30"},
-{"id":"reel-deep","name":"Reel Deep","categories":["Skill"],"ranking":2012,"img":"/thumbs/reel-deep.webp","src":null,"site":61,"added":"2026-09-30"}
+{"id":"reel-deep","name":"Reel Deep","categories":["Skill"],"ranking":2012,"img":"/thumbs/reel-deep.webp","src":null,"site":61,"added":"2026-09-30"},
+{"id":"planet-d4rk","name":"Planet D4rk","categories":["Skill"],"ranking":2013,"img":"/thumbs/planet-d4rk.webp","src":null,"site":61,"added":"2026-09-30"}
 ]}
