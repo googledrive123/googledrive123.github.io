@@ -1803,5 +1803,6 @@
 {"id":"miragine-war","name":"Miragine War","categories":["Strategy"],"ranking":1957,"img":"/thumbs/miragine-war.webp","src":null,"site":59,"added":"2026-09-30"},
 {"id":"superfighters","name":"Superfighters","categories":["Action"],"ranking":1958,"img":"/thumbs/superfighters.webp","src":null,"site":59,"added":"2026-09-30"},
 {"id":"party-project","name":"Party Project","categories":["Skill"],"ranking":1959,"img":"/thumbs/party-project.webp","src":null,"site":60,"added":"2026-09-30"},
-{"id":"ng-stars","name":"NG Stars","categories":["Skill"],"ranking":1960,"img":"/thumbs/ng-stars.webp","src":null,"site":60,"added":"2026-09-30"}
+{"id":"ng-stars","name":"NG Stars","categories":["Skill"],"ranking":1960,"img":"/thumbs/ng-stars.webp","src":null,"site":60,"added":"2026-09-30"},
+{"id":"die-in-the-dungeon","name":"Die In The Dungeon","categories":["RPG"],"ranking":1961,"img":"/thumbs/die-in-the-dungeon.webp","src":null,"site":60,"added":"2026-09-30"}
 ]}
