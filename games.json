@@ -1689,5 +1689,6 @@
 {"id":"100-unicorn","name":"$100 Unicorn","categories":["Skill"],"ranking":1843,"img":"/thumbs/100-unicorn.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"the-executor","name":"The Executor","categories":["Action"],"ranking":1844,"img":"/thumbs/the-executor.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"100-player-pong","name":"100 Player Pong","categories":["Arcade"],"ranking":1845,"img":"/thumbs/100-player-pong.webp","src":null,"site":57,"added":"2026-09-30"},
-{"id":"eat-io","name":"Eat.io","categories":["Multiplayer"],"ranking":1846,"img":"/thumbs/eat-io.webp","src":null,"site":58,"added":"2026-09-30"}
+{"id":"eat-io","name":"Eat.io","categories":["Multiplayer"],"ranking":1846,"img":"/thumbs/eat-io.webp","src":null,"site":58,"added":"2026-09-30"},
+{"id":"steal-this-election","name":"Steal this Election","categories":["Arcade"],"ranking":1847,"img":"/thumbs/steal-this-election.webp","src":null,"site":58,"added":"2026-09-30"}
 ]}
