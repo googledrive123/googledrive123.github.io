@@ -1925,5 +1925,6 @@
 {"id":"turbo-motor-racer","name":"Turbo Motor Racer","categories":["Racing"],"ranking":2079,"img":"/thumbs/turbo-motor-racer.webp","src":null,"site":64,"added":"2026-09-30"},
 {"id":"tennis-masters","name":"Tennis Masters","categories":["Sports"],"ranking":2080,"img":"/thumbs/tennis-masters.webp","src":null,"site":64,"added":"2026-09-30"},
 {"id":"superbike-heroes","name":"Superbike Heroes","categories":["Driving"],"ranking":2081,"img":"/thumbs/superbike-heroes.webp","src":null,"site":64,"added":"2026-09-30"},
-{"id":"volleyball-challenge","name":"Volleyball Challenge","categories":["Sports"],"ranking":2082,"img":"/thumbs/volleyball-challenge.webp","src":null,"site":64,"added":"2026-09-30"}
+{"id":"volleyball-challenge","name":"Volleyball Challenge","categories":["Sports"],"ranking":2082,"img":"/thumbs/volleyball-challenge.webp","src":null,"site":64,"added":"2026-09-30"},
+{"id":"pokemon-unbound","name":"Pokemon Unbound","categories":["RPG"],"ranking":2083,"img":"/thumbs/pokemon-unbound.webp","src":null,"site":64,"added":"2026-09-30"}
 ]}
