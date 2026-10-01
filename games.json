@@ -1951,5 +1951,6 @@
 {"id":"sink-it","name":"Sink It","categories":["Puzzle"],"ranking":2105,"img":"/thumbs/sink-it.webp","src":null,"site":64,"added":"2026-09-30"},
 {"id":"tiny-heist","name":"Tiny Heist","categories":["Puzzle"],"ranking":2106,"img":"/thumbs/tiny-heist.webp","src":null,"site":64,"added":"2026-09-30"},
 {"id":"blumgi-paintball","name":"Blumgi Paintball","categories":["Shooter"],"ranking":2107,"img":"/thumbs/blumgi-paintball.webp","src":null,"site":64,"added":"2026-09-30"},
-{"id":"badegg-io","name":"Badegg.io","categories":["Multiplayer"],"ranking":2108,"img":"/thumbs/badegg-io.webp","src":null,"site":65,"added":"2026-09-30"}
+{"id":"badegg-io","name":"Badegg.io","categories":["Multiplayer"],"ranking":2108,"img":"/thumbs/badegg-io.webp","src":null,"site":65,"added":"2026-09-30"},
+{"id":"cactus-mccoy","name":"Cactus McCoy","categories":["Action"],"ranking":2109,"img":"/thumbs/cactus-mccoy.webp","src":null,"site":65,"added":"2026-09-30"}
 ]}
