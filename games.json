@@ -1603,5 +1603,6 @@
 {"id":"gragyriss","name":"Gragyriss","categories":["RPG"],"ranking":1757,"img":"/thumbs/gragyriss.webp","src":null,"site":56,"added":"2026-09-30"},
 {"id":"gem-twins","name":"Gem Twins","categories":["Puzzle"],"ranking":1758,"img":"/thumbs/gem-twins.webp","src":null,"site":56,"added":"2026-09-30"},
 {"id":"dinogen-arena","name":"Dinogen Arena","categories":["Action"],"ranking":1759,"img":"/thumbs/dinogen-arena.webp","src":null,"site":56,"added":"2026-09-30"},
-{"id":"cursed-travels-flame","name":"Cursed Travels Flame","categories":["Adventure"],"ranking":1760,"img":"/thumbs/cursed-travels-flame.webp","src":null,"site":56,"added":"2026-09-30"}
+{"id":"cursed-travels-flame","name":"Cursed Travels Flame","categories":["Adventure"],"ranking":1760,"img":"/thumbs/cursed-travels-flame.webp","src":null,"site":56,"added":"2026-09-30"},
+{"id":"clickventure","name":"Clickventure","categories":["Adventure"],"ranking":1761,"img":"/thumbs/clickventure.webp","src":null,"site":56,"added":"2026-09-30"}
 ]}
