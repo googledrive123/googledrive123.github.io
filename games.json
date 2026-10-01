@@ -1384,5 +1384,6 @@
 {"id":"winter-gifts","name":"Winter Gifts","categories":["Puzzle"],"ranking":1538,"img":"/thumbs/winter-gifts.webp","src":null,"site":50,"added":"2026-09-30"},
 {"id":"tough-growth","name":"Tough Growth","categories":["Puzzle"],"ranking":1539,"img":"/thumbs/tough-growth.webp","src":null,"site":50,"added":"2026-09-30"},
 {"id":"the-dark-one","name":"The Dark One","categories":["Horror"],"ranking":1540,"img":"/thumbs/the-dark-one.webp","src":null,"site":50,"added":"2026-09-30"},
-{"id":"tactical-weapon-pack","name":"Tactical Weapon Pack","categories":["Shooter"],"ranking":1541,"img":"/thumbs/tactical-weapon-pack.webp","src":null,"site":50,"added":"2026-09-30"}
+{"id":"tactical-weapon-pack","name":"Tactical Weapon Pack","categories":["Shooter"],"ranking":1541,"img":"/thumbs/tactical-weapon-pack.webp","src":null,"site":50,"added":"2026-09-30"},
+{"id":"soul-mirror","name":"Soul Mirror","categories":["Puzzle"],"ranking":1542,"img":"/thumbs/soul-mirror.webp","src":null,"site":50,"added":"2026-09-30"}
 ]}
