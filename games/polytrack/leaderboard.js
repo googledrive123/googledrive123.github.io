@@ -6,9 +6,11 @@
 // set here is ranked against everyone else who plays here.
 //
 // It works by standing in front of XMLHttpRequest rather than by editing
-// main.bundle.js. The game's bundle stays byte-for-byte what Kodub shipped,
-// which means dropping in a newer PolyTrack does not mean redoing any of this.
-// Anything not addressed to vps.kodub.com is handed to the real XHR untouched.
+// main.bundle.js. The game's bundle stays what Kodub shipped, which means
+// dropping in a newer PolyTrack does not mean redoing any of this, with one
+// exception: the weekly challenge's line in the finish handler (see "Weekly
+// challenge" below). Anything not addressed to vps.kodub.com is handed to the
+// real XHR untouched.
 //
 // Loaded before main.bundle.js in index.html. Must stay before it: the game
 // captures XMLHttpRequest when its own module initialises.
@@ -259,6 +261,11 @@
         // against. Already URL-safe as the game writes it.
         p_recording: q.recording || null
       }).then(function () {
+        if (challenge) {
+          challenge.then(function (c) {
+            if (c && c.trackId === trackId && (c.best == null || frames < c.best)) c.best = frames;
+          });
+        }
         return getBoard({ trackId: trackId, skip: '0', amount: '1' });
       }).then(function (after) {
         var entry = after.userEntry;
@@ -512,6 +519,67 @@
     return rpc('polytrack_claim', { p_visitor_id: visitorId() })
       .catch(function (err) { console.error('[leaderboard]', err); });
   }
+
+  // ── Weekly challenge ──────────────────────────────────────────────────
+  // The game only uploads a run that beats the player's own best on the
+  // track. The challenge counts any run that beats their best this week
+  // (challenge/challenge.sql), so a run slower than an old personal best can
+  // still belong on it. main.bundle.js is changed in one place for this:
+  // where the finish handler finds a run is not a new best, it calls
+  // window.gvRunFinished(trackId, frames, recording, profileSlot). A newer
+  // PolyTrack needs that line put back in.
+  //
+  // Such a run goes up through polytrack_submit like any other. The board
+  // keeps the player's faster time, and the challenge picks up this one.
+
+  // Often enough that a new week's track is noticed in a long session.
+  var CHALLENGE_TTL_MS = 5 * 60 * 1000;
+  var challenge = null;
+  var challengeAt = 0;
+
+  // The week's track and the player's best on it this week, in frames.
+  function currentChallenge() {
+    if (challenge && Date.now() - challengeAt < CHALLENGE_TTL_MS) return challenge;
+    challengeAt = Date.now();
+    challenge = settled().then(function () {
+      return rpc('gv_challenge_current', { p_visitor_id: visitorId() });
+    }).then(function (r) {
+      var c = r && r.challenge;
+      return c ? { trackId: c.track_id, best: r.you ? r.you.frames : null } : null;
+    }).catch(function (err) {
+      console.error('[leaderboard]', err);
+      challengeAt = 0;
+      return null;
+    });
+    return challenge;
+  }
+
+  // The game's own profile for the slot being raced, for the country and car
+  // it sends with every run.
+  function gameProfile(slot) {
+    try { return JSON.parse(localStorage.getItem('polytrack_v5_prod_user_' + slot) || 'null'); }
+    catch (e) { return null; }
+  }
+
+  window.gvRunFinished = function (trackId, frames, recording, slot) {
+    currentChallenge().then(function (c) {
+      if (!c || c.trackId !== trackId) return;
+      if (c.best != null && frames >= c.best) return;
+      var gv = identity();
+      var profile = gameProfile(slot) || {};
+      return rpc('polytrack_submit', {
+        p_track_id: trackId,
+        p_frames: frames,
+        p_nickname: gv ? gv.publicName() : (profile.nickname || 'Player'),
+        p_country_code: profile.countryCode || null,
+        p_car_style: typeof profile.carStyle === 'string' ? profile.carStyle : null,
+        p_visitor_id: visitorId(),
+        p_recording: recording && recording.serialize ? recording.serialize() : null
+      }).then(function () {
+        if (c.best == null || frames < c.best) c.best = frames;
+      });
+    }).catch(function (err) { console.error('[leaderboard]', err); });
+  };
 
   // ── Replays kept from before ──────────────────────────────────────────
   // Every time on the board set before replays were kept has none, but the
