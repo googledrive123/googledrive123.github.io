@@ -1601,5 +1601,6 @@
 {"id":"knight-errant","name":"Knight Errant","categories":["RPG"],"ranking":1755,"img":"/thumbs/knight-errant.webp","src":null,"site":56,"added":"2026-09-30"},
 {"id":"hexologic","name":"Hexologic","categories":["Puzzle"],"ranking":1756,"img":"/thumbs/hexologic.webp","src":null,"site":56,"added":"2026-09-30"},
 {"id":"gragyriss","name":"Gragyriss","categories":["RPG"],"ranking":1757,"img":"/thumbs/gragyriss.webp","src":null,"site":56,"added":"2026-09-30"},
-{"id":"gem-twins","name":"Gem Twins","categories":["Puzzle"],"ranking":1758,"img":"/thumbs/gem-twins.webp","src":null,"site":56,"added":"2026-09-30"}
+{"id":"gem-twins","name":"Gem Twins","categories":["Puzzle"],"ranking":1758,"img":"/thumbs/gem-twins.webp","src":null,"site":56,"added":"2026-09-30"},
+{"id":"dinogen-arena","name":"Dinogen Arena","categories":["Action"],"ranking":1759,"img":"/thumbs/dinogen-arena.webp","src":null,"site":56,"added":"2026-09-30"}
 ]}
