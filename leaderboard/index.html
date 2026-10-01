@@ -237,15 +237,16 @@
     body.textContent = '';
     var q = $('lbFind').value.trim().toLowerCase();
     var shown = 0;
-    data.games.forEach(function (row, i) {
-      var g = catalog[row.id];
-      if (!g) return;
+    data.games.forEach(function (row) {
+      // A game the catalog does not know (or a catalog that did not load)
+      // still shows, under its id.
+      var g = catalog[row.id] || { id: row.id, name: row.id };
       if (q && g.name.toLowerCase().indexOf(q) === -1) return;
       shown++;
       var tr = document.createElement('tr');
       tr.className = 'lb-open-row';
       tr.dataset.game = row.id;
-      tr.appendChild(td('rank', String(i + 1)));
+      tr.appendChild(td('rank', String(row.rank)));
       tr.appendChild(td('', gameLink(g)));
       tr.appendChild(td('num', hours(row.sec)));
       tr.appendChild(td('num lb-hide-sm', String(row.players)));
@@ -278,18 +279,19 @@
     sb.rpc('gv_leaderboard_game', { p_game_id: tr.dataset.game }).then(function (r) {
       if (r.error) throw new Error(r.error.message);
       var list = r.data || [];
+      if (!(window.GV && GV.avatars)) return list;
       return GV.avatars.publicProfiles(list.map(function (p) { return p.id; })).then(function (rows) {
         rows.forEach(function (p) { people[p.id] = p; });
         return list;
-      });
+      }).catch(function () { return list; });
     }).then(function (list) {
       var ol = document.createElement('ol');
       ol.className = 'lb-detail-list';
-      list.forEach(function (p, i) {
+      list.forEach(function (p) {
         var li = document.createElement('li');
         var left = who(p.id, true);
         var n = document.createElement('small');
-        n.textContent = '#' + (i + 1);
+        n.textContent = '#' + p.rank;
         left.prepend(n);
         var right = document.createElement('span');
         right.textContent = hours(p.sec);
@@ -320,6 +322,10 @@
       a.href = '/';
       a.textContent = 'Sign in';
       box.append(main, a);
+    } else if (data.me && data.me.hidden) {
+      name.textContent = (people[session.user.id] || {}).username || 'You';
+      sub.textContent = 'You are hidden from the leaderboard. Turn it back on in your profile on the home page.';
+      box.append(main);
     } else if (!data.me) {
       name.textContent = (people[session.user.id] || {}).username || 'You';
       sub.textContent = 'Play a game while signed in to get on the board.';
@@ -334,7 +340,7 @@
         data.me.games + (data.me.games === 1 ? ' game' : ' games');
       var rank = document.createElement('div');
       rank.className = 'lb-me-rank';
-      rank.textContent = '#' + data.me.rank + ' of ' + data.me.of;
+      rank.textContent = '#' + data.me.rank + ' of ' + data.of;
       box.append(av, main, rank);
     }
     box.hidden = false;
