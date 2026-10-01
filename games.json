@@ -1550,5 +1550,6 @@
 {"id":"stickman-bridge-constructor","name":"Stickman Bridge Constructor","categories":["Puzzle"],"ranking":1704,"img":"/thumbs/stickman-bridge-constructor.webp","src":null,"site":55,"added":"2026-09-30"},
 {"id":"stickman-bike","name":"Stickman Bike","categories":["Driving"],"ranking":1705,"img":"/thumbs/stickman-bike.webp","src":null,"site":55,"added":"2026-09-30"},
 {"id":"stick-fighters","name":"Stick Fighters","categories":["Action"],"ranking":1706,"img":"/thumbs/stick-fighters.webp","src":null,"site":55,"added":"2026-09-30"},
-{"id":"stick-defenders","name":"Stick Defenders","categories":["Strategy"],"ranking":1707,"img":"/thumbs/stick-defenders.webp","src":null,"site":55,"added":"2026-09-30"}
+{"id":"stick-defenders","name":"Stick Defenders","categories":["Strategy"],"ranking":1707,"img":"/thumbs/stick-defenders.webp","src":null,"site":55,"added":"2026-09-30"},
+{"id":"stair-race-3d","name":"Stair Race 3D","categories":["Racing"],"ranking":1708,"img":"/thumbs/stair-race-3d.webp","src":null,"site":55,"added":"2026-09-30"}
 ]}
