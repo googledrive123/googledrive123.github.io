@@ -1914,5 +1914,6 @@
 {"id":"mini-magbot","name":"Mini Magbot","categories":["Platformer"],"ranking":2068,"img":"/thumbs/mini-magbot.webp","src":null,"site":63,"added":"2026-09-30"},
 {"id":"driftmania","name":"Driftmania","categories":["Racing"],"ranking":2069,"img":"/thumbs/driftmania.webp","src":null,"site":63,"added":"2026-09-30"},
 {"id":"club-tycoon","name":"Club Tycoon","categories":["Idle"],"ranking":2070,"img":"/thumbs/club-tycoon.webp","src":null,"site":63,"added":"2026-09-30"},
-{"id":"blasting-marbles","name":"Blasting Marbles","categories":["Puzzle"],"ranking":2071,"img":"/thumbs/blasting-marbles.webp","src":null,"site":63,"added":"2026-09-30"}
+{"id":"blasting-marbles","name":"Blasting Marbles","categories":["Puzzle"],"ranking":2071,"img":"/thumbs/blasting-marbles.webp","src":null,"site":63,"added":"2026-09-30"},
+{"id":"resent-client","name":"Resent Client","categories":["Sandbox"],"ranking":2072,"img":"/thumbs/resent-client.webp","src":null,"site":63,"added":"2026-09-30"}
 ]}
