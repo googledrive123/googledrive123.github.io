@@ -1929,5 +1929,6 @@
 {"id":"pokemon-unbound","name":"Pokemon Unbound","categories":["RPG"],"ranking":2083,"img":"/thumbs/pokemon-unbound.webp","src":null,"site":64,"added":"2026-09-30"},
 {"id":"big-flappy-tower-tiny-square","name":"Big Flappy Tower Tiny Square","categories":["Platformer"],"ranking":2084,"img":"/thumbs/big-flappy-tower-tiny-square.webp","src":null,"site":64,"added":"2026-09-30"},
 {"id":"cherry-on-the-ice-cream","name":"Cherry On The Ice Cream","categories":["Puzzle"],"ranking":2085,"img":"/thumbs/cherry-on-the-ice-cream.webp","src":null,"site":64,"added":"2026-09-30"},
-{"id":"real-garbage-truck","name":"Real Garbage Truck","categories":["Driving"],"ranking":2086,"img":"/thumbs/real-garbage-truck.webp","src":null,"site":64,"added":"2026-09-30"}
+{"id":"real-garbage-truck","name":"Real Garbage Truck","categories":["Driving"],"ranking":2086,"img":"/thumbs/real-garbage-truck.webp","src":null,"site":64,"added":"2026-09-30"},
+{"id":"free-kick-classic","name":"Free Kick Classic","categories":["Sports"],"ranking":2087,"img":"/thumbs/free-kick-classic.webp","src":null,"site":64,"added":"2026-09-30"}
 ]}
