@@ -3830,7 +3830,8 @@ let mounted = null;
 // answer about an earlier mount from one about this one.
 let mountedFrom = null;
 let mountToken = 0;
-let introToken = -1;
+// The intro playing over the frame, if any.
+let introEl = null;
 
 // Which copy this browser has been told to run, by game id: 'vault' or 'src'.
 // Survives reloads, so someone on a network that blocks one picks once and it
@@ -3910,6 +3911,21 @@ function paintSwap(g, where) {
   loaderSwap.textContent = label;
 }
 
+// The intro covers the frame while a game loads, with the loader quiet under
+// it. If the game is still loading when the intro is over, the loader's
+// spinner fades in. A switch to the other copy mid-intro keeps the intro.
+function showIntro() {
+  if (introEl && introEl.isConnected && !introEl.classList.contains('leaving')) return;
+  gameLoader.classList.add('quiet');
+  introEl = playIntro(gameFrame.parentElement, () => gameLoader.classList.remove('quiet'));
+  if (!introEl) gameLoader.classList.remove('quiet');
+}
+function dropIntro() {
+  if (introEl) introEl.remove();
+  introEl = null;
+  gameLoader.classList.remove('quiet');
+}
+
 function mountGame(g, where) {
   mounted = g;
   where = where || sourceFor(g);
@@ -3922,6 +3938,7 @@ function mountGame(g, where) {
   gameNewTab.href = where === 'src' ? url : url + (url.includes('?') ? '&' : '?') + 'solo';
   gameLoaderText.textContent = 'Loading game…';
   gameLoader.classList.remove('hidden');
+  showIntro();
   paintSwap(g, where);
   clearTimeout(stallTimer);
   expectLoad = false;
