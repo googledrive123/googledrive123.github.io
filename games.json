@@ -1658,5 +1658,6 @@
 {"id":"strike-force-kitty-3","name":"Strike Force Kitty 3","categories":["Action"],"ranking":1812,"img":"/thumbs/strike-force-kitty-3.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"sugar-sugar","name":"Sugar, Sugar","categories":["Puzzle"],"ranking":1813,"img":"/thumbs/sugar-sugar.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"algaes-escapade","name":"Algaes Escapade","categories":["Platformer"],"ranking":1814,"img":"/thumbs/algaes-escapade.webp","src":null,"site":57,"added":"2026-09-30"},
-{"id":"alien-invasion","name":"Alien Invasion","categories":["Shooter"],"ranking":1815,"img":"/thumbs/alien-invasion.webp","src":null,"site":57,"added":"2026-09-30"}
+{"id":"alien-invasion","name":"Alien Invasion","categories":["Shooter"],"ranking":1815,"img":"/thumbs/alien-invasion.webp","src":null,"site":57,"added":"2026-09-30"},
+{"id":"appel","name":"Appel","categories":["Platformer"],"ranking":1816,"img":"/thumbs/appel.webp","src":null,"site":57,"added":"2026-09-30"}
 ]}
