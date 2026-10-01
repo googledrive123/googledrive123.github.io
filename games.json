@@ -1595,5 +1595,6 @@
 {"id":"scalak","name":"Scalak","categories":["RPG"],"ranking":1749,"img":"/thumbs/scalak.webp","src":null,"site":56,"added":"2026-09-30"},
 {"id":"sabotage","name":"Sabotage","categories":["Puzzle"],"ranking":1750,"img":"/thumbs/sabotage.webp","src":null,"site":56,"added":"2026-09-30"},
 {"id":"roots","name":"Roots","categories":["Puzzle"],"ranking":1751,"img":"/thumbs/roots.webp","src":null,"site":56,"added":"2026-09-30"},
-{"id":"rogue-fable-3","name":"Rogue Fable 3","categories":["RPG"],"ranking":1752,"img":"/thumbs/rogue-fable-3.webp","src":null,"site":56,"added":"2026-09-30"}
+{"id":"rogue-fable-3","name":"Rogue Fable 3","categories":["RPG"],"ranking":1752,"img":"/thumbs/rogue-fable-3.webp","src":null,"site":56,"added":"2026-09-30"},
+{"id":"pixoji","name":"Pixoji","categories":["Puzzle"],"ranking":1753,"img":"/thumbs/pixoji.webp","src":null,"site":56,"added":"2026-09-30"}
 ]}
