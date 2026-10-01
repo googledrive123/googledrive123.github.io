@@ -1788,5 +1788,6 @@
 {"id":"westoon","name":"Westoon","categories":["Shooter"],"ranking":1942,"img":"/thumbs/westoon.webp","src":null,"site":59,"added":"2026-09-30"},
 {"id":"thumb-fighter-christmas","name":"Thumb Fighter Christmas","categories":["Action"],"ranking":1943,"img":"/thumbs/thumb-fighter-christmas.webp","src":null,"site":59,"added":"2026-09-30"},
 {"id":"poker","name":"Poker","categories":["Puzzle"],"ranking":1944,"img":"/thumbs/poker.webp","src":null,"site":59,"added":"2026-09-30"},
-{"id":"leader-strike","name":"Leader Strike","categories":["Shooter"],"ranking":1945,"img":"/thumbs/leader-strike.webp","src":null,"site":59,"added":"2026-09-30"}
+{"id":"leader-strike","name":"Leader Strike","categories":["Shooter"],"ranking":1945,"img":"/thumbs/leader-strike.webp","src":null,"site":59,"added":"2026-09-30"},
+{"id":"idle-digging-tycoon","name":"Idle Digging Tycoon","categories":["Idle"],"ranking":1946,"img":"/thumbs/idle-digging-tycoon.webp","src":null,"site":59,"added":"2026-09-30"}
 ]}
