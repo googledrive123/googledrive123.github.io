@@ -1714,7 +1714,7 @@
 {"id":"retro-speed","name":"Retro Speed","categories":["Racing"],"ranking":1868,"img":"/thumbs/retro-speed.webp","src":null,"site":58,"added":"2026-09-30"},
 {"id":"army-of-silverite","name":"Army of Silverite","categories":["Action"],"ranking":1869,"img":"/thumbs/army-of-silverite.webp","src":null,"site":58,"added":"2026-09-30"},
 {"id":"multiplayer-pong","name":"Multiplayer Pong","categories":["Arcade"],"ranking":1870,"img":null,"src":null,"site":58,"added":"2026-09-30"},
-{"id":"pokey-stick","name":"Pokey Stick","categories":["Skill"],"ranking":1871,"img":null,"src":null,"site":58,"added":"2026-09-30"},
+{"id":"pokey-stick","name":"Pokey Stick","categories":["Skill"],"ranking":1871,"img":"/thumbs/pokey-stick.webp","src":null,"site":58,"added":"2026-09-30"},
 {"id":"rodeo-stampede","name":"Rodeo Stampede","categories":["Simulation"],"ranking":1872,"img":"/thumbs/rodeo-stampede.webp","src":null,"site":58,"added":"2026-09-30"},
 {"id":"thats-not-my-scratcher","name":"That's Not My Scratcher","categories":["Horror"],"ranking":1873,"img":"/thumbs/thats-not-my-scratcher.webp","src":null,"site":58,"added":"2026-09-30"},
 {"id":"risk","name":"Risk","categories":["Strategy"],"ranking":1874,"img":"/thumbs/risk.webp","src":null,"site":58,"added":"2026-09-30"},
