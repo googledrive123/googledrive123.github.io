@@ -1686,5 +1686,6 @@
 {"id":"terrain-generator","name":"Terrain Generator","categories":["Sandbox"],"ranking":1840,"img":"/thumbs/terrain-generator.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"the-ninja","name":"The Ninja","categories":["Platformer"],"ranking":1841,"img":"/thumbs/the-ninja.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"the-ninja-5-hacked","name":"The Ninja 5 Hacked","categories":["Platformer"],"ranking":1842,"img":"/thumbs/the-ninja-5-hacked.webp","src":null,"site":57,"added":"2026-09-30"},
-{"id":"100-unicorn","name":"$100 Unicorn","categories":["Skill"],"ranking":1843,"img":"/thumbs/100-unicorn.webp","src":null,"site":57,"added":"2026-09-30"}
+{"id":"100-unicorn","name":"$100 Unicorn","categories":["Skill"],"ranking":1843,"img":"/thumbs/100-unicorn.webp","src":null,"site":57,"added":"2026-09-30"},
+{"id":"the-executor","name":"The Executor","categories":["Action"],"ranking":1844,"img":"/thumbs/the-executor.webp","src":null,"site":57,"added":"2026-09-30"}
 ]}
