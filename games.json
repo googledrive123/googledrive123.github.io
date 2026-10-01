@@ -1469,5 +1469,6 @@
 {"id":"cave-blast","name":"Cave Blast","categories":["Skill"],"ranking":1623,"img":"/thumbs/cave-blast.webp","src":null,"site":53,"added":"2026-09-30"},
 {"id":"switchblade","name":"Switchblade","categories":["Action"],"ranking":1624,"img":"/thumbs/switchblade.webp","src":null,"site":53,"added":"2026-09-30"},
 {"id":"plactions","name":"Plactions","categories":["Skill"],"ranking":1625,"img":"/thumbs/plactions.webp","src":null,"site":53,"added":"2026-09-30"},
-{"id":"rally-champion","name":"Rally Champion","categories":["Racing"],"ranking":1626,"img":"/thumbs/rally-champion.webp","src":null,"site":53,"added":"2026-09-30"}
+{"id":"rally-champion","name":"Rally Champion","categories":["Racing"],"ranking":1626,"img":"/thumbs/rally-champion.webp","src":null,"site":53,"added":"2026-09-30"},
+{"id":"flip-runner","name":"Flip Runner","categories":["Platformer"],"ranking":1627,"img":"/thumbs/flip-runner.webp","src":null,"site":53,"added":"2026-09-30"}
 ]}
