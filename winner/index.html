@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Winner · GameVault</title>
-  <meta name="description" content="Reveal the latest GameVault giveaway or monthly challenge winner.">
+  <meta name="description" content="Reveal the latest GameVault giveaway or weekly challenge winner.">
   <link rel="icon" href="/favicon.svg">
   <!-- Blocking on purpose: the cloak has to land before the first paint. -->
   <script src="/js/mimicry.js"></script>
@@ -144,7 +144,7 @@
 <main class="page">
   <div class="page-kicker">winner</div>
   <h1>And the winner is…</h1>
-  <p class="lede">The latest giveaway or monthly challenge winner, hidden under the card.</p>
+  <p class="lede">The latest giveaway or weekly challenge winner, hidden under the card.</p>
 
   <div class="wn-stage" id="wnStage">
     <button class="wn-card" id="wnCard" type="button" disabled>
@@ -164,10 +164,10 @@
   </div>
 
   <p class="wn-empty" id="wnEmpty" hidden>No winner yet. The first one shows up here after a
-  giveaway is drawn or a monthly challenge ends.</p>
+  giveaway is drawn or a weekly challenge ends.</p>
   <div class="btn-row wn-links">
     <a class="btn" href="/giveaway/">Giveaway</a>
-    <a class="btn" href="/challenge/">Monthly challenge</a>
+    <a class="btn" href="/challenge/">Weekly challenge</a>
   </div>
 
 <script>
@@ -187,20 +187,23 @@
   var card = $('wnCard');
   var winner = null;
 
-  // '2026-09-01' as "September 2026", read as UTC so it never slips a month.
-  function monthName(day, opts) {
-    var p = String(day || '').split('-');
-    var d = new Date(Date.UTC(+p[0], +p[1] - 1, 1));
-    if (isNaN(d.getTime())) return '';
-    return d.toLocaleDateString(undefined, opts || { month: 'long', year: 'numeric', timeZone: 'UTC' });
+  // A challenge from its first day to its last, as "Sep 28 – Oct 4", read as
+  // UTC so it never slips a day. endedAt is the moment it ended, at midnight.
+  function span(starts, endedAt) {
+    var p = String(starts || '').split('-');
+    var a = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2]));
+    var b = new Date(Date.parse(endedAt) - 1);
+    if (isNaN(a.getTime()) || isNaN(b.getTime())) return '';
+    var o = { month: 'short', day: 'numeric', timeZone: 'UTC' };
+    return a.toLocaleDateString(undefined, o) + ' \u2013 ' + b.toLocaleDateString(undefined, o);
   }
 
   // Whichever came last: the latest giveaway draw, or the latest challenge
-  // month the owner has closed. A month still being checked has no winner yet.
-  function latest(giveaway, months) {
+  // the owner has closed. A week still being checked has no winner yet.
+  function latest(giveaway, past) {
     var g = giveaway && giveaway.last_winner;
     var m = null;
-    (months || []).some(function (x) {
+    (past || []).some(function (x) {
       if (x.closed && x.winner) { m = x; return true; }
       return false;
     });
@@ -216,10 +219,10 @@
       you: !!g.won
     };
     var b = m && {
-      key: 'c' + m.month,
+      key: 'c' + m.starts,
       at: Date.parse(m.closed_at),
-      kind: 'Challenge · ' + monthName(m.month, { month: 'long', timeZone: 'UTC' }),
-      label: monthName(m.month) + ' challenge winner',
+      kind: 'Challenge · ' + span(m.starts, m.ended_at),
+      label: 'Challenge winner, ' + span(m.starts, m.ended_at),
       name: m.winner.nickname,
       what: m.title + ' in ' + m.winner.time,
       you: false
