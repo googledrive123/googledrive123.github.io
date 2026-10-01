@@ -1619,5 +1619,6 @@
 {"id":"shortcut-race","name":"Shortcut Race","categories":["Racing"],"ranking":1773,"img":"/thumbs/shortcut-race.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"alien-thief","name":"Alien Thief","categories":["Puzzle"],"ranking":1774,"img":"/thumbs/alien-thief.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"checkpoint","name":"Checkpoint","categories":["Platformer"],"ranking":1775,"img":"/thumbs/checkpoint.webp","src":null,"site":57,"added":"2026-09-30"},
-{"id":"chimney-trouble","name":"Chimney Trouble","categories":["Puzzle"],"ranking":1776,"img":"/thumbs/chimney-trouble.webp","src":null,"site":57,"added":"2026-09-30"}
+{"id":"chimney-trouble","name":"Chimney Trouble","categories":["Puzzle"],"ranking":1776,"img":"/thumbs/chimney-trouble.webp","src":null,"site":57,"added":"2026-09-30"},
+{"id":"disaster-will-strike","name":"Disaster Will Strike","categories":["Puzzle"],"ranking":1777,"img":"/thumbs/disaster-will-strike.webp","src":null,"site":57,"added":"2026-09-30"}
 ]}
