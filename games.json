@@ -1504,5 +1504,6 @@
 {"id":"death-chase","name":"Death Chase","categories":["Driving"],"ranking":1658,"img":"/thumbs/death-chase.webp","src":null,"site":54,"added":"2026-09-30"},
 {"id":"jumping-shell","name":"Jumping Shell","categories":["Platformer"],"ranking":1659,"img":"/thumbs/jumping-shell.webp","src":null,"site":54,"added":"2026-09-30"},
 {"id":"lethal-sniper-3d-army-soldier","name":"Lethal Sniper 3D Army Soldier","categories":["Shooter"],"ranking":1660,"img":"/thumbs/lethal-sniper-3d-army-soldier.webp","src":null,"site":54,"added":"2026-09-30"},
-{"id":"slime-laboratory","name":"Slime Laboratory","categories":["Platformer"],"ranking":1661,"img":"/thumbs/slime-laboratory.webp","src":null,"site":54,"added":"2026-09-30"}
+{"id":"slime-laboratory","name":"Slime Laboratory","categories":["Platformer"],"ranking":1661,"img":"/thumbs/slime-laboratory.webp","src":null,"site":54,"added":"2026-09-30"},
+{"id":"slope-city","name":"Slope City","categories":["Skill"],"ranking":1662,"img":"/thumbs/slope-city.webp","src":null,"site":54,"added":"2026-09-30"}
 ]}
