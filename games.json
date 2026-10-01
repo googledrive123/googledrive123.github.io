@@ -1636,5 +1636,6 @@
 {"id":"mini-train","name":"Mini Train","categories":["Puzzle"],"ranking":1790,"img":"/thumbs/mini-train.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"scrap-metal-heroes","name":"Scrap Metal Heroes","categories":["Action"],"ranking":1791,"img":"/thumbs/scrap-metal-heroes.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"shape-shifter","name":"Shape Shifter","categories":["Puzzle"],"ranking":1792,"img":"/thumbs/shape-shifter.webp","src":null,"site":57,"added":"2026-09-30"},
-{"id":"square-hero","name":"Square Hero","categories":["Platformer"],"ranking":1793,"img":"/thumbs/square-hero.webp","src":null,"site":57,"added":"2026-09-30"}
+{"id":"square-hero","name":"Square Hero","categories":["Platformer"],"ranking":1793,"img":"/thumbs/square-hero.webp","src":null,"site":57,"added":"2026-09-30"},
+{"id":"tarzan-ball","name":"Tarzan Ball","categories":["Platformer"],"ranking":1794,"img":"/thumbs/tarzan-ball.webp","src":null,"site":57,"added":"2026-09-30"}
 ]}
