@@ -74,7 +74,15 @@
 
     @media (max-width: 560px) {
       .lb-hide-sm { display: none; }
-      .lb-name { max-width: 9rem; }
+      /* Fixed columns, so a long name shrinks instead of pushing the play
+         time off the screen. */
+      #lbPanel table.gv { table-layout: fixed; }
+      #lbPanel table.gv th, #lbPanel table.gv td { padding-left: 0.45rem; padding-right: 0.45rem; }
+      #lbPanel table.gv th:first-child { width: 2.25rem; }
+      #lbPanel table.gv th.num { width: 5.25rem; }
+      .lb-name { max-width: none; }
+      .lb-who, .lb-game { min-width: 0; }
+      .lb-game span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     }
   </style>
 </head>
