@@ -1773,5 +1773,6 @@
 {"id":"top-speed-3d","name":"Top Speed 3D","categories":["Racing"],"ranking":1927,"img":"/thumbs/top-speed-3d.webp","src":null,"site":59,"added":"2026-09-30"},
 {"id":"timber-man","name":"Timber Man","categories":["Arcade"],"ranking":1928,"img":"/thumbs/timber-man.webp","src":null,"site":59,"added":"2026-09-30"},
 {"id":"idle-ants","name":"Idle Ants","categories":["Idle"],"ranking":1929,"img":"/thumbs/idle-ants.webp","src":null,"site":59,"added":"2026-09-30"},
-{"id":"zompocalypse","name":"Zompocalypse","categories":["Action"],"ranking":1930,"img":"/thumbs/zompocalypse.webp","src":null,"site":59,"added":"2026-09-30"}
+{"id":"zompocalypse","name":"Zompocalypse","categories":["Action"],"ranking":1930,"img":"/thumbs/zompocalypse.webp","src":null,"site":59,"added":"2026-09-30"},
+{"id":"crossy-cat","name":"Crossy Cat","categories":["Arcade"],"ranking":1931,"img":"/thumbs/crossy-cat.webp","src":null,"site":59,"added":"2026-09-30"}
 ]}
