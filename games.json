@@ -1765,5 +1765,6 @@
 {"id":"cities-of-babylon","name":"Cities Of Babylon","categories":["Strategy"],"ranking":1919,"img":"/thumbs/cities-of-babylon.webp","src":null,"site":59,"added":"2026-09-30"},
 {"id":"tower-defense-2d","name":"Tower Defense 2D","categories":["Strategy"],"ranking":1920,"img":"/thumbs/tower-defense-2d.webp","src":null,"site":59,"added":"2026-09-30"},
 {"id":"push-the-box","name":"Push The Box","categories":["Puzzle"],"ranking":1921,"img":"/thumbs/push-the-box.webp","src":null,"site":59,"added":"2026-09-30"},
-{"id":"moto-maniac-3","name":"Moto Maniac 3","categories":["Driving"],"ranking":1922,"img":"/thumbs/moto-maniac-3.webp","src":null,"site":59,"added":"2026-09-30"}
+{"id":"moto-maniac-3","name":"Moto Maniac 3","categories":["Driving"],"ranking":1922,"img":"/thumbs/moto-maniac-3.webp","src":null,"site":59,"added":"2026-09-30"},
+{"id":"sausage-flipping","name":"Sausage Flipping","categories":["Skill"],"ranking":1923,"img":"/thumbs/sausage-flipping.webp","src":null,"site":59,"added":"2026-09-30"}
 ]}
