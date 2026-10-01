@@ -1480,5 +1480,6 @@
 {"id":"james-gun","name":"James Gun","categories":["Shooter"],"ranking":1634,"img":"/thumbs/james-gun.webp","src":null,"site":53,"added":"2026-09-30"},
 {"id":"decent","name":"Decent","categories":["Skill"],"ranking":1635,"img":"/thumbs/decent.webp","src":null,"site":53,"added":"2026-09-30"},
 {"id":"cow-bay","name":"Cow Bay","categories":["Simulation"],"ranking":1636,"img":"/thumbs/cow-bay.webp","src":null,"site":53,"added":"2026-09-30"},
-{"id":"cricket-world-cup","name":"Cricket World Cup","categories":["Sports"],"ranking":1637,"img":"/thumbs/cricket-world-cup.webp","src":null,"site":53,"added":"2026-09-30"}
+{"id":"cricket-world-cup","name":"Cricket World Cup","categories":["Sports"],"ranking":1637,"img":"/thumbs/cricket-world-cup.webp","src":null,"site":53,"added":"2026-09-30"},
+{"id":"dark-runner","name":"Dark Runner","categories":["Platformer"],"ranking":1638,"img":"/thumbs/dark-runner.webp","src":null,"site":53,"added":"2026-09-30"}
 ]}
