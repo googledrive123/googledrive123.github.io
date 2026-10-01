@@ -1411,5 +1411,6 @@
 {"id":"marble-dash","name":"Marble Dash","categories":["Puzzle"],"ranking":1565,"img":"/thumbs/marble-dash.webp","src":null,"site":51,"added":"2026-09-30"},
 {"id":"mob-city","name":"Mob City","categories":["Action"],"ranking":1566,"img":"/thumbs/mob-city.webp","src":null,"site":51,"added":"2026-09-30"},
 {"id":"mystical-birdlink","name":"Mystical Birdlink","categories":["Puzzle"],"ranking":1567,"img":"/thumbs/mystical-birdlink.webp","src":null,"site":51,"added":"2026-09-30"},
-{"id":"bladers","name":"Bladers","categories":["Action"],"ranking":1568,"img":"/thumbs/bladers.webp","src":null,"site":51,"added":"2026-09-30"}
+{"id":"bladers","name":"Bladers","categories":["Action"],"ranking":1568,"img":"/thumbs/bladers.webp","src":null,"site":51,"added":"2026-09-30"},
+{"id":"car-simulator-arena","name":"Car Simulator Arena","categories":["Driving"],"ranking":1569,"img":"/thumbs/car-simulator-arena.webp","src":null,"site":51,"added":"2026-09-30"}
 ]}
