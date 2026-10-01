@@ -1751,5 +1751,6 @@
 {"id":"room-clicker","name":"Room Clicker","categories":["Idle"],"ranking":1905,"img":"/thumbs/room-clicker.webp","src":null,"site":58,"added":"2026-09-30"},
 {"id":"ping-pong-chaos","name":"Ping Pong Chaos","categories":["Sports"],"ranking":1906,"img":"/thumbs/ping-pong-chaos.webp","src":null,"site":58,"added":"2026-09-30"},
 {"id":"death-run","name":"Death Run","categories":["Platformer"],"ranking":1907,"img":"/thumbs/death-run.webp","src":null,"site":58,"added":"2026-09-30"},
-{"id":"mirror-madness","name":"Mirror Madness","categories":["Puzzle"],"ranking":1908,"img":"/thumbs/mirror-madness.webp","src":null,"site":58,"added":"2026-09-30"}
+{"id":"mirror-madness","name":"Mirror Madness","categories":["Puzzle"],"ranking":1908,"img":"/thumbs/mirror-madness.webp","src":null,"site":58,"added":"2026-09-30"},
+{"id":"red-vs-blue","name":"Red vs Blue","categories":["Action"],"ranking":1909,"img":"/thumbs/red-vs-blue.webp","src":null,"site":58,"added":"2026-09-30"}
 ]}
