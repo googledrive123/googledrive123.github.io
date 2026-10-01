@@ -1865,5 +1865,6 @@
 {"id":"forward-winds","name":"Forward Winds","categories":["Action"],"ranking":2019,"img":"/thumbs/forward-winds.webp","src":null,"site":61,"added":"2026-09-30"},
 {"id":"fluctuoid","name":"Fluctuoid","categories":["Skill"],"ranking":2020,"img":"/thumbs/fluctuoid.webp","src":null,"site":61,"added":"2026-09-30"},
 {"id":"cursed-travels-a-forgotten-seal","name":"Cursed Travels: A Forgotten Seal","categories":["Adventure"],"ranking":2021,"img":"/thumbs/cursed-travels-a-forgotten-seal.webp","src":null,"site":61,"added":"2026-09-30"},
-{"id":"blacken-slash-demo","name":"Blacken Slash Demo","categories":["Action"],"ranking":2022,"img":"/thumbs/blacken-slash-demo.webp","src":null,"site":61,"added":"2026-09-30"}
+{"id":"blacken-slash-demo","name":"Blacken Slash Demo","categories":["Action"],"ranking":2022,"img":"/thumbs/blacken-slash-demo.webp","src":null,"site":61,"added":"2026-09-30"},
+{"id":"magirune","name":"Magirune","categories":["Skill"],"ranking":2023,"img":"/thumbs/magirune.webp","src":null,"site":61,"added":"2026-09-30"}
 ]}
