@@ -1852,5 +1852,6 @@
 {"id":"yarn-untangled","name":"Yarn Untangled","categories":["Puzzle"],"ranking":2006,"img":"/thumbs/yarn-untangled.webp","src":null,"site":61,"added":"2026-09-30"},
 {"id":"towerland","name":"Towerland","categories":["Strategy"],"ranking":2007,"img":"/thumbs/towerland.webp","src":null,"site":61,"added":"2026-09-30"},
 {"id":"the-mage","name":"The Mage","categories":["RPG"],"ranking":2008,"img":"/thumbs/the-mage.webp","src":null,"site":61,"added":"2026-09-30"},
-{"id":"telepobox-2","name":"Telepobox 2","categories":["Puzzle"],"ranking":2009,"img":"/thumbs/telepobox-2.webp","src":null,"site":61,"added":"2026-09-30"}
+{"id":"telepobox-2","name":"Telepobox 2","categories":["Puzzle"],"ranking":2009,"img":"/thumbs/telepobox-2.webp","src":null,"site":61,"added":"2026-09-30"},
+{"id":"snail-trail","name":"Snail Trail","categories":["Arcade"],"ranking":2010,"img":"/thumbs/snail-trail.webp","src":null,"site":61,"added":"2026-09-30"}
 ]}
