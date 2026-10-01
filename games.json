@@ -1790,5 +1790,6 @@
 {"id":"poker","name":"Poker","categories":["Puzzle"],"ranking":1944,"img":"/thumbs/poker.webp","src":null,"site":59,"added":"2026-09-30"},
 {"id":"leader-strike","name":"Leader Strike","categories":["Shooter"],"ranking":1945,"img":"/thumbs/leader-strike.webp","src":null,"site":59,"added":"2026-09-30"},
 {"id":"idle-digging-tycoon","name":"Idle Digging Tycoon","categories":["Idle"],"ranking":1946,"img":"/thumbs/idle-digging-tycoon.webp","src":null,"site":59,"added":"2026-09-30"},
-{"id":"bomber-royale","name":"Bomber Royale","categories":["Action"],"ranking":1947,"img":"/thumbs/bomber-royale.webp","src":null,"site":59,"added":"2026-09-30"}
+{"id":"bomber-royale","name":"Bomber Royale","categories":["Action"],"ranking":1947,"img":"/thumbs/bomber-royale.webp","src":null,"site":59,"added":"2026-09-30"},
+{"id":"just-passing-2","name":"Just Passing 2","categories":["Puzzle"],"ranking":1948,"img":"/thumbs/just-passing-2.webp","src":null,"site":59,"added":"2026-09-30"}
 ]}
