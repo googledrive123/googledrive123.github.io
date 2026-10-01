@@ -1890,5 +1890,6 @@
 {"id":"slime-knight","name":"Slime Knight","categories":["RPG"],"ranking":2044,"img":"/thumbs/slime-knight.webp","src":null,"site":62,"added":"2026-09-30"},
 {"id":"platformation","name":"Platformation","categories":["Platformer"],"ranking":2045,"img":"/thumbs/platformation.webp","src":null,"site":62,"added":"2026-09-30"},
 {"id":"ninja-kite","name":"Ninja Kite","categories":["Action"],"ranking":2046,"img":"/thumbs/ninja-kite.webp","src":null,"site":62,"added":"2026-09-30"},
-{"id":"mutato-potato","name":"Mutato Potato","categories":["Skill"],"ranking":2047,"img":"/thumbs/mutato-potato.webp","src":null,"site":62,"added":"2026-09-30"}
+{"id":"mutato-potato","name":"Mutato Potato","categories":["Skill"],"ranking":2047,"img":"/thumbs/mutato-potato.webp","src":null,"site":62,"added":"2026-09-30"},
+{"id":"mini-rocket","name":"Mini Rocket","categories":["Skill"],"ranking":2048,"img":"/thumbs/mini-rocket.webp","src":null,"site":62,"added":"2026-09-30"}
 ]}
