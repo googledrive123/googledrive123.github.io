@@ -1621,5 +1621,6 @@
 {"id":"checkpoint","name":"Checkpoint","categories":["Platformer"],"ranking":1775,"img":"/thumbs/checkpoint.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"chimney-trouble","name":"Chimney Trouble","categories":["Puzzle"],"ranking":1776,"img":"/thumbs/chimney-trouble.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"disaster-will-strike","name":"Disaster Will Strike","categories":["Puzzle"],"ranking":1777,"img":"/thumbs/disaster-will-strike.webp","src":null,"site":57,"added":"2026-09-30"},
-{"id":"drake-and-the-wizards","name":"Drake and the Wizards","categories":["RPG"],"ranking":1778,"img":"/thumbs/drake-and-the-wizards.webp","src":null,"site":57,"added":"2026-09-30"}
+{"id":"drake-and-the-wizards","name":"Drake and the Wizards","categories":["RPG"],"ranking":1778,"img":"/thumbs/drake-and-the-wizards.webp","src":null,"site":57,"added":"2026-09-30"},
+{"id":"electric-man-2","name":"Electric Man 2","categories":["Action"],"ranking":1779,"img":"/thumbs/electric-man-2.webp","src":null,"site":57,"added":"2026-09-30"}
 ]}
