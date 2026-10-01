@@ -1679,5 +1679,6 @@
 {"id":"radius-raid","name":"Radius Raid","categories":["Shooter"],"ranking":1833,"img":"/thumbs/radius-raid.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"retrohaunt","name":"Retrohaunt","categories":["Horror"],"ranking":1834,"img":"/thumbs/retrohaunt.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"roadblocks","name":"Roadblocks","categories":["Puzzle"],"ranking":1835,"img":"/thumbs/roadblocks.webp","src":null,"site":57,"added":"2026-09-30"},
-{"id":"sleeping-beauty","name":"Sleeping Beauty","categories":["RPG"],"ranking":1836,"img":"/thumbs/sleeping-beauty.webp","src":null,"site":57,"added":"2026-09-30"}
+{"id":"sleeping-beauty","name":"Sleeping Beauty","categories":["RPG"],"ranking":1836,"img":"/thumbs/sleeping-beauty.webp","src":null,"site":57,"added":"2026-09-30"},
+{"id":"space-huggers","name":"Space Huggers","categories":["Platformer"],"ranking":1837,"img":"/thumbs/space-huggers.webp","src":null,"site":57,"added":"2026-09-30"}
 ]}
