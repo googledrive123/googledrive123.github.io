@@ -1730,5 +1730,6 @@
 {"id":"deeper-sleep","name":"Deeper Sleep","categories":["Horror"],"ranking":1884,"img":"/thumbs/deeper-sleep.webp","src":null,"site":58,"added":"2026-09-30"},
 {"id":"the-deepest-sleep","name":"The Deepest Sleep","categories":["Horror"],"ranking":1885,"img":"/thumbs/the-deepest-sleep.webp","src":null,"site":58,"added":"2026-09-30"},
 {"id":"unloop","name":"Unloop","categories":["Puzzle"],"ranking":1886,"img":"/thumbs/unloop.webp","src":null,"site":56,"added":"2026-09-30"},
-{"id":"blue","name":"Blue","categories":["Puzzle"],"ranking":1887,"img":"/thumbs/blue.webp","src":null,"site":56,"added":"2026-09-30"}
+{"id":"blue","name":"Blue","categories":["Puzzle"],"ranking":1887,"img":"/thumbs/blue.webp","src":null,"site":56,"added":"2026-09-30"},
+{"id":"green","name":"Green","categories":["Puzzle"],"ranking":1888,"img":"/thumbs/green.webp","src":null,"site":56,"added":"2026-09-30"}
 ]}
