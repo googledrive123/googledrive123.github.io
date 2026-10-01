@@ -1449,5 +1449,6 @@
 {"id":"blumgi-ball","name":"Blumgi Ball","categories":["Platformer"],"ranking":1603,"img":"/thumbs/blumgi-ball.webp","src":null,"site":53,"added":"2026-09-30"},
 {"id":"alien-invaders-io","name":"Alien Invaders.io","categories":["Multiplayer"],"ranking":1604,"img":"/thumbs/alien-invaders-io.webp","src":null,"site":53,"added":"2026-09-30"},
 {"id":"clash-of-tanks","name":"Clash Of Tanks","categories":["Shooter"],"ranking":1605,"img":"/thumbs/clash-of-tanks.webp","src":null,"site":53,"added":"2026-09-30"},
-{"id":"battle-golf","name":"Battle Golf","categories":["Sports"],"ranking":1606,"img":"/thumbs/battle-golf.webp","src":null,"site":53,"added":"2026-09-30"}
+{"id":"battle-golf","name":"Battle Golf","categories":["Sports"],"ranking":1606,"img":"/thumbs/battle-golf.webp","src":null,"site":53,"added":"2026-09-30"},
+{"id":"shape-fold","name":"Shape Fold","categories":["Puzzle"],"ranking":1607,"img":"/thumbs/shape-fold.webp","src":null,"site":53,"added":"2026-09-30"}
 ]}
