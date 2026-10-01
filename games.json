@@ -1502,5 +1502,6 @@
 {"id":"darts-pro","name":"Darts Pro","categories":["Sports"],"ranking":1656,"img":"/thumbs/darts-pro.webp","src":null,"site":54,"added":"2026-09-30"},
 {"id":"chicky-farm","name":"Chicky Farm","categories":["Simulation"],"ranking":1657,"img":"/thumbs/chicky-farm.webp","src":null,"site":54,"added":"2026-09-30"},
 {"id":"death-chase","name":"Death Chase","categories":["Driving"],"ranking":1658,"img":"/thumbs/death-chase.webp","src":null,"site":54,"added":"2026-09-30"},
-{"id":"jumping-shell","name":"Jumping Shell","categories":["Platformer"],"ranking":1659,"img":"/thumbs/jumping-shell.webp","src":null,"site":54,"added":"2026-09-30"}
+{"id":"jumping-shell","name":"Jumping Shell","categories":["Platformer"],"ranking":1659,"img":"/thumbs/jumping-shell.webp","src":null,"site":54,"added":"2026-09-30"},
+{"id":"lethal-sniper-3d-army-soldier","name":"Lethal Sniper 3D Army Soldier","categories":["Shooter"],"ranking":1660,"img":"/thumbs/lethal-sniper-3d-army-soldier.webp","src":null,"site":54,"added":"2026-09-30"}
 ]}
