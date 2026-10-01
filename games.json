@@ -1548,5 +1548,6 @@
 {"id":"stickman-crazy-box","name":"Stickman Crazy Box","categories":["Action"],"ranking":1702,"img":"/thumbs/stickman-crazy-box.webp","src":null,"site":55,"added":"2026-09-30"},
 {"id":"stickman-climb-2","name":"Stickman Climb 2","categories":["Skill"],"ranking":1703,"img":"/thumbs/stickman-climb-2.webp","src":null,"site":55,"added":"2026-09-30"},
 {"id":"stickman-bridge-constructor","name":"Stickman Bridge Constructor","categories":["Puzzle"],"ranking":1704,"img":"/thumbs/stickman-bridge-constructor.webp","src":null,"site":55,"added":"2026-09-30"},
-{"id":"stickman-bike","name":"Stickman Bike","categories":["Driving"],"ranking":1705,"img":"/thumbs/stickman-bike.webp","src":null,"site":55,"added":"2026-09-30"}
+{"id":"stickman-bike","name":"Stickman Bike","categories":["Driving"],"ranking":1705,"img":"/thumbs/stickman-bike.webp","src":null,"site":55,"added":"2026-09-30"},
+{"id":"stick-fighters","name":"Stick Fighters","categories":["Action"],"ranking":1706,"img":"/thumbs/stick-fighters.webp","src":null,"site":55,"added":"2026-09-30"}
 ]}
