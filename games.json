@@ -1933,5 +1933,6 @@
 {"id":"free-kick-classic","name":"Free Kick Classic","categories":["Sports"],"ranking":2087,"img":"/thumbs/free-kick-classic.webp","src":null,"site":64,"added":"2026-09-30"},
 {"id":"jewels-blitz-2","name":"Jewels Blitz 2","categories":["Puzzle"],"ranking":2088,"img":"/thumbs/jewels-blitz-2.webp","src":null,"site":64,"added":"2026-09-30"},
 {"id":"rise-of-neon-square","name":"Rise Of Neon Square","categories":["Platformer"],"ranking":2089,"img":"/thumbs/rise-of-neon-square.webp","src":null,"site":64,"added":"2026-09-30"},
-{"id":"b-side","name":"B-Side","categories":["Skill"],"ranking":2090,"img":"/thumbs/b-side.webp","src":null,"site":64,"added":"2026-09-30"}
+{"id":"b-side","name":"B-Side","categories":["Skill"],"ranking":2090,"img":"/thumbs/b-side.webp","src":null,"site":64,"added":"2026-09-30"},
+{"id":"baw","name":"Baw","categories":["Skill"],"ranking":2091,"img":"/thumbs/baw.webp","src":null,"site":64,"added":"2026-09-30"}
 ]}
