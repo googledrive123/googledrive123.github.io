@@ -364,8 +364,12 @@
     try { history.replaceState(null, '', tab === 'players' ? location.pathname : '#' + tab); } catch (e) {}
   }
 
-  function load() {
+  function load(tries) {
     return sb.rpc('gv_leaderboard').then(function (r) {
+      // The very first visit can find the board still being worked out.
+      if (r.error && (tries || 0) < 3) {
+        return new Promise(function (res) { setTimeout(res, 1500); }).then(function () { return load((tries || 0) + 1); });
+      }
       if (r.error) throw new Error(r.error.message);
       data = r.data;
       var ids = data.players.concat(data.week).map(function (p) { return p.id; })
