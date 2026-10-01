@@ -1988,5 +1988,6 @@
 {"id":"cloudhopper","name":"Cloudhopper","categories":["Platformer"],"ranking":2142,"img":"/thumbs/cloudhopper.webp","src":null,"site":66,"added":"2026-09-30"},
 {"id":"notebook-jam","name":"Notebook Jam","categories":["Skill"],"ranking":2143,"img":"/thumbs/notebook-jam.webp","src":null,"site":66,"added":"2026-09-30"},
 {"id":"sum-lines","name":"Sum Lines","categories":["Puzzle"],"ranking":2144,"img":"/thumbs/sum-lines.webp","src":null,"site":66,"added":"2026-09-30"},
-{"id":"murder-is-game-over","name":"Murder Is Game Over","categories":["Horror"],"ranking":2145,"img":"/thumbs/murder-is-game-over.webp","src":null,"site":66,"added":"2026-09-30"}
+{"id":"murder-is-game-over","name":"Murder Is Game Over","categories":["Horror"],"ranking":2145,"img":"/thumbs/murder-is-game-over.webp","src":null,"site":66,"added":"2026-09-30"},
+{"id":"marcus-osnail","name":"Marcus O'Snail","categories":["Platformer"],"ranking":2146,"img":"/thumbs/marcus-osnail.webp","src":null,"site":66,"added":"2026-09-30"}
 ]}
