@@ -1640,5 +1640,6 @@
 {"id":"tarzan-ball","name":"Tarzan Ball","categories":["Platformer"],"ranking":1794,"img":"/thumbs/tarzan-ball.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"truck-loader","name":"Truck Loader","categories":["Puzzle"],"ranking":1795,"img":"/thumbs/truck-loader.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"working-stiffs","name":"Working Stiffs","categories":["Puzzle"],"ranking":1796,"img":"/thumbs/working-stiffs.webp","src":null,"site":57,"added":"2026-09-30"},
-{"id":"finding-santa","name":"Finding Santa","categories":["Adventure"],"ranking":1797,"img":"/thumbs/finding-santa.webp","src":null,"site":57,"added":"2026-09-30"}
+{"id":"finding-santa","name":"Finding Santa","categories":["Adventure"],"ranking":1797,"img":"/thumbs/finding-santa.webp","src":null,"site":57,"added":"2026-09-30"},
+{"id":"haunt-the-house","name":"Haunt the House","categories":["Horror"],"ranking":1798,"img":"/thumbs/haunt-the-house.webp","src":null,"site":57,"added":"2026-09-30"}
 ]}
