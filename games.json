@@ -1905,5 +1905,6 @@
 {"id":"last-plant-on-earth","name":"Last Plant On Earth","categories":["Skill"],"ranking":2059,"img":"/thumbs/last-plant-on-earth.webp","src":null,"site":62,"added":"2026-09-30"},
 {"id":"gloop","name":"Gloop","categories":["Skill"],"ranking":2060,"img":"/thumbs/gloop.webp","src":null,"site":62,"added":"2026-09-30"},
 {"id":"doubleup","name":"Doubleup","categories":["Skill"],"ranking":2061,"img":"/thumbs/doubleup.webp","src":null,"site":62,"added":"2026-09-30"},
-{"id":"toms-trial","name":"Tom's Trial","categories":["Skill"],"ranking":2062,"img":"/thumbs/toms-trial.webp","src":null,"site":62,"added":"2026-09-30"}
+{"id":"toms-trial","name":"Tom's Trial","categories":["Skill"],"ranking":2062,"img":"/thumbs/toms-trial.webp","src":null,"site":62,"added":"2026-09-30"},
+{"id":"jetpack-kiwi","name":"Jetpack Kiwi","categories":["Platformer"],"ranking":2063,"img":"/thumbs/jetpack-kiwi.webp","src":null,"site":62,"added":"2026-09-30"}
 ]}
