@@ -1759,5 +1759,6 @@
 {"id":"tanked-up","name":"Tanked Up","categories":["Shooter"],"ranking":1913,"img":"/thumbs/tanked-up.webp","src":null,"site":59,"added":"2026-09-30"},
 {"id":"backgammon","name":"Backgammon","categories":["Puzzle"],"ranking":1914,"img":"/thumbs/backgammon.webp","src":null,"site":59,"added":"2026-09-30"},
 {"id":"rogue-soul","name":"Rogue Soul","categories":["Platformer"],"ranking":1915,"img":"/thumbs/rogue-soul.webp","src":null,"site":59,"added":"2026-09-30"},
-{"id":"rogue-soul-2","name":"Rogue Soul 2","categories":["Platformer"],"ranking":1916,"img":"/thumbs/rogue-soul-2.webp","src":null,"site":59,"added":"2026-09-30"}
+{"id":"rogue-soul-2","name":"Rogue Soul 2","categories":["Platformer"],"ranking":1916,"img":"/thumbs/rogue-soul-2.webp","src":null,"site":59,"added":"2026-09-30"},
+{"id":"arrow","name":"Arrow","categories":["Puzzle"],"ranking":1917,"img":"/thumbs/arrow.webp","src":null,"site":59,"added":"2026-09-30"}
 ]}
