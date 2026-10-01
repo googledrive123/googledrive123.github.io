@@ -1713,5 +1713,6 @@
 {"id":"pizza-challenge","name":"Pizza Challenge","categories":["Skill"],"ranking":1867,"img":"/thumbs/pizza-challenge.webp","src":null,"site":58,"added":"2026-09-30"},
 {"id":"retro-speed","name":"Retro Speed","categories":["Racing"],"ranking":1868,"img":"/thumbs/retro-speed.webp","src":null,"site":58,"added":"2026-09-30"},
 {"id":"army-of-silverite","name":"Army of Silverite","categories":["Action"],"ranking":1869,"img":"/thumbs/army-of-silverite.webp","src":null,"site":58,"added":"2026-09-30"},
-{"id":"multiplayer-pong","name":"Multiplayer Pong","categories":["Arcade"],"ranking":1870,"img":null,"src":null,"site":58,"added":"2026-09-30"}
+{"id":"multiplayer-pong","name":"Multiplayer Pong","categories":["Arcade"],"ranking":1870,"img":null,"src":null,"site":58,"added":"2026-09-30"},
+{"id":"pokey-stick","name":"Pokey Stick","categories":["Skill"],"ranking":1871,"img":null,"src":null,"site":58,"added":"2026-09-30"}
 ]}
