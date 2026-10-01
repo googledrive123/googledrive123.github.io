@@ -1760,5 +1760,6 @@
 {"id":"backgammon","name":"Backgammon","categories":["Puzzle"],"ranking":1914,"img":"/thumbs/backgammon.webp","src":null,"site":59,"added":"2026-09-30"},
 {"id":"rogue-soul","name":"Rogue Soul","categories":["Platformer"],"ranking":1915,"img":"/thumbs/rogue-soul.webp","src":null,"site":59,"added":"2026-09-30"},
 {"id":"rogue-soul-2","name":"Rogue Soul 2","categories":["Platformer"],"ranking":1916,"img":"/thumbs/rogue-soul-2.webp","src":null,"site":59,"added":"2026-09-30"},
-{"id":"arrow","name":"Arrow","categories":["Puzzle"],"ranking":1917,"img":"/thumbs/arrow.webp","src":null,"site":59,"added":"2026-09-30"}
+{"id":"arrow","name":"Arrow","categories":["Puzzle"],"ranking":1917,"img":"/thumbs/arrow.webp","src":null,"site":59,"added":"2026-09-30"},
+{"id":"assembloid","name":"Assembloid","categories":["Puzzle"],"ranking":1918,"img":"/thumbs/assembloid.webp","src":null,"site":59,"added":"2026-09-30"}
 ]}
