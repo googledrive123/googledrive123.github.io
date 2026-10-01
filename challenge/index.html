@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Challenge · GameVault</title>
-  <meta name="description" content="One PolyTrack track a month. Set the fastest time on it before the month ends and win the Challenge winner badge.">
+  <meta name="description" content="One PolyTrack track a week. Set the fastest time on it before the week ends on Sunday and win the Challenge winner badge.">
   <link rel="icon" href="/favicon.svg">
   <!-- Blocking on purpose: the cloak has to land before the first paint. -->
   <script src="/js/mimicry.js"></script>
@@ -22,7 +22,7 @@
        otherwise beat the hidden attribute. */
     .page [hidden] { display: none !important; }
 
-    /* This month's card, under a strip of chequered flag. */
+    /* This week's card, under a strip of chequered flag. */
     .ch-card { position: relative; padding: 0; overflow: hidden; }
     .ch-card::before {
       content: '';
@@ -143,7 +143,7 @@
       border-top: 1px solid var(--border);
     }
     .page .ch-past-list li:first-child { border-top: none; padding-top: 0.1rem; }
-    .ch-past-month { font-size: 0.95rem; font-weight: 600; color: var(--text); }
+    .ch-past-week { font-size: 0.95rem; font-weight: 600; color: var(--text); }
     .ch-past-track { margin-top: 0.1rem; font-size: 0.78rem; color: var(--muted-2); }
     .ch-past-win { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.6rem; }
     .ch-past-time { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--muted); }
@@ -176,25 +176,25 @@
 <body>
 <main class="page">
   <div class="page-kicker">challenge</div>
-  <h1>Monthly challenge</h1>
-  <p class="lede">One PolyTrack track a month. Set the fastest time on it before the month ends
-  and the Challenge winner badge is yours.</p>
+  <h1>Weekly challenge</h1>
+  <p class="lede">One PolyTrack track a week. Set the fastest time on it before the week ends on
+  Sunday and the Challenge winner badge is yours.</p>
 
   <div class="panel ch-card" id="chCard" data-state="loading">
     <div class="ch-head">
-      <div class="panel-label" id="chMonth">This month</div>
+      <div class="panel-label" id="chWeek">This week</div>
       <div class="ch-title-row">
-        <div class="ch-title" id="chTitle">Checking this month's track…</div>
+        <div class="ch-title" id="chTitle">Checking this week's track…</div>
         <span class="badge" id="chEnv" hidden></span>
       </div>
       <div class="ch-track" id="chTrack" hidden></div>
       <p class="ch-note" id="chNote" hidden></p>
-      <p class="ch-empty" id="chEmpty" hidden>No track is set for this month yet. Check back soon,
+      <p class="ch-empty" id="chEmpty" hidden>No track is set for this week yet. Check back soon,
       and keep racing: every PolyTrack time still goes on the leaderboard.</p>
     </div>
     <div class="ch-foot" id="chFoot" hidden>
       <div class="ch-time">
-        <div class="ch-clock" role="timer" aria-label="Time left this month">
+        <div class="ch-clock" role="timer" aria-label="Time left this week">
           <div class="ch-cell"><div class="ch-num" id="chD">0</div><div class="ch-unit">days</div></div>
           <div class="ch-cell"><div class="ch-num" id="chH">00</div><div class="ch-unit">hrs</div></div>
           <div class="ch-cell"><div class="ch-num" id="chM">00</div><div class="ch-unit">min</div></div>
@@ -224,8 +224,8 @@
   <div class="panel ch-past" id="chPast" hidden>
     <div class="panel-label">Past winners</div>
     <ol class="ch-past-list" id="chPastList"></ol>
-    <p class="ch-past-empty" id="chPastEmpty" hidden>No month has finished yet. The first winner
-    shows up here when this month ends.</p>
+    <p class="ch-past-empty" id="chPastEmpty" hidden>No week has finished yet. The first winner
+    shows up here when this week ends.</p>
     <p class="panel-note"><a href="/winner/">See the latest winner revealed</a></p>
   </div>
 
@@ -235,13 +235,13 @@
       <li><strong>The prize is a badge.</strong> First place gets the Challenge winner badge,
       second and third get the Top 3 badge. Never money, gift cards, game currency, or anything
       sent to your home.</li>
-      <li><strong>Times come from the PolyTrack leaderboard.</strong> Race the month's track in
-      PolyTrack here on GameVault, and your best time set during the month counts. Times from
-      before the month started do not.</li>
+      <li><strong>Times come from the PolyTrack leaderboard.</strong> Race the week's track in
+      PolyTrack here on GameVault, and your best time set during the week counts. Times from
+      before the week started do not.</li>
       <li><strong>Suspicious times get removed.</strong> A time that looks impossible, or came from
       a cheat or a glitch, is taken off and cannot win.</li>
-      <li><strong>The month ends at midnight UTC.</strong> A tie goes to whoever set the time
-      first.</li>
+      <li><strong>A week runs Monday to Sunday</strong> and ends at midnight UTC on Sunday night.
+      A tie goes to whoever set the time first.</li>
       <li><strong>Only your leaderboard name is shown.</strong> Guests can race too; sign in to
       keep your badge with your account. Anonymous mode keeps your name off this page as well.</li>
     </ul>
@@ -295,12 +295,15 @@
       + d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
   }
 
-  // '2026-10-01' as "October 2026", read as UTC so it never slips a month.
-  function monthName(day) {
-    var p = String(day || '').split('-');
-    var d = new Date(Date.UTC(+p[0], +p[1] - 1, 1));
-    if (isNaN(d.getTime())) return '';
-    return d.toLocaleDateString(undefined, { month: 'long', year: 'numeric', timeZone: 'UTC' });
+  // A challenge from its first day to its last, as "Sep 28 – Oct 4", read as
+  // UTC so it never slips a day. endsAt is the moment it ends, at midnight.
+  function span(starts, endsAt) {
+    var p = String(starts || '').split('-');
+    var a = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2]));
+    var b = new Date(Date.parse(endsAt) - 1);
+    if (isNaN(a.getTime()) || isNaN(b.getTime())) return '';
+    var o = { month: 'short', day: 'numeric', timeZone: 'UTC' };
+    return a.toLocaleDateString(undefined, o) + ' \u2013 ' + b.toLocaleDateString(undefined, o);
   }
 
   function official(trackId) {
@@ -318,13 +321,13 @@
     $('chH').textContent = two(Math.floor(s / 3600) % 24);
     $('chM').textContent = two(Math.floor(s / 60) % 60);
     $('chS').textContent = two(s % 60);
-    // The month is over, so ask for the next one.
+    // The week is over, so ask for the next one.
     if (left <= 0) load();
   }
 
   function paintNone() {
     card.dataset.state = 'none';
-    $('chMonth').textContent = 'This month';
+    $('chWeek').textContent = 'This week';
     $('chTitle').textContent = 'No track yet';
     $('chEnv').hidden = true;
     $('chTrack').hidden = true;
@@ -335,7 +338,7 @@
 
   function paintChallenge(c) {
     card.dataset.state = 'on';
-    $('chMonth').textContent = monthName(c.month);
+    $('chWeek').textContent = span(c.starts, c.ends_at);
     $('chTitle').textContent = c.title;
     $('chEmpty').hidden = true;
 
@@ -395,7 +398,7 @@
     if (entry.wins > 0) {
       var crown = document.createElement('span');
       crown.className = 'ch-crown';
-      crown.title = 'Won ' + plural(entry.wins, 'month', 'months');
+      crown.title = 'Won ' + plural(entry.wins, 'challenge', 'challenges');
       crown.innerHTML = CROWN_SVG;
       if (entry.wins > 1) crown.appendChild(document.createTextNode('\u00d7' + entry.wins));
       who.appendChild(crown);
@@ -422,7 +425,7 @@
     rows.textContent = '';
     var top = data.top || [];
     if (!top.length) {
-      var none = cell('ch-none', 'No times yet this month. Be the first on ' + c.title + '.');
+      var none = cell('ch-none', 'No times yet this week. Be the first on ' + c.title + '.');
       none.colSpan = 3;
       var tr = document.createElement('tr');
       tr.appendChild(none);
@@ -467,7 +470,7 @@
       bold(el, you.time);
       add('.');
     } else {
-      add('No time from you on ' + c.title + ' this month yet.');
+      add('No time from you on ' + c.title + ' this week yet.');
     }
     var identity = window.GV && window.GV.identity;
     if (identity) {
@@ -498,9 +501,9 @@
       loading = false;
       if (r.error) throw r.error;
       skew = Date.parse(r.data.now) - Date.now();
-      // A new month moves the last one into the past winners.
-      var month = r.data.challenge && r.data.challenge.month;
-      if (!data || month !== (data.challenge && data.challenge.month)) loadPast();
+      // A new week moves the last one into the past winners.
+      var starts = r.data.challenge && r.data.challenge.starts;
+      if (!data || starts !== (data.challenge && data.challenge.starts)) loadPast();
       data = r.data;
       say('');
       paint();
@@ -512,24 +515,24 @@
     });
   }
 
-  // Finished months, newest first. Until the owner has checked a month's
+  // Finished challenges, newest first. Until the owner has checked a week's
   // times and handed out its badges, its leader is only in front.
-  function paintPast(months) {
+  function paintPast(past) {
     var list = $('chPastList');
     list.textContent = '';
     $('chPast').hidden = false;
-    $('chPastEmpty').hidden = months.length > 0;
-    months.forEach(function (m) {
+    $('chPastEmpty').hidden = past.length > 0;
+    past.forEach(function (m) {
       var li = document.createElement('li');
 
       var left = document.createElement('div');
-      var month = document.createElement('div');
-      month.className = 'ch-past-month';
-      month.textContent = monthName(m.month);
+      var week = document.createElement('div');
+      week.className = 'ch-past-week';
+      week.textContent = span(m.starts, m.ended_at);
       var track = document.createElement('div');
       track.className = 'ch-past-track';
       track.textContent = m.title + ' · ' + plural(m.runners, 'racer', 'racers');
-      left.appendChild(month);
+      left.appendChild(week);
       left.appendChild(track);
       li.appendChild(left);
 
