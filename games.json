@@ -1733,5 +1733,6 @@
 {"id":"blue","name":"Blue","categories":["Puzzle"],"ranking":1887,"img":"/thumbs/blue.webp","src":null,"site":56,"added":"2026-09-30"},
 {"id":"green","name":"Green","categories":["Puzzle"],"ranking":1888,"img":"/thumbs/green.webp","src":null,"site":56,"added":"2026-09-30"},
 {"id":"konnekt","name":"Konnekt","categories":["Puzzle"],"ranking":1889,"img":"/thumbs/konnekt.webp","src":null,"site":57,"added":"2026-09-30"},
-{"id":"the-ninja-2","name":"The Ninja 2","categories":["Platformer"],"ranking":1890,"img":"/thumbs/the-ninja-2.webp","src":null,"site":57,"added":"2026-09-30"}
+{"id":"the-ninja-2","name":"The Ninja 2","categories":["Platformer"],"ranking":1890,"img":"/thumbs/the-ninja-2.webp","src":null,"site":57,"added":"2026-09-30"},
+{"id":"the-ninja-3","name":"The Ninja 3","categories":["Platformer"],"ranking":1891,"img":"/thumbs/the-ninja-3.webp","src":null,"site":57,"added":"2026-09-30"}
 ]}
