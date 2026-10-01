@@ -1831,5 +1831,6 @@
 {"id":"white-pen-road","name":"White Pen Road","categories":["Skill"],"ranking":1985,"img":"/thumbs/white-pen-road.webp","src":null,"site":60,"added":"2026-09-30"},
 {"id":"space-cowboy","name":"Space Cowboy","categories":["Shooter"],"ranking":1986,"img":"/thumbs/space-cowboy.webp","src":null,"site":60,"added":"2026-09-30"},
 {"id":"rail-connect","name":"Rail Connect","categories":["Puzzle"],"ranking":1987,"img":"/thumbs/rail-connect.webp","src":null,"site":60,"added":"2026-09-30"},
-{"id":"put-a-ring-on-it","name":"Put A Ring On It","categories":["Puzzle"],"ranking":1988,"img":"/thumbs/put-a-ring-on-it.webp","src":null,"site":60,"added":"2026-09-30"}
+{"id":"put-a-ring-on-it","name":"Put A Ring On It","categories":["Puzzle"],"ranking":1988,"img":"/thumbs/put-a-ring-on-it.webp","src":null,"site":60,"added":"2026-09-30"},
+{"id":"mini-bubbles","name":"Mini Bubbles","categories":["Puzzle"],"ranking":1989,"img":"/thumbs/mini-bubbles.webp","src":null,"site":60,"added":"2026-09-30"}
 ]}
