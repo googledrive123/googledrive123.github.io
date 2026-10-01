@@ -1413,5 +1413,6 @@
 {"id":"mystical-birdlink","name":"Mystical Birdlink","categories":["Puzzle"],"ranking":1567,"img":"/thumbs/mystical-birdlink.webp","src":null,"site":51,"added":"2026-09-30"},
 {"id":"bladers","name":"Bladers","categories":["Action"],"ranking":1568,"img":"/thumbs/bladers.webp","src":null,"site":51,"added":"2026-09-30"},
 {"id":"car-simulator-arena","name":"Car Simulator Arena","categories":["Driving"],"ranking":1569,"img":"/thumbs/car-simulator-arena.webp","src":null,"site":51,"added":"2026-09-30"},
-{"id":"pack-a-bag","name":"Pack A Bag","categories":["Puzzle"],"ranking":1570,"img":"/thumbs/pack-a-bag.webp","src":null,"site":51,"added":"2026-09-30"}
+{"id":"pack-a-bag","name":"Pack A Bag","categories":["Puzzle"],"ranking":1570,"img":"/thumbs/pack-a-bag.webp","src":null,"site":51,"added":"2026-09-30"},
+{"id":"burnout-drift-seaport-max","name":"Burnout Drift Seaport Max","categories":["Racing"],"ranking":1571,"img":"/thumbs/burnout-drift-seaport-max.webp","src":null,"site":51,"added":"2026-09-30"}
 ]}
