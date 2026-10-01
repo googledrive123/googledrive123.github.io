@@ -1822,5 +1822,6 @@
 {"id":"top-outpost","name":"Top Outpost","categories":["Strategy"],"ranking":1976,"img":"/thumbs/top-outpost.webp","src":null,"site":60,"added":"2026-09-30"},
 {"id":"pixel-tap-dungeon","name":"Pixel Tap Dungeon","categories":["RPG"],"ranking":1977,"img":"/thumbs/pixel-tap-dungeon.webp","src":null,"site":60,"added":"2026-09-30"},
 {"id":"out-of-ctrl","name":"Out Of Ctrl","categories":["Skill"],"ranking":1978,"img":"/thumbs/out-of-ctrl.webp","src":null,"site":60,"added":"2026-09-30"},
-{"id":"mad-pirate-skeleton","name":"Mad Pirate Skeleton","categories":["Action"],"ranking":1979,"img":"/thumbs/mad-pirate-skeleton.webp","src":null,"site":60,"added":"2026-09-30"}
+{"id":"mad-pirate-skeleton","name":"Mad Pirate Skeleton","categories":["Action"],"ranking":1979,"img":"/thumbs/mad-pirate-skeleton.webp","src":null,"site":60,"added":"2026-09-30"},
+{"id":"kity-builder-prototype","name":"Kity Builder Prototype","categories":["Sandbox"],"ranking":1980,"img":"/thumbs/kity-builder-prototype.webp","src":null,"site":60,"added":"2026-09-30"}
 ]}
