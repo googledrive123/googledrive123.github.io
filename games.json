@@ -1590,5 +1590,6 @@
 {"id":"sonny-2","name":"Sonny 2","categories":["RPG"],"ranking":1744,"img":"/thumbs/sonny-2.webp","src":null,"site":56,"added":"2026-09-30"},
 {"id":"sonny","name":"Sonny","categories":["RPG"],"ranking":1745,"img":"/thumbs/sonny.webp","src":null,"site":56,"added":"2026-09-30"},
 {"id":"kingdom-rush-frontiers","name":"Kingdom Rush Frontiers","categories":["Strategy"],"ranking":1746,"img":"/thumbs/kingdom-rush-frontiers.webp","src":null,"site":56,"added":"2026-09-30"},
-{"id":"worlds-within-worlds","name":"Worlds Within Worlds","categories":["Puzzle"],"ranking":1747,"img":"/thumbs/worlds-within-worlds.webp","src":null,"site":56,"added":"2026-09-30"}
+{"id":"worlds-within-worlds","name":"Worlds Within Worlds","categories":["Puzzle"],"ranking":1747,"img":"/thumbs/worlds-within-worlds.webp","src":null,"site":56,"added":"2026-09-30"},
+{"id":"tower-of-the-scorched","name":"Tower of the Scorched","categories":["Platformer"],"ranking":1748,"img":"/thumbs/tower-of-the-scorched.webp","src":null,"site":56,"added":"2026-09-30"}
 ]}
