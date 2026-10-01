@@ -3269,13 +3269,6 @@ function playIntro(host) {
   return el;
 }
 
-const INTRO_KEY = 'gv.intro.seen';
-(function siteIntro() {
-  let seen = true;
-  try { seen = localStorage.getItem(INTRO_KEY) === '1'; localStorage.setItem(INTRO_KEY, '1'); } catch (e) {}
-  if (!seen && location.pathname === '/') playIntro(null);
-})();
-
 // Skipping the welcome screen should not flash it while the catalog loads.
 if ((location.pathname === '/' || location.pathname === '') && GV.layout.skipWelcome()) {
   document.getElementById('welcome').classList.add('hidden');
