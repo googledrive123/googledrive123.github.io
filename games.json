@@ -1488,5 +1488,6 @@
 {"id":"noob-hook","name":"Noob Hook","categories":["Skill"],"ranking":1642,"img":"/thumbs/noob-hook.webp","src":null,"site":53,"added":"2026-09-30"},
 {"id":"eugenes-life","name":"Eugene's Life","categories":["Simulation"],"ranking":1643,"img":"/thumbs/eugenes-life.webp","src":null,"site":54,"added":"2026-09-30"},
 {"id":"energy","name":"Energy","categories":["Puzzle"],"ranking":1644,"img":"/thumbs/energy.webp","src":null,"site":54,"added":"2026-09-30"},
-{"id":"balloons-io","name":"Balloons.io","categories":["Multiplayer"],"ranking":1645,"img":"/thumbs/balloons-io.webp","src":null,"site":54,"added":"2026-09-30"}
+{"id":"balloons-io","name":"Balloons.io","categories":["Multiplayer"],"ranking":1645,"img":"/thumbs/balloons-io.webp","src":null,"site":54,"added":"2026-09-30"},
+{"id":"candy-jump","name":"Candy Jump","categories":["Platformer"],"ranking":1646,"img":"/thumbs/candy-jump.webp","src":null,"site":54,"added":"2026-09-30"}
 ]}
