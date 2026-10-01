@@ -1921,5 +1921,6 @@
 {"id":"more-ore","name":"More Ore","categories":["Idle"],"ranking":2075,"img":"/thumbs/more-ore.webp","src":null,"site":64,"added":"2026-09-30"},
 {"id":"ping-pong","name":"Ping Pong","categories":["Sports"],"ranking":2076,"img":"/thumbs/ping-pong.webp","src":null,"site":64,"added":"2026-09-30"},
 {"id":"sketchbook-04","name":"Sketchbook 04","categories":["Sandbox"],"ranking":2077,"img":"/thumbs/sketchbook-04.webp","src":null,"site":64,"added":"2026-09-30"},
-{"id":"super-mario-world","name":"Super Mario World","categories":["Platformer"],"ranking":2078,"img":"/thumbs/super-mario-world.webp","src":null,"site":64,"added":"2026-09-30"}
+{"id":"super-mario-world","name":"Super Mario World","categories":["Platformer"],"ranking":2078,"img":"/thumbs/super-mario-world.webp","src":null,"site":64,"added":"2026-09-30"},
+{"id":"turbo-motor-racer","name":"Turbo Motor Racer","categories":["Racing"],"ranking":2079,"img":"/thumbs/turbo-motor-racer.webp","src":null,"site":64,"added":"2026-09-30"}
 ]}
