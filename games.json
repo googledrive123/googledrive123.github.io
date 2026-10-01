@@ -1514,5 +1514,6 @@
 {"id":"power-badminton","name":"Power Badminton","categories":["Sports"],"ranking":1668,"img":"/thumbs/power-badminton.webp","src":null,"site":54,"added":"2026-09-30"},
 {"id":"runman-race-around-the-world","name":"Runman Race Around The World","categories":["Racing"],"ranking":1669,"img":"/thumbs/runman-race-around-the-world.webp","src":null,"site":54,"added":"2026-09-30"},
 {"id":"fortz","name":"Fortz","categories":["Shooter"],"ranking":1670,"img":"/thumbs/fortz.webp","src":null,"site":54,"added":"2026-09-30"},
-{"id":"free-the-key","name":"Free The Key","categories":["Puzzle"],"ranking":1671,"img":"/thumbs/free-the-key.webp","src":null,"site":54,"added":"2026-09-30"}
+{"id":"free-the-key","name":"Free The Key","categories":["Puzzle"],"ranking":1671,"img":"/thumbs/free-the-key.webp","src":null,"site":54,"added":"2026-09-30"},
+{"id":"fury-wars","name":"Fury Wars","categories":["Shooter"],"ranking":1672,"img":"/thumbs/fury-wars.webp","src":null,"site":54,"added":"2026-09-30"}
 ]}
