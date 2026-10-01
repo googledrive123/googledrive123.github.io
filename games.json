@@ -1446,5 +1446,6 @@
 {"id":"eggbot-vs-zombies","name":"Eggbot Vs Zombies","categories":["Action"],"ranking":1600,"img":"/thumbs/eggbot-vs-zombies.webp","src":null,"site":52,"added":"2026-09-30"},
 {"id":"aqua-thrills","name":"Aqua Thrills","categories":["Skill"],"ranking":1601,"img":"/thumbs/aqua-thrills.webp","src":null,"site":53,"added":"2026-09-30"},
 {"id":"big-tall-small","name":"Big Tall Small","categories":["Puzzle"],"ranking":1602,"img":"/thumbs/big-tall-small.webp","src":null,"site":53,"added":"2026-09-30"},
-{"id":"blumgi-ball","name":"Blumgi Ball","categories":["Platformer"],"ranking":1603,"img":"/thumbs/blumgi-ball.webp","src":null,"site":53,"added":"2026-09-30"}
+{"id":"blumgi-ball","name":"Blumgi Ball","categories":["Platformer"],"ranking":1603,"img":"/thumbs/blumgi-ball.webp","src":null,"site":53,"added":"2026-09-30"},
+{"id":"alien-invaders-io","name":"Alien Invaders.io","categories":["Multiplayer"],"ranking":1604,"img":"/thumbs/alien-invaders-io.webp","src":null,"site":53,"added":"2026-09-30"}
 ]}
