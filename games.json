@@ -1974,5 +1974,6 @@
 {"id":"grab-party-io","name":"Grab Party.io","categories":["Multiplayer"],"ranking":2128,"img":"/thumbs/grab-party-io.webp","src":null,"site":65,"added":"2026-09-30"},
 {"id":"drift","name":"Drift","categories":["Racing"],"ranking":2129,"img":"/thumbs/drift.webp","src":null,"site":65,"added":"2026-09-30"},
 {"id":"cube-flip","name":"Cube Flip","categories":["Platformer"],"ranking":2130,"img":"/thumbs/cube-flip.webp","src":null,"site":65,"added":"2026-09-30"},
-{"id":"call-of-ops-2","name":"Call Of Ops 2","categories":["Shooter"],"ranking":2131,"img":"/thumbs/call-of-ops-2.webp","src":null,"site":65,"added":"2026-09-30"}
+{"id":"call-of-ops-2","name":"Call Of Ops 2","categories":["Shooter"],"ranking":2131,"img":"/thumbs/call-of-ops-2.webp","src":null,"site":65,"added":"2026-09-30"},
+{"id":"basketball-io","name":"Basketball.io","categories":["Sports"],"ranking":2132,"img":"/thumbs/basketball-io.webp","src":null,"site":65,"added":"2026-09-30"}
 ]}
