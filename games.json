@@ -1638,5 +1638,6 @@
 {"id":"shape-shifter","name":"Shape Shifter","categories":["Puzzle"],"ranking":1792,"img":"/thumbs/shape-shifter.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"square-hero","name":"Square Hero","categories":["Platformer"],"ranking":1793,"img":"/thumbs/square-hero.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"tarzan-ball","name":"Tarzan Ball","categories":["Platformer"],"ranking":1794,"img":"/thumbs/tarzan-ball.webp","src":null,"site":57,"added":"2026-09-30"},
-{"id":"truck-loader","name":"Truck Loader","categories":["Puzzle"],"ranking":1795,"img":"/thumbs/truck-loader.webp","src":null,"site":57,"added":"2026-09-30"}
+{"id":"truck-loader","name":"Truck Loader","categories":["Puzzle"],"ranking":1795,"img":"/thumbs/truck-loader.webp","src":null,"site":57,"added":"2026-09-30"},
+{"id":"working-stiffs","name":"Working Stiffs","categories":["Puzzle"],"ranking":1796,"img":"/thumbs/working-stiffs.webp","src":null,"site":57,"added":"2026-09-30"}
 ]}
