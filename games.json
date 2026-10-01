@@ -1820,5 +1820,6 @@
 {"id":"bokdown","name":"Bokdown","categories":["Skill"],"ranking":1974,"img":"/thumbs/bokdown.webp","src":null,"site":60,"added":"2026-09-30"},
 {"id":"yin-and-yang","name":"Yin And Yang","categories":["Puzzle"],"ranking":1975,"img":"/thumbs/yin-and-yang.webp","src":null,"site":60,"added":"2026-09-30"},
 {"id":"top-outpost","name":"Top Outpost","categories":["Strategy"],"ranking":1976,"img":"/thumbs/top-outpost.webp","src":null,"site":60,"added":"2026-09-30"},
-{"id":"pixel-tap-dungeon","name":"Pixel Tap Dungeon","categories":["RPG"],"ranking":1977,"img":"/thumbs/pixel-tap-dungeon.webp","src":null,"site":60,"added":"2026-09-30"}
+{"id":"pixel-tap-dungeon","name":"Pixel Tap Dungeon","categories":["RPG"],"ranking":1977,"img":"/thumbs/pixel-tap-dungeon.webp","src":null,"site":60,"added":"2026-09-30"},
+{"id":"out-of-ctrl","name":"Out Of Ctrl","categories":["Skill"],"ranking":1978,"img":"/thumbs/out-of-ctrl.webp","src":null,"site":60,"added":"2026-09-30"}
 ]}
