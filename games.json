@@ -1382,5 +1382,6 @@
 {"id":"one-trick-mage","name":"One Trick Mage","categories":["RPG"],"ranking":1536,"img":"/thumbs/one-trick-mage.webp","src":null,"site":50,"added":"2026-09-30"},
 {"id":"arcuz","name":"Arcuz","categories":["RPG"],"ranking":1537,"img":"/thumbs/arcuz.webp","src":null,"site":50,"added":"2026-09-30"},
 {"id":"winter-gifts","name":"Winter Gifts","categories":["Puzzle"],"ranking":1538,"img":"/thumbs/winter-gifts.webp","src":null,"site":50,"added":"2026-09-30"},
-{"id":"tough-growth","name":"Tough Growth","categories":["Puzzle"],"ranking":1539,"img":"/thumbs/tough-growth.webp","src":null,"site":50,"added":"2026-09-30"}
+{"id":"tough-growth","name":"Tough Growth","categories":["Puzzle"],"ranking":1539,"img":"/thumbs/tough-growth.webp","src":null,"site":50,"added":"2026-09-30"},
+{"id":"the-dark-one","name":"The Dark One","categories":["Horror"],"ranking":1540,"img":"/thumbs/the-dark-one.webp","src":null,"site":50,"added":"2026-09-30"}
 ]}
