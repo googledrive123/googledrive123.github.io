@@ -4049,6 +4049,7 @@ function openGame(g) {
 function closeGame() {
   if (window._trackClose) window._trackClose();
   showMore(false);
+  dropIntro();
   clearTimeout(stallTimer);
   expectLoad = false;
   mounted = null;
@@ -4097,11 +4098,11 @@ window.addEventListener('popstate', function() {
   if (p === '/' || p === '') {
     document.getElementById('welcome').classList.remove('hidden');
     document.getElementById('browse').classList.remove('visible');
-    if (gameOverlay.classList.contains('show')) { if (window._trackClose) window._trackClose(); showMore(false); clearTimeout(stallTimer); expectLoad = false; mounted = null; gameOverlay.classList.remove('show'); gameFrame.src = ''; document.body.style.overflow = ''; }
+    if (gameOverlay.classList.contains('show')) { if (window._trackClose) window._trackClose(); showMore(false); dropIntro(); clearTimeout(stallTimer); expectLoad = false; mounted = null; gameOverlay.classList.remove('show'); gameFrame.src = ''; document.body.style.overflow = ''; }
   } else if (p === '/games' || p === '/games/') {
     document.getElementById('welcome').classList.add('hidden');
     document.getElementById('browse').classList.add('visible');
-    if (gameOverlay.classList.contains('show')) { if (window._trackClose) window._trackClose(); showMore(false); clearTimeout(stallTimer); expectLoad = false; mounted = null; gameOverlay.classList.remove('show'); gameFrame.src = ''; document.body.style.overflow = ''; }
+    if (gameOverlay.classList.contains('show')) { if (window._trackClose) window._trackClose(); showMore(false); dropIntro(); clearTimeout(stallTimer); expectLoad = false; mounted = null; gameOverlay.classList.remove('show'); gameFrame.src = ''; document.body.style.overflow = ''; }
   } else if (p.startsWith('/games/')) {
     var id = p.slice(7).replace(/\/$/, '');
     var g = gamesById[id];
