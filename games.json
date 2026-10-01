@@ -1737,5 +1737,6 @@
 {"id":"the-ninja-3","name":"The Ninja 3","categories":["Platformer"],"ranking":1891,"img":"/thumbs/the-ninja-3.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"the-ninja-4","name":"The Ninja 4","categories":["Platformer"],"ranking":1892,"img":"/thumbs/the-ninja-4.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"the-ninja-5","name":"The Ninja 5","categories":["Platformer"],"ranking":1893,"img":"/thumbs/the-ninja-5.webp","src":null,"site":57,"added":"2026-09-30"},
-{"id":"ball-hop","name":"Ball Hop","categories":["Platformer"],"ranking":1894,"img":"/thumbs/ball-hop.webp","src":null,"site":57,"added":"2026-09-30"}
+{"id":"ball-hop","name":"Ball Hop","categories":["Platformer"],"ranking":1894,"img":"/thumbs/ball-hop.webp","src":null,"site":57,"added":"2026-09-30"},
+{"id":"biters-io","name":"Biters.io","categories":["Multiplayer"],"ranking":1895,"img":"/thumbs/biters-io.webp","src":null,"site":57,"added":"2026-09-30"}
 ]}
