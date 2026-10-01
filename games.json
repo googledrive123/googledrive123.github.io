@@ -1699,5 +1699,6 @@
 {"id":"space-invaders","name":"Space Invaders","categories":["Arcade"],"ranking":1853,"img":"/thumbs/space-invaders.webp","src":null,"site":58,"added":"2026-09-30"},
 {"id":"stack-ball","name":"Stack Ball","categories":["Arcade"],"ranking":1854,"img":"/thumbs/stack-ball.webp","src":null,"site":58,"added":"2026-09-30"},
 {"id":"the-square","name":"The Square","categories":["Platformer"],"ranking":1855,"img":"/thumbs/the-square.webp","src":null,"site":58,"added":"2026-09-30"},
-{"id":"tic-tac-toe","name":"Tic-Tac-Toe","categories":["Puzzle"],"ranking":1856,"img":"/thumbs/tic-tac-toe.webp","src":null,"site":58,"added":"2026-09-30"}
+{"id":"tic-tac-toe","name":"Tic-Tac-Toe","categories":["Puzzle"],"ranking":1856,"img":"/thumbs/tic-tac-toe.webp","src":null,"site":58,"added":"2026-09-30"},
+{"id":"tower-master","name":"Tower Master","categories":["Arcade"],"ranking":1857,"img":"/thumbs/tower-master.webp","src":null,"site":58,"added":"2026-09-30"}
 ]}
