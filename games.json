@@ -1796,5 +1796,6 @@
 {"id":"tanko-io","name":"Tanko.io","categories":["Multiplayer"],"ranking":1950,"img":"/thumbs/tanko-io.webp","src":null,"site":59,"added":"2026-09-30"},
 {"id":"level-devil","name":"Level Devil","categories":["Platformer"],"ranking":1951,"img":"/thumbs/level-devil.webp","src":null,"site":59,"added":"2026-09-30"},
 {"id":"fireboy-and-watergirl-6","name":"Fireboy and Watergirl 6","categories":["Puzzle"],"ranking":1952,"img":"/thumbs/fireboy-and-watergirl-6.webp","src":null,"site":59,"added":"2026-09-30"},
-{"id":"grindcraft","name":"Grindcraft","categories":["Idle"],"ranking":1953,"img":"/thumbs/grindcraft.webp","src":null,"site":59,"added":"2026-09-30"}
+{"id":"grindcraft","name":"Grindcraft","categories":["Idle"],"ranking":1953,"img":"/thumbs/grindcraft.webp","src":null,"site":59,"added":"2026-09-30"},
+{"id":"pixwars-2","name":"Pixwars 2","categories":["Shooter"],"ranking":1954,"img":"/thumbs/pixwars-2.webp","src":null,"site":59,"added":"2026-09-30"}
 ]}
