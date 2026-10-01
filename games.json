@@ -1862,5 +1862,6 @@
 {"id":"laqueus-escape-chapter-6","name":"Laqueus Escape Chapter 6","categories":["Adventure"],"ranking":2016,"img":"/thumbs/laqueus-escape-chapter-6.webp","src":null,"site":61,"added":"2026-09-30"},
 {"id":"house-pusher","name":"House Pusher","categories":["Puzzle"],"ranking":2017,"img":"/thumbs/house-pusher.webp","src":null,"site":61,"added":"2026-09-30"},
 {"id":"gobo-desert-of-cubes","name":"Gobo Desert Of Cubes","categories":["Skill"],"ranking":2018,"img":"/thumbs/gobo-desert-of-cubes.webp","src":null,"site":61,"added":"2026-09-30"},
-{"id":"forward-winds","name":"Forward Winds","categories":["Action"],"ranking":2019,"img":"/thumbs/forward-winds.webp","src":null,"site":61,"added":"2026-09-30"}
+{"id":"forward-winds","name":"Forward Winds","categories":["Action"],"ranking":2019,"img":"/thumbs/forward-winds.webp","src":null,"site":61,"added":"2026-09-30"},
+{"id":"fluctuoid","name":"Fluctuoid","categories":["Skill"],"ranking":2020,"img":"/thumbs/fluctuoid.webp","src":null,"site":61,"added":"2026-09-30"}
 ]}
