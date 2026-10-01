@@ -1645,5 +1645,6 @@
 {"id":"couch-2048","name":"Couch 2048","categories":["Puzzle"],"ranking":1799,"img":"/thumbs/couch-2048.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"factory-balls-4","name":"Factory Balls 4","categories":["Puzzle"],"ranking":1800,"img":"/thumbs/factory-balls-4.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"penguin-dinner","name":"Penguin Dinner","categories":["Simulation"],"ranking":1801,"img":"/thumbs/penguin-dinner.webp","src":null,"site":57,"added":"2026-09-30"},
-{"id":"bomb-it-1","name":"Bomb It 1","categories":["Arcade"],"ranking":1802,"img":"/thumbs/bomb-it-1.webp","src":null,"site":57,"added":"2026-09-30"}
+{"id":"bomb-it-1","name":"Bomb It 1","categories":["Arcade"],"ranking":1802,"img":"/thumbs/bomb-it-1.webp","src":null,"site":57,"added":"2026-09-30"},
+{"id":"bomb-it-2","name":"Bomb It 2","categories":["Arcade"],"ranking":1803,"img":"/thumbs/bomb-it-2.webp","src":null,"site":57,"added":"2026-09-30"}
 ]}
