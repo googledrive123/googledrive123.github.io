@@ -114,6 +114,7 @@
   .verify-bar input, .verify-bar select { background: var(--bg); border: 1px solid var(--border-strong); color: var(--text); font: inherit; font-size: 0.8rem; padding: 7px 10px; border-radius: 8px; min-width: 0; }
   .verify-bar input { flex: 1 1 200px; }
   .verify-bar select { flex: 2 1 260px; }
+  .verify-bar select#chWeek { flex: 1 1 180px; }
   .verify-msg { font-size: 0.74rem; color: var(--muted); margin-top: 8px; min-height: 1em; }
   .verify-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
   .bc-text { width: 100%; min-height: 64px; resize: vertical; background: var(--bg); border: 1px solid var(--border-strong); color: var(--text); font: inherit; font-size: 0.85rem; padding: 9px 10px; border-radius: 8px; margin-bottom: 8px; }
@@ -290,10 +291,10 @@
   </section>
 
   <section>
-    <h2>Monthly challenge <small>PolyTrack track of the month, badges for the top three</small></h2>
+    <h2>Weekly challenge <small>PolyTrack track of the week, Monday to Sunday UTC, badges for the top three</small></h2>
     <div class="card">
       <div class="verify-bar">
-        <input type="month" id="chMonth" aria-label="Month">
+        <select id="chWeek" aria-label="Week"></select>
         <select id="chTrack" aria-label="Track"></select>
         <input type="text" id="chTitle" placeholder="Title" maxlength="80">
         <input type="text" id="chNote" placeholder="Note (optional)" maxlength="300">
@@ -1139,30 +1140,48 @@
     if (call) call.then(loadGiveaways).catch(function (err) { $('gaMsg').textContent = 'Could not do that: ' + err.message; });
   }
 
-  // ── monthly challenge ──
-  function monthName(m) { return new Date(m + 'T00:00:00Z').toLocaleDateString(undefined, { month: 'long', year: 'numeric', timeZone: 'UTC' }); }
+  // ── weekly challenge ──
+  // A challenge from its first day to its last, as "Sep 28 – Oct 4". Weeks run
+  // Monday to Sunday on UTC; endsAt is midnight at the end of the Sunday.
+  function chSpan(starts, endsAt) {
+    var o = { month: 'short', day: 'numeric', timeZone: 'UTC' };
+    return new Date(starts + 'T00:00:00Z').toLocaleDateString(undefined, o) + ' \u2013 ' + new Date(Date.parse(endsAt) - 1).toLocaleDateString(undefined, o);
+  }
+  var chSpans = {};
+  // This week and the seven after it, by their Mondays.
+  function fillChallengeWeeks() {
+    var now = new Date(), opts = [];
+    var monday = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - (now.getUTCDay() + 6) % 7);
+    for (var i = 0; i < 8; i++) {
+      var starts = new Date(monday + i * 7 * 864e5).toISOString().slice(0, 10);
+      var label = chSpan(starts, new Date(monday + (i + 1) * 7 * 864e5).toISOString());
+      opts.push('<option value="' + starts + '">' + (i ? '' : 'This week \u00b7 ') + label + '</option>');
+    }
+    $('chWeek').innerHTML = opts.join('');
+  }
   function loadChallenges() {
     return rpc('gv_challenge_list', { p_secret: state.secret }).then(function (list) {
       $('chList').innerHTML = (list || []).length ? list.map(function (c) {
+        chSpans[c.starts] = chSpan(c.starts, c.ends_at);
         var podium = (c.podium || []).map(function (p) { return '#' + p.rank + ' ' + esc(p.nickname || 'a guest') + ' ' + esc(p.time); }).join(' · ');
-        return '<div class="bc-item"><span class="when">' + esc(monthName(c.month)) + '</span>'
+        return '<div class="bc-item"><span class="when">' + esc(chSpans[c.starts]) + '</span>'
           + '<span class="msg"><b>' + esc(c.title) + '</b>' + (c.note ? ' · ' + esc(c.note) : '') + (podium ? '<br>' + podium : '') + '</span>'
           + '<span class="st' + (c.ended ? '' : ' on') + '">' + c.runners + ' racers · ' + (c.closed_at ? 'badges given' : c.ended ? 'ended' : 'ends ' + esc(new Date(c.ends_at).toLocaleDateString())) + '</span>'
-          + '<button class="btn" type="button" data-chboard="' + esc(c.month) + '">Board</button>'
-          + (c.ended && c.runners ? '<button class="btn" type="button" data-chclose="' + esc(c.month) + '">' + (c.closed_at ? 'Give again' : 'Give badges') + '</button>' : '') + '</div>';
+          + '<button class="btn" type="button" data-chboard="' + esc(c.starts) + '">Board</button>'
+          + (c.ended && c.runners ? '<button class="btn" type="button" data-chclose="' + esc(c.starts) + '">' + (c.closed_at ? 'Give again' : 'Give badges') + '</button>' : '') + '</div>';
       }).join('') : '<div class="empty">No challenges yet.</div>';
     }).catch(function (e) { $('chMsg').textContent = 'Could not load challenges: ' + e.message; });
   }
 
-  function loadChallengeBoard(month) {
-    return rpc('gv_challenge_board', { p_secret: state.secret, p_month: month }).then(function (rows) {
+  function loadChallengeBoard(starts) {
+    return rpc('gv_challenge_board', { p_secret: state.secret, p_starts: starts }).then(function (rows) {
       $('chBoardH').hidden = false;
-      $('chBoardH').textContent = 'Board for ' + monthName(month);
+      $('chBoardH').textContent = 'Board for ' + (chSpans[starts] || starts);
       $('chBoard').innerHTML = (rows || []).length ? rows.map(function (r) {
         return '<div class="bc-item"><span class="when">#' + r.rank + '</span>'
           + '<span class="msg">' + (r.nickname ? esc(r.nickname) + (r.user_id ? '' : ' (guest)') : 'a guest') + '</span>'
           + '<span class="st">' + esc(r.time) + ' \u00b7 ' + esc(new Date(r.at).toLocaleDateString()) + '</span>'
-          + '<button class="btn" type="button" data-chrm="' + esc(r.player_key) + '" data-month="' + esc(month) + '">Remove</button></div>';
+          + '<button class="btn" type="button" data-chrm="' + esc(r.player_key) + '" data-starts="' + esc(starts) + '">Remove</button></div>';
       }).join('') : '<div class="empty">Nobody has raced it yet.</div>';
     }).catch(function (e) { $('chMsg').textContent = 'Could not load the board: ' + e.message; });
   }
@@ -1171,14 +1190,14 @@
     var call;
     if (b.dataset.chboard) return loadChallengeBoard(b.dataset.chboard);
     if (b.dataset.chclose) {
-      if (!confirm('Give the badges for ' + monthName(b.dataset.chclose) + ' to its top three?')) return;
-      call = rpc('gv_challenge_close', { p_secret: state.secret, p_month: b.dataset.chclose }).then(function (top) {
+      if (!confirm('Give the badges for ' + (chSpans[b.dataset.chclose] || b.dataset.chclose) + ' to its top three?')) return;
+      call = rpc('gv_challenge_close', { p_secret: state.secret, p_starts: b.dataset.chclose }).then(function (top) {
         $('chMsg').textContent = (top || []).length ? 'Badges given: ' + top.map(function (p) { return (p.nickname || 'a guest') + ' (' + p.time + ')'; }).join(', ') + '.' : 'Nobody to give badges to.';
       });
     } else if (b.dataset.chrm) {
       if (!confirm('Take this time off the challenge? It stays on the PolyTrack board.')) return;
-      call = rpc('gv_challenge_remove', { p_secret: state.secret, p_month: b.dataset.month, p_player_key: b.dataset.chrm })
-        .then(function () { $('chMsg').textContent = 'Removed.'; return loadChallengeBoard(b.dataset.month); });
+      call = rpc('gv_challenge_remove', { p_secret: state.secret, p_starts: b.dataset.starts, p_player_key: b.dataset.chrm })
+        .then(function () { $('chMsg').textContent = 'Removed.'; return loadChallengeBoard(b.dataset.starts); });
     }
     if (call) call.then(loadChallenges).catch(function (err) { $('chMsg').textContent = 'Could not do that: ' + err.message; });
   }
@@ -1459,7 +1478,7 @@
   }
 
   // ── auth / wiring ──
-  function showDash() { $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); load(); loadPeople(); loadBroadcasts(); loadLinks(); loadChat(); loadAvatars(); loadTesting(); loadGiveaways(); loadChallenges(); loadChallengeTracks(); loadBoard(); loadMirrors(); setTimer(); }
+  function showDash() { $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); load(); loadPeople(); loadBroadcasts(); loadLinks(); loadChat(); loadAvatars(); loadTesting(); loadGiveaways(); fillChallengeWeeks(); loadChallenges(); loadChallengeTracks(); loadBoard(); loadMirrors(); setTimer(); }
   function setTimer() { clearInterval(state.timer); if ($('autoRefresh').checked) state.timer = setInterval(load, 60000); }
   function tryLogin(secret, remember) {
     $('loginErr').textContent = '';
@@ -1518,11 +1537,11 @@
     if (name && !$('chTitle').value.trim()) $('chTitle').value = name;
   });
   $('chSet').addEventListener('click', function () {
-    var month = $('chMonth').value;
-    if (!month) { $('chMsg').textContent = 'Pick a month first.'; return; }
+    var week = $('chWeek').value;
+    if (!week) { $('chMsg').textContent = 'Pick a week first.'; return; }
     $('chSet').disabled = true;
-    rpc('gv_challenge_set', { p_secret: state.secret, p_month: month + '-01', p_track_id: $('chTrack').value, p_title: $('chTitle').value.trim(), p_note: $('chNote').value.trim() || null })
-      .then(function (c) { $('chTitle').value = $('chNote').value = ''; $('chMsg').textContent = monthName(c.month) + ' is set, with ' + c.runners + ' racers so far.'; return loadChallenges(); })
+    rpc('gv_challenge_set', { p_secret: state.secret, p_week: week, p_track_id: $('chTrack').value, p_title: $('chTitle').value.trim(), p_note: $('chNote').value.trim() || null })
+      .then(function (c) { $('chTitle').value = $('chNote').value = ''; $('chMsg').textContent = chSpan(c.starts, c.ends_at) + ' is set, with ' + c.runners + ' racers so far.'; return loadChallenges(); })
       .catch(function (e) { $('chMsg').textContent = 'Could not set it: ' + e.message; })
       .then(function () { $('chSet').disabled = false; });
   });
