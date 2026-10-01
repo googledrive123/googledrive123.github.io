@@ -1692,5 +1692,6 @@
 {"id":"eat-io","name":"Eat.io","categories":["Multiplayer"],"ranking":1846,"img":"/thumbs/eat-io.webp","src":null,"site":58,"added":"2026-09-30"},
 {"id":"steal-this-election","name":"Steal this Election","categories":["Arcade"],"ranking":1847,"img":"/thumbs/steal-this-election.webp","src":null,"site":58,"added":"2026-09-30"},
 {"id":"flip-hero","name":"Flip Hero","categories":["Platformer"],"ranking":1848,"img":"/thumbs/flip-hero.webp","src":null,"site":58,"added":"2026-09-30"},
-{"id":"interactive-buddy","name":"Interactive Buddy","categories":["Sandbox"],"ranking":1849,"img":"/thumbs/interactive-buddy.webp","src":null,"site":58,"added":"2026-09-30"}
+{"id":"interactive-buddy","name":"Interactive Buddy","categories":["Sandbox"],"ranking":1849,"img":"/thumbs/interactive-buddy.webp","src":null,"site":58,"added":"2026-09-30"},
+{"id":"picky-package","name":"Picky Package","categories":["Puzzle"],"ranking":1850,"img":"/thumbs/picky-package.webp","src":null,"site":58,"added":"2026-09-30"}
 ]}
