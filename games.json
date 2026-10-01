@@ -1894,5 +1894,6 @@
 {"id":"mini-rocket","name":"Mini Rocket","categories":["Skill"],"ranking":2048,"img":"/thumbs/mini-rocket.webp","src":null,"site":62,"added":"2026-09-30"},
 {"id":"magnet-master-redux","name":"Magnet Master Redux","categories":["Puzzle"],"ranking":2049,"img":"/thumbs/magnet-master-redux.webp","src":null,"site":62,"added":"2026-09-30"},
 {"id":"inversion","name":"Inversion","categories":["Skill"],"ranking":2050,"img":"/thumbs/inversion.webp","src":null,"site":62,"added":"2026-09-30"},
-{"id":"dispersal-vectors","name":"Dispersal Vectors","categories":["Skill"],"ranking":2051,"img":"/thumbs/dispersal-vectors.webp","src":null,"site":62,"added":"2026-09-30"}
+{"id":"dispersal-vectors","name":"Dispersal Vectors","categories":["Skill"],"ranking":2051,"img":"/thumbs/dispersal-vectors.webp","src":null,"site":62,"added":"2026-09-30"},
+{"id":"cata-catapult","name":"Cata Catapult","categories":["Skill"],"ranking":2052,"img":"/thumbs/cata-catapult.webp","src":null,"site":62,"added":"2026-09-30"}
 ]}
