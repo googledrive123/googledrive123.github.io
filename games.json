@@ -1966,5 +1966,6 @@
 {"id":"two-punk-racing","name":"Two Punk Racing","categories":["Racing"],"ranking":2120,"img":"/thumbs/two-punk-racing.webp","src":null,"site":65,"added":"2026-09-30"},
 {"id":"tank-io","name":"Tank.io","categories":["Multiplayer"],"ranking":2121,"img":"/thumbs/tank-io.webp","src":null,"site":65,"added":"2026-09-30"},
 {"id":"supra-speed-racing-turbo-drift","name":"Supra Speed Racing Turbo Drift","categories":["Racing"],"ranking":2122,"img":"/thumbs/supra-speed-racing-turbo-drift.webp","src":null,"site":65,"added":"2026-09-30"},
-{"id":"sports","name":"Sports","categories":["Sports"],"ranking":2123,"img":"/thumbs/sports.webp","src":null,"site":65,"added":"2026-09-30"}
+{"id":"sports","name":"Sports","categories":["Sports"],"ranking":2123,"img":"/thumbs/sports.webp","src":null,"site":65,"added":"2026-09-30"},
+{"id":"pixel-foosball","name":"Pixel Foosball","categories":["Sports"],"ranking":2124,"img":"/thumbs/pixel-foosball.webp","src":null,"site":65,"added":"2026-09-30"}
 ]}
