@@ -1435,5 +1435,6 @@
 {"id":"arithmetica","name":"Arithmetica","categories":["Puzzle"],"ranking":1589,"img":"/thumbs/arithmetica.webp","src":null,"site":52,"added":"2026-09-30"},
 {"id":"blocky-trials","name":"Blocky Trials","categories":["Driving"],"ranking":1590,"img":"/thumbs/blocky-trials.webp","src":null,"site":52,"added":"2026-09-30"},
 {"id":"air-hockey-championship-deluxe","name":"Air Hockey Championship Deluxe","categories":["Sports"],"ranking":1591,"img":"/thumbs/air-hockey-championship-deluxe.webp","src":null,"site":52,"added":"2026-09-30"},
-{"id":"duo-survival-3","name":"Duo Survival 3","categories":["Puzzle"],"ranking":1592,"img":"/thumbs/duo-survival-3.webp","src":null,"site":52,"added":"2026-09-30"}
+{"id":"duo-survival-3","name":"Duo Survival 3","categories":["Puzzle"],"ranking":1592,"img":"/thumbs/duo-survival-3.webp","src":null,"site":52,"added":"2026-09-30"},
+{"id":"duo-survival-2","name":"Duo Survival 2","categories":["Puzzle"],"ranking":1593,"img":"/thumbs/duo-survival-2.webp","src":null,"site":52,"added":"2026-09-30"}
 ]}
