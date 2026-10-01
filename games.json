@@ -1485,5 +1485,6 @@
 {"id":"mafia-wars","name":"Mafia Wars","categories":["Strategy"],"ranking":1639,"img":"/thumbs/mafia-wars.webp","src":null,"site":53,"added":"2026-09-30"},
 {"id":"puppet-master","name":"Puppet Master","categories":["Skill"],"ranking":1640,"img":"/thumbs/puppet-master.webp","src":null,"site":53,"added":"2026-09-30"},
 {"id":"minecraft-builder","name":"Minecraft Builder","categories":["Sandbox"],"ranking":1641,"img":"/thumbs/minecraft-builder.webp","src":null,"site":53,"added":"2026-09-30"},
-{"id":"noob-hook","name":"Noob Hook","categories":["Skill"],"ranking":1642,"img":"/thumbs/noob-hook.webp","src":null,"site":53,"added":"2026-09-30"}
+{"id":"noob-hook","name":"Noob Hook","categories":["Skill"],"ranking":1642,"img":"/thumbs/noob-hook.webp","src":null,"site":53,"added":"2026-09-30"},
+{"id":"eugenes-life","name":"Eugene's Life","categories":["Simulation"],"ranking":1643,"img":"/thumbs/eugenes-life.webp","src":null,"site":54,"added":"2026-09-30"}
 ]}
