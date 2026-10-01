@@ -2440,8 +2440,8 @@
       50%      { border-color: var(--accent);        box-shadow: 0 0 14px 0 rgba(255,59,59,0.28); }
     }
     /* ─── GameVault intro: the name slams up from below, then flies apart ───
-       Plays once on a first visit, and over each game once it has loaded.
-       Click anywhere on it to skip. */
+       Plays over the game frame while a game loads, and leaves early once
+       the game is ready. Click anywhere on it to skip. */
     .gv-intro {
       position: fixed; inset: 0; z-index: 3000;
       display: flex; align-items: center; justify-content: center; gap: 0.35em;
@@ -3254,22 +3254,26 @@ document.getElementById('enterBtn').addEventListener('click', showBrowse);
 document.getElementById('logoBtn').addEventListener('click', showWelcome);
 
 // ───── Intro ─────
-// The name slams in and flies apart, about three seconds. Runs over the page
-// (a first visit) or over the game frame (each game, once it has loaded).
-function playIntro(host) {
+// The name slams in and flies apart, about three seconds, over the game frame
+// while a game loads. el.end() cuts it short; onEnd runs once it is over,
+// however it ended.
+function playIntro(host, onEnd) {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return null;
   const el = document.createElement('div');
-  el.className = 'gv-intro' + (host ? ' in-frame' : '');
+  el.className = 'gv-intro in-frame';
   el.setAttribute('aria-hidden', 'true');
   el.innerHTML = '<span class="w1">GAME</span><span class="w2">VAULT</span>';
-  const done = () => {
-    if (!el.isConnected) return;
+  let over = false;
+  el.end = () => {
+    if (over) return;
+    over = true;
     el.classList.add('leaving');
     setTimeout(() => el.remove(), 650);
+    if (onEnd) onEnd();
   };
-  el.addEventListener('click', done);
-  setTimeout(done, 3000);
-  (host || document.body).appendChild(el);
+  el.addEventListener('click', el.end);
+  setTimeout(el.end, 3000);
+  host.appendChild(el);
   return el;
 }
 
