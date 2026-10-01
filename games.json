@@ -1747,5 +1747,6 @@
 {"id":"dunkers-fight","name":"Dunkers Fight","categories":["Sports"],"ranking":1901,"img":"/thumbs/dunkers-fight.webp","src":null,"site":58,"added":"2026-09-30"},
 {"id":"deep-sleep","name":"Deep Sleep","categories":["Horror"],"ranking":1902,"img":"/thumbs/deep-sleep.webp","src":null,"site":58,"added":"2026-09-30"},
 {"id":"drunk-guy","name":"Drunk Guy","categories":["Skill"],"ranking":1903,"img":"/thumbs/drunk-guy.webp","src":null,"site":58,"added":"2026-09-30"},
-{"id":"unicycle-hero","name":"Unicycle Hero","categories":["Skill"],"ranking":1904,"img":"/thumbs/unicycle-hero.webp","src":null,"site":58,"added":"2026-09-30"}
+{"id":"unicycle-hero","name":"Unicycle Hero","categories":["Skill"],"ranking":1904,"img":"/thumbs/unicycle-hero.webp","src":null,"site":58,"added":"2026-09-30"},
+{"id":"room-clicker","name":"Room Clicker","categories":["Idle"],"ranking":1905,"img":"/thumbs/room-clicker.webp","src":null,"site":58,"added":"2026-09-30"}
 ]}
