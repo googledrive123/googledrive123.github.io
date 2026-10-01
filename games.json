@@ -1670,5 +1670,6 @@
 {"id":"cube-miner","name":"Cube Miner","categories":["Idle"],"ranking":1824,"img":"/thumbs/cube-miner.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"digger","name":"Digger","categories":["Arcade"],"ranking":1825,"img":"/thumbs/digger.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"flappy-2048","name":"Flappy 2048","categories":["Puzzle"],"ranking":1826,"img":"/thumbs/flappy-2048.webp","src":null,"site":57,"added":"2026-09-30"},
-{"id":"fortnite-z","name":"Fortnite Z","categories":["Shooter"],"ranking":1827,"img":"/thumbs/fortnite-z.webp","src":null,"site":57,"added":"2026-09-30"}
+{"id":"fortnite-z","name":"Fortnite Z","categories":["Shooter"],"ranking":1827,"img":"/thumbs/fortnite-z.webp","src":null,"site":57,"added":"2026-09-30"},
+{"id":"geometry-dash-meltdown","name":"Geometry Dash Meltdown","categories":["Platformer"],"ranking":1828,"img":"/thumbs/geometry-dash-meltdown.webp","src":null,"site":57,"added":"2026-09-30"}
 ]}
