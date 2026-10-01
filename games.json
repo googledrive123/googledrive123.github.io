@@ -1663,5 +1663,6 @@
 {"id":"asciispace","name":"Asciispace","categories":["Arcade"],"ranking":1817,"img":"/thumbs/asciispace.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"asteroids","name":"Asteroids","categories":["Arcade"],"ranking":1818,"img":"/thumbs/asteroids.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"ball-platformer","name":"Ball Platformer","categories":["Platformer"],"ranking":1819,"img":"/thumbs/ball-platformer.webp","src":null,"site":57,"added":"2026-09-30"},
-{"id":"javascript-breakout","name":"Javascript Breakout","categories":["Arcade"],"ranking":1820,"img":"/thumbs/javascript-breakout.webp","src":null,"site":57,"added":"2026-09-30"}
+{"id":"javascript-breakout","name":"Javascript Breakout","categories":["Arcade"],"ranking":1820,"img":"/thumbs/javascript-breakout.webp","src":null,"site":57,"added":"2026-09-30"},
+{"id":"bubble-scratch","name":"Bubble Scratch","categories":["Arcade"],"ranking":1821,"img":"/thumbs/bubble-scratch.webp","src":null,"site":57,"added":"2026-09-30"}
 ]}
