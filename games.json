@@ -1941,5 +1941,6 @@
 {"id":"president-simulator","name":"President Simulator","categories":["Simulation"],"ranking":2095,"img":"/thumbs/president-simulator.webp","src":null,"site":64,"added":"2026-09-30"},
 {"id":"rocket-soccer-derby","name":"Rocket Soccer Derby","categories":["Sports"],"ranking":2096,"img":"/thumbs/rocket-soccer-derby.webp","src":null,"site":64,"added":"2026-09-30"},
 {"id":"tennis-random","name":"Tennis Random","categories":["Sports"],"ranking":2097,"img":"/thumbs/tennis-random.webp","src":null,"site":64,"added":"2026-09-30"},
-{"id":"zuck-vs-musk-beatdown","name":"Zuck Vs Musk Beatdown","categories":["Action"],"ranking":2098,"img":"/thumbs/zuck-vs-musk-beatdown.webp","src":null,"site":64,"added":"2026-09-30"}
+{"id":"zuck-vs-musk-beatdown","name":"Zuck Vs Musk Beatdown","categories":["Action"],"ranking":2098,"img":"/thumbs/zuck-vs-musk-beatdown.webp","src":null,"site":64,"added":"2026-09-30"},
+{"id":"ultimate-offroad-simulator","name":"Ultimate Offroad Simulator","categories":["Driving"],"ranking":2099,"img":"/thumbs/ultimate-offroad-simulator.webp","src":null,"site":64,"added":"2026-09-30"}
 ]}
