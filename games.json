@@ -1418,5 +1418,6 @@
 {"id":"cars-thief-tank-edition","name":"Cars Thief Tank Edition","categories":["Driving"],"ranking":1572,"img":"/thumbs/cars-thief-tank-edition.webp","src":null,"site":51,"added":"2026-09-30"},
 {"id":"sling-drift","name":"Sling Drift","categories":["Racing"],"ranking":1573,"img":"/thumbs/sling-drift.webp","src":null,"site":51,"added":"2026-09-30"},
 {"id":"bearsus","name":"Bearsus","categories":["Skill"],"ranking":1574,"img":"/thumbs/bearsus.webp","src":null,"site":51,"added":"2026-09-30"},
-{"id":"city-rider","name":"City Rider","categories":["Driving"],"ranking":1575,"img":"/thumbs/city-rider.webp","src":null,"site":52,"added":"2026-09-30"}
+{"id":"city-rider","name":"City Rider","categories":["Driving"],"ranking":1575,"img":"/thumbs/city-rider.webp","src":null,"site":52,"added":"2026-09-30"},
+{"id":"3d-car-simulator","name":"3D Car Simulator","categories":["Driving"],"ranking":1576,"img":"/thumbs/3d-car-simulator.webp","src":null,"site":52,"added":"2026-09-30"}
 ]}
