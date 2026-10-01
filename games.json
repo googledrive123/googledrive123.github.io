@@ -1542,5 +1542,6 @@
 {"id":"super-racing-gt","name":"Super Racing GT","categories":["Racing"],"ranking":1696,"img":"/thumbs/super-racing-gt.webp","src":null,"site":55,"added":"2026-09-30"},
 {"id":"super-mx-the-champion","name":"Super MX The Champion","categories":["Driving"],"ranking":1697,"img":"/thumbs/super-mx-the-champion.webp","src":null,"site":55,"added":"2026-09-30"},
 {"id":"sumo-party","name":"Sumo Party","categories":["Sports"],"ranking":1698,"img":"/thumbs/sumo-party.webp","src":null,"site":55,"added":"2026-09-30"},
-{"id":"stickman-warriors","name":"Stickman Warriors","categories":["Action"],"ranking":1699,"img":"/thumbs/stickman-warriors.webp","src":null,"site":55,"added":"2026-09-30"}
+{"id":"stickman-warriors","name":"Stickman Warriors","categories":["Action"],"ranking":1699,"img":"/thumbs/stickman-warriors.webp","src":null,"site":55,"added":"2026-09-30"},
+{"id":"stickman-school-run","name":"Stickman School Run","categories":["Platformer"],"ranking":1700,"img":"/thumbs/stickman-school-run.webp","src":null,"site":55,"added":"2026-09-30"}
 ]}
