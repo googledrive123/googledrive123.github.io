@@ -1555,5 +1555,6 @@
 {"id":"stacktris","name":"Stacktris","categories":["Puzzle"],"ranking":1709,"img":"/thumbs/stacktris.webp","src":null,"site":55,"added":"2026-09-30"},
 {"id":"squish-run","name":"Squish Run","categories":["Platformer"],"ranking":1710,"img":"/thumbs/squish-run.webp","src":null,"site":55,"added":"2026-09-30"},
 {"id":"zombie-outbreak-arena","name":"Zombie Outbreak Arena","categories":["Action"],"ranking":1711,"img":"/thumbs/zombie-outbreak-arena.webp","src":null,"site":55,"added":"2026-09-30"},
-{"id":"zeepkist-crash-2d","name":"Zeepkist Crash 2D","categories":["Driving"],"ranking":1712,"img":"/thumbs/zeepkist-crash-2d.webp","src":null,"site":55,"added":"2026-09-30"}
+{"id":"zeepkist-crash-2d","name":"Zeepkist Crash 2D","categories":["Driving"],"ranking":1712,"img":"/thumbs/zeepkist-crash-2d.webp","src":null,"site":55,"added":"2026-09-30"},
+{"id":"words-search-classic-edition","name":"Words Search Classic Edition","categories":["Puzzle"],"ranking":1713,"img":"/thumbs/words-search-classic-edition.webp","src":null,"site":56,"added":"2026-09-30"}
 ]}
