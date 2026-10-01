@@ -1579,5 +1579,6 @@
 {"id":"clickventure-castaway","name":"Clickventure Castaway","categories":["Adventure"],"ranking":1733,"img":"/thumbs/clickventure-castaway.webp","src":null,"site":56,"added":"2026-09-30"},
 {"id":"cataractae","name":"Cataractae","categories":["Puzzle"],"ranking":1734,"img":"/thumbs/cataractae.webp","src":null,"site":56,"added":"2026-09-30"},
 {"id":"cat-house","name":"Cat House","categories":["Puzzle"],"ranking":1735,"img":"/thumbs/cat-house.webp","src":null,"site":56,"added":"2026-09-30"},
-{"id":"cardinal-chains","name":"Cardinal Chains","categories":["Puzzle"],"ranking":1736,"img":"/thumbs/cardinal-chains.webp","src":null,"site":56,"added":"2026-09-30"}
+{"id":"cardinal-chains","name":"Cardinal Chains","categories":["Puzzle"],"ranking":1736,"img":"/thumbs/cardinal-chains.webp","src":null,"site":56,"added":"2026-09-30"},
+{"id":"bunnies-carrot","name":"Bunnies Carrot","categories":["Platformer"],"ranking":1737,"img":"/thumbs/bunnies-carrot.webp","src":null,"site":56,"added":"2026-09-30"}
 ]}
