@@ -1614,5 +1614,6 @@
 {"id":"mountain-biking","name":"Mountain Biking","categories":["Driving"],"ranking":1768,"img":"/thumbs/mountain-biking.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"maptroid","name":"Maptroid","categories":["Platformer"],"ranking":1769,"img":"/thumbs/maptroid.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"hover-racer-drive","name":"Hover Racer Drive","categories":["Racing"],"ranking":1770,"img":"/thumbs/hover-racer-drive.webp","src":null,"site":57,"added":"2026-09-30"},
-{"id":"crystal-seeker","name":"Crystal Seeker","categories":["Platformer"],"ranking":1771,"img":"/thumbs/crystal-seeker.webp","src":null,"site":57,"added":"2026-09-30"}
+{"id":"crystal-seeker","name":"Crystal Seeker","categories":["Platformer"],"ranking":1771,"img":"/thumbs/crystal-seeker.webp","src":null,"site":57,"added":"2026-09-30"},
+{"id":"erase-box","name":"Erase Box","categories":["Puzzle"],"ranking":1772,"img":"/thumbs/erase-box.webp","src":null,"site":57,"added":"2026-09-30"}
 ]}
