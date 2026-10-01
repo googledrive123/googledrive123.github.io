@@ -1997,5 +1997,6 @@
 {"id":"dungeon-scroller","name":"Dungeon Scroller","categories":["RPG"],"ranking":2151,"img":"/thumbs/dungeon-scroller.webp","src":null,"site":66,"added":"2026-09-30"},
 {"id":"pixel-shooter","name":"Pixel Shooter","categories":["Shooter"],"ranking":2152,"img":"/thumbs/pixel-shooter.webp","src":null,"site":66,"added":"2026-09-30"},
 {"id":"giraffes-volleyball","name":"Giraffes Volleyball","categories":["Sports"],"ranking":2153,"img":"/thumbs/giraffes-volleyball.webp","src":null,"site":66,"added":"2026-09-30"},
-{"id":"slis","name":"Slis","categories":["Skill"],"ranking":2154,"img":"/thumbs/slis.webp","src":null,"site":66,"added":"2026-09-30"}
+{"id":"slis","name":"Slis","categories":["Skill"],"ranking":2154,"img":"/thumbs/slis.webp","src":null,"site":66,"added":"2026-09-30"},
+{"id":"oil-race","name":"Oil Race","categories":["Racing"],"ranking":2155,"img":"/thumbs/oil-race.webp","src":null,"site":66,"added":"2026-09-30"}
 ]}
