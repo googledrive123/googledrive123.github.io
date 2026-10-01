@@ -1917,5 +1917,6 @@
 {"id":"blasting-marbles","name":"Blasting Marbles","categories":["Puzzle"],"ranking":2071,"img":"/thumbs/blasting-marbles.webp","src":null,"site":63,"added":"2026-09-30"},
 {"id":"resent-client","name":"Resent Client","categories":["Sandbox"],"ranking":2072,"img":"/thumbs/resent-client.webp","src":null,"site":63,"added":"2026-09-30"},
 {"id":"athletics-hero","name":"Athletics Hero","categories":["Sports"],"ranking":2073,"img":"/thumbs/athletics-hero.webp","src":null,"site":64,"added":"2026-09-30"},
-{"id":"8bit-fiesta","name":"8bit Fiesta","categories":["Arcade"],"ranking":2074,"img":"/thumbs/8bit-fiesta.webp","src":null,"site":64,"added":"2026-09-30"}
+{"id":"8bit-fiesta","name":"8bit Fiesta","categories":["Arcade"],"ranking":2074,"img":"/thumbs/8bit-fiesta.webp","src":null,"site":64,"added":"2026-09-30"},
+{"id":"more-ore","name":"More Ore","categories":["Idle"],"ranking":2075,"img":"/thumbs/more-ore.webp","src":null,"site":64,"added":"2026-09-30"}
 ]}
