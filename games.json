@@ -1745,5 +1745,6 @@
 {"id":"drift-city","name":"Drift City","categories":["Racing"],"ranking":1899,"img":"/thumbs/drift-city.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"drift-king","name":"Drift King","categories":["Racing"],"ranking":1900,"img":"/thumbs/drift-king.webp","src":null,"site":58,"added":"2026-09-30"},
 {"id":"dunkers-fight","name":"Dunkers Fight","categories":["Sports"],"ranking":1901,"img":"/thumbs/dunkers-fight.webp","src":null,"site":58,"added":"2026-09-30"},
-{"id":"deep-sleep","name":"Deep Sleep","categories":["Horror"],"ranking":1902,"img":"/thumbs/deep-sleep.webp","src":null,"site":58,"added":"2026-09-30"}
+{"id":"deep-sleep","name":"Deep Sleep","categories":["Horror"],"ranking":1902,"img":"/thumbs/deep-sleep.webp","src":null,"site":58,"added":"2026-09-30"},
+{"id":"drunk-guy","name":"Drunk Guy","categories":["Skill"],"ranking":1903,"img":"/thumbs/drunk-guy.webp","src":null,"site":58,"added":"2026-09-30"}
 ]}
