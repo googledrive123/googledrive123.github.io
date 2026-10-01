@@ -1995,5 +1995,6 @@
 {"id":"cordovan","name":"Cordovan","categories":["Skill"],"ranking":2149,"img":"/thumbs/cordovan.webp","src":null,"site":66,"added":"2026-09-30"},
 {"id":"handle","name":"Handle","categories":["Skill"],"ranking":2150,"img":"/thumbs/handle.webp","src":null,"site":66,"added":"2026-09-30"},
 {"id":"dungeon-scroller","name":"Dungeon Scroller","categories":["RPG"],"ranking":2151,"img":"/thumbs/dungeon-scroller.webp","src":null,"site":66,"added":"2026-09-30"},
-{"id":"pixel-shooter","name":"Pixel Shooter","categories":["Shooter"],"ranking":2152,"img":"/thumbs/pixel-shooter.webp","src":null,"site":66,"added":"2026-09-30"}
+{"id":"pixel-shooter","name":"Pixel Shooter","categories":["Shooter"],"ranking":2152,"img":"/thumbs/pixel-shooter.webp","src":null,"site":66,"added":"2026-09-30"},
+{"id":"giraffes-volleyball","name":"Giraffes Volleyball","categories":["Sports"],"ranking":2153,"img":"/thumbs/giraffes-volleyball.webp","src":null,"site":66,"added":"2026-09-30"}
 ]}
