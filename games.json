@@ -1477,5 +1477,6 @@
 {"id":"parkour-race","name":"Parkour Race","categories":["Racing"],"ranking":1631,"img":"/thumbs/parkour-race.webp","src":null,"site":53,"added":"2026-09-30"},
 {"id":"paint-strike","name":"Paint Strike","categories":["Shooter"],"ranking":1632,"img":"/thumbs/paint-strike.webp","src":null,"site":53,"added":"2026-09-30"},
 {"id":"idle-startup-tycoon","name":"Idle Startup Tycoon","categories":["Idle"],"ranking":1633,"img":"/thumbs/idle-startup-tycoon.webp","src":null,"site":53,"added":"2026-09-30"},
-{"id":"james-gun","name":"James Gun","categories":["Shooter"],"ranking":1634,"img":"/thumbs/james-gun.webp","src":null,"site":53,"added":"2026-09-30"}
+{"id":"james-gun","name":"James Gun","categories":["Shooter"],"ranking":1634,"img":"/thumbs/james-gun.webp","src":null,"site":53,"added":"2026-09-30"},
+{"id":"decent","name":"Decent","categories":["Skill"],"ranking":1635,"img":"/thumbs/decent.webp","src":null,"site":53,"added":"2026-09-30"}
 ]}
