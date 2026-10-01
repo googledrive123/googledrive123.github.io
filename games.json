@@ -1428,5 +1428,6 @@
 {"id":"bumper-cars-soccer","name":"Bumper Cars Soccer","categories":["Sports"],"ranking":1582,"img":"/thumbs/bumper-cars-soccer.webp","src":null,"site":52,"added":"2026-09-30"},
 {"id":"foot-chinko","name":"Foot Chinko","categories":["Sports"],"ranking":1583,"img":"/thumbs/foot-chinko.webp","src":null,"site":52,"added":"2026-09-30"},
 {"id":"shady-bears","name":"Shady Bears","categories":["Skill"],"ranking":1584,"img":"/thumbs/shady-bears.webp","src":null,"site":52,"added":"2026-09-30"},
-{"id":"paper-fighter","name":"Paper Fighter","categories":["Action"],"ranking":1585,"img":"/thumbs/paper-fighter.webp","src":null,"site":52,"added":"2026-09-30"}
+{"id":"paper-fighter","name":"Paper Fighter","categories":["Action"],"ranking":1585,"img":"/thumbs/paper-fighter.webp","src":null,"site":52,"added":"2026-09-30"},
+{"id":"kart-race","name":"Kart Race","categories":["Racing"],"ranking":1586,"img":"/thumbs/kart-race.webp","src":null,"site":52,"added":"2026-09-30"}
 ]}
