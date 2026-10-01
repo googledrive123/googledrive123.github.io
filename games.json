@@ -1754,5 +1754,6 @@
 {"id":"mirror-madness","name":"Mirror Madness","categories":["Puzzle"],"ranking":1908,"img":"/thumbs/mirror-madness.webp","src":null,"site":58,"added":"2026-09-30"},
 {"id":"red-vs-blue","name":"Red vs Blue","categories":["Action"],"ranking":1909,"img":"/thumbs/red-vs-blue.webp","src":null,"site":58,"added":"2026-09-30"},
 {"id":"fishing-and-lines","name":"Fishing And Lines","categories":["Skill"],"ranking":1910,"img":"/thumbs/fishing-and-lines.webp","src":null,"site":58,"added":"2026-09-30"},
-{"id":"ngu-idle","name":"NGU Idle","categories":["Idle"],"ranking":1911,"img":"/thumbs/ngu-idle.webp","src":null,"site":58,"added":"2026-09-30"}
+{"id":"ngu-idle","name":"NGU Idle","categories":["Idle"],"ranking":1911,"img":"/thumbs/ngu-idle.webp","src":null,"site":58,"added":"2026-09-30"},
+{"id":"golf-orbit","name":"Golf Orbit","categories":["Sports"],"ranking":1912,"img":"/thumbs/golf-orbit.webp","src":null,"site":59,"added":"2026-09-30"}
 ]}
