@@ -1681,5 +1681,6 @@
 {"id":"roadblocks","name":"Roadblocks","categories":["Puzzle"],"ranking":1835,"img":"/thumbs/roadblocks.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"sleeping-beauty","name":"Sleeping Beauty","categories":["RPG"],"ranking":1836,"img":"/thumbs/sleeping-beauty.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"space-huggers","name":"Space Huggers","categories":["Platformer"],"ranking":1837,"img":"/thumbs/space-huggers.webp","src":null,"site":57,"added":"2026-09-30"},
-{"id":"sand-and-water","name":"Sand and Water","categories":["Sandbox"],"ranking":1838,"img":"/thumbs/sand-and-water.webp","src":null,"site":57,"added":"2026-09-30"}
+{"id":"sand-and-water","name":"Sand and Water","categories":["Sandbox"],"ranking":1838,"img":"/thumbs/sand-and-water.webp","src":null,"site":57,"added":"2026-09-30"},
+{"id":"scratch-brawl-2","name":"Scratch Brawl 2","categories":["Action"],"ranking":1839,"img":"/thumbs/scratch-brawl-2.webp","src":null,"site":57,"added":"2026-09-30"}
 ]}
