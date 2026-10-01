@@ -1901,5 +1901,6 @@
 {"id":"the-designer","name":"The Designer","categories":["Puzzle"],"ranking":2055,"img":"/thumbs/the-designer.webp","src":null,"site":62,"added":"2026-09-30"},
 {"id":"stress-chess","name":"Stress Chess","categories":["Puzzle"],"ranking":2056,"img":"/thumbs/stress-chess.webp","src":null,"site":62,"added":"2026-09-30"},
 {"id":"space-order-mine","name":"Space Order Mine","categories":["Skill"],"ranking":2057,"img":"/thumbs/space-order-mine.webp","src":null,"site":62,"added":"2026-09-30"},
-{"id":"scraplegs","name":"Scraplegs","categories":["Platformer"],"ranking":2058,"img":"/thumbs/scraplegs.webp","src":null,"site":62,"added":"2026-09-30"}
+{"id":"scraplegs","name":"Scraplegs","categories":["Platformer"],"ranking":2058,"img":"/thumbs/scraplegs.webp","src":null,"site":62,"added":"2026-09-30"},
+{"id":"last-plant-on-earth","name":"Last Plant On Earth","categories":["Skill"],"ranking":2059,"img":"/thumbs/last-plant-on-earth.webp","src":null,"site":62,"added":"2026-09-30"}
 ]}
