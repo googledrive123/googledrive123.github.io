@@ -397,7 +397,7 @@
 {"id":"20-minutes-till-dawn","name":"20 Minutes Till Dawn","categories":["Action"],"ranking":522,"img":"https://upload.wikimedia.org/wikipedia/en/thumb/b/b8/20_Minutes_Till_Dawn_title.jpg/330px-20_Minutes_Till_Dawn_title.jpg","src":"https://genizymath.github.io/iframe/819-fix2.html","site":14},
 {"id":"2048-merge-run","name":"2048 Merge Run","categories":["Puzzle"],"ranking":523,"img":"https://cdn.jsdelivr.net/gh/genizy/brainrot@main/2048-merge-run/logo.png","src":null,"site":14},
 {"id":"3d-bolt-master","name":"3D Bolt Master","categories":["Action"],"ranking":524,"img":"/thumbs/3d-bolt-master.webp","src":"https://genizymath.github.io/iframe/663.html","site":14},
-{"id":"3d-bowling","name":"3D Bowling","categories":["Sports"],"ranking":525,"img":"/thumbs/3d-bowling.webp","src":"https://icons-6.us/driving-games/3d-bowling/"},
+{"id":"3d-bowling","name":"3D Bowling","categories":["Sports"],"ranking":525,"img":"/thumbs/3d-bowling.webp","src":"https://icons-6.us/driving-games/3d-bowling/","site":46},
 {"id":"64-in-1-nes","name":"64 In 1 NES","categories":["Action"],"ranking":526,"img":"/thumbs/64-in-1-nes.webp","src":"https://genizymath.github.io/iframe/732.html"},
 {"id":"99-balls","name":"99 Balls","categories":["Arcade"],"ranking":527,"img":"/thumbs/99-balls.webp","src":"https://genizymath.github.io/iframe/431.html","site":14},
 {"id":"a-game-about-feeding-a-black-hole","name":"A Game About Feeding A Black Hole","categories":["Puzzle"],"ranking":530,"img":"https://cdn.jsdelivr.net/gh/genizy/google-class@main/a-game-black-hole/index.png","src":null,"site":14},
