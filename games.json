@@ -1675,5 +1675,6 @@
 {"id":"geometry-dash-subzero","name":"Geometry Dash Subzero","categories":["Platformer"],"ranking":1829,"img":"/thumbs/geometry-dash-subzero.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"geometry-dash-world-toxic-factory","name":"Geometry Dash World Toxic Factory","categories":["Platformer"],"ranking":1830,"img":"/thumbs/geometry-dash-world-toxic-factory.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"packabunchas","name":"Packabunchas","categories":["Puzzle"],"ranking":1831,"img":"/thumbs/packabunchas.webp","src":null,"site":57,"added":"2026-09-30"},
-{"id":"javascript-racer","name":"Javascript Racer","categories":["Racing"],"ranking":1832,"img":"/thumbs/javascript-racer.webp","src":null,"site":57,"added":"2026-09-30"}
+{"id":"javascript-racer","name":"Javascript Racer","categories":["Racing"],"ranking":1832,"img":"/thumbs/javascript-racer.webp","src":null,"site":57,"added":"2026-09-30"},
+{"id":"radius-raid","name":"Radius Raid","categories":["Shooter"],"ranking":1833,"img":"/thumbs/radius-raid.webp","src":null,"site":57,"added":"2026-09-30"}
 ]}
