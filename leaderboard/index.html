@@ -17,6 +17,7 @@
   <script src="/js/analytics.js" defer></script>
   <script src="/js/site.js" defer></script>
   <script src="/js/avatars.js" defer></script>
+  <script src="/js/totw.js" defer></script>
   <style>
     /* Rows set their own display, which would otherwise beat hidden. */
     .page [hidden] { display: none !important; }
@@ -84,6 +85,8 @@
       .lb-who, .lb-game { min-width: 0; }
       .lb-game span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     }
+    /* The week's PolyTrack challenge, from js/totw.js, full width here. */
+    .page .lb-totw { margin: 0 0 1rem; max-width: none; }
   </style>
 </head>
 <body>
@@ -92,6 +95,8 @@
   <h1>Leaderboard</h1>
   <p class="lede">Who has played the most. Levels come from play time, so the top level and the
   most play time are the same list. Only signed-in accounts are ranked.</p>
+
+  <div class="lb-totw" data-totw hidden></div>
 
   <div class="lb-me panel" id="lbMe" hidden></div>
 
