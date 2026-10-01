@@ -1420,5 +1420,6 @@
 {"id":"bearsus","name":"Bearsus","categories":["Skill"],"ranking":1574,"img":"/thumbs/bearsus.webp","src":null,"site":51,"added":"2026-09-30"},
 {"id":"city-rider","name":"City Rider","categories":["Driving"],"ranking":1575,"img":"/thumbs/city-rider.webp","src":null,"site":52,"added":"2026-09-30"},
 {"id":"3d-car-simulator","name":"3D Car Simulator","categories":["Driving"],"ranking":1576,"img":"/thumbs/3d-car-simulator.webp","src":null,"site":52,"added":"2026-09-30"},
-{"id":"3d-moto-simulator-2","name":"3D Moto Simulator 2","categories":["Driving"],"ranking":1577,"img":"/thumbs/3d-moto-simulator-2.webp","src":null,"site":52,"added":"2026-09-30"}
+{"id":"3d-moto-simulator-2","name":"3D Moto Simulator 2","categories":["Driving"],"ranking":1577,"img":"/thumbs/3d-moto-simulator-2.webp","src":null,"site":52,"added":"2026-09-30"},
+{"id":"4x4-drive-offroad","name":"4x4 Drive Offroad","categories":["Driving"],"ranking":1578,"img":"/thumbs/4x4-drive-offroad.webp","src":null,"site":52,"added":"2026-09-30"}
 ]}
