@@ -1,14 +1,21 @@
 -- Weekly PolyTrack challenge.
 --
 -- Each week the site owner picks one PolyTrack track. Every run driven on it
--- during that week counts, straight from the site's PolyTrack leaderboard
+-- once the track is up counts, straight from the site's PolyTrack leaderboard
 -- (games/polytrack/leaderboard.sql), and once the week is over the owner
 -- closes it from the analytics dashboard: first place gets the
 -- challenge-winner badge, second and third get challenge-top3. The badge is
 -- the whole prize. /challenge/ shows the week, /winner/ shows its winner.
 --
 -- A week runs Monday to Sunday and ends at midnight UTC on Sunday night, so
--- everyone has the same finish line.
+-- everyone has the same finish line. A time set before the week's track went
+-- up does not count, even one set earlier the same week: the challenge board
+-- is its own, apart from the track's all-time board.
+--
+-- The game only sends a run that beats the player's own best on the track.
+-- games/polytrack/leaderboard.js sends the others on the week's track too,
+-- when they beat the player's best this week, so a slower run than an old
+-- personal best still makes the challenge board.
 --
 -- The challenge ran by the month until 1 October 2026. September's challenge
 -- is kept as it ran, which is why a challenge has its own end date rather
@@ -52,24 +59,18 @@ begin
 
   alter table public.gv_badges rename column month to starts;
 
-  -- October's track becomes this week's, which began on Monday 28 September,
-  -- and picks up the times set on it since then.
+  -- October's track becomes this week's, which began on Monday 28 September.
   update public.gv_challenges set starts = '2026-09-28', ends = '2026-10-05'
    where starts = '2026-10-01';
-  insert into public.gv_challenge_runs (starts, track_id, player_key, nickname, user_id, frames, at)
-  select c.starts, s.track_id, s.player_key, s.nickname, s.user_id, s.frames, s.updated_at
-  from public.gv_challenges c
-  join public.polytrack_scores s
-    on s.track_id = c.track_id
-   and s.updated_at >= c.starts::timestamp at time zone 'utc'
-   and s.updated_at < c.ends::timestamp at time zone 'utc'
-  where c.starts = '2026-09-28'
-  on conflict (starts, player_key) do update
-    set frames = least(excluded.frames, gv_challenge_runs.frames),
-        at     = case when excluded.frames < gv_challenge_runs.frames
-                      then excluded.at else gv_challenge_runs.at end;
 end;
 $migrate$;
+
+-- Summer 3 went up at midnight UTC on 1 October. The move to weekly first
+-- counted times set on it earlier that week, before anyone knew it was the
+-- track; those come off.
+delete from public.gv_challenge_runs
+ where starts = '2026-09-28'
+   and at < '2026-10-01 00:00:00+00';
 
 
 -- One row per challenge, keyed by its first day, a Monday.
@@ -480,9 +481,8 @@ grant execute on function public.gv_badges_for(text[]) to anon, authenticated;
 -- Owner only, behind the dashboard secret.
 --
 -- Sets a week's track, ahead of time or for the week under way. p_week is any
--- day in the week. A new track starts that week's board again from the times
--- already set on it that week, which is also how a week set after it began
--- gets its board.
+-- day in the week. A new track starts that week's board empty: only runs
+-- driven after it goes up count.
 create or replace function public.gv_challenge_set(
   p_secret text,
   p_week date,
@@ -534,16 +534,8 @@ begin
         note     = excluded.note
   returning * into v_row;
 
-  if v_old.starts is null or v_old.track_id <> v_row.track_id then
+  if v_old.track_id <> v_row.track_id then
     delete from gv_challenge_runs where starts = v_week;
-    -- updated_at is the date of each player's best ever, so this finds the
-    -- players whose best on the track was set this week.
-    insert into gv_challenge_runs (starts, track_id, player_key, nickname, user_id, frames, at)
-    select v_week, s.track_id, s.player_key, s.nickname, s.user_id, s.frames, s.updated_at
-    from polytrack_scores s
-    where s.track_id = v_row.track_id
-      and s.updated_at >= v_row.starts::timestamp at time zone 'utc'
-      and s.updated_at < v_row.ends::timestamp at time zone 'utc';
   end if;
 
   return json_build_object(
@@ -767,9 +759,9 @@ $function$;
 -- The first two challenges, both on official tracks, which every player has.
 -- September ran for the whole month, on the most raced track on the board.
 -- The week of 28 September is on the next most raced, so the new challenge
--- brings a new track. Each board is filled in from the times set on its track
--- while it ran, once: after that the owner may have removed runs, and running
--- this file again must not bring them back.
+-- brings a new track. September's board was filled in from the times set on
+-- its track during September, once: after that the owner may have removed
+-- runs, and running this file again must not bring them back.
 insert into public.gv_challenges (starts, ends, track_id, title) values
   ('2026-09-01', '2026-10-01', '5803f9e963625804e3de3246d043dc7dde847aa32e991f7f7326b0453f1fa038', 'Summer 1'),
   ('2026-09-28', '2026-10-05', '148826aa16ffaa23dbc453b32cff05e025ddbce1773fc7733cc13d218926515a', 'Summer 3')
@@ -782,7 +774,7 @@ join public.polytrack_scores s
   on s.track_id = c.track_id
  and s.updated_at >= c.starts::timestamp at time zone 'utc'
  and s.updated_at < c.ends::timestamp at time zone 'utc'
-where c.starts in ('2026-09-01', '2026-09-28')
+where c.starts = '2026-09-01'
   and c.closed_at is null
   and not exists (select 1 from public.gv_challenge_runs r where r.starts = c.starts)
 on conflict (starts, player_key) do nothing;
