@@ -1612,5 +1612,6 @@
 {"id":"ricochet-arrow","name":"Ricochet Arrow","categories":["Puzzle"],"ranking":1766,"img":"/thumbs/ricochet-arrow.webp","src":null,"site":56,"added":"2026-09-30"},
 {"id":"pixel-battles","name":"Pixel Battles","categories":["Action"],"ranking":1767,"img":"/thumbs/pixel-battles.webp","src":null,"site":56,"added":"2026-09-30"},
 {"id":"mountain-biking","name":"Mountain Biking","categories":["Driving"],"ranking":1768,"img":"/thumbs/mountain-biking.webp","src":null,"site":57,"added":"2026-09-30"},
-{"id":"maptroid","name":"Maptroid","categories":["Platformer"],"ranking":1769,"img":"/thumbs/maptroid.webp","src":null,"site":57,"added":"2026-09-30"}
+{"id":"maptroid","name":"Maptroid","categories":["Platformer"],"ranking":1769,"img":"/thumbs/maptroid.webp","src":null,"site":57,"added":"2026-09-30"},
+{"id":"hover-racer-drive","name":"Hover Racer Drive","categories":["Racing"],"ranking":1770,"img":"/thumbs/hover-racer-drive.webp","src":null,"site":57,"added":"2026-09-30"}
 ]}
