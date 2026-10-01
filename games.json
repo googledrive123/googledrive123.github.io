@@ -1545,5 +1545,6 @@
 {"id":"stickman-warriors","name":"Stickman Warriors","categories":["Action"],"ranking":1699,"img":"/thumbs/stickman-warriors.webp","src":null,"site":55,"added":"2026-09-30"},
 {"id":"stickman-school-run","name":"Stickman School Run","categories":["Platformer"],"ranking":1700,"img":"/thumbs/stickman-school-run.webp","src":null,"site":55,"added":"2026-09-30"},
 {"id":"stickman-fighter-mega-brawl","name":"Stickman Fighter Mega Brawl","categories":["Action"],"ranking":1701,"img":"/thumbs/stickman-fighter-mega-brawl.webp","src":null,"site":55,"added":"2026-09-30"},
-{"id":"stickman-crazy-box","name":"Stickman Crazy Box","categories":["Action"],"ranking":1702,"img":"/thumbs/stickman-crazy-box.webp","src":null,"site":55,"added":"2026-09-30"}
+{"id":"stickman-crazy-box","name":"Stickman Crazy Box","categories":["Action"],"ranking":1702,"img":"/thumbs/stickman-crazy-box.webp","src":null,"site":55,"added":"2026-09-30"},
+{"id":"stickman-climb-2","name":"Stickman Climb 2","categories":["Skill"],"ranking":1703,"img":"/thumbs/stickman-climb-2.webp","src":null,"site":55,"added":"2026-09-30"}
 ]}
