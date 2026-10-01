@@ -1466,5 +1466,6 @@
 {"id":"court-kings-3d","name":"Court Kings 3D","categories":["Sports"],"ranking":1620,"img":"/thumbs/court-kings-3d.webp","src":null,"site":53,"added":"2026-09-30"},
 {"id":"patricks-parabox","name":"Patrick's Parabox","categories":["Puzzle"],"ranking":1621,"img":"/thumbs/patricks-parabox.webp","src":null,"site":53,"added":"2026-09-30"},
 {"id":"brain-test-3-tricky-quests","name":"Brain Test 3 Tricky Quests","categories":["Puzzle"],"ranking":1622,"img":"/thumbs/brain-test-3-tricky-quests.webp","src":null,"site":53,"added":"2026-09-30"},
-{"id":"cave-blast","name":"Cave Blast","categories":["Skill"],"ranking":1623,"img":"/thumbs/cave-blast.webp","src":null,"site":53,"added":"2026-09-30"}
+{"id":"cave-blast","name":"Cave Blast","categories":["Skill"],"ranking":1623,"img":"/thumbs/cave-blast.webp","src":null,"site":53,"added":"2026-09-30"},
+{"id":"switchblade","name":"Switchblade","categories":["Action"],"ranking":1624,"img":"/thumbs/switchblade.webp","src":null,"site":53,"added":"2026-09-30"}
 ]}
