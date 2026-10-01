@@ -1191,6 +1191,37 @@
     }).catch(function (e) { $('chMsg').textContent = 'Could not load tracks: ' + e.message; });
   }
 
+  // ── leaderboard ──
+  function loadBoard() {
+    return Promise.all([rpc('gv_leaderboard', {}), rpc('gv_board_bans_list', { p_secret: state.secret })]).then(function (r) {
+      var top = ((r[0] && r[0].players) || []).slice(0, 20), bans = r[1] || [];
+      var ids = top.map(function (p) { return p.id; }).concat(bans.map(function (b) { return b.id; }));
+      return rpc('gv_public_profiles', { p_ids: ids }).then(function (rows) {
+        var names = {};
+        (rows || []).forEach(function (row) { names[row.id] = row.username; });
+        $('boardTop').innerHTML = top.length ? top.map(function (p) {
+          return '<div class="bc-item"><span class="when">#' + p.rank + '</span>'
+            + '<span class="msg">' + esc(names[p.id] || 'player') + '</span>'
+            + '<span class="st">' + (Math.round(p.sec / 360) / 10) + ' h · ' + p.games + ' games</span>'
+            + '<button class="btn" type="button" data-boardhide="' + esc(p.id) + '">Hide</button></div>';
+        }).join('') : '<div class="empty">Nobody is on the board yet.</div>';
+        $('boardBans').innerHTML = bans.length ? bans.map(function (b) {
+          return '<div class="bc-item"><span class="when">' + esc(new Date(b.at).toLocaleDateString()) + '</span>'
+            + '<span class="msg">' + esc(names[b.id] || 'player') + '</span>'
+            + '<button class="btn" type="button" data-boardshow="' + esc(b.id) + '">Show again</button></div>';
+        }).join('') : '<div class="empty">Nobody is hidden.</div>';
+      });
+    }).catch(function (e) { $('boardMsg').textContent = 'Could not load the leaderboard: ' + e.message; });
+  }
+  function boardAction(e) {
+    var b = e.target.closest('button'); if (!b) return;
+    var id = b.dataset.boardhide || b.dataset.boardshow; if (!id) return;
+    if (b.dataset.boardhide && !confirm('Take this account off the public leaderboard?')) return;
+    rpc('gv_board_ban', { p_secret: state.secret, p_user: id, p_on: !!b.dataset.boardhide })
+      .then(function () { $('boardMsg').textContent = b.dataset.boardhide ? 'Hidden from the board.' : 'Back on the board.'; return loadBoard(); })
+      .catch(function (err) { $('boardMsg').textContent = 'Could not do that: ' + err.message; });
+  }
+
   // ── backup addresses ──
   function loadMirrors() {
     return rpc('gv_mirrors_list', {}).then(function (list) {
@@ -1428,7 +1459,7 @@
   }
 
   // ── auth / wiring ──
-  function showDash() { $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); load(); loadPeople(); loadBroadcasts(); loadLinks(); loadChat(); loadAvatars(); loadTesting(); loadGiveaways(); loadChallenges(); loadChallengeTracks(); loadMirrors(); setTimer(); }
+  function showDash() { $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); load(); loadPeople(); loadBroadcasts(); loadLinks(); loadChat(); loadAvatars(); loadTesting(); loadGiveaways(); loadChallenges(); loadChallengeTracks(); loadBoard(); loadMirrors(); setTimer(); }
   function setTimer() { clearInterval(state.timer); if ($('autoRefresh').checked) state.timer = setInterval(load, 60000); }
   function tryLogin(secret, remember) {
     $('loginErr').textContent = '';
@@ -1481,6 +1512,7 @@
       .then(function () { $('gaCreate').disabled = false; });
   });
   ['chList', 'chBoard'].forEach(function (id) { $(id).addEventListener('click', chAction); });
+  ['boardTop', 'boardBans'].forEach(function (id) { $(id).addEventListener('click', boardAction); });
   $('chTrack').addEventListener('change', function () {
     var name = $('chTrack').selectedOptions[0] && $('chTrack').selectedOptions[0].dataset.name;
     if (name && !$('chTitle').value.trim()) $('chTitle').value = name;
