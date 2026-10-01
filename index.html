@@ -5130,11 +5130,20 @@ async function renderStats() {
   document.getElementById('statPeriods').textContent = '…';
   document.getElementById('statTopPeriod').textContent = '…';
   try {
-    const { data: sessions, error } = await sb.from('play_sessions')
-      .select('game_id, started_at, ended_at, duration_seconds')
-      .eq('user_id', currentUser.id)
-      .not('ended_at', 'is', null);
-    computeAndShowStats(error ? [] : (sessions || []));
+    // Supabase hands back at most 1000 rows at a time, so read in pages.
+    const sessions = [];
+    for (let from = 0; ; from += 1000) {
+      const { data, error } = await sb.from('play_sessions')
+        .select('game_id, started_at, ended_at, duration_seconds')
+        .eq('user_id', currentUser.id)
+        .not('ended_at', 'is', null)
+        .order('started_at').order('id')
+        .range(from, from + 999);
+      if (error) break;
+      sessions.push(...(data || []));
+      if (!data || data.length < 1000) break;
+    }
+    computeAndShowStats(sessions, currentUser.created_at);
   } catch(e) {
     computeAndShowStats([]);
   }
