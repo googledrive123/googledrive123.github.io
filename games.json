@@ -1593,5 +1593,6 @@
 {"id":"worlds-within-worlds","name":"Worlds Within Worlds","categories":["Puzzle"],"ranking":1747,"img":"/thumbs/worlds-within-worlds.webp","src":null,"site":56,"added":"2026-09-30"},
 {"id":"tower-of-the-scorched","name":"Tower of the Scorched","categories":["Platformer"],"ranking":1748,"img":"/thumbs/tower-of-the-scorched.webp","src":null,"site":56,"added":"2026-09-30"},
 {"id":"scalak","name":"Scalak","categories":["RPG"],"ranking":1749,"img":"/thumbs/scalak.webp","src":null,"site":56,"added":"2026-09-30"},
-{"id":"sabotage","name":"Sabotage","categories":["Puzzle"],"ranking":1750,"img":"/thumbs/sabotage.webp","src":null,"site":56,"added":"2026-09-30"}
+{"id":"sabotage","name":"Sabotage","categories":["Puzzle"],"ranking":1750,"img":"/thumbs/sabotage.webp","src":null,"site":56,"added":"2026-09-30"},
+{"id":"roots","name":"Roots","categories":["Puzzle"],"ranking":1751,"img":"/thumbs/roots.webp","src":null,"site":56,"added":"2026-09-30"}
 ]}
