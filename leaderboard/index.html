@@ -197,6 +197,26 @@
     });
   }
 
+  function paintWeek() {
+    var body = $('lbWeekRows');
+    body.textContent = '';
+    if (!data.week.length) {
+      var tr = document.createElement('tr');
+      var c = td('', 'Nobody has played this week yet.');
+      c.colSpan = 3;
+      tr.appendChild(c);
+      body.appendChild(tr);
+      return;
+    }
+    var rank = 0, last = -1;
+    data.week.forEach(function (p, i) {
+      if (p.sec !== last) { rank = i + 1; last = p.sec; }
+      var tr = rankRow(rank, p.id);
+      tr.appendChild(td('num', hours(p.sec)));
+      body.appendChild(tr);
+    });
+  }
+
   function show(tab) {
     document.querySelectorAll('.lb-tab').forEach(function (b) {
       b.setAttribute('aria-selected', b.dataset.tab === tab ? 'true' : 'false');
@@ -211,13 +231,14 @@
     return sb.rpc('gv_leaderboard').then(function (r) {
       if (r.error) throw new Error(r.error.message);
       data = r.data;
-      var ids = data.players.map(function (p) { return p.id; });
+      var ids = data.players.concat(data.week).map(function (p) { return p.id; });
       return window.GV && GV.avatars ? GV.avatars.publicProfiles(ids).then(function (rows) {
         rows.forEach(function (row) { people[row.id] = row; });
       }).catch(function () {}) : null;
     }).then(function () {
       $('lbMsg').textContent = data.players.length ? '' : 'Nobody is on the board yet. Sign in and play a game to be first.';
       paintPlayers();
+      paintWeek();
     }).catch(function () {
       $('lbMsg').textContent = 'The leaderboard could not load. Refresh to try again.';
     });
