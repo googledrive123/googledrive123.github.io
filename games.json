@@ -1432,5 +1432,6 @@
 {"id":"kart-race","name":"Kart Race","categories":["Racing"],"ranking":1586,"img":"/thumbs/kart-race.webp","src":null,"site":52,"added":"2026-09-30"},
 {"id":"age-of-war-2","name":"Age Of War 2","categories":["Strategy"],"ranking":1587,"img":"/thumbs/age-of-war-2.webp","src":null,"site":52,"added":"2026-09-30"},
 {"id":"aliens-nest","name":"Aliens Nest","categories":["Skill"],"ranking":1588,"img":"/thumbs/aliens-nest.webp","src":null,"site":52,"added":"2026-09-30"},
-{"id":"arithmetica","name":"Arithmetica","categories":["Puzzle"],"ranking":1589,"img":"/thumbs/arithmetica.webp","src":null,"site":52,"added":"2026-09-30"}
+{"id":"arithmetica","name":"Arithmetica","categories":["Puzzle"],"ranking":1589,"img":"/thumbs/arithmetica.webp","src":null,"site":52,"added":"2026-09-30"},
+{"id":"blocky-trials","name":"Blocky Trials","categories":["Driving"],"ranking":1590,"img":"/thumbs/blocky-trials.webp","src":null,"site":52,"added":"2026-09-30"}
 ]}
