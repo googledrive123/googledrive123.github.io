@@ -1936,5 +1936,6 @@
 {"id":"b-side","name":"B-Side","categories":["Skill"],"ranking":2090,"img":"/thumbs/b-side.webp","src":null,"site":64,"added":"2026-09-30"},
 {"id":"baw","name":"Baw","categories":["Skill"],"ranking":2091,"img":"/thumbs/baw.webp","src":null,"site":64,"added":"2026-09-30"},
 {"id":"pixel-gun-apocalypse-2","name":"Pixel Gun Apocalypse 2","categories":["Shooter"],"ranking":2092,"img":"/thumbs/pixel-gun-apocalypse-2.webp","src":null,"site":64,"added":"2026-09-30"},
-{"id":"running-fred","name":"Running Fred","categories":["Platformer"],"ranking":2093,"img":"/thumbs/running-fred.webp","src":null,"site":64,"added":"2026-09-30"}
+{"id":"running-fred","name":"Running Fred","categories":["Platformer"],"ranking":2093,"img":"/thumbs/running-fred.webp","src":null,"site":64,"added":"2026-09-30"},
+{"id":"skyblock","name":"Skyblock","categories":["Sandbox"],"ranking":2094,"img":"/thumbs/skyblock.webp","src":null,"site":64,"added":"2026-09-30"}
 ]}
