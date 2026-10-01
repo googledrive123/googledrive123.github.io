@@ -1631,5 +1631,6 @@
 {"id":"iq-ball","name":"IQ Ball","categories":["Puzzle"],"ranking":1785,"img":"/thumbs/iq-ball.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"i-wanna-win","name":"I Wanna Win","categories":["Platformer"],"ranking":1786,"img":"/thumbs/i-wanna-win.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"jelly-go","name":"Jelly Go!","categories":["Puzzle"],"ranking":1787,"img":"/thumbs/jelly-go.webp","src":null,"site":57,"added":"2026-09-30"},
-{"id":"little-wheel","name":"Little Wheel","categories":["Adventure"],"ranking":1788,"img":"/thumbs/little-wheel.webp","src":null,"site":57,"added":"2026-09-30"}
+{"id":"little-wheel","name":"Little Wheel","categories":["Adventure"],"ranking":1788,"img":"/thumbs/little-wheel.webp","src":null,"site":57,"added":"2026-09-30"},
+{"id":"mini-putt-3","name":"Mini Putt 3","categories":["Sports"],"ranking":1789,"img":"/thumbs/mini-putt-3.webp","src":null,"site":57,"added":"2026-09-30"}
 ]}
