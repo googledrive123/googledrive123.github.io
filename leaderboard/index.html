@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leaderboard · GameVault</title>
+  <meta name="description" content="Who has played the most on GameVault: top levels, top play time, this week's leaders, and the most played games.">
+  <link rel="icon" href="/favicon.svg">
+  <!-- Blocking on purpose: the cloak has to land before the first paint. -->
+  <script src="/js/mimicry.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/site.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
+  <script src="/js/identity.js" defer></script>
+  <script src="/js/analytics.js" defer></script>
+  <script src="/js/site.js" defer></script>
+  <script src="/js/avatars.js" defer></script>
+</head>
+<body>
+<main class="page">
+  <div class="page-kicker">leaderboard</div>
+  <h1>Leaderboard</h1>
+  <p class="lede">Who has played the most. Levels come from play time, so the top level and the
+  most play time are the same list. Only signed-in accounts are ranked.</p>
+
+  <div class="panel" id="lbPanel">
+    <div class="lb-msg" id="lbMsg" role="status">Loading the leaderboard…</div>
+  </div>
+
+  <p class="panel-note">A session saved twice counts once, and one session counts for at most four
+  hours, so a tab left open overnight does not win.</p>
+</main>
+</body>
+</html>
