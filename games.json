@@ -1376,5 +1376,6 @@
 {"id":"babel-tower","name":"Babel Tower","categories":["Idle"],"ranking":1530,"img":"/thumbs/babel-tower.webp","src":null,"site":50,"added":"2026-09-30"},
 {"id":"throw-a-potato-again","name":"Throw a Potato Again","categories":["Skill"],"ranking":1531,"img":"/thumbs/throw-a-potato-again.webp","src":null,"site":50,"added":"2026-09-30"},
 {"id":"throw-a-potato-in-space","name":"Throw a Potato in Space","categories":["Skill"],"ranking":1532,"img":"/thumbs/throw-a-potato-in-space.webp","src":null,"site":50,"added":"2026-09-30"},
-{"id":"mirror-wizard","name":"Mirror Wizard","categories":["RPG"],"ranking":1533,"img":"/thumbs/mirror-wizard.webp","src":null,"site":50,"added":"2026-09-30"}
+{"id":"mirror-wizard","name":"Mirror Wizard","categories":["RPG"],"ranking":1533,"img":"/thumbs/mirror-wizard.webp","src":null,"site":50,"added":"2026-09-30"},
+{"id":"pathfinder","name":"Pathfinder","categories":["Puzzle"],"ranking":1534,"img":"/thumbs/pathfinder.webp","src":null,"site":50,"added":"2026-09-30"}
 ]}
