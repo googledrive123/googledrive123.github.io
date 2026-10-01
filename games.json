@@ -1857,5 +1857,6 @@
 {"id":"robox","name":"Robox","categories":["Puzzle"],"ranking":2011,"img":"/thumbs/robox.webp","src":null,"site":61,"added":"2026-09-30"},
 {"id":"reel-deep","name":"Reel Deep","categories":["Skill"],"ranking":2012,"img":"/thumbs/reel-deep.webp","src":null,"site":61,"added":"2026-09-30"},
 {"id":"planet-d4rk","name":"Planet D4rk","categories":["Skill"],"ranking":2013,"img":"/thumbs/planet-d4rk.webp","src":null,"site":61,"added":"2026-09-30"},
-{"id":"moosha","name":"Moosha","categories":["Skill"],"ranking":2014,"img":"/thumbs/moosha.webp","src":null,"site":61,"added":"2026-09-30"}
+{"id":"moosha","name":"Moosha","categories":["Skill"],"ranking":2014,"img":"/thumbs/moosha.webp","src":null,"site":61,"added":"2026-09-30"},
+{"id":"may-i-have-your-attention-please","name":"May I Have Your Attention, Please","categories":["Skill"],"ranking":2015,"img":"/thumbs/may-i-have-your-attention-please.webp","src":null,"site":61,"added":"2026-09-30"}
 ]}
