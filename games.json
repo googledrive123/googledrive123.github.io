@@ -1573,5 +1573,6 @@
 {"id":"bridge-tactics","name":"Bridge Tactics","categories":["Puzzle"],"ranking":1727,"img":"/thumbs/bridge-tactics.webp","src":null,"site":56,"added":"2026-09-30"},
 {"id":"cursed-winds","name":"Cursed Winds","categories":["Skill"],"ranking":1728,"img":"/thumbs/cursed-winds.webp","src":null,"site":56,"added":"2026-09-30"},
 {"id":"eco-ego","name":"Eco Ego","categories":["Skill"],"ranking":1729,"img":"/thumbs/eco-ego.webp","src":null,"site":56,"added":"2026-09-30"},
-{"id":"effing-worms","name":"Effing Worms","categories":["Action"],"ranking":1730,"img":"/thumbs/effing-worms.webp","src":null,"site":56,"added":"2026-09-30"}
+{"id":"effing-worms","name":"Effing Worms","categories":["Action"],"ranking":1730,"img":"/thumbs/effing-worms.webp","src":null,"site":56,"added":"2026-09-30"},
+{"id":"kids-vs-santa","name":"Kids Vs Santa","categories":["Action"],"ranking":1731,"img":"/thumbs/kids-vs-santa.webp","src":null,"site":56,"added":"2026-09-30"}
 ]}
