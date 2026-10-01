@@ -1697,5 +1697,6 @@
 {"id":"pong-html5","name":"Pong HTML5","categories":["Arcade"],"ranking":1851,"img":"/thumbs/pong-html5.webp","src":null,"site":58,"added":"2026-09-30"},
 {"id":"idle-shark","name":"Idle Shark","categories":["Idle"],"ranking":1852,"img":"/thumbs/idle-shark.webp","src":null,"site":58,"added":"2026-09-30"},
 {"id":"space-invaders","name":"Space Invaders","categories":["Arcade"],"ranking":1853,"img":"/thumbs/space-invaders.webp","src":null,"site":58,"added":"2026-09-30"},
-{"id":"stack-ball","name":"Stack Ball","categories":["Arcade"],"ranking":1854,"img":"/thumbs/stack-ball.webp","src":null,"site":58,"added":"2026-09-30"}
+{"id":"stack-ball","name":"Stack Ball","categories":["Arcade"],"ranking":1854,"img":"/thumbs/stack-ball.webp","src":null,"site":58,"added":"2026-09-30"},
+{"id":"the-square","name":"The Square","categories":["Platformer"],"ranking":1855,"img":"/thumbs/the-square.webp","src":null,"site":58,"added":"2026-09-30"}
 ]}
