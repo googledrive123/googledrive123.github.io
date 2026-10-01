@@ -1509,5 +1509,6 @@
 {"id":"hypersnake","name":"Hypersnake","categories":["Arcade"],"ranking":1663,"img":"/thumbs/hypersnake.webp","src":null,"site":54,"added":"2026-09-30"},
 {"id":"shoot-stickman","name":"Shoot Stickman","categories":["Shooter"],"ranking":1664,"img":"/thumbs/shoot-stickman.webp","src":null,"site":54,"added":"2026-09-30"},
 {"id":"scrap-divers","name":"Scrap Divers","categories":["Skill"],"ranking":1665,"img":"/thumbs/scrap-divers.webp","src":null,"site":54,"added":"2026-09-30"},
-{"id":"rocket-pult","name":"Rocket Pult","categories":["Skill"],"ranking":1666,"img":"/thumbs/rocket-pult.webp","src":null,"site":54,"added":"2026-09-30"}
+{"id":"rocket-pult","name":"Rocket Pult","categories":["Skill"],"ranking":1666,"img":"/thumbs/rocket-pult.webp","src":null,"site":54,"added":"2026-09-30"},
+{"id":"slime-road","name":"Slime Road","categories":["Skill"],"ranking":1667,"img":"/thumbs/slime-road.webp","src":null,"site":54,"added":"2026-09-30"}
 ]}
