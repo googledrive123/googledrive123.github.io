@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Free V-Bucks · GameVault</title>
+  <meta name="description" content="Claim your free V-Bucks.">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="/favicon.svg">
+  <!-- Blocking on purpose: the cloak has to land before the first paint. -->
+  <script src="/js/mimicry.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/site.css">
+  <script src="/js/identity.js" defer></script>
+  <script src="/js/analytics.js" defer></script>
+  <!-- No site.js or player.js: no chrome around the video, and no music over it. -->
+  <style>
+    body { background: #000; overflow: hidden; }
+    .rr-video {
+      position: fixed; inset: 0;
+      width: 100%; height: 100%;
+      border: 0;
+      background: #000;
+    }
+    /* Held clear of the player's own control bar along the bottom. */
+    .rr-sound {
+      position: fixed; left: 50%; bottom: max(5rem, 17vh); z-index: 2;
+      transform: translateX(-50%);
+      padding: 1rem 2rem;
+      font-size: 1.15rem;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 28px rgba(255,59,59,0.35);
+    }
+    .rr-sound[hidden] { display: none; }
+    /* Top left, over the channel badge rather than the play controls. */
+    .rr-back {
+      position: fixed; left: 0.75rem; top: 0.75rem; z-index: 2;
+      padding: 0.35rem 0.8rem;
+      border-radius: 100px;
+      border: 1px solid var(--border-strong);
+      background: rgba(8,8,10,0.75);
+      color: var(--muted);
+      font-size: 0.78rem;
+      text-decoration: none;
+    }
+    .rr-back:hover { color: var(--text); }
+  </style>
+</head>
+<body>
+<!-- Muted, because browsers only autoplay a video that makes no sound. -->
+<iframe class="rr-video" id="rrVideo"
+  src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&amp;mute=1&amp;playsinline=1&amp;rel=0"
+  title="Your free V-Bucks"
+  allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+  referrerpolicy="strict-origin-when-cross-origin"
+  allowfullscreen></iframe>
+<button class="btn btn-primary rr-sound" id="rrSound" type="button">Tap for sound</button>
+<a class="rr-back" id="rrBack" href="/">&larr; Back</a>
+
+<script>
+(function () {
+  var video = document.getElementById('rrVideo');
+  var sound = document.getElementById('rrSound');
+  // The tap counts as the user asking for sound, so the reload may play it.
+  // A fresh frame rather than a new src: changing src adds a history entry,
+  // and then Back would only take the video back to muted.
+  sound.addEventListener('click', function () {
+    var fresh = video.cloneNode(false);
+    fresh.src = video.src.replace('mute=1', 'mute=0');
+    video.parentNode.replaceChild(fresh, video);
+    video = fresh;
+    sound.hidden = true;
+  });
+
+  // Straight back to wherever on GameVault they came from, else home.
+  document.getElementById('rrBack').addEventListener('click', function (e) {
+    var fromHere = document.referrer.indexOf(location.origin + '/') === 0;
+    if (fromHere && history.length > 1) {
+      e.preventDefault();
+      history.back();
+    }
+  });
+})();
+</script>
+</body>
+</html>

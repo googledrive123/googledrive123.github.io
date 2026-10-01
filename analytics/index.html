@@ -116,6 +116,16 @@
   .verify-bar select { flex: 2 1 260px; }
   .verify-msg { font-size: 0.74rem; color: var(--muted); margin-top: 8px; min-height: 1em; }
   .verify-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .bc-text { width: 100%; min-height: 64px; resize: vertical; background: var(--bg); border: 1px solid var(--border-strong); color: var(--text); font: inherit; font-size: 0.85rem; padding: 9px 10px; border-radius: 8px; margin-bottom: 8px; }
+  .bc-item { display: flex; gap: 10px; align-items: baseline; padding: 7px 0; border-top: 1px solid var(--border); font-size: 0.8rem; width: 100%; }
+  .bc-item .when { color: var(--muted); font-size: 0.7rem; white-space: nowrap; }
+  .bc-item .msg { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .bc-item .st { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+  .bc-item .st.on { color: #7dffa0; }
+  .mod-h { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin: 14px 0 4px; font-weight: 600; }
+  .mod-scroll { max-height: 320px; overflow: auto; }
+  .bc-item.gone .msg { text-decoration: line-through; opacity: 0.5; }
+  .av-img { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; background: var(--bg); flex-shrink: 0; }
   .verify-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 0.76rem; padding: 4px 4px 4px 8px; border: 1px solid var(--border); border-radius: 999px; }
   .verify-chip .kind { color: var(--muted-2); font-size: 0.68rem; }
   .verify-chip button { background: none; border: 0; color: var(--muted); font: inherit; font-size: 0.9rem; line-height: 1; padding: 2px 6px; cursor: pointer; }
@@ -190,6 +200,133 @@
       </div>
       <div class="verify-msg" id="verifyMsg"></div>
       <div class="verify-list" id="verifyList"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Broadcast <small>a message across the top of every page</small></h2>
+    <div class="card">
+      <textarea class="bc-text" id="bcText" maxlength="500" placeholder="What should people see?"></textarea>
+      <div class="verify-bar">
+        <select id="bcMode" aria-label="Who sees it">
+          <option value="both">Everyone: on the site now and arriving later</option>
+          <option value="now">Only people on the site right now</option>
+          <option value="later">Only people who arrive after this</option>
+        </select>
+        <select id="bcHours" aria-label="How long">
+          <option value="1">for 1 hour</option>
+          <option value="6">for 6 hours</option>
+          <option value="24" selected>for 1 day</option>
+          <option value="72">for 3 days</option>
+          <option value="168">for 1 week</option>
+        </select>
+        <button class="btn" id="bcSend">Send</button>
+      </div>
+      <div class="verify-msg" id="bcMsg"></div>
+      <div class="verify-list" id="bcList"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Broken links <small>reported from the 404 page</small></h2>
+    <div class="card">
+      <div class="verify-msg" id="linkMsg"></div>
+      <div class="verify-list" id="linkList"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Chat moderation <small>reports, recent messages and bans</small></h2>
+    <div class="card">
+      <div class="verify-msg" id="chatMsg"></div>
+      <h3 class="mod-h">Reported</h3>
+      <div class="verify-list" id="chatReports"></div>
+      <h3 class="mod-h">Bans</h3>
+      <div class="verify-list" id="chatBans"></div>
+      <h3 class="mod-h">Latest messages</h3>
+      <div class="verify-list mod-scroll" id="chatRecent"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Pictures waiting <small>profile uploads only show once approved</small></h2>
+    <div class="card">
+      <div class="verify-msg" id="avMsg"></div>
+      <div class="verify-list" id="avQueue"></div>
+      <h3 class="mod-h">Showing now</h3>
+      <div class="verify-list" id="avShowing"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Testers and submissions <small>new games checked before they go public</small></h2>
+    <div class="card">
+      <div class="verify-bar">
+        <input type="search" id="testerName" placeholder="Username" autocomplete="off">
+        <button class="btn" id="testerAdd" type="button">Make tester</button>
+      </div>
+      <div class="verify-msg" id="testMsg"></div>
+      <h3 class="mod-h">Testers</h3>
+      <div class="verify-list" id="testerList"></div>
+      <h3 class="mod-h">Tester reports</h3>
+      <div class="verify-list mod-scroll" id="testReports"></div>
+      <h3 class="mod-h">Games sent in</h3>
+      <div class="verify-list mod-scroll" id="subList"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Giveaways <small>site prizes only, never money</small></h2>
+    <div class="card">
+      <div class="verify-bar">
+        <input type="text" id="gaTitle" placeholder="Title" maxlength="80">
+        <input type="text" id="gaPrize" placeholder="Prize (a badge, a crate, a name colour)" maxlength="200">
+        <input type="datetime-local" id="gaEnds" aria-label="Ends">
+        <button class="btn" id="gaCreate" type="button">Start giveaway</button>
+      </div>
+      <div class="verify-msg" id="gaMsg"></div>
+      <div class="verify-list" id="gaList"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Monthly challenge <small>PolyTrack track of the month, badges for the top three</small></h2>
+    <div class="card">
+      <div class="verify-bar">
+        <input type="month" id="chMonth" aria-label="Month">
+        <select id="chTrack" aria-label="Track"></select>
+        <input type="text" id="chTitle" placeholder="Title" maxlength="80">
+        <input type="text" id="chNote" placeholder="Note (optional)" maxlength="300">
+        <button class="btn" id="chSet" type="button">Set track</button>
+      </div>
+      <div class="verify-msg" id="chMsg"></div>
+      <div class="verify-list" id="chList"></div>
+      <h3 class="mod-h" id="chBoardH" hidden></h3>
+      <div class="verify-list mod-scroll" id="chBoard"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Leaderboard <small>play time is saved by the browser, so take a faked one off here</small></h2>
+    <div class="card">
+      <div class="verify-msg" id="boardMsg"></div>
+      <h3 class="mod-h">Top 20</h3>
+      <div class="verify-list mod-scroll" id="boardTop"></div>
+      <h3 class="mod-h">Hidden by you</h3>
+      <div class="verify-list" id="boardBans"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Backup addresses <small>mirror sites, see mirrors/SETUP.md</small></h2>
+    <div class="card">
+      <div class="verify-bar">
+        <input type="text" id="mirrorOrigin" placeholder="https://name.github.io" autocomplete="off">
+        <input type="text" id="mirrorLabel" placeholder="Label (optional)" maxlength="60">
+        <button class="btn" id="mirrorAdd" type="button">Add</button>
+      </div>
+      <div class="verify-msg" id="mirrorMsg"></div>
+      <div class="verify-list" id="mirrorList"></div>
     </div>
   </section>
 
@@ -438,7 +575,11 @@
     };
     // A request that never settles would leave `loading` stuck and stop auto-refresh for good.
     try { if (AbortSignal && AbortSignal.timeout) opts.signal = AbortSignal.timeout(45000); } catch (e) {}
-    return fetch(SUPA_URL + '/rest/v1/rpc/' + fn, opts).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+    return fetch(SUPA_URL + '/rest/v1/rpc/' + fn, opts).then(function (r) {
+      if (r.ok) return r.json();
+      // The functions explain a refusal in plain words; show those.
+      return r.json().catch(function () { return {}; }).then(function (b) { throw new Error(b.message || 'HTTP ' + r.status); });
+    });
   }
   // Supabase's PostgREST caps every response at 1000 rows (db-max-rows), whatever
   // p_limit says, so page in 1000s and keep going while a page comes back full.
@@ -816,6 +957,281 @@
   // name ("Anonymous" most of all), so each carries a slice of its id.
   var people = [];
   function kindLabel(p) { return p.kind === 'account' ? 'account' : 'guest ' + p.key.slice(6, 12); }
+  // ── broadcasts ──
+  var BC_MODE = { now: 'on the site then', later: 'arriving after', both: 'everyone' };
+  function loadBroadcasts() {
+    return rpc('gv_broadcast_list', { p_secret: state.secret }).then(function (list) {
+      var now = Date.now();
+      $('bcList').innerHTML = (list || []).length ? list.map(function (b) {
+        var live = !b.stopped && Date.parse(b.expires_at) > now;
+        return '<div class="bc-item"><span class="when">' + esc(new Date(b.created_at).toLocaleString()) + '</span>'
+          + '<span class="msg">' + esc(b.message) + '</span>'
+          + '<span class="st' + (live ? ' on' : '') + '">' + (live ? 'showing' : b.stopped ? 'stopped' : 'ended') + ' · ' + esc(BC_MODE[b.mode] || b.mode) + '</span>'
+          + (live ? '<button class="btn" type="button" data-stop="' + b.id + '">Stop</button>' : '') + '</div>';
+      }).join('') : '<div class="empty">Nothing sent yet.</div>';
+    }).catch(function (e) { $('bcMsg').textContent = 'Could not load broadcasts: ' + e.message; });
+  }
+  function sendBroadcast() {
+    var text = $('bcText').value.trim();
+    if (!text) { $('bcMsg').textContent = 'Write a message first.'; return; }
+    $('bcSend').disabled = true;
+    rpc('gv_broadcast_send', { p_secret: state.secret, p_message: text, p_mode: $('bcMode').value, p_hours: +$('bcHours').value })
+      .then(function () { $('bcText').value = ''; $('bcMsg').textContent = 'Sent. Open pages pick it up within a minute.'; return loadBroadcasts(); })
+      .catch(function (e) { $('bcMsg').textContent = 'Could not send: ' + e.message; })
+      .then(function () { $('bcSend').disabled = false; });
+  }
+  function stopBroadcast(id) {
+    rpc('gv_broadcast_stop', { p_secret: state.secret, p_id: id }).then(loadBroadcasts)
+      .catch(function (e) { $('bcMsg').textContent = 'Could not stop it: ' + e.message; });
+  }
+
+  // ── broken links ──
+  function loadLinks() {
+    return rpc('gv_link_reports_list', { p_secret: state.secret }).then(function (list) {
+      $('linkList').innerHTML = (list || []).length ? list.map(function (r) {
+        return '<div class="bc-item"><span class="when">' + esc(new Date(r.last_seen).toLocaleString()) + '</span>'
+          + '<span class="msg"><code>' + esc(r.path) + '</code>'
+          + (r.referrers && r.referrers.length ? ' <span class="st">from ' + r.referrers.map(esc).join(', ') + '</span>' : '') + '</span>'
+          + '<span class="st">' + r.reports + ' report' + (r.reports === 1 ? '' : 's') + '</span>'
+          + '<button class="btn" type="button" data-fix="' + esc(r.path) + '">Fixed</button></div>';
+      }).join('') : '<div class="empty">No open reports.</div>';
+    }).catch(function (e) { $('linkMsg').textContent = 'Could not load reports: ' + e.message; });
+  }
+
+  // ── chat moderation ──
+  function chatRow(m, extra) {
+    return '<div class="bc-item' + (m.deleted ? ' gone' : '') + '"><span class="when">' + esc(new Date(m.created_at).toLocaleString()) + '</span>'
+      + '<span class="msg"><b>' + esc(m.username || '?') + '</b> ' + esc(m.body) + '</span>' + (extra || '') + '</div>';
+  }
+  function modButtons(msgId, userId) {
+    return (msgId ? '<button class="btn" type="button" data-del="' + msgId + '">Delete</button>' : '')
+      + '<button class="btn" type="button" data-ban="' + esc(userId) + '" data-days="1">Ban 1 day</button>'
+      + '<button class="btn" type="button" data-ban="' + esc(userId) + '" data-days="">Ban</button>';
+  }
+  function loadChat() {
+    return rpc('gv_chat_mod_list', { p_secret: state.secret }).then(function (d) {
+      $('chatReports').innerHTML = d.reports.length ? d.reports.map(function (r) {
+        var why = r.reports.map(function (x) { return esc(x.reporter) + ': ' + esc(x.reason || '—'); }).join('; ');
+        return chatRow(r, '<span class="st">' + r.count + ' report' + (r.count === 1 ? '' : 's') + ' · ' + why + '</span>'
+          + modButtons(r.deleted ? null : r.message_id, r.user_id)
+          + '<button class="btn" type="button" data-resolve="' + r.report_id + '">Dismiss</button>');
+      }).join('') : '<div class="empty">No open reports.</div>';
+      $('chatBans').innerHTML = d.bans.filter(function (b) { return b.active; }).map(function (b) {
+        return '<div class="bc-item"><span class="msg"><b>' + esc(b.username) + '</b> ' + esc(b.reason || '') + '</span>'
+          + '<span class="st">' + (b.until ? 'until ' + esc(new Date(b.until).toLocaleString()) : 'for good') + '</span>'
+          + '<button class="btn" type="button" data-unban="' + esc(b.user_id) + '">Unban</button></div>';
+      }).join('') || '<div class="empty">Nobody is banned.</div>';
+      $('chatRecent').innerHTML = d.recent.length ? d.recent.map(function (m) {
+        return chatRow(m, m.deleted ? '' : modButtons(m.id, m.user_id));
+      }).join('') : '<div class="empty">No messages yet.</div>';
+    }).catch(function (e) { $('chatMsg').textContent = 'Could not load chat: ' + e.message; });
+  }
+  function chatAction(e) {
+    var b = e.target.closest('button'); if (!b) return;
+    var call;
+    if (b.dataset.del) call = rpc('gv_chat_delete', { p_secret: state.secret, p_message_id: +b.dataset.del });
+    else if (b.dataset.resolve) call = rpc('gv_chat_resolve', { p_secret: state.secret, p_report_id: +b.dataset.resolve });
+    else if (b.dataset.unban) call = rpc('gv_chat_unban', { p_secret: state.secret, p_user_id: b.dataset.unban });
+    else if (b.dataset.ban) {
+      var reason = prompt('Reason for the ban (the player sees it):', 'Breaking the chat rules');
+      if (reason === null) return;
+      call = rpc('gv_chat_ban', { p_secret: state.secret, p_user_id: b.dataset.ban, p_reason: reason, p_days: b.dataset.days ? +b.dataset.days : null });
+    }
+    if (call) call.then(loadChat).catch(function (err) { $('chatMsg').textContent = 'Could not do that: ' + err.message; });
+  }
+
+  // ── pictures ──
+  // Only data:image URLs come back from the database (sql/avatars.sql checks
+  // them), so they can go straight into an <img>.
+  function avImg(src) { return /^data:image\/(webp|png|jpeg);base64,/.test(src || '') ? '<img class="av-img" alt="" src="' + src + '">' : ''; }
+  function loadAvatars() {
+    return Promise.all([
+      rpc('gv_avatar_queue', { p_secret: state.secret }),
+      rpc('gv_avatar_queue', { p_secret: state.secret, p_status: 'approved' })
+    ]).then(function (r) {
+      var q = r[0] || [], on = r[1] || [];
+      $('avQueue').innerHTML = q.length ? q.map(function (a) {
+        return '<div class="bc-item">' + avImg(a.upload) + '<span class="msg"><b>' + esc(a.username) + '</b></span>'
+          + '<button class="btn" type="button" data-av="' + esc(a.user_id) + '" data-at="' + esc(a.uploaded_at) + '" data-ok="1">Approve</button>'
+          + '<button class="btn" type="button" data-av="' + esc(a.user_id) + '" data-at="' + esc(a.uploaded_at) + '" data-ok="">Turn down</button></div>';
+      }).join('') : '<div class="empty">Nothing waiting.</div>';
+      $('avShowing').innerHTML = on.length ? on.map(function (a) {
+        return '<div class="bc-item">' + avImg(a.approved || a.upload) + '<span class="msg"><b>' + esc(a.username) + '</b></span>'
+          + '<button class="btn" type="button" data-avdown="' + esc(a.user_id) + '">Take down</button></div>';
+      }).join('') : '<div class="empty">No uploaded pictures showing.</div>';
+    }).catch(function (e) { $('avMsg').textContent = 'Could not load pictures: ' + e.message; });
+  }
+  function avAction(e) {
+    var b = e.target.closest('button'); if (!b) return;
+    var call = b.dataset.avdown
+      ? rpc('gv_avatar_remove', { p_secret: state.secret, p_user_id: b.dataset.avdown })
+      : rpc('gv_avatar_review', { p_secret: state.secret, p_user_id: b.dataset.av, p_approve: !!b.dataset.ok, p_uploaded_at: b.dataset.at });
+    call.then(loadAvatars).catch(function (err) { $('avMsg').textContent = 'Could not do that: ' + err.message; });
+  }
+
+  // ── testers and submissions ──
+  function loadTesting() {
+    return Promise.all([
+      rpc('gv_testers_list', { p_secret: state.secret }),
+      rpc('gv_game_reports_list', { p_secret: state.secret }),
+      rpc('gv_submissions_list', { p_secret: state.secret })
+    ]).then(function (r) {
+      var testers = r[0] || [], reports = r[1] || [], subs = r[2] || [];
+      $('testerList').innerHTML = testers.length ? testers.map(function (t) {
+        return '<span class="verify-chip">' + esc(t.username) + ' <span class="kind">' + (t.reports || 0) + ' reports</span>'
+          + '<button type="button" data-untest="' + esc(t.user_id) + '" title="Stop being a tester">\u00d7</button></span>';
+      }).join('') : '<div class="empty">No testers yet.</div>';
+      var open = reports.filter(function (x) { return !x.resolved; });
+      $('testReports').innerHTML = open.length ? open.map(function (x) {
+        return '<div class="bc-item"><span class="when">' + esc(new Date(x.created_at).toLocaleString()) + '</span>'
+          + '<span class="msg"><code>' + esc(x.game_id) + '</code> <b>' + esc(x.verdict) + '</b> ' + esc(x.note || '') + ' <span class="st">' + esc(x.username || '') + '</span></span>'
+          + '<button class="btn" type="button" data-resolve-test="' + x.id + '">Done</button></div>';
+      }).join('') : '<div class="empty">No open reports.</div>';
+      $('subList').innerHTML = subs.length ? subs.map(function (x) {
+        return '<div class="bc-item"><span class="when">' + esc(new Date(x.created_at).toLocaleString()) + '</span>'
+          + '<span class="msg"><b>' + esc(x.title) + '</b> by ' + esc(x.username) + (x.link ? ' · ' + esc(x.link) : '') + (x.notes ? ' · ' + esc(x.notes) : '')
+          + ' <span class="st">' + Math.round((x.size_bytes || 0) / 1e5) / 10 + ' MB · ' + esc(x.status) + '</span></span>'
+          + '<button class="btn" type="button" data-get="' + x.id + '">Download</button>'
+          + (x.status !== 'approved' ? '<button class="btn" type="button" data-sub="' + x.id + '" data-to="approved">Approve</button>' : '')
+          + (x.status !== 'rejected' ? '<button class="btn" type="button" data-sub="' + x.id + '" data-to="rejected">Reject</button>' : '') + '</div>';
+      }).join('') : '<div class="empty">Nothing sent in yet.</div>';
+    }).catch(function (e) { $('testMsg').textContent = 'Could not load testing: ' + e.message; });
+  }
+  function testAction(e) {
+    var b = e.target.closest('button'); if (!b) return;
+    var call;
+    // By account id: two players can have names that differ only in case.
+    if (b.dataset.untest) call = rpc('gv_tester_set', { p_secret: state.secret, p_username: null, p_on: false, p_user_id: b.dataset.untest });
+    else if (b.dataset.resolveTest) call = rpc('gv_game_report_resolve', { p_secret: state.secret, p_id: +b.dataset.resolveTest });
+    else if (b.dataset.sub) call = rpc('gv_submission_set', { p_secret: state.secret, p_id: +b.dataset.sub, p_status: b.dataset.to });
+    else if (b.dataset.get) {
+      // A ten-minute signed link from the edge function (supabase/functions/gv-submission-url).
+      fetch(SUPA_URL + '/functions/v1/gv-submission-url', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ secret: state.secret, id: +b.dataset.get })
+      }).then(function (r) { return r.json(); }).then(function (d) {
+        if (d.url) location.href = d.url; else $('testMsg').textContent = 'Could not get the file: ' + (d.error || 'unknown');
+      }).catch(function (err) { $('testMsg').textContent = 'Could not get the file: ' + err.message; });
+      return;
+    }
+    if (call) call.then(loadTesting).catch(function (err) { $('testMsg').textContent = 'Could not do that: ' + err.message; });
+  }
+
+  // ── giveaways ──
+  function loadGiveaways() {
+    return rpc('gv_giveaway_list', { p_secret: state.secret }).then(function (list) {
+      $('gaList').innerHTML = (list || []).length ? list.map(function (g) {
+        return '<div class="bc-item"><span class="when">ends ' + esc(new Date(g.ends_at).toLocaleString()) + '</span>'
+          + '<span class="msg"><b>' + esc(g.title) + '</b> · ' + esc(g.prize_text) + '</span>'
+          + '<span class="st">' + g.entries + ' entries' + (g.winner_name ? ' · won by ' + esc(g.winner_name) : '') + '</span>'
+          + (!g.drawn_at && g.entries > 0 ? '<button class="btn" type="button" data-draw="' + g.id + '">Draw</button>' : '')
+          + '<button class="btn" type="button" data-gadel="' + g.id + '">Delete</button></div>';
+      }).join('') : '<div class="empty">No giveaways yet.</div>';
+    }).catch(function (e) { $('gaMsg').textContent = 'Could not load giveaways: ' + e.message; });
+  }
+  function gaAction(e) {
+    var b = e.target.closest('button'); if (!b) return;
+    var call;
+    if (b.dataset.draw) call = rpc('gv_giveaway_draw', { p_secret: state.secret, p_id: +b.dataset.draw }).then(function (w) {
+      $('gaMsg').textContent = 'Winner: ' + (w.winner_name || 'a player') + (w.name_hidden ? ' (the public page shows "A GameVault player")' : '') + '. Hand the prize to them by hand.';
+    });
+    else if (b.dataset.gadel) { if (!confirm('Delete this giveaway and its entries?')) return; call = rpc('gv_giveaway_delete', { p_secret: state.secret, p_id: +b.dataset.gadel }); }
+    if (call) call.then(loadGiveaways).catch(function (err) { $('gaMsg').textContent = 'Could not do that: ' + err.message; });
+  }
+
+  // ── monthly challenge ──
+  function monthName(m) { return new Date(m + 'T00:00:00Z').toLocaleDateString(undefined, { month: 'long', year: 'numeric', timeZone: 'UTC' }); }
+  function loadChallenges() {
+    return rpc('gv_challenge_list', { p_secret: state.secret }).then(function (list) {
+      $('chList').innerHTML = (list || []).length ? list.map(function (c) {
+        var podium = (c.podium || []).map(function (p) { return '#' + p.rank + ' ' + esc(p.nickname || 'a guest') + ' ' + esc(p.time); }).join(' · ');
+        return '<div class="bc-item"><span class="when">' + esc(monthName(c.month)) + '</span>'
+          + '<span class="msg"><b>' + esc(c.title) + '</b>' + (c.note ? ' · ' + esc(c.note) : '') + (podium ? '<br>' + podium : '') + '</span>'
+          + '<span class="st' + (c.ended ? '' : ' on') + '">' + c.runners + ' racers · ' + (c.closed_at ? 'badges given' : c.ended ? 'ended' : 'ends ' + esc(new Date(c.ends_at).toLocaleDateString())) + '</span>'
+          + '<button class="btn" type="button" data-chboard="' + esc(c.month) + '">Board</button>'
+          + (c.ended && c.runners ? '<button class="btn" type="button" data-chclose="' + esc(c.month) + '">' + (c.closed_at ? 'Give again' : 'Give badges') + '</button>' : '') + '</div>';
+      }).join('') : '<div class="empty">No challenges yet.</div>';
+    }).catch(function (e) { $('chMsg').textContent = 'Could not load challenges: ' + e.message; });
+  }
+
+  function loadChallengeBoard(month) {
+    return rpc('gv_challenge_board', { p_secret: state.secret, p_month: month }).then(function (rows) {
+      $('chBoardH').hidden = false;
+      $('chBoardH').textContent = 'Board for ' + monthName(month);
+      $('chBoard').innerHTML = (rows || []).length ? rows.map(function (r) {
+        return '<div class="bc-item"><span class="when">#' + r.rank + '</span>'
+          + '<span class="msg">' + (r.nickname ? esc(r.nickname) + (r.user_id ? '' : ' (guest)') : 'a guest') + '</span>'
+          + '<span class="st">' + esc(r.time) + ' \u00b7 ' + esc(new Date(r.at).toLocaleDateString()) + '</span>'
+          + '<button class="btn" type="button" data-chrm="' + esc(r.player_key) + '" data-month="' + esc(month) + '">Remove</button></div>';
+      }).join('') : '<div class="empty">Nobody has raced it yet.</div>';
+    }).catch(function (e) { $('chMsg').textContent = 'Could not load the board: ' + e.message; });
+  }
+  function chAction(e) {
+    var b = e.target.closest('button'); if (!b) return;
+    var call;
+    if (b.dataset.chboard) return loadChallengeBoard(b.dataset.chboard);
+    if (b.dataset.chclose) {
+      if (!confirm('Give the badges for ' + monthName(b.dataset.chclose) + ' to its top three?')) return;
+      call = rpc('gv_challenge_close', { p_secret: state.secret, p_month: b.dataset.chclose }).then(function (top) {
+        $('chMsg').textContent = (top || []).length ? 'Badges given: ' + top.map(function (p) { return (p.nickname || 'a guest') + ' (' + p.time + ')'; }).join(', ') + '.' : 'Nobody to give badges to.';
+      });
+    } else if (b.dataset.chrm) {
+      if (!confirm('Take this time off the challenge? It stays on the PolyTrack board.')) return;
+      call = rpc('gv_challenge_remove', { p_secret: state.secret, p_month: b.dataset.month, p_player_key: b.dataset.chrm })
+        .then(function () { $('chMsg').textContent = 'Removed.'; return loadChallengeBoard(b.dataset.month); });
+    }
+    if (call) call.then(loadChallenges).catch(function (err) { $('chMsg').textContent = 'Could not do that: ' + err.message; });
+  }
+  function loadChallengeTracks() {
+    return rpc('gv_challenge_tracks', { p_secret: state.secret }).then(function (list) {
+      $('chTrack').innerHTML = (list || []).length ? list.map(function (t) {
+        return '<option value="' + esc(t.track_id) + '" data-name="' + esc(t.name || '') + '">'
+          + esc(t.name || 'Community track ' + t.track_id.slice(0, 8)) + ' \u00b7 ' + t.players + ' racers</option>';
+      }).join('') : '<option value="">No tracks raced yet</option>';
+    }).catch(function (e) { $('chMsg').textContent = 'Could not load tracks: ' + e.message; });
+  }
+
+  // ── leaderboard ──
+  function loadBoard() {
+    return Promise.all([rpc('gv_leaderboard', {}), rpc('gv_board_bans_list', { p_secret: state.secret })]).then(function (r) {
+      var top = ((r[0] && r[0].players) || []).slice(0, 20), bans = r[1] || [];
+      var ids = top.map(function (p) { return p.id; }).concat(bans.map(function (b) { return b.id; }));
+      return rpc('gv_public_profiles', { p_ids: ids }).then(function (rows) {
+        var names = {};
+        (rows || []).forEach(function (row) { names[row.id] = row.username; });
+        $('boardTop').innerHTML = top.length ? top.map(function (p) {
+          return '<div class="bc-item"><span class="when">#' + p.rank + '</span>'
+            + '<span class="msg">' + esc(names[p.id] || 'player') + '</span>'
+            + '<span class="st">' + (Math.round(p.sec / 360) / 10) + ' h · ' + p.games + ' games</span>'
+            + '<button class="btn" type="button" data-boardhide="' + esc(p.id) + '">Hide</button></div>';
+        }).join('') : '<div class="empty">Nobody is on the board yet.</div>';
+        $('boardBans').innerHTML = bans.length ? bans.map(function (b) {
+          return '<div class="bc-item"><span class="when">' + esc(new Date(b.at).toLocaleDateString()) + '</span>'
+            + '<span class="msg">' + esc(names[b.id] || 'player') + '</span>'
+            + '<button class="btn" type="button" data-boardshow="' + esc(b.id) + '">Show again</button></div>';
+        }).join('') : '<div class="empty">Nobody is hidden.</div>';
+      });
+    }).catch(function (e) { $('boardMsg').textContent = 'Could not load the leaderboard: ' + e.message; });
+  }
+  function boardAction(e) {
+    var b = e.target.closest('button'); if (!b) return;
+    var id = b.dataset.boardhide || b.dataset.boardshow; if (!id) return;
+    if (b.dataset.boardhide && !confirm('Take this account off the public leaderboard?')) return;
+    rpc('gv_board_ban', { p_secret: state.secret, p_user: id, p_on: !!b.dataset.boardhide })
+      .then(function () { $('boardMsg').textContent = b.dataset.boardhide ? 'Hidden from the board.' : 'Back on the board.'; return loadBoard(); })
+      .catch(function (err) { $('boardMsg').textContent = 'Could not do that: ' + err.message; });
+  }
+
+  // ── backup addresses ──
+  function loadMirrors() {
+    return rpc('gv_mirrors_list', {}).then(function (list) {
+      $('mirrorList').innerHTML = (list || []).length ? list.map(function (m) {
+        return '<span class="verify-chip">' + esc(m.origin) + (m.label ? ' <span class="kind">' + esc(m.label) + '</span>' : '')
+          + '<button type="button" data-unmirror="' + esc(m.origin) + '" title="Remove">\u00d7</button></span>';
+      }).join('') : '<div class="empty">No backup addresses yet.</div>';
+    }).catch(function (e) { $('mirrorMsg').textContent = 'Could not load addresses: ' + e.message; });
+  }
+
   function loadPeople() {
     return rpc('gv_verify_candidates', { p_secret: state.secret }).then(function (list) {
       people = Array.isArray(list) ? list : [];
@@ -938,8 +1354,12 @@
   function gameTab(visitor, solo) {
     var at = Date.now();
     try { localStorage.removeItem(JOIN_KEY); } catch (e) {}
+    // A tab opened like this starts with a copy of this tab's sessionStorage,
+    // which holds the secret. Take it out for that moment.
+    try { sessionStorage.removeItem(SECRET_KEY); } catch (e) {}
     var tab = window.open('/games/polytrack/#gv-creator-wait=' + encodeURIComponent(displayName(visitor))
       + (solo ? '&solo=1' : '') + '&t=' + at, '_blank');
+    try { sessionStorage.setItem(SECRET_KEY, state.secret); } catch (e) {}
     if (!tab) $('playingMsg').textContent = 'The browser blocked the new tab. Allow popups for this page and try again.';
     return !!tab;
   }
@@ -1039,18 +1459,18 @@
   }
 
   // ── auth / wiring ──
-  function showDash() { $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); load(); loadPeople(); setTimer(); }
+  function showDash() { $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); load(); loadPeople(); loadBroadcasts(); loadLinks(); loadChat(); loadAvatars(); loadTesting(); loadGiveaways(); loadChallenges(); loadChallengeTracks(); loadBoard(); loadMirrors(); setTimer(); }
   function setTimer() { clearInterval(state.timer); if ($('autoRefresh').checked) state.timer = setInterval(load, 60000); }
   function tryLogin(secret, remember) {
     $('loginErr').textContent = '';
     rpc('analytics_check', { p_secret: secret }).then(function (ok) {
-      if (ok === true) { state.secret = secret; if (remember) try { localStorage.setItem(SECRET_KEY, secret); } catch (e) {} showDash(); }
-      else { $('loginErr').textContent = 'Wrong secret.'; try { localStorage.removeItem(SECRET_KEY); } catch (e) {} }
+      if (ok === true) { state.secret = secret; if (remember) try { sessionStorage.setItem(SECRET_KEY, secret); } catch (e) {} showDash(); }
+      else { $('loginErr').textContent = 'Wrong secret.'; try { sessionStorage.removeItem(SECRET_KEY); } catch (e) {} }
     }).catch(function (e) { $('loginErr').textContent = 'Could not reach Supabase: ' + e.message; });
   }
   $('loginBtn').addEventListener('click', function () { tryLogin($('secretInput').value.trim(), true); });
   $('secretInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') tryLogin($('secretInput').value.trim(), true); });
-  $('logoutBtn').addEventListener('click', function () { try { localStorage.removeItem(SECRET_KEY); } catch (e) {} location.reload(); });
+  $('logoutBtn').addEventListener('click', function () { try { sessionStorage.removeItem(SECRET_KEY); localStorage.removeItem(SECRET_KEY); } catch (e) {} location.reload(); });
   $('refreshBtn').addEventListener('click', function () { load(); loadPeople(); });
   $('verifySearch').addEventListener('input', fillSelect);
   $('playingMore').addEventListener('click', openPlaying);
@@ -1069,6 +1489,57 @@
     if (p) setVerified(p, false);
   });
   $('verifyBtn').addEventListener('click', function () { var p = picked(); if (p) setVerified(p, !p.verified); });
+  $('linkList').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-fix]'); if (!b) return;
+    rpc('gv_link_reports_fix', { p_secret: state.secret, p_path: b.dataset.fix }).then(loadLinks)
+      .catch(function (err) { $('linkMsg').textContent = 'Could not do that: ' + err.message; });
+  });
+  ['chatReports', 'chatBans', 'chatRecent'].forEach(function (id) { $(id).addEventListener('click', chatAction); });
+  ['testerList', 'testReports', 'subList'].forEach(function (id) { $(id).addEventListener('click', testAction); });
+  $('testerAdd').addEventListener('click', function () {
+    var name = $('testerName').value.trim(); if (!name) return;
+    rpc('gv_tester_set', { p_secret: state.secret, p_username: name, p_on: true })
+      .then(function (r) { $('testerName').value = ''; $('testMsg').textContent = (r && r.username || name) + ' is a tester now.'; return loadTesting(); })
+      .catch(function (e) { $('testMsg').textContent = 'Could not add ' + name + ': ' + e.message; });
+  });
+  $('gaList').addEventListener('click', gaAction);
+  $('gaCreate').addEventListener('click', function () {
+    var ends = $('gaEnds').value;
+    $('gaCreate').disabled = true;
+    rpc('gv_giveaway_create', { p_secret: state.secret, p_title: $('gaTitle').value.trim(), p_prize_text: $('gaPrize').value.trim(), p_ends_at: ends ? new Date(ends).toISOString() : null })
+      .then(function () { $('gaTitle').value = $('gaPrize').value = ''; $('gaMsg').textContent = 'Started.'; return loadGiveaways(); })
+      .catch(function (e) { $('gaMsg').textContent = 'Could not start it: ' + e.message; })
+      .then(function () { $('gaCreate').disabled = false; });
+  });
+  ['chList', 'chBoard'].forEach(function (id) { $(id).addEventListener('click', chAction); });
+  ['boardTop', 'boardBans'].forEach(function (id) { $(id).addEventListener('click', boardAction); });
+  $('chTrack').addEventListener('change', function () {
+    var name = $('chTrack').selectedOptions[0] && $('chTrack').selectedOptions[0].dataset.name;
+    if (name && !$('chTitle').value.trim()) $('chTitle').value = name;
+  });
+  $('chSet').addEventListener('click', function () {
+    var month = $('chMonth').value;
+    if (!month) { $('chMsg').textContent = 'Pick a month first.'; return; }
+    $('chSet').disabled = true;
+    rpc('gv_challenge_set', { p_secret: state.secret, p_month: month + '-01', p_track_id: $('chTrack').value, p_title: $('chTitle').value.trim(), p_note: $('chNote').value.trim() || null })
+      .then(function (c) { $('chTitle').value = $('chNote').value = ''; $('chMsg').textContent = monthName(c.month) + ' is set, with ' + c.runners + ' racers so far.'; return loadChallenges(); })
+      .catch(function (e) { $('chMsg').textContent = 'Could not set it: ' + e.message; })
+      .then(function () { $('chSet').disabled = false; });
+  });
+  $('mirrorList').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-unmirror]'); if (!b) return;
+    rpc('gv_mirror_remove', { p_secret: state.secret, p_origin: b.dataset.unmirror }).then(loadMirrors)
+      .catch(function (err) { $('mirrorMsg').textContent = 'Could not remove it: ' + err.message; });
+  });
+  $('mirrorAdd').addEventListener('click', function () {
+    rpc('gv_mirror_add', { p_secret: state.secret, p_origin: $('mirrorOrigin').value.trim(), p_label: $('mirrorLabel').value.trim() || null })
+      .then(function () { $('mirrorOrigin').value = $('mirrorLabel').value = ''; $('mirrorMsg').textContent = 'Added.'; return loadMirrors(); })
+      .catch(function (e) { $('mirrorMsg').textContent = 'Could not add it: ' + e.message; });
+  });
+  $('avQueue').addEventListener('click', avAction);
+  $('avShowing').addEventListener('click', avAction);
+  $('bcSend').addEventListener('click', sendBroadcast);
+  $('bcList').addEventListener('click', function (e) { var b = e.target.closest('button[data-stop]'); if (b) stopBroadcast(+b.dataset.stop); });
   $('exportBtn').addEventListener('click', exportCSV);
   $('autoRefresh').addEventListener('change', setTimer);
   $('rangeSeg').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; state.range = b.dataset.range; $('rangeSeg').querySelectorAll('button').forEach(function (x) { x.classList.toggle('active', x === b); }); load(); });
@@ -1076,7 +1547,16 @@
   try { $('excludeMe').checked = localStorage.getItem('gv.noanalytics') === '1'; } catch (e) {}
   $('excludeMe').addEventListener('change', function () { try { if ($('excludeMe').checked) localStorage.setItem('gv.noanalytics', '1'); else localStorage.removeItem('gv.noanalytics'); } catch (e) {} });
 
-  var saved = null; try { saved = localStorage.getItem(SECRET_KEY); } catch (e) {}
+  // Every game page shares this site's address, so anything in localStorage is
+  // readable by all of them. The secret stays in this tab's sessionStorage,
+  // and a copy an older version left in localStorage is moved over and wiped.
+  var saved = null;
+  try {
+    saved = sessionStorage.getItem(SECRET_KEY);
+    var old = localStorage.getItem(SECRET_KEY);
+    if (!saved && old) { saved = old; sessionStorage.setItem(SECRET_KEY, old); }
+    localStorage.removeItem(SECRET_KEY);
+  } catch (e) {}
   var qs = new URLSearchParams(location.search).get('key');
   if (qs) { history.replaceState(null, '', location.pathname); tryLogin(qs, true); }
   else if (saved) tryLogin(saved, false);

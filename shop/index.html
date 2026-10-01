@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop · GameVault</title>
+  <meta name="description" content="Earn coins by playing and open crates of name colors, avatar rings, tile colors and titles.">
+  <link rel="icon" href="/favicon.svg">
+  <!-- Blocking on purpose: the cloak has to land before the first paint. -->
+  <script src="/js/mimicry.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/site.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
+  <script src="/js/identity.js" defer></script>
+  <script src="/js/analytics.js" defer></script>
+  <script src="/js/site.js" defer></script>
+  <script src="/js/player.js" defer></script>
+  <script src="/js/cosmetics.js" defer></script>
+  <style>
+    /* Rarity and crate colors. Kept off the site red, which stays for actions. */
+    .r-common    { --r: #a0a0aa; }
+    .r-uncommon  { --r: #5ce08a; }
+    .r-rare      { --r: #6aa8ff; }
+    .r-epic      { --r: #b58cff; }
+    .r-legendary { --r: #f0c04a; }
+
+    .coin {
+      display: inline-block; flex-shrink: 0;
+      width: 0.85em; height: 0.85em; border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #fff1b8, #f0c04a 45%, #a8760e);
+      box-shadow: inset 0 0 0 0.1em rgba(110, 70, 0, 0.45);
+      vertical-align: -0.08em;
+    }
+
+    .wallet { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 1.25rem 2rem; }
+    .wallet-coins {
+      display: flex; align-items: center; gap: 0.55rem;
+      font-size: 2.4rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .wallet-today { color: var(--muted); font-size: 0.82rem; margin-top: 0.7rem; }
+    .wallet-today b { color: var(--text); font-weight: 600; }
+    .meter { width: 240px; max-width: 100%; height: 6px; border-radius: 6px; background: var(--surface-2); margin-top: 0.5rem; overflow: hidden; }
+    .meter span { display: block; height: 100%; width: 0; border-radius: inherit; background: #f0c04a; transition: width 0.6s ease; }
+    .wallet-guest { color: var(--muted); font-size: 0.9rem; line-height: 1.55; max-width: 44ch; }
+    .wallet-guest .btn-row { margin-top: 0.8rem; }
+    .shop-note {
+      flex-basis: 100%;
+      padding-top: 1rem; border-top: 1px solid var(--border);
+      font-size: 0.82rem; color: var(--muted); line-height: 1.55;
+    }
+    /* How other players see you: the ring, the name color and the title. */
+    .look { display: flex; align-items: center; gap: 0.85rem; }
+    .look-avatar {
+      display: grid; place-items: center; flex-shrink: 0;
+      width: 46px; height: 46px; border-radius: 50%;
+      background: var(--surface-2); border: 1px solid var(--border-strong);
+      font-weight: 700; font-size: 0.95rem;
+    }
+    .look-name { font-weight: 600; font-size: 1.05rem; }
+    .look-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--muted); margin-top: 0.25rem;
+    }
+    .crates { display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: 0.75rem; }
+    .crate {
+      --tier: #a0a0aa;
+      display: flex; flex-direction: column;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+      padding: 1rem;
+    }
+    .crate[data-tier="rare"]      { --tier: #6aa8ff; }
+    .crate[data-tier="epic"]      { --tier: #b58cff; }
+    .crate[data-tier="legendary"] { --tier: #f0c04a; }
+    .crate-top { display: flex; align-items: center; gap: 0.8rem; }
+    /* A small box with a lid and a latch, in the crate's color. */
+    .crate-art {
+      position: relative; flex-shrink: 0;
+      width: 46px; height: 38px; border-radius: 7px;
+      border: 1.5px solid var(--tier);
+      background: linear-gradient(180deg, color-mix(in srgb, var(--tier) 30%, #1a1a20), color-mix(in srgb, var(--tier) 10%, #121216));
+    }
+    .crate-art::before { content: ''; position: absolute; left: 0; right: 0; top: 11px; height: 1.5px; background: var(--tier); }
+    .crate-art::after {
+      content: ''; position: absolute; left: 50%; top: 7px;
+      width: 9px; height: 9px; margin-left: -4.5px; border-radius: 2px;
+      background: var(--tier);
+    }
+    .page .crate h3 { margin: 0; font-size: 0.95rem; }
+    .crate-price { display: flex; align-items: center; gap: 0.35rem; margin-top: 0.2rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .odds-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--muted-2); margin: 1rem 0 0.4rem;
+    }
+    .page .odds { list-style: none; margin: 0 0 1rem; }
+    .page .odds li {
+      display: flex; align-items: center; gap: 0.5rem;
+      margin: 0; padding: 0.18rem 0;
+      font-size: 0.8rem; color: var(--muted); line-height: 1.4;
+    }
+    .odds .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--r); flex-shrink: 0; }
+    .odds .pct { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text); }
+    .page .odds li.none { color: var(--muted-2); }
+    .odds li.none .pct { color: var(--muted-2); }
+    .crate .btn { margin-top: auto; width: 100%; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    .shop-status { min-height: 1.4em; margin-top: 0.75rem; font-size: 0.85rem; color: var(--muted); }
+    .shop-status.bad { color: #ff7a7a; }
+    .kind { margin-top: 1.25rem; }
+    .kind-head { display: flex; align-items: baseline; gap: 0.6rem; margin-bottom: 0.6rem; }
+    .page .kind-head h3 { margin: 0; }
+    .kind-count { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--muted-2); }
+    .items { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 0.6rem; }
+    .item {
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      padding: 0.85rem 0.6rem 0.7rem;
+    }
+    .item.wearing { border-color: color-mix(in srgb, var(--r) 55%, transparent); }
+    .item.locked .item-look, .item.locked .item-name { opacity: 0.35; }
+    .item-look { height: 58px; display: grid; place-items: center; width: 100%; }
+    .item-name { font-size: 0.84rem; font-weight: 600; margin-top: 0.45rem; }
+    .item-meta {
+      display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+      margin-top: 0.2rem;
+      font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--muted-2);
+    }
+    .item-meta .rar { color: var(--r); }
+    .item-missing { margin-top: 0.6rem; padding: 0.35rem 0; font-size: 0.74rem; color: var(--muted-2); }
+    .item .btn { margin-top: 0.6rem; padding: 0.35rem 0.8rem; font-size: 0.76rem; }
+    .item .btn[aria-pressed="true"] { border-color: var(--r); }
+
+    /* The four kinds of preview, used in the collection and on the reveal cards. */
+    .pv-name { font-weight: 700; font-size: 1.05rem; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pv-avatar {
+      display: grid; place-items: center;
+      width: 38px; height: 38px; border-radius: 50%;
+      background: var(--surface-2); border: 1px solid var(--border-strong);
+      font-weight: 700; font-size: 0.78rem;
+    }
+    .pv-tile {
+      position: relative;
+      width: 70px; height: 46px; border-radius: 9px;
+      background: linear-gradient(135deg, var(--surface-2), #0c0c10);
+      border: 1.5px solid var(--tile-accent, var(--border-strong));
+      box-shadow: 0 0 16px -6px var(--tile-accent, transparent);
+    }
+    .pv-tile::after {
+      content: ''; position: absolute; left: 8px; right: 22px; bottom: 7px;
+      height: 5px; border-radius: 3px;
+      background: var(--tile-accent, var(--muted-2));
+    }
+    .pv-title {
+      padding: 0.3rem 0.6rem; border-radius: 100px;
+      border: 1px solid var(--border-strong);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--text); white-space: nowrap;
+    }
+    /* Crate reveal: three cards that flip over one after another. With reduced
+       motion, site.css turns the transition off and they simply turn up. */
+    .reveal {
+      margin: auto; width: min(560px, calc(100vw - 2rem));
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--border-strong); border-radius: 18px;
+      padding: 1.4rem 1.25rem 1.25rem;
+    }
+    .reveal::backdrop { background: rgba(4, 4, 6, 0.78); backdrop-filter: blur(4px); }
+    .reveal h2 { margin: 0 0 1.1rem; font-size: 1.1rem; text-align: center; }
+    .reveal-cards { display: flex; justify-content: center; gap: 0.6rem; }
+    .flip { --tier: #a0a0aa; flex: 1 1 0; max-width: 158px; aspect-ratio: 3 / 4; perspective: 900px; }
+    .flip[data-tier="rare"]      { --tier: #6aa8ff; }
+    .flip[data-tier="epic"]      { --tier: #b58cff; }
+    .flip[data-tier="legendary"] { --tier: #f0c04a; }
+    .flip-inner {
+      position: relative; width: 100%; height: 100%;
+      transform-style: preserve-3d;
+      transition: transform 0.7s cubic-bezier(0.2, 0.75, 0.25, 1);
+    }
+    .flip.open .flip-inner { transform: rotateY(180deg); }
+    .face {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      border-radius: 14px; padding: 0.6rem;
+      backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    }
+    .face.back {
+      border: 1.5px solid var(--tier);
+      background:
+        repeating-linear-gradient(135deg, transparent 0 10px, color-mix(in srgb, var(--tier) 12%, transparent) 10px 20px),
+        linear-gradient(180deg, color-mix(in srgb, var(--tier) 22%, #1a1a20), #101014);
+      font-family: 'JetBrains Mono', monospace; font-size: 2rem; font-weight: 600; color: var(--tier);
+    }
+    .face.front {
+      transform: rotateY(180deg);
+      background: var(--bg);
+      border: 1.5px solid var(--r);
+      box-shadow: 0 0 0 1px color-mix(in srgb, var(--r) 20%, transparent), 0 8px 30px -12px var(--r);
+      text-align: center;
+    }
+    .flip.r-epic .face.front, .flip.r-legendary .face.front { box-shadow: 0 0 26px -4px var(--r); }
+    .face .item-look { height: 52px; }
+    .face .item-name { font-size: 0.8rem; }
+    .face .item-meta { flex-wrap: wrap; }
+    .face .pv-name { font-size: 0.95rem; }
+    .face .pv-title { font-size: 0.56rem; padding: 0.25rem 0.45rem; white-space: normal; }
+    .tag-new {
+      margin-top: 0.45rem; padding: 0.12rem 0.45rem; border-radius: 100px;
+      background: var(--r); color: #0b0b0e;
+      font-family: 'JetBrains Mono', monospace; font-size: 0.56rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+    }
+    .tag-dup { margin-top: 0.45rem; font-family: 'JetBrains Mono', monospace; font-size: 0.56rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted-2); }
+    .reveal-sum { text-align: center; min-height: 1.3em; margin-top: 1rem; font-size: 0.84rem; color: var(--muted); }
+    .reveal .btn-row { justify-content: center; }
+
+    @media (max-width: 420px) {
+      .reveal { padding: 1.1rem 0.75rem 1rem; }
+      .reveal-cards { gap: 0.4rem; }
+      .face { padding: 0.4rem; }
+      .face .pv-avatar { width: 32px; height: 32px; }
+      .face .pv-tile { width: 56px; height: 38px; }
+    }
+  </style>
+</head>
+<body>
+<main class="page">
+  <div class="page-kicker">shop</div>
+  <h1>Crate shop</h1>
+  <p class="lede">Play any game to earn coins, then open crates for name colors,
+  avatar rings, tile colors and titles.</p>
+
+  <section class="panel wallet" aria-label="Your coins">
+    <div id="walletSigned" hidden>
+      <div class="panel-label">Your coins</div>
+      <div class="wallet-coins"><span class="coin" aria-hidden="true"></span><span id="coinCount">0</span></div>
+      <div class="wallet-today" id="coinToday"></div>
+      <div class="meter" aria-hidden="true"><span id="coinMeter"></span></div>
+    </div>
+    <div class="wallet-guest" id="walletGuest">
+      <div class="panel-label">Coins</div>
+      You get 1 coin for every full minute you play a game, up to 120 a day.
+      Sign in on the home page to earn coins.
+      <div class="btn-row"><a class="btn btn-primary" href="/?profile">Sign in</a></div>
+    </div>
+    <div id="lookBox" hidden>
+      <div class="panel-label">How others see you</div>
+      <div class="look">
+        <span class="look-avatar" id="lookAvatar"></span>
+        <div>
+          <div class="look-name"><span id="lookName"></span></div>
+          <div class="look-title" id="lookTitle" hidden></div>
+        </div>
+      </div>
+    </div>
+    <p class="shop-note">Coins come only from playing. They can't be bought, and items only change how things look.</p>
+  </section>
+
+  <h2>Crates</h2>
+  <div class="crates" id="crates"></div>
+  <p class="shop-status" id="shopStatus" role="status"></p>
+
+  <h2 id="itemsHeading">Everything in the crates</h2>
+  <div id="collection"></div>
+
+  <dialog class="reveal" id="reveal" aria-labelledby="revealTitle">
+    <h2 id="revealTitle"></h2>
+    <div class="reveal-cards" id="revealCards"></div>
+    <p class="reveal-sum" id="revealSum" aria-live="polite"></p>
+    <div class="btn-row">
+      <button class="btn" type="button" id="revealAgain"></button>
+      <button class="btn btn-primary" type="button" id="revealDone">Done</button>
+    </div>
+  </dialog>
+
+<script>
+// Waits for DOMContentLoaded so supabase-js and js/cosmetics.js (both
+// deferred) are in. Everything that spends or earns goes through the
+// functions in shop/shop.sql; this page only draws what they answer.
+document.addEventListener('DOMContentLoaded', function () {
+  'use strict';
+
+  var SUPA_URL = 'https://dxwjxzmlezfyursysays.supabase.co';
+  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
+  var RARITIES = ['common', 'uncommon', 'rare', 'epic', 'legendary'];
+  var cos = window.GV && GV.cosmetics;
+
+  var state = { tiers: [], items: [], wallet: null, user: null, name: 'Player', busy: false };
+  var sb = null;
+  try { sb = window.supabase.createClient(SUPA_URL, SUPA_KEY); } catch (e) { console.error(e); }
+
+  function el(tag, cls, text) {
+    var node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text != null) node.textContent = text;
+    return node;
+  }
+  function cap(word) { return word.charAt(0).toUpperCase() + word.slice(1); }
+  // 70 -> "70%", 1.8 -> "1.8%": exactly what the server rolls with.
+  function pct(n) { return String(Number(n)) + '%'; }
+  function say(text, bad) {
+    var box = document.getElementById('shopStatus');
+    box.textContent = text || '';
+    box.classList.toggle('bad', !!bad);
+  }
+
+  // Crates and items are public, so they come by plain fetch and still show
+  // when supabase-js does not load.
+  function publicRpc(name, args) {
+    return fetch(SUPA_URL + '/rest/v1/rpc/' + name, {
+      method: 'POST',
+      headers: { apikey: SUPA_KEY, Authorization: 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify(args || {})
+    }).then(function (r) { return r.ok ? r.json() : Promise.reject(new Error(name + ' ' + r.status)); });
+  }
+
+  function rpc(name, args) {
+    if (!sb) return Promise.reject(new Error('supabase-js did not load'));
+    return sb.rpc(name, args || {}).then(function (r) {
+      if (r.error) throw r.error;
+      return r.data;
+    });
+  }
+
+  function coins() { return state.wallet ? state.wallet.coins : 0; }
+
+  function renderCrates() {
+    var box = document.getElementById('crates');
+    box.innerHTML = '';
+    state.tiers.forEach(function (tier) {
+      var card = el('article', 'crate');
+      card.dataset.tier = tier.id;
+
+      var top = el('div', 'crate-top');
+      top.appendChild(el('div', 'crate-art'));
+      var head = el('div');
+      head.appendChild(el('h3', null, tier.name));
+      var price = el('div', 'crate-price');
+      var coin = el('span', 'coin');
+      coin.setAttribute('aria-hidden', 'true');
+      price.appendChild(coin);
+      price.appendChild(document.createTextNode(tier.price));
+      price.appendChild(el('span', 'sr-only', ' coins'));
+      head.appendChild(price);
+      top.appendChild(head);
+      card.appendChild(top);
+
+      card.appendChild(el('div', 'odds-label', 'Chances'));
+      var list = el('ul', 'odds');
+      RARITIES.forEach(function (r) {
+        var n = Number(tier.odds[r]);
+        var li = el('li', 'r-' + r + (n ? '' : ' none'));
+        li.appendChild(el('span', 'dot'));
+        li.appendChild(document.createTextNode(cap(r)));
+        li.appendChild(el('span', 'pct', pct(n)));
+        list.appendChild(li);
+      });
+      card.appendChild(list);
+
+      var btn = el('button', 'btn');
+      btn.type = 'button';
+      if (!state.user) {
+        btn.disabled = true;
+        btn.textContent = 'Sign in to open';
+      } else if (coins() < tier.price) {
+        btn.disabled = true;
+        btn.textContent = 'Need ' + (tier.price - coins()) + ' more';
+      } else {
+        btn.textContent = 'Open';
+        btn.addEventListener('click', function () { openCrate(tier); });
+      }
+      card.appendChild(btn);
+      box.appendChild(card);
+    });
+  }
+
+  function initials(name) {
+    return (name || '?').split(/[\s_]+/).map(function (w) { return w.charAt(0); }).join('').toUpperCase().slice(0, 2);
+  }
+
+  function renderWallet() {
+    var signed = !!state.user;
+    document.getElementById('walletSigned').hidden = !signed;
+    document.getElementById('walletGuest').hidden = signed;
+    document.getElementById('lookBox').hidden = !signed;
+    if (!signed || !state.wallet) return;
+
+    var w = state.wallet;
+    document.getElementById('coinCount').textContent = w.coins.toLocaleString();
+    var today = document.getElementById('coinToday');
+    today.innerHTML = '';
+    if (w.earned_today >= w.daily_cap) {
+      today.appendChild(document.createTextNode('That is all ' + w.daily_cap + ' for today. More tomorrow.'));
+    } else {
+      var b = el('b', null, w.earned_today + ' of ' + w.daily_cap);
+      today.appendChild(b);
+      today.appendChild(document.createTextNode(' earned today. 1 coin a minute of play.'));
+    }
+    document.getElementById('coinMeter').style.width = Math.min(100, 100 * w.earned_today / w.daily_cap) + '%';
+
+    var worn = cos ? cos.fromWallet(w) : {};
+    var avatar = document.getElementById('lookAvatar');
+    avatar.textContent = initials(state.name);
+    var name = document.getElementById('lookName');
+    name.textContent = state.name;
+    if (cos) {
+      cos.applyAvatar(avatar, worn);
+      cos.applyName(name, worn);
+      cos.applyTitle(document.getElementById('lookTitle'), worn);
+    }
+  }
+
+  var KINDS = [
+    { id: 'name_color',   label: 'Name colors' },
+    { id: 'avatar_frame', label: 'Avatar rings' },
+    { id: 'tile_theme',   label: 'Tile colors' },
+    { id: 'title',        label: 'Titles' }
+  ];
+
+  // The part of an item that shows what it does, drawn the way the site will.
+  function preview(item) {
+    var one = {};
+    one[item.kind] = item;
+    var node;
+    if (item.kind === 'name_color') {
+      node = el('span', 'pv-name', state.name);
+      if (cos) cos.applyName(node, one);
+    } else if (item.kind === 'avatar_frame') {
+      node = el('span', 'pv-avatar', initials(state.name));
+      if (cos) cos.applyAvatar(node, one);
+    } else if (item.kind === 'tile_theme') {
+      node = el('span', 'pv-tile');
+      if (cos) cos.applyTiles(node, one);
+    } else {
+      node = el('span', 'pv-title', (item.value && item.value.text) || item.name);
+    }
+    var look = el('div', 'item-look');
+    look.appendChild(node);
+    return look;
+  }
+
+  function renderCollection() {
+    var owned = {};
+    var worn = {};
+    if (state.wallet) {
+      state.wallet.inventory.forEach(function (i) { owned[i.id] = i.qty; });
+      worn = state.wallet.equipped || {};
+    }
+    document.getElementById('itemsHeading').textContent = state.user ? 'Your items' : 'Everything in the crates';
+
+    var box = document.getElementById('collection');
+    box.innerHTML = '';
+    KINDS.forEach(function (kind) {
+      var items = state.items.filter(function (i) { return i.kind === kind.id; });
+      if (!items.length) return;
+      var have = items.filter(function (i) { return owned[i.id]; }).length;
+
+      var section = el('section', 'kind');
+      var head = el('div', 'kind-head');
+      head.appendChild(el('h3', null, kind.label));
+      head.appendChild(el('span', 'kind-count', state.user ? have + ' / ' + items.length : items.length + ' to find'));
+      section.appendChild(head);
+
+      var grid = el('div', 'items');
+      items.forEach(function (item) {
+        var qty = owned[item.id] || 0;
+        var wearing = worn[item.kind] === item.id;
+        // Dimmed only for a signed-in player who has not found it; for a guest
+        // this is the catalog.
+        var card = el('div', 'item r-' + item.rarity + (state.user && !qty ? ' locked' : '') + (wearing ? ' wearing' : ''));
+        card.appendChild(preview(item));
+        card.appendChild(el('div', 'item-name', item.name));
+        var meta = el('div', 'item-meta');
+        meta.appendChild(el('span', 'rar', cap(item.rarity)));
+        if (qty > 1) meta.appendChild(el('span', null, '×' + qty));
+        card.appendChild(meta);
+        if (state.user && !qty) card.appendChild(el('div', 'item-missing', 'Not found yet'));
+        if (qty) card.appendChild(wearButton(item, wearing));
+        grid.appendChild(card);
+      });
+      section.appendChild(grid);
+      box.appendChild(section);
+    });
+  }
+
+  function wearButton(item, wearing) {
+    var btn = el('button', 'btn', wearing ? 'Take off' : 'Wear');
+    btn.type = 'button';
+    btn.setAttribute('aria-pressed', wearing ? 'true' : 'false');
+    btn.setAttribute('aria-label', (wearing ? 'Take off ' : 'Wear ') + item.name);
+    btn.addEventListener('click', function () {
+      if (state.busy) return;
+      state.busy = true;
+      btn.disabled = true;
+      var call = wearing ? rpc('gv_unequip', { p_kind: item.kind }) : rpc('gv_equip', { p_item_id: item.id });
+      call.then(function (wallet) {
+        state.wallet = wallet;
+        // So this page's own lookups (and a chat open in another tab, within
+        // a minute) show the change.
+        if (cos) cos.forget(state.user.id);
+        say(wearing ? 'Took off ' + item.name + '.' : 'Now wearing ' + item.name + '.');
+      }).catch(function (err) {
+        console.error(err);
+        say('Could not change that. Try again.', true);
+      }).then(function () {
+        state.busy = false;
+        render();
+      });
+    });
+    return btn;
+  }
+
+  // ─── Opening a crate ───
+  var dialog = document.getElementById('reveal');
+  var lastTier = null;
+  var revealRun = 0; // so a slow timer from the last crate cannot write over this one
+  var reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function openCrate(tier) {
+    if (state.busy) return;
+    state.busy = true;
+    lastTier = tier;
+    say('Opening the ' + tier.name.toLowerCase() + '…');
+    document.querySelectorAll('.crate .btn, #revealAgain').forEach(function (b) { b.disabled = true; });
+    rpc('gv_open_crate', { p_tier: tier.id }).then(function (res) {
+      state.wallet.coins = res.coins;
+      res.items.forEach(function (got) {
+        var mine = state.wallet.inventory.filter(function (i) { return i.id === got.id; })[0];
+        if (mine) mine.qty += 1;
+        else state.wallet.inventory.push({ id: got.id, kind: got.kind, name: got.name, rarity: got.rarity, value: got.value, qty: 1 });
+      });
+      say('');
+      showReveal(tier, res.items);
+    }).catch(function (err) {
+      console.error(err);
+      var msg = String(err && err.message || '');
+      var text = /not enough coins/.test(msg) ? 'Not enough coins for that crate yet.'
+        : /sign in/.test(msg) ? 'Sign in on the home page first.'
+        : 'Could not open the crate. Your coins were not spent. Try again.';
+      say(text, true);
+      if (dialog.open) document.getElementById('revealSum').textContent = text;
+    }).then(function () {
+      state.busy = false;
+      render();
+    });
+  }
+
+  function showReveal(tier, items) {
+    var run = ++revealRun;
+    document.getElementById('revealTitle').textContent = tier.name;
+    var cards = document.getElementById('revealCards');
+    cards.innerHTML = '';
+    items.forEach(function (item) {
+      var flip = el('div', 'flip r-' + item.rarity);
+      flip.dataset.tier = tier.id;
+      var inner = el('div', 'flip-inner');
+      var back = el('div', 'face back', '?');
+      back.setAttribute('aria-hidden', 'true');
+      var front = el('div', 'face front');
+      front.appendChild(preview(item));
+      front.appendChild(el('div', 'item-name', item.name));
+      var meta = el('div', 'item-meta');
+      meta.appendChild(el('span', 'rar', cap(item.rarity)));
+      front.appendChild(meta);
+      front.appendChild(item.new ? el('span', 'tag-new', 'New') : el('span', 'tag-dup', 'Duplicate'));
+      inner.appendChild(back);
+      inner.appendChild(front);
+      flip.appendChild(inner);
+      cards.appendChild(flip);
+    });
+
+    var fresh = items.filter(function (i) { return i.new; }).length;
+    var sum = document.getElementById('revealSum');
+    sum.textContent = '';
+    if (!dialog.open) dialog.showModal();
+
+    var flips = cards.querySelectorAll('.flip');
+    var gap = reduceMotion ? 0 : 320;
+    flips.forEach(function (f, n) {
+      setTimeout(function () { if (run === revealRun) f.classList.add('open'); }, reduceMotion ? 0 : 300 + n * gap);
+    });
+    setTimeout(function () {
+      if (run !== revealRun) return;
+      sum.textContent = items.map(function (i) { return i.name; }).join(', ') + '. ' +
+        (fresh === items.length ? 'All new.' : fresh ? fresh + ' new, ' + (items.length - fresh) + ' already owned.' : 'All already owned.');
+    }, reduceMotion ? 0 : 300 + flips.length * gap + 300);
+  }
+
+  function renderRevealButtons() {
+    var again = document.getElementById('revealAgain');
+    if (!lastTier) return;
+    var short = coins() < lastTier.price;
+    again.textContent = short ? 'Need ' + (lastTier.price - coins()) + ' more' : 'Open another · ' + lastTier.price;
+    again.disabled = short || state.busy;
+  }
+
+  document.getElementById('revealAgain').addEventListener('click', function () {
+    if (lastTier) openCrate(lastTier);
+  });
+  document.getElementById('revealDone').addEventListener('click', function () { dialog.close(); });
+  // A click on the dim area around the dialog lands on the dialog itself.
+  dialog.addEventListener('click', function (e) { if (e.target === dialog) dialog.close(); });
+
+  function render() {
+    renderCrates();
+    renderWallet();
+    renderCollection();
+    renderRevealButtons();
+  }
+
+  // Signed in: pay out any play since last time, then read the wallet. The
+  // grant is what makes coins appear, so it runs on every visit.
+  function loadWallet(session) {
+    state.user = session.user;
+    var email = session.user.email || '';
+    state.name = email.split('@')[0] || 'Player';
+    var nameRead = sb.from('profiles').select('username').eq('id', state.user.id).maybeSingle()
+      .then(function (r) { if (r.data && r.data.username) state.name = r.data.username; })
+      .catch(function () {});
+    return rpc('gv_grant_coins').then(function (grant) {
+      return Promise.all([rpc('gv_wallet_get'), nameRead]).then(function (res) {
+        state.wallet = res[0];
+        if (grant.earned > 0) say('+' + grant.earned + ' coins from your play since last time.');
+      });
+    });
+  }
+
+  publicRpc('gv_crates').then(function (data) {
+    state.tiers = data.tiers || [];
+    state.items = data.items || [];
+    render();
+  }).catch(function (err) {
+    console.error(err);
+    say('Could not load the shop. Refresh to try again.', true);
+  });
+
+  if (sb) {
+    sb.auth.getSession().then(function (r) {
+      var session = r.data && r.data.session;
+      if (!session) return;
+      return loadWallet(session).then(render);
+    }).catch(function (err) {
+      console.error(err);
+      state.user = null;
+      state.wallet = null;
+      render();
+      say('Could not load your coins. Refresh to try again.', true);
+    });
+  }
+});
+</script>
+</main>
+</body>
+</html>

@@ -2,13 +2,20 @@
  * GameVault tab cloaking + panic controls, and the hand-off that puts a game
  * page opened on its own back inside the player.
  *
- * Loaded by index.html, every page under /games/, and every standalone page.
+ * Loaded by index.html, every game page (in /games/ and the vault sites), and
+ * every standalone page.
  * One engine, one storage key (gv.cloak.v1) — before this, index.html and this
  * file each kept their own cloak, so picking Khan Academy on the homepage still
  * opened games in a Google Docs tab.
  *
  * Public surface: window.GV.cloak and window.GV.security.
  */
+// Light or dark. This file loads before the first paint on every page, so it
+// sets the theme too, and nothing flashes dark first.
+try {
+  if (localStorage.getItem('gv.theme') === 'light') document.documentElement.setAttribute('data-theme', 'light');
+} catch (e) {}
+
 (function () {
   'use strict';
 
@@ -285,23 +292,23 @@
 
   // ── Player ──────────────────────────────────────────────────────────────
 
-  /* Every game with a folder under /games/ has a real page at /games/<id>/,
-     so GitHub Pages answers /games/<id> with the bare game instead of the
-     player around it. A reload, a typed address, or Chrome bringing back a tab
-     it put to sleep all land there, and the Back bar is gone. A game page with
+  /* Every game has a real page at /games/<id>/ or /vault<N>/<id>/, and a
+     New Tab, a shared link, or Chrome bringing back a tab it put to sleep can
+     land on it with no player around it and no Back bar. A game page with
      nothing around it hands its address to index.html, which opens it in the
      player the same way it opens any deep link. */
   function intoPlayer() {
     if (window.top !== window.self) return false;
-    var match = /^\/games\/([^\/]+)\/(index\.html)?$/.exec(location.pathname);
+    var match = /^\/(?:games|vault\d+)\/([^\/]+)\/(index\.html)?$/.exec(location.pathname);
     if (!match) return false;
     // New Tab (?solo) and the dashboard's creator tab (#gv-creator-wait) open
     // a game on its own on purpose.
     if (location.search || location.hash) return false;
     try {
       sessionStorage.setItem('gv.redirect', '/games/' + match[1]);
-      // So index.html can send a page it has no catalog entry for back here.
-      sessionStorage.setItem('gv.bounce', match[1]);
+      // So index.html can send a page it has no catalog entry for back here,
+      // to this exact address (it may be in any vault).
+      sessionStorage.setItem('gv.bounce', location.pathname);
     } catch (e) { return false; }
     location.replace('/');
     return true;

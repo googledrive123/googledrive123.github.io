@@ -7,8 +7,9 @@
 // people here play on.
 //
 // All of those are already settings in the game. This file adds a Quality
-// row that sets them together, starts weaker devices on a lighter one, and
-// lowers the resolution on its own when the frame rate drops.
+// row that sets them together, starts weaker devices on a lighter one,
+// lowers the resolution on its own when the frame rate drops, and puts a Max
+// performance button on the main menu that picks the lightest in one tap.
 //
 // The game also draws a frame for every refresh of the display, 120 a second
 // on a MacBook Pro, which is where the fan noise comes from. It is held to 60
@@ -71,11 +72,31 @@
 
   // The game stores its settings as a list of [name, value] pairs and fills
   // in its own defaults for anything the list leaves out.
+  function savedSettings() {
+    var pairs = null;
+    try { pairs = JSON.parse(localStorage.getItem(SETTINGS_KEY)); } catch (e) {}
+    return Array.isArray(pairs) ? pairs : [];
+  }
+
+  // Everything outside the preset, like the language, stays as it was.
   function writePreset(preset) {
-    var pairs = Object.keys(preset.values).map(function (name) {
-      return [name, preset.values[name]];
+    var pairs = savedSettings().filter(function (pair) {
+      return !Array.isArray(pair) || !(pair[0] in preset.values);
+    });
+    Object.keys(preset.values).forEach(function (name) {
+      pairs.push([name, preset.values[name]]);
     });
     try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(pairs)); } catch (e) {}
+  }
+
+  function presetSaved(preset) {
+    var saved = {};
+    savedSettings().forEach(function (pair) {
+      if (Array.isArray(pair)) saved[pair[0]] = pair[1];
+    });
+    return Object.keys(preset.values).every(function (name) {
+      return saved[name] === preset.values[name];
+    });
   }
 
   try {
@@ -211,6 +232,55 @@
 
   setInterval(sample, 1000);
 
+  // ── Max performance ───────────────────────────────────────────────────
+  // One tap on the main menu for a game that is struggling, since the people
+  // it struggles for are the least likely to go looking in Settings. It saves
+  // the Very low preset, holds the frame rate to 60 if it was unlimited, and
+  // turns auto resolution back on if it was off. The game only reads its
+  // settings as it starts, so it then starts again.
+  //
+  // Picking any other Quality preset undoes it. The preset brings its own
+  // picture, and the frame rate and auto resolution go back to what they
+  // were, unless the player has changed them since.
+
+  var LIGHTEST = PRESETS[0];
+  var UNDO_KEY = 'gv.graphics.maxPerformanceUndo';
+
+  function maxPerformanceOn() {
+    var fps = maxFrameRate();
+    return presetSaved(LIGHTEST) && fps > 0 && fps <= 60 && autoOn();
+  }
+
+  // True when the picture settings changed, which only a restart shows.
+  function maxPerformance() {
+    var undo = {};
+    var fps = maxFrameRate();
+    if (fps === 0 || fps > 60) {
+      undo.maxFps = fps;
+      setMaxFrameRate(60);
+    }
+    if (!autoOn()) {
+      undo.auto = false;
+      setAuto(true);
+    }
+    try { localStorage.setItem(UNDO_KEY, JSON.stringify(undo)); } catch (e) {}
+    if (presetSaved(LIGHTEST)) return false;
+    writePreset(LIGHTEST);
+    return true;
+  }
+
+  // Each value goes back only if it is still what max performance left.
+  function undoMaxPerformance() {
+    var undo = null;
+    try {
+      undo = JSON.parse(localStorage.getItem(UNDO_KEY));
+      localStorage.removeItem(UNDO_KEY);
+    } catch (e) {}
+    if (!undo) return;
+    if (typeof undo.maxFps === 'number' && maxFrameRate() === 60) setMaxFrameRate(undo.maxFps);
+    if (undo.auto === false && autoOn()) setAuto(false);
+  }
+
   // ── The Settings screen ───────────────────────────────────────────────
   // Rows at the top of the game's own Graphics section, built the way the
   // game builds its rows so they look like part of it. Quality works by
@@ -304,6 +374,9 @@
       matchingPreset(menu), function (name) {
         applyPreset(menu, presetNamed(name));
         markSelected(quality, matchingPreset(menu));
+        if (name !== LIGHTEST.name) undoMaxPerformance();
+        markSelected(auto, autoOn() ? 'On' : 'Off');
+        markSelected(fps, fpsLabel(maxFrameRate()));
       });
     var auto = choiceRow('gv-auto-resolution', 'Auto resolution', ['Off', 'On'],
       autoOn() ? 'On' : 'Off', function (choice) {
@@ -327,13 +400,67 @@
     });
   }
 
-  function watchSettings() {
-    new MutationObserver(fillSettings).observe(document.body, { childList: true, subtree: true });
-    fillSettings();
+  // ── The main menu ─────────────────────────────────────────────────────
+  // Max performance sits in the bar along the bottom, beside Fullscreen and
+  // Music, built the way the game builds those. The game has no icon for it,
+  // so it brings a lightning bolt in the same white.
+
+  var BOLT = 'data:image/svg+xml,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">' +
+    '<path fill="#fff" d="M14 0 3 14h7l-2 10 13-15h-7l2-9z"/></svg>');
+
+  var restarting = false;
+
+  function menuLabel() {
+    if (restarting) return 'Max performance: On, restarting';
+    return maxPerformanceOn() ? 'Max performance: On' : 'Max performance';
   }
 
-  if (document.body) watchSettings();
-  else document.addEventListener('DOMContentLoaded', watchSettings);
+  function menuButton() {
+    var button = document.createElement('button');
+    button.className = 'button gv-max-performance';
+    button.title = 'The lightest graphics, for a smoother game. Pick a Quality in Settings to go back.';
+    var icon = document.createElement('img');
+    icon.src = BOLT;
+    button.appendChild(icon);
+    var label = document.createTextNode(' ' + menuLabel());
+    button.appendChild(label);
+    button.addEventListener('click', function () {
+      if (restarting || maxPerformanceOn()) return;
+      restarting = maxPerformance();
+      label.textContent = ' ' + menuLabel();
+      // Long enough to read that it worked before the loading screen.
+      if (restarting) setTimeout(function () { location.reload(); }, 900);
+    });
+    return button;
+  }
+
+  // The game takes its own buttons out of the bar and puts them back, after
+  // Settings for one, which would leave this one first instead of beside
+  // Music.
+  function fillMenu() {
+    var bar = document.querySelector('.menu-ui > .button-bar');
+    if (!bar) return;
+    var button = bar.querySelector('.gv-max-performance') || menuButton();
+    var right = bar.querySelector(':scope > .right');
+    if (button.parentNode !== bar || button.nextElementSibling !== right) bar.insertBefore(button, right);
+    // A preset picked in Settings since may have turned it off.
+    var label = ' ' + menuLabel();
+    if (button.lastChild.textContent !== label) button.lastChild.textContent = label;
+  }
+
+  function fill() {
+    fillSettings();
+    fillMenu();
+  }
+
+  function watchScreens() {
+    new MutationObserver(fill).observe(document.body, { childList: true, subtree: true });
+    fill();
+  }
+
+  if (document.body) watchScreens();
+  else document.addEventListener('DOMContentLoaded', watchScreens);
 
   window.GV = window.GV || {};
   window.GV.graphics = {

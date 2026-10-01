@@ -59,7 +59,9 @@
       <a class="btn btn-primary" href="/">Back to GameVault</a>
       <button class="btn" id="nfRandom" type="button">Play something random</button>
       <a class="btn" href="/status/">Request it</a>
+      <button class="btn" id="nfReport" type="button">Report this broken link</button>
     </div>
+    <div class="nf-note" id="nfReportMsg" role="status"></div>
   </div>
 
 <script>
@@ -80,7 +82,7 @@
       line.appendChild(code);
       // A missing game deep link is the likeliest way to land here, so seed the
       // search with the slug that failed.
-      var slug = missing.replace(/^\/games\//, '').replace(/[\/?#].*$/, '');
+      var slug = missing.replace(/^\/(games|vault\d+)\//, '').replace(/[\/?#].*$/, '');
       if (slug && slug !== missing) search.value = slug.replace(/-/g, ' ');
     }
   } catch (e) {}
@@ -126,12 +128,36 @@
     .then(function (r) { return r.json(); })
     .then(function (data) {
       // Most played first, so the fallback suggestions are ones people want.
-      games = data.games.slice().sort(function (a, b) { return a.ranking - b.ranking; });
+      games = data.games.filter(function (g) { return !g.hidden && !g.staging; })
+        .sort(function (a, b) { return a.ranking - b.ranking; });
       run();
       search.addEventListener('input', run);
       search.focus();
     })
     .catch(function () { note('Could not load the catalog. Head back to the homepage.'); });
+
+  // Sends the address that failed to the owner's dashboard (404/reports.sql).
+  // `missing` was read (and cleared from sessionStorage) at the top.
+  var failed = missing || location.pathname;
+  var cameFrom = document.referrer;
+  var reportBtn = document.getElementById('nfReport');
+  reportBtn.addEventListener('click', function () {
+    var KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
+    var vid = window.GV && GV.identity ? GV.identity.id() : null;
+    reportBtn.disabled = true;
+    fetch('https://dxwjxzmlezfyursysays.supabase.co/rest/v1/rpc/gv_report_link', {
+      method: 'POST',
+      headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_path: failed, p_referrer: cameFrom, p_visitor_id: vid })
+    }).then(function (r) {
+      if (!r.ok) throw new Error(r.status);
+      document.getElementById('nfReportMsg').textContent = 'Thanks, we will look at it.';
+      reportBtn.textContent = 'Reported';
+    }).catch(function () {
+      reportBtn.disabled = false;
+      document.getElementById('nfReportMsg').textContent = 'Could not send the report. Try again in a moment.';
+    });
+  });
 
   document.getElementById('nfRandom').addEventListener('click', function () {
     if (!games.length) { location.href = '/'; return; }

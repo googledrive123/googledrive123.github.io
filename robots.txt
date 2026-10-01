@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /analytics/
+Disallow: /test/
+Disallow: /secret/
+Disallow: /iframe/
+Disallow: /vault

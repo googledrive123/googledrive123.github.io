@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat · GameVault</title>
+  <meta name="description" content="One chat room for everyone signed in to GameVault.">
+  <link rel="icon" href="/favicon.svg">
+  <!-- Blocking on purpose: the cloak has to land before the first paint. -->
+  <script src="/js/mimicry.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/site.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
+  <script src="/js/identity.js" defer></script>
+  <script src="/js/analytics.js" defer></script>
+  <script src="/js/site.js" defer></script>
+  <script src="/js/player.js" defer></script>
+  <style>
+    .chat-panel { padding: 0; overflow: hidden; }
+    .chat-top {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 0.4rem 1rem;
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .chat-top .panel-label { display: flex; align-items: center; gap: 0.5rem; margin: 0; }
+    .chat-live { width: 6px; height: 6px; border-radius: 50%; background: #5ce08a; }
+    .chat-rules { font-size: 0.78rem; color: var(--muted-2); }
+
+    .chat-wrap { position: relative; }
+    /* Sized so the box stays on screen under the heading. */
+    .chat-log {
+      height: clamp(260px, calc(100vh - 420px), 600px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding: 0.6rem 0.75rem;
+      display: flex; flex-direction: column; gap: 0.1rem;
+    }
+    /* A short conversation sits at the bottom, next to the box. */
+    .chat-log > .msg:first-child { margin-top: auto; }
+    .chat-empty {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--muted-2); font-size: 0.85rem;
+      pointer-events: none;
+    }
+    .chat-empty[hidden] { display: none; }
+    .chat-jump {
+      position: absolute; left: 50%; bottom: 0.75rem; transform: translateX(-50%);
+      padding: 0.35rem 0.85rem;
+      border-radius: 100px;
+      border: 1px solid var(--border-strong);
+      background: var(--surface-2);
+      color: var(--text);
+      font: inherit; font-size: 0.75rem;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.45);
+    }
+    .chat-jump:hover { border-color: var(--accent); }
+
+    .msg { padding: 0.45rem 0.55rem; border-radius: 10px; }
+    .msg:hover { background: rgba(255,255,255,0.025); }
+    .msg-head { display: flex; align-items: baseline; gap: 0.5rem; min-width: 0; }
+    .msg-name {
+      font-size: 0.84rem; font-weight: 600;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .msg.mine .msg-name { color: var(--accent); }
+    .msg-time {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.64rem; color: var(--muted-2);
+      white-space: nowrap;
+    }
+    .msg-body {
+      margin-top: 0.1rem;
+      font-size: 0.9rem; line-height: 1.5;
+      color: #d8d8de;
+      overflow-wrap: anywhere;
+    }
+    .msg-report {
+      margin-left: auto;
+      padding: 0.1rem 0.4rem;
+      border: 0; border-radius: 6px;
+      background: none;
+      color: var(--muted-2);
+      font: inherit; font-size: 0.7rem;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.15s, color 0.15s;
+    }
+    .msg:hover .msg-report, .msg-report:focus-visible, .msg.reporting .msg-report { opacity: 1; }
+    .msg-report:hover { color: var(--text); }
+    .msg-report:disabled { opacity: 1; cursor: default; color: var(--muted-2); }
+    @media (hover: none) { .msg-report { opacity: 1; } }
+    .msg-flag {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem;
+      margin-top: 0.45rem;
+      font-size: 0.75rem; color: var(--muted);
+    }
+    .msg-flag button {
+      padding: 0.25rem 0.65rem;
+      border-radius: 100px;
+      border: 1px solid var(--border-strong);
+      background: transparent;
+      color: var(--text);
+      font: inherit; font-size: 0.72rem;
+      cursor: pointer;
+    }
+    .msg-flag button:hover { border-color: var(--accent); }
+    .msg-flag button.cancel { border-color: transparent; color: var(--muted-2); }
+    .msg-flag button:disabled { opacity: 0.45; cursor: default; }
+
+    .chat-form {
+      display: flex; gap: 0.5rem; align-items: center;
+      padding: 0.85rem 1.25rem 0.5rem;
+      border-top: 1px solid var(--border);
+    }
+    .chat-box { position: relative; flex: 1; min-width: 0; }
+    .chat-box .field { padding-right: 4.4rem; }
+    .chat-count {
+      position: absolute; right: 0.8rem; top: 50%; transform: translateY(-50%);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.64rem; color: var(--muted-2);
+      pointer-events: none;
+    }
+    .chat-count.near { color: #f0c04a; }
+    .chat-count.full { color: var(--accent); }
+    .chat-send { min-width: 5.2rem; flex-shrink: 0; }
+    .chat-status {
+      min-height: 1.3rem;
+      padding: 0 1.25rem 0.75rem;
+      font-size: 0.8rem; line-height: 1.45;
+      color: var(--muted);
+    }
+    .chat-status.wait { color: #f0c04a; }
+    .chat-status.error { color: #ff7a7a; }
+
+    .chat-out a.btn { color: #fff; text-decoration: none; }
+  </style>
+</head>
+<body>
+<main class="page">
+  <div class="page-kicker">chat</div>
+  <h1>Chat</h1>
+  <p class="lede">One room for everyone with a GameVault account.</p>
+
+  <div class="panel chat-panel" id="chat">
+    <div class="chat-top">
+      <div class="panel-label"><span class="chat-live" aria-hidden="true"></span>Everyone</div>
+      <div class="chat-rules">Be kind. No personal info. Reports go to the site owner.</div>
+    </div>
+    <div class="chat-wrap">
+      <div class="chat-log" id="chatLog" role="log" aria-live="polite" aria-label="Chat messages"></div>
+      <div class="chat-empty" id="chatEmpty">Loading chat…</div>
+      <button class="chat-jump" id="chatJump" type="button" hidden>New messages ↓</button>
+    </div>
+    <form class="chat-form" id="chatForm" autocomplete="off">
+      <div class="chat-box">
+        <input class="field" id="chatInput" maxlength="300" placeholder="Say something nice…" aria-label="Message" enterkeyhint="send">
+        <span class="chat-count" id="chatCount" aria-hidden="true">0/300</span>
+      </div>
+      <button class="btn btn-primary chat-send" id="chatSend" type="submit">Send</button>
+    </form>
+    <div class="chat-status" id="chatStatus" aria-live="polite"></div>
+  </div>
+
+  <div class="panel chat-out" id="chatOut" hidden>
+    <div class="panel-label">Accounts only</div>
+    <p>Sign in on the home page to chat.</p>
+    <div class="btn-row">
+      <a class="btn btn-primary" href="/">Go to the home page</a>
+    </div>
+  </div>
+
+<script>
+(function () {
+  'use strict';
+
+  var SUPA_URL = 'https://dxwjxzmlezfyursysays.supabase.co';
+  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
+  // Where supabase-js keeps the session the home page signed in with.
+  var TOKEN_KEY = 'sb-dxwjxzmlezfyursysays-auth-token';
+  var MAX = 300;
+  var POLL_MS = 4000;
+  // Every eighth poll asks for the whole window again. That is how a message
+  // the owner removed disappears from pages that already show it.
+  var FULL_EVERY = 8;
+  var KEEP = 300;
+  var REASONS = ['Mean', 'Rude', 'Personal info', 'Spam'];
+
+  var chat = document.getElementById('chat');
+  var out = document.getElementById('chatOut');
+  var log = document.getElementById('chatLog');
+  var empty = document.getElementById('chatEmpty');
+  var jump = document.getElementById('chatJump');
+  var form = document.getElementById('chatForm');
+  var input = document.getElementById('chatInput');
+  var count = document.getElementById('chatCount');
+  var send = document.getElementById('chatSend');
+  var status = document.getElementById('chatStatus');
+
+  var sb = null;
+  var byId = {};
+  var lastId = 0;
+  var polls = 0;
+  var timer = null;
+  var polling = false;
+  var sending = false;
+  var waitUntil = 0;
+  var waitTimer = null;
+
+  function savedSession() {
+    try {
+      var s = JSON.parse(localStorage.getItem(TOKEN_KEY) || 'null');
+      return s && s.access_token ? s : null;
+    } catch (e) { return null; }
+  }
+
+  function signedOut() {
+    stopPolling();
+    chat.hidden = true;
+    out.hidden = false;
+  }
+
+  function say(text, kind) {
+    status.textContent = text || '';
+    status.className = 'chat-status' + (kind ? ' ' + kind : '');
+    status.dataset.kind = kind || '';
+  }
+
+  function when(iso) {
+    var d = new Date(iso);
+    var t = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    if (d.toDateString() === new Date().toDateString()) return t;
+    return d.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ', ' + t;
+  }
+
+  function render(m) {
+    var el = document.createElement('div');
+    el.className = 'msg' + (m.mine ? ' mine' : '');
+    el.dataset.id = m.id;
+
+    var head = document.createElement('div');
+    head.className = 'msg-head';
+    var name = document.createElement('span');
+    name.className = 'msg-name';
+    name.textContent = m.username;
+    var time = document.createElement('time');
+    time.className = 'msg-time';
+    time.dateTime = m.created_at;
+    time.textContent = when(m.created_at);
+    head.appendChild(name);
+    head.appendChild(time);
+
+    if (!m.mine) {
+      var flag = document.createElement('button');
+      flag.type = 'button';
+      flag.className = 'msg-report';
+      flag.textContent = 'Report';
+      flag.addEventListener('click', function () { openReport(el, m.id, flag); });
+      head.appendChild(flag);
+    }
+
+    var body = document.createElement('div');
+    body.className = 'msg-body';
+    body.textContent = m.body;
+
+    el.appendChild(head);
+    el.appendChild(body);
+    return el;
+  }
+
+  function nearBottom() {
+    return log.scrollHeight - log.scrollTop - log.clientHeight < 80;
+  }
+
+  function toBottom() {
+    log.scrollTop = log.scrollHeight;
+    jump.hidden = true;
+  }
+
+  // Keeps the list in id order. A message just sent shows at once, before
+  // the poll that brings in anything posted a moment earlier.
+  function add(list, stick) {
+    var follow = stick || nearBottom();
+    var others = 0;
+    list.forEach(function (m) {
+      if (byId[m.id]) return;
+      var el = render(m);
+      var next = null;
+      var cur = log.lastElementChild;
+      while (cur && Number(cur.dataset.id) > m.id) { next = cur; cur = cur.previousElementSibling; }
+      log.insertBefore(el, next);
+      byId[m.id] = el;
+      if (!m.mine) others++;
+    });
+    while (log.children.length > KEEP) {
+      delete byId[log.firstElementChild.dataset.id];
+      log.removeChild(log.firstElementChild);
+    }
+    empty.textContent = 'No messages yet. Say hi.';
+    empty.hidden = log.children.length > 0;
+    if (follow) toBottom();
+    else if (others) jump.hidden = false;
+  }
+
+  // A full poll lists everything still up. Anything on the page in the same
+  // range that it leaves out was removed by the owner.
+  function prune(list, before) {
+    var keep = {};
+    var top = before;
+    list.forEach(function (m) { keep[m.id] = true; if (m.id > top) top = m.id; });
+    var floor = list.length >= 100 ? list[0].id : 0;
+    Object.keys(byId).forEach(function (id) {
+      var n = Number(id);
+      if (n >= floor && n <= top && !keep[id]) {
+        log.removeChild(byId[id]);
+        delete byId[id];
+      }
+    });
+  }
+
+  function ours(err) { return err && err.code === 'P0001'; }
+
+  // 42501 is PostgREST answering as a guest: the session is gone.
+  function recheck(err) {
+    if (!err || err.code !== '42501') return false;
+    sb.auth.getSession().then(function (r) {
+      if (!r.data.session) signedOut();
+    });
+    return true;
+  }
+
+  function poll() {
+    if (polling || document.hidden) return;
+    polling = true;
+    var full = polls++ % FULL_EVERY === 0;
+    var before = lastId;
+    sb.rpc('gv_chat_recent', { p_after_id: full ? 0 : lastId }).then(function (res) {
+      polling = false;
+      if (res.error) {
+        if (!recheck(res.error)) say('Chat lost its connection. Trying again…', 'wait');
+        return;
+      }
+      if (status.dataset.kind === 'wait' && !waitTimer) say('');
+      var list = res.data || [];
+      if (full) prune(list, before);
+      list.forEach(function (m) { if (m.id > lastId) lastId = m.id; });
+      add(list, before === 0);
+    }, function () {
+      polling = false;
+    });
+  }
+
+  function startPolling() {
+    if (timer) return;
+    poll();
+    timer = setInterval(poll, POLL_MS);
+  }
+
+  function stopPolling() {
+    clearInterval(timer);
+    timer = null;
+  }
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) stopPolling();
+    else if (sb && !chat.hidden) startPolling();
+  });
+
+  function paintCount() {
+    var n = input.value.length;
+    count.textContent = n + '/' + MAX;
+    count.classList.toggle('near', n >= MAX - 30 && n < MAX);
+    count.classList.toggle('full', n >= MAX);
+  }
+
+  function pad(n) { return n < 10 ? '0' + n : String(n); }
+
+  function paintSend() {
+    var left = Math.ceil((waitUntil - Date.now()) / 1000);
+    if (left > 0) {
+      send.disabled = true;
+      send.textContent = left >= 60 ? Math.floor(left / 60) + ':' + pad(left % 60) : left + 's';
+      return;
+    }
+    clearInterval(waitTimer);
+    waitTimer = null;
+    send.textContent = 'Send';
+    send.disabled = sending;
+    if (status.dataset.kind === 'wait') say('');
+  }
+
+  // The server holds the real limit. Waiting here as well means a normal
+  // chatter never hits it and never sees the error.
+  function cooldown(secs) {
+    waitUntil = Date.now() + secs * 1000;
+    clearInterval(waitTimer);
+    waitTimer = setInterval(paintSend, 250);
+    paintSend();
+  }
+
+  function failed(err) {
+    if (recheck(err)) return;
+    if (!ours(err)) {
+      say('Could not send that. Check your connection and try again.', 'error');
+      return;
+    }
+    var wait = /wait=(\d+)/.exec(err.hint || '');
+    var until = /until=(\S+)/.exec(err.hint || '');
+    if (wait) {
+      say(err.message, 'wait');
+      cooldown(Number(wait[1]));
+    } else if (until) {
+      say(err.message + ' Try again after ' + when(until[1]) + '.', 'error');
+    } else {
+      say(err.message, 'error');
+    }
+  }
+
+  input.addEventListener('input', paintCount);
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!sb || sending || waitTimer) return;
+    var text = input.value.trim();
+    if (!text) {
+      say('Write something first.', 'wait');
+      return;
+    }
+    sending = true;
+    send.disabled = true;
+    sb.rpc('gv_chat_send', { p_body: text }).then(function (res) {
+      sending = false;
+      if (res.error) {
+        failed(res.error);
+        paintSend();
+        return;
+      }
+      input.value = '';
+      paintCount();
+      say('');
+      add([res.data], true);
+      cooldown(5);
+    }, function () {
+      sending = false;
+      say('Could not send that. Check your connection and try again.', 'error');
+      paintSend();
+    });
+  });
+
+  log.addEventListener('scroll', function () {
+    if (nearBottom()) jump.hidden = true;
+  });
+  jump.addEventListener('click', toBottom);
+
+  function closeReport(el) {
+    var row = el.querySelector('.msg-flag');
+    if (row) row.remove();
+    el.classList.remove('reporting');
+  }
+
+  function openReport(el, id, flag) {
+    if (el.querySelector('.msg-flag')) return closeReport(el);
+    el.classList.add('reporting');
+    var row = document.createElement('div');
+    row.className = 'msg-flag';
+    var ask = document.createElement('span');
+    ask.textContent = 'What is wrong with it?';
+    row.appendChild(ask);
+    REASONS.forEach(function (reason) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = reason;
+      b.addEventListener('click', function () { report(el, id, reason, row, flag); });
+      row.appendChild(b);
+    });
+    var cancel = document.createElement('button');
+    cancel.type = 'button';
+    cancel.className = 'cancel';
+    cancel.textContent = 'Cancel';
+    cancel.addEventListener('click', function () { closeReport(el); flag.focus(); });
+    row.appendChild(cancel);
+    el.appendChild(row);
+    row.querySelector('button').focus();
+  }
+
+  function report(el, id, reason, row, flag) {
+    Array.prototype.forEach.call(row.querySelectorAll('button'), function (b) { b.disabled = true; });
+    sb.rpc('gv_chat_report', { p_message_id: id, p_reason: reason }).then(function (res) {
+      if (res.error && recheck(res.error)) return;
+      if (res.error) {
+        row.textContent = ours(res.error) ? res.error.message : 'Could not send the report. Try again in a moment.';
+        setTimeout(function () { closeReport(el); }, 4000);
+        return;
+      }
+      row.textContent = res.data ? 'Reported. Thanks for looking out.' : 'You already reported this one.';
+      flag.textContent = 'Reported';
+      flag.disabled = true;
+      setTimeout(function () { closeReport(el); }, 4000);
+    });
+  }
+
+  // Signing in on the home page in another tab opens chat here too.
+  window.addEventListener('storage', function (e) {
+    if (e.key === TOKEN_KEY && e.newValue && !out.hidden) location.reload();
+  });
+
+  paintCount();
+
+  // No session at all needs no network to know, so guests see the sign-in
+  // note straight away.
+  if (!savedSession()) {
+    signedOut();
+    return;
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    if (!window.supabase) {
+      empty.textContent = 'Chat could not load. Refresh to try again.';
+      return;
+    }
+    // Restores the home page's session and refreshes it when it runs out.
+    sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+    sb.auth.onAuthStateChange(function (event, session) {
+      if (!session) signedOut();
+    });
+    sb.auth.getSession().then(function (r) {
+      if (!r.data.session) return signedOut();
+      startPolling();
+    });
+  });
+})();
+</script>
+</main>
+</body>
+</html>

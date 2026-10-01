@@ -52,6 +52,10 @@
   which stores the username and a hashed password.</p>
   <p>While signed in, each game you open is recorded as a play session — the game, when you
   started, when you stopped. That is what the playtime numbers on your profile are built from.</p>
+  <p>Those sessions also make up the public <a href="/leaderboard/">leaderboard</a>. Anyone can see
+  the username and picture of a signed-in account there, with its total play time, its level, how
+  many games it has played, its play time this week, and its play time on each game it has played.
+  To keep your account off it, turn off "Show me on the leaderboard" in your profile.</p>
 
   <h2>3. Site analytics</h2>
   <p>GameVault counts usage so the owner can tell which games are worth keeping. This runs
@@ -63,25 +67,29 @@
     <li>Browser, operating system, device type, screen and window size, language, time zone.</li>
     <li>Page load timing, and JavaScript errors, so breakage gets noticed.</li>
   </ul>
-  <p>Pages under <code>/games/</code> additionally load Google Analytics
-  (<code>G-KRH3X9QS3M</code>), which is subject to
+  <p>Nearly every page also loads Google Analytics (<code>G-KRH3X9QS3M</code>), including
+  the game pages in the vault sites (<code>/vault2/</code>, <code>/vault3/</code> and so on)
+  that open inside the player. That part is subject to
   <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's privacy policy</a>.</p>
 
   <h2>4. Turning analytics off</h2>
   <p>Open your browser console on this site and run:</p>
   <p><code>localStorage.setItem('gv.noanalytics', '1')</code></p>
   <p>The first-party tracker then stops sending anything, permanently, on this browser.
-  Nothing else about the site changes.</p>
+  Nothing else about the site changes. It does not switch off Google Analytics, which is
+  separate and keeps loading.</p>
 
   <h2>5. Third parties</h2>
   <p>GameVault does not sell or share data. It does load things from other people's servers,
   and those servers see the request:</p>
   <ul>
-    <li>Games served from another host, shown in a frame.</li>
+    <li>Games still loaded from the host they came from, shown in a frame. Most games now run
+    from the vault sites on this same address instead.</li>
     <li>Thumbnail images from public image CDNs.</li>
     <li>Fonts from Google Fonts.</li>
     <li>Movie and TV metadata from TMDB, with playback embedded from a third-party player.</li>
     <li>Supabase, for accounts and analytics.</li>
+    <li>Google Analytics, on nearly every page.</li>
   </ul>
   <p>What those services do with a request is governed by their own policies, not this one.</p>
 
@@ -95,7 +103,7 @@
 
   <h2>8. Changes</h2>
   <p>If this policy changes, the date below changes with it.</p>
-  <p class="panel-note">Last updated: 21 September 2026</p>
+  <p class="panel-note">Last updated: 1 October 2026</p>
 </main>
 </body>
 </html>

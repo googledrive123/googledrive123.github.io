@@ -10,6 +10,8 @@
   <script src="/js/mimicry.js"></script>
   <script src="/js/urlcloak.js"></script>
   <script src="/js/pwa.js"></script>
+  <script src="/js/layout.js"></script>
+  <script src="/js/fun.js" defer></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -104,6 +106,40 @@
   </div>
 
   <div class="panel">
+    <div class="panel-label">Home page</div>
+    <div class="toggle-row">
+      <div>
+        <div class="label">Skip the welcome screen</div>
+        <div class="desc">Open straight on the games.</div>
+      </div>
+      <label class="switch"><input type="checkbox" id="skipWelcome"><span class="track"></span></label>
+    </div>
+    <div class="toggle-row">
+      <div>
+        <div class="label">Light theme</div>
+        <div class="desc">A light page instead of the dark one, on every page.</div>
+      </div>
+      <label class="switch"><input type="checkbox" id="lightTheme"><span class="track"></span></label>
+    </div>
+    <div class="toggle-row" style="display:block">
+      <div class="label">Tile size</div>
+      <input type="range" id="tileSize" min="130" max="300" step="10" aria-label="Tile size" style="width:100%;accent-color:var(--accent);margin-top:0.5rem">
+    </div>
+    <div class="toggle-row">
+      <div class="label">Show the Popular now row</div>
+      <label class="switch"><input type="checkbox" data-row="popular"><span class="track"></span></label>
+    </div>
+    <div class="toggle-row">
+      <div class="label">Show the Starred row</div>
+      <label class="switch"><input type="checkbox" data-row="starred"><span class="track"></span></label>
+    </div>
+    <div class="toggle-row">
+      <div class="label">Show the Continue row</div>
+      <label class="switch"><input type="checkbox" data-row="recent"><span class="track"></span></label>
+    </div>
+  </div>
+
+  <div class="panel">
     <div class="panel-label">Panic key</div>
     <div class="toggle-row">
       <div>
@@ -171,6 +207,30 @@
       <input class="field" id="proxyInput" spellcheck="false" autocomplete="off" aria-label="Proxy endpoint">
       <button class="btn" id="proxySave" type="button">Save</button>
     </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-label">Fun</div>
+    <div class="toggle-row">
+      <div>
+        <div class="label">April Fools pranks</div>
+        <div class="desc">Only on April 1. Harmless, and one tap turns them off.</div>
+      </div>
+      <label class="switch"><input type="checkbox" id="funPranks"><span class="track"></span></label>
+    </div>
+    <div class="toggle-row">
+      <div>
+        <div class="label">Seasonal decorations</div>
+        <div class="desc">Cobwebs and bats around Halloween.</div>
+      </div>
+      <label class="switch"><input type="checkbox" id="funSeasonal"><span class="track"></span></label>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-label">Account and saves</div>
+    <p class="panel-note" style="margin-top:0">Sign in, pick an avatar, rename or delete your account from your profile on the <a href="/?profile">home page</a>.
+    Back up your game progress, or keep it in the cloud, on the <a href="/saves/">Saves</a> page.</p>
   </div>
 
   <div class="panel">
@@ -362,6 +422,8 @@
   proxyInput.value = ls(PROXY_KEY, DEFAULT_PROXY);
   document.getElementById('proxySave').addEventListener('click', function () {
     var v = proxyInput.value.trim();
+    // Only an https proxy: the browser page loads whatever this is in a frame.
+    if (v && !/^https:\/\//i.test(v)) { proxyInput.value = DEFAULT_PROXY; v = ''; }
     try {
       if (!v || v === DEFAULT_PROXY) localStorage.removeItem(PROXY_KEY);
       else localStorage.setItem(PROXY_KEY, v);
@@ -376,6 +438,36 @@
       if (analyticsOn.checked) localStorage.removeItem('gv.noanalytics');
       else localStorage.setItem('gv.noanalytics', '1');
     } catch (e) {}
+  });
+
+  var layout = window.GV.layout;
+  var skipWelcome = document.getElementById('skipWelcome');
+  skipWelcome.checked = layout.skipWelcome();
+  skipWelcome.addEventListener('change', function () { layout.setSkipWelcome(skipWelcome.checked); });
+
+  var lightTheme = document.getElementById('lightTheme');
+  lightTheme.checked = layout.theme() === 'light';
+  lightTheme.addEventListener('change', function () { layout.setTheme(lightTheme.checked ? 'light' : 'dark'); });
+
+  var tileSize = document.getElementById('tileSize');
+  tileSize.value = layout.tileSize();
+  tileSize.addEventListener('input', function () { layout.setTileSize(+tileSize.value); });
+
+  document.querySelectorAll('[data-row]').forEach(function (el) {
+    el.checked = !layout.hidden(el.dataset.row);
+    el.addEventListener('change', function () { layout.setHidden(el.dataset.row, !el.checked); });
+  });
+
+  // fun.js is deferred, so it is ready once the page has loaded.
+  document.addEventListener('DOMContentLoaded', function () {
+    var fun = window.GV && window.GV.fun;
+    if (!fun) return;
+    var pranks = document.getElementById('funPranks');
+    var seasonal = document.getElementById('funSeasonal');
+    pranks.checked = fun.pranksOn();
+    seasonal.checked = fun.seasonalOn();
+    pranks.addEventListener('change', function () { fun.setPranks(pranks.checked); });
+    seasonal.addEventListener('change', function () { fun.setSeasonal(seasonal.checked); });
   });
 
   paintState();

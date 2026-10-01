@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Backup addresses · GameVault</title>
+  <meta name="description" content="Other addresses GameVault runs at, for when one is blocked, and a way to move your saves between them.">
+  <!-- School filters crawl too. The list is for players, not for search results. -->
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="/favicon.svg">
+  <!-- Blocking on purpose: the cloak has to land before the first paint. -->
+  <script src="/js/mimicry.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/site.css">
+  <script src="/js/identity.js" defer></script>
+  <script src="/js/analytics.js" defer></script>
+  <script src="/js/site.js" defer></script>
+  <script src="/js/player.js" defer></script>
+  <script src="/js/saves.js" defer></script>
+  <script src="/js/mirrors.js" defer></script>
+  <style>
+    .page .panel > p:not([class]) { font-size: 0.85rem; line-height: 1.6; }
+    .save-note { font-size: 0.8rem; color: var(--muted); margin-top: 0.75rem; line-height: 1.5; }
+    .save-note:empty { display: none; }
+    .save-note.bad { color: var(--accent); }
+    .save-note.good { color: #5ce08a; }
+    .btn-sm { padding: 0.38rem 0.8rem; font-size: 0.78rem; }
+
+    .mirrors { border-top: 1px solid var(--border); }
+    .mirror {
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+      gap: 0.6rem 1rem;
+      padding: 0.85rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .mirror-info { display: flex; align-items: flex-start; gap: 0.75rem; min-width: 0; flex: 1 1 14rem; }
+    .mirror-name { font-size: 0.92rem; color: var(--text); overflow-wrap: anywhere; }
+    .mirror-meta {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--muted-2);
+      margin-top: 0.25rem; overflow-wrap: anywhere;
+    }
+    .mirror-here {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--muted); margin-left: 0.4rem;
+      padding: 0.1rem 0.4rem; border: 1px solid var(--border-strong); border-radius: 999px;
+      vertical-align: 0.1em;
+    }
+    .mirror-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .mirror .save-note { flex-basis: 100%; margin-top: 0; }
+
+    /* Up, blocked or no answer, from this browser on this network. The word
+       next to it says the same, so the colour is never the only clue. */
+    .dot {
+      width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+      margin-top: 0.35rem;
+      background: var(--muted-2);
+    }
+    .dot.up { background: #5ce08a; box-shadow: 0 0 0 3px rgba(92,224,138,0.15); }
+    .dot.blocked { background: var(--accent); box-shadow: 0 0 0 3px rgba(255,59,59,0.15); }
+    .dot.checking { animation: dot-pulse 1.2s ease-in-out infinite; }
+    @keyframes dot-pulse { 50% { opacity: 0.3; } }
+    @media (prefers-reduced-motion: reduce) { .dot.checking { animation: none; } }
+    .mirror-state.up { color: #5ce08a; }
+    .mirror-state.blocked { color: var(--accent); }
+
+    /* Anything that overwrites progress asks here first, in the page, so it
+       reads the same in a disguised tab where pop-up dialogs look out of place. */
+    .confirm {
+      margin-top: 0.9rem;
+      padding: 0.9rem 1rem;
+      border-radius: 10px;
+      border: 1px solid rgba(255,59,59,0.45);
+      background: rgba(255,59,59,0.06);
+    }
+    .confirm-title { color: var(--text); font-size: 0.9rem; font-weight: 600; }
+    .page .confirm p { font-size: 0.82rem; margin-top: 0.3rem; line-height: 1.5; }
+    .confirm .btn-row { margin-top: 0.75rem; }
+  </style>
+</head>
+<body>
+<main class="page">
+  <div class="page-kicker">backup addresses</div>
+  <h1>Backup addresses</h1>
+  <p class="lede">GameVault also runs at other addresses. Schools block sites one address at a
+  time, so when one stops working another usually still does. Bookmark a couple now, before you
+  need them.</p>
+
+  <div class="panel" id="receivePanel" hidden>
+    <div class="panel-label" id="receiveLabel">Moving saves here</div>
+    <p class="save-note" id="receiveNote" role="status" aria-live="polite" style="margin-top:0"></p>
+    <div id="receiveConfirm"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-label">Addresses</div>
+    <div class="mirrors" id="mirrorList"></div>
+    <p class="panel-note" id="mirrorEmpty" hidden>No backup addresses yet. The owner is setting
+    some up, so check back here soon.</p>
+    <p class="save-note" id="listNote" role="status" aria-live="polite"></p>
+    <div class="btn-row">
+      <button class="btn btn-sm" id="recheckBtn" type="button">Check again</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-label">How it works</div>
+    <p>Every address runs the same GameVault, and each one picks up new games and fixes by itself
+    within a day.</p>
+    <p>The dot shows whether this browser can reach an address right now: green works, red is
+    blocked, grey did not answer in time. A school can block a different address tomorrow, so
+    check again when one stops loading.</p>
+    <p>Progress stays with the address you played on, so a new address starts empty. Move my
+    saves there opens that address in a new tab and copies this browser's progress across,
+    replacing whatever progress was there before.</p>
+  </div>
+
+<script>
+/* saves.js and mirrors.js are deferred like the rest of the chrome, and
+   deferred scripts run before DOMContentLoaded, so both are ready by then. */
+document.addEventListener('DOMContentLoaded', function () {
+  var mirrors = window.GV.mirrors;
+  var saves = window.GV.saves;
+  var here = location.origin;
+  var params = new URLSearchParams(location.search);
+
+  function $(id) { return document.getElementById(id); }
+
+  function el(tag, cls, text) {
+    var node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text) node.textContent = text;
+    return node;
+  }
+
+  function note(target, text, tone) {
+    target.textContent = text || '';
+    target.className = 'save-note' + (tone ? ' ' + tone : '');
+  }
+
+  function message(err) {
+    return (err && err.message) || 'Something went wrong. Try again.';
+  }
+
+  function host(origin) { return origin.replace(/^https?:\/\//, ''); }
+
+  function button(text, onClick) {
+    var b = el('button', 'btn btn-sm', text);
+    b.type = 'button';
+    b.addEventListener('click', onClick);
+    return b;
+  }
+
+  var STATES = { checking: 'checking…', up: 'works here', blocked: 'blocked here', unknown: 'no answer' };
+  var rows = [];
+
+  function setState(r, state) {
+    r.dot.className = 'dot ' + state;
+    r.state.className = 'mirror-state ' + state;
+    r.state.textContent = STATES[state];
+  }
+
+  function mirrorRow(item) {
+    var wrap = el('div', 'mirror');
+    var info = el('div', 'mirror-info');
+    var dot = el('span', 'dot');
+    dot.setAttribute('aria-hidden', 'true');
+    var text = el('div');
+    var name = el('div', 'mirror-name', item.label || host(item.origin));
+    if (item.origin === here) name.appendChild(el('span', 'mirror-here', 'You are here'));
+    // An address with no label is already named by its host.
+    var meta = el('div', 'mirror-meta', item.label ? host(item.origin) + ' · ' : '');
+    var state = el('span', 'mirror-state');
+    meta.appendChild(state);
+    text.append(name, meta);
+    info.append(dot, text);
+    wrap.appendChild(info);
+
+    var r = { item: item, wrap: wrap, dot: dot, state: state, note: el('p', 'save-note') };
+    r.note.setAttribute('role', 'status');
+    r.note.setAttribute('aria-live', 'polite');
+
+    var actions = el('div', 'mirror-actions');
+    r.copy = button('Copy link', function () { copyLink(r); });
+    actions.appendChild(r.copy);
+    if (item.origin !== here) {
+      r.move = button('Move my saves there', function () { move(r); });
+      actions.appendChild(r.move);
+    }
+    wrap.append(actions, r.note);
+    return r;
+  }
+
+  // The clipboard API needs a secure page and permission; the old copy
+  // command covers a browser that refuses it.
+  function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text).catch(function () { return copyOld(text); });
+    }
+    return copyOld(text);
+  }
+
+  function copyOld(text) {
+    var box = el('textarea');
+    box.value = text;
+    box.setAttribute('readonly', '');
+    box.style.position = 'fixed';
+    box.style.opacity = '0';
+    document.body.appendChild(box);
+    box.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) {}
+    box.remove();
+    return ok ? Promise.resolve() : Promise.reject(new Error('Could not copy. The address is ' + text));
+  }
+
+  function copyLink(r) {
+    var link = r.item.origin + '/';
+    copyText(link).then(function () {
+      r.copy.textContent = 'Copied';
+      setTimeout(function () { r.copy.textContent = 'Copy link'; }, 1500);
+    }, function (err) {
+      note(r.note, message(err), 'bad');
+    });
+  }
+
+  // The address this page is on answered already, by loading. An answer
+  // from before Check again was pressed is dropped for the newer one.
+  function checkAll() {
+    rows.forEach(function (r) {
+      if (r.item.origin === here) { setState(r, 'up'); return; }
+      var ticket = r.ticket = {};
+      setState(r, 'checking');
+      mirrors.check(r.item.origin).then(function (state) {
+        if (r.ticket === ticket) setState(r, state);
+      });
+    });
+  }
+
+  function render(items) {
+    var list = $('mirrorList');
+    list.textContent = '';
+    rows = items.map(mirrorRow);
+    rows.forEach(function (r) { list.appendChild(r.wrap); });
+    $('mirrorEmpty').hidden = items.length > 1;
+    checkAll();
+  }
+
+  mirrors.list().then(function (items) {
+    render(items);
+    if (items.stale) {
+      note($('listNote'), 'Could not reach the list just now, so this is the one from your last visit.');
+    }
+  }, function () {
+    render([{ origin: mirrors.MAIN, label: 'Main address', main: true }]);
+    $('mirrorEmpty').hidden = true;
+    note($('listNote'), 'Could not load the backup addresses. Check your connection, then reload.', 'bad');
+  });
+
+  $('recheckBtn').addEventListener('click', checkAll);
+
+  // One move at a time: each one opens a tab and packs every save.
+  function setMoving(on) {
+    rows.forEach(function (r) { if (r.move) r.move.disabled = on; });
+  }
+
+  // Straight from the click, so the new tab opens before anything async.
+  function move(r) {
+    var there = host(r.item.origin);
+    rows.forEach(function (other) { note(other.note, ''); });
+    setMoving(true);
+    note(r.note, 'Opening ' + there + ' and packing your saves. Keep this tab open.');
+    mirrors.moveSaves(r.item.origin).then(function () {
+      note(r.note, 'Your saves are in the ' + there + ' tab. Say yes there to finish.', 'good');
+    }, function (err) {
+      note(r.note, message(err), 'bad');
+    }).then(function () {
+      setMoving(false);
+    });
+  }
+
+  // Resolves true or false with the player's answer.
+  function ask(hostEl, q) {
+    return new Promise(function (resolve) {
+      var box = el('div', 'confirm');
+      box.setAttribute('role', 'alertdialog');
+      box.appendChild(el('div', 'confirm-title', q.title));
+      box.appendChild(el('p', '', q.body));
+      var row = el('div', 'btn-row');
+      var yes = el('button', 'btn btn-primary btn-sm', q.yes);
+      var no = el('button', 'btn btn-sm', 'Cancel');
+      yes.type = no.type = 'button';
+      row.append(yes, no);
+      box.appendChild(row);
+      hostEl.appendChild(box);
+      function finish(answer) { box.remove(); resolve(answer); }
+      yes.addEventListener('click', function () { finish(true); });
+      no.addEventListener('click', function () { finish(false); });
+      yes.focus();
+    });
+  }
+
+  var receiveNote = $('receiveNote');
+
+  // Games run on the progress read at load, so the page moves on once the
+  // new progress is in rather than let one save the old over it.
+  function accept(got) {
+    var from = host(got.from);
+    return ask($('receiveConfirm'), {
+      title: 'Move your saves here from ' + from + '?',
+      body: 'Every game at ' + host(here) + ' goes back to how it was on ' + from
+        + ' just now. Any progress already made at this address is replaced.',
+      yes: 'Move them here'
+    }).then(function (ok) {
+      if (!ok) {
+        note(receiveNote, 'Nothing was changed. You can close this tab.');
+        return;
+      }
+      note(receiveNote, 'Putting your progress here…');
+      return saves.restore(got.data).then(function () {
+        note(receiveNote, 'Done. Reloading…', 'good');
+        setTimeout(function () { location.replace('/mirrors/?moved'); }, 700);
+      });
+    });
+  }
+
+  function receiving() {
+    $('receivePanel').hidden = false;
+    var incoming = mirrors.receive();
+    if (!incoming) {
+      note(receiveNote, 'Nothing is on its way. To move saves here, open Backup addresses on the '
+        + 'address that has your progress and press Move my saves there.');
+      return;
+    }
+    note(receiveNote, 'Waiting for your saves…');
+    var slow = setTimeout(function () {
+      note(receiveNote, 'Nothing has arrived yet. Keep this tab open, or close it and press '
+        + 'Move my saves there again.');
+    }, 45000);
+    incoming.then(function (got) {
+      clearTimeout(slow);
+      note(receiveNote, '');
+      return accept(got).catch(function (err) { note(receiveNote, message(err), 'bad'); });
+    }, function () {
+      clearTimeout(slow);
+      note(receiveNote, 'Could not check where these saves came from, so nothing was changed. '
+        + 'Check your connection, then try again.', 'bad');
+    });
+  }
+
+  if (params.has('receive')) {
+    receiving();
+  } else if (params.has('moved')) {
+    $('receivePanel').hidden = false;
+    $('receiveLabel').textContent = 'Saves moved';
+    note(receiveNote, 'Your progress is at ' + host(here) + ' now. Bookmark it so you can come back.', 'good');
+  }
+});
+</script>
+</main>
+</body>
+</html>

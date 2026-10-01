@@ -4,11 +4,29 @@
   <meta charset="UTF-8"><script>(function(){var r=sessionStorage.getItem('gv.redirect');if(r){sessionStorage.removeItem('gv.redirect');history.replaceState(null,null,r);}})();</script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GameVault</title>
+  <meta name="description" content="Play anything: thousands of browser games, plus movies and music, with no ads.">
+  <link rel="canonical" href="https://googledrive123.github.io/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="GameVault">
+  <meta property="og:title" content="GameVault">
+  <meta property="og:description" content="Play anything: thousands of browser games, plus movies and music, with no ads.">
+  <meta property="og:url" content="https://googledrive123.github.io/">
+  <meta property="og:image" content="https://googledrive123.github.io/icons/share.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">
+  {"@context": "https://schema.org", "@type": "WebSite", "name": "GameVault",
+   "url": "https://googledrive123.github.io/",
+   "potentialAction": {"@type": "SearchAction", "target": "https://googledrive123.github.io/games?q={query}", "query-input": "required name=query"}}
+  </script>
   <link rel="icon" href="/favicon.svg">
   <!-- Blocking on purpose: the cloak has to land before the first paint. -->
   <script src="/js/mimicry.js"></script>
   <script src="/js/urlcloak.js"></script>
   <script src="/js/pwa.js"></script>
+  <script src="/js/layout.js"></script>
+  <script src="/js/carry.js" defer></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
@@ -16,6 +34,12 @@
   <script src="/js/identity.js" defer></script>
   <script src="/js/analytics.js" defer></script>
   <script src="/js/update-check.js" defer></script>
+  <script src="/js/broadcast.js" defer></script>
+  <script src="/js/fun.js" defer></script>
+  <script src="/js/apps.js" defer></script>
+  <script src="/js/saves.js" defer></script>
+  <script src="/js/avatars.js" defer></script>
+  <script src="/js/cosmetics.js" defer></script>
   <script src="/js/player.js" defer></script>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
@@ -29,6 +53,24 @@
       --muted: #8a8a96;
       --muted-2: #54545e;
       --accent: #ff3b3b; /* the one color — used sparingly */
+      --glass: rgba(8,8,10,0.84);      /* sticky bars over the page */
+      --grid-line: rgba(255,255,255,0.07);
+    }
+
+    /* Light theme, set on <html> by js/mimicry.js before the first paint. */
+    :root[data-theme="light"] {
+      --bg: #f4f4f6;
+      --surface: #ffffff;
+      --surface-2: #ececf1;
+      --border: rgba(0,0,0,0.09);
+      --border-strong: rgba(0,0,0,0.2);
+      --text: #141418;
+      --muted: #5c5c68;
+      --muted-2: #8c8c97;
+      --accent: #e0262f;
+      --glass: rgba(244,244,246,0.86);
+      --grid-line: rgba(0,0,0,0.06);
+      color-scheme: light;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -40,6 +82,19 @@
       min-height: 100vh;
       overflow-x: hidden;
     }
+
+    /* Light theme: the glow and scanline layers are made for a dark page. */
+    :root[data-theme="light"] .scanlines,
+    :root[data-theme="light"] .streams,
+    :root[data-theme="light"] .orb,
+    :root[data-theme="light"] .bg::after { display: none; }
+    :root[data-theme="light"] .home-footer { background: rgba(255,255,255,0.6); }
+    :root[data-theme="light"] .cat-pill.active .count,
+    :root[data-theme="light"] .cat-pill.active .cat-pin { color: rgba(255,255,255,0.6); }
+    /* A tile's name sits on a dark shade over its picture in either theme. */
+    :root[data-theme="light"] .tile:has(.tile-thumb) .tile-name,
+    :root[data-theme="light"] .tile:has(.tile-thumb) .tile-cat,
+    :root[data-theme="light"] .tile:has(.tile-thumb) .tile-play { color: #fff; }
 
     /* ───────────── BACKGROUND ───────────── */
     .bg {
@@ -54,8 +109,8 @@
       left: -25%; right: -25%;
       top: 0; bottom: -50%;
       background-image:
-        linear-gradient(rgba(255,255,255,0.07) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.07) 1px, transparent 1px);
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
       background-size: 80px 80px;
       transform: perspective(700px) rotateX(60deg);
       transform-origin: center top;
@@ -393,6 +448,22 @@
       letter-spacing: -0.02em;
       color: var(--text);
     }
+    /* Until the catalog loads the real counts, a pulsing bar instead of a
+       made-up number. */
+    .stat .num.loading {
+      color: transparent;
+      min-width: 3ch;
+      border-radius: 6px;
+      background: var(--surface-2);
+      animation: skeletonPulse 1.2s ease-in-out infinite;
+    }
+    @keyframes skeletonPulse { 50% { opacity: 0.45; } }
+    .tile.skeleton {
+      cursor: default;
+      background: var(--surface-2);
+      animation: skeletonPulse 1.2s ease-in-out infinite;
+    }
+    .tile.skeleton:hover { transform: none; box-shadow: none; border-color: var(--border); }
     .stat .lbl {
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.62rem;
@@ -415,7 +486,7 @@
       display: none;
       align-items: center;
       justify-content: center;
-      background: rgba(8,8,10,0.86);
+      background: var(--glass);
       backdrop-filter: blur(14px);
       animation: fadeIn 0.2s ease;
     }
@@ -637,6 +708,8 @@
       color: var(--muted);
       margin-top: 0.15rem;
     }
+    .news-date { color: var(--accent); margin-right: 0.6em; }
+    .news-date::after { content: '·'; color: var(--muted-2); margin-left: 0.6em; }
     .news-badge {
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.58rem;
@@ -758,7 +831,7 @@
       position: sticky;
       top: 0;
       z-index: 200;
-      background: rgba(8,8,10,0.82);
+      background: var(--glass);
       backdrop-filter: blur(16px) saturate(1.2);
       border-bottom: 1px solid var(--border);
       padding: 1rem 1rem;
@@ -835,11 +908,43 @@
     #search:focus { border-color: var(--accent); background: var(--surface-2); }
     #search::placeholder { color: var(--muted-2); }
 
+    /* Top matches under the search box, one click to play. */
+    .quick-pick {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0; right: 0;
+      z-index: 300;
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: 14px;
+      padding: 0.35rem;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.55);
+    }
+    .quick-pick[hidden] { display: none; }
+    .qp-item {
+      display: flex; align-items: center; gap: 0.7rem;
+      width: 100%;
+      padding: 0.4rem 0.5rem;
+      border: 0; border-radius: 10px;
+      background: transparent;
+      color: var(--text);
+      font: inherit; font-size: 0.86rem;
+      text-align: left;
+      cursor: pointer;
+    }
+    .qp-item.on, .qp-item:hover { background: var(--surface-2); }
+    .qp-thumb {
+      width: 44px; height: 33px; flex-shrink: 0;
+      border-radius: 6px;
+      background: var(--surface-2) center / cover no-repeat;
+    }
+    .qp-cat { margin-left: auto; font-size: 0.7rem; color: var(--muted); }
+
     .cat-bar {
       position: sticky;
       top: 64px;
       z-index: 100;
-      background: rgba(8,8,10,0.82);
+      background: var(--glass);
       backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border);
       padding: 0.75rem 1rem;
@@ -1016,11 +1121,37 @@
       height: 1px;
       background: linear-gradient(to right, var(--border) 0%, transparent 100%);
     }
+    /* One scrolling line of tiles instead of a wrapping grid. */
+    .grid.strip {
+      grid-template-columns: none;
+      grid-auto-flow: column;
+      grid-auto-columns: var(--tile-min, 190px);
+      overflow-x: auto;
+      padding: 8px 4px 12px;
+      margin: -8px -4px 0;
+      scroll-snap-type: x proximity;
+    }
+    .grid.strip .tile { scroll-snap-align: start; }
+    .tile-live {
+      position: absolute; left: 0.9rem; bottom: 0.7rem; z-index: 3;
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      padding: 0.15rem 0.5rem; border-radius: 100px;
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(6px);
+      font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; letter-spacing: 0.08em;
+      color: #7dffa0;
+    }
+    .tile-live::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .tile-live ~ .tile-play { visibility: hidden; }
+    .popular-rank {
+      position: absolute; right: 0.8rem; bottom: 0.7rem; z-index: 2;
+      font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; font-weight: 700;
+      color: rgba(255,255,255,0.18);
+    }
 
     /* ───────────── TILES (uniform, smaller) ───────────── */
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(var(--tile-min, 190px), 1fr));
       gap: 0.75rem;
       grid-auto-flow: dense;
     }
@@ -1133,10 +1264,12 @@
         linear-gradient(135deg, rgba(255,255,255,0.02), transparent 60%);
     }
     .tile:hover {
-      transform: translateY(-3px);
-      border-color: var(--accent);
+      transform: translateY(-6px) scale(1.04);
+      border-color: var(--tile-accent, var(--accent)); /* a tile theme from the shop */
       box-shadow: 0 16px 40px rgba(0,0,0,0.55),
+                  0 0 24px rgba(255,59,59,0.35),
                   0 0 0 1px rgba(255,59,59,0.15) inset;
+      z-index: 1;
     }
     .tile-cat {
       position: absolute;
@@ -1199,7 +1332,10 @@
       padding-right: 1.8rem; /* so long names don't run under the star */
       overflow-wrap: anywhere;
       hyphens: auto;
+      transform: translateY(6px);
+      transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
+    .tile:hover .tile-name { transform: translateY(0); }
     .tile-play {
       margin-top: 0.55rem;
       display: inline-flex;
@@ -1292,7 +1428,7 @@
       .header { padding: 0.85rem 0.85rem; gap: 0.6rem; }
       .cat-bar { padding: 0.6rem 0.85rem; top: 60px; }
       main { padding: 1.1rem 0.85rem 4rem; }
-      .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.6rem; }
+      .grid { grid-template-columns: repeat(auto-fill, minmax(min(150px, var(--tile-min, 150px)), 1fr)); gap: 0.6rem; }
       .tile-name { font-size: 0.95rem; }
       .stat-row { gap: 1.5rem; }
       .roll-item { font-size: 1.15rem; }
@@ -1312,6 +1448,31 @@
       flex-direction: column;
     }
     .game-overlay.show { display: flex; }
+    /* A strip of similar games under the bar, opened from "More like this". */
+    .game-more {
+      display: flex; gap: 0.6rem;
+      padding: 0.6rem 1rem;
+      overflow-x: auto;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .game-more[hidden] { display: none; }
+    .gm-item {
+      flex: 0 0 150px;
+      display: flex; flex-direction: column; gap: 0.35rem;
+      padding: 0; border: 0; background: transparent;
+      color: var(--text); font: inherit; font-size: 0.78rem; text-align: left;
+      cursor: pointer;
+    }
+    .gm-thumb {
+      aspect-ratio: 4 / 3; border-radius: 10px;
+      background: var(--surface-2) center / cover no-repeat;
+      border: 1px solid var(--border);
+      transition: border-color 0.15s, transform 0.15s;
+    }
+    .gm-item:hover .gm-thumb { border-color: var(--accent); transform: translateY(-2px); }
+    .gm-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .game-bar {
       height: 48px;
       background: var(--surface);
@@ -1371,7 +1532,7 @@
       white-space: nowrap;
     }
     .game-bar-newtab:hover { border-color: var(--border-strong); color: var(--text); }
-    /* Only shows for the games that still have a copy in /games/. */
+    /* Only shows for games with both a vault copy and an original host. */
     .game-bar-swap {
       background: transparent;
       border: 1px solid var(--border);
@@ -1394,14 +1555,18 @@
     .game-loader {
       position: absolute; inset: 0;
       display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: 1rem;
+      align-items: center; justify-content: flex-end;
+      gap: 1rem; padding-bottom: 10vh;
       background: var(--bg);
       transition: opacity 0.5s;
       pointer-events: none;
     }
     /* Hidden once faded, so the spinner stops turning behind the game. */
     .game-loader.hidden { opacity: 0; visibility: hidden; transition: opacity 0.5s, visibility 0s 0.5s; }
+    /* Quiet under the intro: only its background shows. When the intro is
+       over and the game is still loading, the spinner fades in. */
+    .game-loader > * { transition: opacity 0.6s; }
+    .game-loader.quiet > * { opacity: 0; visibility: hidden; }
     .game-loader-spinner {
       width: 40px; height: 40px;
       border: 2px solid var(--border-strong);
@@ -1562,6 +1727,7 @@
     .sec-label { font-size: 0.84rem; }
     .sec-desc { font-size: 0.72rem; color: var(--muted-2); line-height: 1.45; margin-top: 0.2rem; }
     .sec-key { max-width: 62px; text-align: center; font-family: 'JetBrains Mono', monospace; }
+    .sec-range { width: 100%; accent-color: var(--accent); margin: 0.35rem 0 0.2rem; cursor: pointer; }
     .sec-switch { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
     .sec-switch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
     .sec-track {
@@ -1624,7 +1790,7 @@
     .auth-overlay {
       position: fixed; inset: 0; z-index: 2000;
       display: none; align-items: center; justify-content: center;
-      background: rgba(8,8,10,0.88);
+      background: var(--glass);
       backdrop-filter: blur(14px);
       animation: fadeIn 0.2s ease;
     }
@@ -1731,6 +1897,9 @@
     .profile-name { font-weight: 600; font-size: 1rem; }
     .profile-email { font-size: 0.72rem; color: var(--muted); margin-top: 0.1rem; word-break: break-all; }
     .profile-section { margin-bottom: 1.25rem; }
+    .board-toggle { display: flex; align-items: center; gap: 0.6rem; font-size: 0.85rem; color: var(--muted); cursor: pointer; }
+    .board-toggle input { accent-color: var(--accent); width: 16px; height: 16px; margin: 0; }
+    .board-toggle a { color: var(--text); }
     .profile-section-label {
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.6rem; letter-spacing: 0.22em; text-transform: uppercase;
@@ -1762,6 +1931,29 @@
       border-radius: 12px; padding: 0.75rem;
     }
     .stat-card.full { grid-column: 1 / -1; }
+    .level-card { display: flex; align-items: center; gap: 0.75rem; }
+    .profile-link { display: block; text-align: center; text-decoration: none; margin-top: 0.5rem; }
+    .profile-link[hidden] { display: none; }
+    .coin-card { text-decoration: none; color: inherit; display: block; }
+    .coin-card[hidden] { display: none; }
+    .coin-card:hover { border-color: var(--accent); }
+    .profile-title { font-size: 0.72rem; color: var(--accent); margin-top: 0.15rem; font-family: 'JetBrains Mono', monospace; }
+    .user-lv {
+      margin-left: 0.4rem; padding: 0.05rem 0.4rem; border-radius: 100px;
+      font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; font-weight: 600;
+      color: var(--accent); border: 1px solid rgba(255,59,59,0.35);
+    }
+    .level-badge {
+      flex-shrink: 0;
+      width: 44px; height: 44px; border-radius: 50%;
+      display: grid; place-items: center;
+      font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 1rem;
+      color: var(--text);
+      background: conic-gradient(var(--accent) calc(var(--pct, 0) * 1%), var(--surface) 0);
+      box-shadow: inset 0 0 0 4px var(--surface-2);
+    }
+    .level-bar { height: 6px; border-radius: 100px; background: var(--surface); overflow: hidden; margin-top: 0.4rem; }
+    .level-bar > span { display: block; height: 100%; width: calc(var(--pct, 0) * 1%); background: var(--accent); transition: width 0.4s; }
     .stat-card-icon { color: var(--muted); margin-bottom: 0.35rem; }
     .stat-card-val {
       font-family: 'JetBrains Mono', monospace;
@@ -1781,7 +1973,14 @@
       cursor: pointer; transition: background 0.15s, border-color 0.15s;
     }
     .profile-signout:hover { background: rgba(255,59,59,0.08); border-color: var(--accent); }
+    .profile-delete {
+      display: block; margin: 0.6rem auto 0; padding: 0.2rem 0.5rem;
+      background: none; border: 0; color: var(--muted-2);
+      font: inherit; font-size: 0.72rem; text-decoration: underline; cursor: pointer;
+    }
+    .profile-delete:hover { color: var(--accent); }
     .profile-msg { font-size: 0.75rem; color: var(--muted); margin-top: 0.5rem; min-height: 1rem; }
+    #profileAvatarPicker .gv-av-grid { grid-template-columns: repeat(auto-fill, minmax(34px, 1fr)); }
     .top-game-row {
       display: flex; align-items: center; gap: 0.6rem;
       padding: 0.45rem 0; border-bottom: 1px solid var(--border);
@@ -1809,7 +2008,7 @@
       align-items: center;
       gap: 1rem;
       padding: 0.9rem 1.5rem;
-      background: rgba(8,8,10,0.85);
+      background: var(--glass);
       backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border);
     }
@@ -2027,7 +2226,7 @@
     .movie-player-bar {
       display: flex; align-items: center; gap: 1rem;
       padding: 0.75rem 1.25rem;
-      background: rgba(8,8,10,0.9);
+      background: var(--glass);
       border-bottom: 1px solid var(--border);
       flex-shrink: 0;
     }
@@ -2057,6 +2256,13 @@
       position: absolute; inset: 0;
       width: 100%; height: 100%; border: none;
     }
+    .movie-resume {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem;
+      background: #000; color: var(--text); text-align: center; padding: 1rem;
+    }
+    .movie-resume-q { font-size: 1.1rem; font-weight: 600; }
+    .movie-resume-row { display: flex; gap: 0.6rem; flex-wrap: wrap; justify-content: center; }
 
     .movie-player-sidebar {
       width: 300px; flex-shrink: 0;
@@ -2236,8 +2442,39 @@
       0%, 100% { border-color: var(--border-strong); box-shadow: 0 0 0 0 rgba(255,59,59,0); }
       50%      { border-color: var(--accent);        box-shadow: 0 0 14px 0 rgba(255,59,59,0.28); }
     }
+    /* ─── GameVault intro: the name slams up from below, then flies apart ───
+       Plays over the game frame while a game loads, and leaves early once
+       the game is ready. Click anywhere on it to skip. */
+    .gv-intro {
+      position: fixed; inset: 0; z-index: 3000;
+      display: flex; align-items: center; justify-content: center; gap: 0.35em;
+      background: var(--bg);
+      font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 700;
+      font-size: clamp(2.6rem, 9vw, 6rem); letter-spacing: -0.04em;
+      cursor: pointer; overflow: hidden;
+      transition: opacity 0.35s, transform 0.6s cubic-bezier(0.7, 0, 0.3, 1);
+    }
+    .gv-intro.in-frame { position: absolute; z-index: 5; }
+    .gv-intro.leaving { transform: translateY(-100%); }
+    .gv-intro span { display: inline-block; opacity: 0; }
+    .gv-intro .w1 { color: var(--text); animation: introSlam 0.9s ease forwards, introRight 0.8s 2s forwards; }
+    .gv-intro .w2 { color: var(--accent); text-shadow: 0 0 24px rgba(255,59,59,0.45); animation: introSlam 0.9s 0.35s ease forwards, introLeft 0.8s 2.25s forwards; }
+    @keyframes introSlam {
+      0% { opacity: 1; transform: translateY(100vh); }
+      60% { transform: translateY(0); }
+      72% { transform: translateY(-14px); }
+      84%, 100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes introRight { from { opacity: 1; } to { opacity: 1; transform: translateX(110vw); } }
+    @keyframes introLeft { from { opacity: 1; } to { opacity: 1; transform: translateX(-110vw); } }
+
     @media (prefers-reduced-motion: reduce) {
+      .gv-intro { display: none; }
       .newest { animation: none; border-color: var(--accent); }
+      .tile.skeleton, .stat .num.loading { animation: none; }
+      .tile, .tile-name { transition: none; }
+      .tile:hover { transform: none; }
+      .tile-name { transform: none; }
     }
     @media (max-width: 560px) {
       .newest { flex-wrap: wrap; }
@@ -2278,6 +2515,7 @@
     <button class="settings-btn" id="settingsBtnWelcome" title="Settings" aria-label="Settings">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </button>
+    <span data-apps style="display:contents"></span>
     <div class="bell" id="bellWelcome" aria-live="polite">
       <span class="date-lbl"><span class="lbl">today · </span><span class="val" data-bell="date">—</span></span>
       <span class="sep"></span>
@@ -2315,16 +2553,21 @@
     </div>
 
     <div class="stat-row">
-      <div class="stat"><div class="num" id="sGames">300</div><div class="lbl">games</div></div>
+      <div class="stat"><div class="num loading" id="sGames">0</div><div class="lbl">games</div></div>
       <div class="stat-divider"></div>
-      <div class="stat"><div class="num" id="sCats">13</div><div class="lbl">categories</div></div>
+      <div class="stat"><div class="num loading" id="sCats">0</div><div class="lbl">categories</div></div>
     </div>
 
     <nav class="mini-nav" aria-label="More">
-      <a href="/schedule/">Schedule <span class="tag-new">new</span></a>
-      <a href="/status/">Requests <span class="tag-new">new</span></a>
-      <a href="/music/">Music <span class="tag-new">new</span></a>
-      <a href="/unblocker/">Browser <span class="tag-new">new</span></a>
+      <a href="/leaderboard/">Leaderboard <span class="tag-new">new</span></a>
+      <a href="/shop/">Shop <span class="tag-new">new</span></a>
+      <a href="/challenge/">Challenge <span class="tag-new">new</span></a>
+      <a href="/chat/">Chat <span class="tag-new">new</span></a>
+      <a href="/saves/">Saves <span class="tag-new">new</span></a>
+      <a href="/schedule/">Schedule</a>
+      <a href="/status/">Requests</a>
+      <a href="/music/">Music</a>
+      <a href="/unblocker/">Browser</a>
       <a href="/settings/">Settings</a>
     </nav>
     <!-- Newest item from NEWS, filled by renderNewest(). Sits under the hero
@@ -2339,24 +2582,6 @@
     </div>
   </div>
 </section>
-
-<footer class="home-footer">
-  <nav aria-label="Site">
-    <a href="/schedule/">Schedule</a>
-    <a href="/music/">Music</a>
-    <a href="/status/">Requests</a>
-    <a href="/unblocker/">Browser</a>
-    <a href="/settings/">Settings</a>
-  </nav>
-  <nav aria-label="Legal">
-    <a href="/legal/about/">About</a>
-    <a href="/legal/contact/">Contact</a>
-    <a href="/legal/privacy-policy/">Privacy</a>
-    <a href="/legal/terms-and-conditions/">Terms</a>
-    <a href="/legal/cookies/">Cookies</a>
-  </nav>
-  <div class="home-footer-fine">GameVault v2.0 · <span id="footerCount">—</span> games</div>
-</footer>
 
 <!-- ─────────────────── ROLL MODAL ─────────────────── --><div class="roll-overlay" id="rollOverlay" role="dialog" aria-label="Random game picker">
   <div class="roll-box">
@@ -2418,12 +2643,14 @@
     </button>
     <div class="search-wrap" id="searchWrap">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-      <input type="text" id="search" placeholder="Search the vault…" autocomplete="off" spellcheck="false">
+      <input type="text" id="search" placeholder="Search the vault…" autocomplete="off" spellcheck="false" aria-controls="quickPick">
       <span class="kbd-hint">/</span>
+      <div class="quick-pick" id="quickPick" role="listbox" hidden></div>
     </div>
     <button class="settings-btn" id="settingsBtnBrowse" title="Settings" aria-label="Settings">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </button>
+    <span data-apps style="display:contents"></span>
     <div class="bell" id="bellHeader" aria-live="polite">
       <span class="date-lbl"><span class="val" data-bell="date">—</span></span>
       <span class="sep"></span>
@@ -2448,6 +2675,7 @@
       <div class="sort-menu" id="sortMenu" role="menu">
         <button data-sort="default" class="active">Default</button>
         <button data-sort="popular">Most played</button>
+        <button data-sort="newest">Newest</button>
         <button data-sort="alpha">A → Z</button>
         <button data-sort="random">Random shuffle</button>
       </div>
@@ -2468,6 +2696,15 @@
       </button>
     </div>
 
+    <!-- Popular now: live from what people opened this week -->
+    <div class="section" id="popularSection" style="display:none">
+      <div class="section-head">
+        <h2>Popular now</h2>
+        <span class="count-tag" id="popularCount">0</span>
+        <div class="rule"></div>
+      </div>
+      <div class="grid strip" id="popularGrid"></div>
+    </div>
     <!-- Continue (recently played) -->
     <div class="section" id="recentSection" style="display:none">
       <div class="section-head">
@@ -2494,10 +2731,39 @@
         <span class="count-tag" id="countLabel">0</span>
         <div class="rule"></div>
       </div>
-      <div class="grid" id="grid"></div>
+      <div class="grid" id="grid">
+        <div class="tile skeleton"></div><div class="tile skeleton"></div><div class="tile skeleton"></div>
+        <div class="tile skeleton"></div><div class="tile skeleton"></div><div class="tile skeleton"></div>
+        <div class="tile skeleton"></div><div class="tile skeleton"></div><div class="tile skeleton"></div>
+        <div class="tile skeleton"></div><div class="tile skeleton"></div><div class="tile skeleton"></div>
+      </div>
     </div>
   </main>
 </section>
+
+<footer class="home-footer">
+  <nav aria-label="Site">
+    <a href="/leaderboard/">Leaderboard</a>
+    <a href="/shop/">Shop</a>
+    <a href="/challenge/">Challenge</a>
+    <a href="/chat/">Chat</a>
+    <a href="/saves/">Saves</a>
+    <a href="/schedule/">Schedule</a>
+    <a href="/music/">Music</a>
+    <a href="/status/">Requests</a>
+    <a href="/unblocker/">Browser</a>
+    <a href="/settings/">Settings</a>
+    <a href="/mirrors/">Backup addresses</a>
+  </nav>
+  <nav aria-label="Legal">
+    <a href="/legal/about/">About</a>
+    <a href="/legal/contact/">Contact</a>
+    <a href="/legal/privacy-policy/">Privacy</a>
+    <a href="/legal/terms-and-conditions/">Terms</a>
+    <a href="/legal/cookies/">Cookies</a>
+  </nav>
+  <div class="home-footer-fine">GameVault v2.0 · <span id="footerCount">—</span> games</div>
+</footer>
 
 <!-- ─────────────────── MOVIES SECTION ─────────────────── -->
 <section id="movies">
@@ -2598,15 +2864,17 @@
       <span><span class="lbl">ends</span> <span class="val" data-bell="endsAt">&#8212;</span></span>
       <span class="bell-progress" data-bell="progress"></span>
     </div>
-    <button class="game-bar-swap" id="gameSwap" hidden>&#8646; Use offline copy</button>
+    <button class="game-bar-swap" id="gameSwap" hidden>&#8646; Use the original host</button>
+    <button class="game-bar-swap" id="gameMoreBtn" aria-expanded="false" aria-controls="gameMore">More like this</button>
     <a class="game-bar-newtab" id="gameNewTab" href="#" target="_blank" rel="noopener">&#8599; New Tab</a>    <button class="game-bar-fs" id="gameFullscreen">⛶ Fullscreen</button>
   </div>
+  <div class="game-more" id="gameMore" hidden></div>
   <div class="game-frame-wrap">
     <iframe id="gameFrame" allowfullscreen allow="autoplay; fullscreen *; gamepad *;"></iframe>
     <div class="game-loader" id="gameLoader">
       <div class="game-loader-spinner"></div>
       <div class="game-loader-text" id="gameLoaderText">Loading game…</div>
-      <button class="game-loader-swap" id="loaderSwap" hidden>Use the offline copy</button>
+      <button class="game-loader-swap" id="loaderSwap" hidden>Use the original host</button>
     </div>
   </div>
 </div>
@@ -2642,6 +2910,40 @@
         </div>
       </div>
       <button class="cloak-reset" id="cloakReset">Reset to default (GameVault)</button>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-label">Home — how the site opens</div>
+      <div class="sec-row">
+        <div>
+          <div class="sec-label">Skip the welcome screen</div>
+          <div class="sec-desc">Open straight on the games.</div>
+        </div>
+        <label class="sec-switch"><input type="checkbox" id="skipWelcomeInput"><span class="sec-track"></span></label>
+      </div>
+      <div class="sec-row">
+        <div>
+          <div class="sec-label">Light theme</div>
+          <div class="sec-desc">A light page instead of the dark one.</div>
+        </div>
+        <label class="sec-switch"><input type="checkbox" id="lightThemeInput"><span class="sec-track"></span></label>
+      </div>
+      <div class="sec-row" style="display:block">
+        <div class="sec-label">Tile size</div>
+        <input class="sec-range" type="range" id="tileSizeInput" min="130" max="300" step="10" aria-label="Tile size">
+      </div>
+      <div class="sec-row">
+        <div class="sec-label">Show the Popular now row</div>
+        <label class="sec-switch"><input type="checkbox" data-row="popular"><span class="sec-track"></span></label>
+      </div>
+      <div class="sec-row">
+        <div class="sec-label">Show the Starred row</div>
+        <label class="sec-switch"><input type="checkbox" data-row="starred"><span class="sec-track"></span></label>
+      </div>
+      <div class="sec-row">
+        <div class="sec-label">Show the Continue row</div>
+        <label class="sec-switch"><input type="checkbox" data-row="recent"><span class="sec-track"></span></label>
+      </div>
     </div>
 
     <div class="settings-section">
@@ -2690,6 +2992,9 @@
 // GAMES from inside a function, never at parse time.
 let CATS = ['All'];
 let GAMES = [];
+// Every entry, including `hidden` ones: pages that are not listed anywhere but
+// still open in the player (emulators, old folders people bookmarked).
+let ALL_GAMES = [];
 
 // ───── Particle background (drifting dots) ─────
 (function particles() {
@@ -2766,6 +3071,7 @@ let GAMES = [];
 function updateWelcomeStats() {
   document.getElementById('sGames').textContent = GAMES.length;
   document.getElementById('sCats').textContent = (CATS.length - 1);
+  document.querySelectorAll('.stat .num.loading').forEach(el => el.classList.remove('loading'));
 }
 
 // ───── Bell schedule ─────
@@ -2804,20 +3110,38 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // ───── What's new ─────
 const NEWS = [
-  {id:'polytrack', label:'PolyTrack rooms: race your friends', status:'new', meta:'Create a room, share the code · track playlists, round timer, per-player options'},
-  {id:'polytrack', label:'PolyTrack updated, with a site leaderboard', status:'added', meta:'New tracks, cars and physics · your times now rank against everyone here'},
-  {id:null, label:'247 more games added', status:'added', meta:'Expanded library · now 1,272 games'},
-  {id:null, label:'203 games on new builds', status:'added', meta:'Same titles, swapped to a different host'},
-  {id:null, label:'Schedule page', status:'added', meta:'Name your periods · knows days off and finals weeks'},
-  {id:null, label:'Panic key and 15 tab disguises', status:'added', meta:'Settings · one key leaves the site instantly'},
-  {id:null, label:'Requests board', status:'added', meta:'Every suggestion, and where it stands'},
-  {id:null, label:'In-page browser', status:'added', meta:'Load other sites without leaving the tab'},
-  {id:null, label:'Most played sort and pinned categories', status:'added', meta:'Browse · sorted by real play counts'},
-  {id:null, label:'784 more games added', status:'added', meta:'Expanded library · now 1,025 games'},
-  {id:null, label:'Base 317 games added', status:'added', meta:'Initial library'},
+  {id:null, date:'2026-10-01', label:'688 more games added', status:'new', meta:'Expanded library · now 1,958 games'},
+  {id:null, date:'2026-10-01', label:'Leaderboard', status:'added', meta:'Top levels, most play time, this week\'s leaders and every game\'s top player'},
+  {id:null, date:'2026-10-01', label:'Games load from our own copies', status:'added', meta:'Harder to block · swap to the original host any time'},
+  {id:null, date:'2026-10-01', label:'Shop, coins and crates', status:'added', meta:'Earn coins by playing · cosmetics only, never real money'},
+  {id:null, date:'2026-10-01', label:'Monthly PolyTrack challenge', status:'added', meta:'Fastest time on the month\'s track wins a badge'},
+  {id:null, date:'2026-10-01', label:'Chat', status:'added', meta:'For signed-in players · report anything rude'},
+  {id:null, date:'2026-10-01', label:'Levels, avatars and synced stars', status:'added', meta:'Profile · level up from play time'},
+  {id:null, date:'2026-10-01', label:'Cloud saves', status:'added', meta:'Three slots and a daily backup · or download a save file'},
+  {id:null, date:'2026-10-01', label:'Popular now and Newest', status:'added', meta:'Browse · this week\'s most played, and the newest games first'},
+  {id:null, date:'2026-10-01', label:'Light theme and layout settings', status:'added', meta:'Settings · tile size, row switches, skip the welcome screen'},
+  {id:'polytrack', date:'2026-09-21', label:'PolyTrack rooms: race your friends', status:'added', meta:'Create a room, share the code · track playlists, round timer, per-player options'},
+  {id:'polytrack', date:'2026-09-19', label:'PolyTrack updated, with a site leaderboard', status:'added', meta:'New tracks, cars and physics · your times now rank against everyone here'},
+  {id:null, date:'2026-09-18', label:'247 more games added', status:'added', meta:'Expanded library · now 1,272 games'},
+  {id:null, date:'2026-09-18', label:'203 games on new builds', status:'added', meta:'Same titles, swapped to a different host'},
+  {id:null, date:'2026-09-16', label:'Schedule page', status:'added', meta:'Name your periods · knows days off and finals weeks'},
+  {id:null, date:'2026-09-16', label:'Panic key and 15 tab disguises', status:'added', meta:'Settings · one key leaves the site instantly'},
+  {id:null, date:'2026-09-16', label:'Requests board', status:'added', meta:'Every suggestion, and where it stands'},
+  {id:null, date:'2026-09-16', label:'In-page browser', status:'added', meta:'Load other sites without leaving the tab'},
+  {id:null, date:'2026-09-16', label:'Most played sort and pinned categories', status:'added', meta:'Browse · sorted by real play counts'},
+  {id:null, date:'2026-05-13', label:'784 more games added', status:'added', meta:'Expanded library · now 1,025 games'},
+  {id:null, date:'2026-05-13', label:'Base 317 games added', status:'added', meta:'Initial library'},
 ];
 
 const BADGE_LABELS = { new: 'NEW', added: 'ADDED', progress: 'IN PROGRESS', soon: 'COMING SOON' };
+
+// '2026-09-21' reads as 'SEP 21' (and gets the year when it is not this one).
+function newsDate(iso) {
+  if (!iso) return '';
+  const [y, m, d] = iso.split('-').map(Number);
+  const s = MONTHS[m - 1] + ' ' + d;
+  return y === new Date().getFullYear() ? s : s + ', ' + y;
+}
 
 // Mirrors the top of NEWS onto the landing page. Reads the same array the
 // modal renders, so adding an entry there updates both.
@@ -2826,7 +3150,8 @@ function renderNewest() {
   if (!box || !NEWS.length) return;
   const item = NEWS[0];
   document.getElementById('newestLabel').textContent = item.label;
-  document.getElementById('newestMeta').textContent = item.meta;
+  document.getElementById('newestMeta').textContent =
+    (item.date ? newsDate(item.date) + ' · ' : '') + item.meta;
   box.hidden = false;
 }
 
@@ -2837,7 +3162,7 @@ function renderNews() {
     const linked = !!item.id;
     const node = document.createElement(linked ? 'a' : 'div');
     node.className = 'news-item ' + (linked ? 'linked' : 'locked');
-    if (linked) node.href = 'games/' + item.id + '/';
+    if (linked) node.href = '/games/' + item.id;
 
     const info = document.createElement('div');
     info.className = 'news-info';
@@ -2847,6 +3172,12 @@ function renderNews() {
     const meta = document.createElement('div');
     meta.className = 'news-meta';
     meta.textContent = item.meta;
+    if (item.date) {
+      const when = document.createElement('span');
+      when.className = 'news-date';
+      when.textContent = newsDate(item.date);
+      meta.prepend(when);
+    }
     info.append(nm, meta);
 
     const badge = document.createElement('span');
@@ -2945,6 +3276,36 @@ function showWelcome() {
 document.getElementById('enterBtn').addEventListener('click', showBrowse);
 document.getElementById('logoBtn').addEventListener('click', showWelcome);
 
+// ───── Intro ─────
+// The name slams in and flies apart, about three seconds, over the game frame
+// while a game loads. el.end() cuts it short; onEnd runs once it is over,
+// however it ended.
+function playIntro(host, onEnd) {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return null;
+  const el = document.createElement('div');
+  el.className = 'gv-intro in-frame';
+  el.setAttribute('aria-hidden', 'true');
+  el.innerHTML = '<span class="w1">GAME</span><span class="w2">VAULT</span>';
+  let over = false;
+  el.end = () => {
+    if (over) return;
+    over = true;
+    el.classList.add('leaving');
+    setTimeout(() => el.remove(), 650);
+    if (onEnd) onEnd();
+  };
+  el.addEventListener('click', el.end);
+  setTimeout(el.end, 3000);
+  host.appendChild(el);
+  return el;
+}
+
+// Skipping the welcome screen should not flash it while the catalog loads.
+if ((location.pathname === '/' || location.pathname === '') && GV.layout.skipWelcome()) {
+  document.getElementById('welcome').classList.add('hidden');
+  document.getElementById('browse').classList.add('visible');
+}
+
 function initRoute() {
   var p = location.pathname;
   // Set the classes directly rather than calling showBrowse(): this runs on a
@@ -2956,13 +3317,25 @@ function initRoute() {
 
   if (p === '/games' || p === '/games/') {
     revealBrowse();
+    // /games?q=slope lands on a search (search engines and shared links).
+    const q = new URLSearchParams(location.search).get('q');
+    if (q) {
+      searchInput.value = searchQ = q.slice(0, 80);
+      searchWrap.classList.add('has-value');
+      render();
+    }
+    return;
+  }
+  if ((p === '/' || p === '') && GV.layout.skipWelcome()) {
+    revealBrowse();
+    history.replaceState({page:'browse'}, '', '/games');
     return;
   }
   if (!p.startsWith('/games/')) return;
 
   var id = p.slice(7).replace(/\/$/, '');
   // A typed address comes in whatever case it was typed in.
-  var g = gamesById[id] || GAMES.find(function (x) {
+  var g = gamesById[id] || ALL_GAMES.find(function (x) {
     return x.id.toLowerCase() === id.toLowerCase();
   });
   // Set by /js/mimicry.js when a game page opened on its own sent itself here.
@@ -2974,8 +3347,8 @@ function initRoute() {
   if (!g) {
     // Not every page under /games/ is in the catalog. One that is not goes
     // straight back, and stays.
-    if (bounced === id) {
-      location.replace('/games/' + id + '/?solo');
+    if (bounced && bounced.split('/')[2] === id) {
+      location.replace(bounced + '?solo');
       return;
     }
     // A deep link to a game that is not in the catalog is a real 404, not a
@@ -3096,6 +3469,8 @@ function toggleStar(id, btn) {
   if (starred.has(id)) { starred.delete(id); btn.classList.remove('active'); }
   else { starred.add(id); btn.classList.add('active'); }
   saveStars(starred);
+  // Signed in, the account keeps a copy too (set up in the auth block below).
+  if (window._starSync) window._starSync(id, starred.has(id));
   btn.classList.remove('pop');
   void btn.offsetWidth;
   btn.classList.add('pop');
@@ -3119,11 +3494,20 @@ function addRecent(id) {
 }
 
 // ───── Sort ─────
-let sortMode = 'default'; // default | popular | alpha | random
+let sortMode = 'default'; // default | popular | newest | alpha | random
 let shuffleSeed = Math.random();
 function sortGames(arr) {
   if (sortMode === 'popular') {
-    return arr.slice().sort((a, b) => a.ranking - b.ranking);
+    // This week's real counts first, then the catalog's own ranking, which is
+    // also all there is when the counts could not be read.
+    const pos = new Map(popular.map((id, i) => [id, i]));
+    const at = g => pos.has(g.id) ? pos.get(g.id) : popular.length + g.ranking;
+    return arr.slice().sort((a, b) => at(a) - at(b));
+  }
+  if (sortMode === 'newest') {
+    // Games with no date are the oldest. A batch added on one day goes A to Z.
+    return arr.slice().sort((a, b) =>
+      (b.added || '').localeCompare(a.added || '') || a.name.localeCompare(b.name));
   }
   if (sortMode === 'alpha') {
     return arr.slice().sort((a, b) => a.name.localeCompare(b.name));
@@ -3228,7 +3612,8 @@ function hashPos(s) {
 function makeTile(g, opts = {}) {
   const a = document.createElement('a');
   a.className = 'tile' + (opts.featured ? ' featured' : '');
-  a.href = 'games/' + g.id + '/';
+  a.href = '/games/' + g.id;
+  a.dataset.id = g.id;
   const p = hashPos(g.id);
   a.style.setProperty('--bx', p.x + '%');
   a.style.setProperty('--by', p.y + '%');
@@ -3239,7 +3624,7 @@ function makeTile(g, opts = {}) {
     addRecent(g.id);
     openGame(g);
   });
-  if (g.src) a.setAttribute('data-external', '1');
+  if (sourceFor(g) === 'src') a.setAttribute('data-external', '1');
 
   // Faded first-letter backdrop (shows when no thumbnail image is available)
   const letter = document.createElement('div');
@@ -3296,6 +3681,7 @@ function makeTile(g, opts = {}) {
   corner.className = 'tile-corner';
 
   a.append(cat, star, name, play, corner);
+  if (playingNow[g.id]) liveBadge(a, playingNow[g.id]);
   return a;
 }
 
@@ -3331,6 +3717,17 @@ function appendPage() {
   }
 }
 
+// "1v1 lol" should find 1v1lol, and "shooter" should find the shooters.
+function matchesSearch(g, q) {
+  if (!q) return true;
+  const qLoose = q.replace(/[^a-z0-9]+/g, '');
+  return g.name.toLowerCase().includes(q)
+    || g.id.toLowerCase().includes(q)
+    || g.categories.some(c => c.toLowerCase().includes(q))
+    || (!!qLoose && (g.name.toLowerCase().replace(/[^a-z0-9]+/g, '').includes(qLoose)
+                  || g.id.toLowerCase().replace(/[^a-z0-9]+/g, '').includes(qLoose)));
+}
+
 function render() {
   const grid = document.getElementById('grid');
   const label = document.getElementById('countLabel');
@@ -3343,17 +3740,9 @@ function render() {
   const recentCount = document.getElementById('recentCount');
   const q = searchQ.toLowerCase().trim();
 
-  // "1v1 lol" should find 1v1lol, and "shooter" should find the shooters.
-  const qLoose = q.replace(/[^a-z0-9]+/g, '');
   const filtered = GAMES.filter(g => {
     const catOk = activeCat === 'All' || g.categories.includes(activeCat);
-    const searchOk = !q
-      || g.name.toLowerCase().includes(q)
-      || g.id.toLowerCase().includes(q)
-      || g.categories.some(c => c.toLowerCase().includes(q))
-      || (qLoose && (g.name.toLowerCase().replace(/[^a-z0-9]+/g, '').includes(qLoose)
-                  || g.id.toLowerCase().replace(/[^a-z0-9]+/g, '').includes(qLoose)));
-    return catOk && searchOk;
+    return catOk && matchesSearch(g, q);
   });
   renderList = sortGames(filtered);
   renderOffset = 0;
@@ -3363,7 +3752,27 @@ function render() {
   // ─── Recently played ───
   recentGrid.innerHTML = '';
   const recentGames = recent.map(id => gamesById[id]).filter(Boolean);
-  if (isDefaultView && recentGames.length > 0) {
+  // ─── Popular now ───
+  const popularSection = document.getElementById('popularSection');
+  const popularGrid = document.getElementById('popularGrid');
+  popularGrid.innerHTML = '';
+  const popularGames = popular.slice(0, POPULAR_ROW).map(id => gamesById[id]);
+  if (isDefaultView && popularGames.length && !GV.layout.hidden('popular')) {
+    popularSection.style.display = '';
+    document.getElementById('popularCount').textContent = popularGames.length;
+    popularGames.forEach((g, i) => {
+      const t = makeTile(g);
+      const rank = document.createElement('span');
+      rank.className = 'popular-rank';
+      rank.textContent = i + 1;
+      t.appendChild(rank);
+      popularGrid.appendChild(t);
+    });
+  } else {
+    popularSection.style.display = 'none';
+  }
+
+  if (isDefaultView && recentGames.length > 0 && !GV.layout.hidden('recent')) {
     recentSection.style.display = '';
     recentCount.textContent = recentGames.length;
     recentGames.forEach(g => recentGrid.appendChild(makeTile(g)));
@@ -3373,7 +3782,7 @@ function render() {
 
   // ─── Starred (or empty hint) ───
   starredGrid.innerHTML = '';
-  if (isDefaultView) {
+  if (isDefaultView && !GV.layout.hidden('starred')) {
     starredSection.style.display = '';
     if (starred.size > 0) {
       const starredList = GAMES.filter(g => starred.has(g.id));
@@ -3430,80 +3839,226 @@ function notePlaying() {
 new MutationObserver(notePlaying).observe(gameOverlay, { attributes: true, attributeFilter: ['class'] });
 notePlaying();
 
-// ───── Offline copies ─────
-// The games marked `local` in the catalog run off someone else's host now, but
-// the build they used to run is still sitting in /games/<id>/. When that host
-// is blocked or the build is broken, these buttons move that one game over to
-// the copy in this repo. Nothing switches on its own — a slow game is not a
-// broken one, and swapping a frame out from under someone mid-load is worse.
+// ───── Which copy runs ─────
+// Game files live in the vault sites (/vault<N>/<id>/, one repo each, so no
+// single Pages build gets too big). `src` is the host a game came from, kept as
+// a way back. When a host is blocked or a copy is broken, the swap buttons move
+// that one game to the other copy. Only a missing vault copy switches on its
+// own: a slow game is not a broken one.
 const STALL_MS = 8000;
 let stallTimer = null;
 let expectLoad = false;
 let mounted = null;
+// Which copy the mounted game came from, and a count that tells a stale
+// answer about an earlier mount from one about this one.
+let mountedFrom = null;
+let mountToken = 0;
+// The intro playing over the frame, if any.
+let introEl = null;
 
-// Which games this browser has been told to run locally. Survives reloads, so
-// someone on a network that blocks the host picks once and it stays picked.
-const prefs = {
-  key: 'gv.offline',
-  offline() {
-    try { return new Set(JSON.parse(localStorage.getItem(this.key) || '[]')); }
-    catch (e) { return new Set(); }
+// Which copy this browser has been told to run, by game id: 'vault' or 'src'.
+// Survives reloads, so someone on a network that blocks one picks once and it
+// stays picked.
+const picks = {
+  key: 'gv.source',
+  all() {
+    try { return JSON.parse(localStorage.getItem(this.key) || '{}') || {}; }
+    catch (e) { return {}; }
   },
-  flip(id) {
-    const set = this.offline();
-    if (set.has(id)) set.delete(id); else set.add(id);
-    try { localStorage.setItem(this.key, JSON.stringify([...set])); } catch (e) {}
+  get(id) { return this.all()[id] || null; },
+  set(id, where) {
+    const all = this.all();
+    all[id] = where;
+    try { localStorage.setItem(this.key, JSON.stringify(all)); } catch (e) {}
   }
 };
 
-function localUrl(g) { return '/games/' + g.id + '/'; }
-// A choice made while a game still had a copy here outlives the copy.
-function isOffline(g) { return !g.src || (!!g.local && prefs.offline().has(g.id)); }
-function gameUrl(g) { return isOffline(g) ? localUrl(g) : g.src; }
-// Games with no `src` are already local, so they get no button to press.
-function canSwap(g) { return !!(g && g.src && g.local); }
+// Saves live with the address a game ran from. Someone who played a game on
+// the host it came from, before it had a vault copy, keeps playing it there,
+// or they would start over. The list is taken once, before anything runs
+// from a vault.
+const OLD_HOST_KEY = 'gv.oldhost';
+const oldHost = (function () {
+  try {
+    const kept = localStorage.getItem(OLD_HOST_KEY);
+    if (kept) return new Set(JSON.parse(kept));
+    const played = new Set(JSON.parse(localStorage.getItem('gv.recent.v1') || '[]'));
+    JSON.parse(localStorage.getItem('gv.sessions') || '[]').forEach(s => {
+      if (s && s.gameId) played.add(s.gameId);
+    });
+    // A game switched to the copy here was played here, not there.
+    const offline = JSON.parse(localStorage.getItem('gv.offline') || '[]');
+    offline.forEach(id => played.delete(id));
+    localStorage.setItem(OLD_HOST_KEY, JSON.stringify([...played]));
+    localStorage.setItem(OLD_HOST_KEY + '.skip', JSON.stringify(offline));
+    localStorage.setItem(OLD_HOST_KEY + '.at', new Date().toISOString());
+    localStorage.removeItem('gv.offline');
+    return played;
+  } catch (e) { return new Set(); }
+})();
 
-function paintSwap(g) {
+// A signed-in player's older history lives on the account, not in this
+// browser's lists (those are emptied as sessions upload). Games the account
+// played before this browser first saw the vaults count as played there too.
+function noteOldHost(ids) {
+  let skip = [];
+  try { skip = JSON.parse(localStorage.getItem(OLD_HOST_KEY + '.skip') || '[]'); } catch (e) {}
+  ids.forEach(id => { if (!skip.includes(id)) oldHost.add(id); });
+  try { localStorage.setItem(OLD_HOST_KEY, JSON.stringify([...oldHost])); } catch (e) {}
+}
+function oldHostSince() {
+  try { return localStorage.getItem(OLD_HOST_KEY + '.at'); } catch (e) { return null; }
+}
+
+// Where a game runs from: 'vault' (/vault<site>/), 'src' (the host it came
+// from) or 'main' (/games/ here, only PolyTrack now).
+function sourceFor(g) {
+  if (!g.site) return g.src ? 'src' : 'main';
+  if (!g.src) return 'vault';
+  return picks.get(g.id) || (oldHost.has(g.id) ? 'src' : 'vault');
+}
+function urlFor(g, where) {
+  if (where === 'src') return g.src;
+  const rel = g.path || g.id + '/';
+  return where === 'vault' ? '/vault' + g.site + '/' + rel : '/games/' + rel;
+}
+// Only a game with both a vault copy and a host to go back to can swap.
+function canSwap(g) { return !!(g && g.site && g.src); }
+
+function paintSwap(g, where) {
   loaderSwap.hidden = true;
   gameSwap.hidden = !canSwap(g);
   if (!canSwap(g)) return;
-  gameSwap.innerHTML = isOffline(g) ? '&#8646; Use online copy' : '&#8646; Use offline copy';
+  const label = where === 'vault' ? 'Use the original host' : 'Use our copy';
+  gameSwap.innerHTML = '&#8646; ' + label;
+  loaderSwap.textContent = label;
 }
 
-function mountGame(g) {
+// The intro covers the frame while a game loads, with the loader quiet under
+// it. If the game is still loading when the intro is over, the loader's
+// spinner fades in. A switch to the other copy mid-intro keeps the intro.
+function showIntro() {
+  if (introEl && introEl.isConnected && !introEl.classList.contains('leaving')) return;
+  gameLoader.classList.add('quiet');
+  introEl = playIntro(gameFrame.parentElement, () => gameLoader.classList.remove('quiet'));
+  if (!introEl) gameLoader.classList.remove('quiet');
+}
+function dropIntro() {
+  if (introEl) introEl.remove();
+  introEl = null;
+  gameLoader.classList.remove('quiet');
+}
+
+function mountGame(g, where) {
   mounted = g;
-  const url = gameUrl(g);
+  where = where || sourceFor(g);
+  mountedFrom = where;
+  // A slower answer about an earlier game must not touch this one.
+  const token = ++mountToken;
+  const url = urlFor(g, where);
   gameTitle.textContent = g.name;
   // ?solo keeps a game page from sending itself back into the player.
-  gameNewTab.href = isOffline(g) ? url + '?solo' : url;
+  gameNewTab.href = where === 'src' ? url : url + (url.includes('?') ? '&' : '?') + 'solo';
   gameLoaderText.textContent = 'Loading game…';
   gameLoader.classList.remove('hidden');
-  paintSwap(g);
+  showIntro();
+  paintSwap(g, where);
   clearTimeout(stallTimer);
   expectLoad = false;
   gameFrame.src = '';
-  setTimeout(() => {
+  if (where === 'vault' && g.src) checkVault(g, url, token);
+  // Saves move with a game from /games/ to its vault (js/carry.js).
+  const ready = where === 'vault' && window.GV && GV.carry ? GV.carry(g) : Promise.resolve();
+  setTimeout(() => ready.then(() => {
+    if (token !== mountToken) return;
     expectLoad = true;
     gameFrame.src = url;
     // A cross-origin frame fires `load` even for the browser's own error page,
     // so a game that never finishes loading is the only failure this can see.
-    if (canSwap(g) && !isOffline(g)) {
-      stallTimer = setTimeout(() => {
-        if (gameLoader.classList.contains('hidden')) return;
-        gameLoaderText.textContent = 'Still loading…';
-        loaderSwap.hidden = false;
-      }, STALL_MS);
-    }
-  }, 60);
+    stallTimer = setTimeout(() => {
+      if (token !== mountToken || gameLoader.classList.contains('hidden')) return;
+      gameLoaderText.textContent = 'Still loading…';
+      loaderSwap.hidden = !canSwap(g);
+    }, STALL_MS);
+  }), 60);
 }
 
-function toggleOffline() {
-  if (!canSwap(mounted)) return;
-  prefs.flip(mounted.id);
-  mountGame(mounted);
+// A vault copy that is missing falls back to the host the game came from,
+// without asking. Only a definite 404 counts: a slow or blocked request says
+// nothing about the copy, and the host may be the thing that is blocked.
+function checkVault(g, url, token) {
+  fetch(url.split('?')[0], { method: 'HEAD', cache: 'no-cache' }).then(res => {
+    if (res.status === 404 && token === mountToken) mountGame(g, 'src');
+  }).catch(() => {});
 }
-gameSwap.addEventListener('click', toggleOffline);
-loaderSwap.addEventListener('click', toggleOffline);
+
+// The 404 page says so when it lands in the game frame (see /404.html).
+window.addEventListener('message', (e) => {
+  if (e.origin !== location.origin || !e.data || e.data.gv !== 'missing') return;
+  if (e.source !== gameFrame.contentWindow || !mounted) return;
+  if (mountedFrom === 'vault' && mounted.src) mountGame(mounted, 'src');
+});
+
+function toggleSource() {
+  if (!canSwap(mounted)) return;
+  const next = mountedFrom === 'vault' ? 'src' : 'vault';
+  picks.set(mounted.id, next);
+  mountGame(mounted, next);
+}
+gameSwap.addEventListener('click', toggleSource);
+loaderSwap.addEventListener('click', toggleSource);
+
+// ───── More like this ─────
+// Games that share the open game's first category, most played first. The
+// strip starts at a different spot for each game so neighbours do not all
+// suggest the same ten.
+const gameMore = document.getElementById('gameMore');
+const gameMoreBtn = document.getElementById('gameMoreBtn');
+const MORE_COUNT = 10;
+
+function similarGames(g) {
+  const cat = g.categories[0];
+  const same = GAMES.filter(x => x.id !== g.id && x.categories.includes(cat))
+    .sort((a, b) => a.ranking - b.ranking)
+    .slice(0, MORE_COUNT * 3);
+  if (same.length <= MORE_COUNT) return same;
+  const start = g.id.split('').reduce((n, c) => n + c.charCodeAt(0), 0) % same.length;
+  return same.slice(start).concat(same.slice(0, start)).slice(0, MORE_COUNT);
+}
+
+function paintMore(g) {
+  gameMore.innerHTML = '';
+  similarGames(g).forEach(x => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'gm-item';
+    const th = document.createElement('span');
+    th.className = 'gm-thumb';
+    if (x.img) th.style.backgroundImage = 'url("' + x.img.replace(/"/g, '%22') + '")';
+    const nm = document.createElement('span');
+    nm.className = 'gm-name';
+    nm.textContent = x.name;
+    b.append(th, nm);
+    b.addEventListener('click', () => {
+      if (window._trackClose) window._trackClose();
+      addRecent(x.id);
+      showMore(false);
+      // Swap the address rather than stack it: Back leaves the player instead
+      // of showing the new game under the old game's address.
+      history.replaceState({page:'game', gameId:x.id}, '', '/games/' + x.id);
+      openGame(x);
+    });
+    gameMore.appendChild(b);
+  });
+}
+
+function showMore(on) {
+  gameMore.hidden = !on;
+  gameMoreBtn.setAttribute('aria-expanded', on ? 'true' : 'false');
+  if (on && mounted) paintMore(mounted);
+}
+gameMoreBtn.addEventListener('click', () => showMore(gameMore.hidden));
+
 
 function openGame(g) {
   gameOverlay.classList.add('show');
@@ -3516,6 +4071,8 @@ function openGame(g) {
 }
 function closeGame() {
   if (window._trackClose) window._trackClose();
+  showMore(false);
+  dropIntro();
   clearTimeout(stallTimer);
   expectLoad = false;
   mounted = null;
@@ -3532,6 +4089,8 @@ gameFrame.addEventListener('load', () => {
   clearTimeout(stallTimer);
   loaderSwap.hidden = true;
   gameLoader.classList.add('hidden');
+  // The game is ready, so nobody waits for the rest of the intro.
+  if (introEl) introEl.end();
 });
 gameBack.addEventListener('click', closeGame);
 gameFS.addEventListener('click', () => {
@@ -3542,6 +4101,18 @@ gameFS.addEventListener('click', () => {
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && gameOverlay.classList.contains('show')) closeGame();
 });
+// F goes fullscreen, but only while this page has the keys: once someone
+// clicks into the game, the game gets them (and many games use F). Never
+// while typing, and never when F is the panic key.
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'f' && e.key !== 'F') return;
+  if (!gameOverlay.classList.contains('show') || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.target.matches('input, textarea, select, [contenteditable]')) return;
+  const panic = window.GV && GV.security && GV.security.enabled() && GV.security.key();
+  if (panic && panic.toLowerCase() === 'f') return;
+  e.preventDefault();
+  gameFS.click();
+});
 
 
 // ─── Popstate (back/forward) ───
@@ -3550,14 +4121,14 @@ window.addEventListener('popstate', function() {
   if (p === '/' || p === '') {
     document.getElementById('welcome').classList.remove('hidden');
     document.getElementById('browse').classList.remove('visible');
-    if (gameOverlay.classList.contains('show')) { if (window._trackClose) window._trackClose(); clearTimeout(stallTimer); expectLoad = false; mounted = null; gameOverlay.classList.remove('show'); gameFrame.src = ''; document.body.style.overflow = ''; }
+    if (gameOverlay.classList.contains('show')) { if (window._trackClose) window._trackClose(); showMore(false); dropIntro(); clearTimeout(stallTimer); expectLoad = false; mounted = null; gameOverlay.classList.remove('show'); gameFrame.src = ''; document.body.style.overflow = ''; }
   } else if (p === '/games' || p === '/games/') {
     document.getElementById('welcome').classList.add('hidden');
     document.getElementById('browse').classList.add('visible');
-    if (gameOverlay.classList.contains('show')) { if (window._trackClose) window._trackClose(); clearTimeout(stallTimer); expectLoad = false; mounted = null; gameOverlay.classList.remove('show'); gameFrame.src = ''; document.body.style.overflow = ''; }
+    if (gameOverlay.classList.contains('show')) { if (window._trackClose) window._trackClose(); showMore(false); dropIntro(); clearTimeout(stallTimer); expectLoad = false; mounted = null; gameOverlay.classList.remove('show'); gameFrame.src = ''; document.body.style.overflow = ''; }
   } else if (p.startsWith('/games/')) {
     var id = p.slice(7).replace(/\/$/, '');
-    var g = GAMES.find(function(x){return x.id===id;});
+    var g = gamesById[id];
     if (g && !gameOverlay.classList.contains('show')) {
       gameOverlay.classList.add('show');
       document.body.style.overflow = 'hidden';
@@ -3620,6 +4191,12 @@ function openSettings() {
   document.getElementById('panicKeyInput').value = security.key();
   document.getElementById('panicUrlInput').value = security.url();
   document.getElementById('confirmCloseInput').checked = security.confirmClose();
+  document.getElementById('skipWelcomeInput').checked = GV.layout.skipWelcome();
+  document.getElementById('tileSizeInput').value = GV.layout.tileSize();
+  document.getElementById('lightThemeInput').checked = GV.layout.theme() === 'light';
+  settingsOverlay.querySelectorAll('[data-row]').forEach(el => {
+    el.checked = !GV.layout.hidden(el.dataset.row);
+  });
 }
 function closeSettings() { settingsOverlay.classList.remove('show'); }
 
@@ -3629,6 +4206,21 @@ document.getElementById('settingsClose').addEventListener('click', closeSettings
 settingsOverlay.addEventListener('click', (e) => { if (e.target === settingsOverlay) closeSettings(); });
 document.getElementById('settingsBtnWelcome').addEventListener('click', openSettings);
 document.getElementById('settingsBtnBrowse').addEventListener('click', openSettings);
+document.getElementById('skipWelcomeInput').addEventListener('change', (e) => {
+  GV.layout.setSkipWelcome(e.target.checked);
+});
+document.getElementById('lightThemeInput').addEventListener('change', (e) => {
+  GV.layout.setTheme(e.target.checked ? 'light' : 'dark');
+});
+document.getElementById('tileSizeInput').addEventListener('input', (e) => {
+  GV.layout.setTileSize(+e.target.value);
+});
+settingsOverlay.querySelectorAll('[data-row]').forEach(el => {
+  el.addEventListener('change', () => {
+    GV.layout.setHidden(el.dataset.row, !el.checked);
+    render();
+  });
+});
 
 document.getElementById('cloakApplyCustom').addEventListener('click', () => {
   const title = document.getElementById('cloakCustomTitle').value.trim();
@@ -3739,11 +4331,84 @@ searchInput.addEventListener('input', e => {
 searchInput.addEventListener('focus', () => searchWrap.classList.add('focused'));
 searchInput.addEventListener('blur', () => searchWrap.classList.remove('focused'));
 
+// ───── Search quick picks ─────
+// The best few matches drop down under the box, so someone who knows what they
+// want can open it without scrolling the grid. The exact name comes first, then
+// names that start with what was typed, then the most played.
+const quickPick = document.getElementById('quickPick');
+const QP_MAX = 7;
+let qpItems = [];
+let qpOn = -1;
+
+function quickPicks(q) {
+  q = q.toLowerCase().trim();
+  if (!q) return [];
+  const score = g => {
+    const n = g.name.toLowerCase();
+    return n === q ? 2 : n.startsWith(q) ? 1 : 0;
+  };
+  return GAMES.filter(g => matchesSearch(g, q))
+    .sort((a, b) => (score(b) - score(a)) || a.ranking - b.ranking)
+    .slice(0, QP_MAX);
+}
+
+function paintQuickPick() {
+  qpItems = quickPicks(searchInput.value);
+  qpOn = -1;
+  quickPick.innerHTML = '';
+  qpItems.forEach((g, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'qp-item';
+    b.setAttribute('role', 'option');
+    const th = document.createElement('span');
+    th.className = 'qp-thumb';
+    if (g.img) th.style.backgroundImage = 'url("' + g.img.replace(/"/g, '%22') + '")';
+    const nm = document.createElement('span');
+    nm.textContent = g.name;
+    const ct = document.createElement('span');
+    ct.className = 'qp-cat';
+    ct.textContent = g.categories[0] || '';
+    b.append(th, nm, ct);
+    // mousedown, not click: the input's blur would hide the list first.
+    b.addEventListener('mousedown', (e) => { e.preventDefault(); pickQuick(i); });
+    quickPick.appendChild(b);
+  });
+  quickPick.hidden = !qpItems.length;
+}
+
+function pickQuick(i) {
+  const g = qpItems[i];
+  if (!g) return;
+  quickPick.hidden = true;
+  searchInput.blur();
+  addRecent(g.id);
+  openGame(g);
+}
+
+searchInput.addEventListener('input', paintQuickPick);
+searchInput.addEventListener('focus', paintQuickPick);
+searchInput.addEventListener('blur', () => { quickPick.hidden = true; });
+searchInput.addEventListener('keydown', (e) => {
+  if (quickPick.hidden || !qpItems.length) return;
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    const n = qpItems.length;
+    qpOn = e.key === 'ArrowDown' ? (qpOn + 1) % n : (qpOn - 1 + n) % n;
+    quickPick.querySelectorAll('.qp-item').forEach((el, i) => el.classList.toggle('on', i === qpOn));
+  } else if (e.key === 'Enter' && qpOn >= 0) {
+    e.preventDefault();
+    pickQuick(qpOn);
+  } else if (e.key === 'Escape') {
+    quickPick.hidden = true;
+  }
+});
+
 // ───── Sort menu ─────
 const sortBtn = document.getElementById('sortBtn');
 const sortMenu = document.getElementById('sortMenu');
 const sortLabel = document.getElementById('sortLabel');
-const SORT_LABELS = { default: 'Default', popular: 'Most played', alpha: 'A → Z', random: 'Random' };
+const SORT_LABELS = { default: 'Default', popular: 'Most played', newest: 'Newest', alpha: 'A → Z', random: 'Random' };
 sortBtn.addEventListener('click', (e) => {
   e.stopPropagation();
   sortMenu.classList.toggle('show');
@@ -3801,6 +4466,54 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+// ───── Public counts ─────
+// Popular now and "N playing" come from counts-only functions (see
+// analytics/public.sql). They need no session, so a plain fetch does.
+const SUPA = {
+  url: 'https://dxwjxzmlezfyursysays.supabase.co',
+  key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0'
+};
+function publicRpc(name, args) {
+  return fetch(SUPA.url + '/rest/v1/rpc/' + name, {
+    method: 'POST',
+    headers: { apikey: SUPA.key, Authorization: 'Bearer ' + SUPA.key, 'Content-Type': 'application/json' },
+    body: JSON.stringify(args || {})
+  }).then(r => r.ok ? r.json() : Promise.reject(new Error(name + ' ' + r.status)));
+}
+
+// The games most people opened this week, best first. Filled after the
+// catalog loads; empty (and the row hidden) if the count cannot be read.
+let popular = [];
+const POPULAR_ROW = 20;
+function loadPopular() {
+  publicRpc('gv_popular', { p_days: 7, p_limit: 50 }).then(list => {
+    popular = list.map(x => x.id).filter(id => gamesById[id] && !gamesById[id].hidden && !gamesById[id].staging);
+    render();
+  }).catch(() => {});
+}
+
+// How many people have each game open right now, by id. Refreshed every
+// minute while the tab is visible; tiles already on screen are updated in place.
+let playingNow = {};
+function liveBadge(tile, n) {
+  let b = tile.querySelector('.tile-live');
+  if (!n) { if (b) b.remove(); return; }
+  if (!b) {
+    b = document.createElement('span');
+    b.className = 'tile-live';
+    const play = tile.querySelector('.tile-play');
+    if (play) play.before(b); else tile.appendChild(b);
+  }
+  b.textContent = n + ' playing';
+}
+function loadPlayingNow() {
+  if (document.hidden) return;
+  publicRpc('gv_playing_now').then(counts => {
+    playingNow = counts || {};
+    document.querySelectorAll('.tile[data-id]').forEach(t => liveBadge(t, playingNow[t.dataset.id]));
+  }).catch(() => {});
+}
+
 // ───── Boot ─────
 // Nothing on screen needs the catalog until this resolves, so the shell paints
 // first and the grid fills in behind it.
@@ -3810,7 +4523,9 @@ async function bootCatalog() {
     if (!res.ok) throw new Error('games.json returned ' + res.status);
     const data = await res.json();
     CATS = data.cats;
-    GAMES = data.games;
+    ALL_GAMES = data.games;
+    // `staging` games are waiting for testers (/test/) and stay off the grid.
+    GAMES = ALL_GAMES.filter(g => !g.hidden && !g.staging);
   } catch (err) {
     console.error('Could not load the game catalog', err);
     const grid = document.getElementById('grid');
@@ -3818,13 +4533,16 @@ async function bootCatalog() {
       '<div class="empty"><div class="big">Catalog did not load</div>Refresh the page to try again.</div>';
     return;
   }
-  gamesById = Object.fromEntries(GAMES.map(g => [g.id, g]));
+  gamesById = Object.fromEntries(ALL_GAMES.map(g => [g.id, g]));
   updateWelcomeStats();
   document.getElementById('footerCount').textContent = GAMES.length;
   buildCatBar();
   render();
   initRoute();
   initPolytrackNotice();
+  loadPopular();
+  loadPlayingNow();
+  setInterval(loadPlayingNow, 60000);
 }
 // ───── PolyTrack update notice ─────
 // Appears once for people who have played PolyTrack here before, pointing them
@@ -3868,12 +4586,27 @@ function initPolytrackNotice() {
 
 bootCatalog();
 
+// The 9-dot apps menu (js/apps.js, deferred) in both home headers.
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.GV && GV.apps) document.querySelectorAll('[data-apps]').forEach(el => GV.apps.mount(el));
+});
+
+// Some games registered service workers for their own /games/<id>/ folder.
+// Those folders moved to the vaults, and a leftover worker would keep
+// answering from its cache. PolyTrack still lives there.
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => {
+    const p = new URL(r.scope).pathname;
+    if (p.startsWith('/games/') && !p.startsWith('/games/polytrack/')) r.unregister();
+  })).catch(() => {});
+}
+
 // ═══════════════════════════════════════════════════════
 // GAMEVAULT AUTH + PROFILE SYSTEM
 // ═══════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', function() {
-const SUPA_URL = 'https://dxwjxzmlezfyursysays.supabase.co';
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
+const SUPA_URL = SUPA.url;
+const SUPA_KEY = SUPA.key;
 const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
 
 const PERIOD_SECS = 50 * 60;
@@ -3921,6 +4654,26 @@ function displayName() {
 }
 
 // ─── Update all user buttons ───
+// ─── Avatars ───
+// An approved picture or a picked avatar (js/avatars.js). An account that has
+// not picked one keeps its initials; a guest keeps the person icon.
+let myAvatar = null;
+const PERSON_SVG = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
+function paintAvatar(el) {
+  const A = window.GV && GV.avatars;
+  if (currentUser) {
+    if (A && myAvatar && (myAvatar.approved || myAvatar.preset != null)) {
+      A.render(el, { preset: myAvatar.preset, upload: myAvatar.approved, id: currentUser.id });
+    } else {
+      el.textContent = initials(displayName());
+    }
+  } else if (A && A.localPreset() != null) {
+    A.render(el, {});
+  } else {
+    el.innerHTML = PERSON_SVG;
+  }
+}
+
 function updateUserUI() {
   const signed = !!currentUser;
   const name = displayName();
@@ -3938,16 +4691,24 @@ function updateUserUI() {
     const lbl = document.getElementById('userLabel' + loc);
     if (!btn) return;
     btn.classList.toggle('signed-in', signed);
-    if (signed) {
-      av.classList.remove('guest');
-      av.textContent = initials(name);
-    } else {
-      av.classList.add('guest');
-      av.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
-    }
-    lbl.textContent = name;
+    av.classList.toggle('guest', !signed && !(window.GV && GV.avatars && GV.avatars.localPreset() != null));
+    paintAvatar(av);
+    // The name in its own span, so a name colour from the shop stays on it.
+    lbl.textContent = '';
+    const nm = document.createElement('span');
+    nm.className = 'user-name-text';
+    nm.textContent = name;
+    lbl.appendChild(nm);
     if (verifiedAt) lbl.insertAdjacentHTML('beforeend', BADGE_SVG);
+    if (window._level > 1) {
+      const lv = document.createElement('span');
+      lv.className = 'user-lv';
+      lv.textContent = 'Lv ' + window._level;
+      lbl.appendChild(lv);
+    }
   });
+  // The buttons were just rebuilt, so the shop's name colour and frame go back on.
+  paintCosmetics();
 }
 
 // ─── Verified badge ───
@@ -3994,7 +4755,18 @@ async function loadUsername() {
 }
 
 // ─── Upload local sessions to Supabase after sign-in ───
-async function uploadLocalSessions() {
+// Runs on every sign-in event and after every game, sometimes in two tabs at
+// once, so uploads take turns (a Web Lock covers other tabs too) and only the
+// sessions that were sent are taken off the list. Otherwise one session could
+// be sent twice, and play time, levels and coins would count it twice.
+let uploading = Promise.resolve();
+function uploadLocalSessions() {
+  const run = () => sendLocalSessions();
+  const next = uploading.then(() => (navigator.locks ? navigator.locks.request('gv-sessions', run) : run()));
+  uploading = next.catch(() => {});
+  return next;
+}
+async function sendLocalSessions() {
   if (!currentUser) return;
   const arr = localSessions().filter(s => s.endedAt);
   if (!arr.length) return;
@@ -4004,8 +4776,84 @@ async function uploadLocalSessions() {
     started_at: s.startedAt,
     ended_at: s.endedAt
   }));
-  await sb.from('play_sessions').insert(rows);
-  saveLocalSessions([]);
+  const { error } = await sb.from('play_sessions').insert(rows);
+  if (error) return;
+  const sent = new Set(arr.map(s => s.gameId + '|' + s.startedAt));
+  saveLocalSessions(localSessions().filter(s => !sent.has(s.gameId + '|' + s.startedAt)));
+}
+
+// ─── Coins and cosmetics (shop/) ───
+// What the account owns and wears: a name colour, an avatar frame, a title
+// and a tile accent, all painted from the wallet.
+let myWallet = null;
+async function loadWallet() {
+  if (!currentUser) { myWallet = null; paintCosmetics(); return; }
+  const { data, error } = await sb.rpc('gv_wallet_get');
+  if (!error) myWallet = data;
+  paintCosmetics();
+}
+function paintCosmetics() {
+  const C = window.GV && GV.cosmetics;
+  if (!C) return;
+  const worn = myWallet ? C.fromWallet(myWallet) : {};
+  ['userAvatarWelcome', 'userAvatarHeader', 'profileAvatarLg'].forEach(id => C.applyAvatar(document.getElementById(id), worn));
+  document.querySelectorAll('.user-name-text').forEach(el => C.applyName(el, worn));
+  C.applyTitle(document.getElementById('profileTitle'), worn);
+  C.applyTiles(document.documentElement, worn);
+  const card = document.getElementById('coinCard');
+  card.hidden = !myWallet;
+  if (myWallet) {
+    document.getElementById('coinCount').textContent = myWallet.coins.toLocaleString() + ' coins';
+    document.getElementById('coinToday').textContent = myWallet.earned_today + ' of ' + myWallet.daily_cap + ' today · open the shop';
+  }
+}
+
+// The account's picture. A guest who picked one before signing up keeps it.
+async function loadAvatar() {
+  const A = window.GV && GV.avatars;
+  if (!A || !currentUser) return;
+  try {
+    myAvatar = await A.mine(sb);
+    if (myAvatar && myAvatar.preset == null && myAvatar.status === 'none' && A.localPreset() != null) {
+      myAvatar = await A.setPreset(sb, A.localPreset());
+    }
+  } catch (e) { return; }
+  updateUserUI();
+}
+
+// ─── Stars on the account ───
+// Guests keep stars in this browser only. Signed in, the account's list is the
+// real one: the first time a browser signs in to an account the two lists are
+// merged, and after that every star and unstar goes to the account as well.
+const STAR_SYNCED_KEY = 'gv.starred.for';
+window._starSync = function (id, on) {
+  if (!currentUser) return;
+  const q = on
+    ? sb.from('starred_games').upsert({ user_id: currentUser.id, game_id: id })
+    : sb.from('starred_games').delete().eq('user_id', currentUser.id).eq('game_id', id);
+  q.then(() => {}, () => {});
+};
+
+async function syncStars() {
+  if (!currentUser) return;
+  const { data, error } = await sb.from('starred_games').select('game_id').eq('user_id', currentUser.id);
+  if (error || !currentUser) return;
+  const remote = new Set(data.map(r => r.game_id));
+  let first = true;
+  try { first = localStorage.getItem(STAR_SYNCED_KEY) !== currentUser.id; } catch (e) {}
+  if (first) {
+    const add = [...starred].filter(id => !remote.has(id))
+      .map(id => ({ user_id: currentUser.id, game_id: id }));
+    if (add.length) await sb.from('starred_games').upsert(add);
+    add.forEach(r => remote.add(r.game_id));
+    try { localStorage.setItem(STAR_SYNCED_KEY, currentUser.id); } catch (e) {}
+  }
+  // This runs on every sign-in event, including each return to the tab, so
+  // only redraw (which resets the scrolled grid) when the stars really moved.
+  const same = remote.size === starred.size && [...remote].every(id => starred.has(id));
+  starred = remote;
+  saveStars(starred);
+  if (!same && GAMES.length) render();
 }
 
 // ─── Auth state ───
@@ -4016,7 +4864,13 @@ function setCurrentUser(user) {
     user._username = currentUser._username;
     user._nameLoaded = currentUser._nameLoaded;
   }
+  const changed = (user ? user.id : null) !== (currentUser ? currentUser.id : null);
   currentUser = user;
+  // A different person has a different level; work it out again.
+  if (changed) {
+    window._level = null;
+    if (user) renderStats(); else renderLocalStats();
+  }
 }
 
 sb.auth.onAuthStateChange(async (event, session) => {
@@ -4025,7 +4879,32 @@ sb.auth.onAuthStateChange(async (event, session) => {
   loadVerified();
   if (currentUser) {
     await loadUsername();
+    loadAvatar();
+    const since = oldHostSince();
+    if (since) {
+      sb.from('play_sessions').select('game_id').eq('user_id', currentUser.id).lt('started_at', since)
+        .then(({ data }) => { if (data) noteOldHost([...new Set(data.map(r => r.game_id))]); }, () => {});
+    }
+    // Testers get a link to the review page (test/test.sql).
+    sb.rpc('gv_is_tester').then(({ data }) => {
+      document.getElementById('profileTestLink').hidden = data !== true;
+    }, () => {});
     await uploadLocalSessions();
+    // Play time turns into shop coins (shop/shop.sql caps it per day).
+    sb.rpc('gv_grant_coins').then(loadWallet, loadWallet);
+    syncStars();
+    // A daily cloud backup of game saves, if this person switched it on.
+    if (window.GV && GV.saves) GV.saves.autoSaveIfDue(sb);
+  } else if (event === 'SIGNED_OUT') {
+    myAvatar = null;
+    myWallet = null;
+    document.getElementById('profileTestLink').hidden = true;
+    paintCosmetics();
+    // The stars belong to the account now. Leaving them would hand them to
+    // whoever signs in next on a shared computer.
+    let synced = null;
+    try { synced = localStorage.getItem(STAR_SYNCED_KEY); localStorage.removeItem(STAR_SYNCED_KEY); } catch (e) {}
+    if (synced) { starred = new Set(); saveStars(starred); render(); }
   }
   if (document.getElementById('profileOverlay').classList.contains('show')) openProfile();
 });
@@ -4033,7 +4912,17 @@ sb.auth.getSession().then(({ data: { session } }) => {
   setCurrentUser(session?.user ?? null);
   updateUserUI();
   if (currentUser) loadUsername();
+  // The level next to the name comes from the same numbers as the stats. An
+  // account's is worked out when setCurrentUser sees it arrive.
+  if (!currentUser) renderLocalStats();
 });
+
+// /?profile (the Settings page links here) opens the profile straight away.
+if (new URLSearchParams(location.search).has('profile')) {
+  history.replaceState(history.state, '', location.pathname);
+  // After this handler has run, once the profile panel below is set up.
+  setTimeout(openProfile);
+}
 
 // ─── User button → always open profile ───
 ['userBtnWelcome','userBtnHeader'].forEach(id => {
@@ -4075,6 +4964,8 @@ document.getElementById('suSubmit').addEventListener('click', async () => {
   const errEl = document.getElementById('authError');
   if (!username || !pw) { errEl.textContent = 'Fill in all fields.'; return; }
   if (username.length < 3) { errEl.textContent = 'Username must be at least 3 characters.'; return; }
+  const nameOk = await sb.rpc('gv_name_ok', { p_name: username });
+  if (nameOk.data === false) { errEl.textContent = 'That username is not allowed. Try another.'; return; }
   if (pw.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; return; }
   const { data, error } = await sb.auth.signUp({ email: username + '@gamevault.app', password: pw });
   if (error) { errEl.textContent = error.message.includes('already') ? 'Username already taken.' : error.message; return; }
@@ -4102,19 +4993,78 @@ async function openProfile() {
   if (verifiedAt) document.getElementById('profileName').insertAdjacentHTML('beforeend', BADGE_SVG);
   document.getElementById('profileEmail').style.display = 'none';
   document.getElementById('profileSignout').style.display = signed ? '' : 'none';
+  document.getElementById('profileDelete').style.display = signed ? '' : 'none';
   document.getElementById('profileSigninBtn').style.display = signed ? 'none' : '';
   document.getElementById('profileEditSection').style.display = signed ? '' : 'none';
 
+  paintAvatar(av);
+  paintPicker();
+  loadBoardChoice();
   if (signed) {
-    av.textContent = initials(name);
     document.getElementById('profileUsernameInput').value = name;
     document.getElementById('profilePwSection').style.display = '';
     await renderStats();
   } else {
-    av.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
     renderLocalStats();
   }
 }
+
+// "Show me on the leaderboard" (profiles.hide_on_boards, leaderboard.sql).
+// Accounts start shown; the board picks a change up within a minute.
+async function loadBoardChoice() {
+  const sec = document.getElementById('boardSection');
+  sec.hidden = !currentUser;
+  if (!currentUser) return;
+  const { data } = await sb.from('profiles').select('hide_on_boards').eq('id', currentUser.id).maybeSingle();
+  document.getElementById('boardShow').checked = !(data && data.hide_on_boards);
+}
+document.getElementById('boardShow').addEventListener('change', async (e) => {
+  if (!currentUser) return;
+  const show = e.target.checked;
+  const { error } = await sb.from('profiles').update({ hide_on_boards: !show }).eq('id', currentUser.id);
+  if (error) e.target.checked = !show;
+});
+
+// The 42 built-in pictures, and for an account an upload that waits for the
+// owner to approve it.
+function paintPicker() {
+  const A = window.GV && GV.avatars;
+  const box = document.getElementById('profileAvatarPicker');
+  if (!A || !box) return;
+  box.innerHTML = '';
+  const current = currentUser
+    ? (myAvatar && myAvatar.approved ? null : (myAvatar && myAvatar.preset != null ? myAvatar.preset : A.defaultFor(currentUser.id)))
+    : A.localPreset();
+  A.picker(box, current, async (i) => {
+    if (!currentUser) A.setLocalPreset(i);
+    else {
+      try { myAvatar = await A.setPreset(sb, i); }
+      catch (e) { document.getElementById('profileAvatarMsg').textContent = e.message; return; }
+    }
+    updateUserUI();
+    paintAvatar(document.getElementById('profileAvatarLg'));
+  });
+  document.getElementById('profileUploadRow').style.display = currentUser ? '' : 'none';
+  const msg = document.getElementById('profileAvatarMsg');
+  msg.textContent = currentUser && myAvatar && myAvatar.status === 'rejected' ? 'Your last picture was not approved.'
+    : currentUser && myAvatar && myAvatar.status === 'pending' ? 'Your picture is waiting to be approved.' : '';
+}
+
+document.getElementById('profileAvatarFile').addEventListener('change', async (e) => {
+  const file = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!file || !currentUser) return;
+  const msg = document.getElementById('profileAvatarMsg');
+  msg.textContent = 'Sending…';
+  try {
+    myAvatar = await GV.avatars.upload(sb, await GV.avatars.resizeToDataUrl(file));
+    msg.textContent = myAvatar.status === 'approved' ? 'Picture updated.' : 'Sent. It shows once it is approved.';
+    updateUserUI();
+    paintAvatar(document.getElementById('profileAvatarLg'));
+  } catch (err) {
+    msg.textContent = err.message || 'Could not send that picture.';
+  }
+});
 
 function closeProfile() { profileOverlay.classList.remove('show'); }
 document.getElementById('profileBackdrop').addEventListener('click', closeProfile);
@@ -4122,6 +5072,27 @@ document.getElementById('profileBackdrop').addEventListener('click', closeProfil
 document.getElementById('profileSignout').addEventListener('click', async () => {
   await sb.auth.signOut();
   closeProfile();
+});
+// Deleting is for good: the account, its stats, stars, saves, chat and its
+// PolyTrack times. Typing the username is the confirmation.
+document.getElementById('profileDelete').addEventListener('click', async () => {
+  if (!currentUser) return;
+  const name = displayName();
+  const typed = prompt('This deletes your account for good: stats, stars, cloud saves, chat messages and your PolyTrack times.\n\nType your username (' + name + ') to delete it.');
+  if (typed === null) return;
+  if (typed.trim().toLowerCase() !== name.toLowerCase()) { alert('That was not your username, so nothing was deleted.'); return; }
+  const msg = document.getElementById('profileMsg');
+  msg.textContent = 'Deleting…';
+  // Storage files cannot be removed from SQL, so they go first, from here.
+  try {
+    const { data: files } = await sb.storage.from('saves').list(currentUser.id);
+    if (files && files.length) await sb.storage.from('saves').remove(files.map(f => currentUser.id + '/' + f.name));
+  } catch (e) {}
+  const { error } = await sb.rpc('gv_delete_account');
+  if (error) { msg.textContent = 'Could not delete: ' + error.message; return; }
+  await sb.auth.signOut({ scope: 'local' });
+  closeProfile();
+  alert('Your account is deleted.');
 });
 document.getElementById('profileSigninBtn').addEventListener('click', () => {
   closeProfile(); openAuth('signin');
@@ -4147,15 +5118,20 @@ document.getElementById('profileSaveBtn').addEventListener('click', async () => 
   const pw = document.getElementById('profilePwInput').value;
   msgEl.textContent = '';
   if (username && username !== userName()) {
+    const nameOk = await sb.rpc('gv_name_ok', { p_name: username });
+    if (nameOk.data === false) { msgEl.textContent = 'That username is not allowed. Try another.'; return; }
     const { error } = await sb.from('profiles').upsert({ id: currentUser.id, username });
-    if (error) { msgEl.textContent = 'Error saving username.'; return; }
+    if (error) {
+      msgEl.textContent = /not allowed/.test(error.message) ? 'That username is not allowed. Try another.' : 'Error saving username.';
+      return;
+    }
     currentUser._username = username;
     currentUser._nameLoaded = true;
     updateUserUI();
     renameOnBoards();
     document.getElementById('profileName').textContent = username;
     if (verifiedAt) document.getElementById('profileName').insertAdjacentHTML('beforeend', BADGE_SVG);
-    document.getElementById('profileAvatarLg').textContent = initials(username);
+    paintAvatar(document.getElementById('profileAvatarLg'));
   }
   if (pw) {
     if (pw.length < 6) { msgEl.textContent = 'Password must be at least 6 characters.'; return; }
@@ -4174,11 +5150,20 @@ async function renderStats() {
   document.getElementById('statPeriods').textContent = '…';
   document.getElementById('statTopPeriod').textContent = '…';
   try {
-    const { data: sessions, error } = await sb.from('play_sessions')
-      .select('game_id, started_at, ended_at, duration_seconds')
-      .eq('user_id', currentUser.id)
-      .not('ended_at', 'is', null);
-    computeAndShowStats(error ? [] : (sessions || []));
+    // Supabase hands back at most 1000 rows at a time, so read in pages.
+    const sessions = [];
+    for (let from = 0; ; from += 1000) {
+      const { data, error } = await sb.from('play_sessions')
+        .select('game_id, started_at, ended_at, duration_seconds')
+        .eq('user_id', currentUser.id)
+        .not('ended_at', 'is', null)
+        .order('started_at').order('id')
+        .range(from, from + 999);
+      if (error) break;
+      sessions.push(...(data || []));
+      if (!data || data.length < 1000) break;
+    }
+    computeAndShowStats(sessions, currentUser.created_at);
   } catch(e) {
     computeAndShowStats([]);
   }
@@ -4195,15 +5180,65 @@ function renderLocalStats() {
   computeAndShowStats(sessions);
 }
 
-function computeAndShowStats(sessions) {
-  // Use duration_seconds if stored, otherwise compute from timestamps
-  const withDur = sessions.map(s => ({
-    ...s,
-    duration_seconds: s.duration_seconds != null
-      ? s.duration_seconds
-      : (s.ended_at ? Math.round((new Date(s.ended_at) - new Date(s.started_at)) / 1000) : 0)
-  }));
+// ─── Levels ───
+// 10 XP for every minute played. Each level needs a bit more than the last:
+// 50 XP at first, 20% more every five levels up to level 50, then a flat 200
+// more every five levels after that.
+const XP_PER_MIN = 10;
+function levelFromXp(xp) {
+  let level = 1, need = 50;
+  while (xp >= need) {
+    xp -= need;
+    if (level % 5 === 0) need = level < 50 ? Math.round(need * 1.2) : need + 200;
+    level++;
+  }
+  return { level, into: xp, need };
+}
 
+function paintLevel(totalSec) {
+  const xp = Math.floor(totalSec / 60) * XP_PER_MIN;
+  const lv = levelFromXp(xp);
+  const pct = Math.round(lv.into / lv.need * 100);
+  const card = document.getElementById('levelCard');
+  card.style.setProperty('--pct', pct);
+  document.getElementById('levelBadge').textContent = lv.level;
+  document.getElementById('levelTitle').textContent = 'Level ' + lv.level + ' · ' + xp.toLocaleString() + ' XP';
+  document.getElementById('levelNext').textContent = lv.into + ' / ' + lv.need + ' XP to level ' + (lv.level + 1);
+  window._level = lv.level;
+  updateUserUI();
+}
+
+// Play time counts the way the leaderboard counts it (leaderboard.sql): only
+// finished sessions that ended in the past (and, for an account, began no more
+// than 60 days before it was made), at most four hours each, with sessions
+// that overlap merged so no minute counts twice.
+const SESSION_CAP_SECS = 4 * 3600;
+function countedSessions(sessions, createdAt) {
+  const now = Date.now();
+  const floor = createdAt ? new Date(createdAt).getTime() - 60 * 86400000 : -Infinity;
+  return sessions.map(s => {
+    const a = new Date(s.started_at).getTime();
+    const end = s.ended_at ? new Date(s.ended_at).getTime()
+      : (s.duration_seconds != null ? a + s.duration_seconds * 1000 : NaN);
+    return { ...s, a, b: Math.min(end, a + SESSION_CAP_SECS * 1000) };
+  }).filter(s => s.a < s.b && s.b <= now && s.a >= floor);
+}
+// Seconds covered by a list of sessions, overlaps counted once.
+function spanSecs(list) {
+  const r = list.map(s => [s.a, s.b]).sort((x, y) => x[0] - y[0]);
+  let total = 0, cs = 0, ce = -Infinity;
+  for (const [a, b] of r) {
+    if (a > ce) { if (ce > cs) total += ce - cs; cs = a; ce = b; }
+    else if (b > ce) ce = b;
+  }
+  if (ce > cs) total += ce - cs;
+  return Math.round(total / 1000);
+}
+function computeAndShowStats(sessions, createdAt) {
+  const withDur = countedSessions(sessions, createdAt);
+  const totalSec = spanSecs(withDur);
+
+  paintLevel(totalSec);
   if (!withDur.length) {
     document.getElementById('statTime').textContent = '0s';
     document.getElementById('statPeriods').textContent = '0';
@@ -4211,7 +5246,6 @@ function computeAndShowStats(sessions) {
     renderTopGames([]);
     return;
   }
-  const totalSec = withDur.reduce((s, r) => s + (r.duration_seconds || 0), 0);
   document.getElementById('statTime').textContent = secsToHMS(totalSec);
   document.getElementById('statPeriods').textContent = (totalSec / PERIOD_SECS).toFixed(1);
   const counts = {};
@@ -4226,10 +5260,10 @@ function computeAndShowStats(sessions) {
   document.getElementById('statTopPeriod').textContent = top ? top[0] : '—';
 
   // Top 3 games by total playtime
+  const byGame = {};
+  withDur.forEach(s => { if (s.game_id) (byGame[s.game_id] = byGame[s.game_id] || []).push(s); });
   const gameTimes = {};
-  withDur.forEach(s => {
-    if (s.game_id) gameTimes[s.game_id] = (gameTimes[s.game_id] || 0) + (s.duration_seconds || 0);
-  });
+  Object.keys(byGame).forEach(g => { gameTimes[g] = spanSecs(byGame[g]); });
   const top3 = Object.entries(gameTimes).sort((a, b) => b[1] - a[1]).slice(0, 3);
   renderTopGames(top3);
 }
@@ -4241,7 +5275,7 @@ function renderTopGames(top3) {
   if (!top3.length) { sec.style.display = 'none'; return; }
   sec.style.display = '';
   el.innerHTML = top3.map(([gid, secs], i) => {
-    const game = (typeof GAMES !== 'undefined') ? GAMES.find(g => g.id === gid) : null;
+    const game = gamesById[gid] || null;
     const name = game ? game.name : gid;
     return '<div class="top-game-row">' +
       '<span class="top-game-rank">' + (i + 1) + '</span>' +
@@ -4272,6 +5306,9 @@ window._trackClose = function() {
   activeSession = null;
   addLocalSession({ gameId, startedAt, endedAt, durationSecs });
   if (!currentUser) return;
+  // Send the finished session now rather than on the next visit, so the
+  // coins it earned are there if the shop is opened next.
+  uploadLocalSessions().then(() => sb.rpc('gv_grant_coins')).then(() => {}, () => {});
   // Match by (user_id, game_id, started_at) — avoids supaId race condition
   sb.from('play_sessions')
     .update({ ended_at: endedAt })
@@ -4477,7 +5514,8 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
   async function openMoviePlayer(movie) {
     playerTitle.textContent = movie.title || 'Loading…';
     playerYear.textContent  = movie.year  || '';
-    playerFrame.innerHTML   = `<iframe src="${EMBED_MOVIE}${movie.id}" frameborder="0" allowfullscreen></iframe>`;
+    watching = 'movie:' + movie.id;
+    offerResume(`${EMBED_MOVIE}${movie.id}`);
     history.pushState({page:'movie', id: movie.id}, '', '/movie/' + movie.id);
 
     const posterSrc = movie.poster
@@ -4534,8 +5572,10 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
       <div class="movie-detail-overview" id="detailOverview"></div>
       <div class="tv-picker" id="tvPicker"><div class="tv-picker-loading">Loading seasons…</div></div>`;
 
-    tvState = { id: show.id, season: 1, episode: 1, seasons: [] };
-    loadTVFrame(show.id, 1, 1);
+    // Back to the last episode watched, if there was one.
+    const last = progressAll()['show:' + show.id];
+    tvState = { id: show.id, season: last ? last.s : 1, episode: last ? last.e : 1, seasons: [] };
+    loadTVFrame(show.id, tvState.season, tvState.episode);
     openOverlay();
 
     try {
@@ -4553,8 +5593,73 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
     }
   }
 
+  // ── Where you left off ──
+  // vidlink.pro reports progress with postMessage and can start at a time
+  // (?startAt=seconds). Progress is kept per movie and per episode, and the
+  // last episode per show, so a show opens where it was left.
+  const PROGRESS_KEY = 'gv.watch';
+  function progressAll() {
+    try { return JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}') || {}; } catch (e) { return {}; }
+  }
+  function progressSave(all) {
+    // Oldest first out, so the list cannot grow without end.
+    const keys = Object.keys(all).sort((a, b) => (all[a].at || 0) - (all[b].at || 0));
+    while (keys.length > 200) delete all[keys.shift()];
+    try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(all)); } catch (e) {}
+  }
+
+  // What is playing, as a progress key ('movie:<id>' or 'tv:<id>:<s>:<e>').
+  let watching = null;
+
+  function mmss(t) {
+    t = Math.floor(t);
+    const h = Math.floor(t / 3600), m = Math.floor(t % 3600 / 60), s = t % 60;
+    return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(s).padStart(2, '0');
+  }
+
+  // Starts the embed, first asking "Continue from 12:34?" when there is a
+  // real spot to go back to (past the first half minute, before the end).
+  function offerResume(src) {
+    const p = progressAll()[watching];
+    const start = at => {
+      playerFrame.innerHTML = '';
+      const f = document.createElement('iframe');
+      f.src = src + (at ? (src.includes('?') ? '&' : '?') + 'startAt=' + Math.floor(at) : '');
+      f.setAttribute('frameborder', '0');
+      f.setAttribute('allowfullscreen', '');
+      playerFrame.appendChild(f);
+    };
+    if (!p || !p.t || p.t < 30 || (p.d && p.t > p.d - 60)) { start(0); return; }
+    playerFrame.innerHTML = '<div class="movie-resume"><div class="movie-resume-q"></div>' +
+      '<div class="movie-resume-row"><button class="btn btn-primary" type="button" data-go="1">Continue</button>' +
+      '<button class="btn btn-ghost" type="button" data-go="0">Start over</button></div></div>';
+    playerFrame.querySelector('.movie-resume-q').textContent = 'Continue from ' + mmss(p.t) + '?';
+    playerFrame.querySelectorAll('[data-go]').forEach(b =>
+      b.addEventListener('click', () => start(b.dataset.go === '1' ? p.t : 0)));
+  }
+
+  // Progress from the embed, at most every few seconds.
+  let lastSaved = 0;
+  window.addEventListener('message', e => {
+    if (e.origin !== 'https://vidlink.pro' || !watching) return;
+    let m = e.data;
+    if (typeof m === 'string') { try { m = JSON.parse(m); } catch (err) { return; } }
+    if (!m || m.type !== 'PLAYER_EVENT' || !m.data) return;
+    const d = m.data;
+    const now = Date.now();
+    if (d.event === 'timeupdate' && now - lastSaved < 5000) return;
+    lastSaved = now;
+    const all = progressAll();
+    all[watching] = { t: d.event === 'ended' ? 0 : +d.currentTime || 0, d: +d.duration || 0, at: now };
+    progressSave(all);
+  });
+
   function loadTVFrame(id, season, episode) {
-    playerFrame.innerHTML = `<iframe src="${EMBED_TV}${id}/${season}/${episode}" frameborder="0" allowfullscreen></iframe>`;
+    const all = progressAll();
+    all['show:' + id] = { s: season, e: episode, at: Date.now() };
+    progressSave(all);
+    watching = 'tv:' + id + ':' + season + ':' + episode;
+    offerResume(`${EMBED_TV}${id}/${season}/${episode}`);
   }
 
   function renderTVPicker() {
@@ -4604,6 +5709,7 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
 
   // ── Close ──
   function closeMoviePlayer(silent) {
+    watching = null;
     overlay.classList.remove('visible');
     setTimeout(() => {
       overlay.classList.remove('open');
@@ -4642,7 +5748,7 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
   // ── Popstate ──
   window.addEventListener('popstate', function() {
     const p = location.pathname;
-    if (p === '/movie' || p === '/movie/') {
+    if (p === '/movie' || p === '/movie/' || p === '/movies' || p === '/movies/') {
       showSection(true); switchMode('movies', true);
       closeMoviePlayer(true);
     } else if (p.startsWith('/movie/')) {
@@ -4665,7 +5771,8 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
   // ── Init route ──
   (function() {
     const p = location.pathname;
-    if (p === '/movie' || p === '/movie/') {
+    // The section itself pushes /movies; a shared /movie means the same.
+    if (p === '/movie' || p === '/movie/' || p === '/movies' || p === '/movies/') {
       showSection(true); switchMode('movies', true);
     } else if (p.startsWith('/movie/')) {
       const id = p.slice(7).replace(/\/$/, '');
@@ -4768,7 +5875,18 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
       </div>
       <div>
         <div class="profile-name" id="profileName">Guest</div>
+        <div class="profile-title" id="profileTitle" hidden></div>
         <div class="profile-email" id="profileEmail" style="display:none"></div>
+      </div>
+    </div>
+
+    <div class="profile-section">
+      <div class="profile-section-label">Picture</div>
+      <div id="profileAvatarPicker"></div>
+      <div id="profileUploadRow" style="display:none">
+        <label class="profile-save" for="profileAvatarFile" style="display:block;text-align:center;margin-top:0.6rem;cursor:pointer">Upload a picture</label>
+        <input type="file" id="profileAvatarFile" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
+        <div class="profile-msg" id="profileAvatarMsg"></div>
       </div>
     </div>
 
@@ -4789,6 +5907,18 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
     <div class="profile-section">
       <div class="profile-section-label">Playtime Stats</div>
       <div class="stat-cards" id="statCards">
+        <div class="stat-card full level-card" id="levelCard">
+          <div class="level-badge" id="levelBadge">1</div>
+          <div style="flex:1;min-width:0">
+            <div class="stat-card-val" id="levelTitle">Level 1</div>
+            <div class="level-bar"><span id="levelBarFill"></span></div>
+            <div class="stat-card-lbl" id="levelNext">0 / 50 XP to level 2</div>
+          </div>
+        </div>
+        <a class="stat-card full coin-card" id="coinCard" href="/shop/" hidden>
+          <div class="stat-card-val" id="coinCount">0 coins</div>
+          <div class="stat-card-lbl" id="coinToday">0 of 120 today · open the shop</div>
+        </a>
         <div class="stat-card full">
           <div class="stat-card-icon">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 12"/></svg>
@@ -4818,7 +5948,16 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
       <div id="statTopGames"></div>
     </div>
 
+    <div class="profile-section" id="boardSection" hidden>
+      <label class="board-toggle">
+        <input type="checkbox" id="boardShow" checked>
+        <span>Show me on the <a href="/leaderboard/">leaderboard</a></span>
+      </label>
+    </div>
+
+    <a class="profile-save profile-link" id="profileTestLink" href="/test/" hidden>Test new games</a>
     <button class="profile-signout" id="profileSignout" style="display:none">Sign Out</button>
+    <button class="profile-delete" id="profileDelete" style="display:none">Delete account</button>
     <button class="auth-submit" id="profileSigninBtn" style="margin-top:0.5rem">Sign In / Sign Up</button>
   </div>
 </div>

@@ -13,6 +13,22 @@
   --muted: #8a8a96;
   --muted-2: #54545e;
   --accent: #ff3b3b; /* the one color — used sparingly */
+  --glass: rgba(8,8,10,0.82);
+}
+
+/* Light theme, set on <html> by js/mimicry.js before the first paint. */
+:root[data-theme="light"] {
+  --bg: #f4f4f6;
+  --surface: #ffffff;
+  --surface-2: #ececf1;
+  --border: rgba(0,0,0,0.09);
+  --border-strong: rgba(0,0,0,0.2);
+  --text: #141418;
+  --muted: #5c5c68;
+  --muted-2: #8c8c97;
+  --accent: #e0262f;
+  --glass: rgba(244,244,246,0.86);
+  color-scheme: light;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -77,12 +93,24 @@ body {
     rgba(255,255,255,0.012) 3px, rgba(255,255,255,0.012) 4px);
 }
 
+/* Light theme: the grid goes dark-on-light and the glow layers step aside. */
+:root[data-theme="light"] .bg::before {
+  background-image:
+    linear-gradient(rgba(0,0,0,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.06) 1px, transparent 1px);
+}
+:root[data-theme="light"] .bg::after,
+:root[data-theme="light"] .orb,
+:root[data-theme="light"] .scanlines { display: none; }
+:root[data-theme="light"] .site-footer { background: rgba(255,255,255,0.6); }
+:root[data-theme="light"] .btn:hover { background: rgba(0,0,0,0.05); }
+
 /* ───────────── Header ───────────── */
 .site-header {
   position: sticky; top: 0; z-index: 200;
   display: flex; align-items: center; gap: 1rem;
   padding: 0.85rem 1.25rem;
-  background: rgba(8,8,10,0.82);
+  background: var(--glass);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border);
 }
@@ -301,4 +329,11 @@ table.gv td:first-child { color: var(--text); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
   html { scroll-behavior: auto; }
+}
+
+/* Phones: the header keeps the brand and the apps button; the links move
+   into the apps drawer (js/apps.js), which has all of them. */
+@media (max-width: 700px) {
+  .site-nav { display: none; }
+  .site-header .gv-apps { margin-left: auto; }
 }

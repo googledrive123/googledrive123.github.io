@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Send a game · GameVault</title>
+  <meta name="description" content="Send the GameVault owner a game as a .zip file.">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="/favicon.svg">
+  <!-- Blocking on purpose: the cloak has to land before the first paint. -->
+  <script src="/js/mimicry.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/site.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
+  <script src="/js/identity.js" defer></script>
+  <script src="/js/analytics.js" defer></script>
+  <script src="/js/site.js" defer></script>
+  <script src="/js/player.js" defer></script>
+  <style>
+    .page .panel > p:not([class]) { font-size: 0.9rem; }
+    .page a.btn { text-decoration: none; }
+
+    /* The one rule of the page, so it sits above the fields, not under them. */
+    .page .warn {
+      padding: 0.75rem 0.9rem;
+      border-radius: 10px;
+      border: 1px solid rgba(240,192,74,0.4);
+      background: rgba(240,192,74,0.06);
+      color: var(--text);
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    .form-field { display: block; margin-top: 1rem; }
+    .form-label { display: block; font-size: 0.82rem; color: var(--text); margin-bottom: 0.4rem; }
+    .form-hint { color: var(--muted-2); font-size: 0.75rem; margin-left: 0.3rem; }
+    textarea.field { resize: vertical; min-height: 6rem; line-height: 1.5; }
+
+    .drop {
+      position: relative;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.3rem;
+      padding: 1.5rem 1rem;
+      border-radius: 10px;
+      border: 1px dashed var(--border-strong);
+      background: var(--bg);
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .drop:hover, .drop.over { border-color: var(--muted); background: var(--surface-2); }
+    .drop:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .drop.has-file { border-style: solid; border-color: rgba(92,224,138,0.45); }
+    .drop.bad { border-color: rgba(255,59,59,0.6); }
+    /* Covers the whole box, so a click or a drop anywhere lands on the input. */
+    .drop input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+    .drop-main { font-size: 0.9rem; color: var(--text); overflow-wrap: anywhere; }
+    .drop-sub { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--muted-2); }
+
+    .send-note { font-size: 0.82rem; color: var(--muted); margin-top: 0.75rem; line-height: 1.5; }
+    .send-note:empty { display: none; }
+    .send-note.bad { color: var(--accent); }
+    .send-note.good { color: #5ce08a; }
+
+    .mine { border-top: 1px solid var(--border); }
+    .mine-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .mine-info { min-width: 0; }
+    .mine-title { font-size: 0.9rem; color: var(--text); overflow-wrap: anywhere; }
+    .mine-meta { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--muted-2); margin-top: 0.2rem; }
+  </style>
+</head>
+<body>
+<main class="page">
+  <div class="page-kicker">submit</div>
+  <h1>Send a game</h1>
+  <p class="lede">Made a game, or know one GameVault should have? Send it as a .zip and the site
+  owner will take a look.</p>
+
+  <p class="panel-note" id="gate">Checking your account…</p>
+
+  <div class="panel" id="signedOut" hidden>
+    <p>Sign in to send a game, so the owner can tell who it came from.</p>
+    <div class="btn-row">
+      <a class="btn" href="/">Sign in on the home page</a>
+    </div>
+  </div>
+
+  <form class="panel" id="form" hidden novalidate>
+    <div class="panel-label">Your game</div>
+    <p class="warn">Only the site owner sees uploads. Never upload games you don't have the right
+    to share.</p>
+
+    <label class="form-field">
+      <span class="form-label">Name</span>
+      <input class="field" id="title" maxlength="80" autocomplete="off" required>
+    </label>
+    <label class="form-field">
+      <span class="form-label">Link <span class="form-hint">optional</span></span>
+      <input class="field" id="link" type="url" maxlength="300" autocomplete="off"
+        placeholder="https://… where it comes from or runs now">
+    </label>
+    <label class="form-field">
+      <span class="form-label">Notes <span class="form-hint">optional</span></span>
+      <textarea class="field" id="notes" maxlength="1000" rows="4"
+        placeholder="How to play, who made it, anything the owner should know"></textarea>
+    </label>
+
+    <div class="form-field">
+      <span class="form-label">Game files</span>
+      <label class="drop" id="drop">
+        <input type="file" id="file" accept=".zip,application/zip,application/x-zip-compressed">
+        <span class="drop-main" id="dropMain">Choose a .zip file</span>
+        <span class="drop-sub" id="dropSub">or drop it here · 50 MB at most</span>
+      </label>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="sendBtn" type="submit">Send game</button>
+    </div>
+    <p class="send-note" id="sendNote" role="status" aria-live="polite"></p>
+  </form>
+
+  <div class="panel" id="minePanel" hidden>
+    <div class="panel-label">What you sent</div>
+    <div class="mine" id="mine"></div>
+  </div>
+
+<script>
+/* supabase-js is deferred like the rest of the chrome, and deferred scripts
+   run before DOMContentLoaded, so window.supabase is ready by then. */
+document.addEventListener('DOMContentLoaded', function () {
+  var SUPA_URL = 'https://dxwjxzmlezfyursysays.supabase.co';
+  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
+
+  function $(id) { return document.getElementById(id); }
+
+  function el(tag, cls, text) {
+    var node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text) node.textContent = text;
+    return node;
+  }
+
+  function message(err) {
+    return (err && err.message) || 'Something went wrong. Try again.';
+  }
+
+  function size(bytes) {
+    if (bytes == null) return '';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return Math.max(1, Math.round(bytes / 1024)) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  function when(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    var day = { day: 'numeric', month: 'short' };
+    if (d.getFullYear() !== new Date().getFullYear()) day.year = 'numeric';
+    return d.toLocaleDateString(undefined, day);
+  }
+
+  var sb = null;
+  try { sb = window.supabase.createClient(SUPA_URL, SUPA_KEY); } catch (e) {}
+  var user = null;
+
+  function rpc(name, args) {
+    return sb.rpc(name, args || {}).then(function (r) {
+      if (r.error) throw r.error;
+      return r.data;
+    });
+  }
+
+  var STATUS = {
+    pending:  { label: 'Waiting',   badge: 'soon' },
+    approved: { label: 'Approved',  badge: 'added' },
+    rejected: { label: 'Not added', badge: 'denied' }
+  };
+
+  function renderMine(list) {
+    var box = $('mine');
+    box.textContent = '';
+    $('minePanel').hidden = !list.length;
+    list.forEach(function (s) {
+      var row = el('div', 'mine-row');
+      var info = el('div', 'mine-info');
+      info.appendChild(el('div', 'mine-title', s.title));
+      info.appendChild(el('div', 'mine-meta', size(s.size_bytes) + ' · ' + when(s.created_at)));
+      row.appendChild(info);
+      var st = STATUS[s.status] || { label: s.status, badge: '' };
+      row.appendChild(el('span', 'badge ' + st.badge, st.label));
+      box.appendChild(row);
+    });
+  }
+
+  // The bucket's own limit, see submit.sql. Checked here first so nobody
+  // waits through an upload that is going to be refused.
+  var MAX_BYTES = 50 * 1024 * 1024;
+  var fileInput = $('file');
+  var drop = $('drop');
+
+  function note(text, tone) {
+    var n = $('sendNote');
+    n.textContent = text || '';
+    n.className = 'send-note' + (tone ? ' ' + tone : '');
+  }
+
+  function fileProblem(f) {
+    if (!f) return 'Choose the .zip with your game in it.';
+    if (!/\.zip$/i.test(f.name)) return 'That is not a .zip file. Put the game\'s files in a .zip first.';
+    if (f.size < 1) return 'That .zip is empty.';
+    if (f.size > MAX_BYTES) return 'That .zip is ' + size(f.size) + '. It has to be 50 MB or smaller.';
+    return null;
+  }
+
+  function showFile() {
+    var f = fileInput.files && fileInput.files[0];
+    var problem = f ? fileProblem(f) : null;
+    drop.classList.toggle('has-file', !!f && !problem);
+    drop.classList.toggle('bad', !!problem);
+    $('dropMain').textContent = f ? f.name : 'Choose a .zip file';
+    $('dropSub').textContent = f ? size(f.size) + ' · click to pick another' : 'or drop it here · 50 MB at most';
+    note(problem || '', problem ? 'bad' : '');
+  }
+
+  fileInput.addEventListener('change', showFile);
+  // A refusal stops being true once the words it was about change.
+  ['title', 'link', 'notes'].forEach(function (id) {
+    $(id).addEventListener('input', function () {
+      if ($('sendNote').classList.contains('bad')) note('');
+    });
+  });
+  ['dragenter', 'dragover'].forEach(function (t) {
+    drop.addEventListener(t, function () { drop.classList.add('over'); });
+  });
+  ['dragleave', 'drop'].forEach(function (t) {
+    drop.addEventListener(t, function () { drop.classList.remove('over'); });
+  });
+
+  // <user id>/<milliseconds>-<name>.zip is the only shape the bucket takes.
+  function storagePath(f) {
+    var base = f.name.replace(/\.zip$/i, '').replace(/[^A-Za-z0-9._-]+/g, '-')
+      .replace(/-+/g, '-').replace(/^[-.]+|[-.]+$/g, '').slice(0, 60);
+    return user.id + '/' + Date.now() + '-' + (base || 'game') + '.zip';
+  }
+
+  // Storage answers in its own words; these are the ones a player can act on.
+  function uploadMessage(err) {
+    var text = String((err && (err.message || err.error)) || '');
+    if (String(err && err.statusCode) === '413' || /maximum allowed size|too large/i.test(text)) {
+      return 'That .zip is over 50 MB, the most one upload can be.';
+    }
+    if (/mime type/i.test(text)) return 'Only .zip files can be sent.';
+    if (/row-level security/i.test(text)) return 'You have sent a lot of files today. Try again tomorrow.';
+    if (/failed to fetch|networkerror|load failed/i.test(text)) {
+      return 'The upload did not get through. Check your connection and try again.';
+    }
+    return text || 'The upload did not get through. Try again.';
+  }
+
+  function setBusy(on) {
+    $('form').querySelectorAll('input, textarea, button').forEach(function (x) { x.disabled = on; });
+    $('sendBtn').textContent = on ? 'Sending…' : 'Send game';
+  }
+
+  $('form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var f = fileInput.files && fileInput.files[0];
+    var fields = { p_title: $('title').value, p_link: $('link').value, p_notes: $('notes').value };
+    if (!fields.p_title.trim()) { note('Give the game a name.', 'bad'); $('title').focus(); return; }
+    var problem = fileProblem(f);
+    if (problem) { note(problem, 'bad'); return; }
+
+    setBusy(true);
+    note('Checking…');
+    var path = storagePath(f);
+    // The words are checked before the file goes, so a refused name does not
+    // cost a 50 MB upload.
+    rpc('gv_submission_check', Object.assign({ p_size: f.size }, fields))
+      .then(function () {
+        note('Uploading ' + size(f.size) + '. A big file can take a minute, so keep this tab open.');
+        return sb.storage.from('submissions').upload(path, f, { contentType: 'application/zip', upsert: false });
+      })
+      .then(function (r) {
+        if (r.error) throw new Error(uploadMessage(r.error));
+        return rpc('gv_submission_create', Object.assign({ p_path: path, p_size: f.size }, fields));
+      })
+      .then(function () {
+        $('form').reset();
+        showFile();
+        note('Sent. The site owner will take a look.', 'good');
+        return refreshMine();
+      }, function (err) {
+        note(message(err), 'bad');
+      })
+      .then(function () { setBusy(false); });
+  });
+
+  function refreshMine() {
+    return rpc('gv_submission_mine').then(renderMine, function () {});
+  }
+
+  (sb ? sb.auth.getSession() : Promise.reject(new Error('Could not reach GameVault. Check your connection and reload.')))
+    .then(function (r) {
+      user = r.data && r.data.session && r.data.session.user;
+      $('gate').hidden = true;
+      if (!user) { $('signedOut').hidden = false; return; }
+      $('form').hidden = false;
+      return refreshMine();
+    })
+    .catch(function (err) {
+      $('gate').textContent = message(err);
+    });
+});
+</script>
+</main>
+</body>
+</html>
