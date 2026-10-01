@@ -1878,5 +1878,6 @@
 {"id":"red-scarf-platformer","name":"Red Scarf Platformer","categories":["Platformer"],"ranking":2032,"img":"/thumbs/red-scarf-platformer.webp","src":null,"site":62,"added":"2026-09-30"},
 {"id":"peeper-reaper","name":"Peeper Reaper","categories":["Skill"],"ranking":2033,"img":"/thumbs/peeper-reaper.webp","src":null,"site":62,"added":"2026-09-30"},
 {"id":"ninja-auto-run","name":"Ninja Auto Run","categories":["Platformer"],"ranking":2034,"img":"/thumbs/ninja-auto-run.webp","src":null,"site":62,"added":"2026-09-30"},
-{"id":"mini-swim","name":"Mini Swim","categories":["Skill"],"ranking":2035,"img":"/thumbs/mini-swim.webp","src":null,"site":62,"added":"2026-09-30"}
+{"id":"mini-swim","name":"Mini Swim","categories":["Skill"],"ranking":2035,"img":"/thumbs/mini-swim.webp","src":null,"site":62,"added":"2026-09-30"},
+{"id":"mini-flips","name":"Mini Flips","categories":["Platformer"],"ranking":2036,"img":"/thumbs/mini-flips.webp","src":null,"site":62,"added":"2026-09-30"}
 ]}
