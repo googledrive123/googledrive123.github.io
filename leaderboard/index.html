@@ -131,6 +131,7 @@
   var sb = null;
   var data = null;
   var people = {};   // account id -> { username, preset, upload }
+  var catalog = {};  // game id -> games.json entry
 
   function $(id) { return document.getElementById(id); }
 
@@ -217,6 +218,88 @@
     });
   }
 
+  function gameLink(g) {
+    var a = document.createElement('a');
+    a.className = 'lb-game';
+    a.href = '/games/' + encodeURIComponent(g.id);
+    var th = document.createElement('span');
+    th.className = 'lb-thumb';
+    if (g.img) th.style.backgroundImage = 'url("' + String(g.img).replace(/"/g, '%22') + '")';
+    var nm = document.createElement('span');
+    nm.textContent = g.name;
+    a.append(th, nm);
+    return a;
+  }
+
+  function paintGames() {
+    var body = $('lbGameRows');
+    body.textContent = '';
+    var q = $('lbFind').value.trim().toLowerCase();
+    var shown = 0;
+    data.games.forEach(function (row, i) {
+      var g = catalog[row.id];
+      if (!g) return;
+      if (q && g.name.toLowerCase().indexOf(q) === -1) return;
+      shown++;
+      var tr = document.createElement('tr');
+      tr.className = 'lb-open-row';
+      tr.dataset.game = row.id;
+      tr.appendChild(td('rank', String(i + 1)));
+      tr.appendChild(td('', gameLink(g)));
+      tr.appendChild(td('num', hours(row.sec)));
+      tr.appendChild(td('num lb-hide-sm', String(row.players)));
+      var top = who(row.top, true);
+      var t = document.createElement('small');
+      t.textContent = hours(row.top_sec);
+      top.appendChild(t);
+      tr.appendChild(td('lb-hide-sm', top));
+      body.appendChild(tr);
+    });
+    if (!shown) {
+      var tr = document.createElement('tr');
+      var c = td('', q ? 'No game on the board matches that.' : 'No games have been played yet.');
+      c.colSpan = 5;
+      tr.appendChild(c);
+      body.appendChild(tr);
+    }
+  }
+
+  // A click on a game's row (not its link) opens its top ten under it.
+  function toggleGame(tr) {
+    var next = tr.nextElementSibling;
+    if (next && next.classList.contains('lb-detail')) { next.remove(); return; }
+    var row = document.createElement('tr');
+    row.className = 'lb-detail';
+    var c = td('', 'Loading…');
+    c.colSpan = 5;
+    row.appendChild(c);
+    tr.after(row);
+    sb.rpc('gv_leaderboard_game', { p_game_id: tr.dataset.game }).then(function (r) {
+      if (r.error) throw new Error(r.error.message);
+      var list = r.data || [];
+      return GV.avatars.publicProfiles(list.map(function (p) { return p.id; })).then(function (rows) {
+        rows.forEach(function (p) { people[p.id] = p; });
+        return list;
+      });
+    }).then(function (list) {
+      var ol = document.createElement('ol');
+      ol.className = 'lb-detail-list';
+      list.forEach(function (p, i) {
+        var li = document.createElement('li');
+        var left = who(p.id, true);
+        var n = document.createElement('small');
+        n.textContent = '#' + (i + 1);
+        left.prepend(n);
+        var right = document.createElement('span');
+        right.textContent = hours(p.sec);
+        li.append(left, right);
+        ol.appendChild(li);
+      });
+      c.textContent = '';
+      c.appendChild(ol);
+    }).catch(function () { c.textContent = 'Could not load this game\'s players.'; });
+  }
+
   function show(tab) {
     document.querySelectorAll('.lb-tab').forEach(function (b) {
       b.setAttribute('aria-selected', b.dataset.tab === tab ? 'true' : 'false');
@@ -231,7 +314,8 @@
     return sb.rpc('gv_leaderboard').then(function (r) {
       if (r.error) throw new Error(r.error.message);
       data = r.data;
-      var ids = data.players.concat(data.week).map(function (p) { return p.id; });
+      var ids = data.players.concat(data.week).map(function (p) { return p.id; })
+        .concat(data.games.map(function (g) { return g.top; }));
       return window.GV && GV.avatars ? GV.avatars.publicProfiles(ids).then(function (rows) {
         rows.forEach(function (row) { people[row.id] = row; });
       }).catch(function () {}) : null;
@@ -239,10 +323,18 @@
       $('lbMsg').textContent = data.players.length ? '' : 'Nobody is on the board yet. Sign in and play a game to be first.';
       paintPlayers();
       paintWeek();
+      paintGames();
     }).catch(function () {
       $('lbMsg').textContent = 'The leaderboard could not load. Refresh to try again.';
     });
   }
+
+  $('lbFind').addEventListener('input', function () { if (data) paintGames(); });
+  $('lbGameRows').addEventListener('click', function (e) {
+    if (e.target.closest('a')) return;
+    var tr = e.target.closest('tr.lb-open-row');
+    if (tr) toggleGame(tr);
+  });
 
   document.querySelectorAll('.lb-tab').forEach(function (b) {
     b.addEventListener('click', function () { show(b.dataset.tab); });
@@ -258,7 +350,10 @@
     // Restores the home page's session, if any, so the board can say where
     // a signed-in player stands.
     sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
-    sb.auth.getSession().then(load);
+    var games = fetch('/games.json').then(function (r) { return r.json(); }).then(function (d) {
+      (d.games || []).forEach(function (g) { catalog[g.id] = g; });
+    }).catch(function () {});
+    Promise.all([games, sb.auth.getSession()]).then(load);
   });
 })();
 </script>
