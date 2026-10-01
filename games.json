@@ -1800,5 +1800,6 @@
 {"id":"pixwars-2","name":"Pixwars 2","categories":["Shooter"],"ranking":1954,"img":"/thumbs/pixwars-2.webp","src":null,"site":59,"added":"2026-09-30"},
 {"id":"strike-force-heroes","name":"Strike Force Heroes","categories":["Shooter"],"ranking":1955,"img":"/thumbs/strike-force-heroes.webp","src":null,"site":59,"added":"2026-09-30"},
 {"id":"burger-tycoon","name":"Burger Tycoon","categories":["Idle"],"ranking":1956,"img":"/thumbs/burger-tycoon.webp","src":null,"site":59,"added":"2026-09-30"},
-{"id":"miragine-war","name":"Miragine War","categories":["Strategy"],"ranking":1957,"img":"/thumbs/miragine-war.webp","src":null,"site":59,"added":"2026-09-30"}
+{"id":"miragine-war","name":"Miragine War","categories":["Strategy"],"ranking":1957,"img":"/thumbs/miragine-war.webp","src":null,"site":59,"added":"2026-09-30"},
+{"id":"superfighters","name":"Superfighters","categories":["Action"],"ranking":1958,"img":"/thumbs/superfighters.webp","src":null,"site":59,"added":"2026-09-30"}
 ]}
