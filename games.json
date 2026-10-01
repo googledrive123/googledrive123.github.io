@@ -1531,5 +1531,6 @@
 {"id":"tricks","name":"Tricks","categories":["Skill"],"ranking":1685,"img":"/thumbs/tricks.webp","src":null,"site":55,"added":"2026-09-30"},
 {"id":"traffic-rush","name":"Traffic Rush","categories":["Driving"],"ranking":1686,"img":"/thumbs/traffic-rush.webp","src":null,"site":55,"added":"2026-09-30"},
 {"id":"tower-of-destiny","name":"Tower Of Destiny","categories":["Platformer"],"ranking":1687,"img":"/thumbs/tower-of-destiny.webp","src":null,"site":55,"added":"2026-09-30"},
-{"id":"touchdowners","name":"Touchdowners","categories":["Sports"],"ranking":1688,"img":"/thumbs/touchdowners.webp","src":null,"site":55,"added":"2026-09-30"}
+{"id":"touchdowners","name":"Touchdowners","categories":["Sports"],"ranking":1688,"img":"/thumbs/touchdowners.webp","src":null,"site":55,"added":"2026-09-30"},
+{"id":"top-speed-racing-3d","name":"Top Speed Racing 3D","categories":["Racing"],"ranking":1689,"img":"/thumbs/top-speed-racing-3d.webp","src":null,"site":55,"added":"2026-09-30"}
 ]}
