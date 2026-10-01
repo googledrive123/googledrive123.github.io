@@ -1907,5 +1907,6 @@
 {"id":"doubleup","name":"Doubleup","categories":["Skill"],"ranking":2061,"img":"/thumbs/doubleup.webp","src":null,"site":62,"added":"2026-09-30"},
 {"id":"toms-trial","name":"Tom's Trial","categories":["Skill"],"ranking":2062,"img":"/thumbs/toms-trial.webp","src":null,"site":62,"added":"2026-09-30"},
 {"id":"jetpack-kiwi","name":"Jetpack Kiwi","categories":["Platformer"],"ranking":2063,"img":"/thumbs/jetpack-kiwi.webp","src":null,"site":62,"added":"2026-09-30"},
-{"id":"a-maniac","name":"A Maniac","categories":["Skill"],"ranking":2064,"img":"/thumbs/a-maniac.webp","src":null,"site":62,"added":"2026-09-30"}
+{"id":"a-maniac","name":"A Maniac","categories":["Skill"],"ranking":2064,"img":"/thumbs/a-maniac.webp","src":null,"site":62,"added":"2026-09-30"},
+{"id":"duck-life-treasure-hunt","name":"Duck Life Treasure Hunt","categories":["Simulation"],"ranking":2065,"img":"/thumbs/duck-life-treasure-hunt.webp","src":null,"site":62,"added":"2026-09-30"}
 ]}
