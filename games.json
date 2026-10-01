@@ -1875,5 +1875,6 @@
 {"id":"sector-01","name":"Sector 01","categories":["Skill"],"ranking":2029,"img":"/thumbs/sector-01.webp","src":null,"site":61,"added":"2026-09-30"},
 {"id":"strg-snek","name":"Strg Snek","categories":["Arcade"],"ranking":2030,"img":"/thumbs/strg-snek.webp","src":null,"site":61,"added":"2026-09-30"},
 {"id":"rotate-box","name":"Rotate Box","categories":["Puzzle"],"ranking":2031,"img":"/thumbs/rotate-box.webp","src":null,"site":61,"added":"2026-09-30"},
-{"id":"red-scarf-platformer","name":"Red Scarf Platformer","categories":["Platformer"],"ranking":2032,"img":"/thumbs/red-scarf-platformer.webp","src":null,"site":62,"added":"2026-09-30"}
+{"id":"red-scarf-platformer","name":"Red Scarf Platformer","categories":["Platformer"],"ranking":2032,"img":"/thumbs/red-scarf-platformer.webp","src":null,"site":62,"added":"2026-09-30"},
+{"id":"peeper-reaper","name":"Peeper Reaper","categories":["Skill"],"ranking":2033,"img":"/thumbs/peeper-reaper.webp","src":null,"site":62,"added":"2026-09-30"}
 ]}
