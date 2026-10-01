@@ -1741,5 +1741,6 @@
 {"id":"biters-io","name":"Biters.io","categories":["Multiplayer"],"ranking":1895,"img":"/thumbs/biters-io.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"boxing-physics","name":"Boxing Physics","categories":["Sports"],"ranking":1896,"img":"/thumbs/boxing-physics.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"cupcake-2048","name":"Cupcake 2048","categories":["Puzzle"],"ranking":1897,"img":"/thumbs/cupcake-2048.webp","src":null,"site":57,"added":"2026-09-30"},
-{"id":"cyber-city-driver","name":"Cyber City Driver","categories":["Driving"],"ranking":1898,"img":"/thumbs/cyber-city-driver.webp","src":null,"site":57,"added":"2026-09-30"}
+{"id":"cyber-city-driver","name":"Cyber City Driver","categories":["Driving"],"ranking":1898,"img":"/thumbs/cyber-city-driver.webp","src":null,"site":57,"added":"2026-09-30"},
+{"id":"drift-city","name":"Drift City","categories":["Racing"],"ranking":1899,"img":"/thumbs/drift-city.webp","src":null,"site":57,"added":"2026-09-30"}
 ]}
