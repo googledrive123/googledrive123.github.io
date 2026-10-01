@@ -1815,5 +1815,6 @@
 {"id":"roll-merge-3d","name":"Roll Merge 3D","categories":["Skill"],"ranking":1969,"img":"/thumbs/roll-merge-3d.webp","src":null,"site":60,"added":"2026-09-30"},
 {"id":"ordeals-of-december","name":"Ordeals Of December","categories":["Skill"],"ranking":1970,"img":"/thumbs/ordeals-of-december.webp","src":null,"site":60,"added":"2026-09-30"},
 {"id":"one-screen-run-2","name":"One Screen Run 2","categories":["Platformer"],"ranking":1971,"img":"/thumbs/one-screen-run-2.webp","src":null,"site":60,"added":"2026-09-30"},
-{"id":"indestructotank-gb","name":"Indestructotank GB","categories":["Shooter"],"ranking":1972,"img":"/thumbs/indestructotank-gb.webp","src":null,"site":60,"added":"2026-09-30"}
+{"id":"indestructotank-gb","name":"Indestructotank GB","categories":["Shooter"],"ranking":1972,"img":"/thumbs/indestructotank-gb.webp","src":null,"site":60,"added":"2026-09-30"},
+{"id":"gaia","name":"Gaia","categories":["Skill"],"ranking":1973,"img":"/thumbs/gaia.webp","src":null,"site":60,"added":"2026-09-30"}
 ]}
