@@ -1708,5 +1708,6 @@
 {"id":"afterlife","name":"Afterlife","categories":["Skill"],"ranking":1862,"img":"/thumbs/afterlife.webp","src":null,"site":58,"added":"2026-09-30"},
 {"id":"flat-guys","name":"Flat Guys","categories":["Skill"],"ranking":1863,"img":"/thumbs/flat-guys.webp","src":null,"site":58,"added":"2026-09-30"},
 {"id":"monke","name":"Monke","categories":["Platformer"],"ranking":1864,"img":"/thumbs/monke.webp","src":null,"site":58,"added":"2026-09-30"},
-{"id":"pixel-bear-adventure","name":"Pixel Bear Adventure","categories":["Platformer"],"ranking":1865,"img":"/thumbs/pixel-bear-adventure.webp","src":null,"site":58,"added":"2026-09-30"}
+{"id":"pixel-bear-adventure","name":"Pixel Bear Adventure","categories":["Platformer"],"ranking":1865,"img":"/thumbs/pixel-bear-adventure.webp","src":null,"site":58,"added":"2026-09-30"},
+{"id":"pixel-speedrun","name":"Pixel Speedrun","categories":["Platformer"],"ranking":1866,"img":"/thumbs/pixel-speedrun.webp","src":null,"site":58,"added":"2026-09-30"}
 ]}
