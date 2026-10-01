@@ -1702,5 +1702,6 @@
 {"id":"tic-tac-toe","name":"Tic-Tac-Toe","categories":["Puzzle"],"ranking":1856,"img":"/thumbs/tic-tac-toe.webp","src":null,"site":58,"added":"2026-09-30"},
 {"id":"tower-master","name":"Tower Master","categories":["Arcade"],"ranking":1857,"img":"/thumbs/tower-master.webp","src":null,"site":58,"added":"2026-09-30"},
 {"id":"tv-static","name":"TV Static","categories":["Sandbox"],"ranking":1858,"img":"/thumbs/tv-static.webp","src":null,"site":58,"added":"2026-09-30"},
-{"id":"whac-a-mole","name":"Whac-A-Mole","categories":["Arcade"],"ranking":1859,"img":"/thumbs/whac-a-mole.webp","src":null,"site":58,"added":"2026-09-30"}
+{"id":"whac-a-mole","name":"Whac-A-Mole","categories":["Arcade"],"ranking":1859,"img":"/thumbs/whac-a-mole.webp","src":null,"site":58,"added":"2026-09-30"},
+{"id":"legend-of-zelda-maker","name":"Legend of Zelda Maker","categories":["Adventure"],"ranking":1860,"img":"/thumbs/legend-of-zelda-maker.webp","src":null,"site":58,"added":"2026-09-30"}
 ]}
