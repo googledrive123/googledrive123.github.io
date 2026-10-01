@@ -1528,5 +1528,6 @@
 {"id":"pool-club","name":"Pool Club","categories":["Sports"],"ranking":1682,"img":"/thumbs/pool-club.webp","src":null,"site":55,"added":"2026-09-30"},
 {"id":"ultimate-car-driving","name":"Ultimate Car Driving","categories":["Driving"],"ranking":1683,"img":"/thumbs/ultimate-car-driving.webp","src":null,"site":55,"added":"2026-09-30"},
 {"id":"two-neon-boxes","name":"Two Neon Boxes","categories":["Puzzle"],"ranking":1684,"img":"/thumbs/two-neon-boxes.webp","src":null,"site":55,"added":"2026-09-30"},
-{"id":"tricks","name":"Tricks","categories":["Skill"],"ranking":1685,"img":"/thumbs/tricks.webp","src":null,"site":55,"added":"2026-09-30"}
+{"id":"tricks","name":"Tricks","categories":["Skill"],"ranking":1685,"img":"/thumbs/tricks.webp","src":null,"site":55,"added":"2026-09-30"},
+{"id":"traffic-rush","name":"Traffic Rush","categories":["Driving"],"ranking":1686,"img":"/thumbs/traffic-rush.webp","src":null,"site":55,"added":"2026-09-30"}
 ]}
