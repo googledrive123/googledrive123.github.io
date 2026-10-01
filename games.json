@@ -1885,5 +1885,6 @@
 {"id":"hummin-out","name":"Hummin' Out","categories":["Skill"],"ranking":2039,"img":"/thumbs/hummin-out.webp","src":null,"site":62,"added":"2026-09-30"},
 {"id":"haunted-rooms","name":"Haunted Rooms","categories":["Horror"],"ranking":2040,"img":"/thumbs/haunted-rooms.webp","src":null,"site":62,"added":"2026-09-30"},
 {"id":"contractomaton","name":"Contractomaton","categories":["Skill"],"ranking":2041,"img":"/thumbs/contractomaton.webp","src":null,"site":62,"added":"2026-09-30"},
-{"id":"arrow-box","name":"Arrow Box","categories":["Puzzle"],"ranking":2042,"img":"/thumbs/arrow-box.webp","src":null,"site":62,"added":"2026-09-30"}
+{"id":"arrow-box","name":"Arrow Box","categories":["Puzzle"],"ranking":2042,"img":"/thumbs/arrow-box.webp","src":null,"site":62,"added":"2026-09-30"},
+{"id":"viscous-ventures","name":"Viscous Ventures","categories":["Skill"],"ranking":2043,"img":"/thumbs/viscous-ventures.webp","src":null,"site":62,"added":"2026-09-30"}
 ]}
