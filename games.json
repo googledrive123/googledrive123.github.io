@@ -1868,5 +1868,6 @@
 {"id":"blacken-slash-demo","name":"Blacken Slash Demo","categories":["Action"],"ranking":2022,"img":"/thumbs/blacken-slash-demo.webp","src":null,"site":61,"added":"2026-09-30"},
 {"id":"magirune","name":"Magirune","categories":["Skill"],"ranking":2023,"img":"/thumbs/magirune.webp","src":null,"site":61,"added":"2026-09-30"},
 {"id":"logica-emotica","name":"Logica Emotica","categories":["Puzzle"],"ranking":2024,"img":"/thumbs/logica-emotica.webp","src":null,"site":61,"added":"2026-09-30"},
-{"id":"hall-of-palettes","name":"Hall Of Palettes","categories":["Puzzle"],"ranking":2025,"img":"/thumbs/hall-of-palettes.webp","src":null,"site":61,"added":"2026-09-30"}
+{"id":"hall-of-palettes","name":"Hall Of Palettes","categories":["Puzzle"],"ranking":2025,"img":"/thumbs/hall-of-palettes.webp","src":null,"site":61,"added":"2026-09-30"},
+{"id":"nova-cloudwalkers","name":"Nova Cloudwalkers","categories":["Skill"],"ranking":2026,"img":"/thumbs/nova-cloudwalkers.webp","src":null,"site":61,"added":"2026-09-30"}
 ]}
