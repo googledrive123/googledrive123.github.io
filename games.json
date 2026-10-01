@@ -1568,5 +1568,6 @@
 {"id":"stickshot","name":"Stickshot","categories":["Puzzle"],"ranking":1722,"img":"/thumbs/stickshot.webp","src":null,"site":56,"added":"2026-09-30"},
 {"id":"neon-blaster","name":"Neon Blaster","categories":["Shooter"],"ranking":1723,"img":"/thumbs/neon-blaster.webp","src":null,"site":56,"added":"2026-09-30"},
 {"id":"renegade-racing","name":"Renegade Racing","categories":["Racing"],"ranking":1724,"img":"/thumbs/renegade-racing.webp","src":null,"site":56,"added":"2026-09-30"},
-{"id":"acid-bunny-2","name":"Acid Bunny 2","categories":["Puzzle"],"ranking":1725,"img":"/thumbs/acid-bunny-2.webp","src":null,"site":56,"added":"2026-09-30"}
+{"id":"acid-bunny-2","name":"Acid Bunny 2","categories":["Puzzle"],"ranking":1725,"img":"/thumbs/acid-bunny-2.webp","src":null,"site":56,"added":"2026-09-30"},
+{"id":"acid-bunny","name":"Acid Bunny","categories":["Puzzle"],"ranking":1726,"img":"/thumbs/acid-bunny.webp","src":null,"site":56,"added":"2026-09-30"}
 ]}
