@@ -1961,5 +1961,6 @@
 {"id":"gunnight","name":"Gunnight","categories":["Shooter"],"ranking":2115,"img":"/thumbs/gunnight.webp","src":null,"site":65,"added":"2026-09-30"},
 {"id":"freefall-tournament","name":"Freefall Tournament","categories":["Multiplayer"],"ranking":2116,"img":"/thumbs/freefall-tournament.webp","src":null,"site":65,"added":"2026-09-30"},
 {"id":"fighter-aircraft-pilot","name":"Fighter Aircraft Pilot","categories":["Simulation"],"ranking":2117,"img":"/thumbs/fighter-aircraft-pilot.webp","src":null,"site":65,"added":"2026-09-30"},
-{"id":"basket-legend-2020","name":"Basket Legend 2020","categories":["Sports"],"ranking":2118,"img":"/thumbs/basket-legend-2020.webp","src":null,"site":65,"added":"2026-09-30"}
+{"id":"basket-legend-2020","name":"Basket Legend 2020","categories":["Sports"],"ranking":2118,"img":"/thumbs/basket-legend-2020.webp","src":null,"site":65,"added":"2026-09-30"},
+{"id":"falling-fox","name":"Falling Fox","categories":["Skill"],"ranking":2119,"img":"/thumbs/falling-fox.webp","src":null,"site":65,"added":"2026-09-30"}
 ]}
