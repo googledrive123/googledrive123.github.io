@@ -1512,5 +1512,6 @@
 {"id":"rocket-pult","name":"Rocket Pult","categories":["Skill"],"ranking":1666,"img":"/thumbs/rocket-pult.webp","src":null,"site":54,"added":"2026-09-30"},
 {"id":"slime-road","name":"Slime Road","categories":["Skill"],"ranking":1667,"img":"/thumbs/slime-road.webp","src":null,"site":54,"added":"2026-09-30"},
 {"id":"power-badminton","name":"Power Badminton","categories":["Sports"],"ranking":1668,"img":"/thumbs/power-badminton.webp","src":null,"site":54,"added":"2026-09-30"},
-{"id":"runman-race-around-the-world","name":"Runman Race Around The World","categories":["Racing"],"ranking":1669,"img":"/thumbs/runman-race-around-the-world.webp","src":null,"site":54,"added":"2026-09-30"}
+{"id":"runman-race-around-the-world","name":"Runman Race Around The World","categories":["Racing"],"ranking":1669,"img":"/thumbs/runman-race-around-the-world.webp","src":null,"site":54,"added":"2026-09-30"},
+{"id":"fortz","name":"Fortz","categories":["Shooter"],"ranking":1670,"img":"/thumbs/fortz.webp","src":null,"site":54,"added":"2026-09-30"}
 ]}
