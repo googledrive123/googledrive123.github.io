@@ -1949,5 +1949,6 @@
 {"id":"tube-clicker","name":"Tube Clicker","categories":["Idle"],"ranking":2103,"img":"/thumbs/tube-clicker.webp","src":null,"site":64,"added":"2026-09-30"},
 {"id":"islander","name":"Islander","categories":["Puzzle"],"ranking":2104,"img":"/thumbs/islander.webp","src":null,"site":64,"added":"2026-09-30"},
 {"id":"sink-it","name":"Sink It","categories":["Puzzle"],"ranking":2105,"img":"/thumbs/sink-it.webp","src":null,"site":64,"added":"2026-09-30"},
-{"id":"tiny-heist","name":"Tiny Heist","categories":["Puzzle"],"ranking":2106,"img":"/thumbs/tiny-heist.webp","src":null,"site":64,"added":"2026-09-30"}
+{"id":"tiny-heist","name":"Tiny Heist","categories":["Puzzle"],"ranking":2106,"img":"/thumbs/tiny-heist.webp","src":null,"site":64,"added":"2026-09-30"},
+{"id":"blumgi-paintball","name":"Blumgi Paintball","categories":["Shooter"],"ranking":2107,"img":"/thumbs/blumgi-paintball.webp","src":null,"site":64,"added":"2026-09-30"}
 ]}
