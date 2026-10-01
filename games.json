@@ -1390,5 +1390,6 @@
 {"id":"progress-knight","name":"Progress Knight","categories":["Idle"],"ranking":1544,"img":"/thumbs/progress-knight.webp","src":null,"site":50,"added":"2026-09-30"},
 {"id":"orange","name":"Orange","categories":["Puzzle"],"ranking":1545,"img":"/thumbs/orange.webp","src":null,"site":50,"added":"2026-09-30"},
 {"id":"life-in-the-static","name":"Life in the Static","categories":["Adventure"],"ranking":1546,"img":"/thumbs/life-in-the-static.webp","src":null,"site":50,"added":"2026-09-30"},
-{"id":"laqueus-escape-chapter-1","name":"Laqueus Escape Chapter 1","categories":["Adventure"],"ranking":1547,"img":"/thumbs/laqueus-escape-chapter-1.webp","src":null,"site":50,"added":"2026-09-30"}
+{"id":"laqueus-escape-chapter-1","name":"Laqueus Escape Chapter 1","categories":["Adventure"],"ranking":1547,"img":"/thumbs/laqueus-escape-chapter-1.webp","src":null,"site":50,"added":"2026-09-30"},
+{"id":"just-passing","name":"Just Passing","categories":["Puzzle"],"ranking":1548,"img":"/thumbs/just-passing.webp","src":null,"site":50,"added":"2026-09-30"}
 ]}
