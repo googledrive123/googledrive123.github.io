@@ -1565,5 +1565,6 @@
 {"id":"village-craft","name":"Village Craft","categories":["Sandbox"],"ranking":1719,"img":"/thumbs/village-craft.webp","src":null,"site":56,"added":"2026-09-30"},
 {"id":"baldis-basics-field-trip","name":"Baldi's Basics Field Trip","categories":["Horror"],"ranking":1720,"img":"/thumbs/baldis-basics-field-trip.webp","src":null,"site":56,"added":"2026-09-30"},
 {"id":"armor-mayhem","name":"Armor Mayhem","categories":["Shooter"],"ranking":1721,"img":"/thumbs/armor-mayhem.webp","src":null,"site":56,"added":"2026-09-30"},
-{"id":"stickshot","name":"Stickshot","categories":["Puzzle"],"ranking":1722,"img":"/thumbs/stickshot.webp","src":null,"site":56,"added":"2026-09-30"}
+{"id":"stickshot","name":"Stickshot","categories":["Puzzle"],"ranking":1722,"img":"/thumbs/stickshot.webp","src":null,"site":56,"added":"2026-09-30"},
+{"id":"neon-blaster","name":"Neon Blaster","categories":["Shooter"],"ranking":1723,"img":"/thumbs/neon-blaster.webp","src":null,"site":56,"added":"2026-09-30"}
 ]}
