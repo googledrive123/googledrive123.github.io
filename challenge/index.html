@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Challenge · GameVault</title>
+  <meta name="description" content="One PolyTrack track a month. Set the fastest time on it before the month ends and win the Challenge winner badge.">
+  <link rel="icon" href="/favicon.svg">
+  <!-- Blocking on purpose: the cloak has to land before the first paint. -->
+  <script src="/js/mimicry.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/site.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
+  <script src="/js/identity.js" defer></script>
+  <script src="/js/analytics.js" defer></script>
+  <script src="/js/site.js" defer></script>
+  <script src="/js/player.js" defer></script>
+  <style>
+    /* Buttons, rows and the clock all set their own display, which would
+       otherwise beat the hidden attribute. */
+    .page [hidden] { display: none !important; }
+
+    /* This month's card, under a strip of chequered flag. */
+    .ch-card { position: relative; padding: 0; overflow: hidden; }
+    .ch-card::before {
+      content: '';
+      display: block;
+      height: 10px;
+      background: repeating-conic-gradient(var(--text) 0 25%, transparent 0 50%) 0 0 / 10px 10px;
+      opacity: 0.14;
+    }
+    .ch-head { padding: 1.15rem 1.25rem 1.1rem; }
+    .ch-head .panel-label { margin-bottom: 0.6rem; }
+    .ch-title-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.75rem; }
+    .ch-title {
+      font-size: clamp(1.6rem, 5vw, 2.3rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.1;
+      color: var(--text);
+      overflow-wrap: anywhere;
+    }
+    .ch-card[data-state="loading"] .ch-title,
+    .ch-card[data-state="none"] .ch-title { font-size: 1.35rem; font-weight: 600; }
+    .badge.summer { color: #5ce08a; border-color: rgba(92,224,138,0.45); }
+    .badge.winter { color: #6aa8ff; border-color: rgba(106,168,255,0.45); }
+    .badge.desert { color: #f0c04a; border-color: rgba(240,192,74,0.45); }
+    .ch-track { margin-top: 0.45rem; font-size: 0.85rem; color: var(--muted); }
+    .page .ch-head p.ch-note { margin-top: 0.6rem; font-size: 0.9rem; color: var(--text); max-width: 62ch; }
+    .page .ch-head p.ch-empty { margin-top: 0.45rem; font-size: 0.88rem; }
+
+    .ch-foot {
+      display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between;
+      gap: 1rem 1.5rem;
+      padding: 1.1rem 1.25rem 1.25rem;
+      border-top: 1px solid var(--border);
+    }
+    .ch-clock { display: flex; gap: 0.45rem; }
+    .ch-cell {
+      min-width: 3.5rem;
+      padding: 0.55rem 0.5rem 0.45rem;
+      border-radius: 10px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+    .ch-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.5rem; font-weight: 600; line-height: 1.1;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+    .ch-unit {
+      margin-top: 0.2rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.56rem; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--muted-2);
+    }
+    .ch-meta { margin-top: 0.55rem; font-size: 0.78rem; color: var(--muted-2); }
+    .page .ch-card a.btn { color: #fff; text-decoration: none; }
+    .ch-race { min-width: 9rem; }
+    .ch-race svg { width: 15px; height: 15px; }
+
+    .ch-msg { padding: 0 1.25rem 1rem; font-size: 0.8rem; color: #ff7a7a; }
+    .ch-msg:empty { display: none; }
+
+    /* The top ten, and the visitor's own row under them when they are
+       further down. */
+    .ch-board .table-wrap { margin-top: 0; }
+    .ch-board table.gv td { vertical-align: middle; }
+    .ch-board table.gv tr:last-child td { border-bottom: none; }
+    .ch-board th.num, .ch-board td.num { text-align: right; }
+    .ch-pos { width: 3.25rem; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; }
+    table.gv td.ch-pos { color: var(--muted); }
+    .ch-medal {
+      display: inline-grid; place-items: center;
+      width: 1.5rem; height: 1.5rem; border-radius: 50%;
+      font-weight: 600;
+      border: 1px solid currentColor;
+    }
+    .ch-medal.m1 { color: #f0c04a; background: rgba(240,192,74,0.12); }
+    .ch-medal.m2 { color: #c3c7d1; background: rgba(195,199,209,0.1); }
+    .ch-medal.m3 { color: #d8955f; background: rgba(216,149,95,0.12); }
+    :root[data-theme="light"] .ch-medal.m1 { color: #b8860b; }
+    :root[data-theme="light"] .ch-medal.m2 { color: #7a7f8c; }
+    :root[data-theme="light"] .ch-medal.m3 { color: #a8622d; }
+    .ch-who { display: flex; align-items: center; gap: 0.4rem; min-width: 0; }
+    .ch-name { color: var(--text); font-weight: 500; overflow-wrap: anywhere; }
+    .ch-check { width: 14px; height: 14px; flex-shrink: 0; }
+    .ch-crown {
+      display: inline-flex; align-items: center; gap: 0.15rem;
+      font-family: 'JetBrains Mono', monospace; font-size: 0.66rem;
+      color: #f0c04a;
+    }
+    :root[data-theme="light"] .ch-crown { color: #b8860b; }
+    .ch-crown svg { width: 14px; height: 14px; }
+    .ch-you-tag {
+      padding: 0.08rem 0.45rem;
+      border-radius: 100px;
+      font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--accent); border: 1px solid var(--accent);
+    }
+    .ch-board tr.ch-you td { background: rgba(255,59,59,0.07); }
+    .ch-board tr.ch-you td:first-child { box-shadow: inset 2px 0 0 var(--accent); }
+    .ch-board td.ch-clock-cell {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    .ch-board tr.ch-gap td { padding: 0.15rem 0.85rem; color: var(--muted-2); letter-spacing: 0.3em; }
+    .ch-board td.ch-none { padding: 1rem 0.85rem; color: var(--muted); }
+    .ch-standing { margin-top: 0.75rem; font-size: 0.8rem; color: var(--muted-2); }
+    .ch-standing:empty { display: none; }
+    .ch-standing b { color: var(--muted); font-weight: 500; }
+
+    .ch-past-list { list-style: none; }
+    .page ol.ch-past-list { margin: 0; }
+    .page .ch-past-list li {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+      gap: 0.35rem 1rem;
+      margin: 0;
+      padding: 0.75rem 0;
+      border-top: 1px solid var(--border);
+    }
+    .page .ch-past-list li:first-child { border-top: none; padding-top: 0.1rem; }
+    .ch-past-month { font-size: 0.95rem; font-weight: 600; color: var(--text); }
+    .ch-past-track { margin-top: 0.1rem; font-size: 0.78rem; color: var(--muted-2); }
+    .ch-past-win { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.6rem; }
+    .ch-past-time { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--muted); }
+    .ch-past-win .ch-crown svg { width: 16px; height: 16px; }
+    .ch-past-win.pending .ch-name { color: var(--muted); }
+    .ch-past-none { font-size: 0.8rem; color: var(--muted-2); }
+    .page .ch-past p.ch-past-empty { font-size: 0.86rem; }
+
+    .ch-rules { counter-reset: rule; list-style: none; }
+    .page ul.ch-rules { margin: 0; }
+    .ch-rules li { position: relative; padding-left: 2rem; font-size: 0.86rem; }
+    .ch-rules li::before {
+      counter-increment: rule;
+      content: counter(rule, decimal-leading-zero);
+      position: absolute; left: 0; top: 0.1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem; color: var(--muted-2);
+    }
+    .ch-rules strong { color: var(--text); font-weight: 600; }
+
+    @media (max-width: 480px) {
+      .ch-cell { min-width: 0; flex: 1; padding: 0.5rem 0.25rem 0.4rem; }
+      .ch-num { font-size: 1.25rem; }
+      .ch-time, .ch-clock, .ch-race { width: 100%; }
+      .ch-board table.gv th, .ch-board table.gv td { padding-left: 0.5rem; padding-right: 0.5rem; }
+      .ch-pos { width: 2.5rem; }
+    }
+  </style>
+</head>
+<body>
+<main class="page">
+  <div class="page-kicker">challenge</div>
+  <h1>Monthly challenge</h1>
+  <p class="lede">One PolyTrack track a month. Set the fastest time on it before the month ends
+  and the Challenge winner badge is yours.</p>
+
+  <div class="panel ch-card" id="chCard" data-state="loading">
+    <div class="ch-head">
+      <div class="panel-label" id="chMonth">This month</div>
+      <div class="ch-title-row">
+        <div class="ch-title" id="chTitle">Checking this month's track…</div>
+        <span class="badge" id="chEnv" hidden></span>
+      </div>
+      <div class="ch-track" id="chTrack" hidden></div>
+      <p class="ch-note" id="chNote" hidden></p>
+      <p class="ch-empty" id="chEmpty" hidden>No track is set for this month yet. Check back soon,
+      and keep racing: every PolyTrack time still goes on the leaderboard.</p>
+    </div>
+    <div class="ch-foot" id="chFoot" hidden>
+      <div class="ch-time">
+        <div class="ch-clock" role="timer" aria-label="Time left this month">
+          <div class="ch-cell"><div class="ch-num" id="chD">0</div><div class="ch-unit">days</div></div>
+          <div class="ch-cell"><div class="ch-num" id="chH">00</div><div class="ch-unit">hrs</div></div>
+          <div class="ch-cell"><div class="ch-num" id="chM">00</div><div class="ch-unit">min</div></div>
+          <div class="ch-cell"><div class="ch-num" id="chS">00</div><div class="ch-unit">sec</div></div>
+        </div>
+        <div class="ch-meta" id="chMeta"></div>
+      </div>
+      <a class="btn btn-primary ch-race" href="/games/polytrack">
+        Race it
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+    <div class="ch-msg" id="chMsg" role="status"></div>
+  </div>
+
+  <div class="panel ch-board" id="chBoard" hidden>
+    <div class="panel-label">Top 10</div>
+    <div class="table-wrap">
+      <table class="gv">
+        <thead><tr><th>#</th><th>Player</th><th class="num">Time</th></tr></thead>
+        <tbody id="chRows"></tbody>
+      </table>
+    </div>
+    <div class="ch-standing" id="chStanding"></div>
+  </div>
+
+  <div class="panel ch-past" id="chPast" hidden>
+    <div class="panel-label">Past winners</div>
+    <ol class="ch-past-list" id="chPastList"></ol>
+    <p class="ch-past-empty" id="chPastEmpty" hidden>No month has finished yet. The first winner
+    shows up here when this month ends.</p>
+    <p class="panel-note"><a href="/winner/">See the latest winner revealed</a></p>
+  </div>
+
+  <div class="panel">
+    <div class="panel-label">Rules</div>
+    <ul class="ch-rules">
+      <li><strong>The prize is a badge.</strong> First place gets the Challenge winner badge,
+      second and third get the Top 3 badge. Never money, gift cards, game currency, or anything
+      sent to your home.</li>
+      <li><strong>Times come from the PolyTrack leaderboard.</strong> Race the month's track in
+      PolyTrack here on GameVault, and your best time set during the month counts. Times from
+      before the month started do not.</li>
+      <li><strong>Suspicious times get removed.</strong> A time that looks impossible, or came from
+      a cheat or a glitch, is taken off and cannot win.</li>
+      <li><strong>The month ends at midnight UTC.</strong> A tie goes to whoever set the time
+      first.</li>
+      <li><strong>Only your leaderboard name is shown.</strong> Guests can race too; sign in to
+      keep your badge with your account. Anonymous mode keeps your name off this page as well.</li>
+    </ul>
+  </div>
+
+<script>
+(function () {
+  'use strict';
+
+  var SUPA_URL = 'https://dxwjxzmlezfyursysays.supabase.co';
+  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
+  // Where supabase-js keeps the session the home page signed in with.
+  var TOKEN_KEY = 'sb-dxwjxzmlezfyursysays-auth-token';
+  // Often enough that new times show up while the page is open.
+  var REFRESH_MS = 60 * 1000;
+
+  // PolyTrack's official tracks, by the start of their ids. The server only
+  // knows a track by its id; this says which one it is.
+  var OFFICIAL = {
+    '5803f9e96362': 'Summer 1', '7eac4fee1111': 'Summer 2', '148826aa16ff': 'Summer 3',
+    '93c7363dfea7': 'Summer 4', '7603aaeffa19': 'Summer 5', 'c117823cf678': 'Summer 6',
+    'e4bcaca3a583': 'Summer 7', '7239b1705712': 'Winter 1', '99864b635d18': 'Winter 2',
+    'a5341fe70609': 'Winter 3', '7d134c939df8': 'Winter 4', '2fe4bd46b007': 'Winter 5',
+    'c20b4ee3cd51': 'Desert 1', '88647ea04145': 'Desert 2', '2806030c503a': 'Desert 3',
+    '4697ea67b18c': 'Desert 4', 'e5d084e06db4': 'Desert 5'
+  };
+
+  function $(id) { return document.getElementById(id); }
+
+  var card = $('chCard');
+
+  var sb = null;
+  var data = null;
+  var visitorId = null;
+  var signedIn = false;
+  // Server time minus this device's time, so a wrong clock on a school laptop
+  // does not move the countdown.
+  var skew = 0;
+  var loading = false;
+
+  function two(n) { return n < 10 ? '0' + n : String(n); }
+
+  function plural(n, one, many) {
+    return Number(n || 0).toLocaleString() + ' ' + (n === 1 ? one : many);
+  }
+
+  function when(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' }) + ', '
+      + d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  }
+
+  // '2026-10-01' as "October 2026", read as UTC so it never slips a month.
+  function monthName(day) {
+    var p = String(day || '').split('-');
+    var d = new Date(Date.UTC(+p[0], +p[1] - 1, 1));
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleDateString(undefined, { month: 'long', year: 'numeric', timeZone: 'UTC' });
+  }
+
+  function official(trackId) {
+    return OFFICIAL[String(trackId || '').slice(0, 12)] || null;
+  }
+
+  function say(text) { $('chMsg').textContent = text || ''; }
+
+  function paintClock() {
+    var c = data && data.challenge;
+    if (!c) return;
+    var left = Math.max(0, Date.parse(c.ends_at) - (Date.now() + skew));
+    var s = Math.floor(left / 1000);
+    $('chD').textContent = Math.floor(s / 86400);
+    $('chH').textContent = two(Math.floor(s / 3600) % 24);
+    $('chM').textContent = two(Math.floor(s / 60) % 60);
+    $('chS').textContent = two(s % 60);
+    // The month is over, so ask for the next one.
+    if (left <= 0) load();
+  }
+
+  function paintNone() {
+    card.dataset.state = 'none';
+    $('chMonth').textContent = 'This month';
+    $('chTitle').textContent = 'No track yet';
+    $('chEnv').hidden = true;
+    $('chTrack').hidden = true;
+    $('chNote').hidden = true;
+    $('chEmpty').hidden = false;
+    $('chFoot').hidden = true;
+  }
+
+  function paintChallenge(c) {
+    card.dataset.state = 'on';
+    $('chMonth').textContent = monthName(c.month);
+    $('chTitle').textContent = c.title;
+    $('chEmpty').hidden = true;
+
+    var name = official(c.track_id);
+    var env = $('chEnv');
+    env.hidden = !name;
+    if (name) {
+      var kind = name.split(' ')[0];
+      env.textContent = kind;
+      env.className = 'badge ' + kind.toLowerCase();
+    }
+    var track = $('chTrack');
+    track.hidden = false;
+    if (!name) track.textContent = 'A community track';
+    else if (name === c.title) track.textContent = 'An official PolyTrack track';
+    else track.textContent = 'Official track: ' + name;
+
+    $('chNote').hidden = !c.note;
+    $('chNote').textContent = c.note || '';
+    $('chMeta').textContent = 'Ends ' + when(c.ends_at) + ' · ' + plural(c.runners, 'racer', 'racers');
+    $('chFoot').hidden = false;
+    paintClock();
+  }
+
+  var CHECK_SVG = '<svg class="ch-check" viewBox="0 0 24 24" role="img" aria-label="Verified"><circle cx="12" cy="12" r="11" fill="#1d9bf0"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var CROWN_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/></svg>';
+
+  function cell(cls, text) {
+    var td = document.createElement('td');
+    if (cls) td.className = cls;
+    if (text != null) td.textContent = text;
+    return td;
+  }
+
+  function row(entry) {
+    var tr = document.createElement('tr');
+    if (entry.you) tr.className = 'ch-you';
+
+    var pos = cell('ch-pos');
+    if (entry.rank <= 3) {
+      var medal = document.createElement('span');
+      medal.className = 'ch-medal m' + entry.rank;
+      medal.textContent = entry.rank;
+      pos.appendChild(medal);
+    } else {
+      pos.textContent = entry.rank;
+    }
+    tr.appendChild(pos);
+
+    var who = document.createElement('div');
+    who.className = 'ch-who';
+    var name = document.createElement('span');
+    name.className = 'ch-name';
+    name.textContent = entry.nickname;
+    who.appendChild(name);
+    if (entry.verified) who.insertAdjacentHTML('beforeend', CHECK_SVG);
+    if (entry.wins > 0) {
+      var crown = document.createElement('span');
+      crown.className = 'ch-crown';
+      crown.title = 'Won ' + plural(entry.wins, 'month', 'months');
+      crown.innerHTML = CROWN_SVG;
+      if (entry.wins > 1) crown.appendChild(document.createTextNode('\u00d7' + entry.wins));
+      who.appendChild(crown);
+    }
+    if (entry.you) {
+      var tag = document.createElement('span');
+      tag.className = 'ch-you-tag';
+      tag.textContent = 'You';
+      who.appendChild(tag);
+    }
+    var td = cell('');
+    td.appendChild(who);
+    tr.appendChild(td);
+
+    tr.appendChild(cell('num ch-clock-cell', entry.time));
+    return tr;
+  }
+
+  function paintBoard() {
+    var c = data.challenge;
+    $('chBoard').hidden = !c;
+    if (!c) return;
+    var rows = $('chRows');
+    rows.textContent = '';
+    var top = data.top || [];
+    if (!top.length) {
+      var none = cell('ch-none', 'No times yet this month. Be the first on ' + c.title + '.');
+      none.colSpan = 3;
+      var tr = document.createElement('tr');
+      tr.appendChild(none);
+      rows.appendChild(tr);
+    }
+    top.forEach(function (entry) { rows.appendChild(row(entry)); });
+
+    // Further down than the top ten: a gap, then the visitor's own row.
+    var you = data.you;
+    var shown = top.some(function (e) { return e.you; });
+    if (you && !shown) {
+      var gap = document.createElement('tr');
+      gap.className = 'ch-gap';
+      var dots = cell('', '\u00b7\u00b7\u00b7');
+      dots.colSpan = 3;
+      dots.setAttribute('aria-hidden', 'true');
+      gap.appendChild(dots);
+      rows.appendChild(gap);
+      rows.appendChild(row({
+        rank: you.rank, nickname: you.nickname, time: you.time,
+        verified: you.verified, wins: you.wins, you: true
+      }));
+    }
+    paintStanding(c, you);
+  }
+
+  function bold(parent, text) {
+    var b = document.createElement('b');
+    b.textContent = text;
+    parent.appendChild(b);
+  }
+
+  // Where the visitor stands, in words, and the name their runs go up under.
+  function paintStanding(c, you) {
+    var el = $('chStanding');
+    el.textContent = '';
+    var add = function (text) { el.appendChild(document.createTextNode(text)); };
+    if (you) {
+      add('You are ');
+      bold(el, '#' + you.rank);
+      add(' of ' + plural(c.runners, 'racer', 'racers') + ' with ');
+      bold(el, you.time);
+      add('.');
+    } else {
+      add('No time from you on ' + c.title + ' this month yet.');
+    }
+    var identity = window.GV && window.GV.identity;
+    if (identity) {
+      add(' You race as ');
+      bold(el, identity.publicName());
+      add('.');
+    }
+    if (!signedIn) {
+      add(' ');
+      var link = document.createElement('a');
+      link.href = '/';
+      link.textContent = 'Sign in';
+      el.appendChild(link);
+      add(' to keep a badge with your account.');
+    }
+  }
+
+  function paint() {
+    if (data.challenge) paintChallenge(data.challenge);
+    else paintNone();
+    paintBoard();
+  }
+
+  function load() {
+    if (loading) return;
+    loading = true;
+    sb.rpc('gv_challenge_current', { p_visitor_id: visitorId }).then(function (r) {
+      loading = false;
+      if (r.error) throw r.error;
+      skew = Date.parse(r.data.now) - Date.now();
+      // A new month moves the last one into the past winners.
+      var month = r.data.challenge && r.data.challenge.month;
+      if (!data || month !== (data.challenge && data.challenge.month)) loadPast();
+      data = r.data;
+      say('');
+      paint();
+    }).catch(function (err) {
+      loading = false;
+      console.error(err);
+      if (!data) $('chTitle').textContent = 'The challenge could not load';
+      say('Could not reach GameVault. Refresh to try again.');
+    });
+  }
+
+  // Finished months, newest first. Until the owner has checked a month's
+  // times and handed out its badges, its leader is only in front.
+  function paintPast(months) {
+    var list = $('chPastList');
+    list.textContent = '';
+    $('chPast').hidden = false;
+    $('chPastEmpty').hidden = months.length > 0;
+    months.forEach(function (m) {
+      var li = document.createElement('li');
+
+      var left = document.createElement('div');
+      var month = document.createElement('div');
+      month.className = 'ch-past-month';
+      month.textContent = monthName(m.month);
+      var track = document.createElement('div');
+      track.className = 'ch-past-track';
+      track.textContent = m.title + ' · ' + plural(m.runners, 'racer', 'racers');
+      left.appendChild(month);
+      left.appendChild(track);
+      li.appendChild(left);
+
+      var right = document.createElement('div');
+      right.className = 'ch-past-win' + (m.closed ? '' : ' pending');
+      if (!m.winner) {
+        var none = document.createElement('span');
+        none.className = 'ch-past-none';
+        none.textContent = 'Nobody raced it';
+        right.appendChild(none);
+      } else {
+        if (m.closed) {
+          var crown = document.createElement('span');
+          crown.className = 'ch-crown';
+          crown.innerHTML = CROWN_SVG;
+          right.appendChild(crown);
+        } else {
+          var tag = document.createElement('span');
+          tag.className = 'badge progress';
+          tag.textContent = 'Checking times';
+          right.appendChild(tag);
+        }
+        var name = document.createElement('span');
+        name.className = 'ch-name';
+        name.textContent = m.winner.nickname;
+        right.appendChild(name);
+        var time = document.createElement('span');
+        time.className = 'ch-past-time';
+        time.textContent = m.winner.time;
+        right.appendChild(time);
+      }
+      li.appendChild(right);
+      list.appendChild(li);
+    });
+  }
+
+  function loadPast() {
+    sb.rpc('gv_challenge_history').then(function (r) {
+      if (r.error) throw r.error;
+      paintPast(r.data || []);
+    }).catch(function (err) {
+      console.error(err);
+    });
+  }
+
+  // A signed-in player's runs go up under their username, which the home
+  // page leaves in identity.js. Looked up here too, for a visit that starts
+  // on this page.
+  function loadName(identity, user) {
+    sb.from('profiles').select('username').eq('id', user.id).maybeSingle().then(function (r) {
+      var name = (r.data && r.data.username) || (user.email || '').split('@')[0];
+      if (name && name !== identity.accountName()) identity.setAccountName(name);
+      if (data && data.challenge) paintBoard();
+    });
+  }
+
+  // Signing in or out on the home page in another tab shows here too.
+  window.addEventListener('storage', function (e) {
+    if (e.key === TOKEN_KEY) location.reload();
+  });
+
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden && data) load();
+  });
+
+  document.addEventListener('DOMContentLoaded', function () {
+    if (!window.supabase) {
+      $('chTitle').textContent = 'The challenge could not load';
+      say('Refresh to try again.');
+      return;
+    }
+    // Restores the home page's session, if there is one, so a signed-in
+    // player is found by their account and a guest by this browser's id.
+    sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+    var identity = window.GV && window.GV.identity;
+    Promise.all([
+      sb.auth.getSession(),
+      identity ? identity.ready : Promise.resolve(null)
+    ]).then(function (r) {
+      var session = r[0].data && r[0].data.session;
+      signedIn = !!session;
+      visitorId = r[1] || null;
+      load();
+      if (session && identity) loadName(identity, session.user);
+    });
+    setInterval(paintClock, 1000);
+    setInterval(function () { if (!document.hidden && data) load(); }, REFRESH_MS);
+  });
+})();
+</script>
+</main>
+</body>
+</html>

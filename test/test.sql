@@ -1,0 +1,284 @@
+-- Testers.
+--
+-- Accounts the site owner trusts to try games before everyone else. A game
+-- waiting to go live is marked "staging": true in games.json, and /test/
+-- lists those for testers to play and mark as working, broken or having a
+-- problem. The owner hands out the role and reads the reports from the
+-- analytics dashboard.
+--
+-- Apply against project dxwjxzmlezfyursysays, after sql/rude.sql. Every
+-- statement is safe to run twice. Applied on 30 September 2026.
+
+
+create table if not exists public.gv_testers (
+  user_id  uuid primary key references auth.users (id) on delete cascade,
+  added_at timestamptz not null default now()
+);
+
+-- Everything goes through the functions below, so there is no policy to
+-- write and a direct PostgREST request reads and writes nothing.
+alter table public.gv_testers enable row level security;
+revoke all on table public.gv_testers from anon, authenticated;
+
+
+create table if not exists public.gv_game_reports (
+  id         bigserial primary key,
+  game_id    text not null check (char_length(game_id) between 1 and 100),
+  user_id    uuid not null references auth.users (id) on delete cascade,
+  verdict    text not null check (verdict in ('works', 'broken', 'problem')),
+  note       text check (char_length(note) <= 500),
+  created_at timestamptz not null default now(),
+  -- Set by the owner once a report has been dealt with.
+  resolved   boolean not null default false
+);
+
+-- A tester's own reports, newest first, are read on every visit to /test/.
+create index if not exists gv_game_reports_user_created
+  on public.gv_game_reports (user_id, created_at desc);
+
+alter table public.gv_game_reports enable row level security;
+revoke all on table public.gv_game_reports from anon, authenticated;
+
+
+-- Asked by /test/ to decide what to show. Signed out is simply not a tester.
+create or replace function public.gv_is_tester()
+returns boolean
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'Testing only works on GameVault.';
+  end if;
+
+  return exists (select 1 from gv_testers where user_id = auth.uid());
+end;
+$function$;
+
+revoke all on function public.gv_is_tester() from public, anon;
+grant execute on function public.gv_is_tester() to authenticated;
+
+
+-- A tester's verdict on one game. Every refusal is a sentence the page shows
+-- as it is. Testing the same game again adds a new report rather than
+-- replacing the old one, so the owner sees a game that broke after working.
+create or replace function public.gv_test_report(p_game_id text, p_verdict text, p_note text default null)
+returns json
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+  v_game text := btrim(coalesce(p_game_id, ''));
+  v_note text := nullif(btrim(coalesce(p_note, '')), '');
+  v_row gv_game_reports;
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'Testing only works on GameVault.';
+  end if;
+  if v_user is null then
+    raise exception 'Sign in to send a report.';
+  end if;
+  if not exists (select 1 from gv_testers where user_id = v_user) then
+    raise exception 'Only testers can send reports.';
+  end if;
+  if v_game !~ '^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$' then
+    raise exception 'That is not a game id.';
+  end if;
+  if p_verdict is null or p_verdict not in ('works', 'broken', 'problem') then
+    raise exception 'Pick works, broken or problem.';
+  end if;
+  if char_length(v_note) > 500 then
+    raise exception 'Notes can be up to 500 characters.';
+  end if;
+  if public.gv_is_rude(v_note) then
+    raise exception 'That note has words we do not allow here. Try saying it another way.';
+  end if;
+  if (select count(*) from gv_game_reports
+       where user_id = v_user and created_at > now() - interval '1 hour') >= 60 then
+    raise exception 'That is a lot of reports. Take a short break before sending more.';
+  end if;
+
+  insert into gv_game_reports (game_id, user_id, verdict, note)
+  values (v_game, v_user, p_verdict, v_note)
+  returning * into v_row;
+
+  return json_build_object('id', v_row.id, 'game_id', v_row.game_id, 'verdict', v_row.verdict,
+                           'note', v_row.note, 'created_at', v_row.created_at);
+end;
+$function$;
+
+revoke all on function public.gv_test_report(text, text, text) from public, anon;
+grant execute on function public.gv_test_report(text, text, text) to authenticated;
+
+
+-- The tester's own last 200 reports, newest first, so /test/ can show what
+-- they already said about each game.
+create or replace function public.gv_test_my_reports()
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'Testing only works on GameVault.';
+  end if;
+  if v_user is null or not exists (select 1 from gv_testers where user_id = v_user) then
+    raise exception 'Only testers can read reports.';
+  end if;
+
+  return coalesce((
+    select json_agg(json_build_object('id', r.id, 'game_id', r.game_id, 'verdict', r.verdict,
+                                      'note', r.note, 'created_at', r.created_at,
+                                      'resolved', r.resolved) order by r.id desc)
+    from (select * from gv_game_reports where user_id = v_user order by id desc limit 200) r
+  ), '[]'::json);
+end;
+$function$;
+
+revoke all on function public.gv_test_my_reports() from public, anon;
+grant execute on function public.gv_test_my_reports() to authenticated;
+
+
+-- Owner only, behind the dashboard secret: every tester with how much they
+-- have reported, newest tester first.
+create or replace function public.gv_testers_list(p_secret text)
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+
+  return coalesce((
+    select json_agg(json_build_object(
+             'user_id', t.user_id,
+             'username', coalesce(nullif(btrim(p.username), ''), 'Account ' || left(t.user_id::text, 8)),
+             'added_at', t.added_at,
+             'reports', (select count(*) from gv_game_reports r where r.user_id = t.user_id),
+             'last_report_at', (select max(created_at) from gv_game_reports r where r.user_id = t.user_id)
+           ) order by t.added_at desc)
+    from gv_testers t
+    left join profiles p on p.id = t.user_id
+  ), '[]'::json);
+end;
+$function$;
+
+
+-- Makes an account a tester or stops it being one, found by its username the
+-- way the dashboard shows it. The name has to match exactly; failing that, a
+-- match that ignores case and spaces at either end is used only when there
+-- is just one, so "sam" never picks between Sam and SAM. Adding one twice
+-- keeps the first date.
+--
+-- Or found by p_user_id, which wins over the name (pass p_username null):
+-- the dashboard's tester list has every id, even for an account without a
+-- username. The name sent back is the one that list shows.
+--
+-- p_user_id came after the first version, which had three arguments; that
+-- one goes so a call with three is not ambiguous between the two.
+drop function if exists public.gv_tester_set(text, text, boolean);
+
+create or replace function public.gv_tester_set(p_secret text, p_username text, p_on boolean, p_user_id uuid default null)
+returns json
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_in text := btrim(coalesce(p_username, ''));
+  v_ids uuid[];
+  v_user uuid;
+  v_name text;
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+
+  if p_user_id is not null then
+    select array_agg(id) into v_ids from auth.users where id = p_user_id;
+  elsif v_in <> '' then
+    select array_agg(id) into v_ids from profiles where username = v_in;
+    if v_ids is null then
+      select array_agg(id) into v_ids from profiles where lower(btrim(username)) = lower(v_in);
+    end if;
+  end if;
+  if cardinality(v_ids) > 1 then
+    raise exception 'more than one account matches that name';
+  end if;
+  v_user := v_ids[1];
+  if v_user is null then
+    raise exception 'no such account';
+  end if;
+  v_name := coalesce(nullif(btrim((select username from profiles where id = v_user)), ''),
+                     'Account ' || left(v_user::text, 8));
+
+  if coalesce(p_on, false) then
+    insert into gv_testers (user_id) values (v_user) on conflict (user_id) do nothing;
+  else
+    delete from gv_testers where user_id = v_user;
+  end if;
+
+  return json_build_object('user_id', v_user, 'username', v_name, 'tester', coalesce(p_on, false));
+end;
+$function$;
+
+
+-- The last 500 reports, newest first, resolved ones included so the owner
+-- can see a game's whole history.
+create or replace function public.gv_game_reports_list(p_secret text)
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+
+  return coalesce((
+    select json_agg(json_build_object(
+             'id', r.id,
+             'game_id', r.game_id,
+             'verdict', r.verdict,
+             'note', r.note,
+             'user_id', r.user_id,
+             'username', coalesce(nullif(btrim(p.username), ''), 'Account ' || left(r.user_id::text, 8)),
+             'created_at', r.created_at,
+             'resolved', r.resolved
+           ) order by r.id desc)
+    from (select * from gv_game_reports order by id desc limit 500) r
+    left join profiles p on p.id = r.user_id
+  ), '[]'::json);
+end;
+$function$;
+
+
+create or replace function public.gv_game_report_resolve(p_secret text, p_id bigint)
+returns boolean
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+
+  update gv_game_reports set resolved = true where id = p_id;
+  return found;
+end;
+$function$;

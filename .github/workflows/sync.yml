@@ -1,0 +1,44 @@
+# Keeps a backup address up to date.
+#
+# Meant for forks. Each backup address listed on /mirrors/ is a fork of this
+# repo (renamed to <user>.github.io) plus a fork of every vaultN repo. Once a
+# day this brings in everything new from the googledrive123 original, then
+# asks GitHub Pages to rebuild. It does nothing in the originals themselves.
+# Setting one up: mirrors/SETUP.md.
+name: Sync from GameVault
+
+on:
+  schedule:
+    - cron: '17 9 * * *'   # once a day, off the hour when Actions is less busy
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+jobs:
+  sync:
+    if: github.repository_owner != 'googledrive123'
+    runs-on: ubuntu-latest
+    steps:
+      # What gh repo sync does: GitHub fast-forwards main from the fork's
+      # parent, googledrive123/<repo name>, on its own side and updates the
+      # branch. Nothing is cloned, which matters: the site repo is gigabytes.
+      # The built-in token may not change files in .github/workflows, so a
+      # SYNC_TOKEN secret with the workflow scope is used when there is one.
+      - name: Merge upstream main
+        id: merge
+        env:
+          GH_TOKEN: ${{ secrets.SYNC_TOKEN || github.token }}
+        run: |
+          result=$(gh api -X POST "repos/$GITHUB_REPOSITORY/merge-upstream" -f branch=main)
+          echo "$result"
+          echo "type=$(jq -r .merge_type <<< "$result")" >> "$GITHUB_OUTPUT"
+
+      # A branch updated from Actions does not reliably start a Pages build,
+      # so one is asked for: whenever something came in, and on a manual run.
+      - name: Rebuild Pages
+        if: steps.merge.outputs.type != 'none' || github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X POST "repos/$GITHUB_REPOSITORY/pages/builds"

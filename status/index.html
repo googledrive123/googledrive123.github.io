@@ -19,6 +19,8 @@
   <style>
     .status-legend { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.25rem; }
     .status-empty { color: var(--muted-2); font-size: 0.85rem; padding: 1rem 0; }
+    .status-search { margin-top: 1.25rem; max-width: 420px; }
+    .why { color: var(--muted); font-weight: 600; margin-right: 0.35em; }
   </style>
 </head>
 <body>
@@ -27,11 +29,16 @@
   <h1>Requests board</h1>
   <p class="lede">What people have asked for and where each one stands.</p>
   <div class="panel">
-    <div class="panel-label">Ask for something</div>
+    <div class="panel-label">Ask for something or report a bug</div>
     <p>Every request on this board came through the suggestion form. Yours will land here too.</p>
     <div class="btn-row">
       <a class="btn btn-primary" href="https://forms.gle/iGM2FSKVatxgAsSp7" target="_blank" rel="noopener">Request a game →</a>
+      <!-- There is no separate bug form. entry.1884081613 is this form's answer box,
+           so a bug report arrives already marked "Bug:" and stands out from requests. -->
+      <a class="btn" href="https://docs.google.com/forms/d/e/1FAIpQLSf1x79XeM8kcP5bG52zRKtOLu94U0x-Iqi6Scwg5kqWecKRwg/viewform?usp=pp_url&amp;entry.1884081613=Bug:+" target="_blank" rel="noopener">Report a bug →</a>
     </div>
+    <p class="panel-note">Something broken? Report a bug opens the same form with "Bug:" already filled in.
+    Say which game or page, and what went wrong.</p>
   </div>
 
   <div class="status-legend">
@@ -40,6 +47,8 @@
     <span class="badge soon">Soon</span>
     <span class="badge denied">Not happening</span>
   </div>
+
+  <input class="field status-search" id="requestSearch" type="search" placeholder="Search requests…" aria-label="Search requests" autocomplete="off">
 
   <div class="table-wrap">
     <table class="gv">
@@ -75,6 +84,28 @@
   }
 
   var body = document.getElementById('requestRows');
+  var search = document.getElementById('requestSearch');
+
+  // "geometry dash" finds "Geometry Dash (full version)", like the home search.
+  function loose(text) { return String(text).toLowerCase().replace(/[^a-z0-9]+/g, ''); }
+
+  function filter() {
+    var q = loose(search.value);
+    var shown = 0;
+    body.querySelectorAll('tr[data-find]').forEach(function (tr) {
+      var hit = !q || tr.dataset.find.indexOf(q) !== -1;
+      tr.hidden = !hit;
+      if (hit) shown++;
+    });
+    var none = document.getElementById('requestNone');
+    if (!shown && !none) {
+      none = message('Nothing matches. Ask for it with the form above.');
+      none.id = 'requestNone';
+      body.appendChild(none);
+    } else if (shown && none) {
+      none.remove();
+    }
+  }
 
   fetch('/requests.json', { cache: 'no-cache' })
     .then(function (r) {
@@ -95,8 +126,20 @@
         badge.className = 'badge ' + key;
         badge.textContent = LABELS[key];
         status.appendChild(badge);
-        body.appendChild(row([td(item.name), status, td(item.note || '')]));
+        var note = td(item.note || '');
+        // A refusal always says why.
+        if (key === 'denied' && item.note) {
+          var why = document.createElement('span');
+          why.className = 'why';
+          why.textContent = 'Why:';
+          note.prepend(why);
+        }
+        var tr = row([td(item.name), status, note]);
+        tr.dataset.find = loose(item.name + ' ' + (item.note || '') + ' ' + LABELS[key]);
+        body.appendChild(tr);
       });
+      search.addEventListener('input', filter);
+      filter();
     })
     .catch(function (err) {
       console.error(err);

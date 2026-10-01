@@ -3,20 +3,78 @@
 <head>
   <meta charset="utf-8">
   <title>GameVault</title>
+  <!-- Deep links like /games/<id> are served from here, so shared ones get a
+       preview too. -->
+  <meta property="og:site_name" content="GameVault">
+  <meta property="og:title" content="GameVault">
+  <meta property="og:description" content="Play anything: thousands of browser games, plus movies and music, with no ads.">
+  <meta property="og:image" content="https://googledrive123.github.io/icons/share.png">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="/favicon.svg">
+  <script src="/js/carry.js"></script>
   <script>
   // GitHub Pages serves this file for anything it cannot find on disk, which is
   // both how the app's deep links survive a refresh and how a genuine typo
   // arrives. Routes the app owns bounce to the root and get replayed there;
   // everything else is a real miss and goes to the 404 page.
   (function () {
+    // Inside the player's game frame this is a game that is not where the
+    // player looked, never a page to show. See inPlayer() below.
+    if (inPlayer()) { toVault(); return; }
+    // An old link to a page inside a moved game, or with its own query
+    // (?solo from New Tab, ?swf= for a Flash game), goes to that page in the
+    // game's vault. A bare /games/<id> is the player's own address.
+    var sub = /^\/games\/([^\/]+)\/(.*)$/.exec(location.pathname);
+    if (sub && (sub[2] || location.search)) { toVaultTop(sub[1], sub[2]); return; }
     var path = location.pathname + location.search;
-    var spa = /^\/(games(\/|$)|movie(\/|$)|tv(\/|$))/.test(location.pathname);
+    var spa = /^\/(games(\/|$)|movies?(\/|$)|tv(\/|$))/.test(location.pathname);
     try {
       sessionStorage.setItem(spa ? 'gv.redirect' : 'gv.missing', path);
     } catch (e) {}
     location.replace(spa ? '/' : '/404/');
   })();
+
+  // A tab left open from before the games moved still looks in /games/. The
+  // game now lives in a vault site, so go there. Anything else tells the
+  // player it is missing, and the player falls back to the original host.
+  function toVault() {
+    var m = /^\/games\/([^\/]+)\/(.*)$/.exec(location.pathname);
+    if (!m) return missing();
+    fetch('/games.json', { cache: 'no-cache' }).then(function (res) { return res.json(); }).then(function (data) {
+      var g = data.games.filter(function (x) { return x.id === m[1]; })[0];
+      if (!g || !g.site) return missing();
+      // The old page never carried this game's saves over (js/carry.js).
+      var carry = window.GV && GV.carry ? GV.carry(g) : Promise.resolve();
+      carry.then(function () {
+        location.replace('/vault' + g.site + '/' + m[1] + '/' + m[2] + location.search);
+      });
+    }).catch(missing);
+  }
+
+  function toVaultTop(id, rest) {
+    fetch('/games.json', { cache: 'no-cache' }).then(function (res) { return res.json(); }).then(function (data) {
+      var g = data.games.filter(function (x) { return x.id === id; })[0];
+      if (!g || !g.site) throw new Error('not moved');
+      var carry = window.GV && GV.carry ? GV.carry(g) : Promise.resolve();
+      return carry.then(function () {
+        location.replace('/vault' + g.site + '/' + id + '/' + rest + location.search);
+      });
+    }).catch(function () {
+      try { sessionStorage.setItem('gv.missing', location.pathname + location.search); } catch (e) {}
+      location.replace('/404/');
+    });
+  }
+
+  function missing() {
+    parent.postMessage({ gv: 'missing' }, location.origin);
+  }
+
+  function inPlayer() {
+    try {
+      var frame = parent.document.getElementById('gameFrame');
+      return !!frame && frame.contentWindow === window;
+    } catch (e) { return false; }
+  }
   </script>
 </head>
 <body></body>

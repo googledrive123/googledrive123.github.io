@@ -125,7 +125,9 @@
     { label: 'Wikipedia',   url: 'https://www.wikipedia.org' },
     { label: 'CoolMath',    url: 'https://www.coolmathgames.com' },
     { label: 'CrazyGames',  url: 'https://www.crazygames.com' },
-    { label: 'YouTube',     url: 'https://www.youtube.com' }
+    { label: 'YouTube',     url: 'https://www.youtube.com' },
+    { label: 'Discord',     url: 'https://discord.com/app' },
+    { label: 'Amazon',      url: 'https://www.amazon.com' }
   ];
 
   var frame = document.getElementById('browserFrame');
@@ -133,9 +135,18 @@
   var status = document.getElementById('browserStatus');
   var proxyInput = document.getElementById('proxyInput');
 
+  // The proxy becomes the frame's address, so a javascript: or data: one
+  // would run inside this page. Only an https:// address counts as a proxy.
+  function httpsOnly(v) {
+    v = String(v || '').trim();
+    if (!/^https:\/\//i.test(v)) return '';
+    try { return new URL(v).protocol === 'https:' ? v : ''; }
+    catch (e) { return ''; }
+  }
   function readProxy() {
-    try { return localStorage.getItem(PROXY_KEY) || DEFAULT_PROXY; }
-    catch (e) { return DEFAULT_PROXY; }
+    var v = '';
+    try { v = localStorage.getItem(PROXY_KEY); } catch (e) {}
+    return httpsOnly(v) || DEFAULT_PROXY;
   }
   function writeProxy(v) {
     try { v ? localStorage.setItem(PROXY_KEY, v) : localStorage.removeItem(PROXY_KEY); }
@@ -196,9 +207,12 @@
 
   proxyInput.value = readProxy();
   document.getElementById('proxySave').addEventListener('click', function () {
-    var v = proxyInput.value.trim();
+    var typed = proxyInput.value.trim();
+    var v = httpsOnly(typed);
     writeProxy(v === DEFAULT_PROXY ? '' : v);
-    say('proxy saved');
+    proxyInput.value = v || DEFAULT_PROXY;
+    if (v || !typed) say('proxy saved');
+    else say('a proxy has to start with https:// · using the default', true);
   });
   document.getElementById('proxyReset').addEventListener('click', function () {
     writeProxy('');
@@ -207,6 +221,11 @@
   });
 
   say('type an address and press Enter');
+
+  // /unblocker/?url=discord.com opens straight on that site (the Discord and
+  // Amazon tiles on the home page link here).
+  var start = new URLSearchParams(location.search).get('url');
+  if (start) go(start);
 })();
 </script>
 </main>

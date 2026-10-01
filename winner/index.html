@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Winner · GameVault</title>
+  <meta name="description" content="Reveal the latest GameVault giveaway or monthly challenge winner.">
+  <link rel="icon" href="/favicon.svg">
+  <!-- Blocking on purpose: the cloak has to land before the first paint. -->
+  <script src="/js/mimicry.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/site.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
+  <script src="/js/identity.js" defer></script>
+  <script src="/js/analytics.js" defer></script>
+  <script src="/js/site.js" defer></script>
+  <script src="/js/player.js" defer></script>
+  <style>
+    .page [hidden] { display: none !important; }
+
+    /* The card and the winner share one grid cell, so the card sits right on
+       top of the name it hides. */
+    .wn-stage {
+      display: grid; place-items: center;
+      min-height: 360px;
+      margin-top: 1rem;
+      padding: 2rem 1rem;
+      perspective: 900px;
+    }
+    .wn-stage > * { grid-area: 1 / 1; }
+
+    .wn-card {
+      position: relative;
+      display: flex; flex-direction: column; justify-content: space-between;
+      width: 260px; height: 260px;
+      padding: 1.1rem 1.15rem 1.2rem;
+      border: none;
+      border-radius: 20px;
+      background:
+        radial-gradient(circle at 30% 20%, rgba(255,255,255,0.22), transparent 55%),
+        linear-gradient(145deg, #ff3b3b 0%, #c41230 55%, #5c0716 100%);
+      box-shadow: 0 24px 60px -18px rgba(255,59,59,0.55), inset 0 0 0 1px rgba(255,255,255,0.14);
+      color: #fff;
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    .wn-card:hover { transform: translateY(-3px) rotate(-1.5deg); }
+    .wn-card:focus-visible { outline: 2px solid var(--text); outline-offset: 4px; }
+    .wn-card:disabled {
+      cursor: default;
+      background: linear-gradient(145deg, var(--surface-2), var(--surface));
+      box-shadow: inset 0 0 0 1px var(--border-strong);
+      color: var(--muted);
+    }
+    .wn-card:disabled:hover { transform: none; }
+    .wn-kind {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.64rem; letter-spacing: 0.16em; text-transform: uppercase;
+      opacity: 0.85;
+    }
+    .wn-mark {
+      align-self: center;
+      font-size: 5.5rem; font-weight: 700; line-height: 1;
+      text-shadow: 0 6px 24px rgba(0,0,0,0.25);
+    }
+    .wn-hint { font-size: 1.05rem; font-weight: 600; line-height: 1.3; }
+    .wn-hint .tap { display: none; }
+    @media (hover: none) {
+      .wn-hint .hover { display: none; }
+      .wn-hint .tap { display: inline; }
+    }
+
+    /* The winner, out of sight until the card is gone. */
+    .wn-result {
+      max-width: 36rem;
+      text-align: center;
+      visibility: hidden;
+      opacity: 0;
+    }
+    .wn-stage.shown .wn-card { visibility: hidden; }
+    .wn-stage.shown .wn-result { visibility: visible; opacity: 1; }
+    .wn-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--muted-2);
+    }
+    .wn-name {
+      margin-top: 0.5rem;
+      padding-bottom: 0.1em;
+      font-size: clamp(2.4rem, 9vw, 4.25rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.05;
+      overflow-wrap: anywhere;
+      background: linear-gradient(90deg, #ff3b3b, #ff9f1a, #ffd43b, #3ddc84, #3ba7ff, #8a5cff, #ff4fd8, #ff3b3b);
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: wn-rainbow 4s linear infinite;
+    }
+    /* Usernames run up to 32 characters; a long one still fits a line. */
+    .wn-name.long { font-size: clamp(1.9rem, 6.5vw, 3.1rem); }
+    .wn-name.longer { font-size: clamp(1.5rem, 5vw, 2.4rem); }
+    /* Deeper colors, so the yellow still reads on white. */
+    :root[data-theme="light"] .wn-name {
+      background-image: linear-gradient(90deg, #e0262f, #e67700, #c99a00, #1f9d55, #1c7ed6, #6741d9, #c2255c, #e0262f);
+    }
+
+    /* The reveal: the card spins twice as it turns edge-on and falls away,
+       then the name fades in where it was. */
+    @keyframes wn-spin {
+      to { transform: rotate(720deg) rotateY(90deg) scale(0.4); opacity: 0; }
+    }
+    @keyframes wn-in {
+      from { opacity: 0; transform: scale(0.85); }
+      to { opacity: 1; transform: none; }
+    }
+    @keyframes wn-rainbow {
+      to { background-position: 200% 0; }
+    }
+    .wn-stage.spinning .wn-card {
+      animation: wn-spin 2.6s cubic-bezier(.65,-0.15,.38,.93) forwards;
+      pointer-events: none;
+    }
+    .wn-stage.spinning .wn-result { visibility: visible; animation: wn-in 0.7s 2.2s both; }
+    .page .wn-result p { margin-top: 0.8rem; color: var(--muted); }
+    .page .wn-result p.wn-you { margin-top: 0.5rem; color: #5ce08a; font-weight: 600; }
+    .wn-result .btn { margin-top: 1.25rem; }
+
+    @media (max-width: 380px) {
+      .wn-stage { min-height: 300px; padding: 1.5rem 0; }
+      .wn-card { width: 220px; height: 220px; }
+      .wn-mark { font-size: 4.5rem; }
+    }
+
+    .page p.wn-empty { max-width: 34rem; margin: 0 auto; text-align: center; font-size: 0.9rem; }
+    .wn-links { justify-content: center; }
+    .page .wn-links a.btn { text-decoration: none; }
+  </style>
+</head>
+<body>
+<main class="page">
+  <div class="page-kicker">winner</div>
+  <h1>And the winner is…</h1>
+  <p class="lede">The latest giveaway or monthly challenge winner, hidden under the card.</p>
+
+  <div class="wn-stage" id="wnStage">
+    <button class="wn-card" id="wnCard" type="button" disabled>
+      <span class="wn-kind" id="wnKind">Winner</span>
+      <span class="wn-mark" aria-hidden="true">?</span>
+      <span class="wn-hint" id="wnHint">
+        <span class="hover">Hover to reveal the winner</span><span class="tap">Tap to reveal the winner</span>
+      </span>
+    </button>
+    <div class="wn-result" id="wnResult" aria-live="polite">
+      <div class="wn-label" id="wnLabel"></div>
+      <div class="wn-name" id="wnName"></div>
+      <p id="wnWhat"></p>
+      <p class="wn-you" id="wnYou" hidden>That is you! The site owner adds the prize to your account.</p>
+      <button class="btn" id="wnReplay" type="button">Hide it again</button>
+    </div>
+  </div>
+
+  <p class="wn-empty" id="wnEmpty" hidden>No winner yet. The first one shows up here after a
+  giveaway is drawn or a monthly challenge ends.</p>
+  <div class="btn-row wn-links">
+    <a class="btn" href="/giveaway/">Giveaway</a>
+    <a class="btn" href="/challenge/">Monthly challenge</a>
+  </div>
+
+<script>
+(function () {
+  'use strict';
+
+  var SUPA_URL = 'https://dxwjxzmlezfyursysays.supabase.co';
+  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
+
+  function $(id) { return document.getElementById(id); }
+
+  // The last winner this browser has seen revealed. Coming back to the same
+  // one skips the spin; a new winner gets the card again.
+  var SEEN_KEY = 'gv.winner.seen';
+
+  var stage = $('wnStage');
+  var card = $('wnCard');
+  var winner = null;
+
+  // '2026-09-01' as "September 2026", read as UTC so it never slips a month.
+  function monthName(day, opts) {
+    var p = String(day || '').split('-');
+    var d = new Date(Date.UTC(+p[0], +p[1] - 1, 1));
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleDateString(undefined, opts || { month: 'long', year: 'numeric', timeZone: 'UTC' });
+  }
+
+  // Whichever came last: the latest giveaway draw, or the latest challenge
+  // month the owner has closed. A month still being checked has no winner yet.
+  function latest(giveaway, months) {
+    var g = giveaway && giveaway.last_winner;
+    var m = null;
+    (months || []).some(function (x) {
+      if (x.closed && x.winner) { m = x; return true; }
+      return false;
+    });
+    var a = g && {
+      key: 'g' + g.id,
+      at: Date.parse(g.drawn_at),
+      kind: 'Giveaway',
+      label: 'Giveaway winner',
+      // No name comes back when the winner's account is gone or its name is
+      // not fit to show.
+      name: g.winner_name || 'A GameVault player',
+      what: g.title + ' · ' + g.prize_text,
+      you: !!g.won
+    };
+    var b = m && {
+      key: 'c' + m.month,
+      at: Date.parse(m.closed_at),
+      kind: 'Challenge · ' + monthName(m.month, { month: 'long', timeZone: 'UTC' }),
+      label: monthName(m.month) + ' challenge winner',
+      name: m.winner.nickname,
+      what: m.title + ' in ' + m.winner.time,
+      you: false
+    };
+    if (!a || !b) return a || b || null;
+    return b.at > a.at ? b : a;
+  }
+
+  function seen() {
+    try { return localStorage.getItem(SEEN_KEY); } catch (e) { return null; }
+  }
+
+  function fill() {
+    $('wnLabel').textContent = winner.label;
+    var name = $('wnName');
+    name.textContent = winner.name;
+    name.classList.toggle('long', winner.name.length > 11 && winner.name.length <= 20);
+    name.classList.toggle('longer', winner.name.length > 20);
+    $('wnWhat').textContent = winner.what;
+    $('wnYou').hidden = !winner.you;
+  }
+
+  function reveal() {
+    if (!winner || stage.classList.contains('spinning') || stage.classList.contains('shown')) return;
+    fill();
+    try { localStorage.setItem(SEEN_KEY, winner.key); } catch (e) {}
+    // The shared stylesheet stops every animation for reduced motion, so
+    // there is no spin to wait for.
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      stage.classList.add('shown');
+      return;
+    }
+    stage.classList.add('spinning');
+    var done = function () {
+      if (!stage.classList.contains('spinning')) return;
+      stage.classList.remove('spinning');
+      stage.classList.add('shown');
+    };
+    $('wnResult').addEventListener('animationend', done, { once: true });
+    // In case the animation never gets to end, in a tab put in the background.
+    setTimeout(done, 3400);
+  }
+
+  function ready(w) {
+    winner = w;
+    if (!w) {
+      $('wnKind').textContent = 'No winner yet';
+      $('wnHint').textContent = 'Check back soon';
+      $('wnEmpty').hidden = false;
+      return;
+    }
+    $('wnKind').textContent = w.kind;
+    card.disabled = false;
+    if (seen() === w.key) {
+      fill();
+      stage.classList.add('shown');
+    }
+  }
+
+  card.addEventListener('click', reveal);
+  $('wnReplay').addEventListener('click', function () {
+    stage.classList.remove('shown');
+    card.focus();
+  });
+  // Hovering is enough where there is a mouse; a touch screen taps.
+  card.addEventListener('mouseenter', function () {
+    if (window.matchMedia('(hover: hover)').matches) reveal();
+  });
+
+  document.addEventListener('DOMContentLoaded', function () {
+    if (!window.supabase) {
+      $('wnHint').textContent = 'Could not load. Refresh to try again.';
+      return;
+    }
+    // With the home page's session, if there is one, so the giveaway can say
+    // when the winner is the one looking.
+    var sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+    var quiet = function (p) {
+      return p.then(function (r) {
+        if (r.error) throw r.error;
+        return r.data;
+      }).catch(function (err) {
+        console.error(err);
+        return undefined;
+      });
+    };
+    sb.auth.getSession().then(function () {
+      return Promise.all([quiet(sb.rpc('gv_giveaway_current')), quiet(sb.rpc('gv_challenge_history'))]);
+    }).then(function (r) {
+      if (r[0] === undefined && r[1] === undefined) {
+        $('wnHint').textContent = 'Could not load. Refresh to try again.';
+        return;
+      }
+      ready(latest(r[0], r[1]));
+    });
+  });
+})();
+</script>
+</main>
+</body>
+</html>

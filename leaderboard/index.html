@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leaderboard · GameVault</title>
+  <meta name="description" content="Who has played the most on GameVault: top levels, top play time, this week's leaders, and the most played games.">
+  <link rel="icon" href="/favicon.svg">
+  <!-- Blocking on purpose: the cloak has to land before the first paint. -->
+  <script src="/js/mimicry.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/site.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
+  <script src="/js/identity.js" defer></script>
+  <script src="/js/analytics.js" defer></script>
+  <script src="/js/site.js" defer></script>
+  <script src="/js/avatars.js" defer></script>
+  <style>
+    /* Rows set their own display, which would otherwise beat hidden. */
+    .page [hidden] { display: none !important; }
+
+    .lb-tabs { display: flex; gap: 0.4rem; margin-top: 1.5rem; flex-wrap: wrap; }
+    .lb-tab {
+      padding: 0.5rem 1rem; border-radius: 100px;
+      border: 1px solid var(--border); background: transparent;
+      color: var(--muted); font: inherit; font-size: 0.85rem; cursor: pointer;
+      transition: all 0.15s;
+    }
+    .lb-tab:hover { color: var(--text); border-color: var(--border-strong); }
+    .lb-tab[aria-selected="true"] { color: var(--text); background: var(--surface); border-color: var(--border-strong); }
+
+    .lb-msg { font-size: 0.88rem; color: var(--muted); }
+    .lb-msg:empty { display: none; }
+    #lbPanel .table-wrap { margin-top: 0; }
+    table.gv th.num, table.gv td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    table.gv td { vertical-align: middle; }
+    table.gv td.rank { color: var(--muted-2); font-family: 'JetBrains Mono', monospace; width: 2.5rem; }
+    tr.top1 td.rank { color: #f0c04a; }
+    tr.top2 td.rank { color: #c9d1dc; }
+    tr.top3 td.rank { color: #d99a62; }
+    tr.mine td { background: rgba(255,59,59,0.07); }
+
+    .lb-who { display: flex; align-items: center; gap: 0.6rem; min-width: 0; }
+    .lb-av { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; background: var(--surface-2); }
+    .lb-name { color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 16rem; }
+    .lb-level {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 2rem; padding: 0.1rem 0.45rem; border-radius: 100px;
+      border: 1px solid rgba(255,59,59,0.45); color: var(--accent);
+      font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
+    }
+
+    .lb-find { margin-bottom: 0.75rem; max-width: 20rem; }
+    .lb-game { display: flex; align-items: center; gap: 0.6rem; color: var(--text); text-decoration: none; }
+    .page a.lb-game { text-decoration: none; }
+    .lb-thumb { width: 44px; height: 28px; border-radius: 6px; flex-shrink: 0; background: var(--surface-2) center / cover no-repeat; }
+    .lb-top { display: flex; align-items: center; gap: 0.45rem; }
+    .lb-top .lb-av { width: 20px; height: 20px; }
+    .lb-top small { color: var(--muted-2); font-size: 0.75rem; }
+    tr.lb-open-row { cursor: pointer; }
+    tr.lb-open-row:hover td { background: rgba(255,255,255,0.03); }
+    tr.lb-detail td { background: var(--bg); padding: 0.4rem 0.85rem 0.85rem; }
+    .lb-detail-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; }
+    .page .lb-detail-list li { margin: 0; display: flex; align-items: center; justify-content: space-between; gap: 1rem; font-size: 0.82rem; }
+
+    .lb-me { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .lb-me .lb-av { width: 40px; height: 40px; }
+    .lb-me-main { flex: 1; min-width: 12rem; }
+    .lb-me-name { color: var(--text); font-weight: 600; }
+    .lb-me-sub { color: var(--muted); font-size: 0.82rem; margin-top: 0.15rem; }
+    .lb-me-rank { font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; color: var(--text); }
+
+    @media (max-width: 560px) {
+      .lb-hide-sm { display: none; }
+      /* Fixed columns, so a long name shrinks instead of pushing the play
+         time off the screen. */
+      #lbPanel table.gv { table-layout: fixed; }
+      #lbPanel table.gv th, #lbPanel table.gv td { padding-left: 0.45rem; padding-right: 0.45rem; }
+      #lbPanel table.gv th:first-child { width: 2.25rem; }
+      #lbPanel table.gv th.num { width: 5.25rem; }
+      .lb-name { max-width: none; }
+      .lb-who, .lb-game { min-width: 0; }
+      .lb-game span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    }
+  </style>
+</head>
+<body>
+<main class="page">
+  <div class="page-kicker">leaderboard</div>
+  <h1>Leaderboard</h1>
+  <p class="lede">Who has played the most. Levels come from play time, so the top level and the
+  most play time are the same list. Only signed-in accounts are ranked.</p>
+
+  <div class="lb-me panel" id="lbMe" hidden></div>
+
+  <div class="lb-tabs" role="tablist" aria-label="Boards">
+    <button class="lb-tab" role="tab" type="button" data-tab="players" aria-selected="true">Top players</button>
+    <button class="lb-tab" role="tab" type="button" data-tab="week" aria-selected="false">This week</button>
+    <button class="lb-tab" role="tab" type="button" data-tab="games" aria-selected="false">Games</button>
+  </div>
+
+  <div class="panel" id="lbPanel">
+    <div class="lb-msg" id="lbMsg" role="status">Loading the leaderboard…</div>
+    <div class="table-wrap" id="lbPlayers" hidden>
+      <table class="gv">
+        <thead><tr><th>#</th><th>Player</th><th class="num">Level</th><th class="num">Play time</th><th class="num lb-hide-sm">Games</th></tr></thead>
+        <tbody id="lbPlayerRows"></tbody>
+      </table>
+    </div>
+    <div class="table-wrap" id="lbWeek" hidden>
+      <table class="gv">
+        <thead><tr><th>#</th><th>Player</th><th class="num">This week</th></tr></thead>
+        <tbody id="lbWeekRows"></tbody>
+      </table>
+    </div>
+    <div id="lbGames" hidden>
+      <input class="field lb-find" id="lbFind" type="search" placeholder="Find a game" autocomplete="off">
+      <div class="table-wrap">
+        <table class="gv">
+          <thead><tr><th>#</th><th>Game</th><th class="num">Play time</th><th class="num lb-hide-sm">Players</th><th class="lb-hide-sm">Top player</th></tr></thead>
+          <tbody id="lbGameRows"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <p class="panel-note">One session counts for at most four hours, so a tab left open overnight does
+  not win, and time spent in two games at once only counts once. Don't want to be listed? Turn off
+  "Show me on the leaderboard" in your profile.</p>
+
+<script>
+(function () {
+  'use strict';
+
+  var SUPA_URL = 'https://dxwjxzmlezfyursysays.supabase.co';
+  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
+
+  var sb = null;
+  var data = null;
+  var people = {};   // account id -> { username, preset, upload }
+  var catalog = {};  // game id -> games.json entry
+  var session = null;
+
+  function $(id) { return document.getElementById(id); }
+
+  // The same levels as the profile on the home page (levelFromXp in
+  // index.html): 10 XP a minute, 50 XP for the first level, 20% more every
+  // five levels up to 50, then 200 more every five levels.
+  function levelFor(sec) {
+    var xp = Math.floor(sec / 60) * 10, level = 1, need = 50;
+    while (xp >= need) {
+      xp -= need;
+      if (level % 5 === 0) need = level < 50 ? Math.round(need * 1.2) : need + 200;
+      level++;
+    }
+    return level;
+  }
+
+  function hours(sec) {
+    var h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60);
+    return h ? h.toLocaleString() + 'h ' + m + 'm' : m + 'm';
+  }
+
+  function td(cls, content) {
+    var c = document.createElement('td');
+    if (cls) c.className = cls;
+    if (content instanceof Node) c.appendChild(content); else c.textContent = content;
+    return c;
+  }
+
+  function who(id, small) {
+    var p = people[id] || {};
+    var box = document.createElement('span');
+    box.className = small ? 'lb-top' : 'lb-who';
+    var av = document.createElement('span');
+    av.className = 'lb-av';
+    if (window.GV && GV.avatars) GV.avatars.render(av, { id: id, preset: p.preset, upload: p.upload });
+    var nm = document.createElement('span');
+    nm.className = 'lb-name';
+    nm.textContent = p.username || 'player';
+    box.append(av, nm);
+    return box;
+  }
+
+  function rankRow(rank, id) {
+    var tr = document.createElement('tr');
+    if (rank <= 3) tr.className = 'top' + rank;
+    if (data.me && data.me.id === id) tr.classList.add('mine');
+    tr.appendChild(td('rank', String(rank)));
+    tr.appendChild(td('', who(id)));
+    return tr;
+  }
+
+  function paintPlayers() {
+    var body = $('lbPlayerRows');
+    body.textContent = '';
+    data.players.forEach(function (p) {
+      var tr = rankRow(p.rank, p.id);
+      var lv = document.createElement('span');
+      lv.className = 'lb-level';
+      lv.textContent = levelFor(p.sec);
+      tr.appendChild(td('num', lv));
+      tr.appendChild(td('num', hours(p.sec)));
+      tr.appendChild(td('num lb-hide-sm', String(p.games)));
+      body.appendChild(tr);
+    });
+  }
+
+  function paintWeek() {
+    var body = $('lbWeekRows');
+    body.textContent = '';
+    if (!data.week.length) {
+      var tr = document.createElement('tr');
+      var c = td('', 'Nobody has played this week yet.');
+      c.colSpan = 3;
+      tr.appendChild(c);
+      body.appendChild(tr);
+      return;
+    }
+    var rank = 0, last = -1;
+    data.week.forEach(function (p, i) {
+      if (p.sec !== last) { rank = i + 1; last = p.sec; }
+      var tr = rankRow(rank, p.id);
+      tr.appendChild(td('num', hours(p.sec)));
+      body.appendChild(tr);
+    });
+  }
+
+  function gameLink(g) {
+    var a = document.createElement('a');
+    a.className = 'lb-game';
+    a.href = '/games/' + encodeURIComponent(g.id);
+    var th = document.createElement('span');
+    th.className = 'lb-thumb';
+    if (g.img) th.style.backgroundImage = 'url("' + String(g.img).replace(/"/g, '%22') + '")';
+    var nm = document.createElement('span');
+    nm.textContent = g.name;
+    a.append(th, nm);
+    return a;
+  }
+
+  function paintGames() {
+    var body = $('lbGameRows');
+    body.textContent = '';
+    var q = $('lbFind').value.trim().toLowerCase();
+    var shown = 0;
+    data.games.forEach(function (row) {
+      // A game the catalog does not know (or a catalog that did not load)
+      // still shows, under its id.
+      var g = catalog[row.id] || { id: row.id, name: row.id };
+      if (q && g.name.toLowerCase().indexOf(q) === -1) return;
+      shown++;
+      var tr = document.createElement('tr');
+      tr.className = 'lb-open-row';
+      tr.dataset.game = row.id;
+      tr.appendChild(td('rank', String(row.rank)));
+      tr.appendChild(td('', gameLink(g)));
+      tr.appendChild(td('num', hours(row.sec)));
+      tr.appendChild(td('num lb-hide-sm', String(row.players)));
+      var top = who(row.top, true);
+      var t = document.createElement('small');
+      t.textContent = hours(row.top_sec);
+      top.appendChild(t);
+      tr.appendChild(td('lb-hide-sm', top));
+      body.appendChild(tr);
+    });
+    if (!shown) {
+      var tr = document.createElement('tr');
+      var c = td('', q ? 'No game on the board matches that.' : 'No games have been played yet.');
+      c.colSpan = 5;
+      tr.appendChild(c);
+      body.appendChild(tr);
+    }
+  }
+
+  // A click on a game's row (not its link) opens its top ten under it.
+  function toggleGame(tr) {
+    var next = tr.nextElementSibling;
+    if (next && next.classList.contains('lb-detail')) { next.remove(); return; }
+    var row = document.createElement('tr');
+    row.className = 'lb-detail';
+    var c = td('', 'Loading…');
+    c.colSpan = 5;
+    row.appendChild(c);
+    tr.after(row);
+    sb.rpc('gv_leaderboard_game', { p_game_id: tr.dataset.game }).then(function (r) {
+      if (r.error) throw new Error(r.error.message);
+      var list = r.data || [];
+      if (!(window.GV && GV.avatars)) return list;
+      return GV.avatars.publicProfiles(list.map(function (p) { return p.id; })).then(function (rows) {
+        rows.forEach(function (p) { people[p.id] = p; });
+        return list;
+      }).catch(function () { return list; });
+    }).then(function (list) {
+      var ol = document.createElement('ol');
+      ol.className = 'lb-detail-list';
+      list.forEach(function (p) {
+        var li = document.createElement('li');
+        var left = who(p.id, true);
+        var n = document.createElement('small');
+        n.textContent = '#' + p.rank;
+        left.prepend(n);
+        var right = document.createElement('span');
+        right.textContent = hours(p.sec);
+        li.append(left, right);
+        ol.appendChild(li);
+      });
+      c.textContent = '';
+      c.appendChild(ol);
+    }).catch(function () { c.textContent = 'Could not load this game\'s players.'; });
+  }
+
+  // Where the signed-in player stands, or a nudge to sign in.
+  function paintMe() {
+    var box = $('lbMe');
+    box.textContent = '';
+    var main = document.createElement('div');
+    main.className = 'lb-me-main';
+    var name = document.createElement('div');
+    name.className = 'lb-me-name';
+    var sub = document.createElement('div');
+    sub.className = 'lb-me-sub';
+    main.append(name, sub);
+    if (!session) {
+      name.textContent = 'Not on the board yet';
+      sub.textContent = 'Sign in on the home page and your play time counts from then on.';
+      var a = document.createElement('a');
+      a.className = 'btn';
+      a.href = '/';
+      a.textContent = 'Sign in';
+      box.append(main, a);
+    } else if (data.me && data.me.hidden) {
+      name.textContent = (people[session.user.id] || {}).username || 'You';
+      sub.textContent = 'You are hidden from the leaderboard. Turn it back on in your profile on the home page.';
+      box.append(main);
+    } else if (!data.me) {
+      name.textContent = (people[session.user.id] || {}).username || 'You';
+      sub.textContent = 'Play a game while signed in to get on the board.';
+      box.append(main);
+    } else {
+      var av = document.createElement('span');
+      av.className = 'lb-av';
+      var p = people[data.me.id] || {};
+      if (window.GV && GV.avatars) GV.avatars.render(av, { id: data.me.id, preset: p.preset, upload: p.upload });
+      name.textContent = p.username || 'You';
+      sub.textContent = 'Level ' + levelFor(data.me.sec) + ' · ' + hours(data.me.sec) + ' played · ' +
+        data.me.games + (data.me.games === 1 ? ' game' : ' games');
+      var rank = document.createElement('div');
+      rank.className = 'lb-me-rank';
+      rank.textContent = '#' + data.me.rank + ' of ' + data.of;
+      box.append(av, main, rank);
+    }
+    box.hidden = false;
+  }
+
+  function show(tab) {
+    document.querySelectorAll('.lb-tab').forEach(function (b) {
+      b.setAttribute('aria-selected', b.dataset.tab === tab ? 'true' : 'false');
+    });
+    $('lbPlayers').hidden = tab !== 'players';
+    $('lbWeek').hidden = tab !== 'week';
+    $('lbGames').hidden = tab !== 'games';
+    try { history.replaceState(null, '', tab === 'players' ? location.pathname : '#' + tab); } catch (e) {}
+  }
+
+  function load(tries) {
+    return sb.rpc('gv_leaderboard').then(function (r) {
+      // The very first visit can find the board still being worked out.
+      if (r.error && (tries || 0) < 3) {
+        return new Promise(function (res) { setTimeout(res, 1500); }).then(function () { return load((tries || 0) + 1); });
+      }
+      if (r.error) throw new Error(r.error.message);
+      data = r.data;
+      var ids = data.players.concat(data.week).map(function (p) { return p.id; })
+        .concat(data.games.map(function (g) { return g.top; }))
+        .concat(session ? [session.user.id] : []);
+      return window.GV && GV.avatars ? GV.avatars.publicProfiles(ids).then(function (rows) {
+        rows.forEach(function (row) { people[row.id] = row; });
+      }).catch(function () {}) : null;
+    }).then(function () {
+      $('lbMsg').textContent = data.players.length ? '' : 'Nobody is on the board yet. Sign in and play a game to be first.';
+      paintPlayers();
+      paintWeek();
+      paintGames();
+      paintMe();
+    }).catch(function () {
+      $('lbMsg').textContent = 'The leaderboard could not load. Refresh to try again.';
+    });
+  }
+
+  $('lbFind').addEventListener('input', function () { if (data) paintGames(); });
+  $('lbGameRows').addEventListener('click', function (e) {
+    if (e.target.closest('a')) return;
+    var tr = e.target.closest('tr.lb-open-row');
+    if (tr) toggleGame(tr);
+  });
+
+  document.querySelectorAll('.lb-tab').forEach(function (b) {
+    b.addEventListener('click', function () { show(b.dataset.tab); });
+  });
+
+  document.addEventListener('DOMContentLoaded', function () {
+    var start = (location.hash || '').slice(1);
+    show(['week', 'games'].indexOf(start) !== -1 ? start : 'players');
+    if (!window.supabase) {
+      $('lbMsg').textContent = 'The leaderboard could not load. Refresh to try again.';
+      return;
+    }
+    // Restores the home page's session, if any, so the board can say where
+    // a signed-in player stands.
+    sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+    var games = fetch('/games.json').then(function (r) { return r.json(); }).then(function (d) {
+      (d.games || []).forEach(function (g) { catalog[g.id] = g; });
+    }).catch(function () {});
+    Promise.all([games, sb.auth.getSession()]).then(function (r) {
+      session = r[1].data && r[1].data.session;
+      return load();
+    });
+  });
+})();
+</script>
+</main>
+</body>
+</html>

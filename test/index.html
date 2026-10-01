@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Testing · GameVault</title>
+  <meta name="description" content="Games waiting to go live, for GameVault testers to try first.">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="/favicon.svg">
+  <!-- Blocking on purpose: the cloak has to land before the first paint. -->
+  <script src="/js/mimicry.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/site.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
+  <script src="/js/identity.js" defer></script>
+  <script src="/js/analytics.js" defer></script>
+  <script src="/js/site.js" defer></script>
+  <script src="/js/player.js" defer></script>
+  <style>
+    .page .panel > p:not([class]) { font-size: 0.9rem; }
+    .test-empty { color: var(--muted-2); font-size: 0.85rem; padding: 0.5rem 0; }
+    .test-note { font-size: 0.8rem; color: var(--muted); margin-top: 0.75rem; line-height: 1.5; }
+    .test-note:empty { display: none; }
+    .test-note.bad { color: var(--accent); }
+    .test-note.good { color: #5ce08a; }
+    .btn-sm { padding: 0.38rem 0.8rem; font-size: 0.78rem; }
+    .page a.btn { text-decoration: none; }
+
+    .queue { border-top: 1px solid var(--border); }
+    .queue:empty { display: none; }
+    .queue-row {
+      display: flex; align-items: center; gap: 0.85rem;
+      padding: 0.7rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .queue-row.current { background: linear-gradient(90deg, rgba(255,59,59,0.07), transparent 60%); }
+    .queue-thumb {
+      display: block;
+      width: 64px; height: 36px; flex-shrink: 0;
+      border-radius: 6px;
+      overflow: hidden;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+    }
+    .queue-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
+    .queue-info { min-width: 0; flex: 1; }
+    .queue-name { font-size: 0.9rem; color: var(--text); overflow-wrap: anywhere; }
+    .queue-meta {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem;
+      font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; color: var(--muted-2);
+      margin-top: 0.2rem;
+    }
+    .queue-missing .queue-name { color: var(--muted); }
+
+    /* Scrolled to when a game opens; clear of the sticky header. */
+    #bench { scroll-margin-top: 5rem; }
+
+    .bench-head {
+      display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap;
+      gap: 0.6rem 1rem; margin-bottom: 0.85rem;
+    }
+    .bench-name { font-size: 1.1rem; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
+    .bench-id { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--muted-2); margin-top: 0.2rem; }
+    .bench-tools { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .stage {
+      position: relative;
+      aspect-ratio: 16 / 9;
+      max-height: 72vh;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #000;
+      border: 1px solid var(--border);
+    }
+    .stage iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+    /* The same three colors as the badges, so a verdict reads the same in
+       the picker, the list and the table. */
+    .verdicts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-top: 1rem; }
+    .verdict {
+      --tone: var(--border-strong);
+      display: flex; flex-direction: column; align-items: flex-start; gap: 0.2rem;
+      padding: 0.7rem 0.85rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font: inherit; text-align: left;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .verdict[data-verdict="works"] { --tone: #5ce08a; --wash: rgba(92,224,138,0.08); }
+    .verdict[data-verdict="problem"] { --tone: #f0c04a; --wash: rgba(240,192,74,0.08); }
+    .verdict[data-verdict="broken"] { --tone: var(--accent); --wash: rgba(255,59,59,0.08); }
+    .verdict:hover { border-color: var(--border-strong); }
+    .verdict[aria-pressed="true"] { border-color: var(--tone); background: var(--wash); }
+    .verdict:focus-visible { outline: 2px solid var(--tone); outline-offset: 2px; }
+    .verdict:disabled { opacity: 0.45; cursor: default; }
+    .verdict-name { font-size: 0.9rem; font-weight: 600; }
+    .verdict[aria-pressed="true"] .verdict-name { color: var(--tone); }
+    .verdict-desc { font-size: 0.72rem; color: var(--muted-2); line-height: 1.35; }
+    .note-box { margin-top: 0.6rem; resize: vertical; min-height: 4.5rem; line-height: 1.5; }
+
+    /* Scrolls sideways on a phone rather than squeezing notes a word a line. */
+    table.reports { min-width: 34rem; }
+    table.reports td:last-child { white-space: nowrap; }
+
+    @media (max-width: 560px) {
+      .verdicts { grid-template-columns: 1fr; }
+      .verdict { flex-direction: row; align-items: baseline; gap: 0.6rem; }
+    }
+  </style>
+</head>
+<body>
+<main class="page">
+  <div class="page-kicker">testing</div>
+  <h1>Game testing</h1>
+  <p class="lede">Games waiting to go live. Play each one for a minute or two, then say whether it
+  works, so broken ones never reach everyone else.</p>
+
+  <p class="panel-note" id="gate">Checking your account…</p>
+
+  <div class="panel" id="notTester" hidden>
+    <p>This page is for testers.</p>
+    <p class="panel-note" id="signInHint" hidden>If you are one, <a href="/">sign in on the home
+    page</a> first, then come back.</p>
+  </div>
+
+  <div id="tester" hidden>
+    <div class="panel">
+      <div class="panel-label">Waiting for a test</div>
+      <div class="queue" id="queue"></div>
+      <p class="test-empty" id="queueEmpty" hidden>No games are waiting for a test right now.
+      Check back soon.</p>
+    </div>
+
+    <div class="panel" id="bench" hidden>
+      <div class="panel-label">Now testing</div>
+      <div class="bench-head">
+        <div class="bench-title">
+          <div class="bench-name" id="benchName"></div>
+          <div class="bench-id" id="benchId"></div>
+        </div>
+        <div class="bench-tools">
+          <button class="btn btn-sm" id="fullBtn" type="button">Full screen</button>
+          <button class="btn btn-sm" id="reloadBtn" type="button">Reload</button>
+          <a class="btn btn-sm" id="openBtn" target="_blank" rel="noopener">New tab</a>
+        </div>
+      </div>
+      <div class="stage">
+        <iframe id="frame" title="Game being tested" allow="autoplay; fullscreen; gamepad; clipboard-write" allowfullscreen></iframe>
+      </div>
+
+      <div class="verdicts" role="group" aria-label="How did it go?">
+        <button class="verdict" type="button" data-verdict="works" aria-pressed="false">
+          <span class="verdict-name">Works</span>
+          <span class="verdict-desc">Loads and plays fine</span>
+        </button>
+        <button class="verdict" type="button" data-verdict="problem" aria-pressed="false">
+          <span class="verdict-name">Problem</span>
+          <span class="verdict-desc">Plays, but something is off</span>
+        </button>
+        <button class="verdict" type="button" data-verdict="broken" aria-pressed="false">
+          <span class="verdict-name">Broken</span>
+          <span class="verdict-desc">Will not load or cannot be played</span>
+        </button>
+      </div>
+      <textarea class="field note-box" id="note" maxlength="500" rows="3"
+        placeholder="Anything worth knowing? (optional)" aria-label="Note for the site owner"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="sendBtn" type="button" disabled>Send report</button>
+        <button class="btn" id="closeBtn" type="button">Close game</button>
+      </div>
+      <p class="test-note" id="benchNote" role="status" aria-live="polite"></p>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">Your reports</div>
+      <div class="table-wrap">
+        <table class="gv reports">
+          <thead><tr><th>Game</th><th>Verdict</th><th>Note</th><th>When</th></tr></thead>
+          <tbody id="reportRows"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* supabase-js is deferred like the rest of the chrome, and deferred scripts
+   run before DOMContentLoaded, so window.supabase is ready by then. */
+document.addEventListener('DOMContentLoaded', function () {
+  var SUPA_URL = 'https://dxwjxzmlezfyursysays.supabase.co';
+  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
+
+  function $(id) { return document.getElementById(id); }
+
+  function el(tag, cls, text) {
+    var node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text) node.textContent = text;
+    return node;
+  }
+
+  function message(err) {
+    return (err && err.message) || 'Something went wrong. Try again.';
+  }
+
+  function when(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    var day = { day: 'numeric', month: 'short' };
+    if (d.getFullYear() !== new Date().getFullYear()) day.year = 'numeric';
+    return d.toLocaleDateString(undefined, day) + ', '
+      + d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  }
+
+  var sb = null;
+  try { sb = window.supabase.createClient(SUPA_URL, SUPA_KEY); } catch (e) {}
+
+  function rpc(name, args) {
+    return sb.rpc(name, args || {}).then(function (r) {
+      if (r.error) throw r.error;
+      return r.data;
+    });
+  }
+
+  // Signed out and signed in without the role see the same thing; only the
+  // hint about signing in differs.
+  function gate() {
+    if (!sb) return Promise.reject(new Error('Could not reach GameVault. Check your connection and reload.'));
+    return sb.auth.getSession().then(function (r) {
+      var user = r.data && r.data.session && r.data.session.user;
+      if (!user) return 'out';
+      return rpc('gv_is_tester').then(function (yes) { return yes ? 'tester' : 'no'; });
+    });
+  }
+
+  var VERDICTS = {
+    works:   { label: 'Works',   badge: 'added' },
+    problem: { label: 'Problem', badge: 'progress' },
+    broken:  { label: 'Broken',  badge: 'denied' }
+  };
+
+  var byId = {};      // the whole catalog, for names in the reports table
+  var queue = [];     // games waiting for a test
+  var reports = [];   // this tester's reports, newest first
+  var current = null; // the game open on the bench
+
+  function badge(verdict) {
+    var v = VERDICTS[verdict];
+    return el('span', 'badge ' + (v ? v.badge : ''), v ? v.label : verdict);
+  }
+
+  // Staged games, then any catalog ids from ?ids=a,b,c, so a game already
+  // live can be checked again after a move.
+  function waiting(catalog) {
+    var list = catalog.filter(function (g) { return g.staging === true; });
+    var asked = (new URLSearchParams(location.search).get('ids') || '').split(',');
+    asked.forEach(function (id) {
+      id = id.trim();
+      if (!id || list.some(function (g) { return g.id === id; })) return;
+      list.push(byId[id] || { id: id, missing: true });
+    });
+    return list;
+  }
+
+  function lastReport(id) {
+    for (var i = 0; i < reports.length; i++) if (reports[i].game_id === id) return reports[i];
+    return null;
+  }
+
+  function queueRow(g) {
+    var row = el('div', 'queue-row' + (g.missing ? ' queue-missing' : '') + (current === g ? ' current' : ''));
+    // An image that fails is removed, not left as a broken-image icon.
+    var thumb = el('span', 'queue-thumb');
+    if (g.img) {
+      var img = el('img');
+      img.alt = '';
+      img.loading = 'lazy';
+      img.addEventListener('error', function () { img.remove(); });
+      img.src = g.img;
+      thumb.appendChild(img);
+    }
+    row.appendChild(thumb);
+
+    var info = el('div', 'queue-info');
+    info.appendChild(el('div', 'queue-name', g.missing ? g.id : g.name || g.id));
+    var meta = el('div', 'queue-meta');
+    if (g.missing) {
+      meta.appendChild(el('span', '', 'Not in the catalog'));
+    } else {
+      meta.appendChild(el('span', '', g.id));
+      var last = lastReport(g.id);
+      if (last) {
+        meta.appendChild(badge(last.verdict));
+        meta.appendChild(el('span', '', when(last.created_at)));
+      }
+    }
+    info.appendChild(meta);
+    row.appendChild(info);
+
+    if (!g.missing) {
+      var go = el('button', 'btn btn-sm', current === g ? 'Testing' : lastReport(g.id) ? 'Test again' : 'Test');
+      go.type = 'button';
+      go.disabled = current === g;
+      go.addEventListener('click', function () { openBench(g); });
+      row.appendChild(go);
+    }
+    return row;
+  }
+
+  function renderQueue() {
+    var box = $('queue');
+    box.textContent = '';
+    queue.forEach(function (g) { box.appendChild(queueRow(g)); });
+    $('queueEmpty').hidden = queue.length > 0;
+  }
+
+  function renderReports() {
+    var body = $('reportRows');
+    body.textContent = '';
+    if (!reports.length) {
+      var empty = el('td', 'test-empty', 'Nothing yet. Your reports show up here.');
+      empty.colSpan = 4;
+      body.appendChild(el('tr')).appendChild(empty);
+      return;
+    }
+    reports.forEach(function (r) {
+      var g = byId[r.game_id];
+      var tr = el('tr');
+      tr.appendChild(el('td', '', g ? g.name : r.game_id));
+      tr.appendChild(el('td')).appendChild(badge(r.verdict));
+      tr.appendChild(el('td', '', r.note || ''));
+      var at = el('td', '', when(r.created_at));
+      // Resolved means the owner has dealt with it.
+      if (r.resolved) at.appendChild(el('div', 'queue-meta', 'Dealt with'));
+      tr.appendChild(at);
+      body.appendChild(tr);
+    });
+  }
+
+  // The same places the home page plays a game from: its vault copy, the
+  // host it came from, or /games/ here.
+  function urlFor(g) {
+    var rel = g.path || g.id + '/';
+    if (g.site) return '/vault' + g.site + '/' + rel;
+    return g.src || '/games/' + rel;
+  }
+
+  var frame = $('frame');
+  var chosen = null;
+
+  function note(text, tone) {
+    var n = $('benchNote');
+    n.textContent = text || '';
+    n.className = 'test-note' + (tone ? ' ' + tone : '');
+  }
+
+  function pick(verdict) {
+    chosen = verdict;
+    document.querySelectorAll('.verdict').forEach(function (b) {
+      b.setAttribute('aria-pressed', String(b.getAttribute('data-verdict') === verdict));
+    });
+    $('sendBtn').disabled = !verdict;
+    $('note').placeholder = verdict && verdict !== 'works'
+      ? 'What went wrong? Where did it stop?'
+      : 'Anything worth knowing? (optional)';
+  }
+
+  document.querySelectorAll('.verdict').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var v = b.getAttribute('data-verdict');
+      pick(chosen === v ? null : v);
+    });
+  });
+
+  function openBench(g) {
+    current = g;
+    $('benchName').textContent = g.name || g.id;
+    $('benchId').textContent = g.id;
+    var url = urlFor(g);
+    $('openBtn').href = url;
+    frame.src = url;
+    pick(null);
+    $('note').value = '';
+    note('');
+    $('bench').hidden = false;
+    renderQueue();
+    $('bench').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function closeBench() {
+    current = null;
+    frame.src = 'about:blank';
+    $('bench').hidden = true;
+    renderQueue();
+  }
+
+  $('closeBtn').addEventListener('click', closeBench);
+  $('reloadBtn').addEventListener('click', function () { if (current) frame.src = urlFor(current); });
+  $('fullBtn').addEventListener('click', function () {
+    var stage = frame.parentNode;
+    if (stage.requestFullscreen) stage.requestFullscreen().catch(function () {});
+  });
+
+  $('sendBtn').addEventListener('click', function () {
+    if (!current || !chosen) return;
+    var g = current;
+    var btns = document.querySelectorAll('#bench button, #note');
+    btns.forEach(function (b) { b.disabled = true; });
+    note('Sending…');
+    rpc('gv_test_report', { p_game_id: g.id, p_verdict: chosen, p_note: $('note').value })
+      .then(function (row) {
+        reports.unshift(row);
+        renderReports();
+        if (current === g) {
+          $('note').value = '';
+          pick(null);
+          note('Sent. Thanks for testing ' + (g.name || g.id) + '.', 'good');
+        }
+        renderQueue();
+      }, function (err) {
+        note(message(err), 'bad');
+      })
+      .then(function () {
+        btns.forEach(function (b) { b.disabled = false; });
+        $('sendBtn').disabled = !chosen;
+      });
+  });
+
+  function load() {
+    return Promise.all([
+      fetch('/games.json').then(function (r) {
+        if (!r.ok) throw new Error('Could not load the game list. Reload to try again.');
+        return r.json();
+      }),
+      rpc('gv_test_my_reports')
+    ]).then(function (got) {
+      var catalog = got[0].games || [];
+      catalog.forEach(function (g) { byId[g.id] = g; });
+      reports = got[1] || [];
+      queue = waiting(catalog);
+      renderQueue();
+      renderReports();
+    });
+  }
+
+  gate().then(function (who) {
+    $('gate').hidden = true;
+    if (who !== 'tester') {
+      $('notTester').hidden = false;
+      $('signInHint').hidden = who !== 'out';
+      return;
+    }
+    $('tester').hidden = false;
+    return load();
+  }).catch(function (err) {
+    $('gate').hidden = false;
+    $('gate').textContent = message(err);
+  });
+});
+</script>
+</main>
+</body>
+</html>

@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Saves · GameVault</title>
+  <meta name="description" content="Back up your game progress to a file or your GameVault account, and put it back.">
+  <link rel="icon" href="/favicon.svg">
+  <!-- Blocking on purpose: the cloak has to land before the first paint. -->
+  <script src="/js/mimicry.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/site.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
+  <script src="/js/identity.js" defer></script>
+  <script src="/js/analytics.js" defer></script>
+  <script src="/js/site.js" defer></script>
+  <script src="/js/player.js" defer></script>
+  <script src="/js/saves.js" defer></script>
+  <style>
+    .save-note { font-size: 0.8rem; color: var(--muted); margin-top: 0.75rem; line-height: 1.5; }
+    .save-note:empty { display: none; }
+    .save-note.bad { color: var(--accent); }
+    .save-note.good { color: #5ce08a; }
+    .who { color: var(--text); }
+    .page a.btn { text-decoration: none; }
+    .page .panel > p:not([class]) { font-size: 0.85rem; line-height: 1.6; }
+
+    .slots { margin-top: 0.9rem; border-top: 1px solid var(--border); }
+    .slots:empty { display: none; }
+    .slot {
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+      gap: 0.6rem 1rem;
+      padding: 0.85rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .slot-info { min-width: 0; flex: 1 1 14rem; }
+    .slot-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.64rem; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--muted-2);
+    }
+    .slot-name { font-size: 0.92rem; color: var(--text); margin-top: 0.15rem; overflow-wrap: anywhere; }
+    .slot.empty .slot-name { color: var(--muted); }
+    .slot-meta { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--muted-2); margin-top: 0.25rem; }
+    .slot-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .btn-sm { padding: 0.38rem 0.8rem; font-size: 0.78rem; }
+    .btn-danger { color: var(--accent); border-color: rgba(255,59,59,0.45); }
+    .btn-danger:hover { background: rgba(255,59,59,0.08); }
+    .slot-rename { display: flex; gap: 0.4rem; margin-top: 0.4rem; max-width: 24rem; }
+    .slot-rename .field { padding: 0.4rem 0.7rem; font-size: 0.85rem; }
+
+    /* Anything that overwrites progress asks here first, in the page, so it
+       reads the same in a disguised tab where pop-up dialogs look out of place. */
+    .confirm {
+      flex-basis: 100%;
+      margin-top: 0.9rem;
+      padding: 0.9rem 1rem;
+      border-radius: 10px;
+      border: 1px solid rgba(255,59,59,0.45);
+      background: rgba(255,59,59,0.06);
+    }
+    .slot .confirm { margin-top: 0.2rem; }
+    .confirm-title { color: var(--text); font-size: 0.9rem; font-weight: 600; }
+    .page .confirm p { font-size: 0.82rem; margin-top: 0.3rem; line-height: 1.5; }
+    .confirm .btn-row { margin-top: 0.75rem; }
+    .confirm.offer { border-color: var(--border-strong); background: var(--surface-2); }
+  </style>
+</head>
+<body>
+<main class="page">
+  <div class="page-kicker">saves</div>
+  <h1>Save backup</h1>
+  <p class="lede">Keep a copy of your game progress, as a file or on your account, and put it
+  back in any browser.</p>
+
+  <div class="panel">
+    <div class="panel-label">Save file</div>
+    <p class="panel-note" style="margin-top:0">One file with the progress of every game you have
+    played here. Keep it somewhere safe, then upload it after clearing your history, or in another
+    browser, to pick up where you left off.</p>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="downloadBtn" type="button">Download save file</button>
+      <button class="btn" id="uploadBtn" type="button">Upload save file</button>
+      <input type="file" id="uploadInput" accept=".json,application/json" hidden>
+    </div>
+    <div id="fileConfirm"></div>
+    <p class="save-note" id="fileNote" role="status" aria-live="polite"></p>
+  </div>
+
+  <div class="panel">
+    <div class="panel-label">Cloud slots</div>
+    <p class="panel-note" id="cloudLoading" style="margin-top:0">Checking your account…</p>
+
+    <div id="cloudOut" hidden>
+      <p class="panel-note" style="margin-top:0">Sign in to keep up to three saves on your GameVault
+      account, plus a daily auto-save, and load them in any browser you sign in on.</p>
+      <div class="btn-row">
+        <a class="btn" href="/">Sign in on the home page</a>
+      </div>
+    </div>
+
+    <div id="cloudIn" hidden>
+      <p class="panel-note" style="margin-top:0">Signed in as <span class="who" id="cloudWho"></span>.
+      Each slot holds one save. Saving over a slot replaces what was in it.</p>
+      <div id="autoOfferBox"></div>
+      <div class="slots" id="slotList"></div>
+      <p class="save-note" id="cloudNote" role="status" aria-live="polite"></p>
+    </div>
+  </div>
+
+  <div class="panel" id="autoPanel" hidden>
+    <div class="panel-label">Daily auto-save</div>
+    <div class="toggle-row">
+      <div>
+        <div class="label">Auto-save this browser</div>
+        <div class="desc">Once a day, when you open GameVault signed in, this browser's progress is
+        copied to your auto-save slot, replacing the one before. Off until you turn it on, and only
+        in browsers where you turned it on.</div>
+      </div>
+      <label class="switch"><input type="checkbox" id="autoSwitch"><span class="track"></span></label>
+    </div>
+    <div class="slots" id="autoSlot"></div>
+    <p class="save-note" id="autoNote" role="status" aria-live="polite"></p>
+  </div>
+
+  <div class="panel">
+    <div class="panel-label">What a save holds</div>
+    <p>Every game that runs on GameVault itself keeps its progress in this browser, and a save
+    holds all of it.</p>
+    <p>Some games still load from other sites, <code>genizymath.github.io</code> and
+    <code>icons-6.us</code>, and keep their progress there. GameVault cannot see or back up those
+    saves. <span id="outsideCount"></span>They are being moved over, and each one is covered as
+    soon as it plays from here.</p>
+    <p>PolyTrack is left out because it already syncs with your account. Your sign-in and tab
+    disguise are left out too: they belong to this browser, not to a game.</p>
+  </div>
+
+<script>
+/* saves.js is deferred like the rest of the chrome, and deferred scripts
+   run before DOMContentLoaded, so GV.saves is ready by then. */
+document.addEventListener('DOMContentLoaded', function () {
+  var saves = window.GV.saves;
+
+  function $(id) { return document.getElementById(id); }
+
+  function el(tag, cls, text) {
+    var node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text) node.textContent = text;
+    return node;
+  }
+
+  function note(target, text, tone) {
+    target.textContent = text || '';
+    target.className = 'save-note' + (tone ? ' ' + tone : '');
+  }
+
+  function message(err) {
+    return (err && err.message) || 'Something went wrong. Try again.';
+  }
+
+  function size(bytes) {
+    if (bytes == null) return '';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return Math.max(1, Math.round(bytes / 1024)) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  function when(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    var day = { day: 'numeric', month: 'short' };
+    if (d.getFullYear() !== new Date().getFullYear()) day.year = 'numeric';
+    return d.toLocaleDateString(undefined, day) + ', '
+      + d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  }
+
+  // Nothing else can be pressed while a save is packed, sent or put back.
+  function setBusy(on) {
+    document.querySelectorAll('.page button, .page input').forEach(function (b) { b.disabled = on; });
+  }
+
+  /* One question on screen at a time. Resolves true or false with the
+     answer, or null when another question took its place, which is not a no. */
+  var closeOpen = null;
+  function ask(host, q) {
+    if (closeOpen) closeOpen(null);
+    return new Promise(function (resolve) {
+      var box = el('div', 'confirm' + (q.tone ? ' ' + q.tone : ''));
+      box.setAttribute('role', 'alertdialog');
+      box.appendChild(el('div', 'confirm-title', q.title));
+      if (q.body) box.appendChild(el('p', '', q.body));
+      var row = el('div', 'btn-row');
+      var yes = el('button', 'btn btn-primary btn-sm', q.yes);
+      var no = el('button', 'btn btn-sm', q.no || 'Cancel');
+      yes.type = no.type = 'button';
+      row.append(yes, no);
+      box.appendChild(row);
+      host.appendChild(box);
+
+      function finish(answer) {
+        box.remove();
+        if (closeOpen === finish) closeOpen = null;
+        resolve(answer);
+      }
+      closeOpen = finish;
+      yes.addEventListener('click', function () { finish(true); });
+      no.addEventListener('click', function () { finish(false); });
+      if (!q.quiet) yes.focus();
+    });
+  }
+
+  var fileNote = $('fileNote');
+  var downloadBtn = $('downloadBtn');
+
+  downloadBtn.addEventListener('click', function () {
+    setBusy(true);
+    downloadBtn.textContent = 'Packing your save…';
+    note(fileNote, '');
+    saves.download().then(function (bytes) {
+      note(fileNote, 'Downloaded, ' + size(bytes) + '. Keep the file somewhere safe.', 'good');
+    }, function (err) {
+      note(fileNote, message(err), 'bad');
+    }).then(function () {
+      downloadBtn.textContent = 'Download save file';
+      setBusy(false);
+    });
+  });
+
+  // Games are running on the progress read at load, so the page reloads
+  // once the new progress is in rather than let them save the old over it.
+  function putBack(run, target) {
+    setBusy(true);
+    note(target, 'Putting your progress back…');
+    return run().then(function () {
+      note(target, 'Done. Reloading…', 'good');
+      setTimeout(function () { location.reload(); }, 700);
+    }, function (err) {
+      setBusy(false);
+      note(target, message(err), 'bad');
+    });
+  }
+
+  var uploadInput = $('uploadInput');
+  $('uploadBtn').addEventListener('click', function () { uploadInput.click(); });
+
+  uploadInput.addEventListener('change', function () {
+    var file = uploadInput.files && uploadInput.files[0];
+    uploadInput.value = '';
+    if (!file) return;
+    note(fileNote, '');
+    saves.readFile(file).then(function (data) {
+      var made = when(data.made);
+      return ask($('fileConfirm'), {
+        title: 'This replaces the game progress in this browser',
+        body: 'Every game goes back to how it was in ' + file.name + (made ? ', saved ' + made : '')
+          + '. Anything played since then is lost, unless you download a save file first.',
+        yes: 'Replace my progress'
+      }).then(function (ok) {
+        if (ok) return putBack(function () { return saves.restore(data); }, fileNote);
+      });
+    }).catch(function (err) {
+      note(fileNote, message(err), 'bad');
+    });
+  });
+
+  var cloudNote = $('cloudNote');
+  var autoNote = $('autoNote');
+  var rows = {};
+
+  function noteFor(slot) { return slot === 'auto' ? autoNote : cloudNote; }
+
+  function slotLabel(slot) {
+    if (slot === 'auto') return 'your auto-save';
+    var row = rows[slot];
+    return row && row.title ? '"' + row.title + '"' : 'slot ' + slot;
+  }
+
+  function button(text, cls, onClick) {
+    var b = el('button', 'btn btn-sm' + (cls ? ' ' + cls : ''), text);
+    b.type = 'button';
+    b.addEventListener('click', onClick);
+    return b;
+  }
+
+  function slotRow(slot) {
+    var row = rows[slot];
+    var isAuto = slot === 'auto';
+    var wrap = el('div', 'slot' + (row ? '' : ' empty'));
+    var info = el('div', 'slot-info');
+    var name = el('div', 'slot-name', row
+      ? (isAuto ? 'Latest auto-save' : row.title || 'Untitled save')
+      : (isAuto ? 'None yet' : 'Empty'));
+    info.appendChild(el('div', 'slot-num', isAuto ? 'Auto-save' : 'Slot ' + slot));
+    info.appendChild(name);
+    if (row) info.appendChild(el('div', 'slot-meta', size(row.size_bytes) + ' · ' + when(row.updated_at)));
+    wrap.appendChild(info);
+
+    var actions = el('div', 'slot-actions');
+    if (!isAuto) {
+      actions.appendChild(button('Save here', '', function () { saveTo(slot, wrap); }));
+    }
+    if (row) {
+      actions.appendChild(button('Load', '', function () { loadFrom(slot, wrap); }));
+      if (!isAuto) actions.appendChild(button('Rename', '', function () { rename(slot, info, name); }));
+      actions.appendChild(button('Delete', 'btn-danger', function () { remove(slot, wrap); }));
+    }
+    wrap.appendChild(actions);
+    return wrap;
+  }
+
+  function render() {
+    var list = $('slotList');
+    list.textContent = '';
+    ['1', '2', '3'].forEach(function (slot) { list.appendChild(slotRow(slot)); });
+    var auto = $('autoSlot');
+    auto.textContent = '';
+    auto.appendChild(slotRow('auto'));
+  }
+
+  function refresh() {
+    return saves.cloudList().then(function (list) {
+      rows = {};
+      list.forEach(function (r) { rows[r.slot] = r; });
+      render();
+      return list;
+    });
+  }
+
+  function saveTo(slot, wrap) {
+    var row = rows[slot];
+    var go = row ? ask(wrap, {
+      title: 'Save over ' + slotLabel(slot) + '?',
+      body: 'The save from ' + when(row.updated_at) + ' is replaced with the progress in this browser.',
+      yes: 'Save over it'
+    }) : Promise.resolve(true);
+
+    go.then(function (ok) {
+      if (!ok) return;
+      setBusy(true);
+      note(cloudNote, 'Packing and sending your save…');
+      return saves.cloudSave(slot).then(function (saved) {
+        rows[slot] = saved;
+        note(cloudNote, 'Saved to slot ' + slot + ', ' + size(saved.size_bytes) + '.', 'good');
+      }, function (err) {
+        note(cloudNote, message(err), 'bad');
+      }).then(function () {
+        setBusy(false);
+        render();
+      });
+    });
+  }
+
+  function loadFrom(slot, wrap) {
+    ask(wrap, {
+      title: 'This replaces the game progress in this browser',
+      body: 'Every game goes back to how it was in ' + slotLabel(slot) + ', saved '
+        + when(rows[slot].updated_at) + '. Anything played since then is lost, unless you save it first.',
+      yes: 'Load this save'
+    }).then(function (ok) {
+      if (ok) putBack(function () { return saves.cloudLoad(slot); }, noteFor(slot));
+    });
+  }
+
+  function remove(slot, wrap) {
+    ask(wrap, {
+      title: 'Delete ' + slotLabel(slot) + '?',
+      body: 'The save is gone for good. The progress in this browser is not touched.',
+      yes: 'Delete'
+    }).then(function (ok) {
+      if (!ok) return;
+      setBusy(true);
+      return saves.cloudDelete(slot).then(function () {
+        delete rows[slot];
+        note(noteFor(slot), 'Deleted.', 'good');
+      }, function (err) {
+        note(noteFor(slot), message(err), 'bad');
+      }).then(function () {
+        setBusy(false);
+        render();
+      });
+    });
+  }
+
+  function rename(slot, info, name) {
+    if (info.querySelector('.slot-rename')) return;
+    var form = el('form', 'slot-rename');
+    var input = el('input', 'field');
+    input.maxLength = 40;
+    input.value = rows[slot].title || '';
+    input.placeholder = 'Name this save';
+    input.setAttribute('aria-label', 'Name for slot ' + slot);
+    var ok = el('button', 'btn btn-sm', 'Save name');
+    ok.type = 'submit';
+    var cancel = button('Cancel', '', function () { form.remove(); name.hidden = false; });
+    form.append(input, ok, cancel);
+    name.hidden = true;
+    info.insertBefore(form, name.nextSibling);
+    input.focus();
+    input.select();
+
+    input.addEventListener('keydown', function (e) { if (e.key === 'Escape') cancel.click(); });
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      setBusy(true);
+      saves.cloudRename(slot, input.value).then(function (saved) {
+        rows[slot] = saved;
+        note(cloudNote, '');
+      }, function (err) {
+        note(cloudNote, message(err), 'bad');
+      }).then(function () {
+        setBusy(false);
+        render();
+      });
+    });
+  }
+
+  function offerAuto() {
+    return saves.autoOffer(Object.keys(rows).map(function (k) { return rows[k]; })).then(function (row) {
+      if (!row) return;
+      return ask($('autoOfferBox'), {
+        title: 'Load your auto-save from ' + when(row.updated_at) + '?',
+        body: 'Your account has an auto-save this browser has not seen. Loading it replaces the '
+          + 'game progress in this browser.',
+        yes: 'Load auto-save',
+        no: 'Keep what is here',
+        tone: 'offer',
+        quiet: true
+      }).then(function (ok) {
+        if (ok) return putBack(function () { return saves.cloudLoad('auto'); }, cloudNote);
+        if (ok === false) {
+          saves.dismissAutoOffer(row);
+          if (saves.autoOn()) runAuto();
+        }
+      });
+    });
+  }
+
+  function nextDue() {
+    var at = Date.parse(saves.autoAt() || '');
+    return 'The next auto-save is due after ' + when(new Date(at + 24 * 60 * 60 * 1000)) + '.';
+  }
+
+  function autoStatus() {
+    if (!saves.autoOn()) {
+      return rows.auto ? 'Off in this browser. The last auto-save stays until you delete it.' : 'Off in this browser.';
+    }
+    if (saves.autoAt()) return 'On. ' + nextDue();
+    if (rows.auto) return 'On. Load or skip the auto-save above first, so this browser does not replace it.';
+    return 'On. The first auto-save happens the next time you open GameVault.';
+  }
+
+  function runAuto() {
+    return saves.autoSaveIfDue().then(function (saved) {
+      if (!saved) { note(autoNote, autoStatus()); return; }
+      return refresh().then(function () { note(autoNote, 'Auto-saved just now. ' + nextDue(), 'good'); });
+    });
+  }
+
+  var autoSwitch = $('autoSwitch');
+  autoSwitch.checked = saves.autoOn();
+  autoSwitch.addEventListener('change', function () {
+    saves.setAuto(autoSwitch.checked);
+    if (!autoSwitch.checked) { note(autoNote, autoStatus()); return; }
+    note(autoNote, 'On. Checking whether an auto-save is due…');
+    runAuto();
+  });
+
+  function showName(user) {
+    $('cloudWho').textContent = (user.email || '').split('@')[0];
+    // The username can change after sign-up; the email it was made with does not.
+    saves.client().then(function (c) {
+      return c.from('profiles').select('username').eq('id', user.id).maybeSingle();
+    }).then(function (r) {
+      if (r && r.data && r.data.username) $('cloudWho').textContent = r.data.username;
+    }).catch(function () {});
+  }
+
+  saves.cloudUser().then(function (user) {
+    $('cloudLoading').hidden = true;
+    if (!user) { $('cloudOut').hidden = false; return; }
+    $('cloudIn').hidden = false;
+    $('autoPanel').hidden = false;
+    showName(user);
+    return refresh().then(function () {
+      note(autoNote, autoStatus());
+      // Not waited on: the offer stays up until answered.
+      offerAuto();
+      if (saves.autoOn()) return runAuto();
+    });
+  }).catch(function (err) {
+    $('cloudLoading').hidden = false;
+    $('cloudLoading').textContent = message(err);
+  });
+
+  // Counted from the list rather than written down, so it shrinks as games move.
+  fetch('/games.json').then(function (r) { return r.json(); }).then(function (data) {
+    var outside = (data.games || []).filter(function (g) {
+      return /^https?:\/\/(genizymath\.github\.io|icons-6\.us)\//.test(g.src || '');
+    }).length;
+    if (outside) $('outsideCount').textContent = 'Right now that is ' + outside.toLocaleString() + ' games. ';
+  }).catch(function () {});
+});
+</script>
+</main>
+</body>
+</html>

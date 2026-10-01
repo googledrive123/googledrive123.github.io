@@ -16,35 +16,81 @@
   <script src="/js/analytics.js" defer></script>
   <script src="/js/site.js" defer></script>
   <script src="/js/player.js" defer></script>
+  <style>
+    /* Frosted glass over slow colour blobs. */
+    .blobs { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+    .blob { position: absolute; width: 42vmax; height: 42vmax; border-radius: 50%; filter: blur(90px); opacity: 0.35; }
+    .blob.a { background: #ff3b3b; top: -12vmax; left: -10vmax; animation: drift 26s ease-in-out infinite alternate; }
+    .blob.b { background: #6a5cff; bottom: -16vmax; right: -12vmax; animation: drift 32s ease-in-out infinite alternate-reverse; }
+    .blob.c { background: #ff9d3b; top: 40%; left: 55%; width: 26vmax; height: 26vmax; opacity: 0.22; animation: drift 38s ease-in-out infinite alternate; }
+    @keyframes drift { to { transform: translate(8vmax, 6vmax) scale(1.15); } }
+    :root[data-theme="light"] .blob { opacity: 0.22; }
+    .glass {
+      background: color-mix(in srgb, var(--surface) 55%, transparent);
+      backdrop-filter: blur(18px) saturate(140%);
+      -webkit-backdrop-filter: blur(18px) saturate(140%);
+      border: 1px solid var(--border-strong);
+      border-radius: 18px;
+      padding: 1.4rem 1.5rem;
+      margin-top: 1.25rem;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+    }
+    .glass h2 { margin-top: 0; }
+    @media (prefers-reduced-motion: reduce) { .blob { animation: none; } }
+  </style>
 </head>
 <body>
+<div class="blobs" aria-hidden="true"><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div></div>
 <main class="page">
   <div class="page-kicker">about</div>
   <h1>About GameVault</h1>
   <p class="lede">A browser games library that loads fast on a school laptop and gets out of the way.</p>
+  <section class="glass">
   <h2>What it is</h2>
   <p>GameVault is a static website. There is no server doing work behind it — the pages,
-  the catalog and most of the games are plain files, which is why it loads on hardware that
+  the catalog and the games are plain files, which is why it loads on hardware that
   struggles with everything else.</p>
-  <p>The library is a bit over a thousand titles. Some are stored here in full. Others are
-  loaded from somewhere else and shown inside a frame. Either way you click a tile and it plays.</p>
+  <p>The library is a couple of thousand titles. Almost all of them are stored on this
+  site's own address, spread over a few sister sites so each stays quick to update. A few
+  very large ones still load from where they came from. Either way you click a tile and it plays.</p>
+  </section>
 
+  <section class="glass">
   <h2>What it does beyond the games</h2>
   <ul>
     <li>A movie and TV section, for the days nobody wants to play anything.</li>
-    <li>An optional account that remembers your playtime and your starred games across devices.</li>
+    <li>An optional account that remembers your playtime, level and starred games across devices.</li>
+    <li>Chat, a math practice page, cosmetic crates earned by playing, and a monthly PolyTrack challenge.</li>
+    <li>Save backups: download your game progress, or keep it in the cloud.</li>
     <li>A bell-schedule strip in the header, so you know how long you actually have.</li>
     <li>Tab disguises and a panic key, under <a href="/settings/">Settings</a>.</li>
   </ul>
+  </section>
 
+  <section class="glass">
   <h2>Who runs it</h2>
   <p>One person, as a side project. Nothing here is sold, and there are no ads.</p>
+  </section>
 
+  <section class="glass">
+  <h2>Credits</h2>
+  <ul>
+    <li><strong>Site:</strong> built and run by the GameVault owner.</li>
+    <li><strong>Games:</strong> made by their original developers. Many copies here come from the
+    Strongdog collection (<a href="https://gametreexp.github.io" target="_blank" rel="noopener">gametreexp.github.io</a>),
+    credited as its README asks, and from community collections such as gn-math.</li>
+    <li><strong>Built with:</strong> Ruffle for Flash games, EmulatorJS and webretro for consoles,
+    and Supabase for accounts.</li>
+  </ul>
+  </section>
+
+  <section class="glass">
   <h2>Requests</h2>
   <p>Missing game, broken game, or an idea for a whole new section — the
   <a href="https://forms.gle/iGM2FSKVatxgAsSp7" target="_blank" rel="noopener">suggestion form</a> is the fastest way in.
   Everything that comes through it ends up on the <a href="/status/">requests board</a>.</p>
-  <p class="panel-note">Last updated: 16 September 2026</p>
+  </section>
+  <p class="panel-note">Last updated: 30 September 2026</p>
 </main>
 </body>
 </html>
