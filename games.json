@@ -1818,5 +1818,6 @@
 {"id":"indestructotank-gb","name":"Indestructotank GB","categories":["Shooter"],"ranking":1972,"img":"/thumbs/indestructotank-gb.webp","src":null,"site":60,"added":"2026-09-30"},
 {"id":"gaia","name":"Gaia","categories":["Skill"],"ranking":1973,"img":"/thumbs/gaia.webp","src":null,"site":60,"added":"2026-09-30"},
 {"id":"bokdown","name":"Bokdown","categories":["Skill"],"ranking":1974,"img":"/thumbs/bokdown.webp","src":null,"site":60,"added":"2026-09-30"},
-{"id":"yin-and-yang","name":"Yin And Yang","categories":["Puzzle"],"ranking":1975,"img":"/thumbs/yin-and-yang.webp","src":null,"site":60,"added":"2026-09-30"}
+{"id":"yin-and-yang","name":"Yin And Yang","categories":["Puzzle"],"ranking":1975,"img":"/thumbs/yin-and-yang.webp","src":null,"site":60,"added":"2026-09-30"},
+{"id":"top-outpost","name":"Top Outpost","categories":["Strategy"],"ranking":1976,"img":"/thumbs/top-outpost.webp","src":null,"site":60,"added":"2026-09-30"}
 ]}
