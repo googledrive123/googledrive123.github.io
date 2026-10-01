@@ -1840,5 +1840,6 @@
 {"id":"crystal-wizards","name":"Crystal Wizards","categories":["RPG"],"ranking":1994,"img":"/thumbs/crystal-wizards.webp","src":null,"site":60,"added":"2026-09-30"},
 {"id":"calturin","name":"Calturin","categories":["Platformer"],"ranking":1995,"img":"/thumbs/calturin.webp","src":null,"site":60,"added":"2026-09-30"},
 {"id":"are-you-human","name":"Are You Human","categories":["Skill"],"ranking":1996,"img":"/thumbs/are-you-human.webp","src":null,"site":60,"added":"2026-09-30"},
-{"id":"anyek-the-keyboard-puzzle","name":"Anyek The Keyboard Puzzle","categories":["Puzzle"],"ranking":1997,"img":"/thumbs/anyek-the-keyboard-puzzle.webp","src":null,"site":60,"added":"2026-09-30"}
+{"id":"anyek-the-keyboard-puzzle","name":"Anyek The Keyboard Puzzle","categories":["Puzzle"],"ranking":1997,"img":"/thumbs/anyek-the-keyboard-puzzle.webp","src":null,"site":60,"added":"2026-09-30"},
+{"id":"adventure-boy-jailbreak","name":"Adventure Boy Jailbreak","categories":["Adventure"],"ranking":1998,"img":"/thumbs/adventure-boy-jailbreak.webp","src":null,"site":60,"added":"2026-09-30"}
 ]}
