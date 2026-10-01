@@ -1959,5 +1959,6 @@
 {"id":"quake","name":"Quake","categories":["Shooter"],"ranking":2113,"img":"/thumbs/quake.webp","src":null,"site":65,"added":"2026-09-30"},
 {"id":"onion-boy","name":"Onion Boy","categories":["Platformer"],"ranking":2114,"img":"/thumbs/onion-boy.webp","src":null,"site":65,"added":"2026-09-30"},
 {"id":"gunnight","name":"Gunnight","categories":["Shooter"],"ranking":2115,"img":"/thumbs/gunnight.webp","src":null,"site":65,"added":"2026-09-30"},
-{"id":"freefall-tournament","name":"Freefall Tournament","categories":["Multiplayer"],"ranking":2116,"img":"/thumbs/freefall-tournament.webp","src":null,"site":65,"added":"2026-09-30"}
+{"id":"freefall-tournament","name":"Freefall Tournament","categories":["Multiplayer"],"ranking":2116,"img":"/thumbs/freefall-tournament.webp","src":null,"site":65,"added":"2026-09-30"},
+{"id":"fighter-aircraft-pilot","name":"Fighter Aircraft Pilot","categories":["Simulation"],"ranking":2117,"img":"/thumbs/fighter-aircraft-pilot.webp","src":null,"site":65,"added":"2026-09-30"}
 ]}
