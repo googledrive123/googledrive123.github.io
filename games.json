@@ -1668,5 +1668,6 @@
 {"id":"captain-callisto","name":"Captain Callisto","categories":["Platformer"],"ranking":1822,"img":"/thumbs/captain-callisto.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"chroma","name":"Chroma","categories":["Platformer"],"ranking":1823,"img":"/thumbs/chroma.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"cube-miner","name":"Cube Miner","categories":["Idle"],"ranking":1824,"img":"/thumbs/cube-miner.webp","src":null,"site":57,"added":"2026-09-30"},
-{"id":"digger","name":"Digger","categories":["Arcade"],"ranking":1825,"img":"/thumbs/digger.webp","src":null,"site":57,"added":"2026-09-30"}
+{"id":"digger","name":"Digger","categories":["Arcade"],"ranking":1825,"img":"/thumbs/digger.webp","src":null,"site":57,"added":"2026-09-30"},
+{"id":"flappy-2048","name":"Flappy 2048","categories":["Puzzle"],"ranking":1826,"img":"/thumbs/flappy-2048.webp","src":null,"site":57,"added":"2026-09-30"}
 ]}
