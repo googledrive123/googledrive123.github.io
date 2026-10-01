@@ -1379,5 +1379,6 @@
 {"id":"mirror-wizard","name":"Mirror Wizard","categories":["RPG"],"ranking":1533,"img":"/thumbs/mirror-wizard.webp","src":null,"site":50,"added":"2026-09-30"},
 {"id":"pathfinder","name":"Pathfinder","categories":["Puzzle"],"ranking":1534,"img":"/thumbs/pathfinder.webp","src":null,"site":50,"added":"2026-09-30"},
 {"id":"hasty-shaman","name":"Hasty Shaman","categories":["Action"],"ranking":1535,"img":"/thumbs/hasty-shaman.webp","src":null,"site":50,"added":"2026-09-30"},
-{"id":"one-trick-mage","name":"One Trick Mage","categories":["RPG"],"ranking":1536,"img":"/thumbs/one-trick-mage.webp","src":null,"site":50,"added":"2026-09-30"}
+{"id":"one-trick-mage","name":"One Trick Mage","categories":["RPG"],"ranking":1536,"img":"/thumbs/one-trick-mage.webp","src":null,"site":50,"added":"2026-09-30"},
+{"id":"arcuz","name":"Arcuz","categories":["RPG"],"ranking":1537,"img":"/thumbs/arcuz.webp","src":null,"site":50,"added":"2026-09-30"}
 ]}
