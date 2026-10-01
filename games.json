@@ -1909,5 +1909,6 @@
 {"id":"jetpack-kiwi","name":"Jetpack Kiwi","categories":["Platformer"],"ranking":2063,"img":"/thumbs/jetpack-kiwi.webp","src":null,"site":62,"added":"2026-09-30"},
 {"id":"a-maniac","name":"A Maniac","categories":["Skill"],"ranking":2064,"img":"/thumbs/a-maniac.webp","src":null,"site":62,"added":"2026-09-30"},
 {"id":"duck-life-treasure-hunt","name":"Duck Life Treasure Hunt","categories":["Simulation"],"ranking":2065,"img":"/thumbs/duck-life-treasure-hunt.webp","src":null,"site":62,"added":"2026-09-30"},
-{"id":"un-evergreen","name":"Un Evergreen","categories":["Puzzle"],"ranking":2066,"img":"/thumbs/un-evergreen.webp","src":null,"site":63,"added":"2026-09-30"}
+{"id":"un-evergreen","name":"Un Evergreen","categories":["Puzzle"],"ranking":2066,"img":"/thumbs/un-evergreen.webp","src":null,"site":63,"added":"2026-09-30"},
+{"id":"super-gauntlet","name":"Super Gauntlet","categories":["Action"],"ranking":2067,"img":"/thumbs/super-gauntlet.webp","src":null,"site":63,"added":"2026-09-30"}
 ]}
