@@ -1781,5 +1781,6 @@
 {"id":"squarex","name":"SquareX","categories":["Platformer"],"ranking":1935,"img":"/thumbs/squarex.webp","src":null,"site":59,"added":"2026-09-30"},
 {"id":"metrocubevania","name":"Metrocubevania","categories":["Platformer"],"ranking":1936,"img":"/thumbs/metrocubevania.webp","src":null,"site":59,"added":"2026-09-30"},
 {"id":"knightin","name":"Knightin'","categories":["RPG"],"ranking":1937,"img":"/thumbs/knightin.webp","src":null,"site":59,"added":"2026-09-30"},
-{"id":"delia-the-traveling-witch","name":"Delia The Traveling Witch","categories":["Adventure"],"ranking":1938,"img":"/thumbs/delia-the-traveling-witch.webp","src":null,"site":59,"added":"2026-09-30"}
+{"id":"delia-the-traveling-witch","name":"Delia The Traveling Witch","categories":["Adventure"],"ranking":1938,"img":"/thumbs/delia-the-traveling-witch.webp","src":null,"site":59,"added":"2026-09-30"},
+{"id":"dark-tomb","name":"Dark Tomb","categories":["Horror"],"ranking":1939,"img":"/thumbs/dark-tomb.webp","src":null,"site":59,"added":"2026-09-30"}
 ]}
