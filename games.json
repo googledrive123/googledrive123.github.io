@@ -714,7 +714,7 @@
 {"id":"pac-man-world","name":"Pac Man World","categories":["Arcade"],"ranking":878,"img":"https://upload.wikimedia.org/wikipedia/en/3/33/Pac-Man_World.jpg","src":null,"site":34},
 {"id":"pac-man-world-2","name":"Pac Man World 2","categories":["Arcade"],"ranking":879,"img":"/thumbs/pac-man-world-2.webp","src":null,"site":34},
 {"id":"pacman-horror","name":"Pacman Horror","categories":["Horror"],"ranking":880,"img":"/thumbs/pacman-horror.webp","src":null,"site":34},
-{"id":"papas-bakeria","name":"Papas Bakeria","categories":["Action"],"ranking":881,"img":"/thumbs/papas-bakeria.webp","src":"https://icons-6.us/casual-games/papas-bake/"},
+{"id":"papas-bakeria","name":"Papas Bakeria","categories":["Action"],"ranking":881,"img":"/thumbs/papas-bakeria.webp","src":"https://icons-6.us/casual-games/papas-bake/","site":48},
 {"id":"papas-burgeria","name":"Papas Burgeria","categories":["Action","Simulation"],"ranking":882,"img":"/thumbs/papas-burgeria.webp","src":"https://icons-6.us/casual-games/papasburgeria/"},
 {"id":"papas-cheeseria","name":"Papas Cheeseria","categories":["Action"],"ranking":883,"img":"/thumbs/papas-cheeseria.webp","src":"https://icons-6.us/casual-games/papas-cheese/"},
 {"id":"papas-cupcakeria","name":"Papas Cupcakeria","categories":["Action"],"ranking":884,"img":"/thumbs/papas-cupcakeria.webp","src":"https://icons-6.us/casual-games/papas-cupcake/"},
