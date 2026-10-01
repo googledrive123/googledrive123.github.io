@@ -1628,5 +1628,6 @@
 {"id":"hoshi-saga-1","name":"Hoshi Saga 1","categories":["Puzzle"],"ranking":1782,"img":"/thumbs/hoshi-saga-1.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"hoshi-saga-2","name":"Hoshi Saga 2","categories":["Puzzle"],"ranking":1783,"img":"/thumbs/hoshi-saga-2.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"hoshi-saga-3","name":"Hoshi Saga 3","categories":["Puzzle"],"ranking":1784,"img":"/thumbs/hoshi-saga-3.webp","src":null,"site":57,"added":"2026-09-30"},
-{"id":"iq-ball","name":"IQ Ball","categories":["Puzzle"],"ranking":1785,"img":"/thumbs/iq-ball.webp","src":null,"site":57,"added":"2026-09-30"}
+{"id":"iq-ball","name":"IQ Ball","categories":["Puzzle"],"ranking":1785,"img":"/thumbs/iq-ball.webp","src":null,"site":57,"added":"2026-09-30"},
+{"id":"i-wanna-win","name":"I Wanna Win","categories":["Platformer"],"ranking":1786,"img":"/thumbs/i-wanna-win.webp","src":null,"site":57,"added":"2026-09-30"}
 ]}
