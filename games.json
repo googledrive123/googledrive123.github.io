@@ -1492,5 +1492,6 @@
 {"id":"candy-jump","name":"Candy Jump","categories":["Platformer"],"ranking":1646,"img":"/thumbs/candy-jump.webp","src":null,"site":54,"added":"2026-09-30"},
 {"id":"color-tunnel-2","name":"Color Tunnel 2","categories":["Skill"],"ranking":1647,"img":"/thumbs/color-tunnel-2.webp","src":null,"site":54,"added":"2026-09-30"},
 {"id":"cubito-mayhem","name":"Cubito Mayhem","categories":["Action"],"ranking":1648,"img":"/thumbs/cubito-mayhem.webp","src":null,"site":54,"added":"2026-09-30"},
-{"id":"ducklings-io","name":"Ducklings.io","categories":["Multiplayer"],"ranking":1649,"img":"/thumbs/ducklings-io.webp","src":null,"site":54,"added":"2026-09-30"}
+{"id":"ducklings-io","name":"Ducklings.io","categories":["Multiplayer"],"ranking":1649,"img":"/thumbs/ducklings-io.webp","src":null,"site":54,"added":"2026-09-30"},
+{"id":"shootz","name":"Shootz","categories":["Shooter"],"ranking":1650,"img":"/thumbs/shootz.webp","src":null,"site":54,"added":"2026-09-30"}
 ]}
