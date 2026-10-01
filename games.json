@@ -1458,5 +1458,6 @@
 {"id":"cats","name":"Cats","categories":["Skill"],"ranking":1612,"img":"/thumbs/cats.webp","src":null,"site":53,"added":"2026-09-30"},
 {"id":"catpad","name":"Catpad","categories":["Skill"],"ranking":1613,"img":"/thumbs/catpad.webp","src":null,"site":53,"added":"2026-09-30"},
 {"id":"ape-sling","name":"Ape Sling","categories":["Skill"],"ranking":1614,"img":"/thumbs/ape-sling.webp","src":null,"site":53,"added":"2026-09-30"},
-{"id":"effing-worms-2","name":"Effing Worms 2","categories":["Action"],"ranking":1615,"img":"/thumbs/effing-worms-2.webp","src":null,"site":53,"added":"2026-09-30"}
+{"id":"effing-worms-2","name":"Effing Worms 2","categories":["Action"],"ranking":1615,"img":"/thumbs/effing-worms-2.webp","src":null,"site":53,"added":"2026-09-30"},
+{"id":"armedforces-io","name":"Armedforces.io","categories":["Multiplayer"],"ranking":1616,"img":"/thumbs/armedforces-io.webp","src":null,"site":53,"added":"2026-09-30"}
 ]}
