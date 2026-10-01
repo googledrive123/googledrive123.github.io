@@ -1647,5 +1647,6 @@
 {"id":"penguin-dinner","name":"Penguin Dinner","categories":["Simulation"],"ranking":1801,"img":"/thumbs/penguin-dinner.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"bomb-it-1","name":"Bomb It 1","categories":["Arcade"],"ranking":1802,"img":"/thumbs/bomb-it-1.webp","src":null,"site":57,"added":"2026-09-30"},
 {"id":"bomb-it-2","name":"Bomb It 2","categories":["Arcade"],"ranking":1803,"img":"/thumbs/bomb-it-2.webp","src":null,"site":57,"added":"2026-09-30"},
-{"id":"bomb-it-3","name":"Bomb It 3","categories":["Arcade"],"ranking":1804,"img":"/thumbs/bomb-it-3.webp","src":null,"site":57,"added":"2026-09-30"}
+{"id":"bomb-it-3","name":"Bomb It 3","categories":["Arcade"],"ranking":1804,"img":"/thumbs/bomb-it-3.webp","src":null,"site":57,"added":"2026-09-30"},
+{"id":"comic-book-cody","name":"Comic Book Cody","categories":["Adventure"],"ranking":1805,"img":"/thumbs/comic-book-cody.webp","src":null,"site":57,"added":"2026-09-30"}
 ]}
