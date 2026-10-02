@@ -237,6 +237,60 @@
     return box;
   }
 
+  // One answer's picture as big as the screen allows, with a button to pick
+  // it when pick is given.
+  function look(p, start, pick) {
+    style();
+    var at = start;
+    var shade = el('div', 'gv-look');
+    shade.setAttribute('role', 'dialog');
+    shade.setAttribute('aria-modal', 'true');
+    var top = el('div', 'gv-look-top');
+    var name = el('div', 'gv-look-name');
+    var count = el('div', 'gv-look-count');
+    var close = el('button', 'gv-look-btn gv-look-close', '\u00d7');
+    close.type = 'button';
+    close.setAttribute('aria-label', 'Close');
+    top.appendChild(name);
+    top.appendChild(count);
+    top.appendChild(close);
+    var stage = el('div', 'gv-look-stage');
+    var img = el('img');
+    stage.appendChild(img);
+    var bar = el('div', 'gv-look-bar');
+    var choose = el('button', 'gv-look-pick', 'Pick this one');
+    choose.type = 'button';
+    choose.hidden = !pick;
+    bar.appendChild(choose);
+    shade.appendChild(top);
+    shade.appendChild(stage);
+    shade.appendChild(bar);
+
+    function show(i) {
+      var n = p.options.length;
+      at = (i % n + n) % n;
+      var src = shot(p, at);
+      img.hidden = !src;
+      if (src) img.src = src;
+      img.alt = p.options[at];
+      name.textContent = p.options[at];
+      count.textContent = (at + 1) + ' of ' + n;
+      shade.setAttribute('aria-label', p.options[at]);
+    }
+    function shut() {
+      shade.remove();
+    }
+    close.addEventListener('click', shut);
+    choose.addEventListener('click', function () {
+      var i = at;
+      shut();
+      pick(p, i);
+    });
+    show(start);
+    document.body.appendChild(shade);
+    (pick ? choose : close).focus();
+  }
+
   // ── The pop-up ────────────────────────────────────────────────────────
 
   function laterMap() {
