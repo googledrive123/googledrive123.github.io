@@ -131,6 +131,19 @@ as $function$
     where e.user_id is not null
     order by 1, 2
     on conflict do nothing
+  ),
+  games as (
+    insert into analytics_visitor_games as g (game_id, visitor_id, name, plays, secs)
+    select e.game_id, e.visitor_id, max(e.item_title),
+           count(*) filter (where e.event = 'game_open'),
+           coalesce(sum(e.value) filter (where e.event = 'game_close'), 0)
+    from e
+    where e.game_id is not null
+    group by 1, 2 order by 1, 2
+    on conflict (game_id, visitor_id) do update set
+      name = greatest(g.name, excluded.name),
+      plays = g.plays + excluded.plays,
+      secs = g.secs + excluded.secs
   )
   select;
 $function$;
