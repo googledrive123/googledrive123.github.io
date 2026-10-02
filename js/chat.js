@@ -286,6 +286,14 @@
       lookUp();
     });
     els.input.addEventListener('keydown', suggestKeys);
+    // Moving the caret onto or off an @name changes what is offered.
+    els.input.addEventListener('click', lookUp);
+    els.input.addEventListener('keyup', function (e) {
+      if (/^(ArrowLeft|ArrowRight|Home|End)$/.test(e.key)) lookUp();
+    });
+    els.input.addEventListener('blur', function () {
+      setTimeout(function () { if (document.activeElement !== els.input) hideSuggest(); }, 150);
+    });
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       if (!els.suggest.hidden && suggestion.items.length) return pickSuggestion(suggestion.at);
