@@ -32,6 +32,8 @@
     '.gv-feat-text{flex:1;min-width:0}',
     '.gv-feat-name{display:block;font-size:.92rem;font-weight:600}',
     '.gv-feat-line{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:2px;font-size:.74rem;line-height:1.35;color:var(--muted)}',
+    '.gv-feat-line.live{color:var(--text);font-weight:600}',
+    '.gv-feat-line.hot{color:var(--accent);font-weight:600}',
     '@media (prefers-reduced-motion:reduce){.gv-feat{transition:none}.gv-feat:hover{transform:none}}'
   ].join('');
 
@@ -86,6 +88,12 @@
   }
 
   function lineFor(f) {
+    var s = social();
+    var counts = (s && s.user() && s.counts()) || null;
+    if (f.id === 'chat' && counts) {
+      if (counts.unread) return { text: counts.unread + ' unread message' + (counts.unread === 1 ? '' : 's'), hot: true };
+      if (counts.server) return { text: 'New messages in the server room', live: true };
+    }
     if (given[f.id]) return { text: given[f.id], live: true };
     return { text: f.line };
   }
@@ -96,6 +104,8 @@
       if (!c) return;
       var now = lineFor(f);
       c.line.textContent = now.text;
+      c.line.classList.toggle('hot', !!now.hot);
+      c.line.classList.toggle('live', !!now.live);
     });
   }
 
@@ -111,6 +121,7 @@
     paint();
     var s = social();
     if (!s) return;
+    s.on('counts', paint);
     s.on('state', function (user) {
       paint();
     });
