@@ -27,6 +27,11 @@ create table if not exists public.gv_chat_messages (
 alter table public.gv_chat_messages
   add column if not exists mentions jsonb not null default '[]'::jsonb;
 
+-- When the owner took it down, so chats already open can drop it too.
+alter table public.gv_chat_messages add column if not exists deleted_at timestamptz;
+create index if not exists gv_chat_messages_deleted_at
+  on public.gv_chat_messages (deleted_at) where deleted_at is not null;
+
 -- Slow mode looks up one account's latest messages on every send.
 create index if not exists gv_chat_messages_user_created
   on public.gv_chat_messages (user_id, created_at desc);
@@ -362,7 +367,7 @@ begin
     raise exception 'not allowed';
   end if;
 
-  update gv_chat_messages set deleted = true where id = p_message_id;
+  update gv_chat_messages set deleted = true, deleted_at = now() where id = p_message_id;
   if not found then
     return false;
   end if;
