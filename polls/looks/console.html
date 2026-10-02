@@ -72,6 +72,9 @@ button{padding:0;border:0;background:none;font:inherit;color:inherit;cursor:poin
 .dock-sep{width:1px;height:24px;margin:0 4px;background:oklch(0.92 calc(0.04 * var(--c)) var(--h) / 0.14)}
 .art{transition:opacity .35s ease}
 @media (prefers-reduced-motion:reduce){.art,.tile{transition:none}}
+[data-soon]{cursor:pointer}
+.pv-toast{position:fixed;left:50%;bottom:24px;z-index:100;transform:translate(-50%,8px);padding:10px 16px;border-radius:12px;background:rgba(20,20,24,.92);color:#f4f4f6;font-size:13px;font-weight:500;line-height:1.3;box-shadow:0 10px 30px rgba(0,0,0,.35);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
+.pv-toast.on{opacity:1;transform:translate(-50%,0)}
 </style>
 </head>
 <body>
@@ -130,6 +133,8 @@ button{padding:0;border:0;background:none;font:inherit;color:inherit;cursor:poin
     <a class="dock-btn" href="#" title="Settings" data-soon><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"></path></svg></a>
   </nav>
 </div>
+
+<div class="pv-toast" id="pvToast" role="status">Just a preview of the home page</div>
 
 <script>
 (function () {
@@ -246,6 +251,15 @@ button{padding:0;border:0;background:none;font:inherit;color:inherit;cursor:poin
     if (state.sel === 0) $('kicker').textContent = ROW[0].kicker;
   }
   setInterval(tick, 1000);
+
+  var toast = $('pvToast'), toastTimer;
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('[data-soon]')) return;
+    e.preventDefault();
+    toast.classList.add('on');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.classList.remove('on'); }, 1600);
+  });
 })();
 </script>
 </body>
