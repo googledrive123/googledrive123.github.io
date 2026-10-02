@@ -67,3 +67,30 @@ $function$;
 
 revoke all on function public.gv_mention_list(text, uuid[], bigint) from public, anon, authenticated;
 
+
+-- The @mentions an account has not looked at yet, counted by chat: 'server'
+-- or 'convo:<id>'. A message the owner took down, or a chat the account has
+-- left, no longer counts.
+create or replace function public.gv_mentions_unseen(p_user uuid)
+returns json
+language sql
+stable
+security definer
+set search_path to 'public'
+as $function$
+  select coalesce(json_object_agg(t.k, t.n), '{}'::json)
+    from (
+      select case when x.message_id is not null then 'server' else 'convo:' || x.convo_id end as k,
+             count(*) as n
+        from gv_mentions x
+       where x.user_id = p_user
+         and not x.seen
+         and (exists (select 1 from gv_chat_messages m where m.id = x.message_id and not m.deleted)
+              or (exists (select 1 from gv_convo_messages m where m.id = x.convo_message_id and not m.deleted)
+                  and exists (select 1 from gv_convo_members cm where cm.convo_id = x.convo_id and cm.user_id = p_user)))
+       group by 1
+    ) t;
+$function$;
+
+revoke all on function public.gv_mentions_unseen(uuid) from public, anon, authenticated;
+
