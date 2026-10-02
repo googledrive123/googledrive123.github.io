@@ -95,6 +95,7 @@
     '.gv-poll-intro-text{margin:0 auto;max-width:38ch;font-size:.95rem;line-height:1.5;color:var(--muted,#8a8a96)}',
     '.gv-poll-peek{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:18px}',
     '.gv-poll-peek img{display:block;width:100%;aspect-ratio:1366/635;object-fit:cover;border-radius:7px;box-shadow:0 0 0 1px var(--border-strong,rgba(255,255,255,.16))}',
+    '.gv-poll-box.intro{width:min(560px,100%)}',
     '@keyframes gvPollIn{from{opacity:0;transform:translateY(10px) scale(.98)}}',
     '@media (prefers-reduced-motion:reduce){.gv-poll-box{animation:none}.gv-poll-opt.result::before,.gv-poll-look,.gv-poll-bar span,.gv-look-screen iframe{transition:none}}'
   ].join('');
@@ -503,6 +504,8 @@
     // An intro goes first, with one big button into the poll.
     var intro = introOf(poll);
     if (intro) {
+      box.classList.remove('wide');
+      box.classList.add('intro');
       var front = el('div', 'gv-poll-front');
       front.appendChild(el('h3', 'gv-poll-intro-title', intro.title));
       if (intro.text) front.appendChild(el('p', 'gv-poll-intro-text', intro.text));
@@ -519,6 +522,8 @@
       go.type = 'button';
       go.addEventListener('click', function () {
         front.replaceWith(body);
+        box.classList.remove('intro');
+        if (hasLooks(poll)) box.classList.add('wide');
       });
       front.appendChild(go);
       box.appendChild(front);
