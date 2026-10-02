@@ -643,6 +643,27 @@
     r.t = new Date(r.tms);
     return r;
   }
+  // The rows held for a range, and which of their visitors are scanners. A
+  // visitor only stops or starts being one when they send something new, so
+  // every answer says so for the visitors in it, and the rows already held
+  // follow.
+  function newStore(from) { return { from: from, rows: [], ids: Object.create(null), scanner: Object.create(null), since: 0 }; }
+  function take(st, res) {
+    var added = [], sorted = true, flags = Object.create(null);
+    (res.rows || []).forEach(function (a) {
+      flags[a[3]] = false;
+      if (st.ids[a[0]]) return;
+      var r = toRow(a), n = st.rows.length;
+      if (n && r.id < st.rows[n - 1].id) sorted = false;
+      st.ids[r.id] = 1;
+      st.rows.push(r);
+      added.push(r);
+    });
+    (res.scanners || []).forEach(function (v) { flags[v] = true; });
+    Object.keys(flags).forEach(function (v) { st.scanner[v] = flags[v]; });
+    if (!sorted) st.rows.sort(function (a, b) { return a.id - b.id; });
+    return added;
+  }
 
   // ── charts ──
   Chart.defaults.color = '#8a8a96';
