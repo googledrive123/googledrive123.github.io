@@ -38,6 +38,33 @@ end;
 $function$;
 
 
+-- One event as a list in this order:
+--
+--   id, ts (ms), event, visitor_id, session_id, user_id, path, referrer,
+--   game_id, item_id, item_title, value, meta, browser, os, device, screen,
+--   viewport, lang, tz, utm_source, utm_medium, utm_campaign, is_new,
+--   client_ts (ms), origin
+--
+-- which is about half the size of an object per row. analytics_rows and
+-- the live channel (analytics/live.sql) both send events this way.
+create or replace function public.analytics_row_list(e analytics_events)
+returns json
+language sql
+immutable
+set search_path to 'public'
+as $function$
+  select json_build_array(
+    e.id, round(extract(epoch from e.ts) * 1000), e.event, e.visitor_id, e.session_id, e.user_id,
+    e.path, e.referrer, e.game_id, e.item_id, e.item_title, e.value, e.meta,
+    e.browser, e.os, e.device, e.screen, e.viewport, e.lang, e.tz,
+    e.utm_source, e.utm_medium, e.utm_campaign, e.is_new,
+    round(extract(epoch from e.client_ts) * 1000), e.origin
+  );
+$function$;
+
+revoke all on function public.analytics_row_list(analytics_events) from public, anon, authenticated;
+
+
 -- Events from p_from on, oldest id first, at most 5000: the ids from p_lo to
 -- p_hi when they are given. Each row is a list in this order:
 --
