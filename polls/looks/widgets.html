@@ -96,6 +96,11 @@
   .tile-art:hover { transform: translateY(-3px); }
   .tile-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .tile-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .news { display: flex; flex-direction: column; gap: 12px; padding: 16px 18px; min-height: 0; }
+  .news-item { display: flex; flex-direction: column; gap: 2px; }
+  .news-item b { font-size: 13px; font-weight: 700; }
+  .news-item span { font-size: 12px; color: var(--mu); }
 </style>
 </head>
 <body>
@@ -171,6 +176,13 @@
         <a class="tile" data-soon><span class="tile-art"><img src="/thumbs/stickman-hook.webp" alt=""></span><span class="tile-name">Stickman Hook</span></a>
         <a class="tile" data-soon><span class="tile-art"><img src="/thumbs/crossyroad.webp" alt=""></span><span class="tile-name">Crossy Road</span></a>
       </div>
+    </div>
+
+    <div class="card news">
+      <div class="card-head"><b>what’s new</b><a class="more" data-soon>all</a></div>
+      <div class="news-item" data-soon><b>friends</b><span>see what friends are playing · oct 2</span></div>
+      <div class="news-item" data-soon><b>messages and group chats</b><span>works over games too · oct 2</span></div>
+      <div class="news-item" data-soon><b>688 more games</b><span>now 1,958 in total · oct 1</span></div>
     </div>
   </main>
 </div>
