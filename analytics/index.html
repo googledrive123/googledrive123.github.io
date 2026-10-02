@@ -2105,7 +2105,7 @@
 
   // ── auth / wiring ──
   function showDash() { $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); load(); loadPeople(); loadBroadcasts(); loadLinks(); loadFailing(); loadChat(); loadAvatars(); loadTesting(); loadGiveaways(); fillChallengeWeeks(); loadChallenges(); loadChallengeTracks(); loadBoard(); loadMirrors(); setTimer(); startPush(); if (location.hash === '#live') enterLive(); }
-  function setTimer() { clearInterval(state.timer); if ($('autoRefresh').checked) state.timer = setInterval(tick, 10000); }
+  function setTimer() { clearInterval(state.timer); if ($('autoRefresh').checked) state.timer = setInterval(tick, 5000); }
   function tryLogin(secret, remember) {
     $('loginErr').textContent = '';
     rpc('analytics_check', { p_secret: secret }).then(function (ok) {
