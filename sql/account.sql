@@ -27,8 +27,8 @@ begin
     raise exception 'not from this origin';
   end if;
 
-  -- Analytics keep the visit, not who made it.
-  update analytics_events set user_id = null where user_id = v_user;
+  -- Every visit the account made goes, not just its name on them.
+  delete from analytics_events where user_id = v_user;
   delete from polytrack_presence where user_id = v_user;
   delete from gv_verified where key = v_user::text;
 
