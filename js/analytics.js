@@ -22,9 +22,9 @@
   var AUTH_LS_KEY = 'sb-dxwjxzmlezfyursysays-auth-token';
 
   var SESSION_IDLE_MS = 30 * 60 * 1000;   // new session after 30 min idle
-  var HEARTBEAT_MS = 3 * 60 * 1000;       // "live now" ping while tab visible
-  var FLUSH_MS = 2000;                    // batch window
-  var MAX_EVENTS_PER_SESSION = 600;       // runaway guard
+  var HEARTBEAT_MS = 60 * 1000;          // "live now" ping while tab visible
+  var FLUSH_MS = 250;                     // batch window, short so the live dashboard sees events at once
+  var MAX_EVENTS_PER_SESSION = 2000;      // runaway guard
 
   function ls(get, key, val) {
     try {
@@ -261,6 +261,8 @@
     m.full_referrer = (document.referrer || '').slice(0, 300) || null;
     m.first_seen = ls(true, 'gv.first_seen') || null;
     m.cloaked = !!ls(true, 'gv.cloak.v1');
+    m.ua = (navigator.userAgent || '').slice(0, 300) || null;
+    try { if (navigator.userAgentData && navigator.userAgentData.platform) m.platform = navigator.userAgentData.platform; } catch (e) {}
     return m;
   }
 
@@ -389,6 +391,25 @@
       track('star', { game_id: g ? g.id : null, item_title: name, value: starring ? 1 : 0 });
     }, true);
   }
+
+  // ── Every click ───────────────────────────────────────────────────────
+  // Anything a person can click, with what it said and where it was, on top
+  // of the named events above. Never what was typed into a box.
+  var CLICKABLE = 'a, button, summary, label, select, [role="button"], [onclick], input[type="checkbox"], input[type="radio"], input[type="button"], input[type="submit"]';
+  document.addEventListener('click', function (e) {
+    var el = e.target && e.target.closest && e.target.closest(CLICKABLE);
+    if (!el) return;
+    var text = el.getAttribute('aria-label') || el.getAttribute('title') || el.textContent || '';
+    var meta = { tag: el.tagName.toLowerCase() };
+    if (el.id) meta.id = el.id;
+    if (typeof el.className === 'string' && el.className) meta.cls = el.className.slice(0, 80);
+    var href = el.getAttribute('href');
+    if (href) meta.href = href.slice(0, 200);
+    var area = el.parentElement && el.parentElement.closest('[id]');
+    if (area) meta.area = area.id;
+    if (el.type === 'checkbox' || el.type === 'radio') meta.checked = el.checked;
+    track('click', { item_title: text.replace(/\s+/g, ' ').trim().slice(0, 80), item_id: el.dataset && (el.dataset.id || el.dataset.game) || null, meta: meta });
+  }, true);
 
   // ── Search + filters ──────────────────────────────────────────────────
   function hookSearch() {

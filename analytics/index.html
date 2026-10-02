@@ -218,7 +218,7 @@
     <button data-range="30d">30d</button>
     <button data-range="90d">90d</button>
   </div>
-  <label class="toggle"><input type="checkbox" id="autoRefresh" checked> Auto-refresh 10s</label>
+  <label class="toggle"><input type="checkbox" id="autoRefresh" checked> Live updates</label>
   <label class="toggle" title="Stop counting this browser's visits to the site"><input type="checkbox" id="excludeMe"> Exclude this browser</label>
   <button class="btn ghost" id="exportBtn">Export CSV</button>
   <button class="btn ghost" id="refreshBtn">Refresh</button>
@@ -236,7 +236,7 @@
 <div id="dash" class="hidden">
 
   <section>
-    <h2>Right now <small>last 5 minutes · updates every 10 seconds</small></h2>
+    <h2>Right now <small>last 5 minutes · updates as it happens</small></h2>
     <div class="kpis">
       <div class="kpi live"><div class="l">Visitors online</div><div class="v" id="liveVisitors">–</div><div class="s" id="liveSub">–</div></div>
       <div class="kpi live"><div class="l">Playing now</div><div class="v" id="livePlaying">–</div><div class="s" id="livePlayingSub">–</div><button class="more" id="playingMore" type="button">See who</button></div>
@@ -558,7 +558,7 @@
   </section>
 
   <div class="footer">
-    Data source: Supabase table <code>analytics_events</code>, written by <code>/js/analytics.js</code>. Clicks = every user interaction (game opens, searches, filters, buttons); page views, pings and close events are counted separately.
+    Data source: Supabase table <code>analytics_events</code>, written by <code>/js/analytics.js</code>. Clicks = every user interaction (game opens, searches, filters, buttons); page views, pings, close events and the raw log of everything clicked are counted separately.
     Sessions expire after 30 minutes idle. Times shown in your browser's time zone. Rows loaded for this range: <span id="rowCount" class="mono">0</span>.
   </div>
 </div>
@@ -622,8 +622,8 @@
   var SECRET_KEY = 'gv.analytics.secret';
 
   // Events that count as user interactions ("clicks")
-  var PASSIVE = { pageview: 1, nav: 1, ping: 1, hidden: 1, visible: 1, session_end: 1, error: 1, game_load: 1, game_close: 1, movie_close: 1, tv_close: 1, _test: 1 };
-  var NICE = { game_open: 'Opened game', game_close: 'Closed game', game_load: 'Game loaded', game_fullscreen: 'Fullscreen', game_newtab: 'Open in new tab', movie_play: 'Played movie', tv_play: 'Played TV', movie_close: 'Closed movie', tv_close: 'Closed TV', search: 'Searched', category: 'Category filter', genre: 'Genre filter', sort: 'Sort changed', roll: 'Random roll', star: 'Starred', enter: 'Entered vault', news_open: 'Opened news', movies_enter: 'Entered movies', profile_open: 'Opened profile', mode_movies: 'Tab: Movies', mode_tv: 'Tab: TV', cloak: 'Tab cloak', auth_signin: 'Signed in', pageview: 'Page view', nav: 'Navigated', ping: 'Heartbeat', hidden: 'Tab hidden', visible: 'Tab visible', session_end: 'Left site', error: 'JS error' };
+  var PASSIVE = { pageview: 1, nav: 1, ping: 1, hidden: 1, visible: 1, session_end: 1, error: 1, game_load: 1, game_close: 1, movie_close: 1, tv_close: 1, click: 1, _test: 1 };
+  var NICE = { game_open: 'Opened game', game_close: 'Closed game', game_load: 'Game loaded', game_fullscreen: 'Fullscreen', game_newtab: 'Open in new tab', movie_play: 'Played movie', tv_play: 'Played TV', movie_close: 'Closed movie', tv_close: 'Closed TV', search: 'Searched', category: 'Category filter', genre: 'Genre filter', sort: 'Sort changed', roll: 'Random roll', star: 'Starred', enter: 'Entered vault', news_open: 'Opened news', movies_enter: 'Entered movies', profile_open: 'Opened profile', mode_movies: 'Tab: Movies', mode_tv: 'Tab: TV', cloak: 'Tab cloak', auth_signin: 'Signed in', pageview: 'Page view', nav: 'Navigated', ping: 'Heartbeat', hidden: 'Tab hidden', visible: 'Tab visible', session_end: 'Left site', error: 'JS error', click: 'Clicked' };
 
   var $ = function (id) { return document.getElementById(id); };
   var state = { secret: null, range: '24h', rows: [], vlist: [], feed: [], playing: [], live: [], overview: null, gameSort: { key: 'plays', dir: -1 }, gameN: 25, timer: null };
@@ -771,6 +771,57 @@
       st.since = Date.parse(res.now);
       return added;
     });
+  }
+
+  // ── push ──
+  // analytics/live.sql sends every new event down a Realtime channel the
+  // moment it is written, a tenth of a second or so after the tracker sends
+  // it. One socket for the page; the dashboard and the live view both take
+  // what comes, and still ask now and then for anything lost on the way.
+  var push = { topic: null, ws: null, joined: false, ref: 0, beat: null, tries: 0, seen: 0, on: [] };
+  function startPush() {
+    rpc('analytics_live_topic', { p_secret: state.secret }).then(function (topic) {
+      if (!topic) return;
+      push.topic = topic;
+      pushConnect();
+    }).catch(function (e) { console.error('Could not start live updates', e); });
+  }
+  function pushConnect() {
+    var ws = new WebSocket(SUPA_URL.replace(/^http/, 'ws') + '/realtime/v1/websocket?apikey=' + SUPA_KEY + '&vsn=1.0.0');
+    push.ws = ws;
+    function send(m) { m.ref = String(++push.ref); try { ws.send(JSON.stringify(m)); } catch (e) {} }
+    ws.onopen = function () {
+      push.seen = Date.now();
+      send({ topic: 'realtime:' + push.topic, event: 'phx_join', join_ref: '1', payload: { config: { broadcast: { ack: false, self: false }, presence: { key: '' }, postgres_changes: [], private: false }, access_token: SUPA_KEY } });
+      // A socket that has gone quiet without closing is closed here, and so
+      // opened again.
+      push.beat = setInterval(function () {
+        if (Date.now() - push.seen > 60000) return ws.close();
+        send({ topic: 'phoenix', event: 'heartbeat', payload: {} });
+      }, 25000);
+    };
+    ws.onmessage = function (e) {
+      push.seen = Date.now();
+      var m;
+      try { m = JSON.parse(e.data); } catch (err) { return; }
+      if (m.topic !== 'realtime:' + push.topic) return;
+      if (m.event === 'phx_reply' && m.payload && m.payload.status === 'ok' && !push.joined) { push.joined = true; push.tries = 0; pushChanged(); }
+      else if (m.event === 'broadcast' && m.payload && m.payload.event === 'events') push.on.forEach(function (fn) { fn(m.payload.payload || {}); });
+      else if (m.event === 'phx_close' || m.event === 'phx_error') ws.close();
+    };
+    ws.onclose = function () {
+      clearInterval(push.beat);
+      if (push.ws !== ws) return;
+      push.joined = false;
+      pushChanged();
+      setTimeout(pushConnect, Math.min(15000, 500 * Math.pow(2, push.tries++)));
+    };
+  }
+  // Joined or dropped: either way, ask once straight away for anything
+  // that came in while the socket was not there.
+  function pushChanged() {
+    if (live) { if (!live.busy) { clearTimeout(live.timer); livePoll(); } }
+    else tick();
   }
 
   // ── charts ──
@@ -1723,9 +1774,10 @@
   }
 
   // ── live ──
-  // A page of its own with every event as it is written, a second or so
-  // later. analytics_rows is asked every second for what came in since,
-  // going back a little each time as tick() does, so none is missed.
+  // A page of its own with every event as it is written. Events are pushed
+  // in as they happen; analytics_rows is asked as well, every 5 seconds
+  // while the push is there and every second while it is not, going back a
+  // little each time as tick() does, so none is missed.
   var LIVE_BACK = 10 * 60000, LIVE_MAX = 1500, LIVE_BEATS = { ping: 1, hidden: 1, visible: 1 };
   var live = null;
   function liveOn() { return !!live; }
@@ -1759,30 +1811,14 @@
     rpc('analytics_rows', { p_secret: state.secret, p_from: new Date(Math.max(l.st.from, l.st.since - OVERLAP)).toISOString(), p_lo: l.after }).then(function (res) {
       if (live !== l) return;
       var list = res.rows || [];
-      var added = take(l.st, res);
       l.skew = Date.parse(res.now) - Date.now();
       // A full answer may stop short of now: the next one carries on from
       // its last id, straight away.
       if (list.length >= SLICE) l.after = list[list.length - 1][0] + 1;
       else { l.after = null; l.st.since = Date.parse(res.now); }
-      // Rows the next answer may hold again keep their ids, so they are
-      // still known when they come back.
-      var cut = Math.min(liveNow() - LIVE_BACK, l.st.since - OVERLAP);
-      if (l.st.rows.length && l.st.rows[0].tms < cut) {
-        l.st.rows = l.st.rows.filter(function (r) {
-          if (r.tms >= cut) return true;
-          delete l.st.ids[r.id];
-          return false;
-        });
-      }
-      if (l.paused) { l.held = l.held.concat(added); $('livePause').textContent = 'Resume (' + fmt(l.held.length) + ' new)'; }
-      else liveAdd(added, !l.first);
+      liveTake(res);
       l.first = false;
       l.fails = 0;
-      livePresence();
-      liveNames(added);
-      liveStats();
-      $('liveStatus').innerHTML = '<span class="dot"></span>Updated ' + new Date().toLocaleTimeString();
     }).catch(function (e) {
       if (live !== l) return;
       l.fails++;
@@ -1790,10 +1826,36 @@
     }).then(function () {
       if (live !== l) return;
       l.busy = false;
-      var wait = l.fails ? Math.min(30000, 1000 * Math.pow(2, l.fails)) : l.after ? 0 : document.hidden ? 5000 : 1000;
+      var wait = l.fails ? Math.min(30000, 1000 * Math.pow(2, l.fails)) : l.after ? 0 : push.joined || document.hidden ? 5000 : 1000;
       l.timer = setTimeout(livePoll, wait);
     });
   }
+  // Rows from an answer or a push, onto the page.
+  function liveTake(res) {
+    var l = live;
+    var added = take(l.st, res);
+    // Rows the next answer may hold again keep their ids, so they are
+    // still known when they come back.
+    var cut = Math.min(liveNow() - LIVE_BACK, l.st.since - OVERLAP);
+    if (l.st.rows.length && l.st.rows[0].tms < cut) {
+      l.st.rows = l.st.rows.filter(function (r) {
+        if (r.tms >= cut) return true;
+        delete l.st.ids[r.id];
+        return false;
+      });
+    }
+    if (l.paused) { l.held = l.held.concat(added); $('livePause').textContent = 'Resume (' + fmt(l.held.length) + ' new)'; }
+    else liveAdd(added, !l.first);
+    livePresence();
+    liveNames(added);
+    liveStats();
+    $('liveStatus').innerHTML = '<span class="dot"></span>' + (push.joined ? 'Instant, updated ' : 'Every second, updated ') + new Date().toLocaleTimeString();
+  }
+  // Pushed events wait for the first answer, so the last 10 minutes go in
+  // underneath them in order.
+  push.on.push(function (res) {
+    if (live && !live.first && res.rows) liveTake(res);
+  });
   // PolyTrack says who is in which room, every few seconds.
   function livePresence() {
     var l = live;
@@ -1873,12 +1935,16 @@
     liveShow(el);
     return el;
   }
-  // Newest at the top, and only the latest LIVE_MAX kept on the page.
+  // Newest at the top, one that comes in late still in its place by id, and
+  // only the latest LIVE_MAX kept on the page.
   function liveAdd(rows, fresh) {
     if (!rows.length) return;
-    var listEl = $('liveList'), frag = document.createDocumentFragment();
-    for (var i = rows.length - 1; i >= 0; i--) frag.appendChild(liveEntry(rows[i], fresh));
-    listEl.insertBefore(frag, listEl.firstChild);
+    var listEl = $('liveList');
+    rows.forEach(function (r) {
+      var at = listEl.firstChild;
+      while (at && at._row.id > r.id) at = at.nextSibling;
+      listEl.insertBefore(liveEntry(r, fresh), at);
+    });
     while (listEl.children.length > LIVE_MAX) listEl.removeChild(listEl.lastChild);
     live.shown += rows.length;
     $('liveCount').textContent = fmt(live.shown) + ' since you opened this';
@@ -1964,14 +2030,16 @@
 
   // ── load ──
   // load() reads the whole range: on opening, on a new range and on Refresh.
-  // tick() then only asks for what is new, every 10 seconds. The all-time
-  // numbers come on their own, once a minute, and never hold the rest up.
-  var store = null, loadGen = 0, loadingRange = false, ticking = false;
+  // New events are then pushed in as they happen, and tick() asks for what
+  // is new every 5 seconds in case any were lost. The all-time numbers come
+  // on their own, once a minute, and never hold the rest up.
+  var store = null, loadGen = 0, loadingRange = false, ticking = false, held = [];
   function load() {
     if (!state.secret) return;
     var gen = ++loadGen;
     var b = rangeBounds();
     loadingRange = true;
+    held = [];
     $('status').innerHTML = '<span class="dot"></span>Loading…';
     Promise.all([
       fetchRange(b.from.getTime(), function (done, all) {
@@ -1981,6 +2049,8 @@
     ]).then(function (res) {
       if (gen !== loadGen) return;
       store = res[0]; state.playingNow = res[1];
+      held.forEach(function (r) { take(store, r); });
+      held = [];
       draw();
     }).catch(function (e) {
       if (gen === loadGen) $('status').innerHTML = '<span class="dot off"></span>Error: ' + esc(e.message);
@@ -2003,14 +2073,34 @@
     }).then(function () { ticking = false; });
     if (Date.now() - allTimeAt > 60000) loadAllTime();
   }
+  // Events pushed from the database join the range as they come. While the
+  // range is still loading they wait, then join the new one.
+  function onPush(res) {
+    if (!res.rows || !$('autoRefresh').checked) return;
+    if (!store || loadingRange) { held.push(res); return; }
+    if (take(store, res).length && !live) drawSoon();
+  }
+  push.on.push(onPush);
+  // Drawing a long range takes a while, so events coming in fast wait for
+  // each other: never more than a quarter of the time goes on drawing.
+  var drawTimer = null, drawnAt = 0, drawMs = 0;
+  function drawSoon() {
+    if (drawTimer) return;
+    drawTimer = setTimeout(draw, Math.max(0, drawnAt + drawMs * 3 - Date.now()));
+  }
   // The range's rows without scanners, and without any the window has slid
   // past since they came in.
   function draw() {
+    var t0 = Date.now();
+    clearTimeout(drawTimer);
+    drawTimer = null;
     var from = rangeBounds().from.getTime();
     state.rows = store.rows.filter(function (r) { return r.tms >= from && !store.scanner[r.visitor_id]; });
     render();
     loadNames();
-    $('status').innerHTML = '<span class="dot"></span>Updated ' + new Date().toLocaleTimeString();
+    $('status').innerHTML = '<span class="dot"></span>' + (push.joined ? 'Live, updated ' : 'Updated ') + new Date().toLocaleTimeString();
+    drawnAt = Date.now();
+    drawMs = drawnAt - t0;
   }
   var allTimeAt = 0;
   function loadAllTime() {
@@ -2031,8 +2121,8 @@
   }
 
   // ── auth / wiring ──
-  function showDash() { $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); load(); loadPeople(); loadBroadcasts(); loadLinks(); loadFailing(); loadChat(); loadAvatars(); loadTesting(); loadGiveaways(); fillChallengeWeeks(); loadChallenges(); loadChallengeTracks(); loadBoard(); loadMirrors(); setTimer(); if (location.hash === '#live') enterLive(); }
-  function setTimer() { clearInterval(state.timer); if ($('autoRefresh').checked) state.timer = setInterval(tick, 10000); }
+  function showDash() { $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); load(); loadPeople(); loadBroadcasts(); loadLinks(); loadFailing(); loadChat(); loadAvatars(); loadTesting(); loadGiveaways(); fillChallengeWeeks(); loadChallenges(); loadChallengeTracks(); loadBoard(); loadMirrors(); setTimer(); startPush(); if (location.hash === '#live') enterLive(); }
+  function setTimer() { clearInterval(state.timer); if ($('autoRefresh').checked) state.timer = setInterval(tick, 5000); }
   function tryLogin(secret, remember) {
     $('loginErr').textContent = '';
     rpc('analytics_check', { p_secret: secret }).then(function (ok) {
