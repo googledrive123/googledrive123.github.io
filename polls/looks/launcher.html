@@ -51,6 +51,11 @@
   .search svg { flex-shrink: 0; opacity: .7; }
   .search input { flex: 1; min-width: 0; height: 100%; border: 0; outline: none; background: transparent; color: inherit; font-family: inherit; font-size: 16px; }
   .kbd { font-size: 12px; opacity: .6; border: 1px solid var(--ln2); border-radius: 6px; padding: 1px 7px; }
+  .chips { margin-top: 16px; display: flex; gap: 8px; }
+  .chip { height: 36px; margin: 0; padding: 0 14px 0 12px; display: flex; align-items: center; gap: 8px; border-radius: 12px; border: 1px solid var(--ln); background: transparent; font-size: 14px; color: var(--mu); text-decoration: none; cursor: pointer; }
+  .chip:hover { background: var(--s1); color: var(--tx); }
+  .chip-chat { position: relative; }
+  .badge { min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--red); color: #fff; font-size: 11px; font-weight: 700; display: grid; place-items: center; }
 </style>
 </head>
 <body>
@@ -65,6 +70,14 @@
         <input id="launchQ" placeholder="search games, movies and music" aria-label="Search games, movies and music" autocomplete="off" spellcheck="false">
         <span class="kbd" aria-hidden="true">/</span>
       </label>
+      <nav class="chips">
+        <button class="chip" id="openGames" type="button" aria-haspopup="dialog"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="11" rx="4"></rect><path d="M8 11v3M6.5 12.5h3"></path><circle cx="15.5" cy="12" r="1"></circle><circle cx="17.5" cy="14" r="1"></circle></svg>games</button>
+        <a class="chip" href="#" data-soon><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M10 9l5 3-5 3z"></path></svg>movies</a>
+        <a class="chip" href="#" data-soon><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l10-2v12"></path><circle cx="6.5" cy="18" r="2.5"></circle><circle cx="16.5" cy="16" r="2.5"></circle></svg>music</a>
+        <a class="chip chip-chat" href="#" data-soon><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v10H9l-5 4z"></path></svg>chat<span class="badge">2</span></a>
+        <a class="chip" href="#" data-soon><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"></path><rect x="5" y="11" width="4" height="9"></rect><rect x="10" y="6" width="4" height="14"></rect><rect x="15" y="14" width="4" height="6"></rect></svg>leaderboard</a>
+        <a class="chip" href="#" data-soon><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="5" r="2"></circle><circle cx="12" cy="5" r="2"></circle><circle cx="19" cy="5" r="2"></circle><circle cx="5" cy="12" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle><circle cx="5" cy="19" r="2"></circle><circle cx="12" cy="19" r="2"></circle><circle cx="19" cy="19" r="2"></circle></svg>more</a>
+      </nav>
     </div>
     <div class="pill" title="Class timer">
       <span class="pill-lbl">period 3</span>
