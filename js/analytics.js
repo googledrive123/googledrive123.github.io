@@ -261,6 +261,7 @@
     m.full_referrer = (document.referrer || '').slice(0, 300) || null;
     m.first_seen = ls(true, 'gv.first_seen') || null;
     m.cloaked = !!ls(true, 'gv.cloak.v1');
+    m.ua = (navigator.userAgent || '').slice(0, 300) || null;
     return m;
   }
 
