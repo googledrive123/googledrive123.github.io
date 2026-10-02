@@ -186,5 +186,34 @@
     </div>
   </main>
 </div>
+
+<script>
+/* Widgets home page preview: the class timer, the track of the week
+   countdown and search all work; links to other pages only show a toast. */
+(function () {
+  'use strict';
+
+  var state = {
+    left: 1421,
+  };
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  // Class timer: mm:ss left in the period, and how far through it is.
+  // After 0 it starts over at 50 minutes.
+  var timer = document.getElementById('timer');
+  var timerPct = document.getElementById('timerPct');
+  function drawTimer() {
+    var pct = Math.max(0, Math.min(100, (1 - state.left / 3000) * 100));
+    timer.textContent = pad(Math.floor(state.left / 60)) + ':' + pad(state.left % 60);
+    timerPct.style.width = pct.toFixed(1) + '%';
+  }
+
+  setInterval(function () {
+    state.left = state.left > 0 ? state.left - 1 : 3000;
+    drawTimer();
+  }, 1000);
+})();
+</script>
 </body>
 </html>
