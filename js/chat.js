@@ -789,7 +789,7 @@
     var body = sheet(convoName(c));
     var people = el('div', 'gv-chat-people');
     people.appendChild(personLine('You'));
-    (c.members || []).forEach(function (m) { people.appendChild(personLine(m.username)); });
+    (c.members || []).forEach(function (m) { people.appendChild(personLine(m.username, m.verified)); });
     body.appendChild(people);
     var note = el('p');
     body.appendChild(el('p', '', 'Add people'));
@@ -810,11 +810,13 @@
     body.appendChild(row);
   }
 
-  function personLine(name) {
+  function personLine(name, verified) {
     var line = el('div', 'gv-chat-person');
     var face = el('span', 'gv-chat-dot', initials(name));
     line.appendChild(face);
-    line.appendChild(el('span', '', name));
+    var label = el('span', '', name);
+    if (verified) label.appendChild(check());
+    line.appendChild(label);
     return line;
   }
 
