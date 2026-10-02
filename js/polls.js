@@ -290,8 +290,10 @@
       shade.remove();
       window.removeEventListener('keydown', onKey, true);
     }
+    // Ahead of the pop-up's own keys, so Escape closes only this.
     function onKey(e) {
-      if (e.key === 'ArrowLeft') show(at - 1);
+      if (e.key === 'Escape') shut();
+      else if (e.key === 'ArrowLeft') show(at - 1);
       else if (e.key === 'ArrowRight') show(at + 1);
       else return;
       e.preventDefault();
