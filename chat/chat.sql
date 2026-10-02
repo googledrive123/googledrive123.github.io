@@ -346,7 +346,10 @@ begin
                'reason', b.reason,
                'until', b.until,
                'created_at', b.created_at,
-               'active', b.until is null or b.until > now()
+               'active', b.until is null or b.until > now(),
+               -- Whose ban this one follows from (chat/bans.sql).
+               'via', b.via,
+               'via_name', case when b.via is not null then public.gv_display_name(b.via) end
              ) order by b.created_at desc)
         from gv_chat_bans b
         left join profiles p on p.id = b.user_id
