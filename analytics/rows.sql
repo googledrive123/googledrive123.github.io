@@ -7,6 +7,11 @@
 -- reaches in ids, asks for slices of it a few at a time, and from then on
 -- only asks for what came in since.
 --
+-- Scanners come back with the rows instead of being left out, flagged by
+-- visitor id. Whether a visitor is a scanner only changes when they send
+-- something new, so the dashboard can keep rows it already has and still
+-- leave out the right people.
+--
 -- Apply against project dxwjxzmlezfyursysays, after analytics/rollups.sql.
 -- Every statement is safe to run twice.
 
@@ -43,7 +48,8 @@ $function$;
 --
 -- which is about half the size of an object per row. now is when the rows
 -- were read: anything not in them started after now less a few seconds,
--- since Supabase stops an insert after 3.
+-- since Supabase stops an insert after 3. scanners lists the visitors in
+-- these rows that analytics_scanners leaves out right now.
 --
 -- Run through execute so each call is planned for its own range: a plan
 -- kept from a call for the last few seconds would read the whole table in
@@ -83,7 +89,9 @@ begin
           r.browser, r.os, r.device, r.screen, r.viewport, r.lang, r.tz,
           r.utm_source, r.utm_medium, r.utm_campaign, r.is_new,
           round(extract(epoch from r.client_ts) * 1000), r.origin
-        ) order by r.id) from r), '[]'::json)
+        ) order by r.id) from r), '[]'::json),
+      'scanners', coalesce((select json_agg(s.visitor_id) from analytics_scanners() s
+        where s.visitor_id in (select r.visitor_id from r)), '[]'::json)
     )
   $q$ into v_out using p_from, p_lo, p_hi;
   return v_out;
