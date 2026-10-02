@@ -196,6 +196,7 @@
   var state = {
     left: 1421,
     totw: 2 * 86400 + 13 * 3600 + 54 * 60 + 9,
+    q: ''
   };
 
   function pad(n) { return String(n).padStart(2, '0'); }
@@ -224,6 +225,67 @@
     state.totw = Math.max(0, state.totw - 1);
     drawTotw();
   }, 1000);
+
+  // Search: while there is text, popular this week becomes the first six
+  // games whose name has it. Clearing the box brings popular back.
+  var G = [
+    ['polytrack', 'PolyTrack'], ['basketball-stars', 'Basketball Stars'],
+    ['amazing-rope-police', 'Amazing Rope Police'], ['ice-dodo', 'Ice Dodo'],
+    ['adrenalinechallenge2', 'Adrenaline Challenge 2'], ['stickman-hook', 'Stickman Hook'],
+    ['crossyroad', 'Crossy Road'], ['retrobowlcollege', 'Retro Bowl College'],
+    ['basket-bros', 'Basket Bros'], ['rocketleague', 'Rocket League'], ['2048', '2048'],
+    ['retro-bowl', 'Retro Bowl'], ['bit-planes', 'Bit Planes'], ['drifthunters', 'Drift Hunters'],
+    ['angry-sharks', 'Angry Sharks'], ['wordle', 'Wordle'], ['aquapark-slides', 'Aquapark Slides'],
+    ['fnaf', "Five Nights at Freddy's"], ['subway-surfers', 'Subway Surfers'],
+    ['grand-theft-auto-vice-city', 'Grand Theft Auto Vice City'], ['backrooms', 'The Backrooms'],
+    ['slope2', 'Slope 2'], ['cluster-rush', 'Cluster Rush'], ['motox3m-spooky', 'Moto X3M Spooky Land'],
+    ['big-neon-tower', 'Big Neon Tower'], ['drivemad', 'Drive Mad'], ['bitlife', 'BitLife'],
+    ['a-difficult-game-about-climbing', 'A Difficult Game About Climbing'],
+    ['madalincars', 'Madalin Cars'], ['snowrider3d', 'Snow Rider 3D'],
+    ['badtimesimulator', 'Bad Time Simulator'], ['2drocketleague', '2D Rocket League'],
+    ['cuphead', 'Cuphead'], ['flappyplane', 'Flappy Plane'],
+    ['adventure-capitalist', 'Adventure Capitalist'], ['1v1lol', '1v1.LOL'],
+    ['awesometanks2', 'Awesome Tanks 2'], ['vex7', 'Vex 7'], ['minesweeper', 'Minesweeper'],
+    ['timeshooter2', 'Time Shooter 2'], ['8ball', '8 Ball Pool'], ['draw-the-hill', 'Draw the Hill'],
+    ['geometrydash', 'Geometry Dash'], ['hollow-knight-silksong', 'Hollow Knight Silksong'],
+    ['1on1soccer', '1 on 1 Soccer'], ['slime-rancher', 'Slime Rancher']
+  ];
+  var POP = ['basketball-stars', 'amazing-rope-police', 'ice-dodo', 'adrenalinechallenge2', 'stickman-hook', 'crossyroad'];
+  var input = document.getElementById('q2c');
+  var head2c = document.getElementById('head2c');
+  var pop2c = document.getElementById('pop2c');
+  var shown = POP.join();
+
+  function byId(id) {
+    return G.filter(function (g) { return g[0] === id; })[0];
+  }
+
+  function tile(g) {
+    var a = document.createElement('a');
+    a.className = 'tile';
+    a.setAttribute('data-soon', '');
+    a.innerHTML = '<span class="tile-art"><img src="/thumbs/' + g[0] + '.webp" alt=""></span><span class="tile-name"></span>';
+    a.lastChild.textContent = g[1];
+    return a;
+  }
+
+  function drawSearch() {
+    var q = state.q.trim();
+    var lq = q.toLowerCase();
+    var found = G.filter(function (g) { return g[1].toLowerCase().indexOf(lq) !== -1; });
+    var list = q ? found.slice(0, 6) : POP.map(byId);
+    var key = list.map(function (g) { return g[0]; }).join();
+    head2c.textContent = q ? 'results for “' + q + '”' : 'popular this week';
+    if (key !== shown) {
+      shown = key;
+      pop2c.replaceChildren.apply(pop2c, list.map(tile));
+    }
+  }
+
+  input.addEventListener('input', function () {
+    state.q = input.value;
+    drawSearch();
+  });
 })();
 </script>
 </body>
