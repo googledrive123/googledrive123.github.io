@@ -1824,7 +1824,7 @@
     }).then(function () {
       if (live !== l) return;
       l.busy = false;
-      var wait = l.fails ? Math.min(30000, 1000 * Math.pow(2, l.fails)) : l.after ? 0 : document.hidden ? 5000 : 1000;
+      var wait = l.fails ? Math.min(30000, 1000 * Math.pow(2, l.fails)) : l.after ? 0 : push.joined || document.hidden ? 5000 : 1000;
       l.timer = setTimeout(livePoll, wait);
     });
   }
