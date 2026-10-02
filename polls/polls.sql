@@ -102,3 +102,29 @@ as $function$
 $function$;
 
 revoke all on function public.gv_poll_json(bigint, uuid, text) from public, anon, authenticated;
+
+
+-- Every poll still open, newest first, for the pop-up.
+create or replace function public.gv_polls_open(p_visitor text default null)
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_visitor text := nullif(left(btrim(coalesce(p_visitor, '')), 64), '');
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'Polls only work on GameVault.';
+  end if;
+
+  return coalesce((
+    select json_agg(public.gv_poll_json(p.id, auth.uid(), v_visitor) order by p.id desc)
+      from gv_polls p
+     where not p.closed and (p.ends_at is null or p.ends_at > now())
+  ), '[]'::json);
+end;
+$function$;
+
+grant execute on function public.gv_polls_open(text) to anon, authenticated;
