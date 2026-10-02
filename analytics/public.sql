@@ -129,3 +129,59 @@ end;
 $function$;
 
 grant execute on function public.gv_failing_games() to anon, authenticated;
+
+
+-- What the people who played one game also played in the last 30 days, for
+-- the home page's "Because you played" row. Ranked by players in common over
+-- the square root of both games' players, so PolyTrack, which nearly everyone
+-- plays, does not top every list just for being big. Two people in common is
+-- the least that counts. Added on 2 October 2026.
+create or replace function public.gv_also_played(p_game text, p_limit integer default 12)
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'not read from this origin';
+  end if;
+
+  return coalesce((
+    with opens as (
+      select distinct game_id, visitor_id
+      from analytics_events
+      where event = 'game_open'
+        and game_id is not null
+        and visitor_id is not null
+        and ts > now() - interval '30 days'
+    ),
+    mine as (
+      select visitor_id from opens where game_id = p_game
+    ),
+    sizes as (
+      select game_id, count(*) as players from opens group by game_id
+    ),
+    shared as (
+      select o.game_id, count(*) as together
+      from opens o
+      join mine m using (visitor_id)
+      where o.game_id <> p_game
+      group by o.game_id
+      having count(*) >= 2
+    )
+    select json_agg(json_build_object('id', game_id, 'together', together) order by score desc)
+    from (
+      select s.game_id, s.together,
+        s.together / sqrt(z.players::float * (select count(*) from mine)) as score
+      from shared s
+      join sizes z using (game_id)
+      order by score desc, s.together desc
+      limit least(greatest(coalesce(p_limit, 12), 1), 30)
+    ) t
+  ), '[]'::json);
+end;
+$function$;
+
+grant execute on function public.gv_also_played(text, integer) to anon, authenticated;
