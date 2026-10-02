@@ -84,7 +84,7 @@
       p_code: state.code,
       p_role: state.role
     }).then(function (reply) {
-      if (reply && reply.call) hostNow();
+      if (reply && reply.call) hostNow().catch(function () {});
     }).catch(function (error) { console.error('Presence beat failed:', error); });
   }
 
@@ -284,7 +284,9 @@
   // same track, and the owner follows them in. The notice they get when the
   // owner arrives is how they find out.
 
-  var hosting = false;
+  // The room being opened right now, if one is, so a second ask for one
+  // waits on the same room instead of starting another.
+  var hosting = null;
 
   // The game keeps more than one picker in the document and the newest one
   // is the one just opened.
@@ -333,16 +335,25 @@
     ]);
   }
 
+  // Resolves with the room's code once the player is racing in it. Someone
+  // already hosting gets their own room's code. Someone in another player's
+  // room gets nothing: that code is not theirs to hand out.
   function hostNow() {
     var room = rooms();
-    if (hosting || !room || room.state().code !== null) return;
-    hosting = true;
+    if (!room) return Promise.reject(new Error('rooms are not ready'));
+    var state = room.state();
+    if (state.code) {
+      return state.role === 'host'
+        ? Promise.resolve(state.code)
+        : Promise.reject(new Error('Only the room\u2019s host can let people in.'));
+    }
+    if (hosting) return hosting;
     var shown = document.querySelector('.game-toolbar-ui .track-name');
     var track = shown ? shown.textContent.trim() : null;
 
     // Their screen holds still on the frame they were on while the game
     // switches behind it, and comes back on the room's race at the start.
-    stillOrNothing()
+    hosting = stillOrNothing()
       .then(function (picture) {
         showCover(picture, null);
         coverInterface();
@@ -383,11 +394,17 @@
       })
       // A few frames for the new race to draw itself before it is shown.
       .then(function () { return new Promise(function (resolve) { setTimeout(resolve, 700); }); })
-      .catch(function (error) { console.error('Could not open a room for the creator:', error); })
       .then(function () {
         hideCover();
-        hosting = false;
+        hosting = null;
+        return room.state().code;
+      }, function (error) {
+        console.error('Could not open a room:', error);
+        hideCover();
+        hosting = null;
+        throw error;
       });
+    return hosting;
   }
 
   function inRace() {
