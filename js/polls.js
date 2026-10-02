@@ -77,6 +77,8 @@
     '.gv-look-chrome{position:relative;display:flex;align-items:center;gap:7px;height:34px;padding:0 14px;background:#1a1a20;border-bottom:1px solid rgba(255,255,255,.08)}',
     '.gv-look-chrome i{width:11px;height:11px;border-radius:50%;background:rgba(255,255,255,.16)}',
     '.gv-look-url{position:absolute;left:50%;transform:translateX(-50%);padding:4px 16px;border-radius:7px;background:#08080a;font-family:"JetBrains Mono",monospace;font-size:12px;color:#8a8a96}',
+    '.gv-look-screen iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#0c0c0e;opacity:0;transition:opacity .25s}',
+    '.gv-look-screen.ready iframe{opacity:1}',
     '@keyframes gvPollIn{from{opacity:0;transform:translateY(10px) scale(.98)}}',
     '@media (prefers-reduced-motion:reduce){.gv-poll-box{animation:none}.gv-poll-opt.result::before,.gv-poll-look,.gv-poll-bar span{transition:none}}'
   ].join('');
@@ -297,6 +299,11 @@
     var screen = el('div', 'gv-look-screen');
     var img = el('img');
     screen.appendChild(img);
+    var live = el('iframe');
+    live.addEventListener('load', function () {
+      screen.classList.add('ready');
+    });
+    screen.appendChild(live);
     var chrome = el('div', 'gv-look-chrome');
     chrome.appendChild(el('i'));
     chrome.appendChild(el('i'));
@@ -332,6 +339,10 @@
       img.hidden = !src;
       if (src) img.src = src;
       img.alt = p.options[at];
+      var url = livePage(p, at);
+      screen.classList.remove('ready');
+      live.hidden = !url;
+      live.src = url || 'about:blank';
       name.textContent = p.options[at];
       count.textContent = (at + 1) + ' of ' + n;
       shade.setAttribute('aria-label', p.options[at]);
