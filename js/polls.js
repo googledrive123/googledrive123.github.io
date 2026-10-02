@@ -8,6 +8,8 @@
 
   var SUPA_URL = 'https://dxwjxzmlezfyursysays.supabase.co';
   var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
+  // Not now waits this long, so the question gets read first.
+  var NOT_NOW_MS = 3000;
 
   var CSS = [
     '.gv-poll{text-align:left}',
@@ -184,8 +186,9 @@
     var box = el('div', 'gv-poll-box');
     box.appendChild(el('div', 'gv-poll-kicker', 'New poll'));
     var foot = el('div', 'gv-poll-foot');
-    var later = el('button', 'gv-poll-later on', 'Not now');
+    var later = el('button', 'gv-poll-later', 'Not now');
     later.type = 'button';
+    later.disabled = true;
     function close() {
       shade.remove();
     }
@@ -197,6 +200,10 @@
     box.appendChild(foot);
     shade.appendChild(box);
     document.body.appendChild(shade);
+    setTimeout(function () {
+      later.disabled = false;
+      later.classList.add('on');
+    }, NOT_NOW_MS);
   }
 
   // Looks for a poll this browser or account has not answered, and asks it.
