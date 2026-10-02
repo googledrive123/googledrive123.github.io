@@ -136,11 +136,15 @@
     return 'Ends soon';
   }
 
-  // An answer's picture, if the poll has one for it. Only pictures on this
-  // site are shown.
-  function shot(poll, i) {
-    var src = poll.images && poll.images[i];
+  // A path on this site, or null. Poll pictures and pages only come from here.
+  function local(src) {
     return typeof src === 'string' && /^\/[^\/\\]/.test(src) ? src : null;
+  }
+
+  // An answer's picture, if the poll has one for it.
+  function shot(poll, i) {
+    var m = poll.media && poll.media[i];
+    return m ? local(m.img) : null;
   }
 
   function hasLooks(poll) {
