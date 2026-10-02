@@ -758,7 +758,9 @@ begin
        where l.friend_id = v_user
          and not exists (select 1 from gv_friend_links r
                           where r.user_id = v_user and r.friend_id = l.user_id)
-    )
+    ),
+    -- @mentions not looked at yet, by chat: 'server' or 'convo:<id>'.
+    'mentioned', public.gv_mentions_unseen(v_user)
   );
 end;
 $function$;
