@@ -63,6 +63,19 @@ h1{margin:0 0 20px;font-size:36px;font-weight:700;letter-spacing:-.025em;line-he
 .totw-ends{font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap}
 .totw-mu{color:#a8a29a}
 .race{height:32px;padding:0 14px;display:flex;align-items:center;border-radius:10px;background:#ff3b3b;color:#fff;font-size:13px;font-weight:700;white-space:nowrap}
+.row{margin-bottom:40px}
+.row-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:16px}
+h2{margin:0;font-size:18px;font-weight:700;letter-spacing:-.015em}
+.more{font-size:13px;color:#a8a29a;text-decoration:none;cursor:pointer}
+.more:hover{color:#f4f1ec}
+.five{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:20px}
+.tile{display:flex;flex-direction:column;gap:10px;min-width:0;color:#f4f1ec;text-decoration:none;cursor:pointer}
+.art{display:block;aspect-ratio:16/10;border-radius:10px;overflow:hidden;background:#1b1a18;transition:transform .15s,box-shadow .15s}
+.art:hover{transform:translateY(-2px);box-shadow:0 0 0 1px rgba(255,245,235,.3)}
+.art img{width:100%;height:100%;object-fit:cover;display:block}
+.meta{display:flex;flex-direction:column;gap:2px;min-width:0}
+.name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub{font-size:12px;color:#a8a29a}
 </style>
 </head>
 <body>
@@ -122,6 +135,22 @@ h1{margin:0 0 20px;font-size:36px;font-weight:700;letter-spacing:-.025em;line-he
           </span>
         </span>
       </a>
+    </div>
+
+    <div id="browseB">
+      <section class="row">
+        <div class="row-head">
+          <h2>Continue</h2>
+          <a class="more" data-soon>History</a>
+        </div>
+        <div class="five" id="contB">
+          <a class="tile" data-soon><span class="art"><img src="/thumbs/slope2.webp" alt=""></span><span class="meta"><span class="name">Slope 2</span><span class="sub">12 min ago</span></span></a>
+          <a class="tile" data-soon><span class="art"><img src="/thumbs/drivemad.webp" alt=""></span><span class="meta"><span class="name">Drive Mad</span><span class="sub">Yesterday</span></span></a>
+          <a class="tile" data-soon><span class="art"><img src="/thumbs/retro-bowl.webp" alt=""></span><span class="meta"><span class="name">Retro Bowl</span><span class="sub">Yesterday</span></span></a>
+          <a class="tile" data-soon><span class="art"><img src="/thumbs/geometrydash.webp" alt=""></span><span class="meta"><span class="name">Geometry Dash</span><span class="sub">3 days ago</span></span></a>
+          <a class="tile" data-soon><span class="art"><img src="/thumbs/1v1lol.webp" alt=""></span><span class="meta"><span class="name">1v1.LOL</span><span class="sub">Last week</span></span></a>
+        </div>
+      </section>
     </div>
   </main>
 </div>
