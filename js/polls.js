@@ -243,6 +243,7 @@
   function look(p, start, pick) {
     style();
     var at = start;
+    var back = document.activeElement;
     var shade = el('div', 'gv-look');
     shade.setAttribute('role', 'dialog');
     shade.setAttribute('aria-modal', 'true');
@@ -289,6 +290,7 @@
     function shut() {
       shade.remove();
       window.removeEventListener('keydown', onKey, true);
+      if (back && back.focus) back.focus();
     }
     // Ahead of the pop-up's own keys, so Escape closes only this.
     function onKey(e) {
