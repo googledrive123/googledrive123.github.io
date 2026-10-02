@@ -66,17 +66,10 @@ revoke all on function public.analytics_row_list(analytics_events) from public, 
 
 
 -- Events from p_from on, oldest id first, at most 5000: the ids from p_lo to
--- p_hi when they are given. Each row is a list in this order:
---
---   id, ts (ms), event, visitor_id, session_id, user_id, path, referrer,
---   game_id, item_id, item_title, value, meta, browser, os, device, screen,
---   viewport, lang, tz, utm_source, utm_medium, utm_campaign, is_new,
---   client_ts (ms), origin
---
--- which is about half the size of an object per row. now is when the rows
--- were read: anything not in them started after now less a few seconds,
--- since Supabase stops an insert after 3. scanners lists the visitors in
--- these rows that analytics_scanners leaves out right now.
+-- p_hi when they are given, each as analytics_row_list makes it. now is
+-- when the rows were read: anything not in them started after now less a
+-- few seconds, since Supabase stops an insert after 3. scanners lists the
+-- visitors in these rows that analytics_scanners leaves out right now.
 --
 -- Run through execute so each call is planned for its own range: a plan
 -- kept from a call for the last few seconds would read the whole table in
@@ -110,13 +103,7 @@ begin
     )
     select json_build_object(
       'now', now(),
-      'rows', coalesce((select json_agg(json_build_array(
-          r.id, round(extract(epoch from r.ts) * 1000), r.event, r.visitor_id, r.session_id, r.user_id,
-          r.path, r.referrer, r.game_id, r.item_id, r.item_title, r.value, r.meta,
-          r.browser, r.os, r.device, r.screen, r.viewport, r.lang, r.tz,
-          r.utm_source, r.utm_medium, r.utm_campaign, r.is_new,
-          round(extract(epoch from r.client_ts) * 1000), r.origin
-        ) order by r.id) from r), '[]'::json),
+      'rows', coalesce((select json_agg(analytics_row_list(r) order by r.id) from r), '[]'::json),
       'scanners', coalesce((select json_agg(s.visitor_id) from analytics_scanners() s
         where s.visitor_id in (select r.visitor_id from r)), '[]'::json)
     )
