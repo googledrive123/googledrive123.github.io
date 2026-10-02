@@ -34,6 +34,12 @@ a{color:inherit}
 .clock{display:flex;align-items:center;gap:8px;white-space:nowrap}
 .mu{color:var(--mu)}
 .timer{font-weight:600;font-variant-numeric:tabular-nums}
+button{padding:0;border:0;background:none;font:inherit;color:inherit;cursor:pointer}
+.friends{display:flex;align-items:center;gap:10px;color:var(--mu)}
+.faces{display:flex}
+.face{width:26px;height:26px;border-radius:50%;background:var(--s3);display:grid;place-items:center;font-size:11px;font-weight:700;color:oklch(0.97 0.01 25);box-shadow:0 0 0 2px var(--bg)}
+.face+.face{margin-left:-6px;background:var(--s2)}
+.me{width:36px;height:36px;border-radius:50%;background:var(--s3);display:grid;place-items:center;font-size:14px;font-weight:600}
 </style>
 </head>
 <body>
@@ -44,7 +50,9 @@ a{color:inherit}
     <img class="mark" src="/favicon.svg" alt="">
     <span class="word">gamevault</span>
     <div class="status">
+      <button class="friends" type="button" data-soon><span class="faces"><span class="face">J</span><span class="face">K</span></span>2 friends online</button>
       <span class="clock"><span class="mu">period 3</span><span class="timer" id="timer">23:41</span></span>
+      <button class="me" type="button" title="Profile" data-soon>M</button>
     </div>
   </header>
 </div>
