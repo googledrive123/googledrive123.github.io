@@ -1892,6 +1892,10 @@
     live.filter = $('liveFilter').value.trim().toLowerCase();
     Array.prototype.forEach.call($('liveList').children, liveShow);
   }
+  function liveFilterTo(text) {
+    $('liveFilter').value = text;
+    liveFilterAll();
+  }
 
   // ── live: the numbers ──
   // Worked out again from the last 10 minutes on every answer, without
@@ -2049,6 +2053,11 @@
   $('liveFilter').addEventListener('input', liveFilterAll);
   $('liveBeats').addEventListener('change', liveFilterAll);
   $('liveBots').addEventListener('change', liveFilterAll);
+  // A visitor's name shows only their events.
+  $('liveList').addEventListener('click', function (e) {
+    var w = e.target.closest('[data-who]');
+    if (w) return liveFilterTo(w.dataset.who);
+  });
   // A hidden tab asks every 5 seconds; coming back asks straight away.
   document.addEventListener('visibilitychange', function () {
     if (live && !document.hidden && !live.busy) { clearTimeout(live.timer); livePoll(); }
