@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "serve . -p 8080 -s",
-    "start": "serve . -p 8080 -s"
+    "dev": "serve . -p 8080",
+    "start": "serve . -p 8080"
   },
   "devDependencies": {
     "serve": "^14.2.4"
