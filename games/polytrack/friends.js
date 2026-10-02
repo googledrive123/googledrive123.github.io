@@ -51,6 +51,18 @@
     return box;
   }
 
+  function button(label, onClick) {
+    var el = document.createElement('button');
+    el.className = 'button';
+    el.textContent = label;
+    el.addEventListener('click', onClick);
+    return el;
+  }
+
+  function answer(id, code) {
+    return creator().rpc('gv_join_answer', { p_id: id, p_code: code });
+  }
+
   function show(ask) {
     if (!ask || shown[ask.id]) return;
     var box = stack();
@@ -63,6 +75,29 @@
     text.textContent = (ask.name || 'A friend') + ' wants to join your room';
     notice.appendChild(text);
 
+    function close() {
+      notice.remove();
+    }
+
+    var accept = button('Accept', function () {
+      accept.disabled = true;
+      text.textContent = 'Letting ' + (ask.name || 'them') + ' in...';
+      creator().host()
+        .then(function (code) { return answer(ask.id, code); })
+        .then(function () {
+          text.textContent = (ask.name || 'Your friend') + ' is on the way';
+          accept.remove();
+          setTimeout(close, 5000);
+        })
+        .catch(function (error) {
+          text.textContent = /host can let/.test(error.message)
+            ? error.message
+            : 'Could not let ' + (ask.name || 'them') + ' in.';
+          accept.remove();
+        });
+    });
+
+    notice.appendChild(accept);
     box.appendChild(notice);
     shown[ask.id] = true;
   }
