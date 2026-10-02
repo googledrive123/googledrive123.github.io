@@ -590,3 +590,44 @@ $function$;
 revoke all on function public.gv_join_answer(bigint, text) from public, anon;
 grant execute on function public.gv_join_answer(bigint, text) to authenticated;
 
+
+-- waiting, yes with the room's code, no, or gone once nobody answered in
+-- time. Only the friend who asked can read it, and the code only for two
+-- minutes after the yes.
+create or replace function public.gv_join_status(p_id bigint)
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+  v_ask gv_join_asks;
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'Friends only work on GameVault.';
+  end if;
+  if v_user is null then
+    raise exception 'Sign in first.';
+  end if;
+
+  select * into v_ask from gv_join_asks where id = p_id and from_user = v_user;
+  if not found then
+    return json_build_object('state', 'gone');
+  end if;
+  if v_ask.answer = 'yes' and v_ask.answered_at > now() - interval '2 minutes' then
+    return json_build_object('state', 'yes', 'code', v_ask.code);
+  end if;
+  if v_ask.answer = 'no' then
+    return json_build_object('state', 'no');
+  end if;
+  if v_ask.answer is null and v_ask.created_at > now() - interval '75 seconds' then
+    return json_build_object('state', 'waiting');
+  end if;
+  return json_build_object('state', 'gone');
+end;
+$function$;
+
+revoke all on function public.gv_join_status(bigint) from public, anon;
+grant execute on function public.gv_join_status(bigint) to authenticated;
