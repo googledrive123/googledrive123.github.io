@@ -187,9 +187,32 @@ begin
 end;
 $function$;
 
+create or replace function public.analytics_roll_changed()
+returns trigger
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_visitors text[];
+begin
+  v_visitors := array(select distinct visitor_id from old_rows);
+  if cardinality(v_visitors) > 0 then
+    perform analytics_roll_redo(v_visitors);
+  end if;
+  return null;
+end;
+$function$;
+
 revoke all on function public.analytics_roll_inserted() from public, anon, authenticated;
+revoke all on function public.analytics_roll_changed() from public, anon, authenticated;
 
 create or replace trigger analytics_roll_insert
   after insert on public.analytics_events
   referencing new table as new_rows
   for each statement execute function public.analytics_roll_inserted();
+
+create or replace trigger analytics_roll_delete
+  after delete on public.analytics_events
+  referencing old table as old_rows
+  for each statement execute function public.analytics_roll_changed();
