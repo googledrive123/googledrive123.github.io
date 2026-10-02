@@ -38,6 +38,13 @@ input::placeholder{color:currentColor;opacity:.5}
 .search-box input{flex:1;min-width:0;height:100%;border:0;outline:none;background:transparent;font-family:inherit;font-size:16px;color:#18181b}
 .surprise{height:36px;padding:0 14px;border-radius:999px;border:0;background:#f0efec;color:#18181b;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
 .surprise:hover{background:#e6e5e1}
+.jump{margin-top:40px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.jump-label{font-size:13px;color:#64646b}
+.shortcuts{display:flex;gap:4px}
+.shortcut{width:96px;display:flex;flex-direction:column;align-items:center;gap:8px;padding:10px 6px;border-radius:14px;color:#18181b;text-decoration:none;cursor:pointer}
+.shortcut:hover{background:#ecebe8}
+.shortcut img{width:64px;height:64px;border-radius:16px;object-fit:cover;box-shadow:0 0 0 1px rgba(0,0,0,0.06)}
+.shortcut span{font-size:12px;font-weight:500;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 </style>
 </head>
 <body>
@@ -74,6 +81,20 @@ input::placeholder{color:currentColor;opacity:.5}
         <input id="q" placeholder="Search 1,958 games" aria-label="Search games" autocomplete="off" spellcheck="false">
         <button class="surprise" id="surprise" type="button">Surprise me</button>
       </label>
+    </div>
+
+    <div class="jump">
+      <span class="jump-label">Jump back in</span>
+      <div class="shortcuts">
+        <a class="shortcut" data-soon><img src="/thumbs/slope2.webp" alt=""><span>Slope 2</span></a>
+        <a class="shortcut" data-soon><img src="/thumbs/drivemad.webp" alt=""><span>Drive Mad</span></a>
+        <a class="shortcut" data-soon><img src="/thumbs/retro-bowl.webp" alt=""><span>Retro Bowl</span></a>
+        <a class="shortcut" data-soon><img src="/thumbs/geometrydash.webp" alt=""><span>Geometry Dash</span></a>
+        <a class="shortcut" data-soon><img src="/thumbs/1v1lol.webp" alt=""><span>1v1.LOL</span></a>
+        <a class="shortcut" data-soon><img src="/thumbs/cuphead.webp" alt=""><span>Cuphead</span></a>
+        <a class="shortcut" data-soon><img src="/thumbs/basketball-stars.webp" alt=""><span>Basketball Stars</span></a>
+        <a class="shortcut" data-soon><img src="/thumbs/amazing-rope-police.webp" alt=""><span>Amazing Rope Police</span></a>
+      </div>
     </div>
   </div>
 </div>
