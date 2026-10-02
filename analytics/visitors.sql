@@ -122,14 +122,14 @@ as $function$
     'first_ts',  (select min(first_ts) from v),
     'last_ts',   (select max(last_ts) from v),
     'daily', (select coalesce(json_agg(d order by d.day), '[]'::json) from (
-        select date_trunc('day', ts) as day,
-               count(*) as events,
+        select date_trunc('day', bucket) as day,
+               sum(events) as events,
                count(distinct visitor_id) as visitors,
                count(distinct session_id) as sessions,
-               count(*) filter (where event = 'pageview') as pageviews,
-               count(*) filter (where event = 'game_open') as plays,
+               sum(pageviews) as pageviews,
+               sum(plays) as plays,
                count(distinct visitor_id) filter (where is_new) as new_visitors
-        from h group by 1) d),
+        from q group by 1) d),
     'top_games', (select coalesce(json_agg(g), '[]'::json) from (
         select game_id,
                max(item_title) as name,
