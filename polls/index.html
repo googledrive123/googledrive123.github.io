@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Polls · GameVault</title>
+  <meta name="description" content="Questions from GameVault. Pick an answer and see what everyone else picked.">
+  <link rel="icon" href="/favicon.svg">
+  <!-- Blocking on purpose: the cloak has to land before the first paint. -->
+  <script src="/js/mimicry.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/site.css">
+  <script src="/js/identity.js" defer></script>
+  <script src="/js/analytics.js" defer></script>
+  <script src="/js/site.js" defer></script>
+  <script src="/js/player.js" defer></script>
+  <script src="/js/polls.js" defer></script>
+  <style>
+    .page [hidden] { display: none !important; }
+    .pl-list { display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem; }
+    .pl-list .panel { margin: 0; }
+    .pl-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.25rem; }
+    .pl-head .panel-label { margin: 0; }
+    .page .pl-empty { margin-top: 1.5rem; }
+  </style>
+</head>
+<body>
+<main class="page">
+  <div class="page-kicker">polls</div>
+  <h1>Polls</h1>
+  <p class="lede">Questions from GameVault. Pick an answer and see what everyone else picked.
+  Everyone gets one vote on each poll, signed in or not.</p>
+
+  <p class="pl-empty" id="plMsg" role="status">Loading polls…</p>
+  <div class="pl-list" id="plList"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  function $(id) { return document.getElementById(id); }
+
+  // Every poll, newest first.
+  function load() {
+    var polls = window.GV && GV.polls;
+    polls.visitor().then(function (v) {
+      return polls.rpc('gv_polls_list', { p_visitor: v });
+    }).then(function (list) {
+      $('plList').textContent = '';
+      $('plMsg').hidden = !!list.length;
+      $('plMsg').textContent = 'No polls yet. When there is one, it shows up here and on the home page.';
+      list.forEach(function (p) {
+        var panel = document.createElement('section');
+        panel.className = 'panel';
+        panel.appendChild(polls.card(p));
+        $('plList').appendChild(panel);
+      });
+    }, function (e) {
+      $('plMsg').hidden = false;
+      $('plMsg').textContent = e.message + ' Refresh to try again.';
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    if (!window.GV || !GV.polls) {
+      $('plMsg').textContent = 'Polls could not load. Refresh to try again.';
+      return;
+    }
+    load();
+  });
+})();
+</script>
+</main>
+</body>
+</html>
