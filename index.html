@@ -388,9 +388,12 @@
       margin-bottom: 2.25rem;
     }
     /* A laptop screen fits the heading, the buttons and the cards at once. */
+    /* On a laptop the whole welcome screen fits without scrolling: the
+       heading, the gaps and the counts shrink with the screen's height. */
     @media (max-height: 860px) {
-      .hero h1 { font-size: clamp(3.2rem, 8vw, 6rem); margin-bottom: 1.6rem; }
-      .stat-row { margin-top: 2rem; }
+      #welcome { padding-top: clamp(4.5rem, 11.5vh, 6rem); padding-bottom: 1rem; }
+      .hero h1 { font-size: clamp(2.8rem, min(8vw, 12.5vh), 6rem); margin-bottom: clamp(0.8rem, 2.4vh, 1.6rem); }
+      .hero .stat-row { margin-top: 2rem; }
     }
     .hero h1 .stroke {
       -webkit-text-stroke: 2px var(--text);
