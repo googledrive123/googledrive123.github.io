@@ -512,6 +512,25 @@
     if (showing && (follow || list.some(function (m) { return m.mine; }))) toBottom();
   }
 
+  // Takes messages the owner deleted out of a conversation, and off the
+  // screen if it is the one showing.
+  function drop(key, ids) {
+    var t = threads[key];
+    if (!t) return;
+    var gone = ids.filter(function (id) { return t.ids[id]; });
+    if (!gone.length) return;
+    gone.forEach(function (id) { delete t.ids[id]; });
+    t.list = t.list.filter(function (m) { return t.ids[m.id]; });
+    if (key === current && isOpen()) {
+      gone.forEach(function (id) {
+        var row = els.log.querySelector('.gv-msg[data-id="' + Number(id) + '"]');
+        if (row) row.remove();
+      });
+      if (!t.list.length) els.log.appendChild(el('div', 'gv-chat-empty', 'No messages yet. Say hi.'));
+    }
+    if (key !== 'server') soonList();
+  }
+
   function nearBottom() {
     return els.log.scrollHeight - els.log.scrollTop - els.log.clientHeight < 80;
   }
@@ -1313,6 +1332,14 @@
       });
       if (isOpen()) markRead(current);
       if (isOpen() || !known) soonList();
+    });
+    // Taken down from the dashboard: gone from a chat that is already open
+    // too, not only after a reload.
+    s.on('deleted', function (gone) {
+      drop('server', gone.server || []);
+      var byConvo = {};
+      (gone.convo || []).forEach(function (x) { (byConvo[x.convo_id] = byConvo[x.convo_id] || []).push(x.id); });
+      Object.keys(byConvo).forEach(function (c) { drop('convo:' + c, byConvo[c]); });
     });
     s.on('counts', function () {
       paintButtons();
