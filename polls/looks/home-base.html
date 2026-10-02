@@ -90,6 +90,9 @@ h2{margin:0;font-size:18px;font-weight:700;letter-spacing:-.015em}
 .foot nav{display:flex;gap:20px}
 .foot a{text-decoration:none;cursor:pointer}
 .foot a:hover{color:#f4f1ec}
+.clear{margin-left:auto;height:36px;padding:0 14px;border-radius:10px;border:1px solid rgba(255,245,235,.14);background:transparent;color:#f4f1ec;font-family:inherit;font-size:14px;cursor:pointer}
+.clear:hover{background:#1b1a18}
+.empty{padding:48px 0;font-size:14px;color:#a8a29a}
 </style>
 </head>
 <body>
@@ -184,6 +187,7 @@ h2{margin:0;font-size:18px;font-weight:700;letter-spacing:-.015em}
       <div class="all-head">
         <h2 id="headB">All games</h2>
         <span class="all-sub" id="subB">1,958</span>
+        <button class="clear" id="clearB" type="button" hidden>Clear search</button>
       </div>
       <div class="tabs" id="tabsB">
         <button class="tab on" type="button" data-cat="All" aria-pressed="true">All</button>
@@ -214,6 +218,7 @@ h2{margin:0;font-size:18px;font-weight:700;letter-spacing:-.015em}
         <a class="tile" data-soon><span class="art"><img src="/thumbs/drifthunters.webp" alt=""></span><span class="meta"><span class="name">Drift Hunters</span><span class="sub">Racing</span></span></a>
         <a class="tile" data-soon><span class="art"><img src="/thumbs/angry-sharks.webp" alt=""></span><span class="meta"><span class="name">Angry Sharks</span><span class="sub">Arcade</span></span></a>
       </div>
+      <div class="empty" id="emptyB" hidden>No games match that. Try a shorter name.</div>
     </section>
     <footer class="foot">
       <nav>
@@ -232,6 +237,8 @@ h2{margin:0;font-size:18px;font-weight:700;letter-spacing:-.015em}
 var state = {
   left: 1421,
   totw: 2 * 86400 + 13 * 3600 + 54 * 60 + 9,
+  qb: '',
+  cb: 'All',
 };
 
 function $(id) { return document.getElementById(id); }
@@ -256,6 +263,106 @@ function tick() {
   drawTotw();
 }
 setInterval(tick, 1000);
+
+var G = [
+  ['polytrack', 'PolyTrack', ['Racing']],
+  ['basketball-stars', 'Basketball Stars', ['Sports']],
+  ['amazing-rope-police', 'Amazing Rope Police', ['Action']],
+  ['ice-dodo', 'Ice Dodo', ['Arcade', 'Skill']],
+  ['adrenalinechallenge2', 'Adrenaline Challenge 2', ['Action', 'Driving']],
+  ['stickman-hook', 'Stickman Hook', ['Action', 'Skill']],
+  ['crossyroad', 'Crossy Road', ['Arcade']],
+  ['retrobowlcollege', 'Retro Bowl College', ['Sports']],
+  ['basket-bros', 'Basket Bros', ['Sports']],
+  ['rocketleague', 'Rocket League', ['Sports']],
+  ['2048', '2048', ['Puzzle']],
+  ['retro-bowl', 'Retro Bowl', ['Sports']],
+  ['bit-planes', 'Bit Planes', ['Action', 'Shooter']],
+  ['drifthunters', 'Drift Hunters', ['Racing', 'Driving']],
+  ['angry-sharks', 'Angry Sharks', ['Arcade', 'Action']],
+  ['wordle', 'Wordle', ['Puzzle']],
+  ['aquapark-slides', 'Aquapark Slides', ['Arcade', 'Racing']],
+  ['fnaf', "Five Nights at Freddy's", ['Horror']],
+  ['subway-surfers', 'Subway Surfers', ['Action', 'Arcade']],
+  ['grand-theft-auto-vice-city', 'Grand Theft Auto Vice City', ['Action']],
+  ['backrooms', 'The Backrooms', ['Horror']],
+  ['slope2', 'Slope 2', ['Action', 'Skill']],
+  ['cluster-rush', 'Cluster Rush', ['Action', 'Skill']],
+  ['motox3m-spooky', 'Moto X3M Spooky Land', ['Racing', 'Driving']],
+  ['big-neon-tower', 'Big Neon Tower', ['Platformer']],
+  ['drivemad', 'Drive Mad', ['Racing', 'Driving']],
+  ['bitlife', 'BitLife', ['Simulation']],
+  ['a-difficult-game-about-climbing', 'A Difficult Game About Climbing', ['Platformer']],
+  ['madalincars', 'Madalin Cars', ['Racing', 'Driving']],
+  ['snowrider3d', 'Snow Rider 3D', ['Action', 'Driving']],
+  ['badtimesimulator', 'Bad Time Simulator', ['Action', 'Skill']],
+  ['2drocketleague', '2D Rocket League', ['Sports']],
+  ['cuphead', 'Cuphead', ['Action']],
+  ['flappyplane', 'Flappy Plane', ['Arcade', 'Skill']],
+  ['adventure-capitalist', 'Adventure Capitalist', ['Idle']],
+  ['1v1lol', '1v1.LOL', ['Action', 'Shooter']],
+  ['awesometanks2', 'Awesome Tanks 2', ['Action', 'Shooter']],
+  ['vex7', 'Vex 7', ['Platformer']],
+  ['minesweeper', 'Minesweeper', ['Puzzle']],
+  ['timeshooter2', 'Time Shooter 2', ['Action', 'Shooter']],
+  ['8ball', '8 Ball Pool', ['Sports']],
+  ['draw-the-hill', 'Draw the Hill', ['Puzzle', 'Driving']],
+  ['geometrydash', 'Geometry Dash', ['Platformer', 'Skill']],
+  ['hollow-knight-silksong', 'Hollow Knight Silksong', ['RPG']],
+  ['1on1soccer', '1 on 1 Soccer', ['Sports']],
+  ['slime-rancher', 'Slime Rancher', ['Simulation']]
+];
+
+function esc(s) {
+  return s.replace(/[&<>"']/g, function (c) { return '&#' + c.charCodeAt(0) + ';'; });
+}
+
+// The design's filt() and sect(): a search ignores the category tab.
+function filt(q, cat) {
+  q = q.trim().toLowerCase();
+  return G.filter(function (g) {
+    return (cat === 'All' || g[2].indexOf(cat) !== -1) && (!q || g[1].toLowerCase().indexOf(q) !== -1);
+  });
+}
+
+function sect(q, cat, n) {
+  var searching = !!q.trim();
+  var list = filt(q, searching ? 'All' : cat);
+  return {
+    list: list.slice(0, n), empty: list.length === 0, browse: !searching,
+    head: searching ? 'Results for “' + q.trim() + '”' : (cat === 'All' ? 'All games' : cat),
+    sub: searching ? list.length + ' found' : (cat === 'All' ? '1,958' : '')
+  };
+}
+
+function tile(g) {
+  return '<a class="tile" data-soon><span class="art"><img src="/thumbs/' + g[0] + '.webp" alt=""></span>' +
+    '<span class="meta"><span class="name">' + esc(g[1]) + '</span><span class="sub">' + esc(g[2][0]) + '</span></span></a>';
+}
+
+var shown = sect('', 'All', 15).list.map(tile).join('');
+function drawGames() {
+  var B = sect(state.qb, state.cb, 15);
+  var html = B.list.map(tile).join('');
+  $('headB').textContent = B.head;
+  $('subB').textContent = B.sub;
+  $('clearB').hidden = B.browse;
+  $('browseB').hidden = !B.browse;
+  $('tabsB').hidden = !B.browse;
+  $('emptyB').hidden = !B.empty;
+  if (html !== shown) $('gridB').innerHTML = shown = html;
+}
+
+$('qb').addEventListener('input', function () {
+  state.qb = this.value;
+  drawGames();
+});
+
+$('clearB').addEventListener('click', function () {
+  state.qb = '';
+  $('qb').value = '';
+  drawGames();
+});
 </script>
 </body>
 </html>
