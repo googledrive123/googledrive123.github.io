@@ -179,5 +179,31 @@ input::placeholder{color:currentColor;opacity:.5}
   <a data-soon>Backup addresses</a>
   <span>GameVault · 1,958 games</span>
 </footer>
+
+<script>
+(function () {
+  'use strict';
+
+  var state = {
+    left: 1421
+  };
+
+  function $(id) { return document.getElementById(id); }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+
+  // Class timer: counts down, wraps to 3000 after 0. The ring fills as the
+  // period goes by (43.98 is the ring's length).
+  function renderTimer() {
+    var pct = Math.max(0, Math.min(100, (1 - state.left / 3000) * 100));
+    $('timer').textContent = pad(Math.floor(state.left / 60)) + ':' + pad(state.left % 60);
+    $('ring').setAttribute('stroke-dasharray', (pct * 0.4398).toFixed(2) + ' 43.98');
+  }
+
+  setInterval(function () {
+    state.left = state.left > 0 ? state.left - 1 : 3000;
+    renderTimer();
+  }, 1000);
+})();
+</script>
 </body>
 </html>
