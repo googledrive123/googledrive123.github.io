@@ -343,6 +343,7 @@
       screen.classList.remove('ready');
       live.hidden = !url;
       live.src = url || 'about:blank';
+      live.title = p.options[at] + ', live';
       name.textContent = p.options[at];
       count.textContent = (at + 1) + ' of ' + n;
       shade.setAttribute('aria-label', p.options[at]);
