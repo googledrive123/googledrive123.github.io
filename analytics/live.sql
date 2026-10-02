@@ -43,7 +43,7 @@ $function$;
 -- Sends an insert's events down the channel as analytics_rows hands them
 -- over, with which of their visitors are scanners now. The totals triggers
 -- run first (triggers go in name order), so a new visitor is already
--- counted.
+-- counted. Big inserts go 200 events a message.
 -- Nothing here may stop the insert, so a failure to send is dropped: the
 -- dashboards' own asking picks those events up.
 create or replace function public.analytics_send_live()
@@ -54,18 +54,25 @@ set search_path to 'public'
 as $function$
 declare
   v_topic text;
+  v_part record;
 begin
   select 'analytics-' || live_topic into v_topic from analytics_settings where id = 1;
   if v_topic is null then
     return null;
   end if;
 
-  perform realtime.send(jsonb_build_object(
-    'now', now(),
-    'rows', (select jsonb_agg(analytics_row_list(r) order by r.id) from new_rows r),
-    'scanners', coalesce((select jsonb_agg(s.visitor_id) from analytics_scanners() s
-      where s.visitor_id in (select r.visitor_id from new_rows r)), '[]'::jsonb)
-  ), 'events', v_topic, false);
+  for v_part in
+    select array_agg(id order by id) as ids
+    from (select id, (row_number() over (order by id) - 1) / 200 as n from new_rows) x
+    group by n
+  loop
+    perform realtime.send(jsonb_build_object(
+      'now', now(),
+      'rows', (select jsonb_agg(analytics_row_list(r) order by r.id) from new_rows r where r.id = any(v_part.ids)),
+      'scanners', coalesce((select jsonb_agg(s.visitor_id) from analytics_scanners() s
+        where s.visitor_id in (select r.visitor_id from new_rows r where r.id = any(v_part.ids))), '[]'::jsonb)
+    ), 'events', v_topic, false);
+  end loop;
   return null;
 exception when others then
   return null;
