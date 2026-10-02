@@ -265,7 +265,10 @@ grant execute on function public.gv_group_leave(bigint) to authenticated;
 
 -- Sends a message as the signed-in account, with the same checks and the
 -- same wait=<seconds> and until=<time> hints as gv_chat_send.
-create or replace function public.gv_convo_send(p_convo bigint, p_body text)
+-- p_mentions is who the page says was picked after an @; chat/mentions.sql
+-- decides who the message really names, members of the chat only.
+drop function if exists public.gv_convo_send(bigint, text);
+create or replace function public.gv_convo_send(p_convo bigint, p_body text, p_mentions uuid[] default null)
 returns json
 language plpgsql
 security definer
@@ -277,6 +280,7 @@ declare
   v_ban gv_chat_bans;
   v_last timestamptz;
   v_wait integer;
+  v_mentions jsonb;
   v_row gv_convo_messages;
 begin
   if not public.gv_origin_allowed() then
@@ -337,8 +341,9 @@ begin
     raise exception 'That message has words we do not allow here. Try saying it another way.';
   end if;
 
-  insert into gv_convo_messages (convo_id, user_id, username, body)
-  values (p_convo, v_user, public.gv_display_name(v_user), v_body)
+  v_mentions := public.gv_mention_list(v_body, p_mentions, p_convo);
+  insert into gv_convo_messages (convo_id, user_id, username, body, mentions)
+  values (p_convo, v_user, public.gv_display_name(v_user), v_body, v_mentions)
   returning * into v_row;
   update gv_convo_members set last_read = v_row.id
    where convo_id = p_convo and user_id = v_user;
@@ -355,8 +360,8 @@ begin
 end;
 $function$;
 
-revoke all on function public.gv_convo_send(bigint, text) from public, anon;
-grant execute on function public.gv_convo_send(bigint, text) to authenticated;
+revoke all on function public.gv_convo_send(bigint, text, uuid[]) from public, anon;
+grant execute on function public.gv_convo_send(bigint, text, uuid[]) to authenticated;
 
 
 -- The newest 100 messages still up, oldest first, or only those after the
