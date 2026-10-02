@@ -231,6 +231,7 @@ h2{margin:0;font-size:18px;font-weight:700;letter-spacing:-.015em}
 'use strict';
 var state = {
   left: 1421,
+  totw: 2 * 86400 + 13 * 3600 + 54 * 60 + 9,
 };
 
 function $(id) { return document.getElementById(id); }
@@ -242,9 +243,17 @@ function drawTimer() {
   $('timerPct').style.width = pct.toFixed(1) + '%';
 }
 
+function drawTotw() {
+  var s = state.totw;
+  var d = Math.floor(s / 86400), h = Math.floor(s / 3600) % 24, m = Math.floor(s / 60) % 60;
+  $('totw').textContent = d + 'd ' + pad(h) + ':' + pad(m) + ':' + pad(s % 60);
+}
+
 function tick() {
   state.left = state.left > 0 ? state.left - 1 : 3000;
   drawTimer();
+  state.totw = Math.max(0, state.totw - 1);
+  drawTotw();
 }
 setInterval(tick, 1000);
 </script>
