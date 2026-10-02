@@ -12,6 +12,8 @@
   // Polls put off with Not now, by id, and when.
   var LATER_KEY = 'gv.poll.later';
   var LATER_MS = 24 * 60 * 60 * 1000;
+  // Set for the rest of a first visit, so polls wait for the next one.
+  var FIRST_KEY = 'gv.poll.first';
   // Not now waits this long, so the question gets read first.
   var NOT_NOW_MS = 5000;
 
@@ -496,6 +498,21 @@
     }, NOT_NOW_MS);
   }
 
+  // Someone new to the site gets to look around first: polls pop up from
+  // their next visit on. A visit is a tab's session, so reloading or coming
+  // back to the home page in the same tab is still the first one.
+  function firstVisit() {
+    try {
+      if (sessionStorage.getItem(FIRST_KEY)) return true;
+      var id = window.GV && GV.identity;
+      if (id && id.isNew && id.isNew()) {
+        sessionStorage.setItem(FIRST_KEY, '1');
+        return true;
+      }
+    } catch (e) {}
+    return false;
+  }
+
   // Looks for a poll this browser or account has not answered and has not
   // put off in the last day, and asks it.
   var waiting = 0;
@@ -509,7 +526,7 @@
       waiting = open.length;
       ask.count(0);
       var next = open.filter(function (p) { return !(later[p.id] && Date.now() - later[p.id] < LATER_MS); })[0];
-      if (next) whenFree(function () { pop(next); });
+      if (next && !firstVisit()) whenFree(function () { pop(next); });
     }).catch(function () {});
   }
   // The Polls card on the home page says how many are waiting.
