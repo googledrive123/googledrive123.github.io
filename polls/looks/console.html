@@ -142,6 +142,8 @@ button{padding:0;border:0;background:none;font:inherit;color:inherit;cursor:poin
     // Seconds left in period 3. The period is 50 minutes, so 0 starts over at 3000.
     left: 1421,
     sel: 0,
+    // Seconds until the track of the week ends.
+    totw: 2 * 86400 + 13 * 3600 + 54 * 60 + 9,
   };
 
   // The row: the track of the week, five games to jump back into, then the six
@@ -200,9 +202,18 @@ button{padding:0;border:0;background:none;font:inherit;color:inherit;cursor:poin
     if (tile) select(Array.prototype.indexOf.call(tiles, tile));
   });
 
+  function trackKicker() {
+    var t = state.totw;
+    var d = Math.floor(t / 86400), h = Math.floor(t / 3600) % 24, m = Math.floor(t / 60) % 60;
+    return 'track of the week · ends in ' + d + 'd ' + pad(h) + ':' + pad(m);
+  }
+
   function tick() {
     state.left = state.left > 0 ? state.left - 1 : 3000;
     $('timer').textContent = pad(Math.floor(state.left / 60)) + ':' + pad(state.left % 60);
+    state.totw = Math.max(0, state.totw - 1);
+    ROW[0].kicker = trackKicker();
+    if (state.sel === 0) $('kicker').textContent = ROW[0].kicker;
   }
   setInterval(tick, 1000);
 })();
