@@ -308,6 +308,17 @@ input::placeholder{color:currentColor;opacity:.5}
     state.qc = input.value;
     render();
   });
+
+  // Category tabs, a red underline on the chosen one.
+  $('tabs').addEventListener('click', function (e) {
+    var tab = e.target.closest('.tab');
+    if (!tab) return;
+    state.cc = tab.getAttribute('data-cat');
+    Array.prototype.forEach.call(this.children, function (t) {
+      t.classList.toggle('on', t === tab);
+    });
+    render();
+  });
 })();
 </script>
 </body>
