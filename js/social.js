@@ -15,6 +15,13 @@
   var listeners = {};
   var me = { status: 'online', notify: true, mutes: {} };
   var counts = { unread: 0, requests: 0, server: false };
+  var timer = null;
+  var busy = false;
+  var cursors = { server: null, convo: null };
+  // Where the cursors stood when this page started. Anything at or under it
+  // was there before the page was, and never pops up.
+  var floors = { server: 0, convo: 0 };
+  var seen = { server: {}, convo: {} };
   // What chat has on screen, so its own messages do not pop up over it.
   var viewing = null;
 
@@ -62,6 +69,59 @@
     }
   }
 
+  function remember(kind, id) {
+    seen[kind][id] = true;
+    var ids = Object.keys(seen[kind]);
+    if (ids.length > 600) ids.slice(0, ids.length - 500).forEach(function (old) { delete seen[kind][old]; });
+  }
+
+  function fresh(kind, list) {
+    return (list || []).filter(function (m) {
+      if (m.id <= floors[kind] || seen[kind][m.id]) return false;
+      remember(kind, m.id);
+      return true;
+    });
+  }
+
+  function schedule() {
+    clearTimeout(timer);
+    if (!sb) return;
+    timer = setTimeout(poll, POLL_MS);
+  }
+
+  function poll() {
+    if (!sb || busy) return;
+    busy = true;
+    var first = cursors.server === null;
+    rpc('gv_social_poll', {
+      p_game: host.gameId ? host.gameId() : null,
+      p_after_server: cursors.server,
+      p_after_convo: cursors.convo
+    }).then(function (data) {
+      busy = false;
+      if (!sb) return;
+      if (first) {
+        floors.server = Math.min(data.server_last, serverSeen() || data.server_last);
+        floors.convo = data.convo_last;
+      }
+      var server = fresh('server', data.server);
+      var convo = fresh('convo', data.convo);
+      cursors.server = Math.max(cursors.server || 0, data.server_last);
+      cursors.convo = Math.max(cursors.convo || 0, data.convo_last);
+
+      counts.unread = data.unread;
+      counts.requests = data.requests;
+      counts.server = data.server_last > serverSeen() && viewing !== 'server';
+      emit('counts', counts);
+      if (server.length || convo.length) emit('messages', { server: server, convo: convo });
+      schedule();
+    }, function (error) {
+      busy = false;
+      // 42501 is the database answering as a guest: the session is gone.
+      if (error.code === '42501') return stop();
+      schedule();
+    });
+  }
 
 
 
@@ -81,11 +141,18 @@
     sb = client;
     user = account;
     emit('state', user);
+    poll();
   }
 
   // Signing out drops everything this account had on screen, which matters
   // on a shared computer.
   function stop() {
+    clearTimeout(timer);
+    timer = null;
+    busy = false;
+    cursors = { server: null, convo: null };
+    floors = { server: 0, convo: 0 };
+    seen = { server: {}, convo: {} };
     var was = !!sb;
     sb = null;
     user = null;
@@ -116,6 +183,7 @@
     },
     // Asks again now, after sending or opening something.
     poke: function () {
+      if (sb && !busy) poll();
     }
   };
 }());
