@@ -3868,7 +3868,7 @@ function render() {
   const popularSection = document.getElementById('popularSection');
   const popularGrid = document.getElementById('popularGrid');
   popularGrid.innerHTML = '';
-  const popularGames = popular.slice(0, POPULAR_ROW).map(id => gamesById[id]);
+  const popularGames = popular.filter(id => !failing.has(id)).slice(0, POPULAR_ROW).map(id => gamesById[id]);
   if (isDefaultView && popularGames.length && !GV.layout.hidden('popular')) {
     popularSection.style.display = '';
     document.getElementById('popularCount').textContent = popularGames.length;
