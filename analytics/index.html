@@ -162,6 +162,8 @@
   @keyframes rec { 50% { opacity: 0.25; } }
   .btn.live-btn { display: inline-flex; align-items: center; border-color: rgba(255,59,59,0.45); }
   .btn.live-btn:hover { border-color: var(--accent); }
+  body.live-on #topBar, body.live-on #dash { display: none !important; }
+  .live-top h1 { display: flex; align-items: center; }
 </style>
 </head>
 <body>
@@ -519,6 +521,15 @@
   <div class="footer">
     Data source: Supabase table <code>analytics_events</code>, written by <code>/js/analytics.js</code>. Clicks = every user interaction (game opens, searches, filters, buttons); page views, pings and close events are counted separately.
     Sessions expire after 30 minutes idle. Times shown in your browser's time zone. Rows loaded for this range: <span id="rowCount" class="mono">0</span>.
+  </div>
+</div>
+
+<div id="live" class="hidden">
+  <div class="top live-top">
+    <button class="btn" id="liveExit" type="button">&larr; Exit live</button>
+    <h1><span class="rec on"></span>Live</h1>
+    <div class="status" id="liveStatus"><span class="dot off"></span>Connecting…</div>
+    <div class="grow"></div>
   </div>
 </div>
 
