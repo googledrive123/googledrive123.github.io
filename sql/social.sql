@@ -79,9 +79,8 @@ alter table public.gv_friend_links enable row level security;
 revoke all on table public.gv_friend_links from anon, authenticated;
 
 
--- Up to 8 accounts whose username starts with what was typed, for adding a
--- friend or starting a chat. Three letters at least, so it is a search for
--- someone rather than a list of everyone.
+-- Up to 8 accounts with what was typed anywhere in their username, for
+-- adding a friend or starting a chat. Two letters at least.
 create or replace function public.gv_user_search(p_q text)
 returns json
 language plpgsql
@@ -91,7 +90,8 @@ set search_path to 'public'
 as $function$
 declare
   v_user uuid := auth.uid();
-  v_q text := lower(btrim(coalesce(p_q, '')));
+  v_q text := left(lower(btrim(coalesce(p_q, ''))), 30);
+  v_like text;
 begin
   if not public.gv_origin_allowed() then
     raise exception 'Friends only work on GameVault.';
@@ -99,11 +99,11 @@ begin
   if v_user is null then
     raise exception 'Sign in to find people.';
   end if;
-  if char_length(v_q) < 3 then
+  if char_length(v_q) < 2 then
     return '[]'::json;
   end if;
   -- Wildcards typed into the box are only characters.
-  v_q := replace(replace(replace(left(v_q, 30), '\', '\\'), '%', '\%'), '_', '\_');
+  v_like := replace(replace(replace(v_q, '\', '\\'), '%', '\%'), '_', '\_');
 
   return coalesce((
     select json_agg(json_build_object(
@@ -113,16 +113,18 @@ begin
              'upload', v.approved_upload
            ) order by lower(f.name))
       from (
-        select p.id, public.gv_display_name(p.id) as name
+        select p.id,
+               public.gv_display_name(p.id) as name
           from profiles p
-         where lower(p.username) like v_q || '%'
-           and p.id <> v_user
+         where p.id <> v_user
+           and nullif(btrim(p.username), '') is not null
+           -- A rude name is shown as a neutral one, which is not what was typed.
+           and not public.gv_is_rude(p.username)
+           and lower(p.username) like '%' || v_like || '%'
          order by lower(p.username)
          limit 8
       ) f
       left join gv_avatars v on v.user_id = f.id
-     -- A rude name was swapped for a neutral one, which is not what was typed.
-     where lower(f.name) like v_q || '%'
   ), '[]'::json);
 end;
 $function$;
