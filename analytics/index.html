@@ -1764,6 +1764,7 @@
       liveAdd(added, !l.first);
       l.first = false;
       l.fails = 0;
+      liveStats();
       $('liveStatus').innerHTML = '<span class="dot"></span>Updated ' + new Date().toLocaleTimeString();
     }).catch(function (e) {
       if (live !== l) return;
@@ -1834,6 +1835,39 @@
     while (listEl.children.length > LIVE_MAX) listEl.removeChild(listEl.lastChild);
     live.shown += rows.length;
     $('liveCount').textContent = fmt(live.shown) + ' since you opened this';
+  }
+
+  // ── live: the numbers ──
+  // Worked out again from the last 10 minutes on every answer, without
+  // scanners, by the same rules as the cards on the dashboard.
+  function liveStats() {
+    var now = liveNow(), sc = live.st.scanner;
+    var rows = live.st.rows.filter(function (r) { return r.tms >= now - LIVE_BACK && !sc[r.visitor_id]; });
+
+    var last = Object.create(null), lastPlay = Object.create(null);
+    rows.forEach(function (r) {
+      last[r.visitor_id] = r;
+      if (now - r.tms < 4 * 60000 && PLAY_EVENTS[r.event]) lastPlay[r.visitor_id] = r;
+    });
+    var playing = Object.create(null);
+    Object.keys(lastPlay).forEach(function (v) {
+      var r = lastPlay[v];
+      if (r.game_id && (r.event === 'game_open' || r.event === 'game_load' || r.event === 'ping')) playing[v] = r.item_title || r.game_id;
+    });
+    var online = Object.keys(last).filter(function (v) { return now - last[v].tms < 5 * 60000; });
+
+    var minute = rows.filter(function (r) { return now - r.tms < 60000; });
+    var games = counter();
+    Object.keys(playing).forEach(function (v) { games.add(playing[v]); });
+    var gamesTop = games.top();
+    kpiTiles('liveKpis', [
+      ['On the site', fmt(online.length), fmt(online.filter(function (v) { return last[v] && now - last[v].tms < 60000; }).length) + ' in the last minute'],
+      ['In a game', fmt(Object.keys(playing).length), gamesTop.slice(0, 2).map(function (p) { return esc(p[0]) + (p[1] > 1 ? ' ×' + p[1] : ''); }).join(', ') || 'nobody'],
+      ['Events a minute', fmt(minute.length), fmt(minute.filter(function (r) { return !PASSIVE[r.event]; }).length) + ' clicks'],
+      ['New visitors', fmt(uniq(rows.filter(function (r) { return r.is_new && r.event === 'pageview'; }), 'visitor_id')), 'last 10 minutes'],
+      ['Signed in', fmt(online.filter(function (v) { return last[v] && last[v].user_id; }).length), 'on the site now'],
+      ['Errors', fmt(rows.filter(function (r) { return r.event === 'error'; }).length), 'last 10 minutes']
+    ]);
   }
 
   // ── load ──
