@@ -184,6 +184,7 @@
     side.appendChild(els.list);
     var foot = el('div', 'gv-chat-foot');
     foot.appendChild(pill('Compose', 'primary', function () { compose('dm'); }));
+    foot.appendChild(pill('Group chat', '', function () { compose('group'); }));
     side.appendChild(foot);
 
     var main = el('section', 'gv-chat-main');
@@ -668,6 +669,7 @@
   }
 
   function compose(kind) {
+    if (kind === 'group') return groupSheet();
     var body = sheet('New message');
     body.appendChild(el('p', '', 'Message anyone on GameVault by their username.'));
     var note = el('p');
@@ -677,6 +679,48 @@
     body.appendChild(note);
   }
 
+  function groupSheet() {
+    var body = sheet('New group chat');
+    var name = el('input', 'gv-chat-field');
+    name.placeholder = 'Group name (optional)';
+    name.maxLength = 40;
+    body.appendChild(name);
+    var chips = el('div', 'gv-chat-chips');
+    var picked = {};
+    function paint() {
+      chips.textContent = '';
+      Object.keys(picked).forEach(function (id) {
+        chips.appendChild(pill(picked[id] + ' \u00d7', '', function () {
+          delete picked[id];
+          paint();
+        }));
+      });
+      make.disabled = !Object.keys(picked).length;
+    }
+    body.appendChild(chips);
+    search(body, 'Add', function (person) {
+      if (Object.keys(picked).length >= 19) return;
+      picked[person.id] = person.username;
+      paint();
+    });
+    var note = el('p');
+    var make = pill('Make the group', 'primary', function () {
+      make.disabled = true;
+      social().rpc('gv_group_create', { p_name: name.value, p_users: Object.keys(picked) })
+        .then(function (id) {
+          return refreshList().then(function () { view('convo:' + id, true); });
+        })
+        .catch(function (error) {
+          note.textContent = error.message;
+          make.disabled = false;
+        });
+    });
+    var row = el('div', 'gv-chat-actions');
+    row.appendChild(make);
+    body.appendChild(row);
+    body.appendChild(note);
+    paint();
+  }
 
 
 
