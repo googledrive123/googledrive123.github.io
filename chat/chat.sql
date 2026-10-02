@@ -432,6 +432,7 @@ begin
         via = excluded.via
     where gv_chat_bans.via is not null
        or (gv_chat_bans.until is not null and gv_chat_bans.until <= now());
+  update gv_chat_bans set until = v_row.until where via = p_user_id;
 
   return row_to_json(v_row);
 end;
