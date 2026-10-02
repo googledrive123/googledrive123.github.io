@@ -4824,6 +4824,7 @@ function paintCosmetics() {
   document.querySelectorAll('.user-name-text').forEach(el => C.applyName(el, worn));
   C.applyTitle(document.getElementById('profileTitle'), worn);
   C.applyTiles(document.documentElement, worn);
+  if (window.GV && GV.features) GV.features.set('shop', myWallet && myWallet.coins ? myWallet.coins.toLocaleString() + ' coins to spend' : null);
   const card = document.getElementById('coinCard');
   card.hidden = !myWallet;
   if (myWallet) {
