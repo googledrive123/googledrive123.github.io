@@ -40,6 +40,16 @@ button{padding:0;border:0;background:none;font:inherit;color:inherit;cursor:poin
 .face{width:26px;height:26px;border-radius:50%;background:var(--s3);display:grid;place-items:center;font-size:11px;font-weight:700;color:oklch(0.97 0.01 25);box-shadow:0 0 0 2px var(--bg)}
 .face+.face{margin-left:-6px;background:var(--s2)}
 .me{width:36px;height:36px;border-radius:50%;background:var(--s3);display:grid;place-items:center;font-size:14px;font-weight:600}
+.hero{position:relative;max-width:760px;padding:40px 48px 0}
+.kicker{font-size:13px;color:var(--mu)}
+.hero h1{margin:10px 0 12px;font-size:52px;font-weight:700;letter-spacing:-0.04em;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.line{font-size:15px;color:var(--mu)}
+.acts{margin-top:24px;display:flex;gap:10px}
+.cta,.star{height:44px;display:flex;align-items:center;border-radius:14px;font-size:15px;text-decoration:none;cursor:pointer}
+.cta{padding:0 24px;background:var(--red);color:#fff;font-weight:600}
+.cta:hover{background:oklch(0.65 0.2 var(--ah))}
+.star{padding:0 20px;background:var(--ln);font-weight:500}
+.star:hover{background:oklch(0.92 calc(0.04 * var(--c)) var(--h) / 0.16)}
 </style>
 </head>
 <body>
@@ -55,6 +65,16 @@ button{padding:0;border:0;background:none;font:inherit;color:inherit;cursor:poin
       <button class="me" type="button" title="Profile" data-soon>M</button>
     </div>
   </header>
+
+  <div class="hero">
+    <div class="kicker" id="kicker">track of the week · ends in 2d 13:54</div>
+    <h1 id="name">PolyTrack</h1>
+    <div class="line" id="line">racing · summer 3 · nova leads at 1:02.418 · 312 racers</div>
+    <div class="acts">
+      <a class="cta" id="cta" href="#" data-soon>race now</a>
+      <a class="star" href="#" data-soon>add to stars</a>
+    </div>
+  </div>
 </div>
 </body>
 </html>
