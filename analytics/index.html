@@ -1698,7 +1698,7 @@
 
   function exportCSV() {
     var cols = ['id', 'ts', 'event', 'visitor_id', 'session_id', 'user_id', 'path', 'referrer', 'game_id', 'item_id', 'item_title', 'value', 'browser', 'os', 'device', 'screen', 'viewport', 'lang', 'tz', 'utm_source', 'utm_medium', 'utm_campaign', 'is_new', 'meta'];
-    var lines = [cols.join(',')].concat(state.rows.map(function (r) { return cols.map(function (c) { var v = r[c]; if (v == null) return ''; if (typeof v === 'object') v = JSON.stringify(v); v = String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(','); }));
+    var lines = [cols.join(',')].concat(state.rows.map(function (r) { return cols.map(function (c) { var v = c === 'ts' ? r.t.toISOString() : r[c]; if (v == null) return ''; if (typeof v === 'object') v = JSON.stringify(v); v = String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(','); }));
     var blob = new Blob([lines.join('\n')], { type: 'text/csv' });
     var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'gamevault-analytics-' + state.range + '-' + new Date().toISOString().slice(0, 10) + '.csv'; a.click();
   }
