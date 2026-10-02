@@ -46,6 +46,7 @@
     '.gv-poll-shot{display:block;aspect-ratio:1366/635;overflow:hidden;border-radius:7px;background:#0c0c0e}',
     '.gv-poll-shot img{display:block;width:100%;height:100%;object-fit:cover}',
     '.gv-poll-look:hover{border-color:var(--accent,#ff3b3b);transform:translateY(-2px)}',
+    '.gv-poll-look:disabled{cursor:default;opacity:.6;transform:none}',
     '@keyframes gvPollIn{from{opacity:0;transform:translateY(10px) scale(.98)}}',
     '@media (prefers-reduced-motion:reduce){.gv-poll-box{animation:none}.gv-poll-opt.result::before{transition:none}}'
   ].join('');
