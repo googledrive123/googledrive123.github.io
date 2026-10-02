@@ -323,6 +323,22 @@ begin
 end;
 $function$;
 
+-- Shows a preview poll to everyone.
+create or replace function public.gv_poll_publish(p_secret text, p_id bigint)
+returns boolean
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+  update gv_polls set preview = false where id = p_id and preview;
+  return found;
+end;
+$function$;
+
 -- Takes a poll and its votes away for good.
 create or replace function public.gv_poll_delete(p_secret text, p_id bigint)
 returns boolean
