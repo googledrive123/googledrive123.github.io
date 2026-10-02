@@ -79,9 +79,8 @@ alter table public.gv_friend_links enable row level security;
 revoke all on table public.gv_friend_links from anon, authenticated;
 
 
--- Up to 8 accounts whose username starts with what was typed, for adding a
--- friend or starting a chat. Three letters at least, so it is a search for
--- someone rather than a list of everyone.
+-- Up to 8 accounts with what was typed anywhere in their username, for
+-- adding a friend or starting a chat. Two letters at least.
 create or replace function public.gv_user_search(p_q text)
 returns json
 language plpgsql
@@ -91,7 +90,9 @@ set search_path to 'public'
 as $function$
 declare
   v_user uuid := auth.uid();
-  v_q text := lower(btrim(coalesce(p_q, '')));
+  v_q text := left(lower(btrim(coalesce(p_q, ''))), 30);
+  v_like text;
+  v_bare text;
 begin
   if not public.gv_origin_allowed() then
     raise exception 'Friends only work on GameVault.';
@@ -99,11 +100,13 @@ begin
   if v_user is null then
     raise exception 'Sign in to find people.';
   end if;
-  if char_length(v_q) < 3 then
+  if char_length(v_q) < 2 then
     return '[]'::json;
   end if;
   -- Wildcards typed into the box are only characters.
-  v_q := replace(replace(replace(left(v_q, 30), '\', '\\'), '%', '\%'), '_', '\_');
+  v_like := replace(replace(replace(v_q, '\', '\\'), '%', '\%'), '_', '\_');
+  -- What was typed without spaces or symbols, so "i am" finds "i_am" too.
+  v_bare := regexp_replace(v_q, '[^a-z0-9]', '', 'g');
 
   return coalesce((
     select json_agg(json_build_object(
@@ -111,18 +114,27 @@ begin
              'username', f.name,
              'preset', v.preset,
              'upload', v.approved_upload
-           ) order by lower(f.name))
+           ) order by f.exact desc, f.at, f.len, lower(f.name))
       from (
-        select p.id, public.gv_display_name(p.id) as name
+        select p.id,
+               public.gv_display_name(p.id) as name,
+               lower(p.username) = v_q as exact,
+               coalesce(nullif(strpos(lower(p.username), v_q), 0), 1000) as at,
+               char_length(p.username) as len
           from profiles p
-         where lower(p.username) like v_q || '%'
-           and p.id <> v_user
-         order by lower(p.username)
+         where p.id <> v_user
+           and nullif(btrim(p.username), '') is not null
+           -- A rude name is shown as a neutral one, which is not what was typed.
+           and not public.gv_is_rude(p.username)
+           and (lower(p.username) like '%' || v_like || '%'
+                or (char_length(v_bare) >= 2
+                    and regexp_replace(lower(p.username), '[^a-z0-9]', '', 'g') like '%' || v_bare || '%'))
+         -- The name itself first, then names that start with it, then the
+         -- earlier it comes in a name and the shorter the name, the closer.
+         order by exact desc, at, len, lower(p.username)
          limit 8
       ) f
       left join gv_avatars v on v.user_id = f.id
-     -- A rude name was swapped for a neutral one, which is not what was typed.
-     where lower(f.name) like v_q || '%'
   ), '[]'::json);
 end;
 $function$;

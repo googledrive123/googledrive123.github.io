@@ -677,7 +677,7 @@
       timer = setTimeout(function () {
         var q = box.value.trim();
         asked = q;
-        if (q.length < 3) {
+        if (q.length < 2) {
           found.textContent = '';
           if (q) found.appendChild(el('p', '', 'Keep typing\u2026'));
           return;
