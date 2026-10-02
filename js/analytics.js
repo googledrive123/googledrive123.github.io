@@ -399,6 +399,10 @@
     if (!el) return;
     var text = el.getAttribute('aria-label') || el.getAttribute('title') || el.textContent || '';
     var meta = { tag: el.tagName.toLowerCase() };
+    if (el.id) meta.id = el.id;
+    if (typeof el.className === 'string' && el.className) meta.cls = el.className.slice(0, 80);
+    var href = el.getAttribute('href');
+    if (href) meta.href = href.slice(0, 200);
     track('click', { item_title: text.replace(/\s+/g, ' ').trim().slice(0, 80), item_id: el.dataset && (el.dataset.id || el.dataset.game) || null, meta: meta });
   }, true);
 
