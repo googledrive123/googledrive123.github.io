@@ -98,6 +98,14 @@ as $function$
       first_ts = least(v.first_ts, excluded.first_ts),
       last_ts = greatest(v.last_ts, excluded.last_ts),
       first_act = least(v.first_act, excluded.first_act)
+  ),
+  traits as (
+    insert into analytics_visitor_traits as t (visitor_id, trait, value, n)
+    select e.visitor_id, x.trait, x.value, count(*)
+    from e, lateral (values ('tz', e.tz), ('viewport', e.viewport)) x (trait, value)
+    where x.value is not null
+    group by 1, 2, 3 order by 1, 2, 3
+    on conflict (visitor_id, trait, value) do update set n = t.n + excluded.n
   )
   select;
 $function$;
