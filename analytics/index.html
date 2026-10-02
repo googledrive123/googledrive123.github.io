@@ -248,6 +248,8 @@
       <div class="verify-msg" id="chatMsg"></div>
       <h3 class="mod-h">Reported</h3>
       <div class="verify-list" id="chatReports"></div>
+      <h3 class="mod-h">Reported in direct and group chats</h3>
+      <div class="verify-list" id="chatDmReports"></div>
       <h3 class="mod-h">Bans</h3>
       <div class="verify-list" id="chatBans"></div>
       <h3 class="mod-h">Latest messages</h3>
@@ -1100,7 +1102,21 @@
       $('chatRecent').innerHTML = d.recent.length ? d.recent.map(function (m) {
         return chatRow(m, m.deleted ? '' : modButtons(m.id, m.user_id));
       }).join('') : '<div class="empty">No messages yet.</div>';
-    }).catch(function (e) { $('chatMsg').textContent = 'Could not load chat: ' + e.message; });
+    }).catch(function (e) { $('chatMsg').textContent = 'Could not load chat: ' + e.message; })
+      .then(loadDmReports);
+  }
+  // Reports from DMs and group chats (chat/convos.sql), with the few lines
+  // before each one, since nobody else can see those chats.
+  function loadDmReports() {
+    return rpc('gv_convo_mod_list', { p_secret: state.secret }).then(function (list) {
+      $('chatDmReports').innerHTML = (list || []).length ? list.map(function (r) {
+        var why = r.reports.map(function (x) { return esc(x.reporter) + ': ' + esc(x.reason || '\u2014'); }).join('; ');
+        var before = (r.before || []).map(function (b) { return esc(b.username || 'site') + ': ' + esc(b.body); }).join(' / ');
+        return chatRow(r, '<span class="st">' + r.count + ' report' + (r.count === 1 ? '' : 's') + ' · ' + why
+          + (before ? ' · before: ' + before : '') + '</span>'
+          + modButtons(null, r.user_id));
+      }).join('') : '<div class="empty">No open reports.</div>';
+    }).catch(function (e) { $('chatMsg').textContent = 'Could not load DM reports: ' + e.message; });
   }
   function chatAction(e) {
     var b = e.target.closest('button'); if (!b) return;
