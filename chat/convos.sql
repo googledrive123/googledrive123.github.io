@@ -430,3 +430,60 @@ $function$;
 revoke all on function public.gv_convo_read(bigint, bigint) from public, anon;
 grant execute on function public.gv_convo_read(bigint, bigint) to authenticated;
 
+
+-- Every chat the account is in, with the other members, the last message
+-- and how many are unread.
+create or replace function public.gv_convo_list()
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'Chat only works on GameVault.';
+  end if;
+  if v_user is null then
+    raise exception 'Sign in to chat.';
+  end if;
+
+  return coalesce((
+    select json_agg(json_build_object(
+             'id', c.id,
+             'kind', c.kind,
+             'name', c.name,
+             'members', (
+               select coalesce(json_agg(json_build_object(
+                        'id', o.user_id,
+                        'username', public.gv_display_name(o.user_id)
+                      ) order by o.joined_at), '[]'::json)
+                 from gv_convo_members o
+                where o.convo_id = c.id and o.user_id <> v_user
+             ),
+             'last', (
+               select json_build_object('id', l.id, 'username', l.username, 'body', l.body,
+                                        'created_at', l.created_at, 'mine', l.user_id = v_user)
+                 from gv_convo_messages l
+                where l.convo_id = c.id and not l.deleted
+                order by l.id desc limit 1
+             ),
+             'unread', (
+               select count(*)
+                 from gv_convo_messages u
+                where u.convo_id = c.id and u.id > me.last_read
+                  and not u.deleted and u.user_id is distinct from v_user
+             )
+           ) order by coalesce((select max(id) from gv_convo_messages x where x.convo_id = c.id), 0) desc, c.id desc)
+      from gv_convo_members me
+      join gv_convos c on c.id = me.convo_id
+     where me.user_id = v_user
+  ), '[]'::json);
+end;
+$function$;
+
+revoke all on function public.gv_convo_list() from public, anon;
+grant execute on function public.gv_convo_list() to authenticated;
+
