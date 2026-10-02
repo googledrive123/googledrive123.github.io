@@ -39,6 +39,11 @@ create table if not exists public.gv_chat_bans (
   created_at timestamptz not null default now()
 );
 
+-- A ban that follows from another account's, for sharing a browser with it
+-- (chat/bans.sql). Unbanning that account removes this one too.
+alter table public.gv_chat_bans
+  add column if not exists via uuid references public.gv_chat_bans (user_id) on delete cascade;
+
 create table if not exists public.gv_chat_reports (
   id         bigserial primary key,
   message_id bigint not null references public.gv_chat_messages (id) on delete cascade,
