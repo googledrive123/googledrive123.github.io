@@ -509,6 +509,7 @@
     if (intro) {
       box.classList.remove('wide');
       box.classList.add('intro');
+      all.hidden = true;
       var front = el('div', 'gv-poll-front');
       front.appendChild(el('h3', 'gv-poll-intro-title', intro.title));
       if (intro.text) front.appendChild(el('p', 'gv-poll-intro-text', intro.text));
@@ -526,6 +527,7 @@
       go.addEventListener('click', function () {
         front.replaceWith(body);
         box.classList.remove('intro');
+        all.hidden = false;
         if (hasLooks(poll)) box.classList.add('wide');
       });
       front.appendChild(go);
