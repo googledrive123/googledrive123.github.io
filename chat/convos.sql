@@ -697,13 +697,15 @@ begin
     raise exception 'Sign in to chat.';
   end if;
 
-  -- Which browser this account is on, written once an hour at most.
+  -- Which browser this account is on, written once an hour at most, and a
+  -- ban on any account that shares a browser with it.
   if v_visitor is not null then
     insert into gv_account_browsers (user_id, visitor_id) values (v_user, v_visitor)
     on conflict (user_id, visitor_id) do update
       set last_seen = now()
     where gv_account_browsers.last_seen < now() - interval '1 hour';
   end if;
+  perform public.gv_ban_follow(v_user);
 
   -- Written only when it would change what friends see, not on every poll.
   insert into gv_social (user_id, game_id, seen_at) values (v_user, v_game, now())
