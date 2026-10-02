@@ -105,6 +105,9 @@
   var id = readLocal();
   var fromCookie = readCookie();
   if (!id) id = fromCookie;
+  // No id anywhere yet: this is the browser's first visit, unless
+  // IndexedDB turns out to remember one.
+  var fresh = !id;
   if (!id) id = uuid();
   if (readLocal() !== id) writeLocal(id);
   if (fromCookie !== id) writeCookie(id);
@@ -117,6 +120,7 @@
     return readDb(db).then(function (stored) {
       if (stored && stored !== id) {
         id = stored;
+        fresh = false;
         writeLocal(id);
         writeCookie(id);
       } else if (!stored) {
@@ -260,6 +264,7 @@
   window.GV.identity = {
     ready: ready,
     id: function () { return id; },
+    isNew: function () { return fresh; },
     guestName: guestName,
     chosenName: chosenName,
     setChosenName: setChosenName,
