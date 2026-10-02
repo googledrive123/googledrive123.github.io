@@ -4182,6 +4182,35 @@ function showMore(on) {
 }
 gameMoreBtn.addEventListener('click', () => showMore(gameMore.hidden));
 
+// ───── Because you played ─────
+// What the people who played your last game also played (gv_also_played in
+// analytics/public.sql), topped up from its own category when that is thin.
+// Games you played lately are left out: they are in Continue already.
+const BECAUSE_ROW = 12;
+const BECAUSE_MIN = 4;
+let because = { id: null, list: [] };
+function loadBecause() {
+  const id = recent.find(x => gamesById[x]);
+  if (!id || id === because.id) return;
+  because = { id: id, list: [] };
+  publicRpc('gv_also_played', { p_game: id, p_limit: 24 }).then(list => {
+    if (because.id !== id) return;
+    because.list = list.map(x => x.id);
+    render();
+  }).catch(() => {});
+}
+function becauseGames() {
+  const g = gamesById[because.id];
+  if (!g) return [];
+  const played = new Set(recent);
+  const ok = x => x && !x.hidden && !x.staging && !played.has(x.id) && !failing.has(x.id);
+  const out = because.list.map(id => gamesById[id]).filter(ok);
+  similarGames(g).forEach(x => {
+    if (out.length < BECAUSE_ROW && ok(x) && !out.includes(x)) out.push(x);
+  });
+  return out.slice(0, BECAUSE_ROW);
+}
+
 
 function openGame(g) {
   suggPlaySecs = 0;
