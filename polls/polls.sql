@@ -68,3 +68,30 @@ as $function$
 $function$;
 
 revoke all on function public.gv_poll_mine(bigint, uuid, text) from public, anon, authenticated;
+
+
+-- One poll as the pages show it.
+create or replace function public.gv_poll_json(p_poll bigint, p_user uuid, p_visitor text)
+returns json
+language sql
+stable
+security definer
+set search_path to 'public'
+as $function$
+  select json_build_object(
+           'id', p.id,
+           'question', p.question,
+           'options', p.options,
+           'created_at', p.created_at,
+           'ends_at', p.ends_at,
+           'open', x.open,
+           'voted', x.mine,
+           'total', (select count(*) from gv_poll_votes v where v.poll_id = p.id)
+         )
+    from gv_polls p,
+         lateral (select not p.closed and (p.ends_at is null or p.ends_at > now()) as open,
+                         public.gv_poll_mine(p.id, p_user, p_visitor) as mine) x
+   where p.id = p_poll;
+$function$;
+
+revoke all on function public.gv_poll_json(bigint, uuid, text) from public, anon, authenticated;
