@@ -529,6 +529,8 @@
         box.classList.remove('intro');
         all.hidden = false;
         if (hasLooks(poll)) box.classList.add('wide');
+        var first = body.querySelector('button');
+        if (first) first.focus();
       });
       front.appendChild(go);
       box.appendChild(front);
