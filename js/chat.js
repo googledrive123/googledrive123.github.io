@@ -285,8 +285,10 @@
       paintLength();
       lookUp();
     });
+    els.input.addEventListener('keydown', suggestKeys);
     form.addEventListener('submit', function (e) {
       e.preventDefault();
+      if (!els.suggest.hidden && suggestion.items.length) return pickSuggestion(suggestion.at);
       sendMessage();
     });
     root.addEventListener('click', function (e) {
@@ -716,6 +718,22 @@
     els.suggest.hidden = true;
     suggestion.items = [];
     suggestion.q = null;
+  }
+
+  function suggestKeys(e) {
+    if (els.suggest.hidden || !suggestion.items.length) return;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      var n = suggestion.items.length;
+      suggestion.at = (suggestion.at + (e.key === 'ArrowDown' ? 1 : n - 1)) % n;
+      Array.prototype.forEach.call(els.suggest.querySelectorAll('button'), function (b, i) {
+        b.setAttribute('aria-selected', i === suggestion.at ? 'true' : 'false');
+        if (i === suggestion.at) b.scrollIntoView({ block: 'nearest' });
+      });
+    } else if (e.key === 'Tab') {
+      e.preventDefault();
+      pickSuggestion(suggestion.at);
+    }
   }
 
   function pickSuggestion(i) {
