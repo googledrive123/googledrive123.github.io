@@ -1735,6 +1735,7 @@
     document.body.classList.add('live-on');
     $('live').classList.remove('hidden');
     $('liveList').innerHTML = '';
+    $('livePause').textContent = 'Pause';
     $('liveStatus').innerHTML = '<span class="dot off"></span>Connecting…';
     liveFilterAll();
     window.scrollTo(0, 0);
@@ -1771,7 +1772,8 @@
           return false;
         });
       }
-      liveAdd(added, !l.first);
+      if (l.paused) { l.held = l.held.concat(added); $('livePause').textContent = 'Resume (' + fmt(l.held.length) + ' new)'; }
+      else liveAdd(added, !l.first);
       l.first = false;
       l.fails = 0;
       livePresence();
@@ -2054,6 +2056,12 @@
   $('liveFilter').addEventListener('input', liveFilterAll);
   $('liveBeats').addEventListener('change', liveFilterAll);
   $('liveBots').addEventListener('change', liveFilterAll);
+  $('livePause').addEventListener('click', function () {
+    if (!live) return;
+    live.paused = !live.paused;
+    if (!live.paused) { liveAdd(live.held, true); live.held = []; }
+    $('livePause').textContent = live.paused ? 'Resume' : 'Pause';
+  });
   // A visitor's name shows only their events; anywhere else on an event
   // opens everything it holds.
   $('liveList').addEventListener('click', function (e) {
