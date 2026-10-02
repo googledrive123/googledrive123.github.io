@@ -347,6 +347,8 @@ begin
   returning * into v_row;
   update gv_convo_members set last_read = v_row.id
    where convo_id = p_convo and user_id = v_user;
+  insert into gv_mentions (user_id, from_user, convo_message_id, convo_id)
+  select (x ->> 'id')::uuid, v_user, v_row.id, p_convo from jsonb_array_elements(v_mentions) x;
 
   return json_build_object(
     'id', v_row.id,
