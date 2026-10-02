@@ -1719,6 +1719,7 @@
   var LIVE_BACK = 10 * 60000, LIVE_MAX = 1500, LIVE_BEATS = { ping: 1, hidden: 1, visible: 1 };
   var live = null;
   function liveOn() { return !!live; }
+  function liveNow() { return Date.now() + live.skew; }
   function enterLive() {
     if (live || !state.secret) return;
     live = { st: newStore(Date.now() - LIVE_BACK), after: null, skew: 0, timer: null, busy: false, first: true, fails: 0, paused: false, held: [], shown: 0, filter: '', presence: [], presenceAt: 0 };
@@ -1727,6 +1728,7 @@
     $('liveList').innerHTML = '';
     $('liveStatus').innerHTML = '<span class="dot off"></span>Connecting…';
     window.scrollTo(0, 0);
+    livePoll();
   }
   function exitLive() {
     if (!live) return;
@@ -1735,6 +1737,25 @@
     document.body.classList.remove('live-on');
     $('live').classList.add('hidden');
     tick();
+  }
+
+  function livePoll() {
+    var l = live;
+    rpc('analytics_rows', { p_secret: state.secret, p_from: new Date(Math.max(l.st.from, l.st.since - OVERLAP)).toISOString() }).then(function (res) {
+      if (live !== l) return;
+      var added = take(l.st, res);
+      l.skew = Date.parse(res.now) - Date.now();
+      l.st.since = Date.parse(res.now);
+      liveAdd(added, !l.first);
+      l.first = false;
+      $('liveStatus').innerHTML = '<span class="dot"></span>Updated ' + new Date().toLocaleTimeString();
+    }).catch(function (e) {
+      if (live !== l) return;
+      $('liveStatus').innerHTML = '<span class="dot off"></span>' + esc(e.message) + ' · trying again';
+    }).then(function () {
+      if (live !== l) return;
+      l.timer = setTimeout(livePoll, 1000);
+    });
   }
 
   // ── live: the events ──
