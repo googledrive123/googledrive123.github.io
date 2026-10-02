@@ -10,7 +10,7 @@
 -- that the account is in the conversation it names.
 --
 -- Apply against project dxwjxzmlezfyursysays, after chat/chat.sql and
--- sql/social.sql. Every statement is safe to run twice.
+-- sql/social.sql. Every statement is safe to run twice. Applied on 1 October 2026.
 
 
 create table if not exists public.gv_convos (
