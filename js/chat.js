@@ -361,12 +361,14 @@
       var count = (c.members || []).length + 1;
       return { name: convoName(c), sub: count + ' people' };
     }
-    return { name: convoName(c), sub: 'Direct message' };
+    var other = (c.members || [])[0];
+    return { name: convoName(c), sub: 'Direct message', verified: !!(other && other.verified) };
   }
 
   function paintHead() {
     var t = titleFor(current);
     els.title.textContent = t.name;
+    if (t.verified) els.title.appendChild(check());
     els.sub.textContent = t.sub;
     var c = current === 'server' ? null : convoFor(current);
     els.members.hidden = !(c && c.kind === 'group');
