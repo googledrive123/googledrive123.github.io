@@ -150,11 +150,20 @@ security definer
 set search_path to 'public'
 as $function$
 declare
-  v_tz text := coalesce((select name from pg_timezone_names where name = p_tz), 'UTC');
+  v_tz text := 'UTC';
 begin
   if not public.analytics_check(p_secret) then
     raise exception 'not allowed';
   end if;
+
+  -- Any zone Postgres knows. Looking for it in pg_timezone_names read every
+  -- zone file on the server, most of a second each time.
+  begin
+    perform now() at time zone coalesce(p_tz, 'UTC');
+    v_tz := coalesce(p_tz, 'UTC');
+  exception when others then
+    v_tz := 'UTC';
+  end;
 
   return coalesce((
     with s as materialized (select visitor_id from analytics_scanners()),
