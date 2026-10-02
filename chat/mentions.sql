@@ -35,3 +35,35 @@ create index if not exists gv_mentions_unseen on public.gv_mentions (user_id) wh
 alter table public.gv_mentions enable row level security;
 revoke all on table public.gv_mentions from anon, authenticated;
 
+
+-- Who a message names, in the order they come in it, as [{id, name}]: the
+-- name the way chat shows it, which is what follows the @.
+create or replace function public.gv_mention_list(p_body text, p_ids uuid[], p_convo bigint default null)
+returns jsonb
+language sql
+stable
+security definer
+set search_path to 'public'
+as $function$
+  select coalesce(jsonb_agg(jsonb_build_object('id', c.id, 'name', c.name) order by c.at), '[]'::jsonb)
+    from (
+      select x.id, x.name, strpos(lower(p_body), '@' || lower(x.name)) as at
+        from (
+          select p.id, public.gv_display_name(p.id) as name
+            from profiles p
+           where p.id = any(coalesce(p_ids, '{}'::uuid[]))
+              or lower(p.username) in (
+                   select lower(r.m[1])
+                     from regexp_matches(p_body, '@([A-Za-z0-9_]+(?:[.-][A-Za-z0-9_]+)*)', 'g') as r(m))
+        ) x
+       where x.id is distinct from auth.uid()
+         and strpos(lower(p_body), '@' || lower(x.name)) > 0
+         and (p_convo is null
+              or exists (select 1 from gv_convo_members cm where cm.convo_id = p_convo and cm.user_id = x.id))
+       order by 3
+       limit 10
+    ) c;
+$function$;
+
+revoke all on function public.gv_mention_list(text, uuid[], bigint) from public, anon, authenticated;
+
