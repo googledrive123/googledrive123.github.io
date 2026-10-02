@@ -158,10 +158,6 @@ begin
 
   return coalesce((
     with s as materialized (select visitor_id from analytics_scanners()),
-    h as materialized (
-      select e.visitor_id, e.ts, e.event from analytics_events e
-      where not exists (select 1 from s where s.visitor_id = e.visitor_id)
-    ),
     firsts as (
       select x.visitor_id, x.first_ts, x.first_act from analytics_visitors x
       where not exists (select 1 from s where s.visitor_id = x.visitor_id)
@@ -173,8 +169,10 @@ begin
     seen as (select date_trunc('hour', first_ts) as hr, count(*) as n from firsts group by 1),
     acted as (select date_trunc('hour', first_act) as hr, count(*) as n from firsts where first_act is not null group by 1),
     days as (
-      select (ts at time zone v_tz)::date as day, count(distinct visitor_id) as n
-      from h group by 1
+      select (q.bucket at time zone v_tz)::date as day, count(distinct q.visitor_id) as n
+      from analytics_quarters q
+      where not exists (select 1 from s where s.visitor_id = q.visitor_id)
+      group by 1
     ),
     series as (
       select hours.hr,
