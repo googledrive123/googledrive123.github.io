@@ -294,6 +294,11 @@
     }, true);
   }
 
+  // A line from the site itself, like a friend's answer to an ask to join.
+  function notice(text, onOpen) {
+    var inGame = !!(host.inGame && host.inGame());
+    return toast('GameVault', '', text, onOpen, inGame);
+  }
 
   // Safe to call on every sign-in event: the same account carries on.
   // Without an account it only keeps the page's hooks, so chat can still
@@ -355,6 +360,7 @@
     mute: mute,
     setStatus: setStatus,
     setNotify: setNotify,
+    notice: notice,
     markServerSeen: markServerSeen,
     // What chat shows, 'server' or 'convo:<id>', or null when it is shut.
     viewing: function (key) {
