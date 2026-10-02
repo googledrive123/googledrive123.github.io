@@ -7,6 +7,11 @@
 
   var MAX = 300;
   var KEEP = 300;
+  var MUTES = [
+    { label: 'For 30 minutes', ms: 30 * 60 * 1000 },
+    { label: 'For 1 hour', ms: 60 * 60 * 1000 },
+    { label: 'Until I turn it back on', ms: 0 }
+  ];
 
   var ICON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v10H9l-5 4z"/></svg>';
 
@@ -198,6 +203,8 @@
     title.appendChild(els.title);
     title.appendChild(els.sub);
     head.appendChild(title);
+    els.mute = iconButton('Mute', '', function () { muteSheet(current, els.title.textContent); });
+    head.appendChild(els.mute);
     els.members = iconButton('People', '\u2630', membersSheet);
     head.appendChild(els.members);
     var shut = iconButton('Close chat', '\u00d7', close);
@@ -337,6 +344,10 @@
     els.sub.textContent = t.sub;
     var c = current === 'server' ? null : convoFor(current);
     els.members.hidden = !(c && c.kind === 'group');
+    var on = social().muted(current);
+    els.mute.innerHTML = on ? BELL_OFF : BELL;
+    els.mute.classList.toggle('on', on);
+    els.mute.title = on ? 'Muted. Click to change' : 'Mute';
   }
 
   function view(key, enter) {
@@ -540,6 +551,7 @@
     words.appendChild(el('span', 'gv-chat-row-last', last || ''));
     b.appendChild(face);
     b.appendChild(words);
+    if (social().muted(key)) b.appendChild(el('span', 'gv-chat-muted', 'muted'));
     var count = el('span', 'gv-chat-count', unread === true ? '' : String(unread || ''));
     count.hidden = !unread;
     if (unread === true) count.style.cssText = 'min-width:9px;width:9px;height:9px;padding:0';
@@ -761,6 +773,33 @@
     return line;
   }
 
+  var BELL = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>';
+  var BELL_OFF = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.7 3A6 6 0 0 1 18 8a21.3 21.3 0 0 0 .6 5"/><path d="M17 17H3s3-2 3-9a4.67 4.67 0 0 1 .3-1.7"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/><path d="m2 2 20 20"/></svg>';
+
+  // Mutes stop pop-ups over games. The messages still come in here.
+  function muteSheet(key, name) {
+    var body = sheet('Mute ' + name);
+    var until = social().me().mutes[key];
+    var on = social().muted(key);
+    body.appendChild(el('p', '', on
+      ? (until === 0 ? 'Muted until you turn it back on.' : 'Muted until ' + when(new Date(until).toISOString()) + '.')
+      : 'New messages from ' + name + ' stop popping up over your game. They still show here.'));
+    var row = el('div', 'gv-chat-actions');
+    var note = el('p');
+    function set(value) {
+      social().mute(key, value).then(function () {
+        closeSheet();
+        paintHead();
+        paintList();
+      }, function (error) { note.textContent = error.message; });
+    }
+    MUTES.forEach(function (m) {
+      row.appendChild(pill(m.label, '', function () { set(m.ms ? Date.now() + m.ms : 0); }));
+    });
+    if (on) row.appendChild(pill('Unmute', 'primary', function () { set(null); }));
+    body.appendChild(row);
+    body.appendChild(note);
+  }
 
 
 
