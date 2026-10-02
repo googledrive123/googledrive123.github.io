@@ -18,7 +18,8 @@
   var host = {};
   var listeners = {};
   var me = { status: 'online', notify: true, mutes: {} };
-  var counts = { unread: 0, requests: 0, server: false };
+  // mentioned: @mentions not looked at yet, by chat; mentions: all of them.
+  var counts = { unread: 0, requests: 0, server: false, mentioned: {}, mentions: 0 };
   var timer = null;
   var busy = false;
   var cursors = { server: null, convo: null };
@@ -118,6 +119,7 @@
       counts.unread = data.unread;
       counts.requests = data.requests;
       counts.server = data.server_last > serverSeen() && viewing !== 'server' && !muted('server');
+      setMentioned(data.mentioned || {});
       emit('counts', counts);
       if (server.length || convo.length) emit('messages', { server: server, convo: convo });
       server.forEach(function (m) { popUp('server', m); });
@@ -129,6 +131,11 @@
       if (error.code === '42501') return stop();
       schedule();
     });
+  }
+
+  function setMentioned(map) {
+    counts.mentioned = map;
+    counts.mentions = Object.keys(map).reduce(function (n, k) { return n + map[k]; }, 0);
   }
 
   function loadMe() {
@@ -332,7 +339,7 @@
     sb = null;
     user = null;
     me = { status: 'online', notify: true, mutes: {} };
-    counts = { unread: 0, requests: 0, server: false };
+    counts = { unread: 0, requests: 0, server: false, mentioned: {}, mentions: 0 };
     if (was) {
       emit('state', null);
       emit('counts', counts);
