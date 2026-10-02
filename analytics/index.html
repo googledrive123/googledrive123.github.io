@@ -127,6 +127,7 @@
   .bc-item { display: flex; gap: 10px; align-items: baseline; padding: 7px 0; border-top: 1px solid var(--border); font-size: 0.8rem; width: 100%; }
   .bc-item.poll-item { align-items: flex-start; padding: 10px 0; }
   .poll-item .ranked { margin: 8px 0 6px; }
+  #pollAnswers input { flex: 1 1 160px; }
   .bc-item .when { color: var(--muted); font-size: 0.7rem; white-space: nowrap; }
   .bc-item .msg { flex: 1; min-width: 0; overflow-wrap: anywhere; }
   .bc-item .st { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
@@ -287,6 +288,14 @@
   <section>
     <h2>Polls <small>asked in a pop-up when people come to the site, one vote each, and kept on /polls/</small></h2>
     <div class="card">
+      <div class="verify-bar">
+        <input type="text" id="pollQ" placeholder="Question" maxlength="200" autocomplete="off">
+      </div>
+      <div class="verify-bar" id="pollAnswers" style="margin-top:8px"></div>
+      <div class="verify-bar" style="margin-top:8px">
+        <button class="btn ghost" id="pollMore" type="button">Add an answer</button>
+        <button class="btn" id="pollCreate" type="button">Ask it</button>
+      </div>
       <div class="verify-msg" id="pollMsg"></div>
       <div class="verify-list" id="pollList"></div>
     </div>
@@ -1446,6 +1455,23 @@
   // ── polls ──
   // polls/polls.sql. Each one pops up on the home page until a person
   // answers it or puts it off, and stays on /polls/ with its results.
+  function addAnswer() {
+    var box = $('pollAnswers');
+    if (box.children.length >= 6) return;
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.maxLength = 80;
+    input.autocomplete = 'off';
+    input.placeholder = 'Answer ' + (box.children.length + 1);
+    box.appendChild(input);
+    $('pollMore').disabled = box.children.length >= 6;
+  }
+  function resetPollForm() {
+    $('pollQ').value = '';
+    $('pollAnswers').textContent = '';
+    addAnswer();
+    addAnswer();
+  }
   function loadPolls() {
     return rpc('gv_polls_admin', { p_secret: state.secret }).then(function (list) {
       $('pollList').innerHTML = (list || []).length ? list.map(function (p) {
@@ -1462,6 +1488,17 @@
           + '</div>';
       }).join('') : '<div class="empty">No polls yet.</div>';
     }).catch(function (e) { $('pollMsg').textContent = 'Could not load polls: ' + e.message; });
+  }
+  function createPoll() {
+    var question = $('pollQ').value.trim();
+    var answers = Array.prototype.map.call($('pollAnswers').querySelectorAll('input'), function (i) { return i.value.trim(); }).filter(Boolean);
+    if (!question) { $('pollMsg').textContent = 'Write the question first.'; return; }
+    if (answers.length < 2) { $('pollMsg').textContent = 'Give it at least two answers.'; return; }
+    $('pollCreate').disabled = true;
+    rpc('gv_poll_create', { p_secret: state.secret, p_question: question, p_options: answers, p_days: null })
+      .then(function () { resetPollForm(); $('pollMsg').textContent = 'Asked. Everyone who comes to the site gets it now.'; return loadPolls(); })
+      .catch(function (e) { $('pollMsg').textContent = 'Could not ask it: ' + e.message; })
+      .then(function () { $('pollCreate').disabled = false; });
   }
 
   // ── giveaways ──
@@ -2243,6 +2280,9 @@
       .catch(function (e) { $('testMsg').textContent = 'Could not add ' + name + ': ' + e.message; });
   });
   $('gaList').addEventListener('click', gaAction);
+  resetPollForm();
+  $('pollMore').addEventListener('click', addAnswer);
+  $('pollCreate').addEventListener('click', createPoll);
   $('gaCreate').addEventListener('click', function () {
     var ends = $('gaEnds').value;
     $('gaCreate').disabled = true;
