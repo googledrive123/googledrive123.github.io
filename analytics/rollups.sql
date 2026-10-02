@@ -173,3 +173,23 @@ end;
 $function$;
 
 revoke all on function public.analytics_roll_redo(text[]) from public, anon, authenticated;
+
+
+create or replace function public.analytics_roll_inserted()
+returns trigger
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+begin
+  perform analytics_roll_add(array(select id from new_rows));
+  return null;
+end;
+$function$;
+
+revoke all on function public.analytics_roll_inserted() from public, anon, authenticated;
+
+create or replace trigger analytics_roll_insert
+  after insert on public.analytics_events
+  referencing new table as new_rows
+  for each statement execute function public.analytics_roll_inserted();
