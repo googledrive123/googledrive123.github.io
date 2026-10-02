@@ -781,6 +781,7 @@
   var push = { topic: null, ws: null, joined: false, ref: 0, beat: null, tries: 0, seen: 0, on: [] };
   function startPush() {
     rpc('analytics_live_topic', { p_secret: state.secret }).then(function (topic) {
+      if (!topic) return;
       push.topic = topic;
       pushConnect();
     }).catch(function (e) { console.error('Could not start live updates', e); });
