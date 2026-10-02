@@ -707,7 +707,9 @@
             if (window.GV && GV.avatars) GV.avatars.render(face, { preset: p.preset, upload: p.upload, id: p.id });
             else face.textContent = initials(p.username);
             line.appendChild(face);
-            line.appendChild(el('span', '', p.username));
+            var who = el('span', '', p.username);
+            if (p.verified) who.appendChild(check());
+            line.appendChild(who);
             line.appendChild(pill(label, '', function () { pick(p, line); }));
             found.appendChild(line);
           });
