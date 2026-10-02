@@ -262,6 +262,7 @@
     m.first_seen = ls(true, 'gv.first_seen') || null;
     m.cloaked = !!ls(true, 'gv.cloak.v1');
     m.ua = (navigator.userAgent || '').slice(0, 300) || null;
+    try { if (navigator.userAgentData && navigator.userAgentData.platform) m.platform = navigator.userAgentData.platform; } catch (e) {}
     return m;
   }
 
