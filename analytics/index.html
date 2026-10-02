@@ -1477,16 +1477,19 @@
 
   // Names for everyone the tables are showing. Asked for after the numbers
   // are drawn rather than before, so a slow lookup never holds up the page.
-  function loadNames(extra) {
+  // Each draw asks only about people it has not asked about; once a minute
+  // everyone is asked again, for anyone who has signed in since.
+  var asked = Object.create(null);
+  function loadNames(extra, all) {
     var people = Object.create(null);
     function add(visitor, user) {
-      if (!visitor) return;
+      if (!visitor || (!all && asked[visitor])) return;
       if (!people[visitor] || user) people[visitor] = { visitor_id: visitor, user_id: user || null };
     }
     state.vlist.forEach(function (v) { add(v.id, v.user); });
     state.feed.forEach(function (r) { add(r.visitor_id, r.user_id); });
     (extra || []).forEach(function (p) { add(p.visitor_id, p.user_id); });
-    var list = Object.keys(people).map(function (k) { return people[k]; });
+    var list = Object.keys(people).map(function (k) { asked[k] = 1; return people[k]; });
     if (!list.length) return Promise.resolve();
     return rpc('analytics_people', { p_secret: state.secret, p_people: list }).then(function (found) {
       (found || []).forEach(function (n) { names[n.visitor_id] = { username: n.username, polytrack: n.polytrack }; });
@@ -1690,6 +1693,7 @@
       renderOverview(o);
     }).catch(function (e) { $('allTimeSince').textContent = 'Could not load: ' + e.message; });
     loadGrowth();
+    loadNames(null, true);
   }
 
   function exportCSV() {
