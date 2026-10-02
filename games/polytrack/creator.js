@@ -709,6 +709,14 @@
       .catch(function (error) { console.error('Could not check the creator ticket:', error); });
   }
 
+  window.GV = window.GV || {};
+  window.GV.creator = {
+    host: hostNow,
+    join: joinRoom,
+    rpc: rpc,
+    onBeat: function (fn) { beatListeners.push(fn); }
+  };
+
   function start() {
     var gv = identity();
     var room = rooms();
