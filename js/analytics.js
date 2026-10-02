@@ -405,6 +405,7 @@
     if (href) meta.href = href.slice(0, 200);
     var area = el.parentElement && el.parentElement.closest('[id]');
     if (area) meta.area = area.id;
+    if (el.type === 'checkbox' || el.type === 'radio') meta.checked = el.checked;
     track('click', { item_title: text.replace(/\s+/g, ' ').trim().slice(0, 80), item_id: el.dataset && (el.dataset.id || el.dataset.game) || null, meta: meta });
   }, true);
 
