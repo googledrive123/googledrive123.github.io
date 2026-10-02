@@ -3501,7 +3501,9 @@ function startRoll() {
   rollStatus.textContent = 'rolling…';
   rollActions.classList.remove('show');
 
-  pickedGame = GAMES[Math.floor(Math.random() * GAMES.length)];
+  // A game that is not loading for people is a bad thing to land on.
+  const pool = GAMES.filter(g => !failing.has(g.id));
+  pickedGame = pool[Math.floor(Math.random() * pool.length)];
 
   // Build a long strip: shuffled fillers, ending with the winner
   const fillerCount = 60; // names that scroll past
@@ -3868,7 +3870,7 @@ function render() {
   const popularSection = document.getElementById('popularSection');
   const popularGrid = document.getElementById('popularGrid');
   popularGrid.innerHTML = '';
-  const popularGames = popular.slice(0, POPULAR_ROW).map(id => gamesById[id]);
+  const popularGames = popular.filter(id => !failing.has(id)).slice(0, POPULAR_ROW).map(id => gamesById[id]);
   if (isDefaultView && popularGames.length && !GV.layout.hidden('popular')) {
     popularSection.style.display = '';
     document.getElementById('popularCount').textContent = popularGames.length;
@@ -4609,6 +4611,17 @@ function loadPopular() {
   }).catch(() => {});
 }
 
+// Games most people could not get to load lately (analytics/public.sql). The
+// home page stops putting them forward until they load again, but they stay
+// in the grid and in search.
+let failing = new Set();
+function loadFailing() {
+  publicRpc('gv_failing_games').then(list => {
+    failing = new Set(list.map(x => x.id));
+    if (failing.size) render();
+  }).catch(() => {});
+}
+
 // How many people have each game open right now, by id. Refreshed every
 // minute while the tab is visible; tiles already on screen are updated in place.
 let playingNow = {};
@@ -4658,6 +4671,7 @@ async function bootCatalog() {
   initRoute();
   initPolytrackNotice();
   loadPopular();
+  loadFailing();
   loadPlayingNow();
   setInterval(loadPlayingNow, 60000);
 }

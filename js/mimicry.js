@@ -111,7 +111,8 @@ try {
     }
     var el = document.createElement('link');
     el.rel = 'icon';
-    el.href = href;
+    // A game page with a <base> tag would look for /icons/ on its asset host.
+    el.href = /^\/(?!\/)/.test(href) ? location.origin + href : href;
     (document.head || document.documentElement).appendChild(el);
   }
 
@@ -296,7 +297,13 @@ try {
      New Tab, a shared link, or Chrome bringing back a tab it put to sleep can
      land on it with no player around it and no Back bar. A game page with
      nothing around it hands its address to index.html, which opens it in the
-     player the same way it opens any deep link. */
+     player the same way it opens any deep link.
+     Some game pages throw themselves out of any frame they are put in. One
+     of those comes straight back here after it was sent into the player, and
+     sending it in again would loop until the tab is closed. The second time,
+     it stays and runs on its own. */
+  var INTO_LOOP_MS = 20000;
+
   function intoPlayer() {
     if (window.top !== window.self) return false;
     var match = /^\/(?:games|vault\d+)\/([^\/]+)\/(index\.html)?$/.exec(location.pathname);
@@ -305,6 +312,12 @@ try {
     // a game on its own on purpose.
     if (location.search || location.hash) return false;
     try {
+      var last = JSON.parse(sessionStorage.getItem('gv.into') || 'null');
+      if (last && last.path === location.pathname && Date.now() - last.at < INTO_LOOP_MS) {
+        sessionStorage.removeItem('gv.into');
+        return false;
+      }
+      sessionStorage.setItem('gv.into', JSON.stringify({ path: location.pathname, at: Date.now() }));
       sessionStorage.setItem('gv.redirect', '/games/' + match[1]);
       // So index.html can send a page it has no catalog entry for back here,
       // to this exact address (it may be in any vault).

@@ -91,3 +91,41 @@ end;
 $function$;
 
 grant execute on function public.gv_playing_now() to anon, authenticated;
+
+
+-- Games most people could not get to load in the last three days. A game's
+-- page finishing in the player counts as a load, and someone who opened a
+-- game and never got one counts against it. The home page stops putting these
+-- forward, and the dashboard lists them so they get fixed. It takes five
+-- people, so one bad connection cannot do it. Added on 2 October 2026.
+create or replace function public.gv_failing_games()
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'not read from this origin';
+  end if;
+
+  return coalesce((
+    select json_agg(json_build_object('id', game_id, 'name', name, 'tried', tried, 'loaded', loaded) order by tried desc)
+    from (
+      select game_id,
+        max(item_title) as name,
+        count(distinct visitor_id) filter (where event = 'game_open') as tried,
+        count(distinct visitor_id) filter (where event = 'game_load') as loaded
+      from analytics_events
+      where event in ('game_open', 'game_load')
+        and game_id is not null
+        and ts > now() - interval '3 days'
+      group by game_id
+    ) t
+    where tried >= 5 and loaded * 2 < tried
+  ), '[]'::json);
+end;
+$function$;
+
+grant execute on function public.gv_failing_games() to anon, authenticated;
