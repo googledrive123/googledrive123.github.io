@@ -54,3 +54,11 @@ create table if not exists public.gv_social (
 alter table public.gv_social enable row level security;
 revoke all on table public.gv_social from anon, authenticated;
 
+
+-- Whether new messages pop up over a game at all, and who is muted until
+-- when, in epoch milliseconds, 0 being until turned back on. Keys are
+-- server, user:<account id> and convo:<conversation id>.
+alter table public.gv_social add column if not exists notify boolean not null default true;
+alter table public.gv_social add column if not exists mutes jsonb not null default '{}'::jsonb
+  check (pg_column_size(mutes) <= 8192);
+
