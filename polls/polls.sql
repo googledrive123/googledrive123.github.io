@@ -128,3 +128,28 @@ end;
 $function$;
 
 grant execute on function public.gv_polls_open(text) to anon, authenticated;
+
+
+-- The newest 50 polls, open or not, for /polls/.
+create or replace function public.gv_polls_list(p_visitor text default null)
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_visitor text := nullif(left(btrim(coalesce(p_visitor, '')), 64), '');
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'Polls only work on GameVault.';
+  end if;
+
+  return coalesce((
+    select json_agg(public.gv_poll_json(p.id, auth.uid(), v_visitor) order by p.id desc)
+      from (select id from gv_polls order by id desc limit 50) p
+  ), '[]'::json);
+end;
+$function$;
+
+grant execute on function public.gv_polls_list(text) to anon, authenticated;
