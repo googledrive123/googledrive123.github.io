@@ -80,3 +80,8 @@ end;
 $function$;
 
 revoke all on function public.analytics_send_live() from public, anon, authenticated;
+
+create or replace trigger analytics_send_live
+  after insert on public.analytics_events
+  referencing new table as new_rows
+  for each statement execute function public.analytics_send_live();
