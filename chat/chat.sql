@@ -347,9 +347,11 @@ begin
                'until', b.until,
                'created_at', b.created_at,
                'active', b.until is null or b.until > now(),
-               -- Whose ban this one follows from (chat/bans.sql).
+               -- Whose ban this one follows from, and how many browsers it
+               -- holds (chat/bans.sql).
                'via', b.via,
-               'via_name', case when b.via is not null then public.gv_display_name(b.via) end
+               'via_name', case when b.via is not null then public.gv_display_name(b.via) end,
+               'browsers', (select count(distinct l.visitor_id) from gv_browser_links l where l.user_id = b.user_id)
              ) order by b.created_at desc)
         from gv_chat_bans b
         left join profiles p on p.id = b.user_id
