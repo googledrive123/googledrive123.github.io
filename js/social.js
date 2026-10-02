@@ -271,6 +271,7 @@
   function popUp(key, m) {
     if (m.mine || !host.inGame || !host.inGame()) return;
     if (viewing === key) return;
+    if (!me.notify || muted(key) || (m.user_id && muted('user:' + m.user_id))) return;
     var from = key === 'server' ? 'Server'
       : m.kind === 'group' ? (m.name || 'Group chat')
       : 'Direct message';
