@@ -70,6 +70,7 @@
     '.gv-poll-note{display:block;padding:0 2px;overflow:hidden;font-size:.78rem;line-height:1.35;color:var(--muted,#8a8a96);white-space:nowrap;text-overflow:ellipsis}',
     '.gv-poll-try{position:absolute;right:8px;bottom:8px;padding:4px 10px;border-radius:100px;background:rgba(8,8,10,.8);color:#f4f4f6;font-size:.72rem;font-weight:600;transition:background .15s}',
     '.gv-poll-try::before{content:"";display:inline-block;margin-right:6px;border-style:solid;border-width:4px 0 4px 6px;border-color:transparent transparent transparent currentColor;vertical-align:1px}',
+    '.gv-poll-look:hover .gv-poll-try{background:var(--accent,#ff3b3b)}',
     '@keyframes gvPollIn{from{opacity:0;transform:translateY(10px) scale(.98)}}',
     '@media (prefers-reduced-motion:reduce){.gv-poll-box{animation:none}.gv-poll-opt.result::before,.gv-poll-look,.gv-poll-bar span{transition:none}}'
   ].join('');
