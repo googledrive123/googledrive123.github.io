@@ -1728,6 +1728,9 @@
     /* The welcome screen is one screen with nothing under it. The footer
        stays under the games. */
     body:has(#welcome:not(.hidden)) .home-footer { display: none; }
+    @media (min-width: 641px) {
+      html:has(#welcome:not(.hidden)) { overflow-y: hidden; }
+    }
     .home-footer {
       position: relative;
       z-index: 1;
