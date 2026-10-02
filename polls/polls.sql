@@ -14,6 +14,16 @@
 --
 -- Results show once you have voted, and to everyone once a poll is over.
 --
+-- An answer can have a picture, a live page to try and a note (media). The
+-- pages show them as tiles, and a click opens the live page at the size of
+-- a school Chromebook's screen.
+--
+-- A poll can open with an intro (intro): a title, a line and one big
+-- button into the poll.
+--
+-- A preview poll shows only on a local copy of the site, so a poll can be
+-- tried out before it goes to everyone.
+--
 -- Apply against project dxwjxzmlezfyursysays, after chat/bans.sql. Every
 -- statement is safe to run twice.
 
@@ -28,6 +38,19 @@ create table if not exists public.gv_polls (
   ends_at    timestamptz,
   closed     boolean not null default false
 );
+
+-- Extras for the answers, in the same order, or null for a poll without.
+-- Each is an object: img (a picture), page (a live page to try) and note
+-- (a line about it). Paths are on this site.
+alter table public.gv_polls add column if not exists media jsonb;
+
+-- What the pop-up says before the poll itself, or null to go straight to
+-- it: an object with a title and a line of text.
+alter table public.gv_polls add column if not exists intro jsonb;
+
+-- A preview poll only shows on a local copy of the site (localhost:8000), to
+-- try it out before anyone else sees it. The dashboard shows it to everyone.
+alter table public.gv_polls add column if not exists preview boolean not null default false;
 
 create table if not exists public.gv_poll_votes (
   id         bigserial primary key,
@@ -83,6 +106,9 @@ as $function$
            'id', p.id,
            'question', p.question,
            'options', p.options,
+           'media', p.media,
+           'intro', p.intro,
+           'preview', p.preview,
            'created_at', p.created_at,
            'ends_at', p.ends_at,
            'open', x.open,
@@ -104,7 +130,21 @@ $function$;
 revoke all on function public.gv_poll_json(bigint, uuid, text) from public, anon, authenticated;
 
 
--- Every poll still open, newest first, for the pop-up.
+-- True when the request comes from a local copy of the site.
+create or replace function public.gv_origin_local()
+returns boolean
+language sql
+stable
+set search_path to 'public', 'pg_temp'
+as $function$
+  select coalesce(public.gv_request_origin(), '') in ('http://localhost:8000', 'http://127.0.0.1:8000');
+$function$;
+
+revoke all on function public.gv_origin_local() from public, anon, authenticated;
+
+
+-- Every poll still open, newest first, for the pop-up. Preview polls only
+-- on localhost.
 create or replace function public.gv_polls_open(p_visitor text default null)
 returns json
 language plpgsql
@@ -123,6 +163,7 @@ begin
     select json_agg(public.gv_poll_json(p.id, auth.uid(), v_visitor) order by p.id desc)
       from gv_polls p
      where not p.closed and (p.ends_at is null or p.ends_at > now())
+       and (not p.preview or public.gv_origin_local())
   ), '[]'::json);
 end;
 $function$;
@@ -130,7 +171,8 @@ $function$;
 grant execute on function public.gv_polls_open(text) to anon, authenticated;
 
 
--- The newest 50 polls, open or not, for /polls/.
+-- The newest 50 polls, open or not, for /polls/. Preview polls only on
+-- localhost.
 create or replace function public.gv_polls_list(p_visitor text default null)
 returns json
 language plpgsql
@@ -147,7 +189,9 @@ begin
 
   return coalesce((
     select json_agg(public.gv_poll_json(p.id, auth.uid(), v_visitor) order by p.id desc)
-      from (select id from gv_polls order by id desc limit 50) p
+      from (select id from gv_polls
+             where not preview or public.gv_origin_local()
+             order by id desc limit 50) p
   ), '[]'::json);
 end;
 $function$;
@@ -176,7 +220,7 @@ begin
   end if;
 
   select * into v_poll from gv_polls where id = p_poll;
-  if not found then
+  if not found or (v_poll.preview and not public.gv_origin_local()) then
     raise exception 'That poll is gone.';
   end if;
   if v_poll.closed or v_poll.ends_at <= now() then
@@ -224,6 +268,7 @@ begin
              'created_at', p.created_at,
              'ends_at', p.ends_at,
              'closed', p.closed,
+             'preview', p.preview,
              'open', not p.closed and (p.ends_at is null or p.ends_at > now()),
              'counts', (
                select json_agg(coalesce(c.n, 0) order by i.idx)
@@ -288,6 +333,26 @@ begin
   end if;
   update gv_polls set closed = true where id = p_id;
   return found;
+end;
+$function$;
+
+-- Shows a preview poll to everyone, without the votes from trying it out.
+create or replace function public.gv_poll_publish(p_secret text, p_id bigint)
+returns boolean
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+  update gv_polls set preview = false where id = p_id and preview;
+  if not found then
+    return false;
+  end if;
+  delete from gv_poll_votes where poll_id = p_id;
+  return true;
 end;
 $function$;
 

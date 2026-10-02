@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Widgets · GameVault preview</title>
+<link rel="icon" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap" rel="stylesheet">
+<style>
+  /* Ember theme: every color comes from one hue. */
+  :root {
+    --h: 25; --c: 1; --ah: 25;
+    --bg: oklch(0.155 calc(0.028 * var(--c)) var(--h));
+    --s2: oklch(0.21 calc(0.038 * var(--c)) var(--h));
+    --s3: oklch(0.265 calc(0.048 * var(--c)) var(--h));
+    --s4: oklch(0.32 calc(0.055 * var(--c)) var(--h));
+    --tx: oklch(0.97 calc(0.012 * var(--c)) var(--h));
+    --mu: oklch(0.79 calc(0.035 * var(--c)) var(--h));
+    --red: oklch(0.6 0.21 var(--ah));
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--tx); font-family: 'Manrope', system-ui, sans-serif; }
+  a { color: inherit; text-decoration: none; }
+  .screen { position: relative; height: 100vh; min-height: 635px; overflow: hidden; display: flex; flex-direction: column; }
+
+  .top { flex-shrink: 0; height: 68px; display: flex; align-items: center; gap: 28px; padding: 0 32px; }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand img { width: 26px; height: 26px; display: block; }
+  .brand span { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; }
+  .tabs { display: flex; gap: 4px; font-size: 14px; font-weight: 600; }
+  .tab { height: 36px; padding: 0 14px; display: flex; align-items: center; border-radius: 12px; color: var(--mu); cursor: pointer; }
+  .tab:hover { background: var(--s2); }
+  .tab.on { background: var(--s3); color: inherit; }
+
+  .tools { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .search { display: flex; align-items: center; gap: 10px; width: 320px; height: 36px; padding: 0 12px; border-radius: 12px; background: var(--s2); }
+  .search svg { flex-shrink: 0; opacity: .7; }
+  .search input { flex: 1; min-width: 0; height: 100%; border: 0; outline: none; background: transparent; color: inherit; font-family: inherit; font-size: 14px; }
+  .search input::placeholder { color: currentColor; opacity: .5; }
+  .icon-btn { position: relative; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 12px; border: 0; background: var(--s2); color: inherit; cursor: pointer; padding: 0; }
+  .dot { position: absolute; top: 7px; right: 7px; width: 8px; height: 8px; border-radius: 50%; background: var(--red); }
+  .avatar { width: 36px; height: 36px; border-radius: 12px; background: var(--s4); display: grid; place-items: center; font-size: 14px; font-weight: 700; }
+
+  .cards { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-rows: minmax(0, 1.25fr) minmax(0, 1fr); gap: 14px; padding: 2px 32px 28px; }
+  .card { border-radius: 22px; background: var(--s2); }
+  .kicker { font-size: 13px; color: var(--mu); }
+  .btn-red { display: flex; align-items: center; border-radius: 12px; background: var(--red); color: #fff; font-size: 14px; font-weight: 700; }
+
+  .jump { grid-column: span 2; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); overflow: hidden; cursor: pointer; }
+  .jump-art { position: relative; display: block; min-height: 0; }
+  .jump-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+  .jump-body { display: flex; flex-direction: column; padding: 22px; min-width: 0; }
+  .jump-name { margin-top: 6px; font-size: 30px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; }
+  .jump-meta { margin-top: 4px; font-size: 13px; color: var(--mu); }
+  .jump-play { margin-top: 16px; align-self: flex-start; height: 40px; padding: 0 20px; }
+  .next { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
+  .next-row { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .next-row img { width: 40px; height: 30px; border-radius: 8px; object-fit: cover; flex-shrink: 0; display: block; }
+  .next-name { flex: 1; min-width: 0; font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .next-ago { font-size: 12px; color: var(--mu); white-space: nowrap; }
+
+  .totw { display: flex; flex-direction: column; overflow: hidden; cursor: pointer; }
+  .totw > img { width: 100%; height: 44%; object-fit: cover; display: block; flex-shrink: 0; }
+  .totw-body { flex: 1; display: flex; flex-direction: column; padding: 16px 18px 18px; }
+  .totw-name { margin-top: 4px; font-size: 22px; font-weight: 800; letter-spacing: -0.025em; }
+  .totw-lead { margin-top: 2px; font-size: 13px; color: var(--mu); }
+  .totw-foot { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .totw-time { font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .totw-race { height: 36px; padding: 0 16px; }
+
+  .side { display: grid; grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; min-height: 0; }
+  .card-head { display: flex; justify-content: space-between; font-size: 13px; }
+  .card-head b { font-weight: 700; }
+  .mu { color: var(--mu); }
+  .clock { display: flex; flex-direction: column; padding: 16px 18px; }
+  .timer { margin-top: auto; font-size: 40px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .bar { margin-top: 12px; height: 6px; border-radius: 3px; background: oklch(0.92 calc(0.04 * var(--c)) var(--h) / 0.12); overflow: hidden; }
+  .bar div { height: 100%; border-radius: 3px; background: var(--tx); }
+  .friends { display: flex; flex-direction: column; gap: 10px; padding: 16px 18px; }
+  .friend { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .friend-i { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; background: var(--s4); display: grid; place-items: center; font-size: 12px; font-weight: 800; }
+  .friend-t { display: flex; flex-direction: column; min-width: 0; }
+  .friend-n { font-size: 13px; font-weight: 700; }
+  .friend-s { font-size: 12px; color: var(--mu); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .pop { grid-column: span 3; display: flex; flex-direction: column; padding: 16px 18px 18px; min-height: 0; }
+  .more { color: var(--mu); cursor: pointer; }
+  .pop .card-head { align-items: baseline; margin-bottom: 12px; }
+  .pop .more:hover { color: oklch(0.97 0.01 25); }
+  .grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
+  .tile { display: flex; flex-direction: column; gap: 8px; min-width: 0; cursor: pointer; }
+  .tile-art { display: block; aspect-ratio: 4/3; border-radius: 14px; overflow: hidden; background: var(--s3); transition: transform .15s; }
+  .tile-art:hover { transform: translateY(-3px); }
+  .tile-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .tile-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .empty { padding: 28px 0; font-size: 14px; color: var(--mu); }
+
+  .news { display: flex; flex-direction: column; gap: 12px; padding: 16px 18px; min-height: 0; }
+  .news-item { display: flex; flex-direction: column; gap: 2px; }
+  .news-item b { font-size: 13px; font-weight: 700; }
+  .news-item span { font-size: 12px; color: var(--mu); }
+
+  [data-soon] { cursor: pointer; }
+  .pv-toast{position:fixed;left:50%;bottom:24px;z-index:100;transform:translate(-50%,8px);padding:10px 16px;border-radius:12px;background:rgba(20,20,24,.92);color:#f4f4f6;font-size:13px;font-weight:500;line-height:1.3;box-shadow:0 10px 30px rgba(0,0,0,.35);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
+  .pv-toast.on{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<div class="screen">
+  <header class="top">
+    <span class="brand"><img src="/favicon.svg" alt=""><span>gamevault</span></span>
+    <nav class="tabs">
+      <a class="tab on">home</a>
+      <a class="tab" data-soon>games</a>
+      <a class="tab" data-soon>movies</a>
+      <a class="tab" data-soon>music</a>
+      <a class="tab" data-soon>leaderboard</a>
+      <a class="tab" data-soon>more</a>
+    </nav>
+    <div class="tools">
+      <label class="search">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input id="q2c" type="text" placeholder="search 1,958 games" autocomplete="off" aria-label="Search games">
+      </label>
+      <button class="icon-btn" type="button" title="Chat" data-soon><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v10H9l-5 4z"></path></svg><span class="dot"></span></button>
+      <span class="avatar" title="Profile" data-soon>M</span>
+    </div>
+  </header>
+
+  <main class="cards">
+    <a class="card jump" data-soon>
+      <span class="jump-art"><img src="/thumbs/slope2.webp" alt=""></span>
+      <span class="jump-body">
+        <span class="kicker">jump back in</span>
+        <span class="jump-name">Slope 2</span>
+        <span class="jump-meta">12 min ago · action</span>
+        <span class="btn-red jump-play">play</span>
+        <span class="next">
+          <span class="next-row"><img src="/thumbs/drivemad.webp" alt=""><span class="next-name">Drive Mad</span><span class="next-ago">yesterday</span></span>
+          <span class="next-row"><img src="/thumbs/retro-bowl.webp" alt=""><span class="next-name">Retro Bowl</span><span class="next-ago">yesterday</span></span>
+        </span>
+      </span>
+    </a>
+
+    <a class="card totw" data-soon>
+      <img src="/thumbs/polytrack.webp" alt="">
+      <span class="totw-body">
+        <span class="kicker">track of the week · PolyTrack</span>
+        <span class="totw-name">Summer 3</span>
+        <span class="totw-lead">nova leads at 1:02.418</span>
+        <span class="totw-foot">
+          <span class="totw-time" id="totw">2d 13:54:09</span>
+          <span class="btn-red totw-race">race</span>
+        </span>
+      </span>
+    </a>
+
+    <div class="side">
+      <div class="card clock">
+        <div class="card-head"><b>period 3</b><span class="mu">ends 10:30 am</span></div>
+        <div class="timer" id="timer">23:41</div>
+        <div class="bar"><div id="timerPct" style="width:52.6%"></div></div>
+      </div>
+      <div class="card friends">
+        <div class="card-head"><b>friends</b><span class="mu">2 online</span></div>
+        <div class="friend" data-soon><span class="friend-i">J</span><span class="friend-t"><span class="friend-n">jules</span><span class="friend-s">playing PolyTrack</span></span></div>
+        <div class="friend" data-soon><span class="friend-i">K</span><span class="friend-t"><span class="friend-n">kai</span><span class="friend-s">in chat</span></span></div>
+      </div>
+    </div>
+
+    <div class="card pop">
+      <div class="card-head"><b id="head2c">popular this week</b><a class="more" data-soon>all 1,958 games →</a></div>
+      <div class="grid" id="pop2c">
+        <a class="tile" data-soon><span class="tile-art"><img src="/thumbs/basketball-stars.webp" alt=""></span><span class="tile-name">Basketball Stars</span></a>
+        <a class="tile" data-soon><span class="tile-art"><img src="/thumbs/amazing-rope-police.webp" alt=""></span><span class="tile-name">Amazing Rope Police</span></a>
+        <a class="tile" data-soon><span class="tile-art"><img src="/thumbs/ice-dodo.webp" alt=""></span><span class="tile-name">Ice Dodo</span></a>
+        <a class="tile" data-soon><span class="tile-art"><img src="/thumbs/adrenalinechallenge2.webp" alt=""></span><span class="tile-name">Adrenaline Challenge 2</span></a>
+        <a class="tile" data-soon><span class="tile-art"><img src="/thumbs/stickman-hook.webp" alt=""></span><span class="tile-name">Stickman Hook</span></a>
+        <a class="tile" data-soon><span class="tile-art"><img src="/thumbs/crossyroad.webp" alt=""></span><span class="tile-name">Crossy Road</span></a>
+      </div>
+      <div class="empty" id="empty2c" hidden>nothing matches that. try a shorter name.</div>
+    </div>
+
+    <div class="card news">
+      <div class="card-head"><b>what’s new</b><a class="more" data-soon>all</a></div>
+      <div class="news-item" data-soon><b>friends</b><span>see what friends are playing · oct 2</span></div>
+      <div class="news-item" data-soon><b>messages and group chats</b><span>works over games too · oct 2</span></div>
+      <div class="news-item" data-soon><b>688 more games</b><span>now 1,958 in total · oct 1</span></div>
+    </div>
+  </main>
+</div>
+
+<div class="pv-toast" id="pvToast" role="status">Just a preview of the home page</div>
+
+<script>
+/* Widgets home page preview: the class timer, the track of the week
+   countdown and search all work; links to other pages only show a toast. */
+(function () {
+  'use strict';
+
+  var state = {
+    left: 1421,
+    totw: 2 * 86400 + 13 * 3600 + 54 * 60 + 9,
+    q: ''
+  };
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  // Class timer: mm:ss left in the period, and how far through it is.
+  // After 0 it starts over at 50 minutes.
+  var timer = document.getElementById('timer');
+  var timerPct = document.getElementById('timerPct');
+  function drawTimer() {
+    var pct = Math.max(0, Math.min(100, (1 - state.left / 3000) * 100));
+    timer.textContent = pad(Math.floor(state.left / 60)) + ':' + pad(state.left % 60);
+    timerPct.style.width = pct.toFixed(1) + '%';
+  }
+
+  // Track of the week ends in d + hh:mm:ss, and stops at 0.
+  var totw = document.getElementById('totw');
+  function drawTotw() {
+    var t = state.totw;
+    totw.textContent = Math.floor(t / 86400) + 'd ' + pad(Math.floor(t / 3600) % 24) + ':' +
+      pad(Math.floor(t / 60) % 60) + ':' + pad(t % 60);
+  }
+
+  setInterval(function () {
+    state.left = state.left > 0 ? state.left - 1 : 3000;
+    drawTimer();
+    state.totw = Math.max(0, state.totw - 1);
+    drawTotw();
+  }, 1000);
+
+  // Search: while there is text, popular this week becomes the first six
+  // games whose name has it. Clearing the box brings popular back.
+  var G = [
+    ['polytrack', 'PolyTrack'], ['basketball-stars', 'Basketball Stars'],
+    ['amazing-rope-police', 'Amazing Rope Police'], ['ice-dodo', 'Ice Dodo'],
+    ['adrenalinechallenge2', 'Adrenaline Challenge 2'], ['stickman-hook', 'Stickman Hook'],
+    ['crossyroad', 'Crossy Road'], ['retrobowlcollege', 'Retro Bowl College'],
+    ['basket-bros', 'Basket Bros'], ['rocketleague', 'Rocket League'], ['2048', '2048'],
+    ['retro-bowl', 'Retro Bowl'], ['bit-planes', 'Bit Planes'], ['drifthunters', 'Drift Hunters'],
+    ['angry-sharks', 'Angry Sharks'], ['wordle', 'Wordle'], ['aquapark-slides', 'Aquapark Slides'],
+    ['fnaf', "Five Nights at Freddy's"], ['subway-surfers', 'Subway Surfers'],
+    ['grand-theft-auto-vice-city', 'Grand Theft Auto Vice City'], ['backrooms', 'The Backrooms'],
+    ['slope2', 'Slope 2'], ['cluster-rush', 'Cluster Rush'], ['motox3m-spooky', 'Moto X3M Spooky Land'],
+    ['big-neon-tower', 'Big Neon Tower'], ['drivemad', 'Drive Mad'], ['bitlife', 'BitLife'],
+    ['a-difficult-game-about-climbing', 'A Difficult Game About Climbing'],
+    ['madalincars', 'Madalin Cars'], ['snowrider3d', 'Snow Rider 3D'],
+    ['badtimesimulator', 'Bad Time Simulator'], ['2drocketleague', '2D Rocket League'],
+    ['cuphead', 'Cuphead'], ['flappyplane', 'Flappy Plane'],
+    ['adventure-capitalist', 'Adventure Capitalist'], ['1v1lol', '1v1.LOL'],
+    ['awesometanks2', 'Awesome Tanks 2'], ['vex7', 'Vex 7'], ['minesweeper', 'Minesweeper'],
+    ['timeshooter2', 'Time Shooter 2'], ['8ball', '8 Ball Pool'], ['draw-the-hill', 'Draw the Hill'],
+    ['geometrydash', 'Geometry Dash'], ['hollow-knight-silksong', 'Hollow Knight Silksong'],
+    ['1on1soccer', '1 on 1 Soccer'], ['slime-rancher', 'Slime Rancher']
+  ];
+  var POP = ['basketball-stars', 'amazing-rope-police', 'ice-dodo', 'adrenalinechallenge2', 'stickman-hook', 'crossyroad'];
+  var input = document.getElementById('q2c');
+  var head2c = document.getElementById('head2c');
+  var pop2c = document.getElementById('pop2c');
+  var empty2c = document.getElementById('empty2c');
+  var shown = POP.join();
+
+  function byId(id) {
+    return G.filter(function (g) { return g[0] === id; })[0];
+  }
+
+  function tile(g) {
+    var a = document.createElement('a');
+    a.className = 'tile';
+    a.setAttribute('data-soon', '');
+    a.innerHTML = '<span class="tile-art"><img src="/thumbs/' + g[0] + '.webp" alt=""></span><span class="tile-name"></span>';
+    a.lastChild.textContent = g[1];
+    return a;
+  }
+
+  function drawSearch() {
+    var q = state.q.trim();
+    var lq = q.toLowerCase();
+    var found = G.filter(function (g) { return g[1].toLowerCase().indexOf(lq) !== -1; });
+    var list = q ? found.slice(0, 6) : POP.map(byId);
+    var key = list.map(function (g) { return g[0]; }).join();
+    head2c.textContent = q ? 'results for “' + q + '”' : 'popular this week';
+    if (key !== shown) {
+      shown = key;
+      pop2c.replaceChildren.apply(pop2c, list.map(tile));
+    }
+    empty2c.hidden = !q || found.length > 0;
+  }
+
+  input.addEventListener('input', function () {
+    state.q = input.value;
+    drawSearch();
+  });
+
+  // Anything that would leave the home page is a dead end in this preview.
+  var toast = document.getElementById('pvToast');
+  var toastTimer = 0;
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('[data-soon]')) return;
+    e.preventDefault();
+    toast.classList.add('on');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.classList.remove('on'); }, 1600);
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Start page · GameVault preview</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400..800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:#f7f7f5;color:#18181b;font-family:'Figtree',system-ui,sans-serif}
+a{color:inherit}
+img{display:block}
+input::placeholder{color:currentColor;opacity:.5}
+.hero{position:relative;height:635px;display:flex;flex-direction:column}
+.top{height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 24px 0 28px}
+.clock{display:flex;align-items:center;gap:10px;font-size:14px}
+.clock-name{font-weight:600}
+.clock-left{color:#64646b;font-variant-numeric:tabular-nums}
+.nav{display:flex;align-items:center;gap:4px}
+.nav-link{height:36px;padding:0 12px;display:flex;align-items:center;border-radius:999px;font-size:14px;color:#3f3f46;text-decoration:none;cursor:pointer}
+.nav-link:hover,.icon-btn:hover{background:#ecebe8}
+.icon-btn{position:relative;width:36px;height:36px;display:grid;place-items:center;border-radius:50%;border:0;background:transparent;color:#3f3f46;cursor:pointer;padding:0}
+.icon-btn.chat{margin-left:4px}
+.dot{position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:#e0262f;box-shadow:0 0 0 2px #f7f7f5}
+.avatar{width:32px;height:32px;margin-left:6px;border-radius:50%;border:0;background:#18181b;color:#fff;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;padding:0}
+.main{flex:1;display:flex;flex-direction:column;align-items:center;padding-top:84px}
+.brand{display:flex;align-items:center;gap:14px}
+.brand img{width:40px;height:40px}
+.brand span{font-size:40px;font-weight:700;letter-spacing:-0.035em;line-height:1}
+.search{position:relative;width:600px;margin-top:28px}
+.search-box{display:flex;align-items:center;gap:12px;height:52px;padding:0 8px 0 20px;border-radius:999px;background:#fff;border:1px solid #e5e4e0;box-shadow:0 1px 2px rgba(0,0,0,0.04),0 6px 20px rgba(0,0,0,0.05);color:#18181b}
+.search-box svg{flex-shrink:0}
+.search-box input{flex:1;min-width:0;height:100%;border:0;outline:none;background:transparent;font-family:inherit;font-size:16px;color:#18181b}
+.surprise{height:36px;padding:0 14px;border-radius:999px;border:0;background:#f0efec;color:#18181b;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+.surprise:hover{background:#e6e5e1}
+.drop{position:absolute;top:60px;left:0;right:0;z-index:5;background:#fff;border:1px solid #e5e4e0;border-radius:20px;box-shadow:0 12px 32px rgba(0,0,0,0.08);padding:8px}
+.drop-item{display:flex;align-items:center;gap:12px;width:100%;padding:8px 12px;border:0;border-radius:12px;background:transparent;font-family:inherit;font-size:14px;color:#18181b;text-align:left;cursor:pointer}
+.drop-item:hover{background:#f3f2ef}
+.drop-item img{width:40px;height:30px;border-radius:6px;object-fit:cover}
+.drop-name{flex:1;font-weight:500}
+.drop-cat{font-size:13px;color:#64646b}
+.drop-empty{padding:12px;font-size:14px;color:#64646b}
+.jump{margin-top:40px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.jump-label{font-size:13px;color:#64646b}
+.shortcuts{display:flex;gap:4px}
+.shortcut{width:96px;display:flex;flex-direction:column;align-items:center;gap:8px;padding:10px 6px;border-radius:14px;color:#18181b;text-decoration:none;cursor:pointer}
+.shortcut:hover{background:#ecebe8}
+.shortcut img{width:64px;height:64px;border-radius:16px;object-fit:cover;box-shadow:0 0 0 1px rgba(0,0,0,0.06)}
+.shortcut span{font-size:12px;font-weight:500;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.totw{margin-top:28px;display:flex;align-items:center;gap:12px;height:48px;padding:0 8px 0 18px;border-radius:999px;background:#fff;border:1px solid #e5e4e0;font-size:14px;color:#18181b;text-decoration:none;cursor:pointer;white-space:nowrap}
+.totw:hover{border-color:#d4d3cf}
+.totw-name{font-weight:600}
+.totw-line{color:#64646b}
+.totw-time{font-variant-numeric:tabular-nums}
+.totw-race{height:34px;padding:0 16px;display:flex;align-items:center;border-radius:999px;background:#e0262f;color:#fff;font-weight:700}
+.more{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);display:flex;align-items:center;gap:6px;font-size:13px;color:#64646b;text-decoration:none;cursor:pointer}
+.lib{background:#fff;border-top:1px solid #e5e4e0;padding:40px 40px 56px}
+.lib-head{display:flex;align-items:baseline;gap:12px;margin-bottom:12px}
+.lib-head h2{margin:0;font-size:22px;font-weight:700;letter-spacing:-0.02em}
+.lib-sub{font-size:14px;color:#64646b}
+.clear{margin-left:auto;height:36px;padding:0 16px;border-radius:999px;border:1px solid #d4d3cf;background:#fff;color:#18181b;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.clear:hover{background:#f3f2ef}
+.tabs{display:flex;gap:24px;border-bottom:1px solid #e5e4e0;margin-bottom:28px}
+.tab{height:44px;padding:0 2px;border:0;background:transparent;color:#64646b;box-shadow:inset 0 -2px 0 transparent;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.tab.on{color:#18181b;box-shadow:inset 0 -2px 0 #e0262f}
+.grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:28px 20px}
+.tile{display:flex;flex-direction:column;gap:10px;min-width:0;color:#18181b;text-decoration:none;cursor:pointer}
+.thumb{display:block;aspect-ratio:4/3;border-radius:12px;overflow:hidden;background:#f0efec;transition:transform .15s,box-shadow .15s}
+.thumb:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,0.12)}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.tile-text{display:flex;flex-direction:column;gap:2px;min-width:0}
+.tile-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile-cat{font-size:13px;color:#64646b}
+.empty{padding:48px 0;font-size:14px;color:#64646b}
+.foot{display:flex;justify-content:center;gap:20px;padding:22px 40px 28px;font-size:13px;color:#64646b;background:#fff;border-top:1px solid #efeeeb}
+.foot a{text-decoration:none;cursor:pointer}
+.foot a:hover{color:#18181b}
+.pv-toast{position:fixed;left:50%;bottom:24px;z-index:100;transform:translate(-50%,8px);padding:10px 16px;border-radius:12px;background:rgba(20,20,24,.92);color:#f4f4f6;font-size:13px;font-weight:500;line-height:1.3;box-shadow:0 10px 30px rgba(0,0,0,.35);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
+.pv-toast.on{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<div class="hero">
+  <header class="top">
+    <div class="clock" title="Class timer">
+      <svg width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="7" fill="none" stroke="#e5e4e0" stroke-width="2.5"></circle><circle id="ring" cx="9" cy="9" r="7" fill="none" stroke="#18181b" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="23.15 43.98" transform="rotate(-90 9 9)"></circle></svg>
+      <span class="clock-name">Period 3</span>
+      <span class="clock-left"><span id="timer">23:41</span> left</span>
+    </div>
+    <nav class="nav">
+      <a class="nav-link" data-soon>Movies</a>
+      <a class="nav-link" data-soon>Music</a>
+      <a class="nav-link" data-soon>Leaderboard</a>
+      <button class="icon-btn chat" type="button" title="Chat" data-soon>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v10H9l-5 4z"></path></svg>
+        <span class="dot"></span>
+      </button>
+      <button class="icon-btn" type="button" title="Apps" data-soon>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="5" r="2"></circle><circle cx="12" cy="5" r="2"></circle><circle cx="19" cy="5" r="2"></circle><circle cx="5" cy="12" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle><circle cx="5" cy="19" r="2"></circle><circle cx="12" cy="19" r="2"></circle><circle cx="19" cy="19" r="2"></circle></svg>
+      </button>
+      <button class="avatar" type="button" title="Profile" data-soon>M</button>
+    </nav>
+  </header>
+
+  <div class="main">
+    <div class="brand">
+      <img src="/favicon.svg" alt="">
+      <span>GameVault</span>
+    </div>
+    <div class="search">
+      <label class="search-box">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64646b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input id="q" placeholder="Search 1,958 games" aria-label="Search games" autocomplete="off" spellcheck="false">
+        <button class="surprise" id="surprise" type="button">Surprise me</button>
+      </label>
+      <div class="drop" id="drop" hidden>
+        <div id="dropList"></div>
+        <div class="drop-empty" id="dropEmpty" hidden>No games match that.</div>
+      </div>
+    </div>
+
+    <div class="jump">
+      <span class="jump-label">Jump back in</span>
+      <div class="shortcuts">
+        <a class="shortcut" data-soon><img src="/thumbs/slope2.webp" alt=""><span>Slope 2</span></a>
+        <a class="shortcut" data-soon><img src="/thumbs/drivemad.webp" alt=""><span>Drive Mad</span></a>
+        <a class="shortcut" data-soon><img src="/thumbs/retro-bowl.webp" alt=""><span>Retro Bowl</span></a>
+        <a class="shortcut" data-soon><img src="/thumbs/geometrydash.webp" alt=""><span>Geometry Dash</span></a>
+        <a class="shortcut" data-soon><img src="/thumbs/1v1lol.webp" alt=""><span>1v1.LOL</span></a>
+        <a class="shortcut" data-soon><img src="/thumbs/cuphead.webp" alt=""><span>Cuphead</span></a>
+        <a class="shortcut" data-soon><img src="/thumbs/basketball-stars.webp" alt=""><span>Basketball Stars</span></a>
+        <a class="shortcut" data-soon><img src="/thumbs/amazing-rope-police.webp" alt=""><span>Amazing Rope Police</span></a>
+      </div>
+    </div>
+
+    <a class="totw" data-soon>
+      <span class="totw-name">Track of the week</span>
+      <span class="totw-line">PolyTrack · Summer 3 · nova leads at 1:02.418 · ends in <span class="totw-time" id="totw">2d 13:54:09</span></span>
+      <span class="totw-race">Race</span>
+    </a>
+  </div>
+
+  <a class="more" id="more" href="#games">All 1,958 games<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></a>
+</div>
+
+<section class="lib" id="games">
+  <div class="lib-head">
+    <h2 id="libHead">All games</h2>
+    <span class="lib-sub" id="libSub">1,958</span>
+    <button class="clear" id="clear" type="button" hidden>Clear search</button>
+  </div>
+  <div class="tabs" id="tabs">
+    <button class="tab on" type="button" data-cat="All">All</button>
+    <button class="tab" type="button" data-cat="Action">Action</button>
+    <button class="tab" type="button" data-cat="Arcade">Arcade</button>
+    <button class="tab" type="button" data-cat="Driving">Driving</button>
+    <button class="tab" type="button" data-cat="Horror">Horror</button>
+    <button class="tab" type="button" data-cat="Platformer">Platformer</button>
+    <button class="tab" type="button" data-cat="Puzzle">Puzzle</button>
+    <button class="tab" type="button" data-cat="Racing">Racing</button>
+    <button class="tab" type="button" data-cat="Shooter">Shooter</button>
+    <button class="tab" type="button" data-cat="Sports">Sports</button>
+  </div>
+  <div class="grid" id="grid">
+    <a class="tile" data-soon><span class="thumb"><img src="/thumbs/polytrack.webp" alt=""></span><span class="tile-text"><span class="tile-name">PolyTrack</span><span class="tile-cat">Racing</span></span></a>
+    <a class="tile" data-soon><span class="thumb"><img src="/thumbs/basketball-stars.webp" alt=""></span><span class="tile-text"><span class="tile-name">Basketball Stars</span><span class="tile-cat">Sports</span></span></a>
+    <a class="tile" data-soon><span class="thumb"><img src="/thumbs/amazing-rope-police.webp" alt=""></span><span class="tile-text"><span class="tile-name">Amazing Rope Police</span><span class="tile-cat">Action</span></span></a>
+    <a class="tile" data-soon><span class="thumb"><img src="/thumbs/ice-dodo.webp" alt=""></span><span class="tile-text"><span class="tile-name">Ice Dodo</span><span class="tile-cat">Arcade</span></span></a>
+    <a class="tile" data-soon><span class="thumb"><img src="/thumbs/adrenalinechallenge2.webp" alt=""></span><span class="tile-text"><span class="tile-name">Adrenaline Challenge 2</span><span class="tile-cat">Action</span></span></a>
+    <a class="tile" data-soon><span class="thumb"><img src="/thumbs/stickman-hook.webp" alt=""></span><span class="tile-text"><span class="tile-name">Stickman Hook</span><span class="tile-cat">Action</span></span></a>
+    <a class="tile" data-soon><span class="thumb"><img src="/thumbs/crossyroad.webp" alt=""></span><span class="tile-text"><span class="tile-name">Crossy Road</span><span class="tile-cat">Arcade</span></span></a>
+    <a class="tile" data-soon><span class="thumb"><img src="/thumbs/retrobowlcollege.webp" alt=""></span><span class="tile-text"><span class="tile-name">Retro Bowl College</span><span class="tile-cat">Sports</span></span></a>
+    <a class="tile" data-soon><span class="thumb"><img src="/thumbs/basket-bros.webp" alt=""></span><span class="tile-text"><span class="tile-name">Basket Bros</span><span class="tile-cat">Sports</span></span></a>
+    <a class="tile" data-soon><span class="thumb"><img src="/thumbs/rocketleague.webp" alt=""></span><span class="tile-text"><span class="tile-name">Rocket League</span><span class="tile-cat">Sports</span></span></a>
+    <a class="tile" data-soon><span class="thumb"><img src="/thumbs/2048.webp" alt=""></span><span class="tile-text"><span class="tile-name">2048</span><span class="tile-cat">Puzzle</span></span></a>
+    <a class="tile" data-soon><span class="thumb"><img src="/thumbs/retro-bowl.webp" alt=""></span><span class="tile-text"><span class="tile-name">Retro Bowl</span><span class="tile-cat">Sports</span></span></a>
+    <a class="tile" data-soon><span class="thumb"><img src="/thumbs/bit-planes.webp" alt=""></span><span class="tile-text"><span class="tile-name">Bit Planes</span><span class="tile-cat">Action</span></span></a>
+    <a class="tile" data-soon><span class="thumb"><img src="/thumbs/drifthunters.webp" alt=""></span><span class="tile-text"><span class="tile-name">Drift Hunters</span><span class="tile-cat">Racing</span></span></a>
+    <a class="tile" data-soon><span class="thumb"><img src="/thumbs/angry-sharks.webp" alt=""></span><span class="tile-text"><span class="tile-name">Angry Sharks</span><span class="tile-cat">Arcade</span></span></a>
+    <a class="tile" data-soon><span class="thumb"><img src="/thumbs/wordle.webp" alt=""></span><span class="tile-text"><span class="tile-name">Wordle</span><span class="tile-cat">Puzzle</span></span></a>
+    <a class="tile" data-soon><span class="thumb"><img src="/thumbs/aquapark-slides.webp" alt=""></span><span class="tile-text"><span class="tile-name">Aquapark Slides</span><span class="tile-cat">Arcade</span></span></a>
+    <a class="tile" data-soon><span class="thumb"><img src="/thumbs/fnaf.webp" alt=""></span><span class="tile-text"><span class="tile-name">Five Nights at Freddy's</span><span class="tile-cat">Horror</span></span></a>
+  </div>
+  <div class="empty" id="empty" hidden>No games match that. Try a shorter name.</div>
+</section>
+
+<footer class="foot">
+  <a data-soon>About</a>
+  <a data-soon>Contact</a>
+  <a data-soon>Privacy</a>
+  <a data-soon>Terms</a>
+  <a data-soon>Backup addresses</a>
+  <span>GameVault · 1,958 games</span>
+</footer>
+
+<div class="pv-toast" id="pvToast" role="status">Just a preview of the home page</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var state = {
+    totw: 2 * 86400 + 13 * 3600 + 54 * 60 + 9,
+    qc: '',
+    cc: 'All',
+    focusC: false,
+    left: 1421
+  };
+
+  function $(id) { return document.getElementById(id); }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+
+  // Class timer: counts down, wraps to 3000 after 0. The ring fills as the
+  // period goes by (43.98 is the ring's length).
+  function renderTimer() {
+    var pct = Math.max(0, Math.min(100, (1 - state.left / 3000) * 100));
+    $('timer').textContent = pad(Math.floor(state.left / 60)) + ':' + pad(state.left % 60);
+    $('ring').setAttribute('stroke-dasharray', (pct * 0.4398).toFixed(2) + ' 43.98');
+  }
+
+  // Track of the week: "2d 13:54:09", stops at zero.
+  function renderTotw() {
+    var t = state.totw;
+    $('totw').textContent = Math.floor(t / 86400) + 'd ' + pad(Math.floor(t / 3600) % 24) + ':' + pad(Math.floor(t / 60) % 60) + ':' + pad(t % 60);
+  }
+
+  setInterval(function () {
+    state.left = state.left > 0 ? state.left - 1 : 3000;
+    renderTimer();
+    state.totw = Math.max(0, state.totw - 1);
+    renderTotw();
+  }, 1000);
+
+  // The games the library and the search dropdown draw from: id, name, categories.
+  var G = [
+    ['polytrack', 'PolyTrack', ['Racing']],
+    ['basketball-stars', 'Basketball Stars', ['Sports']],
+    ['amazing-rope-police', 'Amazing Rope Police', ['Action']],
+    ['ice-dodo', 'Ice Dodo', ['Arcade', 'Skill']],
+    ['adrenalinechallenge2', 'Adrenaline Challenge 2', ['Action', 'Driving']],
+    ['stickman-hook', 'Stickman Hook', ['Action', 'Skill']],
+    ['crossyroad', 'Crossy Road', ['Arcade']],
+    ['retrobowlcollege', 'Retro Bowl College', ['Sports']],
+    ['basket-bros', 'Basket Bros', ['Sports']],
+    ['rocketleague', 'Rocket League', ['Sports']],
+    ['2048', '2048', ['Puzzle']],
+    ['retro-bowl', 'Retro Bowl', ['Sports']],
+    ['bit-planes', 'Bit Planes', ['Action', 'Shooter']],
+    ['drifthunters', 'Drift Hunters', ['Racing', 'Driving']],
+    ['angry-sharks', 'Angry Sharks', ['Arcade', 'Action']],
+    ['wordle', 'Wordle', ['Puzzle']],
+    ['aquapark-slides', 'Aquapark Slides', ['Arcade', 'Racing']],
+    ['fnaf', "Five Nights at Freddy's", ['Horror']],
+    ['subway-surfers', 'Subway Surfers', ['Action', 'Arcade']],
+    ['grand-theft-auto-vice-city', 'Grand Theft Auto Vice City', ['Action']],
+    ['backrooms', 'The Backrooms', ['Horror']],
+    ['slope2', 'Slope 2', ['Action', 'Skill']],
+    ['cluster-rush', 'Cluster Rush', ['Action', 'Skill']],
+    ['motox3m-spooky', 'Moto X3M Spooky Land', ['Racing', 'Driving']],
+    ['big-neon-tower', 'Big Neon Tower', ['Platformer']],
+    ['drivemad', 'Drive Mad', ['Racing', 'Driving']],
+    ['bitlife', 'BitLife', ['Simulation']],
+    ['a-difficult-game-about-climbing', 'A Difficult Game About Climbing', ['Platformer']],
+    ['madalincars', 'Madalin Cars', ['Racing', 'Driving']],
+    ['snowrider3d', 'Snow Rider 3D', ['Action', 'Driving']],
+    ['badtimesimulator', 'Bad Time Simulator', ['Action', 'Skill']],
+    ['2drocketleague', '2D Rocket League', ['Sports']],
+    ['cuphead', 'Cuphead', ['Action']],
+    ['flappyplane', 'Flappy Plane', ['Arcade', 'Skill']],
+    ['adventure-capitalist', 'Adventure Capitalist', ['Idle']],
+    ['1v1lol', '1v1.LOL', ['Action', 'Shooter']],
+    ['awesometanks2', 'Awesome Tanks 2', ['Action', 'Shooter']],
+    ['vex7', 'Vex 7', ['Platformer']],
+    ['minesweeper', 'Minesweeper', ['Puzzle']],
+    ['timeshooter2', 'Time Shooter 2', ['Action', 'Shooter']],
+    ['8ball', '8 Ball Pool', ['Sports']],
+    ['draw-the-hill', 'Draw the Hill', ['Puzzle', 'Driving']],
+    ['geometrydash', 'Geometry Dash', ['Platformer', 'Skill']],
+    ['hollow-knight-silksong', 'Hollow Knight Silksong', ['RPG']],
+    ['1on1soccer', '1 on 1 Soccer', ['Sports']],
+    ['slime-rancher', 'Slime Rancher', ['Simulation']]
+  ];
+
+  var input = $('q');
+
+  function filt(q, cat) {
+    q = q.trim().toLowerCase();
+    return G.filter(function (g) {
+      return (cat === 'All' || g[2].indexOf(cat) >= 0) && (!q || g[1].toLowerCase().indexOf(q) >= 0);
+    });
+  }
+
+  function ids(list) { return list.map(function (g) { return g[0]; }).join(); }
+
+  function tileHtml(g) {
+    return '<a class="tile" data-soon><span class="thumb"><img src="/thumbs/' + g[0] + '.webp" alt=""></span>' +
+      '<span class="tile-text"><span class="tile-name">' + g[1] + '</span><span class="tile-cat">' + g[2][0] + '</span></span></a>';
+  }
+
+  // The library under the fold: a search shows every match by name, otherwise
+  // the chosen category. Up to 18 games.
+  var gridIds = ids(G.slice(0, 18));
+  function renderLib() {
+    var q = state.qc.trim(), searching = !!q, cat = state.cc;
+    var list = filt(state.qc, searching ? 'All' : cat);
+    var shown = list.slice(0, 18);
+    $('libHead').textContent = searching ? 'Results for “' + q + '”' : (cat === 'All' ? 'All games' : cat);
+    $('libSub').textContent = searching ? list.length + ' found' : (cat === 'All' ? '1,958' : '');
+    $('tabs').hidden = searching;
+    $('clear').hidden = !searching;
+    if (ids(shown) !== gridIds) {
+      gridIds = ids(shown);
+      $('grid').innerHTML = shown.map(tileHtml).join('');
+    }
+    $('empty').hidden = list.length > 0;
+  }
+
+  function render() {
+    renderLib();
+    renderDrop();
+  }
+
+  input.addEventListener('input', function () {
+    state.qc = input.value;
+    render();
+  });
+
+  // Category tabs, a red underline on the chosen one.
+  $('tabs').addEventListener('click', function (e) {
+    var tab = e.target.closest('.tab');
+    if (!tab) return;
+    state.cc = tab.getAttribute('data-cat');
+    Array.prototype.forEach.call(this.children, function (t) {
+      t.classList.toggle('on', t === tab);
+    });
+    render();
+  });
+
+  // Surprise me puts a random game's name in the search.
+  $('surprise').addEventListener('click', function () {
+    state.qc = G[Math.floor(Math.random() * G.length)][1];
+    input.value = state.qc;
+    render();
+  });
+
+  $('clear').addEventListener('click', function () {
+    state.qc = '';
+    input.value = '';
+    render();
+  });
+
+  // Dropdown under the search while it has focus and something typed: the
+  // first 6 matches. Picking happens on mousedown so the blur cannot eat it.
+  var dropList = [], dropIds = '';
+  function renderDrop() {
+    var open = state.focusC && !!state.qc.trim();
+    $('drop').hidden = !open;
+    if (!open) return;
+    var list = filt(state.qc, 'All');
+    $('dropEmpty').hidden = list.length > 0;
+    dropList = list.slice(0, 6);
+    if (ids(dropList) === dropIds) return;
+    dropIds = ids(dropList);
+    $('dropList').innerHTML = dropList.map(function (g, i) {
+      return '<button class="drop-item" type="button" data-i="' + i + '"><img src="/thumbs/' + g[0] + '.webp" alt="">' +
+        '<span class="drop-name">' + g[1] + '</span><span class="drop-cat">' + g[2][0] + '</span></button>';
+    }).join('');
+  }
+
+  $('drop').addEventListener('mousedown', function (e) {
+    var item = e.target.closest('.drop-item');
+    if (!item) return;
+    e.preventDefault();
+    state.qc = dropList[+item.getAttribute('data-i')][1];
+    state.focusC = false;
+    input.value = state.qc;
+    render();
+  });
+  input.addEventListener('focus', function () { state.focusC = true; renderDrop(); });
+  input.addEventListener('blur', function () { state.focusC = false; renderDrop(); });
+
+  // All 1,958 games glides down to the library.
+  $('more').addEventListener('click', function (e) {
+    e.preventDefault();
+    $('games').scrollIntoView({ behavior: 'smooth' });
+  });
+
+  // Anything that would leave the home page shows the preview toast instead.
+  var toast = $('pvToast'), toastTimer = 0;
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('[data-soon]')) return;
+    e.preventDefault();
+    toast.classList.add('on');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.classList.remove('on'); }, 1600);
+  });
+})();
+</script>
+</body>
+</html>

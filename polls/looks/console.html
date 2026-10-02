@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Console · GameVault preview</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400..700&display=swap" rel="stylesheet">
+<style>
+/* Every color comes from one hue (ember), so the theme is three numbers. */
+:root{
+  --h:25;--c:1;--ah:25;
+  --bg:oklch(0.125 calc(0.024 * var(--c)) var(--h));
+  --tx:oklch(0.97 calc(0.012 * var(--c)) var(--h));
+  --mu:oklch(0.79 calc(0.035 * var(--c)) var(--h));
+  --s2:oklch(0.265 calc(0.048 * var(--c)) var(--h));
+  --s3:oklch(0.32 calc(0.055 * var(--c)) var(--h));
+  --ln:oklch(0.92 calc(0.04 * var(--c)) var(--h) / 0.1);
+  --red:oklch(0.6 0.21 var(--ah));
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{overflow:hidden;background:var(--bg);color:var(--tx);font-family:'Sora',system-ui,sans-serif}
+a{color:inherit}
+.screen{position:relative;height:100vh;min-height:635px;overflow:hidden;background:var(--bg)}
+.shade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,oklch(0.125 calc(0.024 * var(--c)) var(--h) / 0.94) 0%,oklch(0.125 calc(0.024 * var(--c)) var(--h) / 0.6) 55%,oklch(0.125 calc(0.024 * var(--c)) var(--h) / 0.3) 100%),linear-gradient(0deg,oklch(0.125 calc(0.024 * var(--c)) var(--h) / 0.9) 0%,transparent 45%)}
+.top{position:relative;display:flex;align-items:center;gap:16px;height:72px;padding:0 48px}
+.mark{display:block;width:26px;height:26px}
+.word{font-size:17px;font-weight:600;letter-spacing:-0.02em}
+.status{margin-left:auto;display:flex;align-items:center;gap:20px;font-size:13px}
+.clock{display:flex;align-items:center;gap:8px;white-space:nowrap}
+.mu{color:var(--mu)}
+.timer{font-weight:600;font-variant-numeric:tabular-nums}
+button{padding:0;border:0;background:none;font:inherit;color:inherit;cursor:pointer}
+.friends{display:flex;align-items:center;gap:10px;color:var(--mu)}
+.faces{display:flex}
+.face{width:26px;height:26px;border-radius:50%;background:var(--s3);display:grid;place-items:center;font-size:11px;font-weight:700;color:oklch(0.97 0.01 25);box-shadow:0 0 0 2px var(--bg)}
+.face+.face{margin-left:-6px;background:var(--s2)}
+.me{width:36px;height:36px;border-radius:50%;background:var(--s3);display:grid;place-items:center;font-size:14px;font-weight:600}
+.hero{position:relative;max-width:760px;padding:40px 48px 0}
+.kicker{font-size:13px;color:var(--mu)}
+.hero h1{margin:10px 0 12px;font-size:52px;font-weight:700;letter-spacing:-0.04em;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.line{font-size:15px;color:var(--mu)}
+.acts{margin-top:24px;display:flex;gap:10px}
+.cta,.star{height:44px;display:flex;align-items:center;border-radius:14px;font-size:15px;text-decoration:none;cursor:pointer}
+.cta{padding:0 24px;background:var(--red);color:#fff;font-weight:600}
+.cta:hover{background:oklch(0.65 0.2 var(--ah))}
+.star{padding:0 20px;background:var(--ln);font-weight:500}
+.star:hover{background:oklch(0.92 calc(0.04 * var(--c)) var(--h) / 0.16)}
+/* The picked game's art, blown up and blurred into a wash of its colors. */
+.art{position:absolute;left:-100px;top:-100px;width:calc(100% + 200px);height:calc(100% + 200px);object-fit:cover;filter:blur(70px) saturate(1.3);opacity:0;pointer-events:none}
+.art.on{opacity:0.6}
+.shelf{position:absolute;left:0;right:0;top:338px}
+.shelf-label{margin-bottom:14px;padding-left:48px;font-size:13px;color:var(--mu)}
+/* The row runs past the right edge. It scrolls sideways on its own, and the
+   8px of padding (taken back by the margin) leaves room for the outline. */
+.tiles{display:flex;align-items:flex-end;gap:14px;margin:-8px 0;padding:8px 48px;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;scrollbar-width:none}
+.tiles::-webkit-scrollbar{display:none}
+.tile{flex-shrink:0;width:124px;height:124px;border-radius:20px;overflow:hidden;outline:3px solid transparent;outline-offset:3px;transition:width .2s,height .2s}
+.tile:focus-visible{outline-color:oklch(0.97 calc(0.012 * var(--c)) var(--h) / 0.4)}
+.tile.on{width:152px;height:152px;outline-color:var(--tx)}
+.tile img{display:block;width:100%;height:100%;object-fit:cover}
+.dock{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);display:flex;align-items:center;gap:4px;padding:6px;border-radius:20px;background:oklch(0.21 calc(0.038 * var(--c)) var(--h) / 0.6);border:1px solid oklch(0.92 calc(0.04 * var(--c)) var(--h) / 0.12);backdrop-filter:blur(18px)}
+.dock a{text-decoration:none;cursor:pointer}
+.dock-games{height:44px;padding:0 16px 0 13px;display:flex;align-items:center;gap:10px;border-radius:14px;background:var(--s3);font-size:14px;font-weight:600}
+.dock-btn{position:relative;width:44px;height:44px;display:grid;place-items:center;border-radius:14px;color:var(--mu)}
+.dock-btn:hover{background:var(--ln);color:oklch(0.97 0.01 25)}
+.dot{position:absolute;top:9px;right:9px;width:8px;height:8px;border-radius:50%;background:var(--red)}
+.dock-sep{width:1px;height:24px;margin:0 4px;background:oklch(0.92 calc(0.04 * var(--c)) var(--h) / 0.14)}
+.art{transition:opacity .35s ease}
+@media (prefers-reduced-motion:reduce){.art,.tile{transition:none}}
+[data-soon]{cursor:pointer}
+.pv-toast{position:fixed;left:50%;bottom:24px;z-index:100;transform:translate(-50%,8px);padding:10px 16px;border-radius:12px;background:rgba(20,20,24,.92);color:#f4f4f6;font-size:13px;font-weight:500;line-height:1.3;box-shadow:0 10px 30px rgba(0,0,0,.35);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
+.pv-toast.on{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<div class="screen">
+  <img class="art on" id="art" src="/thumbs/polytrack.webp" alt="">
+  <img class="art" id="art2" alt="">
+  <div class="shade"></div>
+
+  <header class="top">
+    <img class="mark" src="/favicon.svg" alt="">
+    <span class="word">gamevault</span>
+    <div class="status">
+      <button class="friends" type="button" data-soon><span class="faces"><span class="face">J</span><span class="face">K</span></span>2 friends online</button>
+      <span class="clock"><span class="mu">period 3</span><span class="timer" id="timer">23:41</span></span>
+      <button class="me" type="button" title="Profile" data-soon>M</button>
+    </div>
+  </header>
+
+  <div class="hero">
+    <div class="kicker" id="kicker">track of the week · ends in 2d 13:54</div>
+    <h1 id="name">PolyTrack</h1>
+    <div class="line" id="line">racing · summer 3 · nova leads at 1:02.418 · 312 racers</div>
+    <div class="acts">
+      <a class="cta" id="cta" href="#" data-soon>race now</a>
+      <a class="star" href="#" data-soon>add to stars</a>
+    </div>
+  </div>
+
+  <div class="shelf">
+    <div class="shelf-label">this week · jump back in · popular</div>
+    <div class="tiles" id="row">
+      <button class="tile on" type="button" title="PolyTrack" aria-pressed="true"><img src="/thumbs/polytrack.webp" alt=""></button>
+      <button class="tile" type="button" title="Slope 2" aria-pressed="false"><img src="/thumbs/slope2.webp" alt=""></button>
+      <button class="tile" type="button" title="Drive Mad" aria-pressed="false"><img src="/thumbs/drivemad.webp" alt=""></button>
+      <button class="tile" type="button" title="Retro Bowl" aria-pressed="false"><img src="/thumbs/retro-bowl.webp" alt=""></button>
+      <button class="tile" type="button" title="Geometry Dash" aria-pressed="false"><img src="/thumbs/geometrydash.webp" alt=""></button>
+      <button class="tile" type="button" title="1v1.LOL" aria-pressed="false"><img src="/thumbs/1v1lol.webp" alt=""></button>
+      <button class="tile" type="button" title="Basketball Stars" aria-pressed="false"><img src="/thumbs/basketball-stars.webp" alt=""></button>
+      <button class="tile" type="button" title="Amazing Rope Police" aria-pressed="false"><img src="/thumbs/amazing-rope-police.webp" alt=""></button>
+      <button class="tile" type="button" title="Ice Dodo" aria-pressed="false"><img src="/thumbs/ice-dodo.webp" alt=""></button>
+      <button class="tile" type="button" title="Adrenaline Challenge 2" aria-pressed="false"><img src="/thumbs/adrenalinechallenge2.webp" alt=""></button>
+      <button class="tile" type="button" title="Stickman Hook" aria-pressed="false"><img src="/thumbs/stickman-hook.webp" alt=""></button>
+      <button class="tile" type="button" title="Crossy Road" aria-pressed="false"><img src="/thumbs/crossyroad.webp" alt=""></button>
+    </div>
+  </div>
+
+  <nav class="dock" aria-label="Main">
+    <a class="dock-games" href="#" data-soon><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="11" rx="4"></rect><path d="M8 11v3M6.5 12.5h3"></path><circle cx="15.5" cy="12" r="1"></circle><circle cx="17.5" cy="14" r="1"></circle></svg>games</a>
+    <a class="dock-btn" href="#" title="Movies" data-soon><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M10 9l5 3-5 3z"></path></svg></a>
+    <a class="dock-btn" href="#" title="Music" data-soon><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l10-2v12"></path><circle cx="6.5" cy="18" r="2.5"></circle><circle cx="16.5" cy="16" r="2.5"></circle></svg></a>
+    <a class="dock-btn" href="#" title="Chat" data-soon><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v10H9l-5 4z"></path></svg><span class="dot"></span></a>
+    <a class="dock-btn" href="#" title="Leaderboard" data-soon><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"></path><rect x="5" y="11" width="4" height="9"></rect><rect x="10" y="6" width="4" height="14"></rect><rect x="15" y="14" width="4" height="6"></rect></svg></a>
+    <a class="dock-btn" href="#" title="Shop" data-soon><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h16l-1.5 11h-13z"></path><path d="M9 8V6a3 3 0 0 1 6 0v2"></path></svg></a>
+    <span class="dock-sep"></span>
+    <a class="dock-btn" href="#" title="Search" data-soon><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></a>
+    <a class="dock-btn" href="#" title="Settings" data-soon><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"></path></svg></a>
+  </nav>
+</div>
+
+<div class="pv-toast" id="pvToast" role="status">Just a preview of the home page</div>
+
+<script>
+(function () {
+  'use strict';
+
+  function $(id) { return document.getElementById(id); }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+
+  var state = {
+    // Seconds left in period 3. The period is 50 minutes, so 0 starts over at 3000.
+    left: 1421,
+    sel: 0,
+    // Seconds until the track of the week ends.
+    totw: 2 * 86400 + 13 * 3600 + 54 * 60 + 9,
+  };
+
+  // The row: the track of the week, five games to jump back into, then the six
+  // most played this week. Each one carries what the hero says when picked.
+  var CONT = [
+    ['slope2', 'Slope 2', 'Action', '12 min ago'],
+    ['drivemad', 'Drive Mad', 'Racing', 'Yesterday'],
+    ['retro-bowl', 'Retro Bowl', 'Sports', 'Yesterday'],
+    ['geometrydash', 'Geometry Dash', 'Platformer', '3 days ago'],
+    ['1v1lol', '1v1.LOL', 'Action', 'Last week']
+  ];
+  var POP = [
+    ['basketball-stars', 'Basketball Stars', 'Sports'],
+    ['amazing-rope-police', 'Amazing Rope Police', 'Action'],
+    ['ice-dodo', 'Ice Dodo', 'Arcade'],
+    ['adrenalinechallenge2', 'Adrenaline Challenge 2', 'Action'],
+    ['stickman-hook', 'Stickman Hook', 'Action'],
+    ['crossyroad', 'Crossy Road', 'Arcade']
+  ];
+  var ROW = [{
+    id: 'polytrack', name: 'PolyTrack', cta: 'race now',
+    kicker: 'track of the week · ends in 2d 13:54',
+    line: 'racing · summer 3 · nova leads at 1:02.418 · 312 racers'
+  }].concat(CONT.map(function (g) {
+    return { id: g[0], name: g[1], kicker: 'jump back in · ' + g[3].toLowerCase(), line: g[2].toLowerCase(), cta: 'continue' };
+  }), POP.map(function (g, i) {
+    return { id: g[0], name: g[1], kicker: 'popular this week · #' + (i + 1), line: g[2].toLowerCase(), cta: 'play' };
+  }));
+
+  var tiles = $('row').getElementsByClassName('tile');
+  // Two art layers: the new art fades in on the hidden one as the shown one fades out.
+  var arts = [$('art'), $('art2')];
+
+  function select(i) {
+    if (i === state.sel) return;
+    tiles[state.sel].classList.remove('on');
+    tiles[state.sel].setAttribute('aria-pressed', 'false');
+    tiles[i].classList.add('on');
+    tiles[i].setAttribute('aria-pressed', 'true');
+    state.sel = i;
+
+    var g = ROW[i];
+    $('kicker').textContent = g.kicker;
+    $('name').textContent = g.name;
+    $('line').textContent = g.line;
+    $('cta').textContent = g.cta;
+
+    arts.reverse();
+    arts[0].src = '/thumbs/' + g.id + '.webp';
+    arts[0].classList.add('on');
+    arts[1].classList.remove('on');
+    keepInView(i);
+  }
+
+  $('row').addEventListener('click', function (e) {
+    var tile = e.target.closest('.tile');
+    if (tile) select(Array.prototype.indexOf.call(tiles, tile));
+  });
+
+  function trackKicker() {
+    var t = state.totw;
+    var d = Math.floor(t / 86400), h = Math.floor(t / 3600) % 24, m = Math.floor(t / 60) % 60;
+    return 'track of the week · ends in ' + d + 'd ' + pad(h) + ':' + pad(m);
+  }
+
+  // Scroll only the row (never the page, which may sit in a poll's iframe) so
+  // the picked tile stays on screen with the row's 48px margin around it. The
+  // spot is worked out from the finished layout, every tile 124px but the
+  // picked one at 152px, because the tiles are still resizing when this runs.
+  var TILE = 124, BIG = 152, GAP = 14, EDGE = 48;
+  var still = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  function keepInView(i) {
+    var row = $('row');
+    var left = EDGE + i * (TILE + GAP), right = left + BIG;
+    var x = row.scrollLeft;
+    if (left - EDGE < x) x = left - EDGE;
+    else if (right + EDGE > x + row.clientWidth) x = right + EDGE - row.clientWidth;
+    if (x !== row.scrollLeft) row.scrollTo({ left: x, behavior: still.matches ? 'auto' : 'smooth' });
+  }
+
+  // Left and Right walk the row, like a console pad.
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    var t = e.target;
+    if (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+    e.preventDefault();
+    var i = Math.max(0, Math.min(ROW.length - 1, state.sel + (e.key === 'ArrowRight' ? 1 : -1)));
+    select(i);
+    // Focus on a tile follows the pick, so Tab carries on from the right place.
+    if (t.classList.contains('tile')) tiles[i].focus({ preventScroll: true });
+  });
+
+  function tick() {
+    state.left = state.left > 0 ? state.left - 1 : 3000;
+    $('timer').textContent = pad(Math.floor(state.left / 60)) + ':' + pad(state.left % 60);
+    state.totw = Math.max(0, state.totw - 1);
+    ROW[0].kicker = trackKicker();
+    if (state.sel === 0) $('kicker').textContent = ROW[0].kicker;
+  }
+  setInterval(tick, 1000);
+
+  var toast = $('pvToast'), toastTimer;
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('[data-soon]')) return;
+    e.preventDefault();
+    toast.classList.add('on');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.classList.remove('on'); }, 1600);
+  });
+})();
+</script>
+</body>
+</html>

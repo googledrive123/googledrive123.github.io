@@ -65,7 +65,7 @@
         head.className = 'pl-head';
         var label = document.createElement('div');
         label.className = 'panel-label';
-        label.textContent = p.open ? 'Open poll' : 'Poll over';
+        label.textContent = p.preview ? 'Preview poll \u00b7 localhost only' : p.open ? 'Open poll' : 'Poll over';
         head.appendChild(label);
         panel.appendChild(head);
         panel.appendChild(polls.card(p));

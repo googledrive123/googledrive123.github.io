@@ -1,7 +1,9 @@
 /* GameVault polls (polls/polls.sql). The newest open poll someone has not
    answered pops up when they come to the site, and they can vote right in
    it. /polls/ shows every poll. One vote each: per account, and per browser
-   for a guest.
+   for a guest. Answers can come with a picture, a live page to try and a
+   short note. A click opens the live page at a Chromebook's screen size.
+   A poll can open with an intro, and polls wait for someone's second visit.
    Public surface: window.GV.polls.ask(), .card(poll), .use(client), .rpc. */
 (function () {
   'use strict';
@@ -11,8 +13,10 @@
   // Polls put off with Not now, by id, and when.
   var LATER_KEY = 'gv.poll.later';
   var LATER_MS = 24 * 60 * 60 * 1000;
+  // Set for the rest of a first visit, so polls wait for the next one.
+  var FIRST_KEY = 'gv.poll.first';
   // Not now waits this long, so the question gets read first.
-  var NOT_NOW_MS = 3000;
+  var NOT_NOW_MS = 5000;
 
   var CSS = [
     '.gv-poll{text-align:left}',
@@ -41,8 +45,63 @@
     '.gv-poll-later{margin-left:auto;padding:8px 16px;border-radius:100px;border:1px solid var(--border-strong,rgba(255,255,255,.16));background:none;color:var(--text,#f4f4f6);font:inherit;font-size:.82rem;font-weight:600;cursor:pointer;opacity:0;visibility:hidden;transition:opacity .3s}',
     '.gv-poll-later.on{opacity:1;visibility:visible}',
     '.gv-poll-later:hover{border-color:var(--accent,#ff3b3b)}',
+    '.gv-poll-looks{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}',
+    '.gv-poll-look{display:flex;flex-direction:column;gap:8px;min-width:0;padding:8px 8px 10px;border-radius:12px;border:1px solid var(--border-strong,rgba(255,255,255,.16));background:var(--surface-2,#1a1a20);color:var(--text,#f4f4f6);font:inherit;text-align:left;cursor:pointer;transition:border-color .15s,transform .15s}',
+    '.gv-poll-shot{position:relative;display:block;aspect-ratio:1366/635;overflow:hidden;border-radius:7px;background:#0c0c0e}',
+    '.gv-poll-shot img{display:block;width:100%;height:100%;object-fit:cover}',
+    '.gv-poll-look:hover{border-color:var(--accent,#ff3b3b);transform:translateY(-2px)}',
+    '.gv-poll-look:disabled{cursor:default;opacity:.6;transform:none}',
+    '.gv-poll-look-row{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:0 2px;font-size:.9rem;font-weight:600}',
+    '.gv-poll-look-row span{min-width:0;overflow-wrap:anywhere}',
+    '.gv-poll-look .gv-poll-pct{font-family:"JetBrains Mono",monospace;font-size:.74rem;font-weight:400;color:var(--muted,#8a8a96);white-space:nowrap}',
+    '.gv-poll-bar{display:block;height:4px;margin:0 2px;overflow:hidden;border-radius:2px;background:var(--surface,#121216)}',
+    '.gv-poll-bar span{display:block;width:var(--p,0%);height:100%;background:var(--muted,#8a8a96);transition:width .5s cubic-bezier(.2,.8,.2,1)}',
+    '.gv-poll-look.mine{border-color:var(--accent,#ff3b3b)}',
+    '.gv-poll-look.mine .gv-poll-bar span{background:var(--accent,#ff3b3b)}',
+    '.gv-poll-box.wide{width:min(880px,100%)}',
+    '.gv-look{position:fixed;inset:0;z-index:2700;display:flex;flex-direction:column;gap:12px;padding:16px;background:#08080a;color:#f4f4f6}',
+    '.gv-look-top,.gv-look-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;width:min(1366px,100%);margin:0 auto}',
+    '.gv-look-name{font-size:1.1rem;font-weight:700;overflow-wrap:anywhere}',
+    '.gv-look-count{font-family:"JetBrains Mono",monospace;font-size:.74rem;color:#8a8a96}',
+    '.gv-look-stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}',
+    '.gv-look-fit{position:relative;flex-shrink:0}',
+    '.gv-look-frame{position:absolute;top:0;left:0;width:1366px;overflow:hidden;transform-origin:0 0;border-radius:14px;background:#0c0c0e;box-shadow:0 0 0 1px rgba(255,255,255,.16),0 30px 80px rgba(0,0,0,.6)}',
+    '.gv-look-screen{position:relative;height:635px}',
+    '.gv-look-screen img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}',
+    '.gv-look-btn{width:40px;height:40px;flex-shrink:0;display:grid;place-items:center;padding:0;border-radius:50%;border:1px solid rgba(255,255,255,.16);background:#121216;color:#f4f4f6;font:inherit;font-size:1.1rem;line-height:1;cursor:pointer}',
+    '.gv-look-btn:hover{border-color:#ff3b3b}',
+    '.gv-look-close{margin-left:auto}',
+    '.gv-look-pick{margin-left:auto;padding:10px 22px;border-radius:100px;border:1px solid #ff3b3b;background:#ff3b3b;color:#fff;font:inherit;font-size:.9rem;font-weight:600;cursor:pointer}',
+    '.gv-look-note{font-size:.84rem;color:#8a8a96}',
+    '.gv-poll-hint{margin:-.4rem 0 1rem;font-size:.84rem;color:var(--muted,#8a8a96)}',
+    '.gv-poll-note{display:block;padding:0 2px;overflow:hidden;font-size:.78rem;line-height:1.35;color:var(--muted,#8a8a96);white-space:nowrap;text-overflow:ellipsis}',
+    '.gv-poll-try{position:absolute;right:8px;bottom:8px;padding:4px 10px;border-radius:100px;background:rgba(8,8,10,.8);color:#f4f4f6;font-size:.72rem;font-weight:600;transition:background .15s}',
+    '.gv-poll-try::before{content:"";display:inline-block;margin-right:6px;border-style:solid;border-width:4px 0 4px 6px;border-color:transparent transparent transparent currentColor;vertical-align:1px}',
+    '.gv-poll-look:hover .gv-poll-try{background:var(--accent,#ff3b3b)}',
+    '.gv-look-chrome{position:relative;display:flex;align-items:center;gap:7px;height:34px;padding:0 14px;background:#1a1a20;border-bottom:1px solid rgba(255,255,255,.08)}',
+    '.gv-look-chrome i{width:11px;height:11px;border-radius:50%;background:rgba(255,255,255,.16)}',
+    '.gv-look-url{position:absolute;left:50%;transform:translateX(-50%);padding:4px 16px;border-radius:7px;background:#08080a;font-family:"JetBrains Mono",monospace;font-size:12px;color:#8a8a96}',
+    '.gv-look-screen iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#0c0c0e;opacity:0;transition:opacity .25s}',
+    '.gv-look-screen.ready iframe{opacity:1}',
+    '.gv-look-desc{font-size:.88rem;color:#8a8a96}',
+    '.gv-look-chips{display:flex;flex-wrap:wrap;gap:6px}',
+    '.gv-look-chip{padding:7px 13px;border-radius:100px;border:1px solid rgba(255,255,255,.16);background:none;color:#8a8a96;font:inherit;font-size:.8rem;cursor:pointer}',
+    '.gv-look-chip:hover{color:#f4f4f6}',
+    '.gv-look-chip.on{border-color:#f4f4f6;background:#f4f4f6;color:#08080a}',
+    '@media (max-width:760px){.gv-look-chips{display:none}}',
+    '.gv-poll-front{text-align:center}',
+    '.gv-poll-go{display:block;width:100%;margin-top:20px;padding:14px 22px;border-radius:100px;border:0;background:var(--accent,#ff3b3b);color:#fff;font:inherit;font-size:1rem;font-weight:700;cursor:pointer}',
+    '.gv-poll-go:hover{filter:brightness(1.1)}',
+    '.gv-poll-intro-title{margin:.9rem 0 .5rem;font-size:1.6rem;font-weight:700;line-height:1.15;letter-spacing:-.02em;color:var(--text,#f4f4f6);overflow-wrap:anywhere}',
+    '.gv-poll-intro-text{margin:0 auto;max-width:38ch;font-size:.95rem;line-height:1.5;color:var(--muted,#8a8a96)}',
+    '.gv-poll-peek{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:18px}',
+    '.gv-poll-peek img{display:block;width:100%;aspect-ratio:1366/635;object-fit:cover;border-radius:7px;box-shadow:0 0 0 1px var(--border-strong,rgba(255,255,255,.16))}',
+    '.gv-poll-box.intro{width:min(560px,100%)}',
+    '.gv-poll-go{box-shadow:0 0 22px rgba(255,59,59,.5);animation:gvPollGlow 1.6s ease-in-out infinite}',
+    '@keyframes gvPollGlow{0%,100%{box-shadow:0 0 0 0 rgba(255,59,59,.55),0 0 22px rgba(255,59,59,.45)}50%{box-shadow:0 0 0 9px rgba(255,59,59,0),0 0 40px rgba(255,59,59,.8)}}',
+    '.gv-poll-go:focus-visible{outline:2px solid rgba(255,255,255,.9);outline-offset:3px}',
     '@keyframes gvPollIn{from{opacity:0;transform:translateY(10px) scale(.98)}}',
-    '@media (prefers-reduced-motion:reduce){.gv-poll-box{animation:none}.gv-poll-opt.result::before{transition:none}}'
+    '@media (prefers-reduced-motion:reduce){.gv-poll-box,.gv-poll-go{animation:none}.gv-poll-opt.result::before,.gv-poll-look,.gv-poll-bar span,.gv-look-screen iframe{transition:none}}'
   ].join('');
 
   var client = null;
@@ -110,17 +169,54 @@
     return 'Ends soon';
   }
 
+  // A path on this site, or null. Poll pictures and pages only come from here.
+  function local(src) {
+    return typeof src === 'string' && /^\/[^\/\\]/.test(src) ? src : null;
+  }
+
+  // An answer's picture, if the poll has one for it.
+  function shot(poll, i) {
+    var m = poll.media && poll.media[i];
+    return m ? local(m.img) : null;
+  }
+
+  // An answer's live page to try, if it has one.
+  function livePage(poll, i) {
+    var m = poll.media && poll.media[i];
+    return m ? local(m.page) : null;
+  }
+
+  // A line about an answer, if it has one.
+  function blurb(poll, i) {
+    var m = poll.media && poll.media[i];
+    return m && typeof m.note === 'string' ? m.note.slice(0, 140) : '';
+  }
+
+  function hasLooks(poll) {
+    return (poll.options || []).some(function (name, i) { return shot(poll, i); });
+  }
+
+  // A poll's intro, if it has one: a title and a line of text.
+  function introOf(poll) {
+    var t = poll.intro;
+    if (!t || typeof t.title !== 'string' || !t.title) return null;
+    return { title: t.title.slice(0, 120), text: typeof t.text === 'string' ? t.text.slice(0, 300) : '' };
+  }
+
   // One poll: the answers to pick from, or the results once there are any
   // to show. onChange hears about a vote with the poll as it is now.
   function card(poll, onChange) {
     style();
     var box = el('div', 'gv-poll');
     var q = el('h3', 'gv-poll-q', poll.question);
+    var tryable = (poll.options || []).some(function (name, i) { return livePage(poll, i); });
+    var hint = el('p', 'gv-poll-hint', tryable ? 'Click one to try it live, then pick your favorite.' : 'Click a picture to see it big.');
     var opts = el('div', 'gv-poll-opts');
     var meta = el('div', 'gv-poll-meta');
     var err = el('div', 'gv-poll-err');
     err.setAttribute('role', 'status');
     box.appendChild(q);
+    box.appendChild(hint);
     box.appendChild(opts);
     box.appendChild(meta);
     box.appendChild(err);
@@ -129,7 +225,11 @@
       opts.textContent = '';
       var showing = p.counts && p.counts.length;
       var total = showing ? p.counts.reduce(function (a, b) { return a + b; }, 0) : 0;
+      var looks = hasLooks(p);
+      opts.className = looks ? 'gv-poll-looks' : 'gv-poll-opts';
+      hint.hidden = !looks || !!showing;
       (p.options || []).forEach(function (name, i) {
+        if (looks) return opts.appendChild(tile(p, i, total));
         var row;
         if (showing) {
           var n = p.counts[i] || 0, pct = total ? Math.round(100 * n / total) : 0;
@@ -151,6 +251,39 @@
       meta.textContent = bits.join(' \u00b7 ');
     }
 
+    // A picture answer: the picture, with the answer under it. A click opens
+    // it big, with a button to pick it while there is a vote to give.
+    function tile(p, i, total) {
+      var showing = p.counts && p.counts.length;
+      var t = el('button', 'gv-poll-look' + (p.voted === i ? ' mine' : ''));
+      t.type = 'button';
+      var frame = el('span', 'gv-poll-shot');
+      var src = shot(p, i);
+      if (src) {
+        var img = el('img');
+        img.src = src;
+        img.alt = '';
+        frame.appendChild(img);
+      }
+      if (livePage(p, i)) frame.appendChild(el('span', 'gv-poll-try', 'Try it live'));
+      t.appendChild(frame);
+      var row = el('span', 'gv-poll-look-row');
+      row.appendChild(el('span', 'gv-poll-name', p.options[i]));
+      t.appendChild(row);
+      if (blurb(p, i)) t.appendChild(el('span', 'gv-poll-note', blurb(p, i)));
+      if (showing) {
+        var n = p.counts[i] || 0, pct = total ? Math.round(100 * n / total) : 0;
+        row.appendChild(el('span', 'gv-poll-pct', pct + '% \u00b7 ' + n.toLocaleString()));
+        var bar = el('span', 'gv-poll-bar');
+        var fill = el('span');
+        fill.style.setProperty('--p', pct + '%');
+        bar.appendChild(fill);
+        t.appendChild(bar);
+      }
+      t.addEventListener('click', function () { look(p, i, showing ? null : vote); });
+      return t;
+    }
+
     function vote(p, i) {
       err.textContent = '';
       Array.prototype.forEach.call(opts.querySelectorAll('button'), function (b) { b.disabled = true; });
@@ -167,6 +300,150 @@
 
     paint(poll);
     return box;
+  }
+
+  // One answer's live page, or its picture, as big as the screen allows. The
+  // other answers are a click, a chip or an arrow key away, and pick, when
+  // given, votes for the one showing.
+  function look(p, start, pick) {
+    style();
+    var at = start;
+    var back = document.activeElement;
+    var shade = el('div', 'gv-look');
+    shade.setAttribute('role', 'dialog');
+    shade.setAttribute('aria-modal', 'true');
+    var top = el('div', 'gv-look-top');
+    var name = el('div', 'gv-look-name');
+    var count = el('div', 'gv-look-count');
+    var close = el('button', 'gv-look-btn gv-look-close', '\u00d7');
+    close.type = 'button';
+    close.setAttribute('aria-label', 'Close');
+    var desc = el('div', 'gv-look-desc');
+    top.appendChild(name);
+    top.appendChild(desc);
+    top.appendChild(count);
+    top.appendChild(close);
+    var stage = el('div', 'gv-look-stage');
+    var fitBox = el('div', 'gv-look-fit');
+    var frame = el('div', 'gv-look-frame');
+    var screen = el('div', 'gv-look-screen');
+    var img = el('img');
+    screen.appendChild(img);
+    var live = el('iframe');
+    live.addEventListener('load', function () {
+      screen.classList.add('ready');
+      // Escape in the live page closes this too, unless the page used it.
+      try {
+        live.contentWindow.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape' && !e.defaultPrevented) shut();
+        });
+      } catch (e) {}
+    });
+    screen.appendChild(live);
+    var chrome = el('div', 'gv-look-chrome');
+    chrome.appendChild(el('i'));
+    chrome.appendChild(el('i'));
+    chrome.appendChild(el('i'));
+    chrome.appendChild(el('span', 'gv-look-url', location.host || 'GameVault'));
+    frame.appendChild(chrome);
+    frame.appendChild(screen);
+    fitBox.appendChild(frame);
+    stage.appendChild(fitBox);
+    var bar = el('div', 'gv-look-bar');
+    var prev = el('button', 'gv-look-btn', '\u2190');
+    prev.type = 'button';
+    prev.setAttribute('aria-label', 'Previous');
+    var next = el('button', 'gv-look-btn', '\u2192');
+    next.type = 'button';
+    next.setAttribute('aria-label', 'Next');
+    var chips = el('div', 'gv-look-chips');
+    p.options.forEach(function (o, i) {
+      var c = el('button', 'gv-look-chip', o);
+      c.type = 'button';
+      c.addEventListener('click', function () { show(i); });
+      chips.appendChild(c);
+    });
+    var note = el('div', 'gv-look-note');
+    var choose = el('button', 'gv-look-pick', 'Pick this one');
+    choose.type = 'button';
+    choose.hidden = !pick;
+    bar.appendChild(prev);
+    bar.appendChild(next);
+    bar.appendChild(chips);
+    bar.appendChild(note);
+    bar.appendChild(choose);
+    shade.appendChild(top);
+    shade.appendChild(stage);
+    shade.appendChild(bar);
+
+    function show(i) {
+      var n = p.options.length;
+      at = (i % n + n) % n;
+      var src = shot(p, at);
+      img.hidden = !src;
+      if (src) img.src = src;
+      img.alt = p.options[at];
+      var url = livePage(p, at);
+      screen.classList.remove('ready');
+      live.hidden = !url;
+      live.src = url || 'about:blank';
+      live.title = p.options[at] + ', live';
+      name.textContent = p.options[at];
+      desc.textContent = blurb(p, at);
+      Array.prototype.forEach.call(chips.children, function (c, j) {
+        c.classList.toggle('on', j === at);
+        c.setAttribute('aria-pressed', j === at ? 'true' : 'false');
+      });
+      count.textContent = (at + 1) + ' of ' + n;
+      shade.setAttribute('aria-label', p.options[at]);
+      var bits = [];
+      if (p.voted === at) bits.push('Your pick');
+      if (p.counts && p.counts.length) {
+        var total = p.counts.reduce(function (a, b) { return a + b; }, 0);
+        bits.push((total ? Math.round(100 * (p.counts[at] || 0) / total) : 0) + '% of the votes');
+      }
+      note.textContent = bits.join(' \u00b7 ');
+    }
+    // The screen is a school Chromebook's, 1366 by 635, shrunk to fit.
+    function fit() {
+      var w = frame.offsetWidth, h = frame.offsetHeight;
+      var s = Math.min(stage.clientWidth / w, stage.clientHeight / h, 1);
+      fitBox.style.width = w * s + 'px';
+      fitBox.style.height = h * s + 'px';
+      frame.style.transform = 'scale(' + s + ')';
+    }
+    function shut() {
+      shade.remove();
+      window.removeEventListener('resize', fit);
+      window.removeEventListener('keydown', onKey, true);
+      if (back && back.focus) back.focus();
+    }
+    // Ahead of the pop-up's own keys, so Escape closes only this.
+    function onKey(e) {
+      if (e.key === 'Escape') shut();
+      else if (e.key === 'ArrowLeft') show(at - 1);
+      else if (e.key === 'ArrowRight') show(at + 1);
+      else return;
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    close.addEventListener('click', shut);
+    prev.addEventListener('click', function () { show(at - 1); });
+    next.addEventListener('click', function () { show(at + 1); });
+    choose.addEventListener('click', function () {
+      var i = at;
+      shut();
+      pick(p, i);
+    });
+    shade.addEventListener('click', function (e) {
+      if (e.target === shade || e.target === stage) shut();
+    });
+    show(start);
+    document.body.appendChild(shade);
+    fit();
+    window.addEventListener('resize', fit);
+    window.addEventListener('keydown', onKey, true);
+    (pick ? choose : close).focus();
   }
 
   // ── The pop-up ────────────────────────────────────────────────────────
@@ -201,7 +478,8 @@
     shade.setAttribute('aria-modal', 'true');
     shade.setAttribute('aria-label', 'New poll');
     var box = el('div', 'gv-poll-box');
-    box.appendChild(el('div', 'gv-poll-kicker', 'New poll'));
+    if (hasLooks(poll)) box.classList.add('wide');
+    box.appendChild(el('div', 'gv-poll-kicker', poll.preview ? 'Preview poll \u00b7 localhost only' : 'New poll'));
     var foot = el('div', 'gv-poll-foot');
     var all = el('a', '', 'See all polls');
     all.href = '/polls/';
@@ -219,24 +497,73 @@
       if (later.textContent === 'Not now') putOff(poll.id);
       close();
     });
-    box.appendChild(card(poll, function () {
+    var body = card(poll, function () {
       // Voted: done straight away, no wait.
       later.textContent = 'Done';
       later.disabled = false;
       later.classList.add('on');
       later.focus();
       ask.count(-1);
-    }));
+    });
+    // An intro goes first, with one big button into the poll.
+    var intro = introOf(poll);
+    if (intro) {
+      box.classList.remove('wide');
+      box.classList.add('intro');
+      all.hidden = true;
+      var front = el('div', 'gv-poll-front');
+      front.appendChild(el('h3', 'gv-poll-intro-title', intro.title));
+      if (intro.text) front.appendChild(el('p', 'gv-poll-intro-text', intro.text));
+      var peek = el('div', 'gv-poll-peek');
+      (poll.options || []).forEach(function (name, i) {
+        if (!shot(poll, i)) return;
+        var img = el('img');
+        img.src = shot(poll, i);
+        img.alt = name;
+        peek.appendChild(img);
+      });
+      if (peek.children.length) front.appendChild(peek);
+      var go = el('button', 'gv-poll-go', 'Go to the poll \u2192');
+      go.type = 'button';
+      go.addEventListener('click', function () {
+        front.replaceWith(body);
+        box.classList.remove('intro');
+        all.hidden = false;
+        if (hasLooks(poll)) box.classList.add('wide');
+        var first = body.querySelector('button');
+        if (first) first.focus();
+      });
+      front.appendChild(go);
+      box.appendChild(front);
+    } else {
+      box.appendChild(body);
+    }
     foot.appendChild(all);
     foot.appendChild(later);
     box.appendChild(foot);
     shade.appendChild(box);
     document.body.appendChild(shade);
     document.addEventListener('keydown', onKey);
+    if (intro) go.focus();
     setTimeout(function () {
       later.disabled = false;
       later.classList.add('on');
     }, NOT_NOW_MS);
+  }
+
+  // Someone new to the site gets to look around first: polls pop up from
+  // their next visit on. A visit is a tab's session, so reloading or coming
+  // back to the home page in the same tab is still the first one.
+  function firstVisit() {
+    try {
+      if (sessionStorage.getItem(FIRST_KEY)) return true;
+      var id = window.GV && GV.identity;
+      if (id && id.isNew && id.isNew()) {
+        sessionStorage.setItem(FIRST_KEY, '1');
+        return true;
+      }
+    } catch (e) {}
+    return false;
   }
 
   // Looks for a poll this browser or account has not answered and has not
@@ -252,7 +579,7 @@
       waiting = open.length;
       ask.count(0);
       var next = open.filter(function (p) { return !(later[p.id] && Date.now() - later[p.id] < LATER_MS); })[0];
-      if (next) whenFree(function () { pop(next); });
+      if (next && !firstVisit()) whenFree(function () { pop(next); });
     }).catch(function () {});
   }
   // The Polls card on the home page says how many are waiting.
