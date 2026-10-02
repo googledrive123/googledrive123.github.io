@@ -2418,6 +2418,10 @@
       animation: newestGlow 2s ease-in-out infinite;
     }
     .newest[hidden] { display: none; }
+    /* As wide as the row of six cards above them. */
+    @media (min-width: 960px) {
+      .hero .gv-totw, .newest { max-width: 900px; }
+    }
     .newest-kicker {
       flex-shrink: 0;
       display: inline-flex;
