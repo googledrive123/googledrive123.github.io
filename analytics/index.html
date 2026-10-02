@@ -804,7 +804,7 @@
       var m;
       try { m = JSON.parse(e.data); } catch (err) { return; }
       if (m.topic !== 'realtime:' + push.topic) return;
-      if (m.event === 'phx_reply' && m.payload && m.payload.status === 'ok' && !push.joined) { push.joined = true; push.tries = 0; }
+      if (m.event === 'phx_reply' && m.payload && m.payload.status === 'ok' && !push.joined) { push.joined = true; push.tries = 0; pushChanged(); }
       else if (m.event === 'broadcast' && m.payload && m.payload.event === 'events') push.on.forEach(function (fn) { fn(m.payload.payload || {}); });
       else if (m.event === 'phx_close' || m.event === 'phx_error') ws.close();
     };
@@ -812,8 +812,15 @@
       clearInterval(push.beat);
       if (push.ws !== ws) return;
       push.joined = false;
+      pushChanged();
       setTimeout(pushConnect, Math.min(15000, 500 * Math.pow(2, push.tries++)));
     };
+  }
+  // Joined or dropped: either way, ask once straight away for anything
+  // that came in while the socket was not there.
+  function pushChanged() {
+    if (live) { if (!live.busy) { clearTimeout(live.timer); livePoll(); } }
+    else tick();
   }
 
   // ── charts ──
