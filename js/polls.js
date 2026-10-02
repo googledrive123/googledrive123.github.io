@@ -173,7 +173,8 @@
     style();
     var box = el('div', 'gv-poll');
     var q = el('h3', 'gv-poll-q', poll.question);
-    var hint = el('p', 'gv-poll-hint', 'Click a picture to see it big.');
+    var tryable = (poll.options || []).some(function (name, i) { return livePage(poll, i); });
+    var hint = el('p', 'gv-poll-hint', tryable ? 'Click one to try it live, then pick your favorite.' : 'Click a picture to see it big.');
     var opts = el('div', 'gv-poll-opts');
     var meta = el('div', 'gv-poll-meta');
     var err = el('div', 'gv-poll-err');
