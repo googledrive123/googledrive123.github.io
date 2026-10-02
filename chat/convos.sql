@@ -548,3 +548,52 @@ $function$;
 revoke all on function public.gv_convo_report(bigint, text) from public, anon;
 grant execute on function public.gv_convo_report(bigint, text) to authenticated;
 
+
+-- The dashboard's list of reported DM and group messages, behind the
+-- dashboard secret, with the few messages before each one for context.
+create or replace function public.gv_convo_mod_list(p_secret text)
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+
+  return coalesce((
+    select json_agg(r order by r.last_reported_at desc)
+      from (
+        select m.id as message_id,
+               max(rp.id) as report_id,
+               m.convo_id,
+               m.body,
+               m.username,
+               m.user_id,
+               m.created_at,
+               m.deleted,
+               count(*) as count,
+               max(rp.created_at) as last_reported_at,
+               json_agg(json_build_object(
+                 'reason', rp.reason,
+                 'reporter', public.gv_display_name(rp.reporter),
+                 'created_at', rp.created_at
+               ) order by rp.id) as reports,
+               (select json_agg(json_build_object('username', b.username, 'body', b.body) order by b.id)
+                  from (select * from gv_convo_messages b
+                         where b.convo_id = m.convo_id and b.id < m.id
+                         order by b.id desc limit 5) b) as before
+          from gv_convo_reports rp
+          join gv_convo_messages m on m.id = rp.message_id
+         where not rp.resolved
+         group by m.id
+      ) r
+  ), '[]'::json);
+end;
+$function$;
+
+revoke all on function public.gv_convo_mod_list(text) from public;
+grant execute on function public.gv_convo_mod_list(text) to anon, authenticated;
+
