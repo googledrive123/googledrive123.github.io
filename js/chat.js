@@ -479,6 +479,7 @@
     var time = el('time', 'gv-msg-time', when(m.created_at));
     time.dateTime = m.created_at;
     head.appendChild(name);
+    if (m.verified) head.appendChild(check());
     head.appendChild(time);
     if (!m.mine) {
       var flag = el('button', 'gv-msg-report', 'Report');
