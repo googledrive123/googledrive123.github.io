@@ -48,6 +48,10 @@
     '.gv-fr-field:focus{border-color:var(--accent,#ff3b3b)}',
     '.gv-fr-msg{min-height:1rem;margin-top:8px;font-size:.75rem;color:var(--muted,#8a8a96)}',
     '.gv-fr-count{display:inline-block;min-width:16px;margin-left:4px;padding:0 4px;border-radius:100px;background:var(--accent,#ff3b3b);color:#fff;font-size:.62rem;line-height:16px;text-align:center}',
+    '.gv-fr-open{position:relative;flex-shrink:0;width:38px;height:38px;display:grid;place-items:center;border-radius:50%;border:1px solid var(--border,rgba(255,255,255,.07));background:transparent;color:var(--muted,#8a8a96);cursor:pointer;transition:color .15s,border-color .15s}',
+    '.gv-fr-open:hover,.gv-fr-open[aria-expanded="true"]{color:var(--text,#f4f4f6);border-color:var(--border-strong,rgba(255,255,255,.16))}',
+    '.gv-fr-badge{position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;padding:0 4px;box-sizing:border-box;border-radius:100px;background:var(--accent,#ff3b3b);color:#fff;font-size:.6rem;font-weight:700;line-height:16px;text-align:center}',
+    '.gv-fr-badge[hidden]{display:none}',
     ''
   ].join('');
 
@@ -56,6 +60,7 @@
   var data = { friends: [], incoming: [], outgoing: [] };
   var tab = 'friends';
   var timer = null;
+  var buttons = [];
 
   function social() {
     return window.GV && window.GV.social;
@@ -170,6 +175,7 @@
     build();
     overlay.classList.add('show');
     flash('');
+    paintButtons();
     if (!social() || !social().user()) return showGuest();
     els.tabs.hidden = false;
     show(which || tab);
@@ -183,6 +189,7 @@
     overlay.classList.remove('show');
     clearInterval(timer);
     timer = null;
+    paintButtons();
   }
 
   function showGuest() {
@@ -244,11 +251,45 @@
 
 
 
+  // ── The Friends button ────────────────────────────────────────────────
+
+  function mount(container) {
+    if (!container || container.querySelector('.gv-fr-open')) return;
+    style();
+    var b = el('button', 'gv-fr-open');
+    b.type = 'button';
+    b.setAttribute('aria-label', 'Friends');
+    b.setAttribute('aria-expanded', 'false');
+    b.title = 'Friends';
+    b.innerHTML = ICON;
+    var badge = el('span', 'gv-fr-badge');
+    badge.hidden = true;
+    b.appendChild(badge);
+    b.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (isOpen()) close();
+      else open(social() && social().counts().requests ? 'requests' : null);
+    });
+    container.appendChild(b);
+    buttons.push({ button: b, badge: badge });
+    paintButtons();
+  }
+
+  function paintButtons() {
+    var n = (social() && social().counts().requests) || 0;
+    buttons.forEach(function (x) {
+      x.badge.hidden = !n;
+      x.badge.textContent = n > 99 ? '99+' : String(n);
+      x.button.setAttribute('aria-expanded', isOpen() ? 'true' : 'false');
+      x.button.setAttribute('aria-label', n ? 'Friends, ' + n + ' requests' : 'Friends');
+    });
+  }
 
   function wire() {
     var s = social();
     if (!s) return;
     s.on('counts', function (counts) {
+      paintButtons();
       // A new request shows up in the list while it is open.
       if (isOpen() && counts.requests !== data.incoming.length) load();
     });
@@ -262,6 +303,7 @@
   window.GV.friends = {
     open: open,
     close: close,
+    mount: mount
   };
 
   if (window.GV.social) wire();
