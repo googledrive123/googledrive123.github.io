@@ -155,6 +155,11 @@
   .who-pt { color: #8ab8f2; }
   .who-pt::before { content: 'PT'; margin-right: 4px; font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--muted-2); }
   .who-id { font-family: 'JetBrains Mono', monospace; color: var(--muted-2); }
+
+  /* live */
+  .rec { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin-right: 7px; }
+  .rec.on { animation: rec 1.6s ease-in-out infinite; }
+  @keyframes rec { 50% { opacity: 0.25; } }
 </style>
 </head>
 <body>
