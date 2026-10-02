@@ -54,6 +54,7 @@
     '.gv-poll-bar span{display:block;width:var(--p,0%);height:100%;background:var(--muted,#8a8a96);transition:width .5s cubic-bezier(.2,.8,.2,1)}',
     '.gv-poll-look.mine{border-color:var(--accent,#ff3b3b)}',
     '.gv-poll-look.mine .gv-poll-bar span{background:var(--accent,#ff3b3b)}',
+    '.gv-poll-box.wide{width:min(820px,100%)}',
     '@keyframes gvPollIn{from{opacity:0;transform:translateY(10px) scale(.98)}}',
     '@media (prefers-reduced-motion:reduce){.gv-poll-box{animation:none}.gv-poll-opt.result::before{transition:none}}'
   ].join('');
@@ -258,6 +259,7 @@
     shade.setAttribute('aria-modal', 'true');
     shade.setAttribute('aria-label', 'New poll');
     var box = el('div', 'gv-poll-box');
+    if (hasLooks(poll)) box.classList.add('wide');
     box.appendChild(el('div', 'gv-poll-kicker', 'New poll'));
     var foot = el('div', 'gv-poll-foot');
     var all = el('a', '', 'See all polls');
