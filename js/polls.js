@@ -108,8 +108,9 @@
     return 'Ends soon';
   }
 
-  // One poll and the answers to pick from.
-  function card(poll) {
+  // One poll: the answers to pick from, or the results once there are any
+  // to show. onChange hears about a vote with the poll as it is now.
+  function card(poll, onChange) {
     style();
     var box = el('div', 'gv-poll');
     var q = el('h3', 'gv-poll-q', poll.question);
@@ -155,6 +156,7 @@
         return rpc('gv_poll_vote', { p_poll: p.id, p_option: i, p_visitor: v });
       }).then(function (fresh) {
         paint(fresh);
+        if (onChange) onChange(fresh);
       }, function (e) {
         err.textContent = e.message;
         Array.prototype.forEach.call(opts.querySelectorAll('button'), function (b) { b.disabled = !p.open; });
@@ -209,7 +211,13 @@
       if (later.textContent === 'Not now') putOff(poll.id);
       close();
     });
-    box.appendChild(card(poll));
+    box.appendChild(card(poll, function () {
+      // Voted: done straight away, no wait.
+      later.textContent = 'Done';
+      later.disabled = false;
+      later.classList.add('on');
+      later.focus();
+    }));
     foot.appendChild(later);
     box.appendChild(foot);
     shade.appendChild(box);
