@@ -1735,6 +1735,7 @@
     $('live').classList.remove('hidden');
     $('liveList').innerHTML = '';
     $('liveStatus').innerHTML = '<span class="dot off"></span>Connecting…';
+    liveFilterAll();
     window.scrollTo(0, 0);
     livePoll();
   }
@@ -1863,6 +1864,7 @@
       + (r.is_new ? ' <span class="pill g">new</span>' : '') + (r.user_id ? ' <span class="pill b">signed in</span>' : '') + (bot ? ' <span class="pill">scanner</span>' : '')
       + ' <span class="what">' + esc(detail(r)) + '</span></div>'
       + '<div class="chips">' + liveChips(r) + '</div></div>';
+    liveShow(el);
     return el;
   }
   // Newest at the top, and only the latest LIVE_MAX kept on the page.
@@ -1874,6 +1876,21 @@
     while (listEl.children.length > LIVE_MAX) listEl.removeChild(listEl.lastChild);
     live.shown += rows.length;
     $('liveCount').textContent = fmt(live.shown) + ' since you opened this';
+  }
+  function liveText(r) {
+    var n = names[r.visitor_id] || {};
+    return [r.event, NICE[r.event], r.visitor_id, r.session_id, r.user_id, n.username, n.polytrack, r.path, r.referrer, r.game_id, r.item_id, r.item_title,
+      r.browser, r.os, r.device, r.screen, r.viewport, r.tz, r.lang, r.utm_source, r.utm_medium, r.utm_campaign, r.origin, r.meta ? JSON.stringify(r.meta) : ''].join(' ').toLowerCase();
+  }
+  function liveShow(el) {
+    var r = el._row;
+    var hide = live.filter && liveText(r).indexOf(live.filter) === -1;
+    el.classList.toggle('hidden', !!hide);
+  }
+  function liveFilterAll() {
+    if (!live) return;
+    live.filter = $('liveFilter').value.trim().toLowerCase();
+    Array.prototype.forEach.call($('liveList').children, liveShow);
   }
 
   // ── live: the numbers ──
@@ -2029,6 +2046,7 @@
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePlaying(); });
   $('liveBtn').addEventListener('click', enterLive);
   $('liveExit').addEventListener('click', exitLive);
+  $('liveFilter').addEventListener('input', liveFilterAll);
   // A hidden tab asks every 5 seconds; coming back asks straight away.
   document.addEventListener('visibilitychange', function () {
     if (live && !document.hidden && !live.busy) { clearTimeout(live.timer); livePoll(); }
