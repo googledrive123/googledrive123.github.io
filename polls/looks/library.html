@@ -53,6 +53,22 @@
   .cont-item { display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: 10px; background: #151518; color: #f2f2f4; min-width: 0; }
   .cont-item:hover { background: #1c1c20; }
   .cont-item img { width: 56px; height: 42px; border-radius: 6px; object-fit: cover; flex-shrink: 0; display: block; }
+  .totw { display: flex; align-items: center; gap: 24px; padding: 14px 16px; border-radius: 10px; background: #151518; margin-bottom: 40px; }
+  .totw > img { width: 96px; height: 54px; border-radius: 6px; object-fit: cover; display: block; }
+  .stat { display: flex; flex-direction: column; gap: 2px; }
+  .stat-title { min-width: 200px; }
+  .stat-label { font-size: 12px; color: #9b9ba5; }
+  .stat-name { font-size: 16px; font-weight: 600; }
+  .stat-val { font-size: 14px; }
+  .stat-lap { font-size: 13px; color: #9b9ba5; }
+  .stat-ends { font-size: 13px; font-variant-numeric: tabular-nums; line-height: 20px; }
+  .stats { display: flex; gap: 40px; }
+  .totw-acts { margin-left: auto; display: flex; gap: 8px; }
+  .btn-line, .btn-red { height: 36px; display: flex; align-items: center; border-radius: 8px; font-size: 14px; }
+  .btn-line { padding: 0 14px; border: 1px solid rgba(255,255,255,.14); color: #f2f2f4; font-weight: 500; }
+  .btn-line:hover { background: #1c1c20; }
+  .btn-red { padding: 0 16px; background: #ff3b3b; color: #fff; font-weight: 600; }
+  .btn-red:hover { background: #ff5252; }
 </style>
 </head>
 <body>
@@ -100,6 +116,23 @@
       <a class="cont-item" data-soon><img src="/thumbs/geometrydash.webp" alt=""><span class="meta"><span class="name">Geometry Dash</span><span class="sub">3 days ago</span></span></a>
       <a class="cont-item" data-soon><img src="/thumbs/1v1lol.webp" alt=""><span class="meta"><span class="name">1v1.LOL</span><span class="sub">Last week</span></span></a>
       <a class="cont-item" data-soon><img src="/thumbs/cuphead.webp" alt=""><span class="meta"><span class="name">Cuphead</span><span class="sub">Last week</span></span></a>
+    </div>
+  </section>
+
+  <section class="totw" data-browse>
+    <img src="/thumbs/polytrack.webp" alt="">
+    <div class="stat stat-title">
+      <span class="stat-label">Track of the week</span>
+      <span class="stat-name">PolyTrack · Summer 3</span>
+    </div>
+    <div class="stats">
+      <div class="stat"><span class="stat-label">Leader</span><span class="stat-val">nova <span class="stat-lap mono">1:02.418</span></span></div>
+      <div class="stat"><span class="stat-label">Racers</span><span class="stat-val">312</span></div>
+      <div class="stat"><span class="stat-label">Ends in</span><span class="stat-ends mono" id="totw">2d 13:54:09</span></div>
+    </div>
+    <div class="totw-acts">
+      <a class="btn-line" data-soon>Leaderboard</a>
+      <a class="btn-red" data-soon>Race now</a>
     </div>
   </section>
 
