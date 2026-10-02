@@ -697,12 +697,16 @@
 
   function paintButtons() {
     var counts = (social() && social().counts()) || {};
+    var named = counts.mentions || 0;
     buttons.forEach(function (x) {
-      x.badge.hidden = !(counts.unread || counts.server);
-      x.badge.classList.toggle('dot', !counts.unread && !!counts.server);
-      x.badge.textContent = counts.unread ? (counts.unread > 99 ? '99+' : String(counts.unread)) : '';
+      x.badge.hidden = !(counts.unread || counts.server || named);
+      x.badge.classList.toggle('dot', !named && !counts.unread && !!counts.server);
+      // Being mentioned outranks a count of unread messages.
+      x.badge.textContent = named ? '@' + (named > 1 ? (named > 9 ? '9+' : named) : '')
+        : counts.unread ? (counts.unread > 99 ? '99+' : String(counts.unread)) : '';
       x.button.setAttribute('aria-expanded', isOpen() ? 'true' : 'false');
-      x.button.setAttribute('aria-label', counts.unread ? 'Chat, ' + counts.unread + ' unread' : 'Chat');
+      x.button.setAttribute('aria-label', named ? 'Chat, mentioned ' + named + (named === 1 ? ' time' : ' times')
+        : counts.unread ? 'Chat, ' + counts.unread + ' unread' : 'Chat');
     });
   }
 
