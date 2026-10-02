@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Console · GameVault preview</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400..700&display=swap" rel="stylesheet">
+<style>
+/* Every color comes from one hue (ember), so the theme is three numbers. */
+:root{
+  --h:25;--c:1;--ah:25;
+  --bg:oklch(0.125 calc(0.024 * var(--c)) var(--h));
+  --tx:oklch(0.97 calc(0.012 * var(--c)) var(--h));
+  --mu:oklch(0.79 calc(0.035 * var(--c)) var(--h));
+  --s2:oklch(0.265 calc(0.048 * var(--c)) var(--h));
+  --s3:oklch(0.32 calc(0.055 * var(--c)) var(--h));
+  --ln:oklch(0.92 calc(0.04 * var(--c)) var(--h) / 0.1);
+  --red:oklch(0.6 0.21 var(--ah));
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{overflow:hidden;background:var(--bg);color:var(--tx);font-family:'Sora',system-ui,sans-serif}
+a{color:inherit}
+.screen{position:relative;height:100vh;min-height:635px;overflow:hidden;background:var(--bg)}
+.shade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,oklch(0.125 calc(0.024 * var(--c)) var(--h) / 0.94) 0%,oklch(0.125 calc(0.024 * var(--c)) var(--h) / 0.6) 55%,oklch(0.125 calc(0.024 * var(--c)) var(--h) / 0.3) 100%),linear-gradient(0deg,oklch(0.125 calc(0.024 * var(--c)) var(--h) / 0.9) 0%,transparent 45%)}
+.top{position:relative;display:flex;align-items:center;gap:16px;height:72px;padding:0 48px}
+.mark{display:block;width:26px;height:26px}
+.word{font-size:17px;font-weight:600;letter-spacing:-0.02em}
+.status{margin-left:auto;display:flex;align-items:center;gap:20px;font-size:13px}
+.clock{display:flex;align-items:center;gap:8px;white-space:nowrap}
+.mu{color:var(--mu)}
+.timer{font-weight:600;font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<div class="screen">
+  <div class="shade"></div>
+
+  <header class="top">
+    <img class="mark" src="/favicon.svg" alt="">
+    <span class="word">gamevault</span>
+    <div class="status">
+      <span class="clock"><span class="mu">period 3</span><span class="timer" id="timer">23:41</span></span>
+    </div>
+  </header>
+</div>
+</body>
+</html>
