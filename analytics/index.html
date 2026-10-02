@@ -1321,9 +1321,11 @@
       active.forEach(function (b) { roots[b.user_id] = true; });
       active.forEach(function (b) { if (b.via && roots[b.via]) (follow[b.via] = follow[b.via] || []).push(b); });
       $('chatBans').innerHTML = active.filter(function (b) { return !(b.via && roots[b.via]); }).map(function (b) {
-        var also = follow[b.user_id] || [];
+        var also = follow[b.user_id] || [], looks = b.lookalikes || [];
         return '<div class="bc-item"><span class="msg"><b>' + esc(b.username) + '</b> ' + esc(b.reason || '')
           + (also.length ? '<br><span class="st">Also banned for sharing a browser: ' + also.map(function (x) { return esc(x.username); }).join(', ') + '</span>' : '')
+          + (looks.length ? '<br><span class="st">Made since on a device that looks the same, so maybe them (check first):</span> '
+            + looks.map(function (x) { return esc(x.username) + ' <button class="btn" type="button" data-ban="' + esc(x.user_id) + '" data-days="">Ban</button>'; }).join(' ') : '')
           + '</span>'
           + '<span class="st">' + (b.until ? 'until ' + esc(new Date(b.until).toLocaleString()) : 'for good')
           + ' \u00b7 ' + (b.browsers || 0) + (b.browsers === 1 ? ' browser' : ' browsers') + '</span>'
