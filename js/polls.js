@@ -52,6 +52,8 @@
     '.gv-poll-look .gv-poll-pct{font-family:"JetBrains Mono",monospace;font-size:.74rem;font-weight:400;color:var(--muted,#8a8a96);white-space:nowrap}',
     '.gv-poll-bar{display:block;height:4px;margin:0 2px;overflow:hidden;border-radius:2px;background:var(--surface,#121216)}',
     '.gv-poll-bar span{display:block;width:var(--p,0%);height:100%;background:var(--muted,#8a8a96);transition:width .5s cubic-bezier(.2,.8,.2,1)}',
+    '.gv-poll-look.mine{border-color:var(--accent,#ff3b3b)}',
+    '.gv-poll-look.mine .gv-poll-bar span{background:var(--accent,#ff3b3b)}',
     '@keyframes gvPollIn{from{opacity:0;transform:translateY(10px) scale(.98)}}',
     '@media (prefers-reduced-motion:reduce){.gv-poll-box{animation:none}.gv-poll-opt.result::before{transition:none}}'
   ].join('');
@@ -179,7 +181,7 @@
     // A picture answer: the picture, with the answer under it.
     function tile(p, i, total) {
       var showing = p.counts && p.counts.length;
-      var t = el('button', 'gv-poll-look');
+      var t = el('button', 'gv-poll-look' + (p.voted === i ? ' mine' : ''));
       t.type = 'button';
       var frame = el('span', 'gv-poll-shot');
       var src = shot(p, i);
