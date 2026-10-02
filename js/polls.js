@@ -24,6 +24,8 @@
     '.gv-poll-opt.mine{border-color:var(--accent,#ff3b3b)}',
     '.gv-poll-opt.mine::before{background:rgba(255,59,59,.22)}',
     '.gv-poll-meta{margin-top:10px;font-size:.78rem;color:var(--muted,#8a8a96)}',
+    '.gv-poll-err{margin-top:8px;font-size:.8rem;color:#ff7a7a}',
+    '.gv-poll-err:empty{display:none}',
   ].join('');
 
   var client = null;
@@ -98,9 +100,12 @@
     var q = el('h3', 'gv-poll-q', poll.question);
     var opts = el('div', 'gv-poll-opts');
     var meta = el('div', 'gv-poll-meta');
+    var err = el('div', 'gv-poll-err');
+    err.setAttribute('role', 'status');
     box.appendChild(q);
     box.appendChild(opts);
     box.appendChild(meta);
+    box.appendChild(err);
 
     function paint(p) {
       opts.textContent = '';
@@ -129,12 +134,14 @@
     }
 
     function vote(p, i) {
+      err.textContent = '';
       Array.prototype.forEach.call(opts.querySelectorAll('button'), function (b) { b.disabled = true; });
       visitor().then(function (v) {
         return rpc('gv_poll_vote', { p_poll: p.id, p_option: i, p_visitor: v });
       }).then(function (fresh) {
         paint(fresh);
-      }, function () {
+      }, function (e) {
+        err.textContent = e.message;
         Array.prototype.forEach.call(opts.querySelectorAll('button'), function (b) { b.disabled = !p.open; });
       });
     }
