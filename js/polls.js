@@ -80,6 +80,10 @@
     '.gv-look-screen iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#0c0c0e;opacity:0;transition:opacity .25s}',
     '.gv-look-screen.ready iframe{opacity:1}',
     '.gv-look-desc{font-size:.88rem;color:#8a8a96}',
+    '.gv-look-chips{display:flex;flex-wrap:wrap;gap:6px}',
+    '.gv-look-chip{padding:7px 13px;border-radius:100px;border:1px solid rgba(255,255,255,.16);background:none;color:#8a8a96;font:inherit;font-size:.8rem;cursor:pointer}',
+    '.gv-look-chip:hover{color:#f4f4f6}',
+    '.gv-look-chip.on{border-color:#f4f4f6;background:#f4f4f6;color:#08080a}',
     '@keyframes gvPollIn{from{opacity:0;transform:translateY(10px) scale(.98)}}',
     '@media (prefers-reduced-motion:reduce){.gv-poll-box{animation:none}.gv-poll-opt.result::before,.gv-poll-look,.gv-poll-bar span{transition:none}}'
   ].join('');
@@ -329,12 +333,20 @@
     var next = el('button', 'gv-look-btn', '\u2192');
     next.type = 'button';
     next.setAttribute('aria-label', 'Next');
+    var chips = el('div', 'gv-look-chips');
+    p.options.forEach(function (o, i) {
+      var c = el('button', 'gv-look-chip', o);
+      c.type = 'button';
+      c.addEventListener('click', function () { show(i); });
+      chips.appendChild(c);
+    });
     var note = el('div', 'gv-look-note');
     var choose = el('button', 'gv-look-pick', 'Pick this one');
     choose.type = 'button';
     choose.hidden = !pick;
     bar.appendChild(prev);
     bar.appendChild(next);
+    bar.appendChild(chips);
     bar.appendChild(note);
     bar.appendChild(choose);
     shade.appendChild(top);
@@ -355,6 +367,10 @@
       live.title = p.options[at] + ', live';
       name.textContent = p.options[at];
       desc.textContent = blurb(p, at);
+      Array.prototype.forEach.call(chips.children, function (c, j) {
+        c.classList.toggle('on', j === at);
+        c.setAttribute('aria-pressed', j === at ? 'true' : 'false');
+      });
       count.textContent = (at + 1) + ' of ' + n;
       shade.setAttribute('aria-label', p.options[at]);
       var bits = [];
