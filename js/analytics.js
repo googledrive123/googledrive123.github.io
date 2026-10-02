@@ -24,7 +24,7 @@
   var SESSION_IDLE_MS = 30 * 60 * 1000;   // new session after 30 min idle
   var HEARTBEAT_MS = 60 * 1000;          // "live now" ping while tab visible
   var FLUSH_MS = 250;                     // batch window, short so the live dashboard sees events at once
-  var MAX_EVENTS_PER_SESSION = 600;       // runaway guard
+  var MAX_EVENTS_PER_SESSION = 2000;      // runaway guard
 
   function ls(get, key, val) {
     try {
