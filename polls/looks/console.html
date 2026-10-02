@@ -50,10 +50,14 @@ button{padding:0;border:0;background:none;font:inherit;color:inherit;cursor:poin
 .cta:hover{background:oklch(0.65 0.2 var(--ah))}
 .star{padding:0 20px;background:var(--ln);font-weight:500}
 .star:hover{background:oklch(0.92 calc(0.04 * var(--c)) var(--h) / 0.16)}
+/* The picked game's art, blown up and blurred into a wash of its colors. */
+.art{position:absolute;left:-100px;top:-100px;width:calc(100% + 200px);height:calc(100% + 200px);object-fit:cover;filter:blur(70px) saturate(1.3);opacity:0;pointer-events:none}
+.art.on{opacity:0.6}
 </style>
 </head>
 <body>
 <div class="screen">
+  <img class="art on" id="art" src="/thumbs/polytrack.webp" alt="">
   <div class="shade"></div>
 
   <header class="top">
