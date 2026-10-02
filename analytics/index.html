@@ -634,6 +634,15 @@
     }
     return page();
   }
+  // ── rows ──
+  // analytics/rows.sql sends each row as a list, in this order.
+  var COLS = ['id', 'tms', 'event', 'visitor_id', 'session_id', 'user_id', 'path', 'referrer', 'game_id', 'item_id', 'item_title', 'value', 'meta', 'browser', 'os', 'device', 'screen', 'viewport', 'lang', 'tz', 'utm_source', 'utm_medium', 'utm_campaign', 'is_new', 'client_ms', 'origin'];
+  function toRow(a) {
+    var r = {};
+    for (var i = 0; i < COLS.length; i++) r[COLS[i]] = a[i];
+    r.t = new Date(r.tms);
+    return r;
+  }
 
   // ── charts ──
   Chart.defaults.color = '#8a8a96';
