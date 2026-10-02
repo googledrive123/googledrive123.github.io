@@ -125,6 +125,8 @@
   .verify-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
   .bc-text { width: 100%; min-height: 64px; resize: vertical; background: var(--bg); border: 1px solid var(--border-strong); color: var(--text); font: inherit; font-size: 0.85rem; padding: 9px 10px; border-radius: 8px; margin-bottom: 8px; }
   .bc-item { display: flex; gap: 10px; align-items: baseline; padding: 7px 0; border-top: 1px solid var(--border); font-size: 0.8rem; width: 100%; }
+  .bc-item.poll-item { align-items: flex-start; padding: 10px 0; }
+  .poll-item .ranked { margin: 8px 0 6px; }
   .bc-item .when { color: var(--muted); font-size: 0.7rem; white-space: nowrap; }
   .bc-item .msg { flex: 1; min-width: 0; overflow-wrap: anywhere; }
   .bc-item .st { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
@@ -279,6 +281,14 @@
       </div>
       <div class="verify-msg" id="bcMsg"></div>
       <div class="verify-list" id="bcList"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Polls <small>asked in a pop-up when people come to the site, one vote each, and kept on /polls/</small></h2>
+    <div class="card">
+      <div class="verify-msg" id="pollMsg"></div>
+      <div class="verify-list" id="pollList"></div>
     </div>
   </section>
 
@@ -1433,6 +1443,27 @@
     if (call) call.then(loadTesting).catch(function (err) { $('testMsg').textContent = 'Could not do that: ' + err.message; });
   }
 
+  // ── polls ──
+  // polls/polls.sql. Each one pops up on the home page until a person
+  // answers it or puts it off, and stays on /polls/ with its results.
+  function loadPolls() {
+    return rpc('gv_polls_admin', { p_secret: state.secret }).then(function (list) {
+      $('pollList').innerHTML = (list || []).length ? list.map(function (p) {
+        var total = p.total || 0;
+        var rows = p.options.map(function (o, i) {
+          var n = (p.counts || [])[i] || 0, share = total ? Math.round(100 * n / total) : 0;
+          return '<div class="row"><div class="rk">' + (i + 1) + '</div><div class="nm" style="--w:' + share + '%"><span>' + esc(o) + '</span></div>'
+            + '<div class="val"><b>' + fmt(n) + '</b> <span>' + share + '%</span></div></div>';
+        }).join('');
+        var when = p.open ? (p.ends_at ? 'ends ' + new Date(p.ends_at).toLocaleString() : 'open until you close it') : 'over';
+        return '<div class="bc-item poll-item"><div class="msg"><b>' + esc(p.question) + '</b>'
+          + '<div class="ranked">' + rows + '</div>'
+          + '<span class="st">' + fmt(total) + (total === 1 ? ' vote' : ' votes') + ' \u00b7 ' + fmt(p.accounts) + ' from accounts \u00b7 ' + esc(when) + '</span></div>'
+          + '</div>';
+      }).join('') : '<div class="empty">No polls yet.</div>';
+    }).catch(function (e) { $('pollMsg').textContent = 'Could not load polls: ' + e.message; });
+  }
+
   // ── giveaways ──
   function loadGiveaways() {
     return rpc('gv_giveaway_list', { p_secret: state.secret }).then(function (list) {
@@ -2121,7 +2152,7 @@
   }
 
   // ── auth / wiring ──
-  function showDash() { $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); load(); loadPeople(); loadBroadcasts(); loadLinks(); loadFailing(); loadChat(); loadAvatars(); loadTesting(); loadGiveaways(); fillChallengeWeeks(); loadChallenges(); loadChallengeTracks(); loadBoard(); loadMirrors(); setTimer(); startPush(); if (location.hash === '#live') enterLive(); }
+  function showDash() { $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); load(); loadPeople(); loadBroadcasts(); loadLinks(); loadFailing(); loadChat(); loadAvatars(); loadTesting(); loadGiveaways(); fillChallengeWeeks(); loadChallenges(); loadChallengeTracks(); loadBoard(); loadMirrors(); loadPolls(); setTimer(); startPush(); if (location.hash === '#live') enterLive(); }
   function setTimer() { clearInterval(state.timer); if ($('autoRefresh').checked) state.timer = setInterval(tick, 5000); }
   function tryLogin(secret, remember) {
     $('loginErr').textContent = '';
