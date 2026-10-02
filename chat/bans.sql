@@ -41,3 +41,12 @@ create index if not exists analytics_visitor_users_user on public.analytics_visi
 alter table public.gv_account_browsers enable row level security;
 revoke all on table public.gv_account_browsers from anon, authenticated;
 
+
+-- Every account and browser seen together, from the poll and from analytics.
+create or replace view public.gv_browser_links as
+  select user_id, visitor_id from public.gv_account_browsers
+  union
+  select user_id, visitor_id from public.analytics_visitor_users;
+
+revoke all on public.gv_browser_links from anon, authenticated;
+
