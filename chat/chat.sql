@@ -23,6 +23,10 @@ create table if not exists public.gv_chat_messages (
   deleted    boolean not null default false
 );
 
+-- Who the message names with @ (chat/mentions.sql), as [{id, name}].
+alter table public.gv_chat_messages
+  add column if not exists mentions jsonb not null default '[]'::jsonb;
+
 -- Slow mode looks up one account's latest messages on every send.
 create index if not exists gv_chat_messages_user_created
   on public.gv_chat_messages (user_id, created_at desc);
