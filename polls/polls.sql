@@ -29,6 +29,9 @@ create table if not exists public.gv_polls (
   closed     boolean not null default false
 );
 
+-- Pictures for the answers, in the same order, or null for a poll without.
+alter table public.gv_polls add column if not exists images jsonb;
+
 create table if not exists public.gv_poll_votes (
   id         bigserial primary key,
   poll_id    bigint not null references public.gv_polls (id) on delete cascade,
