@@ -7,6 +7,10 @@
 (function () {
   'use strict';
 
+  // The beat hands an ask back for its first minute, so a notice is not
+  // left up past that.
+  var LASTS_MS = 60000;
+
   var STYLE_ID = 'gv-ask-style';
 
   // In the same corner as the creator's notice, above the speedometer, where
@@ -110,6 +114,11 @@
     notice.appendChild(no);
     box.appendChild(notice);
     shown[ask.id] = true;
+
+    // Nobody answered in time, and the friend has stopped waiting.
+    setTimeout(function () {
+      if (!accept.disabled) close();
+    }, LASTS_MS);
   }
 
   function start() {
