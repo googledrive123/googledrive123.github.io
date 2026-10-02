@@ -1773,9 +1773,10 @@
   }
 
   // ── live ──
-  // A page of its own with every event as it is written, a second or so
-  // later. analytics_rows is asked every second for what came in since,
-  // going back a little each time as tick() does, so none is missed.
+  // A page of its own with every event as it is written. Events are pushed
+  // in as they happen; analytics_rows is asked as well, every 5 seconds
+  // while the push is there and every second while it is not, going back a
+  // little each time as tick() does, so none is missed.
   var LIVE_BACK = 10 * 60000, LIVE_MAX = 1500, LIVE_BEATS = { ping: 1, hidden: 1, visible: 1 };
   var live = null;
   function liveOn() { return !!live; }
