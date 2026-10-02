@@ -62,3 +62,19 @@ alter table public.gv_social add column if not exists notify boolean not null de
 alter table public.gv_social add column if not exists mutes jsonb not null default '{}'::jsonb
   check (pg_column_size(mutes) <= 8192);
 
+
+-- A row says user_id wants friend_id as a friend. Rows both ways make them
+-- friends; a row one way is a request still waiting.
+create table if not exists public.gv_friend_links (
+  user_id    uuid not null references auth.users (id) on delete cascade,
+  friend_id  uuid not null references auth.users (id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (user_id, friend_id),
+  check (user_id <> friend_id)
+);
+
+create index if not exists gv_friend_links_friend on public.gv_friend_links (friend_id);
+
+alter table public.gv_friend_links enable row level security;
+revoke all on table public.gv_friend_links from anon, authenticated;
+
