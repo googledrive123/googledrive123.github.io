@@ -106,6 +106,23 @@ as $function$
     where x.value is not null
     group by 1, 2, 3 order by 1, 2, 3
     on conflict (visitor_id, trait, value) do update set n = t.n + excluded.n
+  ),
+  quarters as (
+    insert into analytics_quarters as q (bucket, visitor_id, session_id, events, pageviews, plays, play_secs, is_new)
+    select date_bin('15 minutes', e.ts, timestamptz '2000-01-01 00:00:00+00'), e.visitor_id, e.session_id,
+           count(*),
+           count(*) filter (where e.event = 'pageview'),
+           count(*) filter (where e.event = 'game_open'),
+           coalesce(sum(e.value) filter (where e.event = 'game_close'), 0),
+           bool_or(e.is_new)
+    from e
+    group by 1, 2, 3 order by 1, 2, 3
+    on conflict (bucket, visitor_id, session_id) do update set
+      events = q.events + excluded.events,
+      pageviews = q.pageviews + excluded.pageviews,
+      plays = q.plays + excluded.plays,
+      play_secs = q.play_secs + excluded.play_secs,
+      is_new = q.is_new or excluded.is_new
   )
   select;
 $function$;
