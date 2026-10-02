@@ -351,7 +351,9 @@ begin
                -- holds (chat/bans.sql).
                'via', b.via,
                'via_name', case when b.via is not null then public.gv_display_name(b.via) end,
-               'browsers', (select count(distinct l.visitor_id) from gv_browser_links l where l.user_id = b.user_id)
+               'browsers', (select count(distinct l.visitor_id) from gv_browser_links l where l.user_id = b.user_id),
+               'lookalikes', case when b.via is null and (b.until is null or b.until > now())
+                                  then public.gv_ban_lookalikes(b.user_id) else '[]'::json end
              ) order by b.created_at desc)
         from gv_chat_bans b
         left join profiles p on p.id = b.user_id
