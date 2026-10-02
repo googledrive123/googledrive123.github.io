@@ -1634,8 +1634,9 @@
 
   // ── load ──
   // load() reads the whole range: on opening, on a new range and on Refresh.
-  // The all-time numbers come on their own and never hold the rest up.
-  var store = null, loadGen = 0, loadingRange = false;
+  // tick() then only asks for what is new, every 10 seconds. The all-time
+  // numbers come on their own and never hold the rest up.
+  var store = null, loadGen = 0, loadingRange = false, ticking = false;
   function load() {
     if (!state.secret) return;
     var gen = ++loadGen;
@@ -1657,6 +1658,19 @@
       if (gen === loadGen) loadingRange = false;
     });
     loadAllTime();
+  }
+  function tick() {
+    if (!state.secret || !store || loadingRange || ticking) return;
+    var gen = loadGen;
+    ticking = true;
+    Promise.all([fetchTail(store), rpc('gv_playing_now', {}).catch(function () { return null; })]).then(function (res) {
+      if (gen !== loadGen) return;
+      if (res[0] === null) return load();
+      state.playingNow = res[1];
+      draw();
+    }).catch(function (e) {
+      if (gen === loadGen) $('status').innerHTML = '<span class="dot off"></span>Error: ' + esc(e.message);
+    }).then(function () { ticking = false; });
   }
   // The range's rows without scanners, and without any the window has slid
   // past since they came in.
@@ -1684,7 +1698,7 @@
 
   // ── auth / wiring ──
   function showDash() { $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); load(); loadPeople(); loadBroadcasts(); loadLinks(); loadFailing(); loadChat(); loadAvatars(); loadTesting(); loadGiveaways(); fillChallengeWeeks(); loadChallenges(); loadChallengeTracks(); loadBoard(); loadMirrors(); setTimer(); }
-  function setTimer() { clearInterval(state.timer); if ($('autoRefresh').checked) state.timer = setInterval(load, 60000); }
+  function setTimer() { clearInterval(state.timer); if ($('autoRefresh').checked) state.timer = setInterval(tick, 10000); }
   function tryLogin(secret, remember) {
     $('loginErr').textContent = '';
     rpc('analytics_check', { p_secret: secret }).then(function (ok) {
