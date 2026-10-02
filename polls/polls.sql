@@ -116,6 +116,19 @@ $function$;
 revoke all on function public.gv_poll_json(bigint, uuid, text) from public, anon, authenticated;
 
 
+-- True when the request comes from a local copy of the site.
+create or replace function public.gv_origin_local()
+returns boolean
+language sql
+stable
+set search_path to 'public', 'pg_temp'
+as $function$
+  select coalesce(public.gv_request_origin(), '') in ('http://localhost:8000', 'http://127.0.0.1:8000');
+$function$;
+
+revoke all on function public.gv_origin_local() from public, anon, authenticated;
+
+
 -- Every poll still open, newest first, for the pop-up.
 create or replace function public.gv_polls_open(p_visitor text default null)
 returns json
