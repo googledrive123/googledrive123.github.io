@@ -181,6 +181,8 @@
     var side = el('aside', 'gv-chat-side');
     var sideHead = el('div', 'gv-chat-side-head');
     sideHead.appendChild(el('span', '', 'Chats'));
+    els.notify = iconButton('Pop-ups over games', '', toggleNotify);
+    sideHead.appendChild(els.notify);
     els.sideClose = iconButton('Close chat', '\u00d7', close);
     els.sideClose.classList.add('gv-chat-close');
     sideHead.appendChild(els.sideClose);
@@ -287,6 +289,7 @@
     refreshList();
     view(opts.key || current, !!opts.key || mode !== 'window');
     paintButtons();
+    paintNotify();
   }
 
   function close() {
@@ -801,6 +804,19 @@
     body.appendChild(note);
   }
 
+  function paintNotify() {
+    if (!els.notify) return;
+    var on = social().me().notify !== false;
+    els.notify.innerHTML = on ? BELL : BELL_OFF;
+    els.notify.classList.toggle('on', !on);
+    els.notify.title = on ? 'Pop-ups over games are on' : 'Pop-ups over games are off';
+    els.notify.setAttribute('aria-label', els.notify.title);
+  }
+
+  function toggleNotify() {
+    var on = social().me().notify !== false;
+    social().setNotify(!on).then(paintNotify, function (error) { say(error.message, 'error'); });
+  }
 
 
 
@@ -837,6 +853,7 @@
     s.on('me', function () {
       if (!isOpen()) return;
       paintHead();
+      paintNotify();
     });
     // Signed out, or someone else signed in: nothing of theirs stays.
     s.on('state', function () {
