@@ -128,6 +128,7 @@
   .bc-item.poll-item { align-items: flex-start; padding: 10px 0; }
   .poll-item .ranked { margin: 8px 0 6px; }
   #pollAnswers input { flex: 1 1 160px; }
+  .verify-bar select#pollDays { flex: 1 1 140px; }
   .bc-item .when { color: var(--muted); font-size: 0.7rem; white-space: nowrap; }
   .bc-item .msg { flex: 1; min-width: 0; overflow-wrap: anywhere; }
   .bc-item .st { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
@@ -294,6 +295,13 @@
       <div class="verify-bar" id="pollAnswers" style="margin-top:8px"></div>
       <div class="verify-bar" style="margin-top:8px">
         <button class="btn ghost" id="pollMore" type="button">Add an answer</button>
+        <select id="pollDays" aria-label="How long">
+          <option value="1">for 1 day</option>
+          <option value="3">for 3 days</option>
+          <option value="7" selected>for 1 week</option>
+          <option value="30">for 30 days</option>
+          <option value="">until I close it</option>
+        </select>
         <button class="btn" id="pollCreate" type="button">Ask it</button>
       </div>
       <div class="verify-msg" id="pollMsg"></div>
@@ -1495,7 +1503,7 @@
     if (!question) { $('pollMsg').textContent = 'Write the question first.'; return; }
     if (answers.length < 2) { $('pollMsg').textContent = 'Give it at least two answers.'; return; }
     $('pollCreate').disabled = true;
-    rpc('gv_poll_create', { p_secret: state.secret, p_question: question, p_options: answers, p_days: null })
+    rpc('gv_poll_create', { p_secret: state.secret, p_question: question, p_options: answers, p_days: $('pollDays').value ? +$('pollDays').value : null })
       .then(function () { resetPollForm(); $('pollMsg').textContent = 'Asked. Everyone who comes to the site gets it now.'; return loadPolls(); })
       .catch(function (e) { $('pollMsg').textContent = 'Could not ask it: ' + e.message; })
       .then(function () { $('pollCreate').disabled = false; });
