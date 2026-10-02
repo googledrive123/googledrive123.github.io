@@ -12,6 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/site.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
   <script src="/js/identity.js" defer></script>
   <script src="/js/analytics.js" defer></script>
   <script src="/js/site.js" defer></script>
@@ -40,6 +41,9 @@
 (function () {
   'use strict';
 
+  var SUPA_URL = 'https://dxwjxzmlezfyursysays.supabase.co';
+  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
+
   function $(id) { return document.getElementById(id); }
 
   // Open polls first, newest first in each.
@@ -65,11 +69,15 @@
   }
 
   document.addEventListener('DOMContentLoaded', function () {
-    if (!window.GV || !GV.polls) {
+    if (!window.supabase || !window.GV || !GV.polls) {
       $('plMsg').textContent = 'Polls could not load. Refresh to try again.';
       return;
     }
-    load();
+    // Restores the home page's session, if there is one, so a signed-in
+    // player votes as their account.
+    var sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+    GV.polls.use(sb);
+    sb.auth.getSession().then(load, load);
   });
 })();
 </script>
