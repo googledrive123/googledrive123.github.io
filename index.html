@@ -3362,6 +3362,11 @@ const fitWelcome = (() => {
 })();
 addEventListener('resize', fitWelcome);
 addEventListener('load', fitWelcome);
+// The cards, the track card and the counts fill in after the page does,
+// and the welcome screen comes back from the games page.
+new MutationObserver(fitWelcome).observe(document.getElementById('welcome'), {
+  attributes: true, attributeFilter: ['class'], childList: true, subtree: true
+});
 fitWelcome();
 
 function showBrowse() {
