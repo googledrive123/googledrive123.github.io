@@ -386,6 +386,20 @@
   }
 
   $('clearA').addEventListener('click', function () { setQuery(''); });
+
+  var tabs = document.querySelectorAll('#filtersA .tab');
+
+  $('filtersA').addEventListener('click', function (e) {
+    var b = e.target.closest('.tab');
+    if (!b) return;
+    state.ca = b.getAttribute('data-cat');
+    tabs.forEach(function (t) {
+      var on = t === b;
+      t.classList.toggle('on', on);
+      t.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    paintGames();
+  });
 })();
 </script>
 </body>
