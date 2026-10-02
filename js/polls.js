@@ -100,7 +100,7 @@
     '@keyframes gvPollGlow{0%,100%{box-shadow:0 0 0 0 rgba(255,59,59,.55),0 0 22px rgba(255,59,59,.45)}50%{box-shadow:0 0 0 9px rgba(255,59,59,0),0 0 40px rgba(255,59,59,.8)}}',
     '.gv-poll-go:focus-visible{outline:2px solid rgba(255,255,255,.9);outline-offset:3px}',
     '@keyframes gvPollIn{from{opacity:0;transform:translateY(10px) scale(.98)}}',
-    '@media (prefers-reduced-motion:reduce){.gv-poll-box{animation:none}.gv-poll-opt.result::before,.gv-poll-look,.gv-poll-bar span,.gv-look-screen iframe{transition:none}}'
+    '@media (prefers-reduced-motion:reduce){.gv-poll-box,.gv-poll-go{animation:none}.gv-poll-opt.result::before,.gv-poll-look,.gv-poll-bar span,.gv-look-screen iframe{transition:none}}'
   ].join('');
 
   var client = null;
