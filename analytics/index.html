@@ -1884,7 +1884,7 @@
   }
   function liveShow(el) {
     var r = el._row;
-    var hide = (!$('liveBeats').checked && LIVE_BEATS[r.event]) || (live.filter && liveText(r).indexOf(live.filter) === -1);
+    var hide = (!$('liveBeats').checked && LIVE_BEATS[r.event]) || (!$('liveBots').checked && live.st.scanner[r.visitor_id]) || (live.filter && liveText(r).indexOf(live.filter) === -1);
     el.classList.toggle('hidden', !!hide);
   }
   function liveFilterAll() {
@@ -2048,6 +2048,7 @@
   $('liveExit').addEventListener('click', exitLive);
   $('liveFilter').addEventListener('input', liveFilterAll);
   $('liveBeats').addEventListener('change', liveFilterAll);
+  $('liveBots').addEventListener('change', liveFilterAll);
   // A hidden tab asks every 5 seconds; coming back asks straight away.
   document.addEventListener('visibilitychange', function () {
     if (live && !document.hidden && !live.busy) { clearTimeout(live.timer); livePoll(); }
