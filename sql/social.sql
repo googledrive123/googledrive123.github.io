@@ -250,3 +250,95 @@ $function$;
 revoke all on function public.gv_friend_remove(uuid) from public, anon;
 grant execute on function public.gv_friend_remove(uuid) to authenticated;
 
+
+-- Friends, requests received and requests sent.
+--
+-- A friend is online for 90 seconds after the site last heard from them, or
+-- while their PolyTrack is beating, which also covers PolyTrack open in a tab
+-- of its own. Offline friends show as offline, with no game. can_join is for
+-- friends who are online in PolyTrack and take asks to join.
+create or replace function public.gv_friends()
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'Friends only work on GameVault.';
+  end if;
+  if v_user is null then
+    raise exception 'Sign in to see your friends.';
+  end if;
+
+  return json_build_object(
+    'friends', coalesce((
+      select json_agg(json_build_object(
+               'id', f.id,
+               'username', f.name,
+               'preset', v.preset,
+               'upload', v.approved_upload,
+               'online', f.online,
+               'game_id', f.game_id,
+               'can_join', f.can_join
+             ) order by f.online desc, lower(f.name))
+        from (
+          select s.id,
+                 public.gv_display_name(s.id) as name,
+                 s.status <> 'offline' and (s.on_site or s.racing) as online,
+                 case when s.status = 'offline' then null
+                      when s.racing then 'polytrack'
+                      when s.on_site then s.game_id end as game_id,
+                 s.status = 'online' and s.racing as can_join
+            from (
+              select l.friend_id as id,
+                     coalesce(g.status, 'online') as status,
+                     coalesce(g.seen_at > now() - interval '90 seconds', false) as on_site,
+                     g.game_id,
+                     exists (select 1 from polytrack_presence pp
+                              where pp.user_id = l.friend_id
+                                and pp.updated_at > now() - interval '45 seconds') as racing
+                from gv_friend_links l
+                join gv_friend_links r on r.user_id = l.friend_id and r.friend_id = l.user_id
+                left join gv_social g on g.user_id = l.friend_id
+               where l.user_id = v_user
+            ) s
+        ) f
+        left join gv_avatars v on v.user_id = f.id
+    ), '[]'::json),
+    'incoming', coalesce((
+      select json_agg(json_build_object(
+               'id', l.user_id,
+               'username', public.gv_display_name(l.user_id),
+               'preset', v.preset,
+               'upload', v.approved_upload
+             ) order by l.created_at desc)
+        from gv_friend_links l
+        left join gv_avatars v on v.user_id = l.user_id
+       where l.friend_id = v_user
+         and not exists (select 1 from gv_friend_links r
+                          where r.user_id = v_user and r.friend_id = l.user_id)
+    ), '[]'::json),
+    'outgoing', coalesce((
+      select json_agg(json_build_object(
+               'id', l.friend_id,
+               'username', public.gv_display_name(l.friend_id),
+               'preset', v.preset,
+               'upload', v.approved_upload
+             ) order by l.created_at desc)
+        from gv_friend_links l
+        left join gv_avatars v on v.user_id = l.friend_id
+       where l.user_id = v_user
+         and not exists (select 1 from gv_friend_links r
+                          where r.user_id = l.friend_id and r.friend_id = v_user)
+    ), '[]'::json)
+  );
+end;
+$function$;
+
+revoke all on function public.gv_friends() from public, anon;
+grant execute on function public.gv_friends() to authenticated;
+
