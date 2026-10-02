@@ -5112,26 +5112,12 @@ document.getElementById('profileSignout').addEventListener('click', async () => 
   await sb.auth.signOut();
   closeProfile();
 });
-// Deleting is for good: the account, its stats, stars, saves, chat and its
-// PolyTrack times. Typing the username is the confirmation.
-document.getElementById('profileDelete').addEventListener('click', async () => {
-  if (!currentUser) return;
-  const name = displayName();
-  const typed = prompt('This deletes your account for good: stats, stars, cloud saves, chat messages and your PolyTrack times.\n\nType your username (' + name + ') to delete it.');
-  if (typed === null) return;
-  if (typed.trim().toLowerCase() !== name.toLowerCase()) { alert('That was not your username, so nothing was deleted.'); return; }
-  const msg = document.getElementById('profileMsg');
-  msg.textContent = 'Deleting…';
-  // Storage files cannot be removed from SQL, so they go first, from here.
-  try {
-    const { data: files } = await sb.storage.from('saves').list(currentUser.id);
-    if (files && files.length) await sb.storage.from('saves').remove(files.map(f => currentUser.id + '/' + f.name));
-  } catch (e) {}
-  const { error } = await sb.rpc('gv_delete_account');
-  if (error) { msg.textContent = 'Could not delete: ' + error.message; return; }
-  await sb.auth.signOut({ scope: 'local' });
+// Deleting is for good, and takes everything tied to the account with it
+// (sql/account.sql). js/account.js asks first, with the username typed in.
+document.getElementById('profileDelete').addEventListener('click', () => {
+  if (!currentUser || !window.GV || !GV.account) return;
   closeProfile();
-  alert('Your account is deleted.');
+  GV.account.confirmDelete(sb, { name: displayName(), userId: currentUser.id });
 });
 document.getElementById('profileSigninBtn').addEventListener('click', () => {
   closeProfile(); openAuth('signin');
