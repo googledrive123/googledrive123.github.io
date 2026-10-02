@@ -79,6 +79,12 @@
   .timer { margin-top: auto; font-size: 40px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums; }
   .bar { margin-top: 12px; height: 6px; border-radius: 3px; background: oklch(0.92 calc(0.04 * var(--c)) var(--h) / 0.12); overflow: hidden; }
   .bar div { height: 100%; border-radius: 3px; background: var(--tx); }
+  .friends { display: flex; flex-direction: column; gap: 10px; padding: 16px 18px; }
+  .friend { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .friend-i { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; background: var(--s4); display: grid; place-items: center; font-size: 12px; font-weight: 800; }
+  .friend-t { display: flex; flex-direction: column; min-width: 0; }
+  .friend-n { font-size: 13px; font-weight: 700; }
+  .friend-s { font-size: 12px; color: var(--mu); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 </style>
 </head>
 <body>
@@ -136,6 +142,11 @@
         <div class="card-head"><b>period 3</b><span class="mu">ends 10:30 am</span></div>
         <div class="timer" id="timer">23:41</div>
         <div class="bar"><div id="timerPct" style="width:52.6%"></div></div>
+      </div>
+      <div class="card friends">
+        <div class="card-head"><b>friends</b><span class="mu">2 online</span></div>
+        <div class="friend" data-soon><span class="friend-i">J</span><span class="friend-t"><span class="friend-n">jules</span><span class="friend-s">playing PolyTrack</span></span></div>
+        <div class="friend" data-soon><span class="friend-i">K</span><span class="friend-t"><span class="friend-n">kai</span><span class="friend-s">in chat</span></span></div>
       </div>
     </div>
   </main>
