@@ -20,6 +20,8 @@
   <script src="/js/analytics.js" defer></script>
   <script src="/js/site.js" defer></script>
   <script src="/js/player.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
+  <script src="/js/account.js" defer></script>
   <style>
     .preset-grid {
       display: grid;
@@ -229,8 +231,11 @@
 
   <div class="panel">
     <div class="panel-label">Account and saves</div>
-    <p class="panel-note" style="margin-top:0">Sign in, pick an avatar, rename or delete your account from your profile on the <a href="/?profile">home page</a>.
+    <p class="panel-note" style="margin-top:0">Sign in, pick an avatar or rename your account from your profile on the <a href="/?profile">home page</a>.
     Back up your game progress, or keep it in the cloud, on the <a href="/saves/">Saves</a> page.</p>
+    <div class="btn-row" id="deleteRow" hidden>
+      <button class="btn" id="deleteAccount" type="button">Delete account and all its data</button>
+    </div>
   </div>
 
   <div class="panel">
@@ -471,6 +476,29 @@
   });
 
   paintState();
+
+  // Deleting the account (js/account.js), here as well as in the profile,
+  // for whoever is signed in on this browser.
+  document.addEventListener('DOMContentLoaded', function () {
+    var SUPA_URL = 'https://dxwjxzmlezfyursysays.supabase.co';
+    var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
+    var saved = null;
+    try { saved = JSON.parse(ls('sb-dxwjxzmlezfyursysays-auth-token', 'null')); } catch (e) { saved = null; }
+    if (!saved || !saved.access_token || !window.supabase || !window.GV || !GV.account) return;
+    var row = document.getElementById('deleteRow');
+    var sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+    sb.auth.getSession().then(function (r) {
+      var session = r.data.session;
+      if (!session) return;
+      row.hidden = false;
+      document.getElementById('deleteAccount').addEventListener('click', function () {
+        var name = ls('gv.username', '') || session.user.email.split('@')[0];
+        GV.account.confirmDelete(sb, { name: name, userId: session.user.id }).then(function (gone) {
+          if (gone) row.hidden = true;
+        });
+      });
+    });
+  });
 })();
 </script>
 </main>

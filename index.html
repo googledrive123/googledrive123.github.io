@@ -42,6 +42,10 @@
   <script src="/js/avatars.js" defer></script>
   <script src="/js/cosmetics.js" defer></script>
   <script src="/js/player.js" defer></script>
+  <script src="/js/social.js" defer></script>
+  <script src="/js/chat.js" defer></script>
+  <script src="/js/friends.js" defer></script>
+  <script src="/js/account.js" defer></script>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -1552,6 +1556,7 @@
     .bell-game .sep { height: 10px; }
 
     .game-frame-wrap { flex: 1; min-height: 0; position: relative; overflow: hidden; }
+    .game-frame-wrap:fullscreen { background: #000; }
     #gameFrame { width: 100%; height: 100%; border: 0; display: block; }
     .game-loader {
       position: absolute; inset: 0;
@@ -1975,11 +1980,13 @@
     }
     .profile-signout:hover { background: rgba(255,59,59,0.08); border-color: var(--accent); }
     .profile-delete {
-      display: block; margin: 0.6rem auto 0; padding: 0.2rem 0.5rem;
-      background: none; border: 0; color: var(--muted-2);
-      font: inherit; font-size: 0.72rem; text-decoration: underline; cursor: pointer;
+      width: 100%; padding: 0.5rem; margin-top: 0.5rem;
+      background: transparent; border: 1px solid var(--border);
+      border-radius: 100px; color: var(--muted);
+      font-family: inherit; font-size: 0.78rem; font-weight: 600; cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
     }
-    .profile-delete:hover { color: var(--accent); }
+    .profile-delete:hover { color: var(--accent); border-color: rgba(255,59,59,0.3); }
     .profile-msg { font-size: 0.75rem; color: var(--muted); margin-top: 0.5rem; min-height: 1rem; }
     #profileAvatarPicker .gv-av-grid { grid-template-columns: repeat(auto-fill, minmax(34px, 1fr)); }
     .top-game-row {
@@ -2513,6 +2520,8 @@
         </span>
         <span id="userLabelWelcome">Guest</span>
       </button>
+    <span data-friends style="display:contents"></span>
+    <span data-chat style="display:contents"></span>
     <button class="settings-btn" id="settingsBtnWelcome" title="Settings" aria-label="Settings">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </button>
@@ -2650,6 +2659,8 @@
       <span class="kbd-hint">/</span>
       <div class="quick-pick" id="quickPick" role="listbox" hidden></div>
     </div>
+    <span data-friends style="display:contents"></span>
+    <span data-chat style="display:contents"></span>
     <button class="settings-btn" id="settingsBtnBrowse" title="Settings" aria-label="Settings">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </button>
@@ -2779,6 +2790,7 @@
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
       <input type="text" id="moviesSearch" placeholder="Search movies…" autocomplete="off" spellcheck="false">
     </div>
+    <span data-chat style="display:contents"></span>
     <div class="bell" id="bellMovies" aria-live="polite">
       <span class="period" data-bell="period">—</span>
       <span class="sep"></span>
@@ -2867,6 +2879,7 @@
       <span><span class="lbl">ends</span> <span class="val" data-bell="endsAt">&#8212;</span></span>
       <span class="bell-progress" data-bell="progress"></span>
     </div>
+    <span data-chat="pill" style="display:contents"></span>
     <button class="game-bar-swap" id="gameSwap" hidden>&#8646; Use the original host</button>
     <button class="game-bar-swap" id="gameMoreBtn" aria-expanded="false" aria-controls="gameMore">More like this</button>
     <a class="game-bar-newtab" id="gameNewTab" href="#" target="_blank" rel="noopener">&#8599; New Tab</a>    <button class="game-bar-fs" id="gameFullscreen">⛶ Fullscreen</button>
@@ -4074,6 +4087,7 @@ function openGame(g) {
 }
 function closeGame() {
   if (window._trackClose) window._trackClose();
+  if (window.GV && GV.chat) GV.chat.closeWindow();
   showMore(false);
   dropIntro();
   clearTimeout(stallTimer);
@@ -4096,8 +4110,10 @@ gameFrame.addEventListener('load', () => {
   if (introEl) introEl.end();
 });
 gameBack.addEventListener('click', closeGame);
+// The frame's box rather than the frame, so chat and new-message pop-ups,
+// which sit beside the frame in it, stay on screen.
 gameFS.addEventListener('click', () => {
-  const el = gameFrame;
+  const el = gameFrame.parentElement;
   if (el.requestFullscreen) el.requestFullscreen();
   else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
 });
@@ -4592,6 +4608,10 @@ bootCatalog();
 // The 9-dot apps menu (js/apps.js, deferred) in both home headers.
 document.addEventListener('DOMContentLoaded', () => {
   if (window.GV && GV.apps) document.querySelectorAll('[data-apps]').forEach(el => GV.apps.mount(el));
+  // Chat (js/chat.js): a round button in the headers, a labelled one in the
+  // game bar.
+  if (window.GV && GV.chat) document.querySelectorAll('[data-chat]').forEach(el => GV.chat.mount(el, { pill: el.dataset.chat === 'pill' }));
+  if (window.GV && GV.friends) document.querySelectorAll('[data-friends]').forEach(el => GV.friends.mount(el));
 });
 
 // Some games registered service workers for their own /games/<id>/ folder.
@@ -4859,6 +4879,23 @@ async function syncStars() {
   if (!same && GAMES.length) render();
 }
 
+// ─── Chat and friends ───
+// js/social.js runs while someone is signed in. These are the parts of this
+// page it needs: which game is open, where to draw over it, and how to open
+// one.
+const socialHost = {
+  inGame: () => gameOverlay.classList.contains('show'),
+  gameId: () => (gameOverlay.classList.contains('show') && mounted ? mounted.id : null),
+  gameArea: () => gameFrame.parentElement,
+  frame: () => gameFrame,
+  gameTitle: id => (gamesById[id] ? gamesById[id].name : null),
+  openGame: id => { if (gamesById[id]) window.openGame(gamesById[id]); },
+  signIn: () => openAuth('signin')
+};
+function startSocial() {
+  if (window.GV && GV.social) GV.social.start(sb, currentUser, socialHost);
+}
+
 // ─── Auth state ───
 // Every token refresh hands over a new user object. What was looked up about
 // the same user carries over, or the name drops back to the email's first half.
@@ -4879,6 +4916,7 @@ function setCurrentUser(user) {
 sb.auth.onAuthStateChange(async (event, session) => {
   setCurrentUser(session?.user ?? null);
   updateUserUI();
+  startSocial();
   loadVerified();
   if (currentUser) {
     await loadUsername();
@@ -5076,26 +5114,12 @@ document.getElementById('profileSignout').addEventListener('click', async () => 
   await sb.auth.signOut();
   closeProfile();
 });
-// Deleting is for good: the account, its stats, stars, saves, chat and its
-// PolyTrack times. Typing the username is the confirmation.
-document.getElementById('profileDelete').addEventListener('click', async () => {
-  if (!currentUser) return;
-  const name = displayName();
-  const typed = prompt('This deletes your account for good: stats, stars, cloud saves, chat messages and your PolyTrack times.\n\nType your username (' + name + ') to delete it.');
-  if (typed === null) return;
-  if (typed.trim().toLowerCase() !== name.toLowerCase()) { alert('That was not your username, so nothing was deleted.'); return; }
-  const msg = document.getElementById('profileMsg');
-  msg.textContent = 'Deleting…';
-  // Storage files cannot be removed from SQL, so they go first, from here.
-  try {
-    const { data: files } = await sb.storage.from('saves').list(currentUser.id);
-    if (files && files.length) await sb.storage.from('saves').remove(files.map(f => currentUser.id + '/' + f.name));
-  } catch (e) {}
-  const { error } = await sb.rpc('gv_delete_account');
-  if (error) { msg.textContent = 'Could not delete: ' + error.message; return; }
-  await sb.auth.signOut({ scope: 'local' });
+// Deleting is for good, and takes everything tied to the account with it
+// (sql/account.sql). js/account.js asks first, with the username typed in.
+document.getElementById('profileDelete').addEventListener('click', () => {
+  if (!currentUser || !window.GV || !GV.account) return;
   closeProfile();
-  alert('Your account is deleted.');
+  GV.account.confirmDelete(sb, { name: displayName(), userId: currentUser.id });
 });
 document.getElementById('profileSigninBtn').addEventListener('click', () => {
   closeProfile(); openAuth('signin');
@@ -5960,7 +5984,7 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
 
     <a class="profile-save profile-link" id="profileTestLink" href="/test/" hidden>Test new games</a>
     <button class="profile-signout" id="profileSignout" style="display:none">Sign Out</button>
-    <button class="profile-delete" id="profileDelete" style="display:none">Delete account</button>
+    <button class="profile-delete" id="profileDelete" style="display:none">Delete account and all its data</button>
     <button class="auth-submit" id="profileSigninBtn" style="margin-top:0.5rem">Sign In / Sign Up</button>
   </div>
 </div>

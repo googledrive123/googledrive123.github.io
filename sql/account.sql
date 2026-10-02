@@ -1,9 +1,11 @@
 -- Deleting an account.
 --
--- The profile's "Delete account" button. Everything tied to the account goes
--- with it: most tables reference auth.users with on delete cascade (profiles,
--- play_sessions, starred_games, recently_played, polytrack_scores,
--- polytrack_saves, gv_saves, chat), so removing the auth row removes them.
+-- The "Delete account" button in the profile and on the settings page.
+-- Everything tied to the account goes with it: most tables reference
+-- auth.users with on delete cascade (profiles, play_sessions, starred_games,
+-- recently_played, polytrack_scores, polytrack_saves, gv_saves, chat, direct
+-- and group chats, friends, the wallet and shop items, pictures, challenge
+-- runs and badges), so removing the auth row removes them.
 -- The rest carry the id without a foreign key and are cleared here by hand.
 -- Files in Storage cannot be deleted from SQL (storage.protect_delete), so
 -- the page removes the account's own files through the Storage API first.
@@ -27,12 +29,26 @@ begin
     raise exception 'not from this origin';
   end if;
 
-  -- Analytics keep the visit, not who made it.
-  update analytics_events set user_id = null where user_id = v_user;
+  -- Every visit the account made goes, not just its name on them.
+  delete from analytics_events where user_id = v_user;
   delete from polytrack_presence where user_id = v_user;
   delete from gv_verified where key = v_user::text;
+  -- A giveaway it won stays drawn, without its name.
+  update gv_giveaways set winner_name = null where winner_user = v_user;
+  -- A DM with nobody left to talk to is no use to the other person either.
+  delete from gv_convos c
+   where c.kind = 'dm'
+     and exists (select 1 from gv_convo_members m where m.convo_id = c.id and m.user_id = v_user);
+  -- Nor is a group the account was the last one in.
+  delete from gv_convos c
+   where c.kind = 'group'
+     and exists (select 1 from gv_convo_members m where m.convo_id = c.id and m.user_id = v_user)
+     and not exists (select 1 from gv_convo_members m where m.convo_id = c.id and m.user_id <> v_user);
 
   delete from auth.users where id = v_user;
+  -- The leaderboard keeps what it worked out for a minute. This makes the
+  -- next look work it out again, without this account.
+  update gv_leaderboard_cache set made_at = '-infinity' where id = 1;
   return true;
 end;
 $function$;

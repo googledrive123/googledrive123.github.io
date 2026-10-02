@@ -10,6 +10,10 @@
 // the owner's own game into a room when it is opened from the dashboard, and
 // shows the notice when the owner arrives.
 //
+// Friends joining each other use the same moves, through window.GV.creator:
+// friends.js opens a room for a friend who asked, and the site walks the
+// friend's game into it.
+//
 // Like the rest of the mod it stays outside main.bundle.js and drives the
 // game through its own screens, the way a player would.
 (function () {
@@ -73,6 +77,9 @@
   // Also how long a Join from the dashboard can take to be noticed.
   var BEAT_EVERY = 5000;
 
+  // Other parts of the mod that want each beat's reply, like friends.js.
+  var beatListeners = [];
+
   function beat() {
     var gv = identity();
     var room = rooms();
@@ -84,7 +91,10 @@
       p_code: state.code,
       p_role: state.role
     }).then(function (reply) {
-      if (reply && reply.call) hostNow();
+      if (reply && reply.call) hostNow().catch(function () {});
+      beatListeners.forEach(function (fn) {
+        try { fn(reply); } catch (error) { console.error('Beat listener failed:', error); }
+      });
     }).catch(function (error) { console.error('Presence beat failed:', error); });
   }
 
@@ -284,7 +294,9 @@
   // same track, and the owner follows them in. The notice they get when the
   // owner arrives is how they find out.
 
-  var hosting = false;
+  // The room being opened right now, if one is, so a second ask for one
+  // waits on the same room instead of starting another.
+  var hosting = null;
 
   // The game keeps more than one picker in the document and the newest one
   // is the one just opened.
@@ -333,16 +345,25 @@
     ]);
   }
 
+  // Resolves with the room's code once the player is racing in it. Someone
+  // already hosting gets their own room's code. Someone in another player's
+  // room gets nothing: that code is not theirs to hand out.
   function hostNow() {
     var room = rooms();
-    if (hosting || !room || room.state().code !== null) return;
-    hosting = true;
+    if (!room) return Promise.reject(new Error('rooms are not ready'));
+    var state = room.state();
+    if (state.code) {
+      return state.role === 'host'
+        ? Promise.resolve(state.code)
+        : Promise.reject(new Error('Only the room\u2019s host can let people in.'));
+    }
+    if (hosting) return hosting;
     var shown = document.querySelector('.game-toolbar-ui .track-name');
     var track = shown ? shown.textContent.trim() : null;
 
     // Their screen holds still on the frame they were on while the game
     // switches behind it, and comes back on the room's race at the start.
-    stillOrNothing()
+    hosting = stillOrNothing()
       .then(function (picture) {
         showCover(picture, null);
         coverInterface();
@@ -383,11 +404,17 @@
       })
       // A few frames for the new race to draw itself before it is shown.
       .then(function () { return new Promise(function (resolve) { setTimeout(resolve, 700); }); })
-      .catch(function (error) { console.error('Could not open a room for the creator:', error); })
       .then(function () {
         hideCover();
-        hosting = false;
+        hosting = null;
+        return room.state().code;
+      }, function (error) {
+        console.error('Could not open a room:', error);
+        hideCover();
+        hosting = null;
+        throw error;
       });
+    return hosting;
   }
 
   function inRace() {
@@ -448,10 +475,19 @@
     coverButton('Close', hideCover);
   }
 
-  function openAsCreator(wait) {
-    var who = wait.name || 'them';
+  // The reasons a join fails, kept from here on. Once per page.
+  var watching = false;
+
+  function watchForErrors() {
+    if (watching) return;
+    watching = true;
     recordErrors();
     setInterval(noteGameMessage, 200);
+  }
+
+  function openAsCreator(wait) {
+    var who = wait.name || 'them';
+    watchForErrors();
     showCover(null, wait.solo
       ? 'Opening ' + who + '\u2019s room...'
       : 'Joining ' + who + '...');
@@ -556,7 +592,7 @@
 
   function joinAsCreator(visit) {
     creatorTicket = visit.ticket;
-    waitFor(function () {
+    return waitFor(function () {
       return menuFront() || document.querySelector('.game-toolbar-ui');
     }, 60000)
       // The menu can be up before the physics check is done, and a join that
@@ -589,6 +625,14 @@
           ? error.message
           : 'Could not join: ' + error.message);
       });
+  }
+
+  // Into a room by its code, under the cover, the way the creator goes in.
+  // For a friend whose ask to join was just answered yes.
+  function joinRoom(code, who) {
+    watchForErrors();
+    showCover(null, 'Joining ' + (who || 'the room') + '...');
+    return joinAsCreator({ ticket: null, code: code });
   }
 
   // Once in, the room is told who arrived. Said a few times over the first
@@ -668,6 +712,14 @@
       .then(function (genuine) { if (genuine === true) showNotice(); })
       .catch(function (error) { console.error('Could not check the creator ticket:', error); });
   }
+
+  window.GV = window.GV || {};
+  window.GV.creator = {
+    host: hostNow,
+    join: joinRoom,
+    rpc: rpc,
+    onBeat: function (fn) { beatListeners.push(fn); }
+  };
 
   function start() {
     var gv = identity();

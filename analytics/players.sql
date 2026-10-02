@@ -102,10 +102,27 @@ begin
   )
   returning id into v_call;
 
-  if v_call is null then
-    return json_build_object('call', null);
-  end if;
-  return json_build_object('call', json_build_object('id', v_call));
+  return json_build_object(
+    'call', case when v_call is null then null::json else json_build_object('id', v_call) end,
+    -- Friends asking to join this player's room (sql/social.sql), for a
+    -- signed-in player who still takes asks. Each one comes back on every
+    -- beat until it is answered or runs out, and the game shows it once.
+    'asks', coalesce((
+      select json_agg(json_build_object(
+               'id', a.id,
+               'name', public.gv_display_name(a.from_user)
+             ) order by a.id)
+        from gv_join_asks a
+       where a.to_user = auth.uid()
+         and a.answer is null
+         and a.created_at > now() - interval '60 seconds'
+         and coalesce((select status from gv_social where user_id = a.to_user), 'online') = 'online'
+         and exists (select 1 from gv_friend_links l
+                      where l.user_id = a.to_user and l.friend_id = a.from_user)
+         and exists (select 1 from gv_friend_links l
+                      where l.user_id = a.from_user and l.friend_id = a.to_user)
+    ), '[]'::json)
+  );
 end;
 $function$;
 

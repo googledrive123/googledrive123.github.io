@@ -37,6 +37,8 @@ sits beside it and stands in front of a browser API instead:
   visibility.
 - `creator.js` - tells the analytics dashboard who is playing and in which
   room, and lets the site owner join them from there.
+- `friends.js` - shows a friend's ask to join the room, and opens a room for
+  them on Accept.
 - `graphics.js` - a Quality preset row in the game's settings, Low settings
   for weaker devices on first launch, resolution that drops on its own when
   the frame rate does, and a Max frame rate row that starts at 60.
