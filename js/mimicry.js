@@ -111,7 +111,8 @@ try {
     }
     var el = document.createElement('link');
     el.rel = 'icon';
-    el.href = href;
+    // A game page with a <base> tag would look for /icons/ on its asset host.
+    el.href = /^\/(?!\/)/.test(href) ? location.origin + href : href;
     (document.head || document.documentElement).appendChild(el);
   }
 
