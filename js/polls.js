@@ -60,7 +60,10 @@
     '.gv-look-name{font-size:1.1rem;font-weight:700;overflow-wrap:anywhere}',
     '.gv-look-count{font-family:"JetBrains Mono",monospace;font-size:.74rem;color:#8a8a96}',
     '.gv-look-stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}',
-    '.gv-look-stage img{display:block;max-width:100%;max-height:100%;border-radius:12px;border:1px solid rgba(255,255,255,.16);box-shadow:0 24px 70px rgba(0,0,0,.6)}',
+    '.gv-look-fit{position:relative;flex-shrink:0}',
+    '.gv-look-frame{position:absolute;top:0;left:0;width:1366px;overflow:hidden;transform-origin:0 0;border-radius:14px;background:#0c0c0e;box-shadow:0 0 0 1px rgba(255,255,255,.16),0 30px 80px rgba(0,0,0,.6)}',
+    '.gv-look-screen{position:relative;height:635px}',
+    '.gv-look-screen img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}',
     '.gv-look-btn{width:40px;height:40px;flex-shrink:0;display:grid;place-items:center;padding:0;border-radius:50%;border:1px solid rgba(255,255,255,.16);background:#121216;color:#f4f4f6;font:inherit;font-size:1.1rem;line-height:1;cursor:pointer}',
     '.gv-look-btn:hover{border-color:#ff3b3b}',
     '.gv-look-close{margin-left:auto}',
@@ -286,8 +289,14 @@
     top.appendChild(count);
     top.appendChild(close);
     var stage = el('div', 'gv-look-stage');
+    var fitBox = el('div', 'gv-look-fit');
+    var frame = el('div', 'gv-look-frame');
+    var screen = el('div', 'gv-look-screen');
     var img = el('img');
-    stage.appendChild(img);
+    screen.appendChild(img);
+    frame.appendChild(screen);
+    fitBox.appendChild(frame);
+    stage.appendChild(fitBox);
     var bar = el('div', 'gv-look-bar');
     var prev = el('button', 'gv-look-btn', '\u2190');
     prev.type = 'button';
@@ -325,8 +334,17 @@
       }
       note.textContent = bits.join(' \u00b7 ');
     }
+    // The screen is a school Chromebook's, 1366 by 635, shrunk to fit.
+    function fit() {
+      var w = frame.offsetWidth, h = frame.offsetHeight;
+      var s = Math.min(stage.clientWidth / w, stage.clientHeight / h, 1);
+      fitBox.style.width = w * s + 'px';
+      fitBox.style.height = h * s + 'px';
+      frame.style.transform = 'scale(' + s + ')';
+    }
     function shut() {
       shade.remove();
+      window.removeEventListener('resize', fit);
       window.removeEventListener('keydown', onKey, true);
       if (back && back.focus) back.focus();
     }
@@ -352,6 +370,8 @@
     });
     show(start);
     document.body.appendChild(shade);
+    fit();
+    window.addEventListener('resize', fit);
     window.addEventListener('keydown', onKey, true);
     (pick ? choose : close).focus();
   }
