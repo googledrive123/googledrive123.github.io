@@ -69,6 +69,12 @@
   .btn-line:hover { background: #1c1c20; }
   .btn-red { padding: 0 16px; background: #ff3b3b; color: #fff; font-weight: 600; }
   .btn-red:hover { background: #ff5252; }
+  .pop { margin-bottom: 48px; }
+  .tiles { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 24px 16px; }
+  .tile { display: flex; flex-direction: column; gap: 10px; color: #f2f2f4; min-width: 0; }
+  .tile-art { display: block; aspect-ratio: 4 / 3; border-radius: 10px; overflow: hidden; background: #151518; transition: transform .15s, box-shadow .15s; }
+  .tile-art:hover { transform: translateY(-2px); box-shadow: 0 0 0 1px rgba(255,255,255,.3); }
+  .tile-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
 </style>
 </head>
 <body>
@@ -133,6 +139,21 @@
     <div class="totw-acts">
       <a class="btn-line" data-soon>Leaderboard</a>
       <a class="btn-red" data-soon>Race now</a>
+    </div>
+  </section>
+
+  <section class="pop" data-browse>
+    <div class="row-head">
+      <h2>Popular this week</h2>
+      <a class="row-link" data-soon>See all</a>
+    </div>
+    <div class="tiles">
+      <a class="tile" data-soon><span class="tile-art"><img src="/thumbs/basketball-stars.webp" alt=""></span><span class="meta"><span class="name">Basketball Stars</span><span class="sub">Sports</span></span></a>
+      <a class="tile" data-soon><span class="tile-art"><img src="/thumbs/amazing-rope-police.webp" alt=""></span><span class="meta"><span class="name">Amazing Rope Police</span><span class="sub">Action</span></span></a>
+      <a class="tile" data-soon><span class="tile-art"><img src="/thumbs/ice-dodo.webp" alt=""></span><span class="meta"><span class="name">Ice Dodo</span><span class="sub">Arcade</span></span></a>
+      <a class="tile" data-soon><span class="tile-art"><img src="/thumbs/adrenalinechallenge2.webp" alt=""></span><span class="meta"><span class="name">Adrenaline Challenge 2</span><span class="sub">Action</span></span></a>
+      <a class="tile" data-soon><span class="tile-art"><img src="/thumbs/stickman-hook.webp" alt=""></span><span class="meta"><span class="name">Stickman Hook</span><span class="sub">Action</span></span></a>
+      <a class="tile" data-soon><span class="tile-art"><img src="/thumbs/crossyroad.webp" alt=""></span><span class="meta"><span class="name">Crossy Road</span><span class="sub">Arcade</span></span></a>
     </div>
   </section>
 
