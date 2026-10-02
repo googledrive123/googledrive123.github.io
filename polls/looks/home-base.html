@@ -376,6 +376,12 @@ $('tabsB').addEventListener('click', function (e) {
   }
   drawGames();
 });
+
+$('surpriseB').addEventListener('click', function () {
+  state.qb = G[Math.floor(Math.random() * G.length)][1];
+  $('qb').value = state.qb;
+  drawGames();
+});
 </script>
 </body>
 </html>
