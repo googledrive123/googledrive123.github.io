@@ -258,3 +258,99 @@ $function$;
 revoke all on function public.gv_group_leave(bigint) from public, anon;
 grant execute on function public.gv_group_leave(bigint) to authenticated;
 
+
+-- Sends a message as the signed-in account, with the same checks and the
+-- same wait=<seconds> and until=<time> hints as gv_chat_send.
+create or replace function public.gv_convo_send(p_convo bigint, p_body text)
+returns json
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+  v_body text := btrim(regexp_replace(coalesce(p_body, ''), '[[:space:][:cntrl:]]+', ' ', 'g'));
+  v_ban gv_chat_bans;
+  v_last timestamptz;
+  v_wait integer;
+  v_row gv_convo_messages;
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'Chat only works on GameVault.';
+  end if;
+  if v_user is null then
+    raise exception 'Sign in to chat.';
+  end if;
+  if not exists (select 1 from gv_convo_members where convo_id = p_convo and user_id = v_user) then
+    raise exception 'You are not in that chat.';
+  end if;
+  if (select count(*) from gv_convo_members where convo_id = p_convo) < 2 then
+    raise exception 'Nobody else is in this chat any more.';
+  end if;
+  if v_body = '' then
+    raise exception 'Write something first.';
+  end if;
+  if char_length(v_body) > 300 then
+    raise exception 'Messages can be up to 300 characters.';
+  end if;
+
+  select * into v_ban
+    from gv_chat_bans
+   where user_id = v_user
+     and (until is null or until > now());
+  if found then
+    if v_ban.until is null then
+      raise exception 'You cannot send messages in chat.';
+    end if;
+    raise exception 'You cannot send messages in chat for now.'
+      using hint = 'until=' || to_char(v_ban.until at time zone 'utc', 'YYYY-MM-DD"T"HH24:MI:SS"Z"');
+  end if;
+
+  perform pg_advisory_xact_lock(hashtext('gv_convo_send'), hashtext(v_user::text));
+
+  select max(created_at) into v_last
+    from gv_convo_messages
+   where user_id = v_user;
+  if v_last > now() - interval '1 second' then
+    raise exception 'Slow down a little.'
+      using hint = 'wait=1';
+  end if;
+
+  -- The 30th message back decides when the next one is allowed.
+  select created_at into v_last
+    from gv_convo_messages
+   where user_id = v_user
+     and created_at > now() - interval '1 minute'
+   order by created_at desc
+  offset 29 limit 1;
+  if found then
+    v_wait := greatest(1, ceil(extract(epoch from v_last + interval '1 minute' - now()))::int);
+    raise exception 'That is a lot of messages. Take a short break before sending more.'
+      using hint = 'wait=' || v_wait;
+  end if;
+
+  if public.gv_is_rude(v_body) then
+    raise exception 'That message has words we do not allow here. Try saying it another way.';
+  end if;
+
+  insert into gv_convo_messages (convo_id, user_id, username, body)
+  values (p_convo, v_user, public.gv_display_name(v_user), v_body)
+  returning * into v_row;
+  update gv_convo_members set last_read = v_row.id
+   where convo_id = p_convo and user_id = v_user;
+
+  return json_build_object(
+    'id', v_row.id,
+    'convo_id', v_row.convo_id,
+    'user_id', v_row.user_id,
+    'username', v_row.username,
+    'body', v_row.body,
+    'created_at', v_row.created_at,
+    'mine', true
+  );
+end;
+$function$;
+
+revoke all on function public.gv_convo_send(bigint, text) from public, anon;
+grant execute on function public.gv_convo_send(bigint, text) to authenticated;
+
