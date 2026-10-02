@@ -78,3 +78,23 @@ $function$;
 
 revoke all on function public.gv_ban_follow(uuid) from public, anon, authenticated;
 
+
+-- What a browser looked like on its last page view: the system, the
+-- browser, the screen, the time zone and language, and the hardware.
+create or replace function public.gv_browser_traits(p_visitor text)
+returns text
+language sql
+stable
+security definer
+set search_path to 'public'
+as $function$
+  select md5(concat_ws('|', e.os, e.browser, e.screen, e.tz, e.lang,
+                       e.meta ->> 'cpu', e.meta ->> 'mem_gb', e.meta ->> 'dpr'))
+    from analytics_events e
+   where e.visitor_id = p_visitor and e.event = 'pageview'
+   order by e.ts desc
+   limit 1;
+$function$;
+
+revoke all on function public.gv_browser_traits(text) from public, anon, authenticated;
+
