@@ -452,6 +452,7 @@
     var head = el('div', 'gv-msg-head');
     var name = el('button', 'gv-msg-name', m.username);
     name.type = 'button';
+    if (!m.mine) name.addEventListener('click', function () { personSheet(m.user_id, m.username); });
     var time = el('time', 'gv-msg-time', when(m.created_at));
     time.dateTime = m.created_at;
     head.appendChild(name);
@@ -818,6 +819,29 @@
     social().setNotify(!on).then(paintNotify, function (error) { say(error.message, 'error'); });
   }
 
+  function personSheet(id, name) {
+    var body = sheet(name);
+    var note = el('p');
+    var row = el('div', 'gv-chat-actions');
+    row.appendChild(pill('Message', 'primary', function () {
+      openDm({ id: id }).catch(function (error) { note.textContent = error.message; });
+    }));
+    row.appendChild(pill(social().muted('user:' + id) ? 'Muted' : 'Mute', '', function () {
+      muteSheet('user:' + id, name);
+    }));
+    var add = pill('Add friend', '', function () {
+      add.disabled = true;
+      social().rpc('gv_friend_ask', { p_user: id }).then(function (state) {
+        add.textContent = state === 'friends' ? 'Friends' : 'Request sent';
+      }, function (error) {
+        note.textContent = error.message;
+        add.disabled = false;
+      });
+    });
+    row.appendChild(add);
+    body.appendChild(row);
+    body.appendChild(note);
+  }
 
 
 
