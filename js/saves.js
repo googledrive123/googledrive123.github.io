@@ -623,8 +623,10 @@
     });
   }
 
-  function autoOn() { return read(AUTO_KEY) === '1'; }
-  function setAuto(on) { write(AUTO_KEY, on ? '1' : null); }
+  // On unless this browser turned it off. Hardly anyone opens /saves/, and a
+  // backup that waits to be switched on is not there when it is needed.
+  function autoOn() { return read(AUTO_KEY) !== '0'; }
+  function setAuto(on) { write(AUTO_KEY, on ? '1' : '0'); }
   function autoAt() { return read(AUTO_AT_KEY); }
 
   function whenIdle() {
@@ -634,11 +636,11 @@
     });
   }
 
-  /* Once a day, quietly, for a signed-in player who turned it on in this
-     browser. A browser that has never auto-saved may be a fresh one without
+  /* Once a day, quietly, for a signed-in player, unless this browser turned
+     it off. A browser that has never auto-saved may be a fresh one without
      the progress the account's auto slot holds, so it leaves that slot alone
-     until /saves/ has offered to load it (autoOffer below). Resolves true
-     only when it saved; never rejects, since nobody is watching. */
+     until the home page or /saves/ has offered to load it (autoOffer below).
+     Resolves true only when it saved; never rejects, since nobody is watching. */
   var autoRunning = false;
 
   function autoSaveIfDue(existing) {
@@ -667,10 +669,10 @@
   }
 
   /* The account's auto slot, if this browser has never auto-saved or loaded
-     one: /saves/ asks whether to load it. Turning the offer down counts that
-     copy as this browser's last auto-save, so the next one replaces it a day
-     after it was made. A caller that already listed the slots passes them in
-     rather than asking the server twice. */
+     one: the home page and /saves/ ask whether to load it. Turning the offer
+     down counts that copy as this browser's last auto-save, so the next one
+     replaces it a day after it was made. A caller that already listed the
+     slots passes them in rather than asking the server twice. */
   function autoOffer(rows) {
     if (autoAt()) return Promise.resolve(null);
     return (rows ? Promise.resolve(rows) : cloudList()).then(function (list) {
