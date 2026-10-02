@@ -403,6 +403,8 @@
     if (typeof el.className === 'string' && el.className) meta.cls = el.className.slice(0, 80);
     var href = el.getAttribute('href');
     if (href) meta.href = href.slice(0, 200);
+    var area = el.parentElement && el.parentElement.closest('[id]');
+    if (area) meta.area = area.id;
     track('click', { item_title: text.replace(/\s+/g, ' ').trim().slice(0, 80), item_id: el.dataset && (el.dataset.id || el.dataset.game) || null, meta: meta });
   }, true);
 
