@@ -343,6 +343,13 @@ $('launchQ').addEventListener('input', function () {
   openLib();
   $('libQ').setSelectionRange(text.length, text.length);
 });
+
+// Only a panel close claims Escape; with the panel shut the poll viewer gets it.
+document.addEventListener('keydown', function (e) {
+  if (e.key !== 'Escape' || !state.open) return;
+  e.preventDefault();
+  closeLib();
+});
 </script>
 </body>
 </html>
