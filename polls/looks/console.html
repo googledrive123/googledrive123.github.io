@@ -195,6 +195,7 @@ button{padding:0;border:0;background:none;font:inherit;color:inherit;cursor:poin
     arts[0].src = '/thumbs/' + g.id + '.webp';
     arts[0].classList.add('on');
     arts[1].classList.remove('on');
+    keepInView(i);
   }
 
   $('row').addEventListener('click', function (e) {
@@ -207,6 +208,35 @@ button{padding:0;border:0;background:none;font:inherit;color:inherit;cursor:poin
     var d = Math.floor(t / 86400), h = Math.floor(t / 3600) % 24, m = Math.floor(t / 60) % 60;
     return 'track of the week · ends in ' + d + 'd ' + pad(h) + ':' + pad(m);
   }
+
+  // Scroll only the row (never the page, which may sit in a poll's iframe) so
+  // the picked tile stays on screen with the row's 48px margin around it. The
+  // spot is worked out from the finished layout, every tile 124px but the
+  // picked one at 152px, because the tiles are still resizing when this runs.
+  var TILE = 124, BIG = 152, GAP = 14, EDGE = 48;
+  var still = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  function keepInView(i) {
+    var row = $('row');
+    var left = EDGE + i * (TILE + GAP), right = left + BIG;
+    var x = row.scrollLeft;
+    if (left - EDGE < x) x = left - EDGE;
+    else if (right + EDGE > x + row.clientWidth) x = right + EDGE - row.clientWidth;
+    if (x !== row.scrollLeft) row.scrollTo({ left: x, behavior: still.matches ? 'auto' : 'smooth' });
+  }
+
+  // Left and Right walk the row, like a console pad.
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    var t = e.target;
+    if (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+    e.preventDefault();
+    var i = Math.max(0, Math.min(ROW.length - 1, state.sel + (e.key === 'ArrowRight' ? 1 : -1)));
+    select(i);
+    // Focus on a tile follows the pick, so Tab carries on from the right place.
+    if (t.classList.contains('tile')) tiles[i].focus({ preventScroll: true });
+  });
 
   function tick() {
     state.left = state.left > 0 ? state.left - 1 : 3000;
