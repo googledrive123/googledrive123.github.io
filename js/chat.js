@@ -79,6 +79,12 @@
     '.gv-chat-chips{display:flex;flex-wrap:wrap;gap:6px}',
     '.gv-chat-chips:empty{display:none}',
     '.gv-chat-actions{display:flex;flex-wrap:wrap;gap:8px}',
+    '.gv-chat-btn{position:relative;flex-shrink:0;width:38px;height:38px;display:grid;place-items:center;border-radius:50%;border:1px solid var(--border,rgba(255,255,255,.07));background:transparent;color:var(--muted,#8a8a96);cursor:pointer;transition:color .15s,border-color .15s}',
+    '.gv-chat-btn:hover,.gv-chat-btn[aria-expanded="true"]{color:var(--text,#f4f4f6);border-color:var(--border-strong,rgba(255,255,255,.16))}',
+    '.gv-chat-btn.pill{width:auto;height:auto;display:inline-flex;gap:6px;padding:.35rem .85rem;border-radius:100px;font:inherit;font-size:.78rem;white-space:nowrap}',
+    '.gv-chat-badge{position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;padding:0 4px;box-sizing:border-box;border-radius:100px;background:var(--accent,#ff3b3b);color:#fff;font-size:.6rem;font-weight:700;line-height:16px;text-align:center}',
+    '.gv-chat-badge.dot{min-width:9px;width:9px;height:9px;padding:0;top:-1px;right:-1px}',
+    '.gv-chat-badge[hidden]{display:none}',
     '@media (max-width:700px){.gv-chat-full{padding:0}.gv-chat-full>.gv-chat-frame{border-radius:0;border:0}}'
   ].join('');
 
@@ -92,6 +98,7 @@
   var sending = false;
   var waitUntil = 0;
   var waitTimer = null;
+  var buttons = [];
 
   function social() {
     return window.GV && window.GV.social;
@@ -252,6 +259,7 @@
     root.hidden = false;
     els.sideClose.hidden = mode !== 'window' && !root.classList.contains('gv-chat-narrow');
     view(opts.key || current, !!opts.key || mode !== 'window');
+    paintButtons();
   }
 
   function close() {
@@ -261,6 +269,7 @@
     closeSheet();
     mode = null;
     if (social()) social().viewing(null);
+    paintButtons();
     if (wasWindow) {
       var frame = host().frame && host().frame();
       try { if (frame && frame.contentWindow) frame.contentWindow.focus(); } catch (e) {}
@@ -455,6 +464,39 @@
   }
 
 
+  // ── The chat button ───────────────────────────────────────────────────
+
+  // pill: the game bar's style, with a label, rather than a round icon.
+  function mount(container, opts) {
+    if (!container || container.querySelector('.gv-chat-btn')) return;
+    style();
+    var b = el('button', 'gv-chat-btn' + (opts && opts.pill ? ' pill' : ''));
+    b.type = 'button';
+    b.setAttribute('aria-label', 'Chat');
+    b.setAttribute('aria-expanded', 'false');
+    b.innerHTML = ICON + (opts && opts.pill ? '<span>Chat</span>' : '');
+    var badge = el('span', 'gv-chat-badge');
+    badge.hidden = true;
+    b.appendChild(badge);
+    b.addEventListener('click', function (e) {
+      e.stopPropagation();
+      toggle();
+    });
+    container.appendChild(b);
+    buttons.push({ button: b, badge: badge });
+    paintButtons();
+  }
+
+  function paintButtons() {
+    var counts = (social() && social().counts()) || {};
+    buttons.forEach(function (x) {
+      x.badge.hidden = !(counts.unread || counts.server);
+      x.badge.classList.toggle('dot', !counts.unread && !!counts.server);
+      x.badge.textContent = counts.unread ? (counts.unread > 99 ? '99+' : String(counts.unread)) : '';
+      x.button.setAttribute('aria-expanded', isOpen() ? 'true' : 'false');
+      x.button.setAttribute('aria-label', counts.unread ? 'Chat, ' + counts.unread + ' unread' : 'Chat');
+    });
+  }
 
 
   function closeSheet() {
@@ -478,6 +520,7 @@
       if (data.server.length) add('server', data.server);
     });
     s.on('counts', function () {
+      paintButtons();
     });
     s.on('me', function () {
       if (!isOpen()) return;
@@ -498,6 +541,7 @@
     close: close,
     toggle: toggle,
     isOpen: isOpen,
+    mount: mount,
     // For the game page closing its game: a window over it goes with it.
     closeWindow: function () { if (mode === 'window') close(); }
   };
