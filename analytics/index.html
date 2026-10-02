@@ -2061,7 +2061,7 @@
   function onPush(res) {
     if (!res.rows || !$('autoRefresh').checked) return;
     if (!store || loadingRange) { held.push(res); return; }
-    if (take(store, res).length) drawSoon();
+    if (take(store, res).length && !live) drawSoon();
   }
   push.on.push(onPush);
   // Drawing a long range takes a while, so events coming in fast wait for
