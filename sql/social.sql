@@ -373,3 +373,37 @@ $function$;
 revoke all on function public.gv_social_me() from public, anon;
 grant execute on function public.gv_social_me() to authenticated;
 
+
+-- Either can be left null to keep it as it is.
+create or replace function public.gv_social_set(p_status text default null, p_notify boolean default null)
+returns json
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'Chat only works on GameVault.';
+  end if;
+  if v_user is null then
+    raise exception 'Sign in first.';
+  end if;
+  if p_status is not null and p_status not in ('online', 'offline', 'private') then
+    raise exception 'Pick online, private or offline.';
+  end if;
+
+  insert into gv_social (user_id, status, notify)
+  values (v_user, coalesce(p_status, 'online'), coalesce(p_notify, true))
+  on conflict (user_id) do update
+    set status = coalesce(p_status, gv_social.status),
+        notify = coalesce(p_notify, gv_social.notify);
+
+  return public.gv_social_me();
+end;
+$function$;
+
+revoke all on function public.gv_social_set(text, boolean) from public, anon;
+grant execute on function public.gv_social_set(text, boolean) to authenticated;
+
