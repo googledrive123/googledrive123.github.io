@@ -6,6 +6,7 @@
 (function () {
   'use strict';
 
+  var FRIENDS_MS = 60 * 1000;
 
   var FEATURES = [
     { id: 'chat', label: 'Chat', line: 'Message friends and start groups', added: '2026-10-02', href: '/chat/', module: 'chat',
@@ -40,6 +41,8 @@
   var cards = {};
   // Lines handed in from outside, like the coins from the page's wallet.
   var given = {};
+  var friends = null;
+  var friendsTimer = null;
 
   function style() {
     if (document.getElementById('gvFeaturesCss')) return;
@@ -94,6 +97,14 @@
       if (counts.unread) return { text: counts.unread + ' unread message' + (counts.unread === 1 ? '' : 's'), hot: true };
       if (counts.server) return { text: 'New messages in the server room', live: true };
     }
+    if (f.id === 'friends' && counts) {
+      if (counts.requests) return { text: counts.requests + ' friend request' + (counts.requests === 1 ? '' : 's'), hot: true };
+      if (friends) {
+        var on = friends.filter(function (x) { return x.online; }).length;
+        if (on) return { text: on + ' online now', live: true };
+        if (!friends.length) return { text: 'Add friends by their username' };
+      }
+    }
     if (given[f.id]) return { text: given[f.id], live: true };
     return { text: f.line };
   }
@@ -109,6 +120,25 @@
     });
   }
 
+  // Who is online needs the friends list, asked for once a minute while
+  // the page is on screen.
+  function loadFriends() {
+    var s = social();
+    if (!s || !s.user() || document.hidden) return;
+    s.rpc('gv_friends').then(function (data) {
+      friends = data.friends || [];
+      paint();
+    }, function () {});
+  }
+
+  function watchFriends(user) {
+    clearInterval(friendsTimer);
+    friends = null;
+    paint();
+    if (!user) return;
+    loadFriends();
+    friendsTimer = setInterval(loadFriends, FRIENDS_MS);
+  }
 
   function mount(container) {
     if (!container || container.querySelector('.gv-feats')) return;
@@ -124,7 +154,9 @@
     s.on('counts', paint);
     s.on('state', function (user) {
       paint();
+      watchFriends(user);
     });
+    if (s.user()) watchFriends(s.user());
   }
 
 
