@@ -380,7 +380,8 @@ $function$;
 
 
 -- Mutes an account for p_days days, or for good with no p_days. Banning
--- again replaces the old ban.
+-- again replaces the old ban. Every other account seen on one of its
+-- browsers is banned with it, until the same time (chat/bans.sql).
 create or replace function public.gv_chat_ban(
   p_secret text,
   p_user_id uuid,
@@ -417,6 +418,20 @@ begin
         created_at = excluded.created_at,
         via = null
   returning * into v_row;
+
+  -- A ban the owner gave by hand is left as it is.
+  insert into gv_chat_bans (user_id, reason, until, created_at, via)
+  select distinct other.user_id, 'Same browser as a banned account', v_row.until, now(), p_user_id
+    from gv_browser_links mine
+    join gv_browser_links other on other.visitor_id = mine.visitor_id and other.user_id <> p_user_id
+    join auth.users u on u.id = other.user_id
+   where mine.user_id = p_user_id
+  on conflict (user_id) do update
+    set reason = excluded.reason,
+        until = excluded.until,
+        via = excluded.via
+    where gv_chat_bans.via is not null
+       or (gv_chat_bans.until is not null and gv_chat_bans.until <= now());
 
   return row_to_json(v_row);
 end;
