@@ -11,6 +11,8 @@
 
   var CSS = [
     '.gv-poll{text-align:left}',
+    '.gv-poll-kicker{display:flex;align-items:center;gap:8px;font-family:"JetBrains Mono",monospace;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent,#ff3b3b)}',
+    '.gv-poll-kicker::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent,#ff3b3b);box-shadow:0 0 10px var(--accent,#ff3b3b)}',
     '.gv-poll-q{margin:.5rem 0 1rem;font-size:1.2rem;font-weight:700;line-height:1.3;letter-spacing:-.01em;color:var(--text,#f4f4f6);overflow-wrap:anywhere}',
     '.gv-poll-opts{display:flex;flex-direction:column;gap:8px}',
     '.gv-poll-opt{position:relative;width:100%;display:flex;align-items:center;gap:10px;padding:11px 14px;overflow:hidden;border-radius:10px;border:1px solid var(--border-strong,rgba(255,255,255,.16));background:var(--surface-2,#1a1a20);color:var(--text,#f4f4f6);font:inherit;font-size:.92rem;text-align:left;cursor:pointer;transition:border-color .15s}',
@@ -26,6 +28,14 @@
     '.gv-poll-meta{margin-top:10px;font-size:.78rem;color:var(--muted,#8a8a96)}',
     '.gv-poll-err{margin-top:8px;font-size:.8rem;color:#ff7a7a}',
     '.gv-poll-err:empty{display:none}',
+    '.gv-poll-pop{position:fixed;inset:0;z-index:2600;display:grid;place-items:center;padding:16px;background:rgba(8,8,10,.62);backdrop-filter:blur(5px)}',
+    '.gv-poll-box{width:min(440px,100%);max-height:calc(100vh - 32px);overflow-y:auto;padding:22px;border-radius:16px;border:1px solid var(--border-strong,rgba(255,255,255,.16));background:var(--surface,#121216);box-shadow:0 24px 70px rgba(0,0,0,.6);animation:gvPollIn .25s cubic-bezier(.2,.8,.2,1)}',
+    '.gv-poll-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-top:16px}',
+    '.gv-poll-later{margin-left:auto;padding:8px 16px;border-radius:100px;border:1px solid var(--border-strong,rgba(255,255,255,.16));background:none;color:var(--text,#f4f4f6);font:inherit;font-size:.82rem;font-weight:600;cursor:pointer;opacity:0;visibility:hidden;transition:opacity .3s}',
+    '.gv-poll-later.on{opacity:1;visibility:visible}',
+    '.gv-poll-later:hover{border-color:var(--accent,#ff3b3b)}',
+    '@keyframes gvPollIn{from{opacity:0;transform:translateY(10px) scale(.98)}}',
+    '@media (prefers-reduced-motion:reduce){.gv-poll-box{animation:none}.gv-poll-opt.result::before{transition:none}}'
   ].join('');
 
   var client = null;
@@ -150,8 +160,47 @@
     return box;
   }
 
+  // ── The pop-up ────────────────────────────────────────────────────────
+
+  function pop(poll) {
+    style();
+    var shade = el('div', 'gv-poll-pop');
+    shade.setAttribute('role', 'dialog');
+    shade.setAttribute('aria-modal', 'true');
+    shade.setAttribute('aria-label', 'New poll');
+    var box = el('div', 'gv-poll-box');
+    box.appendChild(el('div', 'gv-poll-kicker', 'New poll'));
+    var foot = el('div', 'gv-poll-foot');
+    var later = el('button', 'gv-poll-later on', 'Not now');
+    later.type = 'button';
+    function close() {
+      shade.remove();
+    }
+    later.addEventListener('click', function () {
+      close();
+    });
+    box.appendChild(card(poll));
+    foot.appendChild(later);
+    box.appendChild(foot);
+    shade.appendChild(box);
+    document.body.appendChild(shade);
+  }
+
+  // Looks for a poll this browser or account has not answered, and asks it.
+  function ask() {
+    if (window.top !== window.self) return;
+    visitor().then(function (v) {
+      return rpc('gv_polls_open', { p_visitor: v });
+    }).then(function (list) {
+      var open = (list || []).filter(function (p) { return p.voted == null; });
+      var next = open[0];
+      if (next) pop(next);
+    }).catch(function () {});
+  }
+
   window.GV = window.GV || {};
   window.GV.polls = {
+    ask: ask,
     card: card,
     use: use,
     rpc: rpc,
