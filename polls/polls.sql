@@ -129,7 +129,8 @@ $function$;
 revoke all on function public.gv_origin_local() from public, anon, authenticated;
 
 
--- Every poll still open, newest first, for the pop-up.
+-- Every poll still open, newest first, for the pop-up. Preview polls only
+-- on localhost.
 create or replace function public.gv_polls_open(p_visitor text default null)
 returns json
 language plpgsql
@@ -148,6 +149,7 @@ begin
     select json_agg(public.gv_poll_json(p.id, auth.uid(), v_visitor) order by p.id desc)
       from gv_polls p
      where not p.closed and (p.ends_at is null or p.ends_at > now())
+       and (not p.preview or public.gv_origin_local())
   ), '[]'::json);
 end;
 $function$;
