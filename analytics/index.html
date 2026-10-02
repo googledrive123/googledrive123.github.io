@@ -2053,6 +2053,13 @@
     }).then(function () { ticking = false; });
     if (Date.now() - allTimeAt > 60000) loadAllTime();
   }
+  // Events pushed from the database join the range as they come.
+  function onPush(res) {
+    if (!res.rows || !$('autoRefresh').checked) return;
+    if (!store || loadingRange) return;
+    if (take(store, res).length) draw();
+  }
+  push.on.push(onPush);
   // The range's rows without scanners, and without any the window has slid
   // past since they came in.
   function draw() {
