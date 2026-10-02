@@ -1809,30 +1809,14 @@
     rpc('analytics_rows', { p_secret: state.secret, p_from: new Date(Math.max(l.st.from, l.st.since - OVERLAP)).toISOString(), p_lo: l.after }).then(function (res) {
       if (live !== l) return;
       var list = res.rows || [];
-      var added = take(l.st, res);
       l.skew = Date.parse(res.now) - Date.now();
       // A full answer may stop short of now: the next one carries on from
       // its last id, straight away.
       if (list.length >= SLICE) l.after = list[list.length - 1][0] + 1;
       else { l.after = null; l.st.since = Date.parse(res.now); }
-      // Rows the next answer may hold again keep their ids, so they are
-      // still known when they come back.
-      var cut = Math.min(liveNow() - LIVE_BACK, l.st.since - OVERLAP);
-      if (l.st.rows.length && l.st.rows[0].tms < cut) {
-        l.st.rows = l.st.rows.filter(function (r) {
-          if (r.tms >= cut) return true;
-          delete l.st.ids[r.id];
-          return false;
-        });
-      }
-      if (l.paused) { l.held = l.held.concat(added); $('livePause').textContent = 'Resume (' + fmt(l.held.length) + ' new)'; }
-      else liveAdd(added, !l.first);
+      liveTake(res);
       l.first = false;
       l.fails = 0;
-      livePresence();
-      liveNames(added);
-      liveStats();
-      $('liveStatus').innerHTML = '<span class="dot"></span>Updated ' + new Date().toLocaleTimeString();
     }).catch(function (e) {
       if (live !== l) return;
       l.fails++;
@@ -1843,6 +1827,27 @@
       var wait = l.fails ? Math.min(30000, 1000 * Math.pow(2, l.fails)) : l.after ? 0 : document.hidden ? 5000 : 1000;
       l.timer = setTimeout(livePoll, wait);
     });
+  }
+  // Rows from an answer or a push, onto the page.
+  function liveTake(res) {
+    var l = live;
+    var added = take(l.st, res);
+    // Rows the next answer may hold again keep their ids, so they are
+    // still known when they come back.
+    var cut = Math.min(liveNow() - LIVE_BACK, l.st.since - OVERLAP);
+    if (l.st.rows.length && l.st.rows[0].tms < cut) {
+      l.st.rows = l.st.rows.filter(function (r) {
+        if (r.tms >= cut) return true;
+        delete l.st.ids[r.id];
+        return false;
+      });
+    }
+    if (l.paused) { l.held = l.held.concat(added); $('livePause').textContent = 'Resume (' + fmt(l.held.length) + ' new)'; }
+    else liveAdd(added, !l.first);
+    livePresence();
+    liveNames(added);
+    liveStats();
+    $('liveStatus').innerHTML = '<span class="dot"></span>Updated ' + new Date().toLocaleTimeString();
   }
   // PolyTrack says who is in which room, every few seconds.
   function livePresence() {
