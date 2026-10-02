@@ -261,9 +261,10 @@
     body.gv-playing #movies { visibility: hidden; }
 
     /* ───────────── WELCOME ───────────── */
+    /* At least one screen, and taller when the cards and the track of the
+       week need it, rather than cutting the heading off at the top. */
     #welcome {
-      height: 100vh;
-      max-height: 100vh;
+      min-height: 100vh;
       overflow: hidden;
       display: flex;
       flex-direction: column;
