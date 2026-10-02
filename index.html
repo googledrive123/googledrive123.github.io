@@ -2777,6 +2777,15 @@
       </div>
       <div class="grid" id="recentGrid"></div>
     </div>
+    <!-- Because you played: what the people who played your last game also played -->
+    <div class="section" id="becauseSection" style="display:none">
+      <div class="section-head">
+        <h2 id="becauseHeading">Because you played</h2>
+        <span class="count-tag" id="becauseCount">0</span>
+        <div class="rule"></div>
+      </div>
+      <div class="grid strip" id="becauseGrid"></div>
+    </div>
     <!-- Starred section -->
     <div class="section" id="starredSection" style="display:none">
       <div class="section-head">
@@ -3912,6 +3921,20 @@ function render() {
     recentSection.style.display = 'none';
   }
 
+  // ─── Because you played ───
+  const becauseSection = document.getElementById('becauseSection');
+  const becauseGrid = document.getElementById('becauseGrid');
+  becauseGrid.innerHTML = '';
+  const becauseList = isDefaultView && !GV.layout.hidden('because') ? becauseGames() : [];
+  if (becauseList.length >= BECAUSE_MIN) {
+    becauseSection.style.display = '';
+    document.getElementById('becauseHeading').textContent = 'Because you played ' + gamesById[because.id].name;
+    document.getElementById('becauseCount').textContent = becauseList.length;
+    becauseList.forEach(g => becauseGrid.appendChild(makeTile(g)));
+  } else {
+    becauseSection.style.display = 'none';
+  }
+
   // ─── Starred (or empty hint) ───
   starredGrid.innerHTML = '';
   if (isDefaultView && !GV.layout.hidden('starred')) {
@@ -4191,6 +4214,35 @@ function showMore(on) {
 }
 gameMoreBtn.addEventListener('click', () => showMore(gameMore.hidden));
 
+// ───── Because you played ─────
+// What the people who played your last game also played (gv_also_played in
+// analytics/public.sql), topped up from its own category when that is thin.
+// Games you played lately are left out: they are in Continue already.
+const BECAUSE_ROW = 12;
+const BECAUSE_MIN = 4;
+let because = { id: null, list: [] };
+function loadBecause() {
+  const id = recent.find(x => gamesById[x]);
+  if (!id || id === because.id) return;
+  because = { id: id, list: [] };
+  publicRpc('gv_also_played', { p_game: id, p_limit: 24 }).then(list => {
+    if (because.id !== id) return;
+    because.list = list.map(x => x.id);
+    render();
+  }).catch(() => {});
+}
+function becauseGames() {
+  const g = gamesById[because.id];
+  if (!g) return [];
+  const played = new Set(recent);
+  const ok = x => x && !x.hidden && !x.staging && !played.has(x.id) && !failing.has(x.id);
+  const out = because.list.map(id => gamesById[id]).filter(ok);
+  similarGames(g).forEach(x => {
+    if (out.length < BECAUSE_ROW && ok(x) && !out.includes(x)) out.push(x);
+  });
+  return out.slice(0, BECAUSE_ROW);
+}
+
 
 function openGame(g) {
   suggPlaySecs = 0;
@@ -4210,6 +4262,7 @@ function closeGame() {
   if (window.GV && GV.chat) GV.chat.closeWindow();
   showMore(false);
   dropIntro();
+  loadBecause();
   clearTimeout(stallTimer);
   expectLoad = false;
   mounted = null;
@@ -4689,6 +4742,7 @@ async function bootCatalog() {
   buildCatBar();
   render();
   initRoute();
+  loadBecause();
   initPolytrackNotice();
   loadPopular();
   loadFailing();

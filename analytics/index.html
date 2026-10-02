@@ -815,7 +815,7 @@
 
     var cc = counter(); gameList.forEach(function (g) { cc.add(g.cat ? g.cat.charAt(0).toUpperCase() + g.cat.slice(1) : 'Unknown', g.plays); });
     ranked('rkCats', cc.top(14));
-    var sc = counter(); opens.forEach(function (r) { sc.add(r.meta && r.meta.source ? { browse: 'Browsing the grid', search: 'From search', roll: 'Random roll', direct_link: 'Direct link / refresh' }[r.meta.source] || r.meta.source : 'Unknown'); });
+    var sc = counter(); opens.forEach(function (r) { sc.add(r.meta && r.meta.source ? { browse: 'Browsing the grid', search: 'From search', roll: 'Random roll', direct_link: 'Direct link / refresh', because: 'Because you played row' }[r.meta.source] || r.meta.source : 'Unknown'); });
     ranked('rkSource', sc.top(6));
     ranked('rkStars', gameList.filter(function (g) { return g.stars; }).sort(function (a, b) { return b.stars - a.stars; }).slice(0, 10).map(function (g) { return [g.name, g.stars, g.unstars ? g.unstars + ' unstarred' : '']; }), { share: false });
     ranked('rkLongest', gameList.filter(function (g) { return g.closes >= 3; }).sort(function (a, b) { return b.avg - a.avg; }).slice(0, 10).map(function (g) { return [g.name, g.avg, g.closes + ' plays']; }), { fmt: dur, share: false });

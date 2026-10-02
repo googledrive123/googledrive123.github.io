@@ -32,8 +32,8 @@
       document.documentElement.style.setProperty('--tile-min', layout.tileSize() + 'px');
     },
 
-    // Home rows someone chose to hide: 'popular', 'starred', 'recent'.
-    ROWS: ['popular', 'starred', 'recent'],
+    // Home rows someone chose to hide: 'popular', 'starred', 'recent', 'because'.
+    ROWS: ['popular', 'starred', 'recent', 'because'],
     hidden: function (row) { return read('gv.hide.' + row, '0') === '1'; },
     setHidden: function (row, on) { write('gv.hide.' + row, on ? '1' : '0'); },
 

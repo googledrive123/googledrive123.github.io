@@ -294,8 +294,17 @@
   var rollShowing = false;
   var initialPath = location.pathname;
 
+  // A game opened from the home page's "Because you played" row, so the
+  // dashboard can tell whether that row gets used.
+  var rowClick = { row: null, at: 0 };
+  document.addEventListener('click', function (e) {
+    var inRow = e.target && e.target.closest && e.target.closest('#becauseSection');
+    rowClick = { row: inRow ? 'because' : null, at: Date.now() };
+  }, true);
+
   function gameSource() {
     if (rollShowing) return 'roll';
+    if (rowClick.row && Date.now() - rowClick.at < 1000) return rowClick.row;
     if (initialPath.indexOf('/games/') === 0 && Date.now() - performance.timeOrigin < 5000) return 'direct_link';
     var s = document.getElementById('search');
     if (s && s.value.trim()) return 'search';
