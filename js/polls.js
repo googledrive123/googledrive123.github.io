@@ -87,7 +87,19 @@
         row.type = 'button';
         row.appendChild(el('span', 'gv-poll-name', name));
         row.disabled = !p.open;
+        row.addEventListener('click', function () { vote(p, i); });
         opts.appendChild(row);
+      });
+    }
+
+    function vote(p, i) {
+      Array.prototype.forEach.call(opts.querySelectorAll('button'), function (b) { b.disabled = true; });
+      visitor().then(function (v) {
+        return rpc('gv_poll_vote', { p_poll: p.id, p_option: i, p_visitor: v });
+      }).then(function (fresh) {
+        paint(fresh);
+      }, function () {
+        Array.prototype.forEach.call(opts.querySelectorAll('button'), function (b) { b.disabled = !p.open; });
       });
     }
 
