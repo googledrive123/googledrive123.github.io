@@ -10,6 +10,10 @@
 // the owner's own game into a room when it is opened from the dashboard, and
 // shows the notice when the owner arrives.
 //
+// Friends joining each other use the same moves, through window.GV.creator:
+// friends.js opens a room for a friend who asked, and the site walks the
+// friend's game into it.
+//
 // Like the rest of the mod it stays outside main.bundle.js and drives the
 // game through its own screens, the way a player would.
 (function () {
