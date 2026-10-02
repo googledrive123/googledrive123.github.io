@@ -43,7 +43,7 @@
     '.gv-poll-later:hover{border-color:var(--accent,#ff3b3b)}',
     '.gv-poll-looks{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}',
     '.gv-poll-look{display:flex;flex-direction:column;gap:8px;min-width:0;padding:8px 8px 10px;border-radius:12px;border:1px solid var(--border-strong,rgba(255,255,255,.16));background:var(--surface-2,#1a1a20);color:var(--text,#f4f4f6);font:inherit;text-align:left;cursor:zoom-in;transition:border-color .15s,transform .15s}',
-    '.gv-poll-shot{display:block;aspect-ratio:1366/635;overflow:hidden;border-radius:7px;background:#0c0c0e}',
+    '.gv-poll-shot{position:relative;display:block;aspect-ratio:1366/635;overflow:hidden;border-radius:7px;background:#0c0c0e}',
     '.gv-poll-shot img{display:block;width:100%;height:100%;object-fit:cover}',
     '.gv-poll-look:hover{border-color:var(--accent,#ff3b3b);transform:translateY(-2px)}',
     '.gv-poll-look:disabled{cursor:default;opacity:.6;transform:none}',
@@ -68,6 +68,8 @@
     '.gv-look-note{font-size:.84rem;color:#8a8a96}',
     '.gv-poll-hint{margin:-.4rem 0 1rem;font-size:.84rem;color:var(--muted,#8a8a96)}',
     '.gv-poll-note{display:block;padding:0 2px;overflow:hidden;font-size:.78rem;line-height:1.35;color:var(--muted,#8a8a96);white-space:nowrap;text-overflow:ellipsis}',
+    '.gv-poll-try{position:absolute;right:8px;bottom:8px;padding:4px 10px;border-radius:100px;background:rgba(8,8,10,.8);color:#f4f4f6;font-size:.72rem;font-weight:600;transition:background .15s}',
+    '.gv-poll-try::before{content:"";display:inline-block;margin-right:6px;border-style:solid;border-width:4px 0 4px 6px;border-color:transparent transparent transparent currentColor;vertical-align:1px}',
     '@keyframes gvPollIn{from{opacity:0;transform:translateY(10px) scale(.98)}}',
     '@media (prefers-reduced-motion:reduce){.gv-poll-box{animation:none}.gv-poll-opt.result::before,.gv-poll-look,.gv-poll-bar span{transition:none}}'
   ].join('');
@@ -225,6 +227,7 @@
         img.alt = '';
         frame.appendChild(img);
       }
+      if (livePage(p, i)) frame.appendChild(el('span', 'gv-poll-try', 'Try it live'));
       t.appendChild(frame);
       var row = el('span', 'gv-poll-look-row');
       row.appendChild(el('span', 'gv-poll-name', p.options[i]));
