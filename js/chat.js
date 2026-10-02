@@ -503,7 +503,8 @@
     return box.firstChild;
   }
 
-  // The text, with each @name the message named picked out.
+  // The text, with each @name the message named picked out. A click on one
+  // opens that person, as a click on a name does.
   function bodyNode(m) {
     var body = el('div', 'gv-msg-body');
     var named = (m.mentions || []).slice().sort(function (a, b) { return b.name.length - a.name.length; });
@@ -521,6 +522,7 @@
       if (at > from) body.appendChild(document.createTextNode(text.slice(from, at)));
       var tag = el('button', 'gv-mention' + (hit.id === me ? ' me' : ''), text.substr(at, hit.name.length + 1));
       tag.type = 'button';
+      if (hit.id !== me) tag.addEventListener('click', personSheet.bind(null, hit.id, hit.name));
       body.appendChild(tag);
       from = i = at + 1 + hit.name.length;
     }
