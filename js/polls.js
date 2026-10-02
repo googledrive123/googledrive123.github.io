@@ -3,6 +3,7 @@
    it. /polls/ shows every poll. One vote each: per account, and per browser
    for a guest. Answers can come with a picture, a live page to try and a
    short note. A click opens the live page at a Chromebook's screen size.
+   A poll can open with an intro, and polls wait for someone's second visit.
    Public surface: window.GV.polls.ask(), .card(poll), .use(client), .rpc. */
 (function () {
   'use strict';
