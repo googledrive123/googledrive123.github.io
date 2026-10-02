@@ -65,3 +65,4 @@ create table if not exists public.analytics_visitor_games (
   secs double precision not null,
   primary key (game_id, visitor_id)
 );
+create index if not exists analytics_visitor_games_visitor_idx on public.analytics_visitor_games (visitor_id);
