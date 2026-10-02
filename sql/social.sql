@@ -342,3 +342,34 @@ $function$;
 revoke all on function public.gv_friends() from public, anon;
 grant execute on function public.gv_friends() to authenticated;
 
+
+create or replace function public.gv_social_me()
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+  v_row gv_social;
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'Chat only works on GameVault.';
+  end if;
+  if v_user is null then
+    raise exception 'Sign in first.';
+  end if;
+
+  select * into v_row from gv_social where user_id = v_user;
+  return json_build_object(
+    'status', coalesce(v_row.status, 'online'),
+    'notify', coalesce(v_row.notify, true),
+    'mutes', coalesce(v_row.mutes, '{}'::jsonb)
+  );
+end;
+$function$;
+
+revoke all on function public.gv_social_me() from public, anon;
+grant execute on function public.gv_social_me() to authenticated;
+
