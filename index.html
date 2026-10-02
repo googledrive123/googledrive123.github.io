@@ -3903,6 +3903,20 @@ function render() {
     recentSection.style.display = 'none';
   }
 
+  // ─── Because you played ───
+  const becauseSection = document.getElementById('becauseSection');
+  const becauseGrid = document.getElementById('becauseGrid');
+  becauseGrid.innerHTML = '';
+  const becauseList = isDefaultView && !GV.layout.hidden('because') ? becauseGames() : [];
+  if (becauseList.length >= BECAUSE_MIN) {
+    becauseSection.style.display = '';
+    document.getElementById('becauseHeading').textContent = 'Because you played ' + gamesById[because.id].name;
+    document.getElementById('becauseCount').textContent = becauseList.length;
+    becauseList.forEach(g => becauseGrid.appendChild(makeTile(g)));
+  } else {
+    becauseSection.style.display = 'none';
+  }
+
   // ─── Starred (or empty hint) ───
   starredGrid.innerHTML = '';
   if (isDefaultView && !GV.layout.hidden('starred')) {
