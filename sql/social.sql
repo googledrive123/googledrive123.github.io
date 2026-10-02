@@ -92,6 +92,7 @@ declare
   v_user uuid := auth.uid();
   v_q text := left(lower(btrim(coalesce(p_q, ''))), 30);
   v_like text;
+  v_bare text;
 begin
   if not public.gv_origin_allowed() then
     raise exception 'Friends only work on GameVault.';
@@ -104,6 +105,8 @@ begin
   end if;
   -- Wildcards typed into the box are only characters.
   v_like := replace(replace(replace(v_q, '\', '\\'), '%', '\%'), '_', '\_');
+  -- What was typed without spaces or symbols, so "i am" finds "i_am" too.
+  v_bare := regexp_replace(v_q, '[^a-z0-9]', '', 'g');
 
   return coalesce((
     select json_agg(json_build_object(
@@ -120,7 +123,9 @@ begin
            and nullif(btrim(p.username), '') is not null
            -- A rude name is shown as a neutral one, which is not what was typed.
            and not public.gv_is_rude(p.username)
-           and lower(p.username) like '%' || v_like || '%'
+           and (lower(p.username) like '%' || v_like || '%'
+                or (char_length(v_bare) >= 2
+                    and regexp_replace(lower(p.username), '[^a-z0-9]', '', 'g') like '%' || v_bare || '%'))
          order by lower(p.username)
          limit 8
       ) f
