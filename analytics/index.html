@@ -1764,6 +1764,7 @@
       liveAdd(added, !l.first);
       l.first = false;
       l.fails = 0;
+      livePresence();
       liveStats();
       $('liveStatus').innerHTML = '<span class="dot"></span>Updated ' + new Date().toLocaleTimeString();
     }).catch(function (e) {
@@ -1776,6 +1777,21 @@
       var wait = l.fails ? Math.min(30000, 1000 * Math.pow(2, l.fails)) : l.after ? 0 : document.hidden ? 5000 : 1000;
       l.timer = setTimeout(livePoll, wait);
     });
+  }
+  // PolyTrack says who is in which room, every few seconds.
+  function livePresence() {
+    var l = live;
+    if (Date.now() - l.presenceAt < 5000) return;
+    l.presenceAt = Date.now();
+    rpc('analytics_polytrack_live', { p_secret: state.secret }).then(function (list) {
+      if (live !== l) return;
+      l.presence = Array.isArray(list) ? list : [];
+      l.presence.forEach(function (p) {
+        var n = names[p.visitor_id] || (names[p.visitor_id] = {});
+        if (!n.username && p.username) n.username = p.username;
+        if (!n.polytrack && p.name) n.polytrack = p.name;
+      });
+    }).catch(function () {});
   }
 
   // ── live: the events ──
@@ -1858,7 +1874,10 @@
       var r = lastPlay[v];
       if (r.game_id && (r.event === 'game_open' || r.event === 'game_load' || r.event === 'ping')) playing[v] = r.item_title || r.game_id;
     });
+    var rooms = Object.create(null);
+    live.presence.forEach(function (p) { playing[p.visitor_id] = 'PolyTrack'; rooms[p.visitor_id] = p; });
     var online = Object.keys(last).filter(function (v) { return now - last[v].tms < 5 * 60000; });
+    Object.keys(rooms).forEach(function (v) { if (!last[v] || now - last[v].tms >= 5 * 60000) online.push(v); });
 
     var minute = rows.filter(function (r) { return now - r.tms < 60000; });
     var games = counter(), pages = counter();
