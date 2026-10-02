@@ -1658,9 +1658,11 @@
     });
     loadAllTime();
   }
-  // The range's rows without scanners.
+  // The range's rows without scanners, and without any the window has slid
+  // past since they came in.
   function draw() {
-    state.rows = store.rows.filter(function (r) { return !store.scanner[r.visitor_id]; });
+    var from = rangeBounds().from.getTime();
+    state.rows = store.rows.filter(function (r) { return r.tms >= from && !store.scanner[r.visitor_id]; });
     render();
     loadNames();
     $('status').innerHTML = '<span class="dot"></span>Updated ' + new Date().toLocaleTimeString();
