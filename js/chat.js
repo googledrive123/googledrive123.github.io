@@ -198,6 +198,8 @@
     title.appendChild(els.title);
     title.appendChild(els.sub);
     head.appendChild(title);
+    els.members = iconButton('People', '\u2630', membersSheet);
+    head.appendChild(els.members);
     var shut = iconButton('Close chat', '\u00d7', close);
     shut.classList.add('gv-chat-close');
     head.appendChild(shut);
@@ -333,6 +335,8 @@
     var t = titleFor(current);
     els.title.textContent = t.name;
     els.sub.textContent = t.sub;
+    var c = current === 'server' ? null : convoFor(current);
+    els.members.hidden = !(c && c.kind === 'group');
   }
 
   function view(key, enter) {
@@ -722,6 +726,40 @@
     paint();
   }
 
+  function membersSheet() {
+    var c = convoFor(current);
+    if (!c) return;
+    var body = sheet(convoName(c));
+    var people = el('div', 'gv-chat-people');
+    people.appendChild(personLine('You'));
+    (c.members || []).forEach(function (m) { people.appendChild(personLine(m.username)); });
+    body.appendChild(people);
+    var note = el('p');
+    body.appendChild(el('p', '', 'Add people'));
+    search(body, 'Add', function (person, line) {
+      social().rpc('gv_group_add', { p_convo: c.id, p_users: [person.id] }).then(function () {
+        line.remove();
+        return refreshList().then(function () { load(current); membersSheet(); });
+      }, function (error) { note.textContent = error.message; });
+    });
+    body.appendChild(note);
+    var row = el('div', 'gv-chat-actions');
+    row.appendChild(pill('Leave the group', 'danger', function () {
+      social().rpc('gv_group_leave', { p_convo: c.id }).then(function () {
+        delete threads[current];
+        return refreshList().then(function () { view('server', mode === 'full'); });
+      }, function (error) { note.textContent = error.message; });
+    }));
+    body.appendChild(row);
+  }
+
+  function personLine(name) {
+    var line = el('div', 'gv-chat-person');
+    var face = el('span', 'gv-chat-dot', initials(name));
+    line.appendChild(face);
+    line.appendChild(el('span', '', name));
+    return line;
+  }
 
 
 
