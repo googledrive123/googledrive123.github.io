@@ -2579,6 +2579,8 @@
       <div class="stat"><div class="num loading" id="sCats">0</div><div class="lbl">categories</div></div>
     </div>
 
+    <!-- The big features as cards, filled by js/features.js. -->
+    <div data-features></div>
     <nav class="mini-nav" aria-label="More">
       <a href="/leaderboard/">Leaderboard <span class="tag-new">new</span></a>
       <a href="/shop/">Shop <span class="tag-new">new</span></a>
@@ -4623,6 +4625,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // game bar.
   if (window.GV && GV.chat) document.querySelectorAll('[data-chat]').forEach(el => GV.chat.mount(el, { pill: el.dataset.chat === 'pill' }));
   if (window.GV && GV.friends) document.querySelectorAll('[data-friends]').forEach(el => GV.friends.mount(el));
+  if (window.GV && GV.features) document.querySelectorAll('[data-features]').forEach(el => GV.features.mount(el));
 });
 
 // Some games registered service workers for their own /games/<id>/ folder.
