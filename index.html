@@ -5126,6 +5126,8 @@ sb.auth.onAuthStateChange(async (event, session) => {
     if (window.GV && GV.saves) GV.saves.autoSaveIfDue(sb);
     offerBackup();
   } else if (event === 'SIGNED_OUT') {
+    backupOffered = false;
+    document.getElementById('saveToast').hidden = true;
     myAvatar = null;
     myWallet = null;
     document.getElementById('profileTestLink').hidden = true;
