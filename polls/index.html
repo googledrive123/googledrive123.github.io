@@ -61,6 +61,13 @@
       list.forEach(function (p) {
         var panel = document.createElement('section');
         panel.className = 'panel';
+        var head = document.createElement('div');
+        head.className = 'pl-head';
+        var label = document.createElement('div');
+        label.className = 'panel-label';
+        label.textContent = p.open ? 'Open poll' : 'Poll over';
+        head.appendChild(label);
+        panel.appendChild(head);
         panel.appendChild(polls.card(p));
         $('plList').appendChild(panel);
       });
