@@ -1741,6 +1741,7 @@
 
   function livePoll() {
     var l = live;
+    l.busy = true;
     rpc('analytics_rows', { p_secret: state.secret, p_from: new Date(Math.max(l.st.from, l.st.since - OVERLAP)).toISOString(), p_lo: l.after }).then(function (res) {
       if (live !== l) return;
       var list = res.rows || [];
@@ -1768,7 +1769,9 @@
       $('liveStatus').innerHTML = '<span class="dot off"></span>' + esc(e.message) + ' · trying again';
     }).then(function () {
       if (live !== l) return;
-      l.timer = setTimeout(livePoll, l.after ? 0 : 1000);
+      l.busy = false;
+      var wait = l.after ? 0 : document.hidden ? 5000 : 1000;
+      l.timer = setTimeout(livePoll, wait);
     });
   }
 
@@ -1925,6 +1928,10 @@
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePlaying(); });
   $('liveBtn').addEventListener('click', enterLive);
   $('liveExit').addEventListener('click', exitLive);
+  // A hidden tab asks every 5 seconds; coming back asks straight away.
+  document.addEventListener('visibilitychange', function () {
+    if (live && !document.hidden && !live.busy) { clearTimeout(live.timer); livePoll(); }
+  });
   $('verifySelect').addEventListener('change', syncVerifyBtn);
   $('verifyList').addEventListener('click', function (e) {
     var b = e.target.closest('button[data-key]'); if (!b) return;
