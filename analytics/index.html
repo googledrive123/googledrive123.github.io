@@ -2016,12 +2016,13 @@
   // load() reads the whole range: on opening, on a new range and on Refresh.
   // tick() then only asks for what is new, every 10 seconds. The all-time
   // numbers come on their own, once a minute, and never hold the rest up.
-  var store = null, loadGen = 0, loadingRange = false, ticking = false;
+  var store = null, loadGen = 0, loadingRange = false, ticking = false, held = [];
   function load() {
     if (!state.secret) return;
     var gen = ++loadGen;
     var b = rangeBounds();
     loadingRange = true;
+    held = [];
     $('status').innerHTML = '<span class="dot"></span>Loading…';
     Promise.all([
       fetchRange(b.from.getTime(), function (done, all) {
@@ -2031,6 +2032,8 @@
     ]).then(function (res) {
       if (gen !== loadGen) return;
       store = res[0]; state.playingNow = res[1];
+      held.forEach(function (r) { take(store, r); });
+      held = [];
       draw();
     }).catch(function (e) {
       if (gen === loadGen) $('status').innerHTML = '<span class="dot off"></span>Error: ' + esc(e.message);
@@ -2053,10 +2056,11 @@
     }).then(function () { ticking = false; });
     if (Date.now() - allTimeAt > 60000) loadAllTime();
   }
-  // Events pushed from the database join the range as they come.
+  // Events pushed from the database join the range as they come. While the
+  // range is still loading they wait, then join the new one.
   function onPush(res) {
     if (!res.rows || !$('autoRefresh').checked) return;
-    if (!store || loadingRange) return;
+    if (!store || loadingRange) { held.push(res); return; }
     if (take(store, res).length) draw();
   }
   push.on.push(onPush);
