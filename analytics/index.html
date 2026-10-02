@@ -125,6 +125,10 @@
   .verify-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
   .bc-text { width: 100%; min-height: 64px; resize: vertical; background: var(--bg); border: 1px solid var(--border-strong); color: var(--text); font: inherit; font-size: 0.85rem; padding: 9px 10px; border-radius: 8px; margin-bottom: 8px; }
   .bc-item { display: flex; gap: 10px; align-items: baseline; padding: 7px 0; border-top: 1px solid var(--border); font-size: 0.8rem; width: 100%; }
+  .bc-item.poll-item { align-items: flex-start; padding: 10px 0; }
+  .poll-item .ranked { margin: 8px 0 6px; }
+  #pollAnswers input { flex: 1 1 160px; }
+  .verify-bar select#pollDays { flex: 1 1 140px; }
   .bc-item .when { color: var(--muted); font-size: 0.7rem; white-space: nowrap; }
   .bc-item .msg { flex: 1; min-width: 0; overflow-wrap: anywhere; }
   .bc-item .st { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
@@ -279,6 +283,29 @@
       </div>
       <div class="verify-msg" id="bcMsg"></div>
       <div class="verify-list" id="bcList"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Polls <small>asked in a pop-up when people come to the site, one vote each, and kept on /polls/</small></h2>
+    <div class="card">
+      <div class="verify-bar">
+        <input type="text" id="pollQ" placeholder="Question" maxlength="200" autocomplete="off">
+      </div>
+      <div class="verify-bar" id="pollAnswers" style="margin-top:8px"></div>
+      <div class="verify-bar" style="margin-top:8px">
+        <button class="btn ghost" id="pollMore" type="button">Add an answer</button>
+        <select id="pollDays" aria-label="How long">
+          <option value="1">for 1 day</option>
+          <option value="3">for 3 days</option>
+          <option value="7" selected>for 1 week</option>
+          <option value="30">for 30 days</option>
+          <option value="">until I close it</option>
+        </select>
+        <button class="btn" id="pollCreate" type="button">Ask it</button>
+      </div>
+      <div class="verify-msg" id="pollMsg"></div>
+      <div class="verify-list" id="pollList"></div>
     </div>
   </section>
 
@@ -1445,6 +1472,68 @@
     if (call) call.then(loadTesting).catch(function (err) { $('testMsg').textContent = 'Could not do that: ' + err.message; });
   }
 
+  // ── polls ──
+  // polls/polls.sql. Each one pops up on the home page until a person
+  // answers it or puts it off, and stays on /polls/ with its results.
+  function addAnswer() {
+    var box = $('pollAnswers');
+    if (box.children.length >= 6) return;
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.maxLength = 80;
+    input.autocomplete = 'off';
+    input.placeholder = 'Answer ' + (box.children.length + 1);
+    box.appendChild(input);
+    $('pollMore').disabled = box.children.length >= 6;
+  }
+  function resetPollForm() {
+    $('pollQ').value = '';
+    $('pollAnswers').textContent = '';
+    addAnswer();
+    addAnswer();
+  }
+  function loadPolls() {
+    return rpc('gv_polls_admin', { p_secret: state.secret }).then(function (list) {
+      $('pollList').innerHTML = (list || []).length ? list.map(function (p) {
+        var total = p.total || 0;
+        var rows = p.options.map(function (o, i) {
+          var n = (p.counts || [])[i] || 0, share = total ? Math.round(100 * n / total) : 0;
+          return '<div class="row"><div class="rk">' + (i + 1) + '</div><div class="nm" style="--w:' + share + '%"><span>' + esc(o) + '</span></div>'
+            + '<div class="val"><b>' + fmt(n) + '</b> <span>' + share + '%</span></div></div>';
+        }).join('');
+        var when = p.open ? (p.ends_at ? 'ends ' + new Date(p.ends_at).toLocaleString() : 'open until you close it') : 'over';
+        return '<div class="bc-item poll-item"><div class="msg"><b>' + esc(p.question) + '</b>'
+          + '<div class="ranked">' + rows + '</div>'
+          + '<span class="st">' + fmt(total) + (total === 1 ? ' vote' : ' votes') + ' \u00b7 ' + fmt(p.accounts) + ' from accounts \u00b7 ' + esc(when) + '</span></div>'
+          + (p.open ? '<button class="btn" type="button" data-pollclose="' + p.id + '">Close</button>' : '')
+          + '<button class="btn" type="button" data-polldel="' + p.id + '">Delete</button></div>';
+      }).join('') : '<div class="empty">No polls yet.</div>';
+    }).catch(function (e) { $('pollMsg').textContent = 'Could not load polls: ' + e.message; });
+  }
+  function createPoll() {
+    var question = $('pollQ').value.trim();
+    var answers = Array.prototype.map.call($('pollAnswers').querySelectorAll('input'), function (i) { return i.value.trim(); }).filter(Boolean);
+    if (!question) { $('pollMsg').textContent = 'Write the question first.'; return; }
+    if (answers.length < 2) { $('pollMsg').textContent = 'Give it at least two answers.'; return; }
+    $('pollCreate').disabled = true;
+    rpc('gv_poll_create', { p_secret: state.secret, p_question: question, p_options: answers, p_days: $('pollDays').value ? +$('pollDays').value : null })
+      .then(function () { resetPollForm(); $('pollMsg').textContent = 'Asked. Everyone who comes to the site gets it now.'; return loadPolls(); })
+      .catch(function (e) { $('pollMsg').textContent = 'Could not ask it: ' + e.message; })
+      .then(function () { $('pollCreate').disabled = false; });
+  }
+  function pollAction(e) {
+    var b = e.target.closest('button'); if (!b) return;
+    var call;
+    if (b.dataset.pollclose) {
+      if (!confirm('End this poll now? Its results stay up.')) return;
+      call = rpc('gv_poll_close', { p_secret: state.secret, p_id: +b.dataset.pollclose });
+    } else if (b.dataset.polldel) {
+      if (!confirm('Delete this poll and every vote on it?')) return;
+      call = rpc('gv_poll_delete', { p_secret: state.secret, p_id: +b.dataset.polldel });
+    }
+    if (call) call.then(loadPolls).catch(function (err) { $('pollMsg').textContent = 'Could not do that: ' + err.message; });
+  }
+
   // ── giveaways ──
   function loadGiveaways() {
     return rpc('gv_giveaway_list', { p_secret: state.secret }).then(function (list) {
@@ -2133,7 +2222,7 @@
   }
 
   // ── auth / wiring ──
-  function showDash() { $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); load(); loadPeople(); loadBroadcasts(); loadLinks(); loadFailing(); loadChat(); loadAvatars(); loadTesting(); loadGiveaways(); fillChallengeWeeks(); loadChallenges(); loadChallengeTracks(); loadBoard(); loadMirrors(); setTimer(); startPush(); if (location.hash === '#live') enterLive(); }
+  function showDash() { $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); load(); loadPeople(); loadBroadcasts(); loadLinks(); loadFailing(); loadChat(); loadAvatars(); loadTesting(); loadGiveaways(); fillChallengeWeeks(); loadChallenges(); loadChallengeTracks(); loadBoard(); loadMirrors(); loadPolls(); setInterval(loadPolls, 30000); setTimer(); startPush(); if (location.hash === '#live') enterLive(); }
   function setTimer() { clearInterval(state.timer); if ($('autoRefresh').checked) state.timer = setInterval(tick, 5000); }
   function tryLogin(secret, remember) {
     $('loginErr').textContent = '';
@@ -2224,6 +2313,10 @@
       .catch(function (e) { $('testMsg').textContent = 'Could not add ' + name + ': ' + e.message; });
   });
   $('gaList').addEventListener('click', gaAction);
+  resetPollForm();
+  $('pollMore').addEventListener('click', addAnswer);
+  $('pollCreate').addEventListener('click', createPoll);
+  $('pollList').addEventListener('click', pollAction);
   $('gaCreate').addEventListener('click', function () {
     var ends = $('gaEnds').value;
     $('gaCreate').disabled = true;

@@ -15,6 +15,7 @@
     { href: '/shop/',      label: 'Shop',     icon: '<path d="M4 8h16l-1.5 11h-13z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>' },
     { href: '/challenge/', label: 'Challenge', icon: '<path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M9 20h6"/>' },
     { href: '/leaderboard/', label: 'Leaderboard', icon: '<path d="M4 20h16"/><rect x="5" y="11" width="4" height="9"/><rect x="10" y="6" width="4" height="14"/><rect x="15" y="14" width="4" height="6"/>' },
+    { href: '/polls/',     label: 'Polls',    icon: '<path d="M5 6h9M5 12h14M5 18h6"/>' },
     { href: '/giveaway/',  label: 'Giveaway', icon: '<rect x="4" y="9" width="16" height="11" rx="1"/><path d="M3 9h18M12 9v11M12 9c-2-4-6-4-6-1.5S10 9 12 9zM12 9c2-4 6-4 6-1.5S14 9 12 9z"/>' },
     { href: '/saves/',     label: 'Saves',    icon: '<path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/>' },
     { href: '/schedule/',  label: 'Schedule', icon: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>' },

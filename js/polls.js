@@ -1,0 +1,272 @@
+/* GameVault polls (polls/polls.sql). The newest open poll someone has not
+   answered pops up when they come to the site, and they can vote right in
+   it. /polls/ shows every poll. One vote each: per account, and per browser
+   for a guest.
+   Public surface: window.GV.polls.ask(), .card(poll), .use(client), .rpc. */
+(function () {
+  'use strict';
+
+  var SUPA_URL = 'https://dxwjxzmlezfyursysays.supabase.co';
+  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
+  // Polls put off with Not now, by id, and when.
+  var LATER_KEY = 'gv.poll.later';
+  var LATER_MS = 24 * 60 * 60 * 1000;
+  // Not now waits this long, so the question gets read first.
+  var NOT_NOW_MS = 3000;
+
+  var CSS = [
+    '.gv-poll{text-align:left}',
+    '.gv-poll-kicker{display:flex;align-items:center;gap:8px;font-family:"JetBrains Mono",monospace;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent,#ff3b3b)}',
+    '.gv-poll-kicker::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent,#ff3b3b);box-shadow:0 0 10px var(--accent,#ff3b3b)}',
+    '.gv-poll-q{margin:.5rem 0 1rem;font-size:1.2rem;font-weight:700;line-height:1.3;letter-spacing:-.01em;color:var(--text,#f4f4f6);overflow-wrap:anywhere}',
+    '.gv-poll-opts{display:flex;flex-direction:column;gap:8px}',
+    '.gv-poll-opt{position:relative;width:100%;display:flex;align-items:center;gap:10px;padding:11px 14px;overflow:hidden;border-radius:10px;border:1px solid var(--border-strong,rgba(255,255,255,.16));background:var(--surface-2,#1a1a20);color:var(--text,#f4f4f6);font:inherit;font-size:.92rem;text-align:left;cursor:pointer;transition:border-color .15s}',
+    'button.gv-poll-opt:hover{border-color:var(--accent,#ff3b3b)}',
+    'button.gv-poll-opt:disabled{cursor:default;opacity:.6}',
+    '.gv-poll-opt span{position:relative;min-width:0;overflow-wrap:anywhere}',
+    '.gv-poll-opt .gv-poll-name{flex:1}',
+    '.gv-poll-opt .gv-poll-pct{font-family:"JetBrains Mono",monospace;font-size:.78rem;color:var(--muted,#8a8a96);white-space:nowrap}',
+    '.gv-poll-opt.result{cursor:default}',
+    '.gv-poll-opt.result::before{content:"";position:absolute;inset:0 auto 0 0;width:var(--p,0%);background:rgba(255,255,255,.07);transition:width .5s cubic-bezier(.2,.8,.2,1)}',
+    '.gv-poll-opt.mine{border-color:var(--accent,#ff3b3b)}',
+    '.gv-poll-opt.mine::before{background:rgba(255,59,59,.22)}',
+    '.gv-poll-meta{margin-top:10px;font-size:.78rem;color:var(--muted,#8a8a96)}',
+    '.gv-poll-err{margin-top:8px;font-size:.8rem;color:#ff7a7a}',
+    '.gv-poll-err:empty{display:none}',
+    '.gv-poll-pop{position:fixed;inset:0;z-index:2600;display:grid;place-items:center;padding:16px;background:rgba(8,8,10,.62);backdrop-filter:blur(5px)}',
+    '.gv-poll-box{width:min(440px,100%);max-height:calc(100vh - 32px);overflow-y:auto;padding:22px;border-radius:16px;border:1px solid var(--border-strong,rgba(255,255,255,.16));background:var(--surface,#121216);box-shadow:0 24px 70px rgba(0,0,0,.6);animation:gvPollIn .25s cubic-bezier(.2,.8,.2,1)}',
+    '.gv-poll-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-top:16px}',
+    '.gv-poll-foot a{font-size:.8rem;color:var(--muted,#8a8a96);text-decoration:underline;text-underline-offset:3px}',
+    '.gv-poll-foot a:hover{color:var(--text,#f4f4f6)}',
+    '.gv-poll-later{margin-left:auto;padding:8px 16px;border-radius:100px;border:1px solid var(--border-strong,rgba(255,255,255,.16));background:none;color:var(--text,#f4f4f6);font:inherit;font-size:.82rem;font-weight:600;cursor:pointer;opacity:0;visibility:hidden;transition:opacity .3s}',
+    '.gv-poll-later.on{opacity:1;visibility:visible}',
+    '.gv-poll-later:hover{border-color:var(--accent,#ff3b3b)}',
+    '@keyframes gvPollIn{from{opacity:0;transform:translateY(10px) scale(.98)}}',
+    '@media (prefers-reduced-motion:reduce){.gv-poll-box{animation:none}.gv-poll-opt.result::before{transition:none}}'
+  ].join('');
+
+  var client = null;
+
+  function style() {
+    if (document.getElementById('gvPollsCss')) return;
+    var st = document.createElement('style');
+    st.id = 'gvPollsCss';
+    st.textContent = CSS;
+    document.head.appendChild(st);
+  }
+
+  function el(tag, cls, text) {
+    var node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text != null) node.textContent = text;
+    return node;
+  }
+
+  // A page with its own Supabase client hands it over here, so a signed-in
+  // player votes as their account.
+  function use(sb) {
+    client = sb;
+  }
+
+  // As the account when someone is signed in, otherwise as a guest with the
+  // site's public key. Every refusal is a sentence to show as it is.
+  function rpc(name, args) {
+    if (client) {
+      return client.rpc(name, args).then(function (res) {
+        if (res.error) throw new Error(res.error.code === 'P0001' ? res.error.message : 'Could not reach GameVault. Try again.');
+        return res.data;
+      });
+    }
+    return fetch(SUPA_URL + '/rest/v1/rpc/' + name, {
+      method: 'POST',
+      headers: { apikey: SUPA_KEY, Authorization: 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify(args)
+    }).then(function (r) {
+      return r.json().catch(function () { return null; }).then(function (body) {
+        if (!r.ok) throw new Error(body && body.code === 'P0001' ? body.message : 'Could not reach GameVault. Try again.');
+        return body;
+      });
+    });
+  }
+
+  // This browser's id (js/identity.js), which a guest votes as.
+  function visitor() {
+    var id = window.GV && GV.identity;
+    if (id && id.ready) return id.ready.then(function (v) { return v || id.id(); });
+    try { return Promise.resolve(localStorage.getItem('gv.vid')); } catch (e) { return Promise.resolve(null); }
+  }
+
+  function plural(n, one, many) {
+    return n.toLocaleString() + ' ' + (n === 1 ? one : many);
+  }
+
+  function endsLine(poll) {
+    if (!poll.open) return 'Over';
+    if (!poll.ends_at) return 'Open';
+    var left = Date.parse(poll.ends_at) - Date.now();
+    var days = Math.round(left / 86400000), hours = Math.round(left / 3600000);
+    if (days >= 2) return 'Ends in ' + plural(days, 'day', 'days');
+    if (hours >= 2) return 'Ends in ' + plural(hours, 'hour', 'hours');
+    return 'Ends soon';
+  }
+
+  // One poll: the answers to pick from, or the results once there are any
+  // to show. onChange hears about a vote with the poll as it is now.
+  function card(poll, onChange) {
+    style();
+    var box = el('div', 'gv-poll');
+    var q = el('h3', 'gv-poll-q', poll.question);
+    var opts = el('div', 'gv-poll-opts');
+    var meta = el('div', 'gv-poll-meta');
+    var err = el('div', 'gv-poll-err');
+    err.setAttribute('role', 'status');
+    box.appendChild(q);
+    box.appendChild(opts);
+    box.appendChild(meta);
+    box.appendChild(err);
+
+    function paint(p) {
+      opts.textContent = '';
+      var showing = p.counts && p.counts.length;
+      var total = showing ? p.counts.reduce(function (a, b) { return a + b; }, 0) : 0;
+      (p.options || []).forEach(function (name, i) {
+        var row;
+        if (showing) {
+          var n = p.counts[i] || 0, pct = total ? Math.round(100 * n / total) : 0;
+          row = el('div', 'gv-poll-opt result' + (p.voted === i ? ' mine' : ''));
+          row.style.setProperty('--p', pct + '%');
+          row.appendChild(el('span', 'gv-poll-name', name));
+          row.appendChild(el('span', 'gv-poll-pct', pct + '% \u00b7 ' + n.toLocaleString()));
+        } else {
+          row = el('button', 'gv-poll-opt');
+          row.type = 'button';
+          row.appendChild(el('span', 'gv-poll-name', name));
+          row.disabled = !p.open;
+          row.addEventListener('click', function () { vote(p, i); });
+        }
+        opts.appendChild(row);
+      });
+      var bits = [plural(p.total || 0, 'vote', 'votes'), endsLine(p)];
+      if (p.voted != null && p.options[p.voted] != null) bits.push('You picked ' + p.options[p.voted]);
+      meta.textContent = bits.join(' \u00b7 ');
+    }
+
+    function vote(p, i) {
+      err.textContent = '';
+      Array.prototype.forEach.call(opts.querySelectorAll('button'), function (b) { b.disabled = true; });
+      visitor().then(function (v) {
+        return rpc('gv_poll_vote', { p_poll: p.id, p_option: i, p_visitor: v });
+      }).then(function (fresh) {
+        paint(fresh);
+        if (onChange) onChange(fresh);
+      }, function (e) {
+        err.textContent = e.message;
+        Array.prototype.forEach.call(opts.querySelectorAll('button'), function (b) { b.disabled = !p.open; });
+      });
+    }
+
+    paint(poll);
+    return box;
+  }
+
+  // ── The pop-up ────────────────────────────────────────────────────────
+
+  function laterMap() {
+    try { return JSON.parse(localStorage.getItem(LATER_KEY) || '{}') || {}; } catch (e) { return {}; }
+  }
+
+  function putOff(id) {
+    var all = laterMap();
+    all[id] = Date.now();
+    try { localStorage.setItem(LATER_KEY, JSON.stringify(all)); } catch (e) {}
+  }
+
+  // Not over the first-visit question, and not over a game: it waits for
+  // both to be out of the way.
+  function whenFree(fn) {
+    var tries = 0;
+    (function check() {
+      var busy = document.getElementById('gvCloakAsk')
+        || document.querySelector('#gameOverlay.show')
+        || document.querySelector('.gv-poll-pop');
+      if (!busy) return fn();
+      if (++tries < 600) setTimeout(check, 1000);
+    }());
+  }
+
+  function pop(poll) {
+    style();
+    var shade = el('div', 'gv-poll-pop');
+    shade.setAttribute('role', 'dialog');
+    shade.setAttribute('aria-modal', 'true');
+    shade.setAttribute('aria-label', 'New poll');
+    var box = el('div', 'gv-poll-box');
+    box.appendChild(el('div', 'gv-poll-kicker', 'New poll'));
+    var foot = el('div', 'gv-poll-foot');
+    var all = el('a', '', 'See all polls');
+    all.href = '/polls/';
+    var later = el('button', 'gv-poll-later', 'Not now');
+    later.type = 'button';
+    later.disabled = true;
+    function close() {
+      shade.remove();
+      document.removeEventListener('keydown', onKey);
+    }
+    function onKey(e) {
+      if (e.key === 'Escape' && !later.disabled) later.click();
+    }
+    later.addEventListener('click', function () {
+      if (later.textContent === 'Not now') putOff(poll.id);
+      close();
+    });
+    box.appendChild(card(poll, function () {
+      // Voted: done straight away, no wait.
+      later.textContent = 'Done';
+      later.disabled = false;
+      later.classList.add('on');
+      later.focus();
+      ask.count(-1);
+    }));
+    foot.appendChild(all);
+    foot.appendChild(later);
+    box.appendChild(foot);
+    shade.appendChild(box);
+    document.body.appendChild(shade);
+    document.addEventListener('keydown', onKey);
+    setTimeout(function () {
+      later.disabled = false;
+      later.classList.add('on');
+    }, NOT_NOW_MS);
+  }
+
+  // Looks for a poll this browser or account has not answered and has not
+  // put off in the last day, and asks it.
+  var waiting = 0;
+  function ask() {
+    if (window.top !== window.self) return;
+    visitor().then(function (v) {
+      return rpc('gv_polls_open', { p_visitor: v });
+    }).then(function (list) {
+      var later = laterMap();
+      var open = (list || []).filter(function (p) { return p.voted == null; });
+      waiting = open.length;
+      ask.count(0);
+      var next = open.filter(function (p) { return !(later[p.id] && Date.now() - later[p.id] < LATER_MS); })[0];
+      if (next) whenFree(function () { pop(next); });
+    }).catch(function () {});
+  }
+  // The Polls card on the home page says how many are waiting.
+  ask.count = function (change) {
+    waiting = Math.max(0, waiting + change);
+    if (window.GV && GV.features) GV.features.set('polls', waiting ? plural(waiting, 'poll', 'polls') + ' to answer' : null);
+  };
+
+  window.GV = window.GV || {};
+  window.GV.polls = {
+    ask: ask,
+    card: card,
+    use: use,
+    rpc: rpc,
+    visitor: visitor
+  };
+}());
