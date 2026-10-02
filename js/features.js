@@ -8,6 +8,7 @@
 
   var NEW_DAYS = 14;
   var FRIENDS_MS = 60 * 1000;
+  var SEEN_KEY = 'gv.seen';
 
   var FEATURES = [
     { id: 'chat', label: 'Chat', line: 'Message friends and start groups', added: '2026-10-02', href: '/chat/', module: 'chat',
@@ -59,6 +60,16 @@
     return window.GV && window.GV.social;
   }
 
+  function seen() {
+    try { return JSON.parse(localStorage.getItem(SEEN_KEY) || '{}') || {}; } catch (e) { return {}; }
+  }
+
+  function markSeen(id) {
+    var all = seen();
+    all[id] = Date.now();
+    try { localStorage.setItem(SEEN_KEY, JSON.stringify(all)); } catch (e) {}
+    paintNew();
+  }
 
   // NEW is for the newest features only, so it still means something: the
   // ones that came out last, for two weeks after.
@@ -66,7 +77,7 @@
     var newest = FEATURES.reduce(function (top, x) { return x.added > top ? x.added : top; }, '');
     if (f.added !== newest) return false;
     var days = (Date.now() - Date.parse(f.added + 'T00:00:00')) / 86400000;
-    return days < NEW_DAYS;
+    return days < NEW_DAYS && !seen()[f.id];
   }
 
   function paintNew() {
@@ -97,6 +108,7 @@
     badge.textContent = 'new';
     el.appendChild(badge);
     el.addEventListener('click', function (e) {
+      markSeen(f.id);
       // Chat and friends open right here. Without them, chat still has its
       // own page to go to.
       var mod = f.module && window.GV && GV[f.module];
