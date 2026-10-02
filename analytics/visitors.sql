@@ -103,17 +103,21 @@ as $function$
   v as materialized (
     select x.* from analytics_visitors x
     where not exists (select 1 from s where s.visitor_id = x.visitor_id)
+  ),
+  q as materialized (
+    select x.* from analytics_quarters x
+    where not exists (select 1 from s where s.visitor_id = x.visitor_id)
   )
   select case when analytics_check(p_secret) then json_build_object(
-    'events',    (select count(*) from h),
+    'events',    (select coalesce(sum(events), 0) from q),
     'visitors',  (select count(*) from v),
     'active_visitors', (select count(*) from v where first_act is not null),
     'scanners',  (select count(*) from s),
-    'sessions',  (select count(distinct session_id) from h),
+    'sessions',  (select count(distinct session_id) from q),
     'users',     (select count(distinct user_id) from h where user_id is not null),
-    'pageviews', (select count(*) from h where event = 'pageview'),
-    'plays',     (select count(*) from h where event = 'game_open'),
-    'play_secs', (select coalesce(sum(value), 0) from h where event = 'game_close'),
+    'pageviews', (select coalesce(sum(pageviews), 0) from q),
+    'plays',     (select coalesce(sum(plays), 0) from q),
+    'play_secs', (select coalesce(sum(play_secs), 0) from q),
     'first_ts',  (select min(first_ts) from v),
     'last_ts',   (select max(last_ts) from v),
     'daily', (select coalesce(json_agg(d order by d.day), '[]'::json) from (
