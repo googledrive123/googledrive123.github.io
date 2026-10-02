@@ -152,6 +152,8 @@ begin
   insert into gv_chat_messages (user_id, username, body, mentions)
   values (v_user, v_name, v_body, v_mentions)
   returning * into v_row;
+  insert into gv_mentions (user_id, from_user, message_id)
+  select (x ->> 'id')::uuid, v_user, v_row.id from jsonb_array_elements(v_mentions) x;
 
   return json_build_object(
     'id', v_row.id,
