@@ -11,7 +11,9 @@
 --
 -- Apply against project dxwjxzmlezfyursysays. Every statement is safe to run
 -- twice. Applied on 1 October 2026, when localhost test rows were also
--- deleted (js/analytics.js no longer records from localhost).
+-- deleted (js/analytics.js no longer records from localhost). Since 2 October
+-- 2026 these read the running totals in analytics/rollups.sql, so apply that
+-- first.
 
 
 -- Things a person does on purpose: entering the games, opening one,
@@ -39,13 +41,26 @@ stable
 security definer
 set search_path to 'public'
 as $function$
-  select e.visitor_id
-  from analytics_events e
-  group by e.visitor_id
-  having not bool_or(analytics_is_action(e.event))
-     and (mode() within group (order by e.tz) in ('UTC', 'Etc/Unknown')
-          or mode() within group (order by e.tz) like 'Europe/%'
-          or mode() within group (order by e.viewport) in ('1280x1024', '1024x768', '800x600'));
+  -- Each visitor's most reported time zone and window size, the smallest
+  -- first on a tie, as mode() picks them.
+  select v.visitor_id
+  from analytics_visitors v
+  left join lateral (
+    select t.value from analytics_visitor_traits t
+    where t.visitor_id = v.visitor_id and t.trait = 'tz'
+    order by t.n desc, t.value
+    limit 1
+  ) tz on true
+  left join lateral (
+    select t.value from analytics_visitor_traits t
+    where t.visitor_id = v.visitor_id and t.trait = 'viewport'
+    order by t.n desc, t.value
+    limit 1
+  ) vp on true
+  where v.first_act is null
+    and (tz.value in ('UTC', 'Etc/Unknown')
+         or tz.value like 'Europe/%'
+         or vp.value in ('1280x1024', '1024x768', '800x600'));
 $function$;
 
 revoke all on function public.analytics_scanners() from public, anon, authenticated;
@@ -83,38 +98,44 @@ security definer
 set search_path to 'public'
 as $function$
   with s as materialized (select visitor_id from analytics_scanners()),
-  h as materialized (
-    select e.* from analytics_events e
-    where not exists (select 1 from s where s.visitor_id = e.visitor_id)
+  v as materialized (
+    select x.* from analytics_visitors x
+    where not exists (select 1 from s where s.visitor_id = x.visitor_id)
+  ),
+  q as materialized (
+    select x.* from analytics_quarters x
+    where not exists (select 1 from s where s.visitor_id = x.visitor_id)
   )
   select case when analytics_check(p_secret) then json_build_object(
-    'events',    (select count(*) from h),
-    'visitors',  (select count(distinct visitor_id) from h),
-    'active_visitors', (select count(distinct visitor_id) from h where analytics_is_action(event)),
+    'events',    (select coalesce(sum(events), 0) from q),
+    'visitors',  (select count(*) from v),
+    'active_visitors', (select count(*) from v where first_act is not null),
     'scanners',  (select count(*) from s),
-    'sessions',  (select count(distinct session_id) from h),
-    'users',     (select count(distinct user_id) from h where user_id is not null),
-    'pageviews', (select count(*) from h where event = 'pageview'),
-    'plays',     (select count(*) from h where event = 'game_open'),
-    'play_secs', (select coalesce(sum(value), 0) from h where event = 'game_close'),
-    'first_ts',  (select min(ts) from h),
-    'last_ts',   (select max(ts) from h),
+    'sessions',  (select count(distinct session_id) from q),
+    'users',     (select count(distinct u.user_id) from analytics_visitor_users u
+                  where not exists (select 1 from s where s.visitor_id = u.visitor_id)),
+    'pageviews', (select coalesce(sum(pageviews), 0) from q),
+    'plays',     (select coalesce(sum(plays), 0) from q),
+    'play_secs', (select coalesce(sum(play_secs), 0) from q),
+    'first_ts',  (select min(first_ts) from v),
+    'last_ts',   (select max(last_ts) from v),
     'daily', (select coalesce(json_agg(d order by d.day), '[]'::json) from (
-        select date_trunc('day', ts) as day,
-               count(*) as events,
+        select date_trunc('day', bucket) as day,
+               sum(events) as events,
                count(distinct visitor_id) as visitors,
                count(distinct session_id) as sessions,
-               count(*) filter (where event = 'pageview') as pageviews,
-               count(*) filter (where event = 'game_open') as plays,
+               sum(pageviews) as pageviews,
+               sum(plays) as plays,
                count(distinct visitor_id) filter (where is_new) as new_visitors
-        from h group by 1) d),
+        from q group by 1) d),
     'top_games', (select coalesce(json_agg(g), '[]'::json) from (
         select game_id,
-               max(item_title) as name,
-               count(*) filter (where event = 'game_open') as plays,
-               count(distinct visitor_id) filter (where event = 'game_open') as players,
-               coalesce(sum(value) filter (where event = 'game_close'), 0) as secs
-        from h where game_id is not null
+               max(name) as name,
+               sum(plays) as plays,
+               count(*) filter (where plays > 0) as players,
+               sum(secs) as secs
+        from analytics_visitor_games x
+        where not exists (select 1 from s where s.visitor_id = x.visitor_id)
         group by game_id order by plays desc limit 50) g)
   ) else null end;
 $function$;
@@ -131,23 +152,26 @@ security definer
 set search_path to 'public'
 as $function$
 declare
-  v_tz text := coalesce((select name from pg_timezone_names where name = p_tz), 'UTC');
+  v_tz text := 'UTC';
 begin
   if not public.analytics_check(p_secret) then
     raise exception 'not allowed';
   end if;
 
+  -- Any zone Postgres knows. Looking for it in pg_timezone_names read every
+  -- zone file on the server, most of a second each time.
+  begin
+    perform now() at time zone coalesce(p_tz, 'UTC');
+    v_tz := coalesce(p_tz, 'UTC');
+  exception when others then
+    v_tz := 'UTC';
+  end;
+
   return coalesce((
     with s as materialized (select visitor_id from analytics_scanners()),
-    h as materialized (
-      select e.visitor_id, e.ts, e.event from analytics_events e
-      where not exists (select 1 from s where s.visitor_id = e.visitor_id)
-    ),
     firsts as (
-      select visitor_id,
-             min(ts) as first_ts,
-             min(ts) filter (where analytics_is_action(event)) as first_act
-      from h group by visitor_id
+      select x.visitor_id, x.first_ts, x.first_act from analytics_visitors x
+      where not exists (select 1 from s where s.visitor_id = x.visitor_id)
     ),
     hours as (
       select generate_series(date_trunc('hour', min(first_ts)), date_trunc('hour', now()), interval '1 hour') as hr
@@ -156,8 +180,10 @@ begin
     seen as (select date_trunc('hour', first_ts) as hr, count(*) as n from firsts group by 1),
     acted as (select date_trunc('hour', first_act) as hr, count(*) as n from firsts where first_act is not null group by 1),
     days as (
-      select (ts at time zone v_tz)::date as day, count(distinct visitor_id) as n
-      from h group by 1
+      select (q.bucket at time zone v_tz)::date as day, count(distinct q.visitor_id) as n
+      from analytics_quarters q
+      where not exists (select 1 from s where s.visitor_id = q.visitor_id)
+      group by 1
     ),
     series as (
       select hours.hr,
