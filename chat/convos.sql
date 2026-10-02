@@ -487,3 +487,64 @@ $function$;
 revoke all on function public.gv_convo_list() from public, anon;
 grant execute on function public.gv_convo_list() to authenticated;
 
+
+create table if not exists public.gv_convo_reports (
+  id         bigserial primary key,
+  message_id bigint not null references public.gv_convo_messages (id) on delete cascade,
+  reporter   uuid not null references auth.users (id) on delete cascade,
+  reason     text,
+  created_at timestamptz not null default now(),
+  resolved   boolean not null default false,
+  unique (message_id, reporter)
+);
+
+alter table public.gv_convo_reports enable row level security;
+revoke all on table public.gv_convo_reports from anon, authenticated;
+
+-- Same as gv_chat_report, for a message in a chat the reporter is in.
+create or replace function public.gv_convo_report(p_message_id bigint, p_reason text)
+returns boolean
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+  v_msg gv_convo_messages;
+  v_id bigint;
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'Chat only works on GameVault.';
+  end if;
+  if v_user is null then
+    raise exception 'Sign in to report a message.';
+  end if;
+
+  select * into v_msg
+    from gv_convo_messages
+   where id = p_message_id and not deleted;
+  if not found or not exists (select 1 from gv_convo_members
+                               where convo_id = v_msg.convo_id and user_id = v_user) then
+    raise exception 'That message is already gone.';
+  end if;
+  if v_msg.user_id is null or v_msg.user_id = v_user then
+    raise exception 'You cannot report that message.';
+  end if;
+
+  if (select count(*) from gv_convo_reports
+       where reporter = v_user and created_at > now() - interval '1 hour') >= 30 then
+    raise exception 'You have sent a lot of reports. Try again later.';
+  end if;
+
+  insert into gv_convo_reports (message_id, reporter, reason)
+  values (p_message_id, v_user, left(nullif(btrim(coalesce(p_reason, '')), ''), 200))
+  on conflict (message_id, reporter) do nothing
+  returning id into v_id;
+
+  return v_id is not null;
+end;
+$function$;
+
+revoke all on function public.gv_convo_report(bigint, text) from public, anon;
+grant execute on function public.gv_convo_report(bigint, text) to authenticated;
+
