@@ -298,7 +298,25 @@
     return el;
   }
 
+  function mentionsMe(m) {
+    return !!(user && !m.mine && (m.mentions || []).some(function (x) { return x.id === user.id; }));
+  }
+
+  // Being named with @ gets through on any page and through a muted chat.
+  // A muted person, or the chat already on screen, still keeps quiet.
+  function mentionPop(key, m) {
+    if (viewing === key || (m.user_id && muted('user:' + m.user_id))) return;
+    var inGame = !!(host.inGame && host.inGame());
+    if (inGame && !me.notify) return;
+    var from = (key === 'server' ? 'Server' : m.kind === 'group' ? (m.name || 'Group chat') : 'Direct message')
+      + ' \u00b7 mentioned you';
+    toast(from, m.username, m.body, function () {
+      if (window.GV && GV.chat) GV.chat.open({ key: key });
+    }, inGame);
+  }
+
   function popUp(key, m) {
+    if (mentionsMe(m)) return mentionPop(key, m);
     if (m.mine || !host.inGame || !host.inGame()) return;
     if (viewing === key) return;
     if (!me.notify || muted(key) || (m.user_id && muted('user:' + m.user_id))) return;
