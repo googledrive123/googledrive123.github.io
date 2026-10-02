@@ -641,6 +641,22 @@
     return hit ? { start: end - hit[2].length - 1, q: hit[2].toLowerCase() } : null;
   }
 
+  // Ranked as gv_user_search ranks (sql/social.sql): the name itself first,
+  // then the earlier the letters come in a name, then the shorter the name.
+  function rankName(q, name) {
+    var n = String(name || '').toLowerCase(), at = n.indexOf(q);
+    if (at < 0) {
+      var bare = q.replace(/[^a-z0-9]/g, '');
+      if (bare.length < 2 || n.replace(/[^a-z0-9]/g, '').indexOf(bare) < 0) return null;
+    }
+    return [n === q ? 0 : 1, at < 0 ? 1000 : at, n.length, n];
+  }
+
+  function byRank(a, b) {
+    for (var i = 0; i < 4; i++) if (a.rank[i] !== b.rank[i]) return a.rank[i] < b.rank[i] ? -1 : 1;
+    return 0;
+  }
+
   function lookUp() {
     var w = atWord();
     if (!w || !signedIn()) return hideSuggest();
@@ -648,6 +664,13 @@
     suggestion.q = w.q;
     clearTimeout(suggestion.timer);
     if (w.q.length < 2) return showSuggest([], w.q ? 'Keep typing\u2026' : 'Type a name');
+    var c = current === 'server' ? null : convoFor(current);
+    if (c) {
+      var found = (c.members || []).map(function (m) {
+        return { id: m.id, username: m.username, verified: m.verified, rank: rankName(w.q, m.username) };
+      }).filter(function (p) { return p.rank; }).sort(byRank).slice(0, 8);
+      return showSuggest(found, found.length ? '' : 'Nobody in this chat by that name.');
+    }
     var q = w.q;
     suggestion.timer = setTimeout(function () {
       social().rpc('gv_user_search', { p_q: q }).then(function (people) {
