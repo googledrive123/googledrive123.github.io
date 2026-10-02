@@ -1688,7 +1688,7 @@
     rpc('analytics_overview', { p_secret: state.secret }).then(function (o) {
       state.overview = o;
       renderOverview(o);
-    });
+    }).catch(function (e) { $('allTimeSince').textContent = 'Could not load: ' + e.message; });
     loadGrowth();
   }
 
