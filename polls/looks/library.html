@@ -77,6 +77,14 @@
   .tile-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .all-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 16px; }
   .count { font-size: 14px; color: #9b9ba5; }
+  .filters { display: flex; align-items: center; gap: 8px; margin-bottom: 24px; }
+  .tab { height: 36px; padding: 0 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,.1); background: transparent; color: #9b9ba5; font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer; }
+  .tab.on { border-color: #f2f2f4; background: #f2f2f4; color: #0c0c0e; }
+  .filters-end { margin-left: auto; display: flex; gap: 8px; }
+  .sort { height: 36px; padding: 0 12px 0 14px; display: flex; align-items: center; gap: 6px; border-radius: 8px; border: 1px solid rgba(255,255,255,.1); background: transparent; color: #9b9ba5; font-family: inherit; font-size: 14px; cursor: pointer; }
+  .sort:hover { color: #f2f2f4; }
+  .surprise { height: 36px; padding: 0 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,.1); background: transparent; color: #f2f2f4; font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer; }
+  .surprise:hover { background: #151518; }
 </style>
 </head>
 <body>
@@ -163,6 +171,22 @@
     <div class="all-head">
       <h2 id="headA">All games</h2>
       <span class="count" id="subA">1,958</span>
+    </div>
+    <div class="filters" id="filtersA" data-browse>
+      <button class="tab on" data-cat="All" aria-pressed="true">All</button>
+      <button class="tab" data-cat="Action" aria-pressed="false">Action</button>
+      <button class="tab" data-cat="Arcade" aria-pressed="false">Arcade</button>
+      <button class="tab" data-cat="Driving" aria-pressed="false">Driving</button>
+      <button class="tab" data-cat="Horror" aria-pressed="false">Horror</button>
+      <button class="tab" data-cat="Platformer" aria-pressed="false">Platformer</button>
+      <button class="tab" data-cat="Puzzle" aria-pressed="false">Puzzle</button>
+      <button class="tab" data-cat="Racing" aria-pressed="false">Racing</button>
+      <button class="tab" data-cat="Shooter" aria-pressed="false">Shooter</button>
+      <button class="tab" data-cat="Sports" aria-pressed="false">Sports</button>
+      <div class="filters-end">
+        <button class="sort" data-soon>Most played<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></button>
+        <button class="surprise" id="surpriseA">Surprise me</button>
+      </div>
     </div>
     <div class="tiles" id="gridA">
       <a class="tile" data-soon><span class="tile-art"><img src="/thumbs/polytrack.webp" alt=""></span><span class="meta"><span class="name">PolyTrack</span><span class="sub">Racing</span></span></a>
