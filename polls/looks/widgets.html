@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Widgets · GameVault preview</title>
+<link rel="icon" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap" rel="stylesheet">
+<style>
+  /* Ember theme: every color comes from one hue. */
+  :root {
+    --h: 25; --c: 1; --ah: 25;
+    --bg: oklch(0.155 calc(0.028 * var(--c)) var(--h));
+    --s2: oklch(0.21 calc(0.038 * var(--c)) var(--h));
+    --s3: oklch(0.265 calc(0.048 * var(--c)) var(--h));
+    --s4: oklch(0.32 calc(0.055 * var(--c)) var(--h));
+    --tx: oklch(0.97 calc(0.012 * var(--c)) var(--h));
+    --mu: oklch(0.79 calc(0.035 * var(--c)) var(--h));
+    --red: oklch(0.6 0.21 var(--ah));
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--tx); font-family: 'Manrope', system-ui, sans-serif; }
+  a { color: inherit; text-decoration: none; }
+  .screen { position: relative; height: 100vh; min-height: 635px; overflow: hidden; display: flex; flex-direction: column; }
+
+  .top { flex-shrink: 0; height: 68px; display: flex; align-items: center; gap: 28px; padding: 0 32px; }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand img { width: 26px; height: 26px; display: block; }
+  .brand span { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; }
+  .tabs { display: flex; gap: 4px; font-size: 14px; font-weight: 600; }
+  .tab { height: 36px; padding: 0 14px; display: flex; align-items: center; border-radius: 12px; color: var(--mu); cursor: pointer; }
+  .tab:hover { background: var(--s2); }
+  .tab.on { background: var(--s3); color: inherit; }
+</style>
+</head>
+<body>
+<div class="screen">
+  <header class="top">
+    <span class="brand"><img src="/favicon.svg" alt=""><span>gamevault</span></span>
+    <nav class="tabs">
+      <a class="tab on">home</a>
+      <a class="tab" data-soon>games</a>
+      <a class="tab" data-soon>movies</a>
+      <a class="tab" data-soon>music</a>
+      <a class="tab" data-soon>leaderboard</a>
+      <a class="tab" data-soon>more</a>
+    </nav>
+  </header>
+</div>
+</body>
+</html>
