@@ -83,6 +83,7 @@
     '.gv-mention:hover{text-decoration:underline}',
     '.gv-mention.me{background:rgba(255,59,59,.3);color:#fff;cursor:default;text-decoration:none}',
     '.gv-msg.mentioned{background:rgba(255,59,59,.07);box-shadow:inset 3px 0 0 var(--accent,#ff3b3b)}',
+    '.gv-chat-at{min-width:18px;height:18px;padding:0 5px;border-radius:100px;background:var(--accent,#ff3b3b);color:#fff;font-size:.68rem;font-weight:800;display:grid;place-items:center}',
     '.gv-chat-status{min-height:1.2rem;padding:2px 12px 8px;font-size:.76rem;color:var(--muted,#8a8a96)}',
     '.gv-chat-status.wait{color:#f0c04a}',
     '.gv-chat-status.error{color:#ff7a7a}',
@@ -637,6 +638,13 @@
     b.appendChild(face);
     b.appendChild(words);
     if (social().muted(key)) b.appendChild(el('span', 'gv-chat-muted', 'muted'));
+    // Someone named this account here and it has not looked yet.
+    var named = (social().counts().mentioned || {})[key];
+    if (named) {
+      var at = el('span', 'gv-chat-at', '@');
+      at.title = named === 1 ? 'You were mentioned' : 'You were mentioned ' + named + ' times';
+      b.appendChild(at);
+    }
     var count = el('span', 'gv-chat-count', unread === true ? '' : String(unread || ''));
     count.hidden = !unread;
     if (unread === true) count.style.cssText = 'min-width:9px;width:9px;height:9px;padding:0';
