@@ -147,6 +147,12 @@
     return m ? local(m.img) : null;
   }
 
+  // An answer's live page to try, if it has one.
+  function livePage(poll, i) {
+    var m = poll.media && poll.media[i];
+    return m ? local(m.page) : null;
+  }
+
   function hasLooks(poll) {
     return (poll.options || []).some(function (name, i) { return shot(poll, i); });
   }
