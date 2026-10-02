@@ -96,10 +96,6 @@ security definer
 set search_path to 'public'
 as $function$
   with s as materialized (select visitor_id from analytics_scanners()),
-  h as materialized (
-    select e.* from analytics_events e
-    where not exists (select 1 from s where s.visitor_id = e.visitor_id)
-  ),
   v as materialized (
     select x.* from analytics_visitors x
     where not exists (select 1 from s where s.visitor_id = x.visitor_id)
@@ -132,11 +128,12 @@ as $function$
         from q group by 1) d),
     'top_games', (select coalesce(json_agg(g), '[]'::json) from (
         select game_id,
-               max(item_title) as name,
-               count(*) filter (where event = 'game_open') as plays,
-               count(distinct visitor_id) filter (where event = 'game_open') as players,
-               coalesce(sum(value) filter (where event = 'game_close'), 0) as secs
-        from h where game_id is not null
+               max(name) as name,
+               sum(plays) as plays,
+               count(*) filter (where plays > 0) as players,
+               sum(secs) as secs
+        from analytics_visitor_games x
+        where not exists (select 1 from s where s.visitor_id = x.visitor_id)
         group by game_id order by plays desc limit 50) g)
   ) else null end;
 $function$;
