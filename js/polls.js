@@ -288,6 +288,14 @@
     }
     function shut() {
       shade.remove();
+      window.removeEventListener('keydown', onKey, true);
+    }
+    function onKey(e) {
+      if (e.key === 'ArrowLeft') show(at - 1);
+      else if (e.key === 'ArrowRight') show(at + 1);
+      else return;
+      e.preventDefault();
+      e.stopPropagation();
     }
     close.addEventListener('click', shut);
     prev.addEventListener('click', function () { show(at - 1); });
@@ -299,6 +307,7 @@
     });
     show(start);
     document.body.appendChild(shade);
+    window.addEventListener('keydown', onKey, true);
     (pick ? choose : close).focus();
   }
 
