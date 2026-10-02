@@ -363,6 +363,19 @@ $('clearB').addEventListener('click', function () {
   $('qb').value = '';
   drawGames();
 });
+
+$('tabsB').addEventListener('click', function (e) {
+  var btn = e.target.closest('.tab');
+  if (!btn) return;
+  state.cb = btn.getAttribute('data-cat');
+  var tabs = $('tabsB').querySelectorAll('.tab');
+  for (var i = 0; i < tabs.length; i++) {
+    var on = tabs[i] === btn;
+    tabs[i].classList.toggle('on', on);
+    tabs[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+  }
+  drawGames();
+});
 </script>
 </body>
 </html>
