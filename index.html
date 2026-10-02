@@ -393,7 +393,11 @@
     @media (max-height: 860px) {
       #welcome { padding-top: clamp(4.5rem, 11.5vh, 6rem); padding-bottom: 1rem; }
       .hero h1 { font-size: clamp(2.8rem, min(8vw, 12.5vh), 6rem); margin-bottom: clamp(0.8rem, 2.4vh, 1.6rem); }
-      .hero .stat-row { margin-top: 2rem; }
+      .hero .stat-row { margin-top: clamp(0.6rem, 2vh, 2rem); gap: 1.4rem; }
+      .hero .stat { display: flex; align-items: baseline; gap: 0.45rem; }
+      .hero .stat .num { font-size: 1.05rem; }
+      .hero .stat .lbl { margin-top: 0; }
+      .hero .stat-divider { height: 14px; }
     }
     .hero h1 .stroke {
       -webkit-text-stroke: 2px var(--text);
