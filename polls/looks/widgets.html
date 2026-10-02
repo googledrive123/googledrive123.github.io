@@ -34,6 +34,15 @@
   .tab { height: 36px; padding: 0 14px; display: flex; align-items: center; border-radius: 12px; color: var(--mu); cursor: pointer; }
   .tab:hover { background: var(--s2); }
   .tab.on { background: var(--s3); color: inherit; }
+
+  .tools { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .search { display: flex; align-items: center; gap: 10px; width: 320px; height: 36px; padding: 0 12px; border-radius: 12px; background: var(--s2); }
+  .search svg { flex-shrink: 0; opacity: .7; }
+  .search input { flex: 1; min-width: 0; height: 100%; border: 0; outline: none; background: transparent; color: inherit; font-family: inherit; font-size: 14px; }
+  .search input::placeholder { color: currentColor; opacity: .5; }
+  .icon-btn { position: relative; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 12px; border: 0; background: var(--s2); color: inherit; cursor: pointer; padding: 0; }
+  .dot { position: absolute; top: 7px; right: 7px; width: 8px; height: 8px; border-radius: 50%; background: var(--red); }
+  .avatar { width: 36px; height: 36px; border-radius: 12px; background: var(--s4); display: grid; place-items: center; font-size: 14px; font-weight: 700; }
 </style>
 </head>
 <body>
@@ -48,6 +57,14 @@
       <a class="tab" data-soon>leaderboard</a>
       <a class="tab" data-soon>more</a>
     </nav>
+    <div class="tools">
+      <label class="search">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input id="q2c" type="text" placeholder="search 1,958 games" autocomplete="off" aria-label="Search games">
+      </label>
+      <button class="icon-btn" type="button" title="Chat" data-soon><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v10H9l-5 4z"></path></svg><span class="dot"></span></button>
+      <span class="avatar" title="Profile" data-soon>M</span>
+    </div>
   </header>
 </div>
 </body>
