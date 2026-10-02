@@ -82,6 +82,7 @@
     '.gv-mention{display:inline;padding:0 3px;border:0;border-radius:4px;background:rgba(57,135,229,.18);color:#8ab8f2;font:inherit;font-weight:600;cursor:pointer}',
     '.gv-mention:hover{text-decoration:underline}',
     '.gv-mention.me{background:rgba(255,59,59,.3);color:#fff;cursor:default;text-decoration:none}',
+    '.gv-msg.mentioned{background:rgba(255,59,59,.07);box-shadow:inset 3px 0 0 var(--accent,#ff3b3b)}',
     '.gv-chat-status{min-height:1.2rem;padding:2px 12px 8px;font-size:.76rem;color:var(--muted,#8a8a96)}',
     '.gv-chat-status.wait{color:#f0c04a}',
     '.gv-chat-status.error{color:#ff7a7a}',
@@ -475,7 +476,7 @@
 
   function render(m) {
     if (!m.user_id) return el('div', 'gv-msg-site', m.body);
-    var row = el('div', 'gv-msg' + (m.mine ? ' mine' : ''));
+    var row = el('div', 'gv-msg' + (m.mine ? ' mine' : '') + (mentionsMe(m) ? ' mentioned' : ''));
     row.dataset.id = m.id;
     var head = el('div', 'gv-msg-head');
     var name = el('button', 'gv-msg-name', m.username);
@@ -599,6 +600,11 @@
   function myId() {
     var u = social() && social().user();
     return u ? u.id : null;
+  }
+
+  function mentionsMe(m) {
+    var me = myId();
+    return !!(me && !m.mine && (m.mentions || []).some(function (x) { return x.id === me; }));
   }
 
   // ── The list ──────────────────────────────────────────────────────────
