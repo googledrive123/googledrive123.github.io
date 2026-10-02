@@ -710,6 +710,7 @@ begin
                'username', m.username,
                'body', m.body,
                'mentions', m.mentions,
+               'verified', exists (select 1 from gv_verified v where v.key = m.user_id::text),
                'created_at', m.created_at,
                'mine', m.user_id = v_user
              ) order by m.id)
@@ -734,6 +735,7 @@ begin
                'username', m.username,
                'body', m.body,
                'mentions', m.mentions,
+               'verified', exists (select 1 from gv_verified v where v.key = m.user_id::text),
                'created_at', m.created_at,
                'mine', m.user_id = v_user
              ) order by m.id)
