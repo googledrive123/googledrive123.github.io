@@ -23,6 +23,7 @@
     '.gv-poll-opt.result::before{content:"";position:absolute;inset:0 auto 0 0;width:var(--p,0%);background:rgba(255,255,255,.07);transition:width .5s cubic-bezier(.2,.8,.2,1)}',
     '.gv-poll-opt.mine{border-color:var(--accent,#ff3b3b)}',
     '.gv-poll-opt.mine::before{background:rgba(255,59,59,.22)}',
+    '.gv-poll-meta{margin-top:10px;font-size:.78rem;color:var(--muted,#8a8a96)}',
   ].join('');
 
   var client = null;
@@ -76,14 +77,30 @@
     try { return Promise.resolve(localStorage.getItem('gv.vid')); } catch (e) { return Promise.resolve(null); }
   }
 
+  function plural(n, one, many) {
+    return n.toLocaleString() + ' ' + (n === 1 ? one : many);
+  }
+
+  function endsLine(poll) {
+    if (!poll.open) return 'Over';
+    if (!poll.ends_at) return 'Open';
+    var left = Date.parse(poll.ends_at) - Date.now();
+    var days = Math.round(left / 86400000), hours = Math.round(left / 3600000);
+    if (days >= 2) return 'Ends in ' + plural(days, 'day', 'days');
+    if (hours >= 2) return 'Ends in ' + plural(hours, 'hour', 'hours');
+    return 'Ends soon';
+  }
+
   // One poll and the answers to pick from.
   function card(poll) {
     style();
     var box = el('div', 'gv-poll');
     var q = el('h3', 'gv-poll-q', poll.question);
     var opts = el('div', 'gv-poll-opts');
+    var meta = el('div', 'gv-poll-meta');
     box.appendChild(q);
     box.appendChild(opts);
+    box.appendChild(meta);
 
     function paint(p) {
       opts.textContent = '';
@@ -106,6 +123,8 @@
         }
         opts.appendChild(row);
       });
+      var bits = [plural(p.total || 0, 'vote', 'votes'), endsLine(p)];
+      meta.textContent = bits.join(' \u00b7 ');
     }
 
     function vote(p, i) {
