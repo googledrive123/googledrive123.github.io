@@ -79,6 +79,9 @@
     '.gv-chat-len{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-family:"JetBrains Mono",monospace;font-size:.62rem;color:var(--muted-2,#54545e);pointer-events:none}',
     '.gv-chat-send{min-width:64px}',
     '.gv-chat-check{width:14px;height:14px;flex-shrink:0;margin-left:4px;vertical-align:-2px}',
+    '.gv-mention{display:inline;padding:0 3px;border:0;border-radius:4px;background:rgba(57,135,229,.18);color:#8ab8f2;font:inherit;font-weight:600;cursor:pointer}',
+    '.gv-mention:hover{text-decoration:underline}',
+    '.gv-mention.me{background:rgba(255,59,59,.3);color:#fff;cursor:default;text-decoration:none}',
     '.gv-chat-status{min-height:1.2rem;padding:2px 12px 8px;font-size:.76rem;color:var(--muted,#8a8a96)}',
     '.gv-chat-status.wait{color:#f0c04a}',
     '.gv-chat-status.error{color:#ff7a7a}',
@@ -490,7 +493,7 @@
       head.appendChild(flag);
     }
     row.appendChild(head);
-    row.appendChild(el('div', 'gv-msg-body', m.body));
+    row.appendChild(bodyNode(m));
     return row;
   }
 
@@ -498,6 +501,31 @@
     var box = el('span');
     box.innerHTML = CHECK;
     return box.firstChild;
+  }
+
+  // The text, with each @name the message named picked out.
+  function bodyNode(m) {
+    var body = el('div', 'gv-msg-body');
+    var named = (m.mentions || []).slice().sort(function (a, b) { return b.name.length - a.name.length; });
+    var text = m.body, lower = text.toLowerCase(), from = 0, i = 0;
+    var me = myId();
+    while (named.length) {
+      var at = lower.indexOf('@', i);
+      if (at < 0) break;
+      var hit = null;
+      for (var k = 0; k < named.length && !hit; k++) {
+        if (lower.substr(at + 1, named[k].name.length) === named[k].name.toLowerCase()) hit = named[k];
+      }
+      i = at + 1;
+      if (!hit) continue;
+      if (at > from) body.appendChild(document.createTextNode(text.slice(from, at)));
+      var tag = el('button', 'gv-mention' + (hit.id === me ? ' me' : ''), text.substr(at, hit.name.length + 1));
+      tag.type = 'button';
+      body.appendChild(tag);
+      from = i = at + 1 + hit.name.length;
+    }
+    if (from < text.length) body.appendChild(document.createTextNode(text.slice(from)));
+    return body;
   }
 
   // ── Sending ───────────────────────────────────────────────────────────
@@ -564,6 +592,11 @@
       failed(error);
       paintSend();
     });
+  }
+
+  function myId() {
+    var u = social() && social().user();
+    return u ? u.id : null;
   }
 
   // ── The list ──────────────────────────────────────────────────────────
