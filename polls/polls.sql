@@ -36,6 +36,10 @@ create table if not exists public.gv_polls (
 -- Pictures for the answers, in the same order, or null for a poll without.
 alter table public.gv_polls add column if not exists images jsonb;
 
+-- A preview poll only shows on a local copy of the site (localhost:8000), to
+-- try it out before anyone else sees it. The dashboard shows it to everyone.
+alter table public.gv_polls add column if not exists preview boolean not null default false;
+
 create table if not exists public.gv_poll_votes (
   id         bigserial primary key,
   poll_id    bigint not null references public.gv_polls (id) on delete cascade,
