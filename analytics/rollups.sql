@@ -12,6 +12,7 @@
 --                             and window size, for the scanner check
 --   analytics_quarters        events, page views, plays and play time per
 --                             visitor and session, 15 minutes at a time
+--   analytics_visitor_users   which accounts each visitor signed in as
 --
 -- Fifteen minutes because every time zone in use today is a whole number of
 -- quarter hours off UTC, so a quarter always falls on one day wherever the
@@ -48,3 +49,9 @@ create table if not exists public.analytics_quarters (
   primary key (bucket, visitor_id, session_id)
 );
 create index if not exists analytics_quarters_visitor_idx on public.analytics_quarters (visitor_id);
+
+create table if not exists public.analytics_visitor_users (
+  visitor_id text not null,
+  user_id uuid not null,
+  primary key (visitor_id, user_id)
+);
