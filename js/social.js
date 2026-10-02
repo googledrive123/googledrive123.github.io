@@ -10,6 +10,7 @@
   var POLL_MS = 8000;
   // While chat is open a reply should show up about as fast as it is typed.
   var FAST_MS = 4000;
+  var TOASTS_MAX = 3;
 
   var sb = null;
   var user = null;
@@ -118,6 +119,8 @@
       counts.server = data.server_last > serverSeen() && viewing !== 'server' && !muted('server');
       emit('counts', counts);
       if (server.length || convo.length) emit('messages', { server: server, convo: convo });
+      server.forEach(function (m) { popUp('server', m); });
+      convo.forEach(function (m) { popUp('convo:' + m.convo_id, m); });
       schedule();
     }, function (error) {
       busy = false;
@@ -167,6 +170,115 @@
     });
   }
 
+  // ── Toasts ────────────────────────────────────────────────────────────
+  // New messages pop up at the top of the game, never over the rest of the
+  // site, where the chat button's count says enough.
+
+  var CSS =
+    '.gv-toasts{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:30;width:min(440px,calc(100% - 24px));display:flex;flex-direction:column;gap:8px;pointer-events:none}' +
+    '.gv-toasts.gv-toasts-page{position:fixed;top:72px;z-index:2500}' +
+    '.gv-toast{pointer-events:auto;display:flex;align-items:flex-start;gap:10px;padding:10px 10px 10px 14px;border-radius:12px;background:var(--surface,#121216);border:1px solid var(--border-strong,rgba(255,255,255,.16));border-left:3px solid var(--accent,#ff3b3b);box-shadow:0 14px 40px rgba(0,0,0,.55);color:var(--text,#f4f4f6);font:inherit;font-size:.85rem;line-height:1.4;cursor:pointer;animation:gvToastIn .22s cubic-bezier(.2,.8,.2,1)}' +
+    '.gv-toast-text{flex:1;min-width:0}' +
+    '.gv-toast-from{display:block;font-family:"JetBrains Mono",monospace;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted,#8a8a96);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
+    '.gv-toast-body{display:block;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}' +
+    '.gv-toast-body b{font-weight:600}' +
+    '.gv-toast-x{flex-shrink:0;width:26px;height:26px;display:grid;place-items:center;border-radius:50%;border:0;background:transparent;color:var(--muted,#8a8a96);font:inherit;font-size:1rem;line-height:1;cursor:pointer}' +
+    '.gv-toast-x:hover{color:var(--text,#f4f4f6);background:rgba(255,255,255,.06)}' +
+    '.gv-toast.gv-toast-out{opacity:0;transform:translateY(-6px);transition:opacity .2s,transform .2s}' +
+    '@keyframes gvToastIn{from{opacity:0;transform:translateY(-10px)}}' +
+    '@media (prefers-reduced-motion:reduce){.gv-toast{animation:none}}';
+
+  function style() {
+    if (document.getElementById('gvSocialCss')) return;
+    var st = document.createElement('style');
+    st.id = 'gvSocialCss';
+    st.textContent = CSS;
+    document.head.appendChild(st);
+  }
+
+  // Over the game when one is open, else at the top of the page.
+  function layer(inGame) {
+    style();
+    var parent = inGame && host.gameArea ? host.gameArea() : document.body;
+    var el = parent.querySelector(':scope > .gv-toasts');
+    if (!el) {
+      el = document.createElement('div');
+      el.className = 'gv-toasts' + (parent === document.body ? ' gv-toasts-page' : '');
+      el.setAttribute('aria-live', 'polite');
+      parent.appendChild(el);
+    }
+    return el;
+  }
+
+  function dismiss(toast) {
+    if (!toast.isConnected || toast.classList.contains('gv-toast-out')) return;
+    toast.classList.add('gv-toast-out');
+    setTimeout(function () { toast.remove(); }, 220);
+  }
+
+  // Clicking × hands the keys back to the game, which lost them to the click.
+  function refocusGame() {
+    var frame = host.frame && host.frame();
+    try { if (frame && frame.contentWindow) frame.contentWindow.focus(); } catch (e) {}
+  }
+
+  function toast(from, who, text, onOpen, inGame) {
+    var box = layer(inGame);
+    var el = document.createElement('div');
+    el.className = 'gv-toast';
+    el.setAttribute('role', 'status');
+
+    var words = document.createElement('div');
+    words.className = 'gv-toast-text';
+    var src = document.createElement('span');
+    src.className = 'gv-toast-from';
+    src.textContent = from;
+    var body = document.createElement('span');
+    body.className = 'gv-toast-body';
+    if (who) {
+      var name = document.createElement('b');
+      name.textContent = who + ': ';
+      body.appendChild(name);
+    }
+    body.appendChild(document.createTextNode(text));
+    words.appendChild(src);
+    words.appendChild(body);
+
+    var x = document.createElement('button');
+    x.type = 'button';
+    x.className = 'gv-toast-x';
+    x.setAttribute('aria-label', 'Dismiss');
+    x.textContent = '\u00d7';
+    x.addEventListener('click', function (e) {
+      e.stopPropagation();
+      dismiss(el);
+      if (inGame) refocusGame();
+    });
+
+    el.appendChild(words);
+    el.appendChild(x);
+    if (onOpen) {
+      el.addEventListener('click', function () {
+        dismiss(el);
+        onOpen();
+      });
+    }
+    box.appendChild(el);
+    while (box.children.length > TOASTS_MAX) box.removeChild(box.firstElementChild);
+    return el;
+  }
+
+  function popUp(key, m) {
+    if (m.mine || !host.inGame || !host.inGame()) return;
+    if (viewing === key) return;
+    var from = key === 'server' ? 'Server'
+      : m.kind === 'group' ? (m.name || 'Group chat')
+      : 'Direct message';
+    var who = m.user_id ? m.username : '';
+    toast(from, who, m.body, function () {
+      if (window.GV && GV.chat) GV.chat.open({ key: key });
+    }, true);
+  }
 
 
   // Safe to call on every sign-in event: the same account carries on.
