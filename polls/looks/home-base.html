@@ -83,6 +83,9 @@ h2{margin:0;font-size:18px;font-weight:700;letter-spacing:-.015em}
 .all-head{display:flex;align-items:baseline;gap:10px;margin-bottom:16px}
 .all-sub{font-size:14px;color:#a8a29a}
 .grid{gap:28px 20px}
+.tabs{display:flex;align-items:center;gap:4px;margin-bottom:24px}
+.tab{height:36px;padding:0 14px;border-radius:10px;border:0;background:transparent;color:#a8a29a;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.tab.on{background:#2a2826;color:#f4f1ec}
 </style>
 </head>
 <body>
@@ -177,6 +180,18 @@ h2{margin:0;font-size:18px;font-weight:700;letter-spacing:-.015em}
       <div class="all-head">
         <h2 id="headB">All games</h2>
         <span class="all-sub" id="subB">1,958</span>
+      </div>
+      <div class="tabs" id="tabsB">
+        <button class="tab on" type="button" data-cat="All" aria-pressed="true">All</button>
+        <button class="tab" type="button" data-cat="Action" aria-pressed="false">Action</button>
+        <button class="tab" type="button" data-cat="Arcade" aria-pressed="false">Arcade</button>
+        <button class="tab" type="button" data-cat="Driving" aria-pressed="false">Driving</button>
+        <button class="tab" type="button" data-cat="Horror" aria-pressed="false">Horror</button>
+        <button class="tab" type="button" data-cat="Platformer" aria-pressed="false">Platformer</button>
+        <button class="tab" type="button" data-cat="Puzzle" aria-pressed="false">Puzzle</button>
+        <button class="tab" type="button" data-cat="Racing" aria-pressed="false">Racing</button>
+        <button class="tab" type="button" data-cat="Shooter" aria-pressed="false">Shooter</button>
+        <button class="tab" type="button" data-cat="Sports" aria-pressed="false">Sports</button>
       </div>
       <div class="five grid" id="gridB">
         <a class="tile" data-soon><span class="art"><img src="/thumbs/polytrack.webp" alt=""></span><span class="meta"><span class="name">PolyTrack</span><span class="sub">Racing</span></span></a>
