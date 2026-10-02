@@ -160,6 +160,7 @@ begin
     'user_id', v_row.user_id,
     'username', v_row.username,
     'body', v_row.body,
+    'mentions', v_row.mentions,
     'created_at', v_row.created_at,
     'mine', true
   );
