@@ -7,6 +7,7 @@
 
   var MAX = 300;
   var KEEP = 300;
+  var REASONS = ['Mean', 'Rude', 'Personal info', 'Spam'];
   var MUTES = [
     { label: 'For 30 minutes', ms: 30 * 60 * 1000 },
     { label: 'For 1 hour', ms: 60 * 60 * 1000 },
@@ -58,6 +59,12 @@
     '.gv-msg-time{font-family:"JetBrains Mono",monospace;font-size:.64rem;color:var(--muted-2,#54545e);white-space:nowrap}',
     '.gv-msg-body{margin-top:1px;line-height:1.5;color:#d8d8de;overflow-wrap:anywhere}',
     '.gv-msg-site{align-self:center;padding:4px 10px;font-size:.75rem;color:var(--muted,#8a8a96)}',
+    '.gv-msg-report{margin-left:auto;padding:1px 6px;border:0;border-radius:6px;background:none;color:var(--muted-2,#54545e);font:inherit;font-size:.7rem;cursor:pointer;opacity:0;transition:opacity .15s}',
+    '.gv-msg:hover .gv-msg-report,.gv-msg-report:focus-visible,.gv-msg.reporting .gv-msg-report{opacity:1}',
+    '.gv-msg-report:hover{color:var(--text,#f4f4f6)}',
+    '.gv-msg-report:disabled{opacity:1;cursor:default}',
+    '@media (hover:none){.gv-msg-report{opacity:1}}',
+    '.gv-msg-flag{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:6px;font-size:.75rem;color:var(--muted,#8a8a96)}',
     '.gv-chat-pill{padding:4px 11px;border-radius:100px;border:1px solid var(--border-strong,rgba(255,255,255,.16));background:transparent;color:var(--text,#f4f4f6);font:inherit;font-size:.75rem;cursor:pointer}',
     '.gv-chat-pill:hover{border-color:var(--accent,#ff3b3b)}',
     '.gv-chat-pill:disabled{opacity:.45;cursor:default}',
@@ -457,6 +464,12 @@
     time.dateTime = m.created_at;
     head.appendChild(name);
     head.appendChild(time);
+    if (!m.mine) {
+      var flag = el('button', 'gv-msg-report', 'Report');
+      flag.type = 'button';
+      flag.addEventListener('click', function () { openReport(row, m, flag); });
+      head.appendChild(flag);
+    }
     row.appendChild(head);
     row.appendChild(el('div', 'gv-msg-body', m.body));
     return row;
@@ -843,6 +856,39 @@
     body.appendChild(note);
   }
 
+  // ── Reports ───────────────────────────────────────────────────────────
+
+  function closeReport(row) {
+    var flag = row.querySelector('.gv-msg-flag');
+    if (flag) flag.remove();
+    row.classList.remove('reporting');
+  }
+
+  function openReport(row, m, flag) {
+    if (row.querySelector('.gv-msg-flag')) return closeReport(row);
+    row.classList.add('reporting');
+    var line = el('div', 'gv-msg-flag');
+    line.appendChild(el('span', '', 'What is wrong with it?'));
+    REASONS.forEach(function (reason) {
+      line.appendChild(pill(reason, '', function () { report(row, m, reason, line, flag); }));
+    });
+    line.appendChild(pill('Cancel', '', function () { closeReport(row); }));
+    row.appendChild(line);
+  }
+
+  function report(row, m, reason, line, flag) {
+    Array.prototype.forEach.call(line.querySelectorAll('button'), function (b) { b.disabled = true; });
+    var fn = m.convo_id ? 'gv_convo_report' : 'gv_chat_report';
+    social().rpc(fn, { p_message_id: m.id, p_reason: reason }).then(function (fresh) {
+      line.textContent = fresh ? 'Reported. Thanks for looking out.' : 'You already reported this one.';
+      flag.textContent = 'Reported';
+      flag.disabled = true;
+      setTimeout(function () { closeReport(row); }, 4000);
+    }, function (error) {
+      line.textContent = error.message;
+      setTimeout(function () { closeReport(row); }, 4000);
+    });
+  }
 
 
   // ── Wiring ────────────────────────────────────────────────────────────
