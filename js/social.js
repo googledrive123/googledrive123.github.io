@@ -10,6 +10,7 @@
   var POLL_MS = 8000;
   // While chat is open a reply should show up about as fast as it is typed.
   var FAST_MS = 4000;
+  var TOAST_MS = 6000;
   var TOASTS_MAX = 3;
 
   var sb = null;
@@ -265,6 +266,18 @@
     }
     box.appendChild(el);
     while (box.children.length > TOASTS_MAX) box.removeChild(box.firstElementChild);
+    // Held while the pointer is on it, so it is not snatched mid-read.
+    var left = TOAST_MS;
+    var started = Date.now();
+    var clock = setTimeout(function () { dismiss(el); }, left);
+    el.addEventListener('mouseenter', function () {
+      clearTimeout(clock);
+      left -= Date.now() - started;
+    });
+    el.addEventListener('mouseleave', function () {
+      started = Date.now();
+      clock = setTimeout(function () { dismiss(el); }, Math.max(1500, left));
+    });
     return el;
   }
 
