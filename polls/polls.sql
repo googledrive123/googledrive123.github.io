@@ -41,6 +41,10 @@ create table if not exists public.gv_polls (
 -- (a line about it). Paths are on this site.
 alter table public.gv_polls add column if not exists media jsonb;
 
+-- What the pop-up says before the poll itself, or null to go straight to
+-- it: an object with a title and a line of text.
+alter table public.gv_polls add column if not exists intro jsonb;
+
 -- A preview poll only shows on a local copy of the site (localhost:8000), to
 -- try it out before anyone else sees it. The dashboard shows it to everyone.
 alter table public.gv_polls add column if not exists preview boolean not null default false;
