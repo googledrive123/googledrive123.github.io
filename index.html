@@ -3501,7 +3501,9 @@ function startRoll() {
   rollStatus.textContent = 'rolling…';
   rollActions.classList.remove('show');
 
-  pickedGame = GAMES[Math.floor(Math.random() * GAMES.length)];
+  // A game that is not loading for people is a bad thing to land on.
+  const pool = GAMES.filter(g => !failing.has(g.id));
+  pickedGame = pool[Math.floor(Math.random() * pool.length)];
 
   // Build a long strip: shuffled fillers, ending with the winner
   const fillerCount = 60; // names that scroll past
