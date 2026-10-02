@@ -407,3 +407,53 @@ $function$;
 revoke all on function public.gv_social_set(text, boolean) from public, anon;
 grant execute on function public.gv_social_set(text, boolean) to authenticated;
 
+
+-- Mutes p_key until p_until (epoch milliseconds), for good with 0, or
+-- unmutes it with null. Mutes that have run out are dropped on the way.
+create or replace function public.gv_mute_set(p_key text, p_until bigint)
+returns json
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+  v_now bigint := (extract(epoch from now()) * 1000)::bigint;
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'Chat only works on GameVault.';
+  end if;
+  if v_user is null then
+    raise exception 'Sign in first.';
+  end if;
+  if p_key is null or p_key !~ '^(server|user:[0-9a-f-]{36}|convo:[0-9]{1,18})$' then
+    raise exception 'Nothing to mute.';
+  end if;
+  if p_until is not null and p_until <> 0 and p_until <= v_now then
+    p_until := null;
+  end if;
+
+  insert into gv_social (user_id) values (v_user) on conflict do nothing;
+
+  update gv_social
+     set mutes = coalesce((
+           select jsonb_object_agg(e.key, e.value)
+             from jsonb_each(gv_social.mutes) e
+            where e.key <> p_key
+              and ((e.value #>> '{}')::bigint = 0 or (e.value #>> '{}')::bigint > v_now)
+         ), '{}'::jsonb)
+         || case when p_until is null then '{}'::jsonb
+                 else jsonb_build_object(p_key, p_until) end
+   where user_id = v_user;
+
+  if (select count(*) from gv_social s, jsonb_object_keys(s.mutes) where s.user_id = v_user) > 200 then
+    raise exception 'That is a lot of mutes. Unmute some first.';
+  end if;
+
+  return public.gv_social_me();
+end;
+$function$;
+
+revoke all on function public.gv_mute_set(text, bigint) from public, anon;
+grant execute on function public.gv_mute_set(text, bigint) to authenticated;
+
