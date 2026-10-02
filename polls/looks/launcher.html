@@ -332,6 +332,17 @@ function closeLib() {
 
 $('openGames').addEventListener('click', openLib);
 $('libClose').addEventListener('click', closeLib);
+
+$('launchQ').addEventListener('input', function () {
+  var text = $('launchQ').value;
+  if (!text) return;
+  $('launchQ').value = '';
+  $('libQ').value = text;
+  state.q2a = text;
+  renderLib();
+  openLib();
+  $('libQ').setSelectionRange(text.length, text.length);
+});
 </script>
 </body>
 </html>
