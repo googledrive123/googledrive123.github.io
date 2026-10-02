@@ -99,19 +99,23 @@ as $function$
   h as materialized (
     select e.* from analytics_events e
     where not exists (select 1 from s where s.visitor_id = e.visitor_id)
+  ),
+  v as materialized (
+    select x.* from analytics_visitors x
+    where not exists (select 1 from s where s.visitor_id = x.visitor_id)
   )
   select case when analytics_check(p_secret) then json_build_object(
     'events',    (select count(*) from h),
-    'visitors',  (select count(distinct visitor_id) from h),
-    'active_visitors', (select count(distinct visitor_id) from h where analytics_is_action(event)),
+    'visitors',  (select count(*) from v),
+    'active_visitors', (select count(*) from v where first_act is not null),
     'scanners',  (select count(*) from s),
     'sessions',  (select count(distinct session_id) from h),
     'users',     (select count(distinct user_id) from h where user_id is not null),
     'pageviews', (select count(*) from h where event = 'pageview'),
     'plays',     (select count(*) from h where event = 'game_open'),
     'play_secs', (select coalesce(sum(value), 0) from h where event = 'game_close'),
-    'first_ts',  (select min(ts) from h),
-    'last_ts',   (select max(ts) from h),
+    'first_ts',  (select min(first_ts) from v),
+    'last_ts',   (select max(last_ts) from v),
     'daily', (select coalesce(json_agg(d order by d.day), '[]'::json) from (
         select date_trunc('day', ts) as day,
                count(*) as events,
