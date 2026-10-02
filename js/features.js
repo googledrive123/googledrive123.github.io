@@ -159,10 +159,16 @@
     if (s.user()) watchFriends(s.user());
   }
 
+  // text: what to show on the card instead of its usual line, or null.
+  function set(id, text) {
+    given[id] = text || null;
+    paint();
+  }
 
   window.GV = window.GV || {};
   window.GV.features = {
     mount: mount,
+    set: set,
     list: FEATURES
   };
 }());
