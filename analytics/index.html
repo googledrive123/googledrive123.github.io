@@ -2014,8 +2014,9 @@
 
   // ── load ──
   // load() reads the whole range: on opening, on a new range and on Refresh.
-  // tick() then only asks for what is new, every 10 seconds. The all-time
-  // numbers come on their own, once a minute, and never hold the rest up.
+  // New events are then pushed in as they happen, and tick() asks for what
+  // is new every 5 seconds in case any were lost. The all-time numbers come
+  // on their own, once a minute, and never hold the rest up.
   var store = null, loadGen = 0, loadingRange = false, ticking = false, held = [];
   function load() {
     if (!state.secret) return;
