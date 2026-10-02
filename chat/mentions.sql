@@ -94,3 +94,38 @@ $function$;
 
 revoke all on function public.gv_mentions_unseen(uuid) from public, anon, authenticated;
 
+
+-- The signed-in account has looked at a chat, 'server' or 'convo:<id>', so
+-- its @mentions there are seen.
+create or replace function public.gv_mentions_seen(p_key text)
+returns boolean
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+  v_convo bigint;
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'Chat only works on GameVault.';
+  end if;
+  if v_user is null then
+    raise exception 'Sign in to chat.';
+  end if;
+  if coalesce(p_key, '') ~ '^convo:[0-9]+$' then
+    v_convo := split_part(p_key, ':', 2)::bigint;
+  end if;
+
+  update gv_mentions
+     set seen = true
+   where user_id = v_user
+     and not seen
+     and ((p_key = 'server' and message_id is not null)
+          or (v_convo is not null and convo_id = v_convo));
+  return found;
+end;
+$function$;
+
+revoke all on function public.gv_mentions_seen(text) from public, anon;
+grant execute on function public.gv_mentions_seen(text) to authenticated;
