@@ -790,12 +790,17 @@
     push.ws = ws;
     function send(m) { m.ref = String(++push.ref); try { ws.send(JSON.stringify(m)); } catch (e) {} }
     ws.onopen = function () {
+      push.seen = Date.now();
       send({ topic: 'realtime:' + push.topic, event: 'phx_join', join_ref: '1', payload: { config: { broadcast: { ack: false, self: false }, presence: { key: '' }, postgres_changes: [], private: false }, access_token: SUPA_KEY } });
+      // A socket that has gone quiet without closing is closed here, and so
+      // opened again.
       push.beat = setInterval(function () {
+        if (Date.now() - push.seen > 60000) return ws.close();
         send({ topic: 'phoenix', event: 'heartbeat', payload: {} });
       }, 25000);
     };
     ws.onmessage = function (e) {
+      push.seen = Date.now();
       var m;
       try { m = JSON.parse(e.data); } catch (err) { return; }
       if (m.topic !== 'realtime:' + push.topic) return;
