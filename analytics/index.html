@@ -164,6 +164,7 @@
   .btn.live-btn:hover { border-color: var(--accent); }
   body.live-on #topBar, body.live-on #dash { display: none !important; }
   .live-top h1 { display: flex; align-items: center; }
+  .live-top input[type=search] { background: var(--bg); border: 1px solid var(--border-strong); color: var(--text); font: inherit; font-size: 0.8rem; padding: 7px 10px; border-radius: 8px; width: 240px; max-width: 100%; }
 </style>
 </head>
 <body>
@@ -530,6 +531,7 @@
     <h1><span class="rec on"></span>Live</h1>
     <div class="status" id="liveStatus"><span class="dot off"></span>Connecting…</div>
     <div class="grow"></div>
+    <input type="search" id="liveFilter" placeholder="Filter by anything" autocomplete="off" aria-label="Filter events">
   </div>
 </div>
 
