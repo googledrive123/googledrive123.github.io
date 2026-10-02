@@ -14,9 +14,9 @@
 --
 -- Results show once you have voted, and to everyone once a poll is over.
 --
--- An answer can have a picture: images is a list of paths on the site, in
--- the same order as the answers. The pages show them as tiles that open
--- big on a click.
+-- An answer can have a picture, a live page to try and a note (media). The
+-- pages show them as tiles, and a click opens the live page at the size of
+-- a school Chromebook's screen.
 --
 -- A preview poll shows only on a local copy of the site, so a poll can be
 -- tried out before it goes to everyone.
