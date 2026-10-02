@@ -57,3 +57,59 @@ alter table public.gv_convo_messages enable row level security;
 revoke all on table public.gv_convos, public.gv_convo_members, public.gv_convo_messages
   from anon, authenticated;
 
+
+-- The DM between the signed-in account and p_user, made the first time.
+create or replace function public.gv_dm_open(p_user uuid)
+returns bigint
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+  v_key text;
+  v_id bigint;
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'Chat only works on GameVault.';
+  end if;
+  if v_user is null then
+    raise exception 'Sign in to chat.';
+  end if;
+  if p_user is null or p_user = v_user then
+    raise exception 'Pick someone else.';
+  end if;
+  if not exists (select 1 from auth.users where id = p_user) then
+    raise exception 'That account is gone.';
+  end if;
+
+  v_key := least(v_user::text, p_user::text) || ':' || greatest(v_user::text, p_user::text);
+  select id into v_id from gv_convos where dm_key = v_key;
+  if found then
+    return v_id;
+  end if;
+
+  perform pg_advisory_xact_lock(hashtext('gv_convo_new'), hashtext(v_user::text));
+  -- Plenty for talking to people, and a cap on messaging everyone.
+  if (select count(*) from gv_convos
+       where created_by = v_user and kind = 'dm'
+         and created_at > now() - interval '1 hour') >= 10 then
+    raise exception 'You have started a lot of new chats. Try again later.';
+  end if;
+
+  insert into gv_convos (kind, dm_key, created_by) values ('dm', v_key, v_user)
+  on conflict (dm_key) do nothing
+  returning id into v_id;
+  if v_id is null then
+    select id into v_id from gv_convos where dm_key = v_key;
+    return v_id;
+  end if;
+
+  insert into gv_convo_members (convo_id, user_id) values (v_id, v_user), (v_id, p_user);
+  return v_id;
+end;
+$function$;
+
+revoke all on function public.gv_dm_open(uuid) from public, anon;
+grant execute on function public.gv_dm_open(uuid) to authenticated;
+
