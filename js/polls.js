@@ -1,7 +1,7 @@
 /* GameVault polls (polls/polls.sql). The newest open poll someone has not
    answered pops up when they come to the site, and they can vote right in
    it. /polls/ shows every poll. One vote each: per account, and per browser
-   for a guest.
+   for a guest. Answers can come with pictures, which open big on a click.
    Public surface: window.GV.polls.ask(), .card(poll), .use(client), .rpc. */
 (function () {
   'use strict';
