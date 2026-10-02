@@ -1325,7 +1325,8 @@
         return '<div class="bc-item"><span class="msg"><b>' + esc(b.username) + '</b> ' + esc(b.reason || '')
           + (also.length ? '<br><span class="st">Also banned for sharing a browser: ' + also.map(function (x) { return esc(x.username); }).join(', ') + '</span>' : '')
           + '</span>'
-          + '<span class="st">' + (b.until ? 'until ' + esc(new Date(b.until).toLocaleString()) : 'for good') + '</span>'
+          + '<span class="st">' + (b.until ? 'until ' + esc(new Date(b.until).toLocaleString()) : 'for good')
+          + ' \u00b7 ' + (b.browsers || 0) + (b.browsers === 1 ? ' browser' : ' browsers') + '</span>'
           + '<button class="btn" type="button" data-unban="' + esc(b.user_id) + '">Unban</button></div>';
       }).join('') || '<div class="empty">Nobody is banned.</div>';
       $('chatRecent').innerHTML = d.recent.length ? d.recent.map(function (m) {
