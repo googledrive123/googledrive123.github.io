@@ -2062,6 +2062,12 @@
     if (!live.paused) { liveAdd(live.held, true); live.held = []; }
     $('livePause').textContent = live.paused ? 'Resume' : 'Pause';
   });
+  $('liveClear').addEventListener('click', function () {
+    if (!live) return;
+    $('liveList').innerHTML = '';
+    live.shown = 0;
+    $('liveCount').textContent = '';
+  });
   // A visitor's name shows only their events; anywhere else on an event
   // opens everything it holds.
   $('liveList').addEventListener('click', function (e) {
