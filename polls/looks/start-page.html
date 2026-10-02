@@ -379,6 +379,12 @@ input::placeholder{color:currentColor;opacity:.5}
   });
   input.addEventListener('focus', function () { state.focusC = true; renderDrop(); });
   input.addEventListener('blur', function () { state.focusC = false; renderDrop(); });
+
+  // All 1,958 games glides down to the library.
+  $('more').addEventListener('click', function (e) {
+    e.preventDefault();
+    $('games').scrollIntoView({ behavior: 'smooth' });
+  });
 })();
 </script>
 </body>
