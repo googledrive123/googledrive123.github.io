@@ -88,6 +88,9 @@
     '.gv-look-chip:hover{color:#f4f4f6}',
     '.gv-look-chip.on{border-color:#f4f4f6;background:#f4f4f6;color:#08080a}',
     '@media (max-width:760px){.gv-look-chips{display:none}}',
+    '.gv-poll-front{text-align:center}',
+    '.gv-poll-go{display:block;width:100%;margin-top:20px;padding:14px 22px;border-radius:100px;border:0;background:var(--accent,#ff3b3b);color:#fff;font:inherit;font-size:1rem;font-weight:700;cursor:pointer}',
+    '.gv-poll-go:hover{filter:brightness(1.1)}',
     '@keyframes gvPollIn{from{opacity:0;transform:translateY(10px) scale(.98)}}',
     '@media (prefers-reduced-motion:reduce){.gv-poll-box{animation:none}.gv-poll-opt.result::before,.gv-poll-look,.gv-poll-bar span,.gv-look-screen iframe{transition:none}}'
   ].join('');
@@ -485,14 +488,30 @@
       if (later.textContent === 'Not now') putOff(poll.id);
       close();
     });
-    box.appendChild(card(poll, function () {
+    var body = card(poll, function () {
       // Voted: done straight away, no wait.
       later.textContent = 'Done';
       later.disabled = false;
       later.classList.add('on');
       later.focus();
       ask.count(-1);
-    }));
+    });
+    // An intro goes first, with one big button into the poll.
+    var intro = introOf(poll);
+    if (intro) {
+      var front = el('div', 'gv-poll-front');
+      front.appendChild(el('h3', 'gv-poll-intro-title', intro.title));
+      if (intro.text) front.appendChild(el('p', 'gv-poll-intro-text', intro.text));
+      var go = el('button', 'gv-poll-go', 'Go to the poll \u2192');
+      go.type = 'button';
+      go.addEventListener('click', function () {
+        front.replaceWith(body);
+      });
+      front.appendChild(go);
+      box.appendChild(front);
+    } else {
+      box.appendChild(body);
+    }
     foot.appendChild(all);
     foot.appendChild(later);
     box.appendChild(foot);
