@@ -163,10 +163,8 @@ begin
       where not exists (select 1 from s where s.visitor_id = e.visitor_id)
     ),
     firsts as (
-      select visitor_id,
-             min(ts) as first_ts,
-             min(ts) filter (where analytics_is_action(event)) as first_act
-      from h group by visitor_id
+      select x.visitor_id, x.first_ts, x.first_act from analytics_visitors x
+      where not exists (select 1 from s where s.visitor_id = x.visitor_id)
     ),
     hours as (
       select generate_series(date_trunc('hour', min(first_ts)), date_trunc('hour', now()), interval '1 hour') as hr
