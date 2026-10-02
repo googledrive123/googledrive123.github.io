@@ -8,6 +8,9 @@
 
   var SUPA_URL = 'https://dxwjxzmlezfyursysays.supabase.co';
   var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
+  // Polls put off with Not now, by id, and when.
+  var LATER_KEY = 'gv.poll.later';
+  var LATER_MS = 24 * 60 * 60 * 1000;
   // Not now waits this long, so the question gets read first.
   var NOT_NOW_MS = 3000;
 
@@ -164,6 +167,16 @@
 
   // ── The pop-up ────────────────────────────────────────────────────────
 
+  function laterMap() {
+    try { return JSON.parse(localStorage.getItem(LATER_KEY) || '{}') || {}; } catch (e) { return {}; }
+  }
+
+  function putOff(id) {
+    var all = laterMap();
+    all[id] = Date.now();
+    try { localStorage.setItem(LATER_KEY, JSON.stringify(all)); } catch (e) {}
+  }
+
   // Not over the first-visit question, and not over a game: it waits for
   // both to be out of the way.
   function whenFree(fn) {
@@ -193,6 +206,7 @@
       shade.remove();
     }
     later.addEventListener('click', function () {
+      if (later.textContent === 'Not now') putOff(poll.id);
       close();
     });
     box.appendChild(card(poll));
@@ -206,14 +220,16 @@
     }, NOT_NOW_MS);
   }
 
-  // Looks for a poll this browser or account has not answered, and asks it.
+  // Looks for a poll this browser or account has not answered and has not
+  // put off in the last day, and asks it.
   function ask() {
     if (window.top !== window.self) return;
     visitor().then(function (v) {
       return rpc('gv_polls_open', { p_visitor: v });
     }).then(function (list) {
+      var later = laterMap();
       var open = (list || []).filter(function (p) { return p.voted == null; });
-      var next = open[0];
+      var next = open.filter(function (p) { return !(later[p.id] && Date.now() - later[p.id] < LATER_MS); })[0];
       if (next) whenFree(function () { pop(next); });
     }).catch(function () {});
   }
