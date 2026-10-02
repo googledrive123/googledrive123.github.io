@@ -1843,6 +1843,10 @@
   function liveStats() {
     var now = liveNow(), sc = live.st.scanner;
     var rows = live.st.rows.filter(function (r) { return r.tms >= now - LIVE_BACK && !sc[r.visitor_id]; });
+    var bars = new Array(120).fill(0);
+    rows.forEach(function (r) { var i = 119 - Math.floor((now - r.tms) / 5000); if (i >= 0) bars[i]++; });
+    var top = Math.max(1, Math.max.apply(null, bars));
+    $('liveSpark').innerHTML = bars.map(function (n) { return '<i style="height:' + (100 * n / top) + '%" title="' + n + ' events"></i>'; }).join('');
 
     var last = Object.create(null), lastPlay = Object.create(null);
     rows.forEach(function (r) {
