@@ -67,6 +67,7 @@
     '.gv-look-pick{margin-left:auto;padding:10px 22px;border-radius:100px;border:1px solid #ff3b3b;background:#ff3b3b;color:#fff;font:inherit;font-size:.9rem;font-weight:600;cursor:pointer}',
     '.gv-look-note{font-size:.84rem;color:#8a8a96}',
     '.gv-poll-hint{margin:-.4rem 0 1rem;font-size:.84rem;color:var(--muted,#8a8a96)}',
+    '.gv-poll-note{display:block;padding:0 2px;overflow:hidden;font-size:.78rem;line-height:1.35;color:var(--muted,#8a8a96);white-space:nowrap;text-overflow:ellipsis}',
     '@keyframes gvPollIn{from{opacity:0;transform:translateY(10px) scale(.98)}}',
     '@media (prefers-reduced-motion:reduce){.gv-poll-box{animation:none}.gv-poll-opt.result::before,.gv-poll-look,.gv-poll-bar span{transition:none}}'
   ].join('');
@@ -228,6 +229,7 @@
       var row = el('span', 'gv-poll-look-row');
       row.appendChild(el('span', 'gv-poll-name', p.options[i]));
       t.appendChild(row);
+      if (blurb(p, i)) t.appendChild(el('span', 'gv-poll-note', blurb(p, i)));
       if (showing) {
         var n = p.counts[i] || 0, pct = total ? Math.round(100 * n / total) : 0;
         row.appendChild(el('span', 'gv-poll-pct', pct + '% \u00b7 ' + n.toLocaleString()));
