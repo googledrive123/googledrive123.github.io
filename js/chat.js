@@ -91,6 +91,9 @@
     '.gv-chat-chips{display:flex;flex-wrap:wrap;gap:6px}',
     '.gv-chat-chips:empty{display:none}',
     '.gv-chat-actions{display:flex;flex-wrap:wrap;gap:8px}',
+    '.gv-chat-guest{margin:auto;max-width:340px;padding:24px;border-radius:16px;background:var(--surface,#121216);border:1px solid var(--border-strong,rgba(255,255,255,.16));text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center;color:var(--muted,#8a8a96);line-height:1.5}',
+    '.gv-chat-guest[hidden],.gv-chat-frame[hidden]{display:none}',
+    '.gv-chat-guest p{margin:0}',
     '.gv-chat-btn{position:relative;flex-shrink:0;width:38px;height:38px;display:grid;place-items:center;border-radius:50%;border:1px solid var(--border,rgba(255,255,255,.07));background:transparent;color:var(--muted,#8a8a96);cursor:pointer;transition:color .15s,border-color .15s}',
     '.gv-chat-btn:hover,.gv-chat-btn[aria-expanded="true"]{color:var(--text,#f4f4f6);border-color:var(--border-strong,rgba(255,255,255,.16))}',
     '.gv-chat-btn.pill{width:auto;height:auto;display:inline-flex;gap:6px;padding:.35rem .85rem;border-radius:100px;font:inherit;font-size:.78rem;white-space:nowrap}',
@@ -293,6 +296,8 @@
     root.classList.toggle('gv-chat-full', mode === 'full');
     root.hidden = false;
     els.sideClose.hidden = mode !== 'window' && !root.classList.contains('gv-chat-narrow');
+    if (!signedIn()) return showGuest();
+    hideGuest();
     refreshList();
     view(opts.key || current, !!opts.key || mode !== 'window');
     paintButtons();
@@ -890,6 +895,35 @@
     });
   }
 
+  function showGuest() {
+    els.frame.hidden = true;
+    var guest = root.querySelector('.gv-chat-guest');
+    if (!guest) {
+      guest = el('div', 'gv-chat-guest');
+      guest.appendChild(el('p', '', 'Sign in to chat with everyone, message people and start group chats.'));
+      var row = el('div', 'gv-chat-actions');
+      if (host().signIn) {
+        row.appendChild(pill('Sign in', 'primary', function () {
+          close();
+          host().signIn();
+        }));
+      } else {
+        var a = el('a', 'gv-chat-pill primary', 'Sign in on the home page');
+        a.href = '/';
+        row.appendChild(a);
+      }
+      row.appendChild(pill('Close', '', close));
+      guest.appendChild(row);
+      root.appendChild(guest);
+    }
+    guest.hidden = false;
+  }
+
+  function hideGuest() {
+    els.frame.hidden = false;
+    var guest = root.querySelector('.gv-chat-guest');
+    if (guest) guest.hidden = true;
+  }
 
   // ── Wiring ────────────────────────────────────────────────────────────
 
