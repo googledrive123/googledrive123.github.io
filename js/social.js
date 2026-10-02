@@ -121,6 +121,7 @@
       counts.server = data.server_last > serverSeen() && viewing !== 'server' && !muted('server');
       setMentioned(data.mentioned || {});
       emit('counts', counts);
+      if (first && counts.mentions) mentionsWaiting();
       if (server.length || convo.length) emit('messages', { server: server, convo: convo });
       server.forEach(function (m) { popUp('server', m); });
       convo.forEach(function (m) { popUp('convo:' + m.convo_id, m); });
@@ -313,6 +314,14 @@
     toast(from, m.username, m.body, function () {
       if (window.GV && GV.chat) GV.chat.open({ key: key });
     }, inGame);
+  }
+
+  // Mentions from while this page was not open, said once when it opens.
+  function mentionsWaiting() {
+    var key = Object.keys(counts.mentioned)[0];
+    notice(counts.mentions === 1 ? 'Someone mentioned you in chat.' : 'You were mentioned ' + counts.mentions + ' times in chat.', function () {
+      if (window.GV && GV.chat) GV.chat.open({ key: key });
+    });
   }
 
   function popUp(key, m) {
