@@ -706,6 +706,7 @@ begin
                'user_id', m.user_id,
                'username', m.username,
                'body', m.body,
+               'mentions', m.mentions,
                'created_at', m.created_at,
                'mine', m.user_id = v_user
              ) order by m.id)
@@ -729,6 +730,7 @@ begin
                'user_id', m.user_id,
                'username', m.username,
                'body', m.body,
+               'mentions', m.mentions,
                'created_at', m.created_at,
                'mine', m.user_id = v_user
              ) order by m.id)
