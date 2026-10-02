@@ -4609,6 +4609,17 @@ function loadPopular() {
   }).catch(() => {});
 }
 
+// Games most people could not get to load lately (analytics/public.sql). The
+// home page stops putting them forward until they load again, but they stay
+// in the grid and in search.
+let failing = new Set();
+function loadFailing() {
+  publicRpc('gv_failing_games').then(list => {
+    failing = new Set(list.map(x => x.id));
+    if (failing.size) render();
+  }).catch(() => {});
+}
+
 // How many people have each game open right now, by id. Refreshed every
 // minute while the tab is visible; tiles already on screen are updated in place.
 let playingNow = {};
@@ -4658,6 +4669,7 @@ async function bootCatalog() {
   initRoute();
   initPolytrackNotice();
   loadPopular();
+  loadFailing();
   loadPlayingNow();
   setInterval(loadPlayingNow, 60000);
 }
