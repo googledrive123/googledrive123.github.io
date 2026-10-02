@@ -2072,6 +2072,10 @@
     pre.textContent = JSON.stringify(o, null, 2);
     el.appendChild(pre);
   });
+  $('liveOnline').addEventListener('click', function (e) {
+    var w = e.target.closest('[data-who]');
+    if (w) liveFilterTo(w.dataset.who);
+  });
   // A hidden tab asks every 5 seconds; coming back asks straight away.
   document.addEventListener('visibilitychange', function () {
     if (live && !document.hidden && !live.busy) { clearTimeout(live.timer); livePoll(); }
