@@ -161,6 +161,8 @@ begin
     'username', v_row.username,
     'body', v_row.body,
     'mentions', v_row.mentions,
+    -- The blue check from analytics/verified.sql, shown next to the name.
+    'verified', exists (select 1 from gv_verified v where v.key = v_user::text),
     'created_at', v_row.created_at,
     'mine', true
   );
@@ -197,6 +199,7 @@ begin
              'username', m.username,
              'body', m.body,
              'mentions', m.mentions,
+             'verified', exists (select 1 from gv_verified v where v.key = m.user_id::text),
              'created_at', m.created_at,
              'mine', m.user_id = v_user
            ) order by m.id)
