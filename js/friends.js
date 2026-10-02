@@ -355,7 +355,7 @@
         var q = box.value.trim();
         asked = q;
         list.textContent = '';
-        if (q.length < 3) {
+        if (q.length < 2) {
           if (q) list.appendChild(el('p', 'gv-fr-empty', 'Keep typing\u2026'));
           return;
         }
