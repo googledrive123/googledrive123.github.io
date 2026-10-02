@@ -199,3 +199,41 @@ end;
 $function$;
 
 grant execute on function public.gv_poll_vote(bigint, integer, text) to anon, authenticated;
+
+
+-- The dashboard's side, behind its secret.
+
+-- Every poll with its results, newest first.
+create or replace function public.gv_polls_admin(p_secret text)
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+
+  return coalesce((
+    select json_agg(json_build_object(
+             'id', p.id,
+             'question', p.question,
+             'options', p.options,
+             'created_at', p.created_at,
+             'ends_at', p.ends_at,
+             'closed', p.closed,
+             'open', not p.closed and (p.ends_at is null or p.ends_at > now()),
+             'counts', (
+               select json_agg(coalesce(c.n, 0) order by i.idx)
+                 from generate_series(0, jsonb_array_length(p.options) - 1) as i(idx)
+                 left join (select choice, count(*) as n from gv_poll_votes
+                             where poll_id = p.id group by choice) c on c.choice = i.idx
+             ),
+             'total', (select count(*) from gv_poll_votes v where v.poll_id = p.id)
+           ) order by p.id desc)
+      from gv_polls p
+  ), '[]'::json);
+end;
+$function$;
