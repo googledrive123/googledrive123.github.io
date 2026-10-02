@@ -123,6 +123,14 @@ as $function$
       plays = q.plays + excluded.plays,
       play_secs = q.play_secs + excluded.play_secs,
       is_new = q.is_new or excluded.is_new
+  ),
+  users as (
+    insert into analytics_visitor_users (visitor_id, user_id)
+    select distinct e.visitor_id, e.user_id
+    from e
+    where e.user_id is not null
+    order by 1, 2
+    on conflict do nothing
   )
   select;
 $function$;
