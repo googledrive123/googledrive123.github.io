@@ -157,7 +157,8 @@ $function$;
 grant execute on function public.gv_polls_open(text) to anon, authenticated;
 
 
--- The newest 50 polls, open or not, for /polls/.
+-- The newest 50 polls, open or not, for /polls/. Preview polls only on
+-- localhost.
 create or replace function public.gv_polls_list(p_visitor text default null)
 returns json
 language plpgsql
@@ -174,7 +175,9 @@ begin
 
   return coalesce((
     select json_agg(public.gv_poll_json(p.id, auth.uid(), v_visitor) order by p.id desc)
-      from (select id from gv_polls order by id desc limit 50) p
+      from (select id from gv_polls
+             where not preview or public.gv_origin_local()
+             order by id desc limit 50) p
   ), '[]'::json);
 end;
 $function$;
