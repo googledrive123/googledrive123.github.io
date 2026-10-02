@@ -168,6 +168,10 @@
   .spark { display: flex; align-items: flex-end; gap: 2px; height: 64px; }
   .spark i { flex: 1; min-width: 0; min-height: 1px; background: var(--s1); opacity: 0.8; border-radius: 2px 2px 0 0; }
   .spark-axis { display: flex; justify-content: space-between; margin-top: 6px; font-family: 'JetBrains Mono', monospace; font-size: 0.66rem; color: var(--muted-2); }
+  .live-grid { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr) 360px; align-items: start; }
+  @media (max-width: 1000px) { .live-grid { grid-template-columns: minmax(0, 1fr); } }
+  .live-side { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+  .live-list { max-height: calc(100vh - 220px); min-height: 320px; overflow-y: auto; }
 </style>
 </head>
 <body>
@@ -550,6 +554,18 @@
       <h2>Events <small>last 10 minutes, 5 seconds a bar, scanners left out</small></h2>
       <div class="spark" id="liveSpark"></div>
       <div class="spark-axis"><span>10 min ago</span><span>5 min ago</span><span>now</span></div>
+    </div>
+  </section>
+
+  <section class="live-grid">
+    <div class="card">
+      <h2>Every event as it comes in <small id="liveCount"></small></h2>
+      <div class="live-list" id="liveList"></div>
+    </div>
+    <div class="live-side">
+      <div class="card"><h2>On the site now <small id="liveOnlineN"></small></h2><div class="online" id="liveOnline"></div></div>
+      <div class="card"><h2>Being played</h2><div class="ranked" id="liveGames"></div></div>
+      <div class="card"><h2>Pages open</h2><div class="ranked" id="livePages"></div></div>
     </div>
   </section>
 </div>
