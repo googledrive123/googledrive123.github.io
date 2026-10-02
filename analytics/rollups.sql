@@ -147,3 +147,5 @@ as $function$
   )
   select;
 $function$;
+
+revoke all on function public.analytics_roll_add(bigint[]) from public, anon, authenticated;
