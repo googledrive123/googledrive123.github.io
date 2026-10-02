@@ -474,7 +474,8 @@ begin
              'members', (
                select coalesce(json_agg(json_build_object(
                         'id', o.user_id,
-                        'username', public.gv_display_name(o.user_id)
+                        'username', public.gv_display_name(o.user_id),
+                        'verified', exists (select 1 from gv_verified v where v.key = o.user_id::text)
                       ) order by o.joined_at), '[]'::json)
                  from gv_convo_members o
                 where o.convo_id = c.id and o.user_id <> v_user
