@@ -771,7 +771,21 @@ begin
                           where r.user_id = v_user and r.friend_id = l.user_id)
     ),
     -- @mentions not looked at yet, by chat: 'server' or 'convo:<id>'.
-    'mentioned', public.gv_mentions_unseen(v_user)
+    'mentioned', public.gv_mentions_unseen(v_user),
+    -- Messages the owner took down in the last day, so a chat that already
+    -- shows them drops them without a reload.
+    'deleted', json_build_object(
+      'server', coalesce((
+        select json_agg(m.id) from gv_chat_messages m
+         where m.deleted_at > now() - interval '1 day'
+      ), '[]'::json),
+      'convo', coalesce((
+        select json_agg(json_build_object('id', m.id, 'convo_id', m.convo_id))
+          from gv_convo_messages m
+          join gv_convo_members me on me.convo_id = m.convo_id and me.user_id = v_user
+         where m.deleted_at > now() - interval '1 day'
+      ), '[]'::json)
+    )
   );
 end;
 $function$;
