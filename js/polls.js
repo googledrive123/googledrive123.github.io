@@ -239,8 +239,9 @@
     return box;
   }
 
-  // One answer's picture as big as the screen allows, with a button to pick
-  // it when pick is given.
+  // One answer's picture as big as the screen allows. The other answers are
+  // a click or an arrow key away, and pick, when given, votes for the one
+  // showing.
   function look(p, start, pick) {
     style();
     var at = start;
