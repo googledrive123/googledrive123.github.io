@@ -400,6 +400,10 @@
     });
     paintGames();
   });
+
+  $('surpriseA').addEventListener('click', function () {
+    setQuery(G[Math.floor(Math.random() * G.length)][1]);
+  });
 })();
 </script>
 </body>
