@@ -45,6 +45,12 @@ input::placeholder{color:currentColor;opacity:.5}
 .shortcut:hover{background:#ecebe8}
 .shortcut img{width:64px;height:64px;border-radius:16px;object-fit:cover;box-shadow:0 0 0 1px rgba(0,0,0,0.06)}
 .shortcut span{font-size:12px;font-weight:500;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.totw{margin-top:28px;display:flex;align-items:center;gap:12px;height:48px;padding:0 8px 0 18px;border-radius:999px;background:#fff;border:1px solid #e5e4e0;font-size:14px;color:#18181b;text-decoration:none;cursor:pointer;white-space:nowrap}
+.totw:hover{border-color:#d4d3cf}
+.totw-name{font-weight:600}
+.totw-line{color:#64646b}
+.totw-time{font-variant-numeric:tabular-nums}
+.totw-race{height:34px;padding:0 16px;display:flex;align-items:center;border-radius:999px;background:#e0262f;color:#fff;font-weight:700}
 </style>
 </head>
 <body>
@@ -96,6 +102,12 @@ input::placeholder{color:currentColor;opacity:.5}
         <a class="shortcut" data-soon><img src="/thumbs/amazing-rope-police.webp" alt=""><span>Amazing Rope Police</span></a>
       </div>
     </div>
+
+    <a class="totw" data-soon>
+      <span class="totw-name">Track of the week</span>
+      <span class="totw-line">PolyTrack · Summer 3 · nova leads at 1:02.418 · ends in <span class="totw-time" id="totw">2d 13:54:09</span></span>
+      <span class="totw-race">Race</span>
+    </a>
   </div>
 </div>
 </body>
