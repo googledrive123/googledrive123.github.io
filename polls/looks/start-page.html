@@ -56,6 +56,8 @@ input::placeholder{color:currentColor;opacity:.5}
 .lib-head{display:flex;align-items:baseline;gap:12px;margin-bottom:12px}
 .lib-head h2{margin:0;font-size:22px;font-weight:700;letter-spacing:-0.02em}
 .lib-sub{font-size:14px;color:#64646b}
+.clear{margin-left:auto;height:36px;padding:0 16px;border-radius:999px;border:1px solid #d4d3cf;background:#fff;color:#18181b;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.clear:hover{background:#f3f2ef}
 .tabs{display:flex;gap:24px;border-bottom:1px solid #e5e4e0;margin-bottom:28px}
 .tab{height:44px;padding:0 2px;border:0;background:transparent;color:#64646b;box-shadow:inset 0 -2px 0 transparent;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer}
 .tab.on{color:#18181b;box-shadow:inset 0 -2px 0 #e0262f}
@@ -137,6 +139,7 @@ input::placeholder{color:currentColor;opacity:.5}
   <div class="lib-head">
     <h2 id="libHead">All games</h2>
     <span class="lib-sub" id="libSub">1,958</span>
+    <button class="clear" id="clear" type="button" hidden>Clear search</button>
   </div>
   <div class="tabs" id="tabs">
     <button class="tab on" type="button" data-cat="All">All</button>
@@ -293,6 +296,7 @@ input::placeholder{color:currentColor;opacity:.5}
     $('libHead').textContent = searching ? 'Results for “' + q + '”' : (cat === 'All' ? 'All games' : cat);
     $('libSub').textContent = searching ? list.length + ' found' : (cat === 'All' ? '1,958' : '');
     $('tabs').hidden = searching;
+    $('clear').hidden = !searching;
     if (ids(shown) !== gridIds) {
       gridIds = ids(shown);
       $('grid').innerHTML = shown.map(tileHtml).join('');
@@ -324,6 +328,12 @@ input::placeholder{color:currentColor;opacity:.5}
   $('surprise').addEventListener('click', function () {
     state.qc = G[Math.floor(Math.random() * G.length)][1];
     input.value = state.qc;
+    render();
+  });
+
+  $('clear').addEventListener('click', function () {
+    state.qc = '';
+    input.value = '';
     render();
   });
 })();
