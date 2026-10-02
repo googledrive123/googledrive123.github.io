@@ -74,6 +74,9 @@
     '.gv-poll-try{position:absolute;right:8px;bottom:8px;padding:4px 10px;border-radius:100px;background:rgba(8,8,10,.8);color:#f4f4f6;font-size:.72rem;font-weight:600;transition:background .15s}',
     '.gv-poll-try::before{content:"";display:inline-block;margin-right:6px;border-style:solid;border-width:4px 0 4px 6px;border-color:transparent transparent transparent currentColor;vertical-align:1px}',
     '.gv-poll-look:hover .gv-poll-try{background:var(--accent,#ff3b3b)}',
+    '.gv-look-chrome{position:relative;display:flex;align-items:center;gap:7px;height:34px;padding:0 14px;background:#1a1a20;border-bottom:1px solid rgba(255,255,255,.08)}',
+    '.gv-look-chrome i{width:11px;height:11px;border-radius:50%;background:rgba(255,255,255,.16)}',
+    '.gv-look-url{position:absolute;left:50%;transform:translateX(-50%);padding:4px 16px;border-radius:7px;background:#08080a;font-family:"JetBrains Mono",monospace;font-size:12px;color:#8a8a96}',
     '@keyframes gvPollIn{from{opacity:0;transform:translateY(10px) scale(.98)}}',
     '@media (prefers-reduced-motion:reduce){.gv-poll-box{animation:none}.gv-poll-opt.result::before,.gv-poll-look,.gv-poll-bar span{transition:none}}'
   ].join('');
@@ -294,6 +297,12 @@
     var screen = el('div', 'gv-look-screen');
     var img = el('img');
     screen.appendChild(img);
+    var chrome = el('div', 'gv-look-chrome');
+    chrome.appendChild(el('i'));
+    chrome.appendChild(el('i'));
+    chrome.appendChild(el('i'));
+    chrome.appendChild(el('span', 'gv-look-url', location.host || 'GameVault'));
+    frame.appendChild(chrome);
     frame.appendChild(screen);
     fitBox.appendChild(frame);
     stage.appendChild(fitBox);
