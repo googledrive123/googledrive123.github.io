@@ -3338,6 +3338,32 @@ function suggAfterGame() {
   }, SUGG_DELAY);
 })();
 
+// The welcome screen is one screen. When what is on it still comes out
+// taller than the window (a short window, a long name, the track card's
+// extra line for a signed-in racer), it shrinks to fit instead of scrolling.
+// Not on a phone, which scrolls.
+const fitWelcome = (() => {
+  const welcome = document.getElementById('welcome');
+  const hero = welcome.querySelector('.hero');
+  let queued = false;
+  return function fit() {
+    if (queued || !hero || !('zoom' in hero.style)) return;
+    queued = true;
+    requestAnimationFrame(() => {
+      queued = false;
+      hero.style.zoom = '';
+      if (welcome.classList.contains('hidden') || innerWidth <= 640) return;
+      const over = welcome.offsetHeight - innerHeight;
+      if (over <= 0) return;
+      const tall = hero.offsetHeight;
+      hero.style.zoom = Math.max(0.7, (tall - over - 2) / tall).toFixed(3);
+    });
+  };
+})();
+addEventListener('resize', fitWelcome);
+addEventListener('load', fitWelcome);
+fitWelcome();
+
 function showBrowse() {
   document.getElementById('welcome').classList.add('hidden');
   document.getElementById('browse').classList.add('visible');
