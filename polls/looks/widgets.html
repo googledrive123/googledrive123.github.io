@@ -96,6 +96,7 @@
   .tile-art:hover { transform: translateY(-3px); }
   .tile-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .tile-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .empty { padding: 28px 0; font-size: 14px; color: var(--mu); }
 
   .news { display: flex; flex-direction: column; gap: 12px; padding: 16px 18px; min-height: 0; }
   .news-item { display: flex; flex-direction: column; gap: 2px; }
@@ -176,6 +177,7 @@
         <a class="tile" data-soon><span class="tile-art"><img src="/thumbs/stickman-hook.webp" alt=""></span><span class="tile-name">Stickman Hook</span></a>
         <a class="tile" data-soon><span class="tile-art"><img src="/thumbs/crossyroad.webp" alt=""></span><span class="tile-name">Crossy Road</span></a>
       </div>
+      <div class="empty" id="empty2c" hidden>nothing matches that. try a shorter name.</div>
     </div>
 
     <div class="card news">
@@ -254,6 +256,7 @@
   var input = document.getElementById('q2c');
   var head2c = document.getElementById('head2c');
   var pop2c = document.getElementById('pop2c');
+  var empty2c = document.getElementById('empty2c');
   var shown = POP.join();
 
   function byId(id) {
@@ -280,6 +283,7 @@
       shown = key;
       pop2c.replaceChildren.apply(pop2c, list.map(tile));
     }
+    empty2c.hidden = !q || found.length > 0;
   }
 
   input.addEventListener('input', function () {
