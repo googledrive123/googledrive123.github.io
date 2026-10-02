@@ -38,6 +38,13 @@ input::placeholder{color:currentColor;opacity:.5}
 .search-box input{flex:1;min-width:0;height:100%;border:0;outline:none;background:transparent;font-family:inherit;font-size:16px;color:#18181b}
 .surprise{height:36px;padding:0 14px;border-radius:999px;border:0;background:#f0efec;color:#18181b;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
 .surprise:hover{background:#e6e5e1}
+.drop{position:absolute;top:60px;left:0;right:0;z-index:5;background:#fff;border:1px solid #e5e4e0;border-radius:20px;box-shadow:0 12px 32px rgba(0,0,0,0.08);padding:8px}
+.drop-item{display:flex;align-items:center;gap:12px;width:100%;padding:8px 12px;border:0;border-radius:12px;background:transparent;font-family:inherit;font-size:14px;color:#18181b;text-align:left;cursor:pointer}
+.drop-item:hover{background:#f3f2ef}
+.drop-item img{width:40px;height:30px;border-radius:6px;object-fit:cover}
+.drop-name{flex:1;font-weight:500}
+.drop-cat{font-size:13px;color:#64646b}
+.drop-empty{padding:12px;font-size:14px;color:#64646b}
 .jump{margin-top:40px;display:flex;flex-direction:column;align-items:center;gap:12px}
 .jump-label{font-size:13px;color:#64646b}
 .shortcuts{display:flex;gap:4px}
@@ -109,6 +116,10 @@ input::placeholder{color:currentColor;opacity:.5}
         <input id="q" placeholder="Search 1,958 games" aria-label="Search games" autocomplete="off" spellcheck="false">
         <button class="surprise" id="surprise" type="button">Surprise me</button>
       </label>
+      <div class="drop" id="drop" hidden>
+        <div id="dropList"></div>
+        <div class="drop-empty" id="dropEmpty" hidden>No games match that.</div>
+      </div>
     </div>
 
     <div class="jump">
@@ -193,6 +204,7 @@ input::placeholder{color:currentColor;opacity:.5}
     totw: 2 * 86400 + 13 * 3600 + 54 * 60 + 9,
     qc: '',
     cc: 'All',
+    focusC: false,
     left: 1421
   };
 
@@ -306,6 +318,7 @@ input::placeholder{color:currentColor;opacity:.5}
 
   function render() {
     renderLib();
+    renderDrop();
   }
 
   input.addEventListener('input', function () {
@@ -336,6 +349,36 @@ input::placeholder{color:currentColor;opacity:.5}
     input.value = '';
     render();
   });
+
+  // Dropdown under the search while it has focus and something typed: the
+  // first 6 matches. Picking happens on mousedown so the blur cannot eat it.
+  var dropList = [], dropIds = '';
+  function renderDrop() {
+    var open = state.focusC && !!state.qc.trim();
+    $('drop').hidden = !open;
+    if (!open) return;
+    var list = filt(state.qc, 'All');
+    $('dropEmpty').hidden = list.length > 0;
+    dropList = list.slice(0, 6);
+    if (ids(dropList) === dropIds) return;
+    dropIds = ids(dropList);
+    $('dropList').innerHTML = dropList.map(function (g, i) {
+      return '<button class="drop-item" type="button" data-i="' + i + '"><img src="/thumbs/' + g[0] + '.webp" alt="">' +
+        '<span class="drop-name">' + g[1] + '</span><span class="drop-cat">' + g[2][0] + '</span></button>';
+    }).join('');
+  }
+
+  $('drop').addEventListener('mousedown', function (e) {
+    var item = e.target.closest('.drop-item');
+    if (!item) return;
+    e.preventDefault();
+    state.qc = dropList[+item.getAttribute('data-i')][1];
+    state.focusC = false;
+    input.value = state.qc;
+    render();
+  });
+  input.addEventListener('focus', function () { state.focusC = true; renderDrop(); });
+  input.addEventListener('blur', function () { state.focusC = false; renderDrop(); });
 })();
 </script>
 </body>
