@@ -8,6 +8,11 @@
   'use strict';
 
   var REFRESH_MS = 15000;
+  var STATUSES = [
+    { id: 'online', label: 'Online', note: 'Friends see you and the game you are playing, and can ask to join your PolyTrack room.' },
+    { id: 'private', label: 'Private', note: 'Friends see you and your game, but cannot ask to join.' },
+    { id: 'offline', label: 'Offline', note: 'You show as offline, and friends do not see your game.' }
+  ];
 
   var ICON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6.2 6.5-6.2s6.5 2.6 6.5 6.2"/><path d="M16 4.7a3.5 3.5 0 0 1 0 6.6M18 14c2 .8 3.5 3 3.5 6"/></svg>';
 
@@ -131,6 +136,19 @@
     head.appendChild(x);
     panel.appendChild(head);
 
+    els.segLabel = el('div', 'gv-fr-label', 'Show me as');
+    panel.appendChild(els.segLabel);
+    els.seg = el('div', 'gv-fr-seg');
+    STATUSES.forEach(function (s) {
+      var b = el('button', '', s.label);
+      b.type = 'button';
+      b.dataset.status = s.id;
+      b.addEventListener('click', function () { setStatus(s.id); });
+      els.seg.appendChild(b);
+    });
+    els.note = el('p', 'gv-fr-note');
+    panel.appendChild(els.seg);
+    panel.appendChild(els.note);
 
     els.tabs = el('div', 'gv-fr-tabs');
     els.tabs.setAttribute('role', 'tablist');
@@ -178,6 +196,7 @@
     paintButtons();
     if (!social() || !social().user()) return showGuest();
     els.tabs.hidden = false;
+    paintStatus();
     show(which || tab);
     load();
     clearInterval(timer);
@@ -194,6 +213,9 @@
 
   function showGuest() {
     els.tabs.hidden = true;
+    els.segLabel.hidden = true;
+    els.seg.hidden = true;
+    els.note.hidden = true;
     els.body.textContent = '';
     els.body.appendChild(el('p', 'gv-fr-empty', 'Sign in to add friends, see what they are playing and join their PolyTrack rooms.'));
     if (host().signIn) {
@@ -247,6 +269,20 @@
     els.body.appendChild(list);
   }
 
+  function paintStatus() {
+    var now = social().me().status || 'online';
+    Array.prototype.forEach.call(els.seg.children, function (b) {
+      b.setAttribute('aria-pressed', b.dataset.status === now ? 'true' : 'false');
+    });
+    STATUSES.forEach(function (s) { if (s.id === now) els.note.textContent = s.note; });
+    els.segLabel.hidden = false;
+    els.seg.hidden = false;
+    els.note.hidden = false;
+  }
+
+  function setStatus(status) {
+    social().setStatus(status).then(paintStatus, function (error) { flash(error.message); });
+  }
 
 
 
@@ -293,6 +329,7 @@
       // A new request shows up in the list while it is open.
       if (isOpen() && counts.requests !== data.incoming.length) load();
     });
+    s.on('me', function () { if (isOpen() && els.seg) paintStatus(); });
     s.on('state', function () {
       close();
       data = { friends: [], incoming: [], outgoing: [] };
