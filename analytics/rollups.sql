@@ -23,7 +23,8 @@
 -- they belonged to. TRUNCATE does not: run analytics_roll_redo(null) after it.
 --
 -- Apply against project dxwjxzmlezfyursysays, before analytics/visitors.sql.
--- Every statement is safe to run twice.
+-- Every statement is safe to run twice. The tables start empty: the end of
+-- this file says how they were filled.
 
 
 create table if not exists public.analytics_visitors (
@@ -228,3 +229,15 @@ create or replace trigger analytics_roll_update
   after update on public.analytics_events
   referencing old table as old_rows new table as new_rows
   for each statement execute function public.analytics_roll_changed();
+
+
+-- Filling the totals from every event so far with analytics_roll_redo(null)
+-- holds new events back while it runs, about 3 seconds for the first 80,000,
+-- and an insert gives up after 3. So the first fill went in sixteen parts
+-- once the triggers were in place, by the first character of the visitor
+-- id, each its own request:
+--
+--   select public.analytics_roll_redo(array(
+--     select distinct visitor_id from analytics_events where left(visitor_id, 1) = '0'));
+--
+-- and the same for '1' to '9' and 'a' to 'f'.
