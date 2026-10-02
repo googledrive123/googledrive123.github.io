@@ -15,6 +15,8 @@
   ];
 
   var ICON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v10H9l-5 4z"/></svg>';
+  // The blue check from analytics/verified.sql, as the rest of the site draws it.
+  var CHECK = '<svg class="gv-chat-check" viewBox="0 0 24 24" role="img" aria-label="Verified"><circle cx="12" cy="12" r="11" fill="#1d9bf0"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
   var CSS = [
     '.gv-chat{--gv-chat-side:260px;display:flex;background:var(--surface,#121216);color:var(--text,#f4f4f6);font-family:inherit;font-size:.9rem;overflow:hidden}',
@@ -76,6 +78,7 @@
     '.gv-chat-input:focus{border-color:var(--accent,#ff3b3b)}',
     '.gv-chat-len{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-family:"JetBrains Mono",monospace;font-size:.62rem;color:var(--muted-2,#54545e);pointer-events:none}',
     '.gv-chat-send{min-width:64px}',
+    '.gv-chat-check{width:14px;height:14px;flex-shrink:0;margin-left:4px;vertical-align:-2px}',
     '.gv-chat-status{min-height:1.2rem;padding:2px 12px 8px;font-size:.76rem;color:var(--muted,#8a8a96)}',
     '.gv-chat-status.wait{color:#f0c04a}',
     '.gv-chat-status.error{color:#ff7a7a}',
@@ -486,6 +489,12 @@
     row.appendChild(head);
     row.appendChild(el('div', 'gv-msg-body', m.body));
     return row;
+  }
+
+  function check() {
+    var box = el('span');
+    box.innerHTML = CHECK;
+    return box.firstChild;
   }
 
   // ── Sending ───────────────────────────────────────────────────────────
