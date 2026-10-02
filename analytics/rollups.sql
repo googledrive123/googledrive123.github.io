@@ -13,6 +13,7 @@
 --   analytics_quarters        events, page views, plays and play time per
 --                             visitor and session, 15 minutes at a time
 --   analytics_visitor_users   which accounts each visitor signed in as
+--   analytics_visitor_games   plays and play time per game and visitor
 --
 -- Fifteen minutes because every time zone in use today is a whole number of
 -- quarter hours off UTC, so a quarter always falls on one day wherever the
@@ -54,4 +55,13 @@ create table if not exists public.analytics_visitor_users (
   visitor_id text not null,
   user_id uuid not null,
   primary key (visitor_id, user_id)
+);
+
+create table if not exists public.analytics_visitor_games (
+  game_id text not null,
+  visitor_id text not null,
+  name text,
+  plays bigint not null,
+  secs double precision not null,
+  primary key (game_id, visitor_id)
 );
