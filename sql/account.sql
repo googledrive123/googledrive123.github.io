@@ -39,6 +39,9 @@ begin
      and exists (select 1 from gv_convo_members m where m.convo_id = c.id and m.user_id = v_user);
 
   delete from auth.users where id = v_user;
+  -- The leaderboard keeps what it worked out for a minute. This makes the
+  -- next look work it out again, without this account.
+  update gv_leaderboard_cache set made_at = '-infinity' where id = 1;
   return true;
 end;
 $function$;
