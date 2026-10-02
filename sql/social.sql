@@ -221,3 +221,32 @@ $function$;
 revoke all on function public.gv_friend_answer(uuid, boolean) from public, anon;
 grant execute on function public.gv_friend_answer(uuid, boolean) to authenticated;
 
+
+-- Removes the link both ways, so it unfriends, cancels a request sent, and
+-- turns down one received.
+create or replace function public.gv_friend_remove(p_user uuid)
+returns boolean
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'Friends only work on GameVault.';
+  end if;
+  if v_user is null then
+    raise exception 'Sign in to change friends.';
+  end if;
+
+  delete from gv_friend_links
+   where (user_id = v_user and friend_id = p_user)
+      or (user_id = p_user and friend_id = v_user);
+  return found;
+end;
+$function$;
+
+revoke all on function public.gv_friend_remove(uuid) from public, anon;
+grant execute on function public.gv_friend_remove(uuid) to authenticated;
+
