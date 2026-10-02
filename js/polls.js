@@ -96,6 +96,8 @@
     '.gv-poll-peek{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:18px}',
     '.gv-poll-peek img{display:block;width:100%;aspect-ratio:1366/635;object-fit:cover;border-radius:7px;box-shadow:0 0 0 1px var(--border-strong,rgba(255,255,255,.16))}',
     '.gv-poll-box.intro{width:min(560px,100%)}',
+    '.gv-poll-go{box-shadow:0 0 22px rgba(255,59,59,.5);animation:gvPollGlow 1.6s ease-in-out infinite}',
+    '@keyframes gvPollGlow{0%,100%{box-shadow:0 0 0 0 rgba(255,59,59,.55),0 0 22px rgba(255,59,59,.45)}50%{box-shadow:0 0 0 9px rgba(255,59,59,0),0 0 40px rgba(255,59,59,.8)}}',
     '@keyframes gvPollIn{from{opacity:0;transform:translateY(10px) scale(.98)}}',
     '@media (prefers-reduced-motion:reduce){.gv-poll-box{animation:none}.gv-poll-opt.result::before,.gv-poll-look,.gv-poll-bar span,.gv-look-screen iframe{transition:none}}'
   ].join('');
