@@ -54,7 +54,7 @@
     '.gv-poll-bar span{display:block;width:var(--p,0%);height:100%;background:var(--muted,#8a8a96);transition:width .5s cubic-bezier(.2,.8,.2,1)}',
     '.gv-poll-look.mine{border-color:var(--accent,#ff3b3b)}',
     '.gv-poll-look.mine .gv-poll-bar span{background:var(--accent,#ff3b3b)}',
-    '.gv-poll-box.wide{width:min(820px,100%)}',
+    '.gv-poll-box.wide{width:min(880px,100%)}',
     '.gv-look{position:fixed;inset:0;z-index:2700;display:flex;flex-direction:column;gap:12px;padding:16px;background:rgba(8,8,10,.94);color:#f4f4f6}',
     '.gv-look-top,.gv-look-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;width:min(1366px,100%);margin:0 auto}',
     '.gv-look-name{font-size:1.1rem;font-weight:700;overflow-wrap:anywhere}',
