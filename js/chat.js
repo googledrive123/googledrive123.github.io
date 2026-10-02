@@ -879,6 +879,9 @@
     input.setSelectionRange(from + e.length, from + e.length);
     input.focus();
     paintLength();
+    var recent = recentEmoji().filter(function (x) { return x !== e; });
+    recent.unshift(e);
+    try { localStorage.setItem(RECENT_KEY, JSON.stringify(recent.slice(0, 24))); } catch (err) {}
   }
 
   // ── The list ──────────────────────────────────────────────────────────
