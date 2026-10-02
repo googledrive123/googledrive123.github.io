@@ -622,3 +622,28 @@ $function$;
 revoke all on function public.gv_convo_delete(text, bigint) from public;
 grant execute on function public.gv_convo_delete(text, bigint) to anon, authenticated;
 
+
+create or replace function public.gv_convo_resolve(p_secret text, p_report_id bigint)
+returns integer
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_count integer;
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+
+  update gv_convo_reports set resolved = true
+   where not resolved
+     and message_id = (select message_id from gv_convo_reports where id = p_report_id);
+  get diagnostics v_count = row_count;
+  return v_count;
+end;
+$function$;
+
+revoke all on function public.gv_convo_resolve(text, bigint) from public;
+grant execute on function public.gv_convo_resolve(text, bigint) to anon, authenticated;
+
