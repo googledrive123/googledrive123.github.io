@@ -349,6 +349,7 @@
     var wasWindow = mode === 'window';
     root.hidden = true;
     closeSheet();
+    hideSuggest();
     mode = null;
     if (social()) social().viewing(null);
     paintButtons();
@@ -411,6 +412,8 @@
     current = key;
     say('');
     closeSheet();
+    hideSuggest();
+    picked = {};
     paintHead();
     root.classList.toggle('gv-chat-in', !!enter);
     social().viewing(key);
@@ -1174,10 +1177,11 @@
   // page's own Escape, which would close the game.
   window.addEventListener('keydown', function (e) {
     if (e.key !== 'Escape' || !isOpen()) return;
-    if (mode === 'inline' && els.sheet.hidden) return;
+    if (mode === 'inline' && els.sheet.hidden && els.suggest.hidden) return;
     e.stopImmediatePropagation();
     e.preventDefault();
-    if (els.sheet && !els.sheet.hidden) closeSheet();
+    if (!els.suggest.hidden) hideSuggest();
+    else if (els.sheet && !els.sheet.hidden) closeSheet();
     else close();
   }, true);
 
