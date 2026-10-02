@@ -56,6 +56,14 @@
   .chip:hover { background: var(--s1); color: var(--tx); }
   .chip-chat { position: relative; }
   .badge { min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--red); color: #fff; font-size: 11px; font-weight: 700; display: grid; place-items: center; }
+  .jump { margin-top: 44px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .jump-lbl { font-size: 13px; color: var(--mu); }
+  .tiles { display: flex; gap: 14px; }
+  .tile { width: 132px; display: flex; flex-direction: column; gap: 8px; color: inherit; text-decoration: none; cursor: pointer; min-width: 0; }
+  .tile-art { display: block; width: 132px; height: 88px; border-radius: 14px; overflow: hidden; box-shadow: 0 0 0 1px var(--ln); transition: transform .15s; }
+  .tile-art:hover { transform: translateY(-3px); }
+  .tile-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .tile-name { font-size: 12px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 </style>
 </head>
 <body>
@@ -78,6 +86,17 @@
         <a class="chip" href="#" data-soon><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"></path><rect x="5" y="11" width="4" height="9"></rect><rect x="10" y="6" width="4" height="14"></rect><rect x="15" y="14" width="4" height="6"></rect></svg>leaderboard</a>
         <a class="chip" href="#" data-soon><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="5" r="2"></circle><circle cx="12" cy="5" r="2"></circle><circle cx="19" cy="5" r="2"></circle><circle cx="5" cy="12" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle><circle cx="5" cy="19" r="2"></circle><circle cx="12" cy="19" r="2"></circle><circle cx="19" cy="19" r="2"></circle></svg>more</a>
       </nav>
+      <div class="jump">
+        <span class="jump-lbl">jump back in</span>
+        <div class="tiles">
+          <a class="tile" href="#" data-soon><span class="tile-art"><img src="/thumbs/slope2.webp" alt=""></span><span class="tile-name">Slope 2</span></a>
+          <a class="tile" href="#" data-soon><span class="tile-art"><img src="/thumbs/drivemad.webp" alt=""></span><span class="tile-name">Drive Mad</span></a>
+          <a class="tile" href="#" data-soon><span class="tile-art"><img src="/thumbs/retro-bowl.webp" alt=""></span><span class="tile-name">Retro Bowl</span></a>
+          <a class="tile" href="#" data-soon><span class="tile-art"><img src="/thumbs/geometrydash.webp" alt=""></span><span class="tile-name">Geometry Dash</span></a>
+          <a class="tile" href="#" data-soon><span class="tile-art"><img src="/thumbs/1v1lol.webp" alt=""></span><span class="tile-name">1v1.LOL</span></a>
+          <a class="tile" href="#" data-soon><span class="tile-art"><img src="/thumbs/cuphead.webp" alt=""></span><span class="tile-name">Cuphead</span></a>
+        </div>
+      </div>
     </div>
     <div class="pill" title="Class timer">
       <span class="pill-lbl">period 3</span>
