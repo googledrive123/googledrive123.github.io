@@ -68,6 +68,12 @@
   /* charts */
   .chart-wrap { position: relative; height: 260px; }
   .chart-wrap.short { height: 190px; }
+  .chart-wrap.growth { height: 300px; }
+  /* Sideways drags scrub the chart; up and down still scroll the page. */
+  .chart-wrap.growth canvas { touch-action: pan-y; cursor: crosshair; }
+  .growth-now { font-size: 0.8rem; color: var(--muted); margin-bottom: 10px; min-height: 1.3em; }
+  .growth-now b { color: var(--text); font-size: 1.05rem; }
+  .growth-now span { color: var(--muted-2); margin-left: 8px; }
   .legend { display: flex; gap: 14px; font-size: 0.72rem; color: var(--muted); margin-bottom: 8px; flex-wrap: wrap; }
   .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
 
@@ -475,6 +481,12 @@
     <h2>All time <small id="allTimeSince"></small></h2>
     <div class="kpis" id="allKpis"></div>
     <div class="grid" style="margin-top:16px">
+      <div class="card span-12">
+        <h2>Visitor growth <small>everyone seen so far, hour by hour · hover or drag across it</small></h2>
+        <div class="legend"><span><i style="background:var(--s2)"></i>Unique visitors</span><span><i style="background:var(--s3)"></i>Active visitors</span></div>
+        <div class="growth-now" id="growthNow"></div>
+        <div class="chart-wrap growth"><canvas id="chGrowth"></canvas></div>
+      </div>
       <div class="card span-8">
         <h2>Daily history</h2>
         <div class="legend"><span><i style="background:var(--s1)"></i>Events</span><span><i style="background:var(--s2)"></i>Visitors</span><span><i style="background:var(--s3)"></i>Plays</span></div>
@@ -540,6 +552,8 @@
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function avg(arr) { return arr.length ? arr.reduce(function (a, b) { return a + b; }, 0) / arr.length : 0; }
   function median(arr) { if (!arr.length) return 0; var a = arr.slice().sort(function (x, y) { return x - y; }); return a[Math.floor(a.length / 2)]; }
+  // Things a person does on purpose, as analytics_is_action (analytics/visitors.sql) lists them.
+  var ACTIONS = { enter: 1, nav: 1, game_open: 1, search: 1, category: 1, genre: 1, star: 1, roll: 1, profile_open: 1, auth_signin: 1, suggest_close: 1, suggest_click: 1, cloak: 1, news_open: 1, movies_enter: 1, mode_tv: 1, mode_movies: 1, sort: 1, game_fullscreen: 1, game_newtab: 1, movie_play: 1 };
   var PLAY_EVENTS = { ping: 1, game_open: 1, game_load: 1, game_close: 1, hidden: 1, session_end: 1 };
   // The card shows gv_playing_now, the same numbers the home page shows, which
   // also counts PolyTrack's own presence beat. Until it answers, the rows'
@@ -701,6 +715,7 @@
     sessList.forEach(function (s) { s.len = Math.max(s.dur, (s.last - s.first) / 1000); });
     var bounced = sessList.filter(function (s) { return s.clicks <= 1 && s.plays === 0; }).length;
     var newVisitors = uniq(rows.filter(function (r) { return r.is_new; }), 'visitor_id');
+    var activeVisitors = uniq(rows.filter(function (r) { return ACTIONS[r.event]; }), 'visitor_id');
     var signedIn = uniq(rows.filter(function (r) { return r.user_id; }), 'user_id');
     var playSecs = closes.reduce(function (a, r) { return a + r.value; }, 0);
     var errors = rows.filter(function (r) { return r.event === 'error'; }).length;
@@ -709,6 +724,7 @@
       ['Clicks', fmt(clicks.length), 'all interactions'],
       ['Page views', fmt(pageviews.length + rows.filter(function (r) { return r.event === 'nav'; }).length), fmt(pageviews.length) + ' full loads'],
       ['Unique visitors', fmt(visitors), fmt(newVisitors) + ' new · ' + fmt(visitors - newVisitors) + ' returning'],
+      ['Active visitors', fmt(activeVisitors), pct(activeVisitors, visitors) + ' did something'],
       ['Sessions', fmt(sessions), (visitors ? (sessions / visitors).toFixed(1) : '–') + ' per visitor'],
       ['Game plays', fmt(opens.length), fmt(uniq(opens, 'game_id')) + ' different games'],
       ['Unique players', fmt(uniq(opens, 'visitor_id')), pct(uniq(opens, 'visitor_id'), visitors) + ' of visitors'],
@@ -948,7 +964,7 @@
     kpiTiles('allKpis', [
       ['Total events', fmt(o.events), ''],
       ['Page views', fmt(o.pageviews), ''],
-      ['Unique visitors', fmt(o.visitors), ''],
+      ['Unique visitors', fmt(o.visitors), fmt(o.active_visitors) + ' active · ' + fmt(o.scanners) + ' scanners left out'],
       ['Sessions', fmt(o.sessions), ''],
       ['Game plays', fmt(o.plays), ''],
       ['Total play time', dur(o.play_secs), ''],
@@ -962,6 +978,54 @@
     ] }, options: baseOpts });
     ranked('rkAllGames', (o.top_games || []).filter(function (g) { return g.plays; }).slice(0, 15).map(function (g) { return [g.name || g.game_id, g.plays, g.players + ' players · ' + dur(g.secs)]; }), { share: false });
   }
+
+  // ── visitor growth ──
+  // Everyone seen so far, an hour at a time (analytics/visitors.sql). Hovering
+  // or dragging across the chart shows the numbers at that hour above it;
+  // off the chart it shows now.
+  var growth = [];
+  function hourLabel(t) { return new Date(t).toLocaleString([], { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric' }); }
+  function showGrowth(i) {
+    var p = growth[i];
+    if (!p) { $('growthNow').textContent = ''; return; }
+    $('growthNow').innerHTML = '<b>' + fmt(p.total) + '</b> visitors · <b>' + fmt(p.active) + '</b> active · ' + fmt(p.day) + ' visited that day'
+      + '<span>' + esc(i === growth.length - 1 ? 'now' : hourLabel(p.t)) + '</span>';
+  }
+  // A dashed line down the chart where the pointer is.
+  var crosshair = { id: 'crosshair', afterDatasetsDraw: function (c) {
+    var a = c.tooltip && c.tooltip.getActiveElements();
+    if (!a || !a.length) return;
+    var x = a[0].element.x, area = c.chartArea, ctx = c.ctx;
+    ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
+    ctx.beginPath(); ctx.moveTo(x, area.top); ctx.lineTo(x, area.bottom); ctx.stroke(); ctx.restore();
+  } };
+  function loadGrowth() {
+    var tz = 'UTC';
+    try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; } catch (e) {}
+    return rpc('analytics_visitor_growth', { p_secret: state.secret, p_tz: tz }).then(function (list) {
+      growth = list || [];
+      var tip = Object.assign({}, baseOpts.plugins.tooltip, { callbacks: {
+        title: function (items) { return hourLabel(growth[items[0].dataIndex].t); },
+        afterBody: function (items) { return fmt(growth[items[0].dataIndex].day) + ' visited that day'; }
+      } });
+      chart('chGrowth', { type: 'line', data: { labels: growth.map(function (p) { return p.t; }), datasets: [
+        Object.assign({ label: 'Unique visitors', data: growth.map(function (p) { return p.total; }), cubicInterpolationMode: 'monotone' }, line(C.s2)),
+        Object.assign({ label: 'Active visitors', data: growth.map(function (p) { return p.active; }), cubicInterpolationMode: 'monotone' }, line(C.s3))
+      ] }, options: Object.assign({}, baseOpts, {
+        onHover: function (e, els) { if (els.length) showGrowth(els[0].index); },
+        plugins: Object.assign({}, baseOpts.plugins, { tooltip: tip }),
+        scales: {
+          x: Object.assign({}, baseOpts.scales.x, { ticks: Object.assign({}, baseOpts.scales.x.ticks, {
+            callback: function (v) { return growth[v] ? new Date(growth[v].t).toLocaleDateString([], { month: 'short', day: 'numeric' }) : ''; }
+          }) }),
+          y: baseOpts.scales.y
+        }
+      }), plugins: [crosshair] });
+      showGrowth(growth.length - 1);
+    }).catch(function (e) { $('growthNow').textContent = 'Could not load visitor growth: ' + e.message; });
+  }
+  $('chGrowth').addEventListener('mouseleave', function () { showGrowth(growth.length - 1); });
+  $('chGrowth').addEventListener('touchend', function () { showGrowth(growth.length - 1); });
 
   // ── verified players ──
   // Everyone who can be given the blue check: accounts by username, and guests
@@ -1475,7 +1539,7 @@
     $('status').innerHTML = '<span class="dot"></span>Loading…';
     Promise.all([fetchAll(b.from, b.to), rpc('analytics_overview', { p_secret: state.secret }), rpc('gv_playing_now', {}).catch(function () { return null; })]).then(function (res) {
       state.rows = res[0]; state.overview = res[1]; state.playingNow = res[2];
-      render(); renderOverview(res[1]);
+      render(); renderOverview(res[1]); loadGrowth();
       loadNames();
       $('status').innerHTML = '<span class="dot"></span>Updated ' + new Date().toLocaleTimeString();
     }).catch(function (e) {
