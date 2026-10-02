@@ -66,6 +66,7 @@
   var tab = 'friends';
   var timer = null;
   var buttons = [];
+  var asking = null;
 
   function social() {
     return window.GV && window.GV.social;
@@ -268,6 +269,11 @@
     data.friends.forEach(function (f) {
       var line = !f.online ? 'Offline' : f.game_id ? 'Playing ' + gameName(f.game_id) : 'Online';
       var row = personRow(f, line, f.online, f.online && f.game_id ? 'playing' : '');
+      if (asking && asking.friend.id === f.id) {
+        row.appendChild(btn('Asking\u2026', '', null)).disabled = true;
+      } else if (f.can_join) {
+        row.appendChild(btn('Join', 'primary', function (e) { join(f, e.currentTarget); }));
+      }
       row.appendChild(btn('Message', '', function () {
         social().rpc('gv_dm_open', { p_user: f.id }).then(function (id) {
           close();
@@ -385,6 +391,68 @@
     setTimeout(function () { box.focus(); });
   }
 
+  // ── Asking to join ────────────────────────────────────────────────────
+  // The friend's PolyTrack shows the ask on its next beat. Once they say
+  // yes, this page opens PolyTrack and walks it into their room, the same
+  // way the creator joins from the dashboard.
+
+  function join(friend, button) {
+    if (asking) return;
+    var h = host();
+    if (h.gameId && h.gameId() === 'polytrack'
+        && !confirm('Joining ' + friend.username + ' ends the race you are in. Join them?')) return;
+    button.disabled = true;
+    social().rpc('gv_join_ask', { p_user: friend.id }).then(function (id) {
+      asking = { id: id, friend: friend, started: Date.now() };
+      paint();
+      social().notice('Asked ' + friend.username + ' to let you in. Waiting for them\u2026');
+      wait(asking);
+    }, function (error) {
+      button.disabled = false;
+      flash(error.message);
+    });
+  }
+
+  function wait(ask) {
+    setTimeout(function check() {
+      if (asking !== ask) return;
+      social().rpc('gv_join_status', { p_id: ask.id }).then(function (st) {
+        if (asking !== ask) return;
+        if (st.state === 'waiting' && Date.now() - ask.started < 80000) return setTimeout(check, 2000);
+        asking = null;
+        paint();
+        if (st.state === 'yes') return enter(ask.friend, st.code);
+        social().notice(st.state === 'no'
+          ? ask.friend.username + ' said no this time.'
+          : ask.friend.username + ' did not answer.');
+      }, function () {
+        if (asking === ask) setTimeout(check, 3000);
+      });
+    }, 2000);
+  }
+
+  // PolyTrack opens in the site's player, and is ready to be walked into the
+  // room once its mod (games/polytrack/creator.js) shows up in the frame.
+  function enter(friend, code) {
+    var h = host();
+    if (!h.openGame || !h.frame) return;
+    close();
+    if (window.GV && GV.chat) GV.chat.close();
+    if (!(h.gameId && h.gameId() === 'polytrack')) h.openGame('polytrack');
+    var started = Date.now();
+    (function find() {
+      var creator = null;
+      try {
+        var w = h.frame().contentWindow;
+        creator = w && w.GV && w.GV.creator;
+      } catch (e) { creator = null; }
+      if (creator) return creator.join(code, friend.username);
+      if (Date.now() - started > 45000) {
+        return social().notice('PolyTrack took too long to start. Open it and ask again.');
+      }
+      setTimeout(find, 500);
+    }());
+  }
 
   // ── The Friends button ────────────────────────────────────────────────
 
@@ -432,6 +500,7 @@
     s.on('state', function () {
       close();
       data = { friends: [], incoming: [], outgoing: [] };
+      asking = null;
     });
   }
 
