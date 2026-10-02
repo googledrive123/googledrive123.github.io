@@ -224,5 +224,30 @@
   </nav>
   <span>GameVault · 1,958 games</span>
 </footer>
+
+<script>
+(function () {
+  'use strict';
+
+  function $(id) { return document.getElementById(id); }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+
+  var state = {
+    left: 1421,
+  };
+
+  // Class timer: mm:ss left in the period, and a bar for how much has gone.
+  function paintTimer() {
+    var pct = Math.max(0, Math.min(100, (1 - state.left / 3000) * 100));
+    $('timer').textContent = pad(Math.floor(state.left / 60)) + ':' + pad(state.left % 60);
+    $('timerBar').style.width = pct.toFixed(1) + '%';
+  }
+
+  setInterval(function () {
+    state.left = state.left > 0 ? state.left - 1 : 3000;
+    paintTimer();
+  }, 1000);
+})();
+</script>
 </body>
 </html>
