@@ -219,3 +219,42 @@ $function$;
 revoke all on function public.gv_group_add(bigint, uuid[]) from public, anon;
 grant execute on function public.gv_group_add(bigint, uuid[]) to authenticated;
 
+
+-- The group goes when its last member leaves.
+create or replace function public.gv_group_leave(p_convo bigint)
+returns boolean
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'Chat only works on GameVault.';
+  end if;
+  if v_user is null then
+    raise exception 'Sign in to chat.';
+  end if;
+
+  delete from gv_convo_members m
+   using gv_convos c
+   where c.id = m.convo_id and c.kind = 'group'
+     and m.convo_id = p_convo and m.user_id = v_user;
+  if not found then
+    return false;
+  end if;
+
+  if exists (select 1 from gv_convo_members where convo_id = p_convo) then
+    insert into gv_convo_messages (convo_id, body)
+    values (p_convo, public.gv_display_name(v_user) || ' left');
+  else
+    delete from gv_convos where id = p_convo;
+  end if;
+  return true;
+end;
+$function$;
+
+revoke all on function public.gv_group_leave(bigint) from public, anon;
+grant execute on function public.gv_group_leave(bigint) to authenticated;
+
