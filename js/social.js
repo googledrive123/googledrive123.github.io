@@ -133,6 +133,7 @@
       emit('counts', counts);
       if (first && counts.mentions) mentionsWaiting();
       if (server.length || convo.length) emit('messages', { server: server, convo: convo });
+      if (data.deleted && (data.deleted.server.length || data.deleted.convo.length)) emit('deleted', data.deleted);
       server.forEach(function (m) { popUp('server', m); });
       convo.forEach(function (m) { popUp('convo:' + m.convo_id, m); });
       schedule();
