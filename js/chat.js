@@ -620,6 +620,7 @@
   // only its members are offered, since nobody else would be told. Who was
   // picked goes with the message; chat/mentions.sql has the last word.
 
+  var picked = {};
   var suggestion = { items: [], at: 0, q: null, timer: null };
 
   function myId() {
@@ -698,6 +699,11 @@
       b.appendChild(face);
       b.appendChild(el('span', '', p.username));
       if (p.verified) b.appendChild(check());
+      // On the press, so the message box never loses the caret.
+      b.addEventListener('mousedown', function (e) {
+        e.preventDefault();
+        pickSuggestion(i);
+      });
       els.suggest.appendChild(b);
     });
     if (note) els.suggest.appendChild(el('p', '', note));
@@ -710,6 +716,21 @@
     els.suggest.hidden = true;
     suggestion.items = [];
     suggestion.q = null;
+  }
+
+  function pickSuggestion(i) {
+    var p = suggestion.items[i], w = atWord();
+    if (!p || !w) return hideSuggest();
+    var v = els.input.value, end = els.input.selectionStart;
+    var text = '@' + p.username + ' ';
+    var next = v.slice(0, w.start) + text + v.slice(end);
+    hideSuggest();
+    if (next.length > MAX) return say('Messages can be up to ' + MAX + ' characters.', 'wait');
+    els.input.value = next;
+    els.input.setSelectionRange(w.start + text.length, w.start + text.length);
+    picked[p.username.toLowerCase()] = p.id;
+    paintLength();
+    els.input.focus();
   }
 
   // ── The list ──────────────────────────────────────────────────────────
