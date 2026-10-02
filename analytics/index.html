@@ -773,6 +773,34 @@
     });
   }
 
+  // ── push ──
+  // analytics/live.sql sends every new event down a Realtime channel the
+  // moment it is written, a tenth of a second or so after the tracker sends
+  // it. One socket for the page; the dashboard and the live view both take
+  // what comes, and still ask now and then for anything lost on the way.
+  var push = { topic: null, ws: null, joined: false, ref: 0, beat: null, tries: 0, seen: 0, on: [] };
+  function startPush() {
+    rpc('analytics_live_topic', { p_secret: state.secret }).then(function (topic) {
+      push.topic = topic;
+      pushConnect();
+    }).catch(function (e) { console.error('Could not start live updates', e); });
+  }
+  function pushConnect() {
+    var ws = new WebSocket(SUPA_URL.replace(/^http/, 'ws') + '/realtime/v1/websocket?apikey=' + SUPA_KEY + '&vsn=1.0.0');
+    push.ws = ws;
+    function send(m) { m.ref = String(++push.ref); try { ws.send(JSON.stringify(m)); } catch (e) {} }
+    ws.onopen = function () {
+      send({ topic: 'realtime:' + push.topic, event: 'phx_join', join_ref: '1', payload: { config: { broadcast: { ack: false, self: false }, presence: { key: '' }, postgres_changes: [], private: false }, access_token: SUPA_KEY } });
+    };
+    ws.onmessage = function (e) {
+      var m;
+      try { m = JSON.parse(e.data); } catch (err) { return; }
+      if (m.topic !== 'realtime:' + push.topic) return;
+      if (m.event === 'phx_reply' && m.payload && m.payload.status === 'ok' && !push.joined) { push.joined = true; push.tries = 0; }
+      else if (m.event === 'broadcast' && m.payload && m.payload.event === 'events') push.on.forEach(function (fn) { fn(m.payload.payload || {}); });
+    };
+  }
+
   // ── charts ──
   Chart.defaults.color = '#8a8a96';
   Chart.defaults.font.family = "'JetBrains Mono', monospace";
@@ -2031,7 +2059,7 @@
   }
 
   // ── auth / wiring ──
-  function showDash() { $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); load(); loadPeople(); loadBroadcasts(); loadLinks(); loadFailing(); loadChat(); loadAvatars(); loadTesting(); loadGiveaways(); fillChallengeWeeks(); loadChallenges(); loadChallengeTracks(); loadBoard(); loadMirrors(); setTimer(); if (location.hash === '#live') enterLive(); }
+  function showDash() { $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); load(); loadPeople(); loadBroadcasts(); loadLinks(); loadFailing(); loadChat(); loadAvatars(); loadTesting(); loadGiveaways(); fillChallengeWeeks(); loadChallenges(); loadChallengeTracks(); loadBoard(); loadMirrors(); setTimer(); startPush(); if (location.hash === '#live') enterLive(); }
   function setTimer() { clearInterval(state.timer); if ($('autoRefresh').checked) state.timer = setInterval(tick, 10000); }
   function tryLogin(secret, remember) {
     $('loginErr').textContent = '';
