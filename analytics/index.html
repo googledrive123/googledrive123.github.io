@@ -1741,11 +1741,15 @@
 
   function livePoll() {
     var l = live;
-    rpc('analytics_rows', { p_secret: state.secret, p_from: new Date(Math.max(l.st.from, l.st.since - OVERLAP)).toISOString() }).then(function (res) {
+    rpc('analytics_rows', { p_secret: state.secret, p_from: new Date(Math.max(l.st.from, l.st.since - OVERLAP)).toISOString(), p_lo: l.after }).then(function (res) {
       if (live !== l) return;
+      var list = res.rows || [];
       var added = take(l.st, res);
       l.skew = Date.parse(res.now) - Date.now();
-      l.st.since = Date.parse(res.now);
+      // A full answer may stop short of now: the next one carries on from
+      // its last id, straight away.
+      if (list.length >= SLICE) l.after = list[list.length - 1][0] + 1;
+      else { l.after = null; l.st.since = Date.parse(res.now); }
       // Rows the next answer may hold again keep their ids, so they are
       // still known when they come back.
       var cut = Math.min(liveNow() - LIVE_BACK, l.st.since - OVERLAP);
@@ -1764,7 +1768,7 @@
       $('liveStatus').innerHTML = '<span class="dot off"></span>' + esc(e.message) + ' · trying again';
     }).then(function () {
       if (live !== l) return;
-      l.timer = setTimeout(livePoll, 1000);
+      l.timer = setTimeout(livePoll, l.after ? 0 : 1000);
     });
   }
 
