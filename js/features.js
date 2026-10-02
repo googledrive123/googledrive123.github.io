@@ -21,8 +21,8 @@
       icon: '<path d="M4 8h16l-1.5 11h-13z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>' },
     { id: 'challenge', label: 'Challenge', line: 'A new PolyTrack track every week', added: '2026-10-01', href: '/challenge/',
       icon: '<path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M9 20h6"/>' },
-    { id: 'saves', label: 'Saves', line: 'Back up your game progress', added: '2026-10-01', href: '/saves/',
-      icon: '<path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/>' }
+    { id: 'polls', label: 'Polls', line: 'Vote on what GameVault asks', added: '2026-10-02', href: '/polls/',
+      icon: '<path d="M5 6h9M5 12h14M5 18h6"/>' }
   ];
 
   var CSS = [
