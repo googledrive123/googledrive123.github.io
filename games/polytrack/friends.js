@@ -86,6 +86,7 @@
         .then(function (code) { return answer(ask.id, code); })
         .then(function () {
           text.textContent = (ask.name || 'Your friend') + ' is on the way';
+          no.remove();
           accept.remove();
           setTimeout(close, 5000);
         })
@@ -97,7 +98,16 @@
         });
     });
 
+    var no = button('\u00d7', function () {
+      answer(ask.id, null).catch(function (error) {
+        console.error('Could not turn down the ask:', error);
+      });
+      close();
+    });
+    no.setAttribute('aria-label', 'Turn down');
+
     notice.appendChild(accept);
+    notice.appendChild(no);
     box.appendChild(notice);
     shown[ask.id] = true;
   }
