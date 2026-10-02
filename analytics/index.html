@@ -929,23 +929,26 @@
     return '<span class="pill ' + cls + '">' + esc(NICE[r.event] || r.event) + '</span>';
   }
 
+  // One line on what an event was about.
+  function detail(r) {
+    var d = r.item_title || r.game_id || r.item_id || '';
+    if (r.event === 'game_close' || r.event === 'movie_close' || r.event === 'tv_close') d += ' · ' + dur(r.value);
+    else if (r.event === 'game_load') d += ' · ' + fmt(r.value) + ' ms';
+    else if (r.event === 'search') d += ' · ' + (r.value != null ? r.value + ' results' : (r.meta && r.meta.section) || '');
+    else if (r.event === 'ping' || r.event === 'session_end' || r.event === 'hidden') d = 'on site ' + dur(r.value) + (r.game_id ? ' · playing ' + r.game_id : '');
+    else if (r.event === 'tv_play' && r.meta) d += ' · S' + r.meta.season + 'E' + r.meta.episode;
+    else if (r.event === 'pageview' && r.meta) d = (r.meta.landing || r.path) + (r.referrer ? ' ← ' + r.referrer : '') + (r.meta.new_session ? ' · new session' : '');
+    else if (r.event === 'nav') d = r.path;
+    else if (r.event === 'game_open' && r.meta && r.meta.source) d += ' · via ' + r.meta.source;
+    return d;
+  }
+
   function renderFeed() {
     table('feedTable', [
       { key: 'ts', label: 'Time', render: function (r) { return r.t.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' }) + ' <span class="muted">' + r.t.toLocaleDateString([], { month: 'short', day: 'numeric' }) + '</span>'; } },
       { key: 'visitor_id', label: 'Visitor', render: function (r) { return who(r.visitor_id) + (r.user_id ? ' <span class="pill b">user</span>' : ''); } },
       { key: 'event', label: 'Event', render: eventPill },
-      { key: 'detail', label: 'Detail', render: function (r) {
-        var d = r.item_title || r.game_id || r.item_id || '';
-        if (r.event === 'game_close' || r.event === 'movie_close' || r.event === 'tv_close') d += ' · ' + dur(r.value);
-        else if (r.event === 'game_load') d += ' · ' + fmt(r.value) + ' ms';
-        else if (r.event === 'search') d += ' · ' + (r.value != null ? r.value + ' results' : (r.meta && r.meta.section) || '');
-        else if (r.event === 'ping' || r.event === 'session_end' || r.event === 'hidden') d = 'on site ' + dur(r.value) + (r.game_id ? ' · playing ' + r.game_id : '');
-        else if (r.event === 'tv_play' && r.meta) d += ' · S' + r.meta.season + 'E' + r.meta.episode;
-        else if (r.event === 'pageview' && r.meta) d = (r.meta.landing || r.path) + (r.referrer ? ' ← ' + r.referrer : '') + (r.meta.new_session ? ' · new session' : '');
-        else if (r.event === 'nav') d = r.path;
-        else if (r.event === 'game_open' && r.meta && r.meta.source) d += ' · via ' + r.meta.source;
-        return esc(d);
-      } },
+      { key: 'detail', label: 'Detail', render: function (r) { return esc(detail(r)); } },
       { key: 'env', label: 'Device', render: function (r) { return esc((r.browser || '?') + ' · ' + (r.os || '?') + ' · ' + (r.viewport || '')); } },
       { key: 'path', label: 'Path' }
     ], state.feed);
