@@ -652,16 +652,17 @@
   // past 3 seconds is stopped, and one at a time took most of a minute for a
   // month. Each slice is at most the 5000 rows analytics_rows hands over.
   var SLICE = 5000, AT_ONCE = 4;
-  function fetchRange(from) {
+  function fetchRange(from, onSlice) {
     var st = newStore(from), p_from = new Date(from).toISOString();
     return rpc('analytics_span', { p_secret: state.secret, p_from: p_from }).then(function (span) {
-      var slices = [];
+      var slices = [], done = 0;
       if (span.min_id != null) for (var lo = span.min_id; lo <= span.max_id; lo += SLICE) slices.push(lo);
       function next() {
         if (!slices.length) return null;
         var lo = slices.shift();
         return rpc('analytics_rows', { p_secret: state.secret, p_from: p_from, p_lo: lo, p_hi: Math.min(lo + SLICE - 1, span.max_id) }).then(function (res) {
           take(st, res);
+          if (onSlice) onSlice(++done, done + slices.length);
           return next();
         });
       }
@@ -1642,7 +1643,9 @@
     loadingRange = true;
     $('status').innerHTML = '<span class="dot"></span>Loading…';
     Promise.all([
-      fetchRange(b.from.getTime()),
+      fetchRange(b.from.getTime(), function (done, all) {
+        if (gen === loadGen) $('status').innerHTML = '<span class="dot"></span>Loading ' + done + ' of ' + all + '…';
+      }),
       rpc('gv_playing_now', {}).catch(function () { return null; })
     ]).then(function (res) {
       if (gen !== loadGen) return;
