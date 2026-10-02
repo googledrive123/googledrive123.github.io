@@ -47,6 +47,7 @@
   <script src="/js/friends.js" defer></script>
   <script src="/js/account.js" defer></script>
   <script src="/js/features.js" defer></script>
+  <script src="/js/polls.js" defer></script>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -4818,6 +4819,9 @@ document.addEventListener('DOMContentLoaded', function() {
 const SUPA_URL = SUPA.url;
 const SUPA_KEY = SUPA.key;
 const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+// A poll this visitor has not answered pops up (js/polls.js), voted on as
+// the signed-in account when there is one.
+if (window.GV && GV.polls) { GV.polls.use(sb); GV.polls.ask(); }
 
 const PERIOD_SECS = 50 * 60;
 const LS_SESSIONS = 'gv.sessions';
