@@ -114,10 +114,13 @@ begin
              'username', f.name,
              'preset', v.preset,
              'upload', v.approved_upload
-           ) order by lower(f.name))
+           ) order by f.exact desc, f.at, f.len, lower(f.name))
       from (
         select p.id,
-               public.gv_display_name(p.id) as name
+               public.gv_display_name(p.id) as name,
+               lower(p.username) = v_q as exact,
+               coalesce(nullif(strpos(lower(p.username), v_q), 0), 1000) as at,
+               char_length(p.username) as len
           from profiles p
          where p.id <> v_user
            and nullif(btrim(p.username), '') is not null
@@ -126,7 +129,9 @@ begin
            and (lower(p.username) like '%' || v_like || '%'
                 or (char_length(v_bare) >= 2
                     and regexp_replace(lower(p.username), '[^a-z0-9]', '', 'g') like '%' || v_bare || '%'))
-         order by lower(p.username)
+         -- The name itself first, then names that start with it, then the
+         -- earlier it comes in a name and the shorter the name, the closer.
+         order by exact desc, at, len, lower(p.username)
          limit 8
       ) f
       left join gv_avatars v on v.user_id = f.id
