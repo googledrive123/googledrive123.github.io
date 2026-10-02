@@ -1763,14 +1763,16 @@
       }
       liveAdd(added, !l.first);
       l.first = false;
+      l.fails = 0;
       $('liveStatus').innerHTML = '<span class="dot"></span>Updated ' + new Date().toLocaleTimeString();
     }).catch(function (e) {
       if (live !== l) return;
+      l.fails++;
       $('liveStatus').innerHTML = '<span class="dot off"></span>' + esc(e.message) + ' · trying again';
     }).then(function () {
       if (live !== l) return;
       l.busy = false;
-      var wait = l.after ? 0 : document.hidden ? 5000 : 1000;
+      var wait = l.fails ? Math.min(30000, 1000 * Math.pow(2, l.fails)) : l.after ? 0 : document.hidden ? 5000 : 1000;
       l.timer = setTimeout(livePoll, wait);
     });
   }
