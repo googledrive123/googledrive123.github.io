@@ -801,6 +801,13 @@
       if (m.topic !== 'realtime:' + push.topic) return;
       if (m.event === 'phx_reply' && m.payload && m.payload.status === 'ok' && !push.joined) { push.joined = true; push.tries = 0; }
       else if (m.event === 'broadcast' && m.payload && m.payload.event === 'events') push.on.forEach(function (fn) { fn(m.payload.payload || {}); });
+      else if (m.event === 'phx_close' || m.event === 'phx_error') ws.close();
+    };
+    ws.onclose = function () {
+      clearInterval(push.beat);
+      if (push.ws !== ws) return;
+      push.joined = false;
+      setTimeout(pushConnect, Math.min(15000, 500 * Math.pow(2, push.tries++)));
     };
   }
 
