@@ -1773,6 +1773,7 @@
       l.first = false;
       l.fails = 0;
       livePresence();
+      liveNames(added);
       liveStats();
       $('liveStatus').innerHTML = '<span class="dot"></span>Updated ' + new Date().toLocaleTimeString();
     }).catch(function (e) {
@@ -1800,6 +1801,20 @@
         if (!n.polytrack && p.name) n.polytrack = p.name;
       });
     }).catch(function () {});
+  }
+  function liveNames(rows) {
+    var want = Object.create(null);
+    rows.forEach(function (r) {
+      if (!asked[r.visitor_id] && (!want[r.visitor_id] || r.user_id)) want[r.visitor_id] = { visitor_id: r.visitor_id, user_id: r.user_id || null };
+    });
+    var list = Object.keys(want).map(function (k) { asked[k] = 1; return want[k]; });
+    if (!list.length) return;
+    rpc('analytics_people', { p_secret: state.secret, p_people: list }).then(function (found) {
+      (found || []).forEach(function (n) { names[n.visitor_id] = { username: n.username, polytrack: n.polytrack }; });
+      if (!live) return;
+      Array.prototype.forEach.call($('liveList').querySelectorAll('.who-btn'), function (b) { if (want[b.dataset.who]) b.innerHTML = who(b.dataset.who); });
+      liveStats();
+    }).catch(function (e) { console.error('Could not load names', e); });
   }
 
   // ── live: the events ──
