@@ -179,6 +179,9 @@ begin
   if not found then
     raise exception 'That poll is gone.';
   end if;
+  if v_poll.closed or v_poll.ends_at <= now() then
+    raise exception 'That poll is over.';
+  end if;
 
   if public.gv_poll_mine(p_poll, v_user, v_visitor) is null then
     insert into gv_poll_votes (poll_id, choice, user_id, visitor_id)
