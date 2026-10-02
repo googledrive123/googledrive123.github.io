@@ -104,6 +104,8 @@
   var waitUntil = 0;
   var waitTimer = null;
   var buttons = [];
+  var listTimer = null;
+  var readTimer = null;
 
   function social() {
     return window.GV && window.GV.social;
@@ -269,6 +271,7 @@
     root.classList.toggle('gv-chat-full', mode === 'full');
     root.hidden = false;
     els.sideClose.hidden = mode !== 'window' && !root.classList.contains('gv-chat-narrow');
+    refreshList();
     view(opts.key || current, !!opts.key || mode !== 'window');
     paintButtons();
   }
@@ -298,9 +301,28 @@
     return threads[key] || (threads[key] = { list: [], ids: {}, last: 0, loaded: false });
   }
 
+  function convoFor(key) {
+    var id = Number(String(key).split(':')[1]);
+    for (var i = 0; i < convos.length; i++) if (convos[i].id === id) return convos[i];
+    return null;
+  }
+
+  function convoName(c) {
+    if (!c) return 'Chat';
+    var names = (c.members || []).map(function (m) { return m.username; });
+    if (c.kind === 'group') return c.name || names.join(', ') || 'Just you';
+    return names[0] || 'Nobody';
+  }
 
   function titleFor(key) {
     if (key === 'server') return { name: 'Server', sub: 'Everyone on GameVault' };
+    var c = convoFor(key);
+    if (!c) return { name: 'Chat', sub: '' };
+    if (c.kind === 'group') {
+      var count = (c.members || []).length + 1;
+      return { name: convoName(c), sub: count + ' people' };
+    }
+    return { name: convoName(c), sub: 'Direct message' };
   }
 
   function paintHead() {
@@ -323,6 +345,7 @@
     toBottom();
     load(key);
     markRead(key);
+    paintList();
     if (enter) els.input.focus();
   }
 
@@ -331,7 +354,7 @@
   function load(key) {
     var req = key === 'server'
       ? social().rpc('gv_chat_recent', { p_after_id: 0 })
-      : Promise.resolve([]);
+      : social().rpc('gv_convo_recent', { p_convo: Number(key.split(':')[1]), p_after_id: 0 });
     req.then(function (list) {
       var t = thread(key);
       t.list = [];
@@ -391,6 +414,13 @@
     var t = thread(key);
     if (!isOpen() || key !== current || !t.last) return;
     if (key === 'server') return social().markServerSeen(t.last);
+    var c = convoFor(key);
+    if (c) c.unread = 0;
+    clearTimeout(readTimer);
+    readTimer = setTimeout(function () {
+      social().rpc('gv_convo_read', { p_convo: Number(key.split(':')[1]), p_id: t.last })
+        .then(function () { social().poke(); }, function () {});
+    }, 400);
   }
 
   function render(m) {
@@ -458,7 +488,7 @@
     els.send.disabled = true;
     var req = key === 'server'
       ? social().rpc('gv_chat_send', { p_body: text })
-      : Promise.reject(new Error('Pick a chat first.'));
+      : social().rpc('gv_convo_send', { p_convo: Number(key.split(':')[1]), p_body: text });
     req.then(function (m) {
       sending = false;
       els.input.value = '';
@@ -475,6 +505,58 @@
     });
   }
 
+  // ── The list ──────────────────────────────────────────────────────────
+
+  function refreshList() {
+    return social().rpc('gv_convo_list').then(function (list) {
+      convos = list || [];
+      paintList();
+      if (isOpen()) paintHead();
+    }, function () {});
+  }
+
+  // Many messages at once only ask for the list once.
+  function soonList() {
+    clearTimeout(listTimer);
+    listTimer = setTimeout(refreshList, 500);
+  }
+
+  function row(key, name, last, unread, dot) {
+    var b = el('button', 'gv-chat-row');
+    b.type = 'button';
+    var on = key === current && (mode === 'full' || root.classList.contains('gv-chat-in'));
+    b.setAttribute('aria-current', on ? 'true' : 'false');
+    var face = el('span', 'gv-chat-dot', dot || initials(name));
+    var words = el('span', 'gv-chat-row-text');
+    words.appendChild(el('span', 'gv-chat-row-name', name));
+    words.appendChild(el('span', 'gv-chat-row-last', last || ''));
+    b.appendChild(face);
+    b.appendChild(words);
+    var count = el('span', 'gv-chat-count', unread === true ? '' : String(unread || ''));
+    count.hidden = !unread;
+    if (unread === true) count.style.cssText = 'min-width:9px;width:9px;height:9px;padding:0';
+    b.appendChild(count);
+    b.addEventListener('click', function () { view(key, true); });
+    return b;
+  }
+
+  function lastLine(m) {
+    if (!m) return '';
+    if (!m.username) return m.body;
+    return (m.mine ? 'You' : m.username) + ': ' + m.body;
+  }
+
+  function paintList() {
+    if (!root) return;
+    els.list.textContent = '';
+    var server = thread('server');
+    var lastServer = server.list[server.list.length - 1];
+    els.list.appendChild(row('server', 'Server', lastServer ? lastLine(lastServer) : 'Everyone on GameVault',
+      social().counts().server, '#'));
+    convos.forEach(function (c) {
+      els.list.appendChild(row('convo:' + c.id, convoName(c), lastLine(c.last), c.unread));
+    });
+  }
 
   // ── The chat button ───────────────────────────────────────────────────
 
@@ -539,9 +621,17 @@
     if (!s) return;
     s.on('messages', function (data) {
       if (data.server.length) add('server', data.server);
+      var known = true;
+      data.convo.forEach(function (m) {
+        if (!convoFor('convo:' + m.convo_id)) known = false;
+        if (thread('convo:' + m.convo_id).loaded) add('convo:' + m.convo_id, [m]);
+      });
+      if (isOpen()) markRead(current);
+      if (isOpen() || !known) soonList();
     });
     s.on('counts', function () {
       paintButtons();
+      if (isOpen()) paintList();
     });
     s.on('me', function () {
       if (!isOpen()) return;
