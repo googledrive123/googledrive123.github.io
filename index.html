@@ -289,6 +289,16 @@
       letter-spacing: 0.2em;
       text-transform: uppercase;
     }
+    /* A phone has no room for the bell and the name beside every button. The
+       bell is in the game bar and on the schedule page, and the picture
+       stands for the name. */
+    @media (max-width: 640px) {
+      .welcome-top { top: 1rem; left: 1rem; right: 1rem; gap: 0.5rem; }
+      .welcome-top > div { gap: 0.45rem !important; }
+      .welcome-top .bell { display: none; }
+      .welcome-top .user-btn { padding: 0.3rem; }
+      #userLabelWelcome { display: none; }
+    }
     .welcome-top .brand {
       color: var(--text);
       font-weight: 600;
