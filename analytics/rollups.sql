@@ -10,6 +10,8 @@
 --                             first did something on purpose
 --   analytics_visitor_traits  how often each visitor reported each time zone
 --                             and window size, for the scanner check
+--   analytics_quarters        events, page views, plays and play time per
+--                             visitor and session, 15 minutes at a time
 --
 -- Apply against project dxwjxzmlezfyursysays, before analytics/visitors.sql.
 -- Every statement is safe to run twice.
@@ -28,4 +30,16 @@ create table if not exists public.analytics_visitor_traits (
   value text not null,
   n bigint not null,
   primary key (visitor_id, trait, value)
+);
+
+create table if not exists public.analytics_quarters (
+  bucket timestamptz not null,
+  visitor_id text not null,
+  session_id text not null,
+  events bigint not null,
+  pageviews bigint not null,
+  plays bigint not null,
+  play_secs double precision not null,
+  is_new boolean not null,
+  primary key (bucket, visitor_id, session_id)
 );
