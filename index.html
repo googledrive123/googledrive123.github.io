@@ -3262,6 +3262,23 @@ function closeSugg(reason, days) {
 }
 window.openSuggest = openSugg;
 
+// The popup waits until someone has played one game for five minutes, time
+// the game was actually on screen. Reaching that is kept, so a visit that
+// ends with the game still open shows the popup on the next one.
+const SUGG_PLAYED_KEY = 'gv.sugg.played';
+const SUGG_PLAY_SECS = 5 * 60;
+var suggPlaySecs = 0;
+function suggPlayed() {
+  try { return !!localStorage.getItem(SUGG_PLAYED_KEY); } catch { return false; }
+}
+setInterval(() => {
+  if (document.hidden || !gameOverlay.classList.contains('show')) return;
+  suggPlaySecs += 5;
+  if (suggPlaySecs >= SUGG_PLAY_SECS && !suggPlayed()) {
+    try { localStorage.setItem(SUGG_PLAYED_KEY, String(Date.now())); } catch {}
+  }
+}, 5000);
+
 document.getElementById('suggClose').addEventListener('click', () => closeSugg('closed', 3));
 document.getElementById('suggLater').addEventListener('click', () => closeSugg('later', 7));
 document.getElementById('suggGo').addEventListener('click', () => {
@@ -4086,6 +4103,7 @@ gameMoreBtn.addEventListener('click', () => showMore(gameMore.hidden));
 
 
 function openGame(g) {
+  suggPlaySecs = 0;
   gameOverlay.classList.add('show');
   document.body.style.overflow = 'hidden';
   // A deep link is already standing on this address. A second entry for it
