@@ -1057,7 +1057,7 @@
     return '<span class="pill ' + cls + '">' + esc(NICE[r.event] || r.event) + '</span>';
   }
 
-  // One line on what an event was about.
+  // One line on what an event was about, for the feed and the live view.
   function detail(r) {
     var d = r.item_title || r.game_id || r.item_id || '';
     if (r.event === 'game_close' || r.event === 'movie_close' || r.event === 'tv_close') d += ' · ' + dur(r.value);
@@ -1735,6 +1735,65 @@
     document.body.classList.remove('live-on');
     $('live').classList.add('hidden');
     tick();
+  }
+
+  // ── live: the events ──
+  function liveKind(r) {
+    if (r.event === 'error') return 'error';
+    if (r.event.indexOf('game_') === 0) return 'game';
+    if (r.event === 'pageview' || r.event === 'nav') return 'page';
+    if (/^(movie|tv)_/.test(r.event)) return 'media';
+    if (LIVE_BEATS[r.event] || r.event === 'session_end') return 'beat';
+    return 'act';
+  }
+  function clock(d) { return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit', fractionalSecondDigits: 3 }); }
+  // Everything the row holds, as small labelled chips under the line.
+  function liveChips(r) {
+    var out = [];
+    function chip(k, v) { if (v != null && v !== '') out.push('<span class="chip"><b>' + esc(k) + '</b>' + esc(v) + '</span>'); }
+    chip('page', r.path);
+    chip('game', r.game_id);
+    chip('item', r.item_id);
+    chip('value', r.value);
+    chip('device', [r.browser, r.os, r.device].filter(Boolean).join(' · '));
+    chip('screen', r.screen);
+    chip('window', r.viewport);
+    chip('tz', r.tz);
+    chip('lang', r.lang);
+    chip('from', r.referrer);
+    chip('utm', [r.utm_source, r.utm_medium, r.utm_campaign].filter(Boolean).join(' / '));
+    chip('session', shortId(r.session_id));
+    if (r.user_id) chip('user', shortId(r.user_id));
+    if (r.client_ms != null) chip('sent after', ((r.tms - r.client_ms) / 1000).toFixed(1) + 's');
+    chip('origin', r.origin);
+    if (r.meta && typeof r.meta === 'object') Object.keys(r.meta).forEach(function (k) {
+      var v = r.meta[k];
+      chip(k, v != null && typeof v === 'object' ? JSON.stringify(v) : v);
+    });
+    return out.join('');
+  }
+  function liveEntry(r, fresh) {
+    var el = document.createElement('div');
+    var bot = live.st.scanner[r.visitor_id];
+    el.className = 'ev k-' + liveKind(r) + (bot ? ' bot' : '') + (fresh ? ' fresh' : '');
+    el._row = r;
+    el.innerHTML = '<div class="when">' + clock(r.t) + '<span data-at="' + r.tms + '">' + ago(r.tms - live.skew) + '</span></div>'
+      + '<div class="body"><div class="line">' + eventPill(r)
+      + ' <button type="button" class="who-btn" data-who="' + esc(r.visitor_id) + '">' + who(r.visitor_id) + '</button>'
+      + (r.is_new ? ' <span class="pill g">new</span>' : '') + (r.user_id ? ' <span class="pill b">signed in</span>' : '') + (bot ? ' <span class="pill">scanner</span>' : '')
+      + ' <span class="what">' + esc(detail(r)) + '</span></div>'
+      + '<div class="chips">' + liveChips(r) + '</div></div>';
+    return el;
+  }
+  // Newest at the top, and only the latest LIVE_MAX kept on the page.
+  function liveAdd(rows, fresh) {
+    if (!rows.length) return;
+    var listEl = $('liveList'), frag = document.createDocumentFragment();
+    for (var i = rows.length - 1; i >= 0; i--) frag.appendChild(liveEntry(rows[i], fresh));
+    listEl.insertBefore(frag, listEl.firstChild);
+    while (listEl.children.length > LIVE_MAX) listEl.removeChild(listEl.lastChild);
+    live.shown += rows.length;
+    $('liveCount').textContent = fmt(live.shown) + ' since you opened this';
   }
 
   // ── load ──
