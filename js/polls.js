@@ -42,6 +42,7 @@
     '.gv-poll-later.on{opacity:1;visibility:visible}',
     '.gv-poll-later:hover{border-color:var(--accent,#ff3b3b)}',
     '.gv-poll-looks{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}',
+    '.gv-poll-look{display:flex;flex-direction:column;gap:8px;min-width:0;padding:8px 8px 10px;border-radius:12px;border:1px solid var(--border-strong,rgba(255,255,255,.16));background:var(--surface-2,#1a1a20);color:var(--text,#f4f4f6);font:inherit;text-align:left;cursor:pointer;transition:border-color .15s,transform .15s}',
     '@keyframes gvPollIn{from{opacity:0;transform:translateY(10px) scale(.98)}}',
     '@media (prefers-reduced-motion:reduce){.gv-poll-box{animation:none}.gv-poll-opt.result::before{transition:none}}'
   ].join('');
