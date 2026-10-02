@@ -4860,6 +4860,23 @@ async function syncStars() {
   if (!same && GAMES.length) render();
 }
 
+// ─── Chat and friends ───
+// js/social.js runs while someone is signed in. These are the parts of this
+// page it needs: which game is open, where to draw over it, and how to open
+// one.
+const socialHost = {
+  inGame: () => gameOverlay.classList.contains('show'),
+  gameId: () => (gameOverlay.classList.contains('show') && mounted ? mounted.id : null),
+  gameArea: () => gameFrame.parentElement,
+  frame: () => gameFrame,
+  gameTitle: id => (gamesById[id] ? gamesById[id].name : null),
+  openGame: id => { if (gamesById[id]) window.openGame(gamesById[id]); },
+  signIn: () => openAuth('signin')
+};
+function startSocial() {
+  if (window.GV && GV.social) GV.social.start(sb, currentUser, socialHost);
+}
+
 // ─── Auth state ───
 // Every token refresh hands over a new user object. What was looked up about
 // the same user carries over, or the name drops back to the email's first half.
@@ -4880,6 +4897,7 @@ function setCurrentUser(user) {
 sb.auth.onAuthStateChange(async (event, session) => {
   setCurrentUser(session?.user ?? null);
   updateUserUI();
+  startSocial();
   loadVerified();
   if (currentUser) {
     await loadUsername();
