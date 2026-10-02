@@ -5034,7 +5034,7 @@ sb.auth.onAuthStateChange(async (event, session) => {
     // Play time turns into shop coins (shop/shop.sql caps it per day).
     sb.rpc('gv_grant_coins').then(loadWallet, loadWallet);
     syncStars();
-    // A daily cloud backup of game saves, if this person switched it on.
+    // A daily cloud backup of game saves, unless this browser switched it off.
     if (window.GV && GV.saves) GV.saves.autoSaveIfDue(sb);
   } else if (event === 'SIGNED_OUT') {
     myAvatar = null;
