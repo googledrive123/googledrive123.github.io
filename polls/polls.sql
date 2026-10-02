@@ -36,9 +36,6 @@ create table if not exists public.gv_polls (
   closed     boolean not null default false
 );
 
--- Pictures for the answers, in the same order, or null for a poll without.
-alter table public.gv_polls add column if not exists images jsonb;
-
 -- Extras for the answers, in the same order, or null for a poll without.
 -- Each is an object: img (a picture), page (a live page to try) and note
 -- (a line about it). Paths are on this site.
