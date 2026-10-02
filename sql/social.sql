@@ -130,3 +130,61 @@ $function$;
 revoke all on function public.gv_user_search(text) from public, anon;
 grant execute on function public.gv_user_search(text) to authenticated;
 
+
+-- Asks p_user to be friends, or accepts if they asked first. Returns
+-- 'friends' or 'asked'.
+create or replace function public.gv_friend_ask(p_user uuid)
+returns text
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+  v_back boolean;
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'Friends only work on GameVault.';
+  end if;
+  if v_user is null then
+    raise exception 'Sign in to add friends.';
+  end if;
+  if p_user is null or p_user = v_user then
+    raise exception 'Pick someone else.';
+  end if;
+  if not exists (select 1 from auth.users where id = p_user) then
+    raise exception 'That account is gone.';
+  end if;
+
+  -- Two clicks at once would both pass the caps.
+  perform pg_advisory_xact_lock(hashtext('gv_friend_ask'), hashtext(v_user::text));
+
+  v_back := exists (select 1 from gv_friend_links where user_id = p_user and friend_id = v_user);
+
+  if not exists (select 1 from gv_friend_links where user_id = v_user and friend_id = p_user) then
+    if (select count(*) from gv_friend_links where user_id = v_user) >= 300 then
+      raise exception 'You have as many friends as an account can have.';
+    end if;
+    if not v_back then
+      if (select count(*) from gv_friend_links l
+           where l.user_id = v_user
+             and not exists (select 1 from gv_friend_links r
+                              where r.user_id = l.friend_id and r.friend_id = v_user)) >= 50 then
+        raise exception 'You have a lot of requests waiting. Cancel some first.';
+      end if;
+      if (select count(*) from gv_friend_links
+           where user_id = v_user and created_at > now() - interval '1 hour') >= 30 then
+        raise exception 'That is a lot of friend requests. Try again later.';
+      end if;
+    end if;
+    insert into gv_friend_links (user_id, friend_id) values (v_user, p_user)
+    on conflict do nothing;
+  end if;
+
+  return case when v_back then 'friends' else 'asked' end;
+end;
+$function$;
+
+revoke all on function public.gv_friend_ask(uuid) from public, anon;
+grant execute on function public.gv_friend_ask(uuid) to authenticated;
+
