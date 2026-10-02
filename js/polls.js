@@ -543,6 +543,7 @@
     shade.appendChild(box);
     document.body.appendChild(shade);
     document.addEventListener('keydown', onKey);
+    if (intro) go.focus();
     setTimeout(function () {
       later.disabled = false;
       later.classList.add('on');
