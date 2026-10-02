@@ -664,6 +664,28 @@
     if (!sorted) st.rows.sort(function (a, b) { return a.id - b.id; });
     return added;
   }
+  // A range comes in as slices of ids a few at a time: a request that runs
+  // past 3 seconds is stopped, and one at a time took most of a minute for a
+  // month. Each slice is at most the 5000 rows analytics_rows hands over.
+  var SLICE = 5000, AT_ONCE = 4;
+  function fetchRange(from) {
+    var st = newStore(from), p_from = new Date(from).toISOString();
+    return rpc('analytics_span', { p_secret: state.secret, p_from: p_from }).then(function (span) {
+      var slices = [];
+      if (span.min_id != null) for (var lo = span.min_id; lo <= span.max_id; lo += SLICE) slices.push(lo);
+      function next() {
+        if (!slices.length) return null;
+        var lo = slices.shift();
+        return rpc('analytics_rows', { p_secret: state.secret, p_from: p_from, p_lo: lo, p_hi: Math.min(lo + SLICE - 1, span.max_id) }).then(function (res) {
+          take(st, res);
+          return next();
+        });
+      }
+      var workers = [];
+      for (var i = 0; i < AT_ONCE; i++) workers.push(next());
+      return Promise.all(workers).then(function () { st.since = Date.parse(span.now); return st; });
+    });
+  }
 
   // ── charts ──
   Chart.defaults.color = '#8a8a96';
