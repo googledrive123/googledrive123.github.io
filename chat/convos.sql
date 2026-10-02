@@ -597,3 +597,28 @@ $function$;
 revoke all on function public.gv_convo_mod_list(text) from public;
 grant execute on function public.gv_convo_mod_list(text) to anon, authenticated;
 
+
+create or replace function public.gv_convo_delete(p_secret text, p_message_id bigint)
+returns boolean
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+
+  update gv_convo_messages set deleted = true where id = p_message_id;
+  if not found then
+    return false;
+  end if;
+  update gv_convo_reports set resolved = true
+   where message_id = p_message_id and not resolved;
+  return true;
+end;
+$function$;
+
+revoke all on function public.gv_convo_delete(text, bigint) from public;
+grant execute on function public.gv_convo_delete(text, bigint) to anon, authenticated;
+
