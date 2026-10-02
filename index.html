@@ -4931,6 +4931,29 @@ function askToKeep(g, from, secs) {
 // closeGame() is outside this block.
 window._afterGame = askToKeep;
 
+// Closing the box asks again on the next visit. Only "Keep this browser's"
+// settles it, because this browser's own progress then replaces the backup
+// within a day.
+let backupOffered = false;
+function offerBackup() {
+  if (backupOffered || !window.GV || !GV.saves) return;
+  backupOffered = true;
+  GV.saves.autoOffer().then(row => {
+    if (!row || !currentUser) return;
+    const when = new Date(row.updated_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    saveToast(['Your account has a backup of your game progress from ' + when + '.',
+      'Load it into this browser? It replaces the game progress here.'],
+      'Load backup', 'Keep this browser\u2019s',
+      () => GV.saves.cloudLoad('auto').then(() => location.reload(), err => {
+        saveToast(['Could not load the backup.', err.message || String(err)], 'Try again', null, () => {
+          backupOffered = false;
+          offerBackup();
+        });
+      }),
+      () => GV.saves.dismissAutoOffer(row));
+  }).catch(() => {});
+}
+
 // ─── Load username ───
 async function loadUsername() {
   if (!currentUser) return;
@@ -5101,6 +5124,7 @@ sb.auth.onAuthStateChange(async (event, session) => {
     syncStars();
     // A daily cloud backup of game saves, unless this browser switched it off.
     if (window.GV && GV.saves) GV.saves.autoSaveIfDue(sb);
+    offerBackup();
   } else if (event === 'SIGNED_OUT') {
     myAvatar = null;
     myWallet = null;
