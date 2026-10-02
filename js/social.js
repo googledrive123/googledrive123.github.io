@@ -115,7 +115,7 @@
 
       counts.unread = data.unread;
       counts.requests = data.requests;
-      counts.server = data.server_last > serverSeen() && viewing !== 'server';
+      counts.server = data.server_last > serverSeen() && viewing !== 'server' && !muted('server');
       emit('counts', counts);
       if (server.length || convo.length) emit('messages', { server: server, convo: convo });
       schedule();
@@ -127,6 +127,45 @@
     });
   }
 
+  function loadMe() {
+    return rpc('gv_social_me').then(function (data) {
+      me = data;
+      emit('me', me);
+      return me;
+    });
+  }
+
+  // A mute holds until its time in epoch milliseconds, or for good at 0.
+  function muted(key) {
+    var until = me.mutes && me.mutes[key];
+    if (until == null) return false;
+    return until === 0 || until > Date.now();
+  }
+
+  // until: a time in epoch milliseconds, 0 for good, null to unmute.
+  function mute(key, until) {
+    return rpc('gv_mute_set', { p_key: key, p_until: until }).then(function (data) {
+      me = data;
+      emit('me', me);
+      return me;
+    });
+  }
+
+  function setStatus(status) {
+    return rpc('gv_social_set', { p_status: status }).then(function (data) {
+      me = data;
+      emit('me', me);
+      return me;
+    });
+  }
+
+  function setNotify(on) {
+    return rpc('gv_social_set', { p_notify: !!on }).then(function (data) {
+      me = data;
+      emit('me', me);
+      return me;
+    });
+  }
 
 
 
@@ -145,6 +184,7 @@
     sb = client;
     user = account;
     emit('state', user);
+    loadMe().catch(function () {});
     poll();
   }
 
@@ -185,6 +225,10 @@
     host: function () { return host; },
     counts: function () { return counts; },
     me: function () { return me; },
+    muted: muted,
+    mute: mute,
+    setStatus: setStatus,
+    setNotify: setNotify,
     markServerSeen: markServerSeen,
     // What chat shows, 'server' or 'convo:<id>', or null when it is shut.
     viewing: function (key) {
