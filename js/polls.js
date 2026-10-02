@@ -55,6 +55,12 @@
     '.gv-poll-look.mine{border-color:var(--accent,#ff3b3b)}',
     '.gv-poll-look.mine .gv-poll-bar span{background:var(--accent,#ff3b3b)}',
     '.gv-poll-box.wide{width:min(820px,100%)}',
+    '.gv-look{position:fixed;inset:0;z-index:2700;display:flex;flex-direction:column;gap:12px;padding:16px;background:rgba(8,8,10,.94);color:#f4f4f6}',
+    '.gv-look-top,.gv-look-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;width:min(1366px,100%);margin:0 auto}',
+    '.gv-look-name{font-size:1.1rem;font-weight:700;overflow-wrap:anywhere}',
+    '.gv-look-count{font-family:"JetBrains Mono",monospace;font-size:.74rem;color:#8a8a96}',
+    '.gv-look-stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}',
+    '.gv-look-stage img{display:block;max-width:100%;max-height:100%;border-radius:12px;border:1px solid rgba(255,255,255,.16);box-shadow:0 24px 70px rgba(0,0,0,.6)}',
     '@keyframes gvPollIn{from{opacity:0;transform:translateY(10px) scale(.98)}}',
     '@media (prefers-reduced-motion:reduce){.gv-poll-box{animation:none}.gv-poll-opt.result::before{transition:none}}'
   ].join('');
