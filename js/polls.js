@@ -225,6 +225,7 @@
       later.disabled = false;
       later.classList.add('on');
       later.focus();
+      ask.count(-1);
     }));
     foot.appendChild(all);
     foot.appendChild(later);
@@ -240,6 +241,7 @@
 
   // Looks for a poll this browser or account has not answered and has not
   // put off in the last day, and asks it.
+  var waiting = 0;
   function ask() {
     if (window.top !== window.self) return;
     visitor().then(function (v) {
@@ -247,10 +249,17 @@
     }).then(function (list) {
       var later = laterMap();
       var open = (list || []).filter(function (p) { return p.voted == null; });
+      waiting = open.length;
+      ask.count(0);
       var next = open.filter(function (p) { return !(later[p.id] && Date.now() - later[p.id] < LATER_MS); })[0];
       if (next) whenFree(function () { pop(next); });
     }).catch(function () {});
   }
+  // The Polls card on the home page says how many are waiting.
+  ask.count = function (change) {
+    waiting = Math.max(0, waiting + change);
+    if (window.GV && GV.features) GV.features.set('polls', waiting ? plural(waiting, 'poll', 'polls') + ' to answer' : null);
+  };
 
   window.GV = window.GV || {};
   window.GV.polls = {
