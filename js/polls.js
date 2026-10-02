@@ -307,6 +307,9 @@
       shut();
       pick(p, i);
     });
+    shade.addEventListener('click', function (e) {
+      if (e.target === shade || e.target === stage) shut();
+    });
     show(start);
     document.body.appendChild(shade);
     window.addEventListener('keydown', onKey, true);
