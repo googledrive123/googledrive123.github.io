@@ -1847,7 +1847,7 @@
     livePresence();
     liveNames(added);
     liveStats();
-    $('liveStatus').innerHTML = '<span class="dot"></span>Updated ' + new Date().toLocaleTimeString();
+    $('liveStatus').innerHTML = '<span class="dot"></span>' + (push.joined ? 'Instant, updated ' : 'Every second, updated ') + new Date().toLocaleTimeString();
   }
   // Pushed events wait for the first answer, so the last 10 minutes go in
   // underneath them in order.
