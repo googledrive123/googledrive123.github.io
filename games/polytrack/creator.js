@@ -573,7 +573,7 @@
 
   function joinAsCreator(visit) {
     creatorTicket = visit.ticket;
-    waitFor(function () {
+    return waitFor(function () {
       return menuFront() || document.querySelector('.game-toolbar-ui');
     }, 60000)
       // The menu can be up before the physics check is done, and a join that
