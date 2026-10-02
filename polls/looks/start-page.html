@@ -67,6 +67,7 @@ input::placeholder{color:currentColor;opacity:.5}
 .tile-text{display:flex;flex-direction:column;gap:2px;min-width:0}
 .tile-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tile-cat{font-size:13px;color:#64646b}
+.empty{padding:48px 0;font-size:14px;color:#64646b}
 .foot{display:flex;justify-content:center;gap:20px;padding:22px 40px 28px;font-size:13px;color:#64646b;background:#fff;border-top:1px solid #efeeeb}
 .foot a{text-decoration:none;cursor:pointer}
 .foot a:hover{color:#18181b}
@@ -169,6 +170,7 @@ input::placeholder{color:currentColor;opacity:.5}
     <a class="tile" data-soon><span class="thumb"><img src="/thumbs/aquapark-slides.webp" alt=""></span><span class="tile-text"><span class="tile-name">Aquapark Slides</span><span class="tile-cat">Arcade</span></span></a>
     <a class="tile" data-soon><span class="thumb"><img src="/thumbs/fnaf.webp" alt=""></span><span class="tile-text"><span class="tile-name">Five Nights at Freddy's</span><span class="tile-cat">Horror</span></span></a>
   </div>
+  <div class="empty" id="empty" hidden>No games match that. Try a shorter name.</div>
 </section>
 
 <footer class="foot">
@@ -186,6 +188,8 @@ input::placeholder{color:currentColor;opacity:.5}
 
   var state = {
     totw: 2 * 86400 + 13 * 3600 + 54 * 60 + 9,
+    qc: '',
+    cc: 'All',
     left: 1421
   };
 
@@ -212,6 +216,98 @@ input::placeholder{color:currentColor;opacity:.5}
     state.totw = Math.max(0, state.totw - 1);
     renderTotw();
   }, 1000);
+
+  // The games the library and the search dropdown draw from: id, name, categories.
+  var G = [
+    ['polytrack', 'PolyTrack', ['Racing']],
+    ['basketball-stars', 'Basketball Stars', ['Sports']],
+    ['amazing-rope-police', 'Amazing Rope Police', ['Action']],
+    ['ice-dodo', 'Ice Dodo', ['Arcade', 'Skill']],
+    ['adrenalinechallenge2', 'Adrenaline Challenge 2', ['Action', 'Driving']],
+    ['stickman-hook', 'Stickman Hook', ['Action', 'Skill']],
+    ['crossyroad', 'Crossy Road', ['Arcade']],
+    ['retrobowlcollege', 'Retro Bowl College', ['Sports']],
+    ['basket-bros', 'Basket Bros', ['Sports']],
+    ['rocketleague', 'Rocket League', ['Sports']],
+    ['2048', '2048', ['Puzzle']],
+    ['retro-bowl', 'Retro Bowl', ['Sports']],
+    ['bit-planes', 'Bit Planes', ['Action', 'Shooter']],
+    ['drifthunters', 'Drift Hunters', ['Racing', 'Driving']],
+    ['angry-sharks', 'Angry Sharks', ['Arcade', 'Action']],
+    ['wordle', 'Wordle', ['Puzzle']],
+    ['aquapark-slides', 'Aquapark Slides', ['Arcade', 'Racing']],
+    ['fnaf', "Five Nights at Freddy's", ['Horror']],
+    ['subway-surfers', 'Subway Surfers', ['Action', 'Arcade']],
+    ['grand-theft-auto-vice-city', 'Grand Theft Auto Vice City', ['Action']],
+    ['backrooms', 'The Backrooms', ['Horror']],
+    ['slope2', 'Slope 2', ['Action', 'Skill']],
+    ['cluster-rush', 'Cluster Rush', ['Action', 'Skill']],
+    ['motox3m-spooky', 'Moto X3M Spooky Land', ['Racing', 'Driving']],
+    ['big-neon-tower', 'Big Neon Tower', ['Platformer']],
+    ['drivemad', 'Drive Mad', ['Racing', 'Driving']],
+    ['bitlife', 'BitLife', ['Simulation']],
+    ['a-difficult-game-about-climbing', 'A Difficult Game About Climbing', ['Platformer']],
+    ['madalincars', 'Madalin Cars', ['Racing', 'Driving']],
+    ['snowrider3d', 'Snow Rider 3D', ['Action', 'Driving']],
+    ['badtimesimulator', 'Bad Time Simulator', ['Action', 'Skill']],
+    ['2drocketleague', '2D Rocket League', ['Sports']],
+    ['cuphead', 'Cuphead', ['Action']],
+    ['flappyplane', 'Flappy Plane', ['Arcade', 'Skill']],
+    ['adventure-capitalist', 'Adventure Capitalist', ['Idle']],
+    ['1v1lol', '1v1.LOL', ['Action', 'Shooter']],
+    ['awesometanks2', 'Awesome Tanks 2', ['Action', 'Shooter']],
+    ['vex7', 'Vex 7', ['Platformer']],
+    ['minesweeper', 'Minesweeper', ['Puzzle']],
+    ['timeshooter2', 'Time Shooter 2', ['Action', 'Shooter']],
+    ['8ball', '8 Ball Pool', ['Sports']],
+    ['draw-the-hill', 'Draw the Hill', ['Puzzle', 'Driving']],
+    ['geometrydash', 'Geometry Dash', ['Platformer', 'Skill']],
+    ['hollow-knight-silksong', 'Hollow Knight Silksong', ['RPG']],
+    ['1on1soccer', '1 on 1 Soccer', ['Sports']],
+    ['slime-rancher', 'Slime Rancher', ['Simulation']]
+  ];
+
+  var input = $('q');
+
+  function filt(q, cat) {
+    q = q.trim().toLowerCase();
+    return G.filter(function (g) {
+      return (cat === 'All' || g[2].indexOf(cat) >= 0) && (!q || g[1].toLowerCase().indexOf(q) >= 0);
+    });
+  }
+
+  function ids(list) { return list.map(function (g) { return g[0]; }).join(); }
+
+  function tileHtml(g) {
+    return '<a class="tile" data-soon><span class="thumb"><img src="/thumbs/' + g[0] + '.webp" alt=""></span>' +
+      '<span class="tile-text"><span class="tile-name">' + g[1] + '</span><span class="tile-cat">' + g[2][0] + '</span></span></a>';
+  }
+
+  // The library under the fold: a search shows every match by name, otherwise
+  // the chosen category. Up to 18 games.
+  var gridIds = ids(G.slice(0, 18));
+  function renderLib() {
+    var q = state.qc.trim(), searching = !!q, cat = state.cc;
+    var list = filt(state.qc, searching ? 'All' : cat);
+    var shown = list.slice(0, 18);
+    $('libHead').textContent = searching ? 'Results for “' + q + '”' : (cat === 'All' ? 'All games' : cat);
+    $('libSub').textContent = searching ? list.length + ' found' : (cat === 'All' ? '1,958' : '');
+    $('tabs').hidden = searching;
+    if (ids(shown) !== gridIds) {
+      gridIds = ids(shown);
+      $('grid').innerHTML = shown.map(tileHtml).join('');
+    }
+    $('empty').hidden = list.length > 0;
+  }
+
+  function render() {
+    renderLib();
+  }
+
+  input.addEventListener('input', function () {
+    state.qc = input.value;
+    render();
+  });
 })();
 </script>
 </body>
