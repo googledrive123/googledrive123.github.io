@@ -13,7 +13,7 @@
   var LATER_KEY = 'gv.poll.later';
   var LATER_MS = 24 * 60 * 60 * 1000;
   // Not now waits this long, so the question gets read first.
-  var NOT_NOW_MS = 3000;
+  var NOT_NOW_MS = 5000;
 
   var CSS = [
     '.gv-poll{text-align:left}',
