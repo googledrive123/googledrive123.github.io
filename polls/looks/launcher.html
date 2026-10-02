@@ -68,6 +68,29 @@
   .foot b { color: var(--tx); font-weight: 600; }
   .foot a { text-decoration: none; }
   .foot a:hover { color: var(--tx); }
+  .shade { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.3); }
+  .lib { position: absolute; left: 96px; right: 96px; top: 40px; bottom: 40px; display: flex; flex-direction: column; border-radius: 24px; overflow: hidden; background: oklch(0.19 calc(0.035 * var(--c)) var(--h) / 0.88); border: 1px solid oklch(0.92 calc(0.04 * var(--c)) var(--h) / 0.16); backdrop-filter: blur(24px); box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45); }
+  .shade, .lib { visibility: hidden; opacity: 0; pointer-events: none; }
+  .open .shade, .open .lib { visibility: visible; opacity: 1; pointer-events: auto; }
+  .lib-head { display: flex; align-items: center; gap: 8px; padding: 20px 20px 18px; }
+  .lib-title { margin: 0 10px 0 0; font-size: 20px; font-weight: 600; letter-spacing: -0.02em; }
+  .lib-search { display: flex; align-items: center; gap: 10px; width: 250px; height: 36px; padding: 0 12px; border-radius: 12px; background: var(--s2); margin-right: 8px; }
+  .lib-search svg { flex-shrink: 0; opacity: .7; }
+  .lib-search input { flex: 1; min-width: 0; height: 100%; border: 0; outline: none; background: transparent; color: inherit; font-family: inherit; font-size: 14px; }
+  .tab { height: 36px; padding: 0 13px; border-radius: 12px; border: 1px solid var(--ln); background: transparent; color: var(--mu); font-size: 14px; cursor: pointer; }
+  .tab.on { border-color: transparent; background: var(--s3); color: var(--tx); }
+  .lib-x { margin-left: auto; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 12px; border: 0; background: var(--s2); color: inherit; cursor: pointer; padding: 0; }
+  .lib-x:hover { background: var(--s3); }
+  .lib-body { flex: 1; min-height: 0; overflow: auto; padding: 2px 20px 20px; }
+  .lib-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 20px 16px; }
+  .game { display: flex; flex-direction: column; gap: 8px; min-width: 0; color: inherit; text-decoration: none; cursor: pointer; }
+  .game[hidden] { display: none; }
+  .game-art { display: block; aspect-ratio: 1 / 1; border-radius: 16px; overflow: hidden; background: var(--s2); transition: transform .15s; }
+  .game-art:hover { transform: scale(1.04); }
+  .game-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .game-meta { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  .game-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .game-cat { font-size: 12px; color: var(--mu); }
 </style>
 </head>
 <body>
@@ -113,12 +136,82 @@
     </div>
     <div class="foot"><span><b>142</b> playing right now</span><span>·</span><span><a href="#" data-soon>about</a> · <a href="#" data-soon>privacy</a> · <a href="#" data-soon>terms</a></span></div>
   </div>
+  <div class="shade"></div>
+  <div class="lib" id="lib" role="dialog" aria-modal="true" aria-labelledby="libTitle">
+    <div class="lib-head">
+      <h2 class="lib-title" id="libTitle">games</h2>
+      <label class="lib-search">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input id="libQ" placeholder="search 1,958 games" aria-label="Search games" autocomplete="off" spellcheck="false">
+      </label>
+      <button class="tab on" type="button" data-cat="All" aria-pressed="true">all</button>
+      <button class="tab" type="button" data-cat="Action" aria-pressed="false">action</button>
+      <button class="tab" type="button" data-cat="Arcade" aria-pressed="false">arcade</button>
+      <button class="tab" type="button" data-cat="Driving" aria-pressed="false">driving</button>
+      <button class="tab" type="button" data-cat="Platformer" aria-pressed="false">platformer</button>
+      <button class="tab" type="button" data-cat="Puzzle" aria-pressed="false">puzzle</button>
+      <button class="tab" type="button" data-cat="Racing" aria-pressed="false">racing</button>
+      <button class="tab" type="button" data-cat="Sports" aria-pressed="false">sports</button>
+      <button class="lib-x" id="libClose" type="button" title="Close" aria-label="Close"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+    </div>
+    <div class="lib-body" id="libBody">
+      <div class="lib-grid" id="libGrid">
+        <a class="game" href="#" data-soon data-id="polytrack"><span class="game-art"><img src="/thumbs/polytrack.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">PolyTrack</span><span class="game-cat">racing</span></span></a>
+        <a class="game" href="#" data-soon data-id="basketball-stars"><span class="game-art"><img src="/thumbs/basketball-stars.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Basketball Stars</span><span class="game-cat">sports</span></span></a>
+        <a class="game" href="#" data-soon data-id="amazing-rope-police"><span class="game-art"><img src="/thumbs/amazing-rope-police.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Amazing Rope Police</span><span class="game-cat">action</span></span></a>
+        <a class="game" href="#" data-soon data-id="ice-dodo"><span class="game-art"><img src="/thumbs/ice-dodo.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Ice Dodo</span><span class="game-cat">arcade</span></span></a>
+        <a class="game" href="#" data-soon data-id="adrenalinechallenge2"><span class="game-art"><img src="/thumbs/adrenalinechallenge2.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Adrenaline Challenge 2</span><span class="game-cat">action</span></span></a>
+        <a class="game" href="#" data-soon data-id="stickman-hook"><span class="game-art"><img src="/thumbs/stickman-hook.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Stickman Hook</span><span class="game-cat">action</span></span></a>
+        <a class="game" href="#" data-soon data-id="crossyroad"><span class="game-art"><img src="/thumbs/crossyroad.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Crossy Road</span><span class="game-cat">arcade</span></span></a>
+        <a class="game" href="#" data-soon data-id="retrobowlcollege"><span class="game-art"><img src="/thumbs/retrobowlcollege.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Retro Bowl College</span><span class="game-cat">sports</span></span></a>
+        <a class="game" href="#" data-soon data-id="basket-bros"><span class="game-art"><img src="/thumbs/basket-bros.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Basket Bros</span><span class="game-cat">sports</span></span></a>
+        <a class="game" href="#" data-soon data-id="rocketleague"><span class="game-art"><img src="/thumbs/rocketleague.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Rocket League</span><span class="game-cat">sports</span></span></a>
+        <a class="game" href="#" data-soon data-id="2048"><span class="game-art"><img src="/thumbs/2048.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">2048</span><span class="game-cat">puzzle</span></span></a>
+        <a class="game" href="#" data-soon data-id="retro-bowl"><span class="game-art"><img src="/thumbs/retro-bowl.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Retro Bowl</span><span class="game-cat">sports</span></span></a>
+        <a class="game" href="#" data-soon data-id="bit-planes"><span class="game-art"><img src="/thumbs/bit-planes.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Bit Planes</span><span class="game-cat">action</span></span></a>
+        <a class="game" href="#" data-soon data-id="drifthunters"><span class="game-art"><img src="/thumbs/drifthunters.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Drift Hunters</span><span class="game-cat">racing</span></span></a>
+        <a class="game" href="#" data-soon data-id="angry-sharks"><span class="game-art"><img src="/thumbs/angry-sharks.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Angry Sharks</span><span class="game-cat">arcade</span></span></a>
+        <a class="game" href="#" data-soon data-id="wordle"><span class="game-art"><img src="/thumbs/wordle.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Wordle</span><span class="game-cat">puzzle</span></span></a>
+        <a class="game" href="#" data-soon data-id="aquapark-slides"><span class="game-art"><img src="/thumbs/aquapark-slides.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Aquapark Slides</span><span class="game-cat">arcade</span></span></a>
+        <a class="game" href="#" data-soon data-id="fnaf"><span class="game-art"><img src="/thumbs/fnaf.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Five Nights at Freddy's</span><span class="game-cat">horror</span></span></a>
+        <a class="game" href="#" data-soon data-id="subway-surfers"><span class="game-art"><img src="/thumbs/subway-surfers.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Subway Surfers</span><span class="game-cat">action</span></span></a>
+        <a class="game" href="#" data-soon data-id="grand-theft-auto-vice-city"><span class="game-art"><img src="/thumbs/grand-theft-auto-vice-city.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Grand Theft Auto Vice City</span><span class="game-cat">action</span></span></a>
+        <a class="game" href="#" data-soon data-id="backrooms"><span class="game-art"><img src="/thumbs/backrooms.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">The Backrooms</span><span class="game-cat">horror</span></span></a>
+        <a class="game" href="#" data-soon data-id="slope2"><span class="game-art"><img src="/thumbs/slope2.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Slope 2</span><span class="game-cat">action</span></span></a>
+        <a class="game" href="#" data-soon data-id="cluster-rush"><span class="game-art"><img src="/thumbs/cluster-rush.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Cluster Rush</span><span class="game-cat">action</span></span></a>
+        <a class="game" href="#" data-soon data-id="motox3m-spooky"><span class="game-art"><img src="/thumbs/motox3m-spooky.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Moto X3M Spooky Land</span><span class="game-cat">racing</span></span></a>
+        <a class="game" href="#" data-soon data-id="big-neon-tower"><span class="game-art"><img src="/thumbs/big-neon-tower.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Big Neon Tower</span><span class="game-cat">platformer</span></span></a>
+        <a class="game" href="#" data-soon data-id="drivemad"><span class="game-art"><img src="/thumbs/drivemad.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Drive Mad</span><span class="game-cat">racing</span></span></a>
+        <a class="game" href="#" data-soon data-id="bitlife"><span class="game-art"><img src="/thumbs/bitlife.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">BitLife</span><span class="game-cat">simulation</span></span></a>
+        <a class="game" href="#" data-soon data-id="a-difficult-game-about-climbing"><span class="game-art"><img src="/thumbs/a-difficult-game-about-climbing.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">A Difficult Game About Climbing</span><span class="game-cat">platformer</span></span></a>
+        <a class="game" href="#" data-soon data-id="madalincars"><span class="game-art"><img src="/thumbs/madalincars.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Madalin Cars</span><span class="game-cat">racing</span></span></a>
+        <a class="game" href="#" data-soon data-id="snowrider3d"><span class="game-art"><img src="/thumbs/snowrider3d.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Snow Rider 3D</span><span class="game-cat">action</span></span></a>
+        <a class="game" href="#" data-soon data-id="badtimesimulator"><span class="game-art"><img src="/thumbs/badtimesimulator.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Bad Time Simulator</span><span class="game-cat">action</span></span></a>
+        <a class="game" href="#" data-soon data-id="2drocketleague"><span class="game-art"><img src="/thumbs/2drocketleague.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">2D Rocket League</span><span class="game-cat">sports</span></span></a>
+        <a class="game" href="#" data-soon data-id="cuphead"><span class="game-art"><img src="/thumbs/cuphead.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Cuphead</span><span class="game-cat">action</span></span></a>
+        <a class="game" href="#" data-soon data-id="flappyplane"><span class="game-art"><img src="/thumbs/flappyplane.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Flappy Plane</span><span class="game-cat">arcade</span></span></a>
+        <a class="game" href="#" data-soon data-id="adventure-capitalist"><span class="game-art"><img src="/thumbs/adventure-capitalist.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Adventure Capitalist</span><span class="game-cat">idle</span></span></a>
+        <a class="game" href="#" data-soon data-id="1v1lol"><span class="game-art"><img src="/thumbs/1v1lol.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">1v1.LOL</span><span class="game-cat">action</span></span></a>
+        <a class="game" href="#" data-soon data-id="awesometanks2"><span class="game-art"><img src="/thumbs/awesometanks2.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Awesome Tanks 2</span><span class="game-cat">action</span></span></a>
+        <a class="game" href="#" data-soon data-id="vex7"><span class="game-art"><img src="/thumbs/vex7.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Vex 7</span><span class="game-cat">platformer</span></span></a>
+        <a class="game" href="#" data-soon data-id="minesweeper"><span class="game-art"><img src="/thumbs/minesweeper.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Minesweeper</span><span class="game-cat">puzzle</span></span></a>
+        <a class="game" href="#" data-soon data-id="timeshooter2"><span class="game-art"><img src="/thumbs/timeshooter2.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Time Shooter 2</span><span class="game-cat">action</span></span></a>
+        <a class="game" href="#" data-soon data-id="8ball"><span class="game-art"><img src="/thumbs/8ball.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">8 Ball Pool</span><span class="game-cat">sports</span></span></a>
+        <a class="game" href="#" data-soon data-id="draw-the-hill"><span class="game-art"><img src="/thumbs/draw-the-hill.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Draw the Hill</span><span class="game-cat">puzzle</span></span></a>
+        <a class="game" href="#" data-soon data-id="geometrydash"><span class="game-art"><img src="/thumbs/geometrydash.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Geometry Dash</span><span class="game-cat">platformer</span></span></a>
+        <a class="game" href="#" data-soon data-id="hollow-knight-silksong"><span class="game-art"><img src="/thumbs/hollow-knight-silksong.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Hollow Knight Silksong</span><span class="game-cat">rpg</span></span></a>
+        <a class="game" href="#" data-soon data-id="1on1soccer"><span class="game-art"><img src="/thumbs/1on1soccer.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">1 on 1 Soccer</span><span class="game-cat">sports</span></span></a>
+        <a class="game" href="#" data-soon data-id="slime-rancher"><span class="game-art"><img src="/thumbs/slime-rancher.webp" alt="" loading="lazy"></span><span class="game-meta"><span class="game-name">Slime Rancher</span><span class="game-cat">simulation</span></span></a>
+      </div>
+    </div>
+  </div>
 </main>
 <script>
 'use strict';
 
 var state = {
   left: 1421,
+  open: false,
 };
 
 function $(id) { return document.getElementById(id); }
@@ -131,6 +224,23 @@ function tick() {
   $('timerBar').style.width = pct.toFixed(1) + '%';
 }
 setInterval(tick, 1000);
+
+function openLib() {
+  state.open = true;
+  $('scr').classList.add('open');
+  $('launch').inert = true;
+  $('libQ').focus();
+}
+
+function closeLib() {
+  state.open = false;
+  $('scr').classList.remove('open');
+  $('launch').inert = false;
+  $('launchQ').focus();
+}
+
+$('openGames').addEventListener('click', openLib);
+$('libClose').addEventListener('click', closeLib);
 </script>
 </body>
 </html>
