@@ -255,6 +255,7 @@ begin
              'created_at', p.created_at,
              'ends_at', p.ends_at,
              'closed', p.closed,
+             'preview', p.preview,
              'open', not p.closed and (p.ends_at is null or p.ends_at > now()),
              'counts', (
                select json_agg(coalesce(c.n, 0) order by i.idx)
