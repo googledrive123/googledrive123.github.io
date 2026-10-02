@@ -524,6 +524,15 @@
 
   // ── Wiring ────────────────────────────────────────────────────────────
 
+  // Escape closes what is open in chat first, and never reaches the game
+  // page's own Escape, which would close the game.
+  window.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape' || !isOpen()) return;
+    e.stopImmediatePropagation();
+    e.preventDefault();
+    if (els.sheet && !els.sheet.hidden) closeSheet();
+    else close();
+  }, true);
 
   function wire() {
     var s = social();
