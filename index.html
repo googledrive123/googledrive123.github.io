@@ -1725,6 +1725,9 @@
       transition: color 0.15s;
     }
     .mini-nav a:hover { color: var(--text); }
+    /* The welcome screen is one screen with nothing under it. The footer
+       stays under the games. */
+    body:has(#welcome:not(.hidden)) .home-footer { display: none; }
     .home-footer {
       position: relative;
       z-index: 1;
