@@ -147,6 +147,7 @@ begin
 
   return json_build_object(
     'id', v_row.id,
+    'user_id', v_row.user_id,
     'username', v_row.username,
     'body', v_row.body,
     'created_at', v_row.created_at,
