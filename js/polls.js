@@ -366,7 +366,7 @@
     shade.setAttribute('aria-label', 'New poll');
     var box = el('div', 'gv-poll-box');
     if (hasLooks(poll)) box.classList.add('wide');
-    box.appendChild(el('div', 'gv-poll-kicker', 'New poll'));
+    box.appendChild(el('div', 'gv-poll-kicker', poll.preview ? 'Preview poll \u00b7 localhost only' : 'New poll'));
     var foot = el('div', 'gv-poll-foot');
     var all = el('a', '', 'See all polls');
     all.href = '/polls/';
