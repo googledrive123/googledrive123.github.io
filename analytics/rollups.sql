@@ -13,6 +13,10 @@
 --   analytics_quarters        events, page views, plays and play time per
 --                             visitor and session, 15 minutes at a time
 --
+-- Fifteen minutes because every time zone in use today is a whole number of
+-- quarter hours off UTC, so a quarter always falls on one day wherever the
+-- dashboard is opened.
+--
 -- Apply against project dxwjxzmlezfyursysays, before analytics/visitors.sql.
 -- Every statement is safe to run twice.
 
