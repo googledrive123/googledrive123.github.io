@@ -2081,7 +2081,7 @@
     state.rows = store.rows.filter(function (r) { return r.tms >= from && !store.scanner[r.visitor_id]; });
     render();
     loadNames();
-    $('status').innerHTML = '<span class="dot"></span>Updated ' + new Date().toLocaleTimeString();
+    $('status').innerHTML = '<span class="dot"></span>' + (push.joined ? 'Live, updated ' : 'Updated ') + new Date().toLocaleTimeString();
     drawnAt = Date.now();
     drawMs = drawnAt - t0;
   }
