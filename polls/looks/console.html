@@ -127,5 +127,25 @@ button{padding:0;border:0;background:none;font:inherit;color:inherit;cursor:poin
     <a class="dock-btn" href="#" title="Settings" data-soon><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"></path></svg></a>
   </nav>
 </div>
+
+<script>
+(function () {
+  'use strict';
+
+  function $(id) { return document.getElementById(id); }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+
+  var state = {
+    // Seconds left in period 3. The period is 50 minutes, so 0 starts over at 3000.
+    left: 1421,
+  };
+
+  function tick() {
+    state.left = state.left > 0 ? state.left - 1 : 3000;
+    $('timer').textContent = pad(Math.floor(state.left / 60)) + ':' + pad(state.left % 60);
+  }
+  setInterval(tick, 1000);
+})();
+</script>
 </body>
 </html>
