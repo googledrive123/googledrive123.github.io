@@ -153,3 +153,41 @@ end;
 $function$;
 
 grant execute on function public.gv_polls_list(text) to anon, authenticated;
+
+
+-- Votes, as the signed-in account if there is one and as this browser
+-- either way. Voting twice changes nothing and hands back the first vote.
+create or replace function public.gv_poll_vote(p_poll bigint, p_option integer, p_visitor text)
+returns json
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+  v_visitor text := nullif(left(btrim(coalesce(p_visitor, '')), 64), '');
+  v_poll gv_polls;
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'Polls only work on GameVault.';
+  end if;
+  if v_visitor is null then
+    raise exception 'Could not vote from this browser. Refresh and try again.';
+  end if;
+
+  select * into v_poll from gv_polls where id = p_poll;
+  if not found then
+    raise exception 'That poll is gone.';
+  end if;
+
+  if public.gv_poll_mine(p_poll, v_user, v_visitor) is null then
+    insert into gv_poll_votes (poll_id, choice, user_id, visitor_id)
+    values (p_poll, p_option, v_user, v_visitor)
+    on conflict do nothing;
+  end if;
+
+  return public.gv_poll_json(p_poll, v_user, v_visitor);
+end;
+$function$;
+
+grant execute on function public.gv_poll_vote(bigint, integer, text) to anon, authenticated;
