@@ -686,6 +686,20 @@
       return Promise.all(workers).then(function () { st.since = Date.parse(span.now); return st; });
     });
   }
+  // What came in since the last answer. An insert that had not finished then
+  // started at most 3 seconds before it, when Supabase would have stopped it,
+  // so going back a little further catches every one. Rows already held are
+  // skipped by id. A full answer means there may be more than it holds; null
+  // asks for the whole range again.
+  var OVERLAP = 15000;
+  function fetchTail(st) {
+    return rpc('analytics_rows', { p_secret: state.secret, p_from: new Date(Math.max(st.from, st.since - OVERLAP)).toISOString() }).then(function (res) {
+      if ((res.rows || []).length >= SLICE) return null;
+      var added = take(st, res);
+      st.since = Date.parse(res.now);
+      return added;
+    });
+  }
 
   // ── charts ──
   Chart.defaults.color = '#8a8a96';
