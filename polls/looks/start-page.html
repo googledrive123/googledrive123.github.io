@@ -319,6 +319,13 @@ input::placeholder{color:currentColor;opacity:.5}
     });
     render();
   });
+
+  // Surprise me puts a random game's name in the search.
+  $('surprise').addEventListener('click', function () {
+    state.qc = G[Math.floor(Math.random() * G.length)][1];
+    input.value = state.qc;
+    render();
+  });
 })();
 </script>
 </body>
