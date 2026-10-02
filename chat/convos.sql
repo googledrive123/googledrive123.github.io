@@ -403,3 +403,30 @@ $function$;
 revoke all on function public.gv_convo_recent(bigint, bigint) from public, anon;
 grant execute on function public.gv_convo_recent(bigint, bigint) to authenticated;
 
+
+create or replace function public.gv_convo_read(p_convo bigint, p_id bigint)
+returns boolean
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'Chat only works on GameVault.';
+  end if;
+  if v_user is null then
+    raise exception 'Sign in to chat.';
+  end if;
+
+  update gv_convo_members
+     set last_read = greatest(last_read, coalesce(p_id, 0))
+   where convo_id = p_convo and user_id = v_user;
+  return found;
+end;
+$function$;
+
+revoke all on function public.gv_convo_read(bigint, bigint) from public, anon;
+grant execute on function public.gv_convo_read(bigint, bigint) to authenticated;
+
