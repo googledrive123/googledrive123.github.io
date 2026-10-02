@@ -182,6 +182,9 @@ begin
   if v_poll.closed or v_poll.ends_at <= now() then
     raise exception 'That poll is over.';
   end if;
+  if p_option is null or p_option < 0 or p_option >= jsonb_array_length(v_poll.options) then
+    raise exception 'Pick one of the answers.';
+  end if;
 
   if public.gv_poll_mine(p_poll, v_user, v_visitor) is null then
     insert into gv_poll_votes (poll_id, choice, user_id, visitor_id)
