@@ -3306,7 +3306,9 @@ function suggAfterGame() {
 (function scheduleSugg(){
   let framed = false;
   try { framed = window.self !== window.top; } catch { framed = true; }
-  if (framed || !suggAllowed()) return;
+  // A visit only gets it once a game has run five minutes, on this visit's
+  // way out of the game or, if the site was closed mid-game, on the next.
+  if (framed || !suggAllowed() || !suggPlayed()) return;
   setTimeout(() => {
     if (!suggAllowed()) return;
     if (document.querySelector('.roll-overlay.show, .game-overlay.show, .auth-overlay.show, .profile-overlay.show, .movie-overlay.open')) return;
