@@ -50,6 +50,8 @@
     '.gv-poll-look-row{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:0 2px;font-size:.9rem;font-weight:600}',
     '.gv-poll-look-row span{min-width:0;overflow-wrap:anywhere}',
     '.gv-poll-look .gv-poll-pct{font-family:"JetBrains Mono",monospace;font-size:.74rem;font-weight:400;color:var(--muted,#8a8a96);white-space:nowrap}',
+    '.gv-poll-bar{display:block;height:4px;margin:0 2px;overflow:hidden;border-radius:2px;background:var(--surface,#121216)}',
+    '.gv-poll-bar span{display:block;width:var(--p,0%);height:100%;background:var(--muted,#8a8a96);transition:width .5s cubic-bezier(.2,.8,.2,1)}',
     '@keyframes gvPollIn{from{opacity:0;transform:translateY(10px) scale(.98)}}',
     '@media (prefers-reduced-motion:reduce){.gv-poll-box{animation:none}.gv-poll-opt.result::before{transition:none}}'
   ].join('');
@@ -194,6 +196,11 @@
       if (showing) {
         var n = p.counts[i] || 0, pct = total ? Math.round(100 * n / total) : 0;
         row.appendChild(el('span', 'gv-poll-pct', pct + '% \u00b7 ' + n.toLocaleString()));
+        var bar = el('span', 'gv-poll-bar');
+        var fill = el('span');
+        fill.style.setProperty('--p', pct + '%');
+        bar.appendChild(fill);
+        t.appendChild(bar);
       }
       if (!showing) t.addEventListener('click', function () { vote(p, i); });
       return t;
