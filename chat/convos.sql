@@ -48,6 +48,10 @@ create table if not exists public.gv_convo_messages (
   deleted    boolean not null default false
 );
 
+-- Who the message names with @ (chat/mentions.sql), as [{id, name}].
+alter table public.gv_convo_messages
+  add column if not exists mentions jsonb not null default '[]'::jsonb;
+
 create index if not exists gv_convo_messages_convo on public.gv_convo_messages (convo_id, id);
 create index if not exists gv_convo_messages_user on public.gv_convo_messages (user_id, created_at desc);
 
@@ -261,7 +265,10 @@ grant execute on function public.gv_group_leave(bigint) to authenticated;
 
 -- Sends a message as the signed-in account, with the same checks and the
 -- same wait=<seconds> and until=<time> hints as gv_chat_send.
-create or replace function public.gv_convo_send(p_convo bigint, p_body text)
+-- p_mentions is who the page says was picked after an @; chat/mentions.sql
+-- decides who the message really names, members of the chat only.
+drop function if exists public.gv_convo_send(bigint, text);
+create or replace function public.gv_convo_send(p_convo bigint, p_body text, p_mentions uuid[] default null)
 returns json
 language plpgsql
 security definer
@@ -273,6 +280,7 @@ declare
   v_ban gv_chat_bans;
   v_last timestamptz;
   v_wait integer;
+  v_mentions jsonb;
   v_row gv_convo_messages;
 begin
   if not public.gv_origin_allowed() then
@@ -333,11 +341,14 @@ begin
     raise exception 'That message has words we do not allow here. Try saying it another way.';
   end if;
 
-  insert into gv_convo_messages (convo_id, user_id, username, body)
-  values (p_convo, v_user, public.gv_display_name(v_user), v_body)
+  v_mentions := public.gv_mention_list(v_body, p_mentions, p_convo);
+  insert into gv_convo_messages (convo_id, user_id, username, body, mentions)
+  values (p_convo, v_user, public.gv_display_name(v_user), v_body, v_mentions)
   returning * into v_row;
   update gv_convo_members set last_read = v_row.id
    where convo_id = p_convo and user_id = v_user;
+  insert into gv_mentions (user_id, from_user, convo_message_id, convo_id)
+  select (x ->> 'id')::uuid, v_user, v_row.id, p_convo from jsonb_array_elements(v_mentions) x;
 
   return json_build_object(
     'id', v_row.id,
@@ -345,14 +356,17 @@ begin
     'user_id', v_row.user_id,
     'username', v_row.username,
     'body', v_row.body,
+    'mentions', v_row.mentions,
+    -- The blue check from analytics/verified.sql, shown next to the name.
+    'verified', exists (select 1 from gv_verified v where v.key = v_user::text),
     'created_at', v_row.created_at,
     'mine', true
   );
 end;
 $function$;
 
-revoke all on function public.gv_convo_send(bigint, text) from public, anon;
-grant execute on function public.gv_convo_send(bigint, text) to authenticated;
+revoke all on function public.gv_convo_send(bigint, text, uuid[]) from public, anon;
+grant execute on function public.gv_convo_send(bigint, text, uuid[]) to authenticated;
 
 
 -- The newest 100 messages still up, oldest first, or only those after the
@@ -384,6 +398,8 @@ begin
              'user_id', m.user_id,
              'username', m.username,
              'body', m.body,
+             'mentions', m.mentions,
+             'verified', exists (select 1 from gv_verified v where v.key = m.user_id::text),
              'created_at', m.created_at,
              'mine', m.user_id = v_user
            ) order by m.id)
@@ -458,7 +474,8 @@ begin
              'members', (
                select coalesce(json_agg(json_build_object(
                         'id', o.user_id,
-                        'username', public.gv_display_name(o.user_id)
+                        'username', public.gv_display_name(o.user_id),
+                        'verified', exists (select 1 from gv_verified v where v.key = o.user_id::text)
                       ) order by o.joined_at), '[]'::json)
                  from gv_convo_members o
                 where o.convo_id = c.id and o.user_id <> v_user
@@ -693,6 +710,8 @@ begin
                'user_id', m.user_id,
                'username', m.username,
                'body', m.body,
+               'mentions', m.mentions,
+               'verified', exists (select 1 from gv_verified v where v.key = m.user_id::text),
                'created_at', m.created_at,
                'mine', m.user_id = v_user
              ) order by m.id)
@@ -716,6 +735,8 @@ begin
                'user_id', m.user_id,
                'username', m.username,
                'body', m.body,
+               'mentions', m.mentions,
+               'verified', exists (select 1 from gv_verified v where v.key = m.user_id::text),
                'created_at', m.created_at,
                'mine', m.user_id = v_user
              ) order by m.id)
@@ -743,7 +764,9 @@ begin
        where l.friend_id = v_user
          and not exists (select 1 from gv_friend_links r
                           where r.user_id = v_user and r.friend_id = l.user_id)
-    )
+    ),
+    -- @mentions not looked at yet, by chat: 'server' or 'convo:<id>'.
+    'mentioned', public.gv_mentions_unseen(v_user)
   );
 end;
 $function$;

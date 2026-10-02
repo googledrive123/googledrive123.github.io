@@ -15,6 +15,21 @@
   ];
 
   var ICON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v10H9l-5 4z"/></svg>';
+  var SMILE = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 14a4 4 0 0 0 7 0"/><path d="M9 9.5h.01M15 9.5h.01"/></svg>';
+  // The blue check from analytics/verified.sql, as the rest of the site draws it.
+  var CHECK = '<svg class="gv-chat-check" viewBox="0 0 24 24" role="img" aria-label="Verified"><circle cx="12" cy="12" r="11" fill="#1d9bf0"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  // The emoji picker's pages: the tab's own emoji, then what is on it.
+  var EMOJI = [
+    ['\ud83d\ude00', '😀 😃 😄 😁 😆 😅 😂 🤣 🙂 🙃 😉 😊 😇 🥰 😍 🤩 😘 😋 😛 😜 🤪 😝 🤑 🤗 🤭 🤫 🤔 🤐 🤨 😐 😑 😶 😏 😒 🙄 😬 😌 😔 😪 🤤 😴 😷 🤒 🤕 🤢 🤮 🥵 🥶 🥴 😵 🤯 🤠 🥳 😎 🤓 🧐 😕 😟 🙁 😮 😯 😲 😳 🥺 😦 😧 😨 😰 😥 😢 😭 😱 😖 😣 😞 😓 😩 😫 🥱 😤 😡 😠 🤬 😈 👿 💀 💩 🤡 👻 👽 🤖'],
+    ['\ud83d\udc4d', '👋 🤚 ✋ 🖖 👌 🤌 🤏 ✌️ 🤞 🤟 🤘 🤙 👈 👉 👆 👇 ☝️ 👍 👎 ✊ 👊 🤛 🤜 👏 🙌 👐 🤲 🙏 💪 🫡 🫶 👀 🧠'],
+    ['\u2764\ufe0f', '❤️ 🧡 💛 💚 💙 💜 🖤 🤍 🤎 💔 ❣️ 💕 💞 💓 💗 💖 💘 💝 💯 💢 💥 💫 💦 💨 🔥 ✨ ⭐ 🌟'],
+    ['\ud83d\udc36', '🐶 🐱 🐭 🐹 🐰 🦊 🐻 🐼 🐨 🐯 🦁 🐮 🐷 🐸 🐵 🐔 🐧 🐦 🦄 🐝 🐛 🦋 🐌 🐢 🐍 🦖 🐙 🦈 🐬 🐳 🌵 🌲 🌸 🌻 🌈 ☀️ 🌙 ⚡ ❄️ ☃️'],
+    ['\ud83c\udf55', '🍎 🍊 🍋 🍌 🍉 🍇 🍓 🍒 🍑 🥭 🍍 🥥 🥝 🍅 🥑 🌽 🥕 🍞 🧀 🍗 🍖 🍔 🍟 🍕 🌭 🌮 🌯 🍿 🍩 🍪 🎂 🍰 🧁 🍫 🍬 🍭 🍦 ☕ 🧃 🥤'],
+    ['\ud83c\udfae', '🎮 🕹️ 👾 🎯 🎲 🧩 ♟️ 🏆 🥇 🥈 🥉 🏅 ⚽ 🏀 🏈 ⚾ 🎾 🏐 🏓 🎳 🏁 🚗 🏎️ 🚀 🛸 ✈️ 🎉 🎊 🎁 🎈 🎵 🎶 🎧 🎤 🎬 📺 📱 💻'],
+    ['\u2705', '✅ ❌ ❓ ❗ ‼️ ⚠️ 🚫 💤 🆗 🆒 🆕 🔝 💬 💭 👑 💎 💰 🔒 🔑 ⏰ ⌛ 📌']
+  ];
+  var RECENT_KEY = 'gv.chat.emoji';
 
   var CSS = [
     '.gv-chat{--gv-chat-side:260px;display:flex;background:var(--surface,#121216);color:var(--text,#f4f4f6);font-family:inherit;font-size:.9rem;overflow:hidden}',
@@ -70,12 +85,33 @@
     '.gv-chat-pill:disabled{opacity:.45;cursor:default}',
     '.gv-chat-pill.primary{background:var(--text,#f4f4f6);color:var(--bg,#08080a);border-color:transparent;font-weight:700}',
     '.gv-chat-pill.danger{color:var(--accent,#ff3b3b);border-color:rgba(255,59,59,.35)}',
-    '.gv-chat-form{display:flex;gap:8px;padding:10px 12px 4px;border-top:1px solid var(--border,rgba(255,255,255,.07))}',
+    '.gv-chat-form{position:relative;display:flex;align-items:center;gap:8px;padding:10px 12px 4px;border-top:1px solid var(--border,rgba(255,255,255,.07))}',
     '.gv-chat-box{position:relative;flex:1;min-width:0}',
     '.gv-chat-input{width:100%;box-sizing:border-box;padding:9px 56px 9px 12px;border-radius:10px;border:1px solid var(--border,rgba(255,255,255,.07));background:var(--surface-2,#1a1a20);color:var(--text,#f4f4f6);font:inherit;font-size:.88rem;outline:none}',
     '.gv-chat-input:focus{border-color:var(--accent,#ff3b3b)}',
     '.gv-chat-len{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-family:"JetBrains Mono",monospace;font-size:.62rem;color:var(--muted-2,#54545e);pointer-events:none}',
     '.gv-chat-send{min-width:64px}',
+    '.gv-chat-check{width:14px;height:14px;flex-shrink:0;margin-left:4px;vertical-align:-2px}',
+    '.gv-mention{display:inline;padding:0 3px;border:0;border-radius:4px;background:rgba(57,135,229,.18);color:#8ab8f2;font:inherit;font-weight:600;cursor:pointer}',
+    '.gv-mention:hover{text-decoration:underline}',
+    '.gv-mention.me{background:rgba(255,59,59,.3);color:#fff;cursor:default;text-decoration:none}',
+    '.gv-msg.mentioned{background:rgba(255,59,59,.07);box-shadow:inset 3px 0 0 var(--accent,#ff3b3b)}',
+    '.gv-chat-at{min-width:18px;height:18px;padding:0 5px;border-radius:100px;background:var(--accent,#ff3b3b);color:#fff;font-size:.68rem;font-weight:800;display:grid;place-items:center}',
+    '.gv-chat-suggest{position:absolute;left:0;right:0;bottom:calc(100% + 6px);z-index:6;max-height:260px;overflow-y:auto;padding:4px;border-radius:12px;border:1px solid var(--border-strong,rgba(255,255,255,.16));background:var(--surface-2,#1a1a20);box-shadow:0 12px 30px rgba(0,0,0,.5)}',
+    '.gv-chat-suggest[hidden]{display:none}',
+    '.gv-chat-suggest button{width:100%;display:flex;align-items:center;gap:8px;padding:6px 8px;border:0;border-radius:8px;background:none;color:inherit;font:inherit;font-size:.85rem;text-align:left;cursor:pointer}',
+    '.gv-chat-suggest button[aria-selected="true"],.gv-chat-suggest button:hover{background:rgba(255,255,255,.08)}',
+    '.gv-chat-suggest .gv-chat-dot{width:24px;height:24px;font-size:.6rem}',
+    '.gv-chat-suggest p{margin:0;padding:6px 8px;font-size:.78rem;color:var(--muted,#8a8a96)}',
+    '.gv-chat-emojis{position:absolute;left:12px;bottom:calc(100% + 4px);z-index:7;width:min(330px,calc(100% - 24px));height:290px;display:flex;flex-direction:column;border-radius:14px;border:1px solid var(--border-strong,rgba(255,255,255,.16));background:var(--surface-2,#1a1a20);box-shadow:0 14px 36px rgba(0,0,0,.55);overflow:hidden}',
+    '.gv-chat-emojis[hidden]{display:none}',
+    '.gv-chat-emoji-tabs{display:flex;gap:2px;padding:6px 6px 4px;border-bottom:1px solid var(--border,rgba(255,255,255,.07))}',
+    '.gv-chat-emoji-tabs button{flex:1;min-width:0;padding:4px 0;border:0;border-radius:8px;background:none;font-size:1.05rem;line-height:1.3;cursor:pointer;opacity:.55}',
+    '.gv-chat-emoji-tabs button[aria-selected="true"],.gv-chat-emoji-tabs button:hover{opacity:1;background:rgba(255,255,255,.08)}',
+    '.gv-chat-emoji-grid{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(8,1fr);align-content:start;gap:2px;padding:6px}',
+    '.gv-chat-emoji-grid button{aspect-ratio:1;display:grid;place-items:center;padding:0;border:0;border-radius:8px;background:none;font-size:1.35rem;line-height:1;cursor:pointer}',
+    '.gv-chat-emoji-grid button:hover{background:rgba(255,255,255,.1)}',
+    '.gv-chat-emoji-grid p{grid-column:1/-1;margin:0;padding:8px 4px;font-size:.78rem;color:var(--muted,#8a8a96)}',
     '.gv-chat-status{min-height:1.2rem;padding:2px 12px 8px;font-size:.76rem;color:var(--muted,#8a8a96)}',
     '.gv-chat-status.wait{color:#f0c04a}',
     '.gv-chat-status.error{color:#ff7a7a}',
@@ -231,16 +267,27 @@
 
     var form = el('form', 'gv-chat-form');
     form.autocomplete = 'off';
+    els.emojiBtn = iconButton('Emoji', SMILE, toggleEmojis);
+    els.emojiBtn.setAttribute('aria-expanded', 'false');
+    els.emojis = el('div', 'gv-chat-emojis');
+    els.emojis.hidden = true;
     var box = el('div', 'gv-chat-box');
     els.input = el('input', 'gv-chat-input');
     els.input.maxLength = MAX;
     els.input.setAttribute('aria-label', 'Message');
     els.input.setAttribute('enterkeyhint', 'send');
+    els.input.setAttribute('aria-autocomplete', 'list');
     els.len = el('span', 'gv-chat-len', '0/' + MAX);
+    els.suggest = el('div', 'gv-chat-suggest');
+    els.suggest.hidden = true;
+    els.suggest.setAttribute('role', 'listbox');
+    box.appendChild(els.suggest);
     box.appendChild(els.input);
     box.appendChild(els.len);
     els.send = pill('Send', 'primary gv-chat-send');
     els.send.type = 'submit';
+    form.appendChild(els.emojis);
+    form.appendChild(els.emojiBtn);
     form.appendChild(box);
     form.appendChild(els.send);
     els.status = el('div', 'gv-chat-status');
@@ -262,13 +309,27 @@
     els.side = side;
     els.main = main;
 
-    els.input.addEventListener('input', paintLength);
+    els.input.addEventListener('input', function () {
+      paintLength();
+      lookUp();
+    });
+    els.input.addEventListener('keydown', suggestKeys);
+    // Moving the caret onto or off an @name changes what is offered.
+    els.input.addEventListener('click', lookUp);
+    els.input.addEventListener('keyup', function (e) {
+      if (/^(ArrowLeft|ArrowRight|Home|End)$/.test(e.key)) lookUp();
+    });
+    els.input.addEventListener('blur', function () {
+      setTimeout(function () { if (document.activeElement !== els.input) hideSuggest(); }, 150);
+    });
     form.addEventListener('submit', function (e) {
       e.preventDefault();
+      if (!els.suggest.hidden && suggestion.items.length) return pickSuggestion(suggestion.at);
       sendMessage();
     });
     root.addEventListener('click', function (e) {
       if (e.target === root) close();
+      if (!els.emojis.hidden && !els.emojis.contains(e.target) && !els.emojiBtn.contains(e.target)) hideEmojis();
     });
   }
 
@@ -317,6 +378,8 @@
     var wasWindow = mode === 'window';
     root.hidden = true;
     closeSheet();
+    hideSuggest();
+    hideEmojis();
     mode = null;
     if (social()) social().viewing(null);
     paintButtons();
@@ -358,12 +421,14 @@
       var count = (c.members || []).length + 1;
       return { name: convoName(c), sub: count + ' people' };
     }
-    return { name: convoName(c), sub: 'Direct message' };
+    var other = (c.members || [])[0];
+    return { name: convoName(c), sub: 'Direct message', verified: !!(other && other.verified) };
   }
 
   function paintHead() {
     var t = titleFor(current);
     els.title.textContent = t.name;
+    if (t.verified) els.title.appendChild(check());
     els.sub.textContent = t.sub;
     var c = current === 'server' ? null : convoFor(current);
     els.members.hidden = !(c && c.kind === 'group');
@@ -377,6 +442,9 @@
     current = key;
     say('');
     closeSheet();
+    hideSuggest();
+    hideEmojis();
+    picked = {};
     paintHead();
     root.classList.toggle('gv-chat-in', !!enter);
     social().viewing(key);
@@ -454,7 +522,9 @@
 
   function markRead(key) {
     var t = thread(key);
-    if (!isOpen() || key !== current || !t.last) return;
+    if (!isOpen() || key !== current) return;
+    social().seenMentions(key);
+    if (!t.last) return;
     if (key === 'server') return social().markServerSeen(t.last);
     var c = convoFor(key);
     if (c) c.unread = 0;
@@ -467,7 +537,7 @@
 
   function render(m) {
     if (!m.user_id) return el('div', 'gv-msg-site', m.body);
-    var row = el('div', 'gv-msg' + (m.mine ? ' mine' : ''));
+    var row = el('div', 'gv-msg' + (m.mine ? ' mine' : '') + (mentionsMe(m) ? ' mentioned' : ''));
     row.dataset.id = m.id;
     var head = el('div', 'gv-msg-head');
     var name = el('button', 'gv-msg-name', m.username);
@@ -476,6 +546,7 @@
     var time = el('time', 'gv-msg-time', when(m.created_at));
     time.dateTime = m.created_at;
     head.appendChild(name);
+    if (m.verified) head.appendChild(check());
     head.appendChild(time);
     if (!m.mine) {
       var flag = el('button', 'gv-msg-report', 'Report');
@@ -484,8 +555,41 @@
       head.appendChild(flag);
     }
     row.appendChild(head);
-    row.appendChild(el('div', 'gv-msg-body', m.body));
+    row.appendChild(bodyNode(m));
     return row;
+  }
+
+  function check() {
+    var box = el('span');
+    box.innerHTML = CHECK;
+    return box.firstChild;
+  }
+
+  // The text, with each @name the message named picked out. A click on one
+  // opens that person, as a click on a name does.
+  function bodyNode(m) {
+    var body = el('div', 'gv-msg-body');
+    var named = (m.mentions || []).slice().sort(function (a, b) { return b.name.length - a.name.length; });
+    var text = m.body, lower = text.toLowerCase(), from = 0, i = 0;
+    var me = myId();
+    while (named.length) {
+      var at = lower.indexOf('@', i);
+      if (at < 0) break;
+      var hit = null;
+      for (var k = 0; k < named.length && !hit; k++) {
+        if (lower.substr(at + 1, named[k].name.length) === named[k].name.toLowerCase()) hit = named[k];
+      }
+      i = at + 1;
+      if (!hit) continue;
+      if (at > from) body.appendChild(document.createTextNode(text.slice(from, at)));
+      var tag = el('button', 'gv-mention' + (hit.id === me ? ' me' : ''), text.substr(at, hit.name.length + 1));
+      tag.type = 'button';
+      if (hit.id !== me) tag.addEventListener('click', personSheet.bind(null, hit.id, hit.name));
+      body.appendChild(tag);
+      from = i = at + 1 + hit.name.length;
+    }
+    if (from < text.length) body.appendChild(document.createTextNode(text.slice(from)));
+    return body;
   }
 
   // ── Sending ───────────────────────────────────────────────────────────
@@ -533,14 +637,18 @@
     var text = els.input.value.trim();
     if (!text) return say('Write something first.', 'wait');
     var key = current;
+    var ids = mentionIds(text);
     sending = true;
     els.send.disabled = true;
+    hideSuggest();
     var req = key === 'server'
-      ? social().rpc('gv_chat_send', { p_body: text })
-      : social().rpc('gv_convo_send', { p_convo: Number(key.split(':')[1]), p_body: text });
+      ? social().rpc('gv_chat_send', { p_body: text, p_mentions: ids })
+      : social().rpc('gv_convo_send', { p_convo: Number(key.split(':')[1]), p_body: text, p_mentions: ids });
     req.then(function (m) {
       sending = false;
       els.input.value = '';
+      picked = {};
+      hideEmojis();
       paintLength();
       say('');
       add(key, [m]);
@@ -552,6 +660,233 @@
       failed(error);
       paintSend();
     });
+  }
+
+  // ── @mentions ─────────────────────────────────────────────────────────
+  // Typing @ and a name offers the people it fits, found the way Compose and
+  // Add friend find them (gv_user_search). In a direct message or group chat
+  // only its members are offered, since nobody else would be told. Who was
+  // picked goes with the message; chat/mentions.sql has the last word.
+
+  var picked = {};
+  var suggestion = { items: [], at: 0, q: null, timer: null };
+
+  function myId() {
+    var u = social() && social().user();
+    return u ? u.id : null;
+  }
+
+  function mentionsMe(m) {
+    var me = myId();
+    return !!(me && !m.mine && (m.mentions || []).some(function (x) { return x.id === me; }));
+  }
+
+  // The picked people whose @name is still in the text.
+  function mentionIds(text) {
+    var low = text.toLowerCase(), out = [];
+    Object.keys(picked).forEach(function (name) {
+      if (low.indexOf('@' + name) !== -1 && out.indexOf(picked[name]) === -1) out.push(picked[name]);
+    });
+    return out.length ? out : null;
+  }
+
+  // The @word the caret is at the end of, if any: where its @ is, and what
+  // has been typed after it.
+  function atWord() {
+    var v = els.input.value, end = els.input.selectionStart;
+    if (end == null || end !== els.input.selectionEnd) return null;
+    var hit = /(^|\s)@([^\s@]{0,30})$/.exec(v.slice(0, end));
+    return hit ? { start: end - hit[2].length - 1, q: hit[2].toLowerCase() } : null;
+  }
+
+  // Ranked as gv_user_search ranks (sql/social.sql): the name itself first,
+  // then the earlier the letters come in a name, then the shorter the name.
+  function rankName(q, name) {
+    var n = String(name || '').toLowerCase(), at = n.indexOf(q);
+    if (at < 0) {
+      var bare = q.replace(/[^a-z0-9]/g, '');
+      if (bare.length < 2 || n.replace(/[^a-z0-9]/g, '').indexOf(bare) < 0) return null;
+    }
+    return [n === q ? 0 : 1, at < 0 ? 1000 : at, n.length, n];
+  }
+
+  function byRank(a, b) {
+    for (var i = 0; i < 4; i++) if (a.rank[i] !== b.rank[i]) return a.rank[i] < b.rank[i] ? -1 : 1;
+    return 0;
+  }
+
+  function lookUp() {
+    var w = atWord();
+    if (!w || !signedIn()) return hideSuggest();
+    if (w.q === suggestion.q && !els.suggest.hidden) return;
+    suggestion.q = w.q;
+    clearTimeout(suggestion.timer);
+    if (w.q.length < 2) return showSuggest([], w.q ? 'Keep typing\u2026' : 'Type a name');
+    var c = current === 'server' ? null : convoFor(current);
+    if (c) {
+      var found = (c.members || []).map(function (m) {
+        return { id: m.id, username: m.username, verified: m.verified, rank: rankName(w.q, m.username) };
+      }).filter(function (p) { return p.rank; }).sort(byRank).slice(0, 8);
+      return showSuggest(found, found.length ? '' : 'Nobody in this chat by that name.');
+    }
+    var q = w.q;
+    suggestion.timer = setTimeout(function () {
+      social().rpc('gv_user_search', { p_q: q }).then(function (people) {
+        if (suggestion.q !== q) return;
+        people = people || [];
+        showSuggest(people, people.length ? '' : 'Nobody by that name.');
+      }, function (error) {
+        if (suggestion.q === q) showSuggest([], error.message);
+      });
+    }, 250);
+  }
+
+  function showSuggest(people, note) {
+    suggestion.items = people;
+    suggestion.at = 0;
+    els.suggest.textContent = '';
+    people.forEach(function (p, i) {
+      var b = el('button');
+      b.type = 'button';
+      b.setAttribute('role', 'option');
+      b.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
+      var face = el('span', 'gv-chat-dot');
+      if (window.GV && GV.avatars) GV.avatars.render(face, { preset: p.preset, upload: p.upload, id: p.id });
+      else face.textContent = initials(p.username);
+      b.appendChild(face);
+      b.appendChild(el('span', '', p.username));
+      if (p.verified) b.appendChild(check());
+      // On the press, so the message box never loses the caret.
+      b.addEventListener('mousedown', function (e) {
+        e.preventDefault();
+        pickSuggestion(i);
+      });
+      els.suggest.appendChild(b);
+    });
+    if (note) els.suggest.appendChild(el('p', '', note));
+    els.suggest.hidden = false;
+  }
+
+  function hideSuggest() {
+    if (!els.suggest) return;
+    clearTimeout(suggestion.timer);
+    els.suggest.hidden = true;
+    suggestion.items = [];
+    suggestion.q = null;
+  }
+
+  function suggestKeys(e) {
+    if (els.suggest.hidden || !suggestion.items.length) return;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      var n = suggestion.items.length;
+      suggestion.at = (suggestion.at + (e.key === 'ArrowDown' ? 1 : n - 1)) % n;
+      Array.prototype.forEach.call(els.suggest.querySelectorAll('button'), function (b, i) {
+        b.setAttribute('aria-selected', i === suggestion.at ? 'true' : 'false');
+        if (i === suggestion.at) b.scrollIntoView({ block: 'nearest' });
+      });
+    } else if (e.key === 'Tab') {
+      e.preventDefault();
+      pickSuggestion(suggestion.at);
+    }
+  }
+
+  function pickSuggestion(i) {
+    var p = suggestion.items[i], w = atWord();
+    if (!p || !w) return hideSuggest();
+    var v = els.input.value, end = els.input.selectionStart;
+    var text = '@' + p.username + ' ';
+    var next = v.slice(0, w.start) + text + v.slice(end);
+    hideSuggest();
+    if (next.length > MAX) return say('Messages can be up to ' + MAX + ' characters.', 'wait');
+    els.input.value = next;
+    els.input.setSelectionRange(w.start + text.length, w.start + text.length);
+    picked[p.username.toLowerCase()] = p.id;
+    paintLength();
+    els.input.focus();
+  }
+
+  // ── Emoji ─────────────────────────────────────────────────────────────
+  // Everyday emoji a page at a time, the ones used lately first. A pick goes
+  // where the caret is, and the grid stays open for the next.
+
+  var EMOJI_PAGES = ['Used lately', 'Faces', 'Hands', 'Hearts', 'Animals and nature', 'Food', 'Games and fun', 'Symbols'];
+
+  function recentEmoji() {
+    try { return (JSON.parse(localStorage.getItem(RECENT_KEY) || '[]') || []).slice(0, 24); } catch (e) { return []; }
+  }
+
+  function toggleEmojis() {
+    if (els.emojis.hidden) showEmojis();
+    else hideEmojis();
+  }
+
+  function showEmojis() {
+    hideSuggest();
+    if (!els.emojiGrid) buildEmojis();
+    emojiPage(recentEmoji().length ? -1 : 0);
+    els.emojis.hidden = false;
+    els.emojiBtn.setAttribute('aria-expanded', 'true');
+  }
+
+  function hideEmojis() {
+    if (!els.emojis) return;
+    els.emojis.hidden = true;
+    els.emojiBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  function buildEmojis() {
+    var tabs = el('div', 'gv-chat-emoji-tabs');
+    tabs.setAttribute('role', 'tablist');
+    [['\ud83d\udd52']].concat(EMOJI).forEach(function (page, i) {
+      var t = el('button', '', page[0]);
+      t.type = 'button';
+      t.setAttribute('role', 'tab');
+      t.setAttribute('aria-label', EMOJI_PAGES[i]);
+      t.title = EMOJI_PAGES[i];
+      t.addEventListener('click', function () { emojiPage(i - 1); });
+      tabs.appendChild(t);
+    });
+    els.emojiGrid = el('div', 'gv-chat-emoji-grid');
+    els.emojiGrid.addEventListener('mousedown', function (e) { e.preventDefault(); });
+    els.emojiGrid.addEventListener('click', function (e) {
+      var b = e.target.closest('button');
+      if (b) addEmoji(b.textContent);
+    });
+    els.emojis.appendChild(tabs);
+    els.emojis.appendChild(els.emojiGrid);
+  }
+
+  function emojiPage(i) {
+    var list = i < 0 ? recentEmoji() : EMOJI[i][1].split(' ');
+    Array.prototype.forEach.call(els.emojis.querySelectorAll('.gv-chat-emoji-tabs button'), function (t, k) {
+      t.setAttribute('aria-selected', k === i + 1 ? 'true' : 'false');
+    });
+    els.emojiGrid.textContent = '';
+    if (!list.length) els.emojiGrid.appendChild(el('p', '', 'Emoji you use show up here.'));
+    list.forEach(function (e) {
+      var b = el('button', '', e);
+      b.type = 'button';
+      b.setAttribute('aria-label', e);
+      els.emojiGrid.appendChild(b);
+    });
+    els.emojiGrid.scrollTop = 0;
+  }
+
+  function addEmoji(e) {
+    var input = els.input, v = input.value;
+    var from = input.selectionStart == null ? v.length : input.selectionStart;
+    var to = input.selectionEnd == null ? v.length : input.selectionEnd;
+    var next = v.slice(0, from) + e + v.slice(to);
+    if (next.length > MAX) return say('Messages can be up to ' + MAX + ' characters.', 'wait');
+    input.value = next;
+    input.setSelectionRange(from + e.length, from + e.length);
+    // A touch screen would bring its keyboard up over the grid.
+    if (!(window.matchMedia && matchMedia('(pointer: coarse)').matches)) input.focus();
+    paintLength();
+    var recent = recentEmoji().filter(function (x) { return x !== e; });
+    recent.unshift(e);
+    try { localStorage.setItem(RECENT_KEY, JSON.stringify(recent.slice(0, 24))); } catch (err) {}
   }
 
   // ── The list ──────────────────────────────────────────────────────────
@@ -570,18 +905,27 @@
     listTimer = setTimeout(refreshList, 500);
   }
 
-  function row(key, name, last, unread, dot) {
+  function row(key, name, last, unread, dot, verified) {
     var b = el('button', 'gv-chat-row');
     b.type = 'button';
     var on = key === current && (mode === 'full' || root.classList.contains('gv-chat-in'));
     b.setAttribute('aria-current', on ? 'true' : 'false');
     var face = el('span', 'gv-chat-dot', dot || initials(name));
     var words = el('span', 'gv-chat-row-text');
-    words.appendChild(el('span', 'gv-chat-row-name', name));
+    var title = el('span', 'gv-chat-row-name', name);
+    if (verified) title.appendChild(check());
+    words.appendChild(title);
     words.appendChild(el('span', 'gv-chat-row-last', last || ''));
     b.appendChild(face);
     b.appendChild(words);
     if (social().muted(key)) b.appendChild(el('span', 'gv-chat-muted', 'muted'));
+    // Someone named this account here and it has not looked yet.
+    var named = (social().counts().mentioned || {})[key];
+    if (named) {
+      var at = el('span', 'gv-chat-at', '@');
+      at.title = named === 1 ? 'You were mentioned' : 'You were mentioned ' + named + ' times';
+      b.appendChild(at);
+    }
     var count = el('span', 'gv-chat-count', unread === true ? '' : String(unread || ''));
     count.hidden = !unread;
     if (unread === true) count.style.cssText = 'min-width:9px;width:9px;height:9px;padding:0';
@@ -604,7 +948,8 @@
     els.list.appendChild(row('server', 'Server', lastServer ? lastLine(lastServer) : 'Everyone on GameVault',
       social().counts().server, '#'));
     convos.forEach(function (c) {
-      els.list.appendChild(row('convo:' + c.id, convoName(c), lastLine(c.last), c.unread));
+      var other = c.kind === 'dm' && (c.members || [])[0];
+      els.list.appendChild(row('convo:' + c.id, convoName(c), lastLine(c.last), c.unread, null, !!(other && other.verified)));
     });
   }
 
@@ -633,12 +978,16 @@
 
   function paintButtons() {
     var counts = (social() && social().counts()) || {};
+    var named = counts.mentions || 0;
     buttons.forEach(function (x) {
-      x.badge.hidden = !(counts.unread || counts.server);
-      x.badge.classList.toggle('dot', !counts.unread && !!counts.server);
-      x.badge.textContent = counts.unread ? (counts.unread > 99 ? '99+' : String(counts.unread)) : '';
+      x.badge.hidden = !(counts.unread || counts.server || named);
+      x.badge.classList.toggle('dot', !named && !counts.unread && !!counts.server);
+      // Being mentioned outranks a count of unread messages.
+      x.badge.textContent = named ? '@' + (named > 1 ? (named > 9 ? '9+' : named) : '')
+        : counts.unread ? (counts.unread > 99 ? '99+' : String(counts.unread)) : '';
       x.button.setAttribute('aria-expanded', isOpen() ? 'true' : 'false');
-      x.button.setAttribute('aria-label', counts.unread ? 'Chat, ' + counts.unread + ' unread' : 'Chat');
+      x.button.setAttribute('aria-label', named ? 'Chat, mentioned ' + named + (named === 1 ? ' time' : ' times')
+        : counts.unread ? 'Chat, ' + counts.unread + ' unread' : 'Chat');
     });
   }
 
@@ -692,7 +1041,9 @@
             if (window.GV && GV.avatars) GV.avatars.render(face, { preset: p.preset, upload: p.upload, id: p.id });
             else face.textContent = initials(p.username);
             line.appendChild(face);
-            line.appendChild(el('span', '', p.username));
+            var who = el('span', '', p.username);
+            if (p.verified) who.appendChild(check());
+            line.appendChild(who);
             line.appendChild(pill(label, '', function () { pick(p, line); }));
             found.appendChild(line);
           });
@@ -774,7 +1125,7 @@
     var body = sheet(convoName(c));
     var people = el('div', 'gv-chat-people');
     people.appendChild(personLine('You'));
-    (c.members || []).forEach(function (m) { people.appendChild(personLine(m.username)); });
+    (c.members || []).forEach(function (m) { people.appendChild(personLine(m.username, m.verified)); });
     body.appendChild(people);
     var note = el('p');
     body.appendChild(el('p', '', 'Add people'));
@@ -795,11 +1146,13 @@
     body.appendChild(row);
   }
 
-  function personLine(name) {
+  function personLine(name, verified) {
     var line = el('div', 'gv-chat-person');
     var face = el('span', 'gv-chat-dot', initials(name));
     line.appendChild(face);
-    line.appendChild(el('span', '', name));
+    var label = el('span', '', name);
+    if (verified) label.appendChild(check());
+    line.appendChild(label);
     return line;
   }
 
@@ -939,10 +1292,12 @@
   // page's own Escape, which would close the game.
   window.addEventListener('keydown', function (e) {
     if (e.key !== 'Escape' || !isOpen()) return;
-    if (mode === 'inline' && els.sheet.hidden) return;
+    if (mode === 'inline' && els.sheet.hidden && els.suggest.hidden && els.emojis.hidden) return;
     e.stopImmediatePropagation();
     e.preventDefault();
-    if (els.sheet && !els.sheet.hidden) closeSheet();
+    if (!els.suggest.hidden) hideSuggest();
+    else if (!els.emojis.hidden) hideEmojis();
+    else if (els.sheet && !els.sheet.hidden) closeSheet();
     else close();
   }, true);
 

@@ -18,7 +18,8 @@
   var host = {};
   var listeners = {};
   var me = { status: 'online', notify: true, mutes: {} };
-  var counts = { unread: 0, requests: 0, server: false };
+  // mentioned: @mentions not looked at yet, by chat; mentions: all of them.
+  var counts = { unread: 0, requests: 0, server: false, mentioned: {}, mentions: 0 };
   var timer = null;
   var busy = false;
   var cursors = { server: null, convo: null };
@@ -118,7 +119,9 @@
       counts.unread = data.unread;
       counts.requests = data.requests;
       counts.server = data.server_last > serverSeen() && viewing !== 'server' && !muted('server');
+      setMentioned(data.mentioned || {});
       emit('counts', counts);
+      if (first && counts.mentions) mentionsWaiting();
       if (server.length || convo.length) emit('messages', { server: server, convo: convo });
       server.forEach(function (m) { popUp('server', m); });
       convo.forEach(function (m) { popUp('convo:' + m.convo_id, m); });
@@ -129,6 +132,21 @@
       if (error.code === '42501') return stop();
       schedule();
     });
+  }
+
+  function setMentioned(map) {
+    counts.mentioned = map;
+    counts.mentions = Object.keys(map).reduce(function (n, k) { return n + map[k]; }, 0);
+  }
+
+  // Chat has shown one of its chats, so its @mentions are seen.
+  function seenMentions(key) {
+    if (!sb || !counts.mentioned[key]) return;
+    var rest = {};
+    Object.keys(counts.mentioned).forEach(function (k) { if (k !== key) rest[k] = counts.mentioned[k]; });
+    setMentioned(rest);
+    emit('counts', counts);
+    rpc('gv_mentions_seen', { p_key: key }).catch(function () {});
   }
 
   function loadMe() {
@@ -281,7 +299,33 @@
     return el;
   }
 
+  function mentionsMe(m) {
+    return !!(user && !m.mine && (m.mentions || []).some(function (x) { return x.id === user.id; }));
+  }
+
+  // Being named with @ gets through on any page and through a muted chat.
+  // A muted person, or the chat already on screen, still keeps quiet.
+  function mentionPop(key, m) {
+    if (viewing === key || (m.user_id && muted('user:' + m.user_id))) return;
+    var inGame = !!(host.inGame && host.inGame());
+    if (inGame && !me.notify) return;
+    var from = (key === 'server' ? 'Server' : m.kind === 'group' ? (m.name || 'Group chat') : 'Direct message')
+      + ' \u00b7 mentioned you';
+    toast(from, m.username, m.body, function () {
+      if (window.GV && GV.chat) GV.chat.open({ key: key });
+    }, inGame);
+  }
+
+  // Mentions from while this page was not open, said once when it opens.
+  function mentionsWaiting() {
+    var key = Object.keys(counts.mentioned)[0];
+    notice(counts.mentions === 1 ? 'Someone mentioned you in chat.' : 'You were mentioned ' + counts.mentions + ' times in chat.', function () {
+      if (window.GV && GV.chat) GV.chat.open({ key: key });
+    });
+  }
+
   function popUp(key, m) {
+    if (mentionsMe(m)) return mentionPop(key, m);
     if (m.mine || !host.inGame || !host.inGame()) return;
     if (viewing === key) return;
     if (!me.notify || muted(key) || (m.user_id && muted('user:' + m.user_id))) return;
@@ -332,7 +376,7 @@
     sb = null;
     user = null;
     me = { status: 'online', notify: true, mutes: {} };
-    counts = { unread: 0, requests: 0, server: false };
+    counts = { unread: 0, requests: 0, server: false, mentioned: {}, mentions: 0 };
     if (was) {
       emit('state', null);
       emit('counts', counts);
@@ -362,6 +406,7 @@
     setNotify: setNotify,
     notice: notice,
     markServerSeen: markServerSeen,
+    seenMentions: seenMentions,
     // What chat shows, 'server' or 'convo:<id>', or null when it is shut.
     viewing: function (key) {
       viewing = key || null;

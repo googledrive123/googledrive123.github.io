@@ -23,6 +23,10 @@ create table if not exists public.gv_chat_messages (
   deleted    boolean not null default false
 );
 
+-- Who the message names with @ (chat/mentions.sql), as [{id, name}].
+alter table public.gv_chat_messages
+  add column if not exists mentions jsonb not null default '[]'::jsonb;
+
 -- Slow mode looks up one account's latest messages on every send.
 create index if not exists gv_chat_messages_user_created
   on public.gv_chat_messages (user_id, created_at desc);
@@ -58,8 +62,10 @@ revoke all on table public.gv_chat_messages, public.gv_chat_bans, public.gv_chat
 -- Sends a message as the signed-in account. Every refusal is a sentence the
 -- page shows as it is. A wait also comes back in the hint as wait=<seconds>
 -- and a ban's end as until=<time>, for the page to count down or show in
--- the reader's own time.
-create or replace function public.gv_chat_send(p_body text)
+-- the reader's own time. p_mentions is who the page says was picked after
+-- an @; chat/mentions.sql decides who the message really names.
+drop function if exists public.gv_chat_send(text);
+create or replace function public.gv_chat_send(p_body text, p_mentions uuid[] default null)
 returns json
 language plpgsql
 security definer
@@ -74,6 +80,7 @@ declare
   v_last timestamptz;
   v_wait integer;
   v_name text;
+  v_mentions jsonb;
   v_row gv_chat_messages;
 begin
   if not public.gv_origin_allowed() then
@@ -141,23 +148,29 @@ begin
     v_name := 'player ' || left(v_user::text, 4);
   end if;
 
-  insert into gv_chat_messages (user_id, username, body)
-  values (v_user, v_name, v_body)
+  v_mentions := public.gv_mention_list(v_body, p_mentions, null);
+  insert into gv_chat_messages (user_id, username, body, mentions)
+  values (v_user, v_name, v_body, v_mentions)
   returning * into v_row;
+  insert into gv_mentions (user_id, from_user, message_id)
+  select (x ->> 'id')::uuid, v_user, v_row.id from jsonb_array_elements(v_mentions) x;
 
   return json_build_object(
     'id', v_row.id,
     'user_id', v_row.user_id,
     'username', v_row.username,
     'body', v_row.body,
+    'mentions', v_row.mentions,
+    -- The blue check from analytics/verified.sql, shown next to the name.
+    'verified', exists (select 1 from gv_verified v where v.key = v_user::text),
     'created_at', v_row.created_at,
     'mine', true
   );
 end;
 $function$;
 
-revoke all on function public.gv_chat_send(text) from public, anon;
-grant execute on function public.gv_chat_send(text) to authenticated;
+revoke all on function public.gv_chat_send(text, uuid[]) from public, anon;
+grant execute on function public.gv_chat_send(text, uuid[]) to authenticated;
 
 
 -- The newest 100 messages still up, oldest first, or only those after the
@@ -185,6 +198,8 @@ begin
              'user_id', m.user_id,
              'username', m.username,
              'body', m.body,
+             'mentions', m.mentions,
+             'verified', exists (select 1 from gv_verified v where v.key = m.user_id::text),
              'created_at', m.created_at,
              'mine', m.user_id = v_user
            ) order by m.id)
