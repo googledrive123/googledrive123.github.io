@@ -153,6 +153,12 @@
     return m ? local(m.page) : null;
   }
 
+  // A line about an answer, if it has one.
+  function blurb(poll, i) {
+    var m = poll.media && poll.media[i];
+    return m && typeof m.note === 'string' ? m.note.slice(0, 140) : '';
+  }
+
   function hasLooks(poll) {
     return (poll.options || []).some(function (name, i) { return shot(poll, i); });
   }
