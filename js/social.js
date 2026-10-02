@@ -89,6 +89,15 @@
     });
   }
 
+  // This browser's own id (js/identity.js, or the tracker's copy of it). A
+  // chat ban follows it to every account used here (chat/bans.sql).
+  function visitorId() {
+    try {
+      if (window.GV && GV.identity && GV.identity.id) return GV.identity.id();
+      return localStorage.getItem('gv.vid');
+    } catch (e) { return null; }
+  }
+
   function schedule() {
     clearTimeout(timer);
     if (!sb) return;
@@ -103,7 +112,8 @@
     rpc('gv_social_poll', {
       p_game: host.gameId ? host.gameId() : null,
       p_after_server: cursors.server,
-      p_after_convo: cursors.convo
+      p_after_convo: cursors.convo,
+      p_visitor: visitorId()
     }).then(function (data) {
       busy = false;
       if (!sb) return;
@@ -123,6 +133,7 @@
       emit('counts', counts);
       if (first && counts.mentions) mentionsWaiting();
       if (server.length || convo.length) emit('messages', { server: server, convo: convo });
+      if (data.deleted && (data.deleted.server.length || data.deleted.convo.length)) emit('deleted', data.deleted);
       server.forEach(function (m) { popUp('server', m); });
       convo.forEach(function (m) { popUp('convo:' + m.convo_id, m); });
       schedule();

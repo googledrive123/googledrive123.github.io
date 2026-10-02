@@ -52,6 +52,11 @@ create table if not exists public.gv_convo_messages (
 alter table public.gv_convo_messages
   add column if not exists mentions jsonb not null default '[]'::jsonb;
 
+-- When the owner took it down, so chats already open can drop it too.
+alter table public.gv_convo_messages add column if not exists deleted_at timestamptz;
+create index if not exists gv_convo_messages_deleted_at
+  on public.gv_convo_messages (deleted_at) where deleted_at is not null;
+
 create index if not exists gv_convo_messages_convo on public.gv_convo_messages (convo_id, id);
 create index if not exists gv_convo_messages_user on public.gv_convo_messages (user_id, created_at desc);
 
@@ -279,7 +284,6 @@ declare
   v_body text := btrim(regexp_replace(coalesce(p_body, ''), '[[:space:][:cntrl:]]+', ' ', 'g'));
   v_ban gv_chat_bans;
   v_last timestamptz;
-  v_wait integer;
   v_mentions jsonb;
   v_row gv_convo_messages;
 begin
@@ -322,19 +326,6 @@ begin
   if v_last > now() - interval '1 second' then
     raise exception 'Slow down a little.'
       using hint = 'wait=1';
-  end if;
-
-  -- The 30th message back decides when the next one is allowed.
-  select created_at into v_last
-    from gv_convo_messages
-   where user_id = v_user
-     and created_at > now() - interval '1 minute'
-   order by created_at desc
-  offset 29 limit 1;
-  if found then
-    v_wait := greatest(1, ceil(extract(epoch from v_last + interval '1 minute' - now()))::int);
-    raise exception 'That is a lot of messages. Take a short break before sending more.'
-      using hint = 'wait=' || v_wait;
   end if;
 
   if public.gv_is_rude(v_body) then
@@ -626,7 +617,7 @@ begin
     raise exception 'not allowed';
   end if;
 
-  update gv_convo_messages set deleted = true where id = p_message_id;
+  update gv_convo_messages set deleted = true, deleted_at = now() where id = p_message_id;
   if not found then
     return false;
   end if;
@@ -672,11 +663,14 @@ grant execute on function public.gv_convo_resolve(text, bigint) to anon, authent
 -- A message can commit a moment after a later one, so the last ten seconds
 -- come back every time as well, and the page drops ids it already has. A
 -- null cursor returns no messages, only where the cursors stand now, so a
--- page that has just opened does not pop up the whole backlog.
+-- page that has just opened does not pop up the whole backlog. p_visitor is
+-- the browser's visitor id, which a ban follows (chat/bans.sql).
+drop function if exists public.gv_social_poll(text, bigint, bigint);
 create or replace function public.gv_social_poll(
   p_game text default null,
   p_after_server bigint default null,
-  p_after_convo bigint default null
+  p_after_convo bigint default null,
+  p_visitor text default null
 ) returns json
 language plpgsql
 security definer
@@ -685,6 +679,7 @@ as $function$
 declare
   v_user uuid := auth.uid();
   v_game text := nullif(left(btrim(coalesce(p_game, '')), 80), '');
+  v_visitor text := nullif(left(btrim(coalesce(p_visitor, '')), 64), '');
 begin
   if not public.gv_origin_allowed() then
     raise exception 'Chat only works on GameVault.';
@@ -692,6 +687,16 @@ begin
   if v_user is null then
     raise exception 'Sign in to chat.';
   end if;
+
+  -- Which browser this account is on, written once an hour at most, and a
+  -- ban on any account that shares a browser with it.
+  if v_visitor is not null then
+    insert into gv_account_browsers (user_id, visitor_id) values (v_user, v_visitor)
+    on conflict (user_id, visitor_id) do update
+      set last_seen = now()
+    where gv_account_browsers.last_seen < now() - interval '1 hour';
+  end if;
+  perform public.gv_ban_follow(v_user);
 
   -- Written only when it would change what friends see, not on every poll.
   insert into gv_social (user_id, game_id, seen_at) values (v_user, v_game, now())
@@ -766,10 +771,24 @@ begin
                           where r.user_id = v_user and r.friend_id = l.user_id)
     ),
     -- @mentions not looked at yet, by chat: 'server' or 'convo:<id>'.
-    'mentioned', public.gv_mentions_unseen(v_user)
+    'mentioned', public.gv_mentions_unseen(v_user),
+    -- Messages the owner took down in the last day, so a chat that already
+    -- shows them drops them without a reload.
+    'deleted', json_build_object(
+      'server', coalesce((
+        select json_agg(m.id) from gv_chat_messages m
+         where m.deleted_at > now() - interval '1 day'
+      ), '[]'::json),
+      'convo', coalesce((
+        select json_agg(json_build_object('id', m.id, 'convo_id', m.convo_id))
+          from gv_convo_messages m
+          join gv_convo_members me on me.convo_id = m.convo_id and me.user_id = v_user
+         where m.deleted_at > now() - interval '1 day'
+      ), '[]'::json)
+    )
   );
 end;
 $function$;
 
-revoke all on function public.gv_social_poll(text, bigint, bigint) from public, anon;
-grant execute on function public.gv_social_poll(text, bigint, bigint) to authenticated;
+revoke all on function public.gv_social_poll(text, bigint, bigint, text) from public, anon;
+grant execute on function public.gv_social_poll(text, bigint, bigint, text) to authenticated;

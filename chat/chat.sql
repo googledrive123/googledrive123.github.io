@@ -27,6 +27,11 @@ create table if not exists public.gv_chat_messages (
 alter table public.gv_chat_messages
   add column if not exists mentions jsonb not null default '[]'::jsonb;
 
+-- When the owner took it down, so chats already open can drop it too.
+alter table public.gv_chat_messages add column if not exists deleted_at timestamptz;
+create index if not exists gv_chat_messages_deleted_at
+  on public.gv_chat_messages (deleted_at) where deleted_at is not null;
+
 -- Slow mode looks up one account's latest messages on every send.
 create index if not exists gv_chat_messages_user_created
   on public.gv_chat_messages (user_id, created_at desc);
@@ -38,6 +43,11 @@ create table if not exists public.gv_chat_bans (
   until      timestamptz,
   created_at timestamptz not null default now()
 );
+
+-- A ban that follows from another account's, for sharing a browser with it
+-- (chat/bans.sql). Unbanning that account removes this one too.
+alter table public.gv_chat_bans
+  add column if not exists via uuid references public.gv_chat_bans (user_id) on delete cascade;
 
 create table if not exists public.gv_chat_reports (
   id         bigserial primary key,
@@ -117,19 +127,6 @@ begin
   if v_last > now() - interval '5 seconds' then
     v_wait := greatest(1, ceil(extract(epoch from v_last + interval '5 seconds' - now()))::int);
     raise exception 'Slow mode is on. Wait a few seconds before sending again.'
-      using hint = 'wait=' || v_wait;
-  end if;
-
-  -- The 20th message back decides when the next one is allowed.
-  select created_at into v_last
-    from gv_chat_messages
-   where user_id = v_user
-     and created_at > now() - interval '10 minutes'
-   order by created_at desc
-  offset 19 limit 1;
-  if found then
-    v_wait := greatest(1, ceil(extract(epoch from v_last + interval '10 minutes' - now()))::int);
-    raise exception 'That is a lot of messages. Take a short break before sending more.'
       using hint = 'wait=' || v_wait;
   end if;
 
@@ -341,7 +338,14 @@ begin
                'reason', b.reason,
                'until', b.until,
                'created_at', b.created_at,
-               'active', b.until is null or b.until > now()
+               'active', b.until is null or b.until > now(),
+               -- Whose ban this one follows from, and how many browsers it
+               -- holds (chat/bans.sql).
+               'via', b.via,
+               'via_name', case when b.via is not null then public.gv_display_name(b.via) end,
+               'browsers', (select count(distinct l.visitor_id) from gv_browser_links l where l.user_id = b.user_id),
+               'lookalikes', case when b.via is null and (b.until is null or b.until > now())
+                                  then public.gv_ban_lookalikes(b.user_id) else '[]'::json end
              ) order by b.created_at desc)
         from gv_chat_bans b
         left join profiles p on p.id = b.user_id
@@ -363,7 +367,7 @@ begin
     raise exception 'not allowed';
   end if;
 
-  update gv_chat_messages set deleted = true where id = p_message_id;
+  update gv_chat_messages set deleted = true, deleted_at = now() where id = p_message_id;
   if not found then
     return false;
   end if;
@@ -375,7 +379,8 @@ $function$;
 
 
 -- Mutes an account for p_days days, or for good with no p_days. Banning
--- again replaces the old ban.
+-- again replaces the old ban. Every other account seen on one of its
+-- browsers is banned with it, until the same time (chat/bans.sql).
 create or replace function public.gv_chat_ban(
   p_secret text,
   p_user_id uuid,
@@ -409,8 +414,24 @@ begin
   on conflict (user_id) do update
     set reason = excluded.reason,
         until = excluded.until,
-        created_at = excluded.created_at
+        created_at = excluded.created_at,
+        via = null
   returning * into v_row;
+
+  -- A ban the owner gave by hand is left as it is.
+  insert into gv_chat_bans (user_id, reason, until, created_at, via)
+  select distinct other.user_id, 'Same browser as a banned account', v_row.until, now(), p_user_id
+    from gv_browser_links mine
+    join gv_browser_links other on other.visitor_id = mine.visitor_id and other.user_id <> p_user_id
+    join auth.users u on u.id = other.user_id
+   where mine.user_id = p_user_id
+  on conflict (user_id) do update
+    set reason = excluded.reason,
+        until = excluded.until,
+        via = excluded.via
+    where gv_chat_bans.via is not null
+       or (gv_chat_bans.until is not null and gv_chat_bans.until <= now());
+  update gv_chat_bans set until = v_row.until where via = p_user_id;
 
   return row_to_json(v_row);
 end;
