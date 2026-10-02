@@ -66,3 +66,12 @@ create table if not exists public.analytics_visitor_games (
   primary key (game_id, visitor_id)
 );
 create index if not exists analytics_visitor_games_visitor_idx on public.analytics_visitor_games (visitor_id);
+
+-- Only the functions below read or write these.
+alter table public.analytics_visitors enable row level security;
+alter table public.analytics_visitor_traits enable row level security;
+alter table public.analytics_quarters enable row level security;
+alter table public.analytics_visitor_users enable row level security;
+alter table public.analytics_visitor_games enable row level security;
+revoke all on public.analytics_visitors, public.analytics_visitor_traits, public.analytics_quarters,
+  public.analytics_visitor_users, public.analytics_visitor_games from anon, authenticated;
