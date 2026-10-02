@@ -117,6 +117,10 @@
     return typeof src === 'string' && /^\/[^\/\\]/.test(src) ? src : null;
   }
 
+  function hasLooks(poll) {
+    return (poll.options || []).some(function (name, i) { return shot(poll, i); });
+  }
+
   // One poll: the answers to pick from, or the results once there are any
   // to show. onChange hears about a vote with the poll as it is now.
   function card(poll, onChange) {
