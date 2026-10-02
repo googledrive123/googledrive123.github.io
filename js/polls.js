@@ -93,6 +93,8 @@
     '.gv-poll-go:hover{filter:brightness(1.1)}',
     '.gv-poll-intro-title{margin:.9rem 0 .5rem;font-size:1.6rem;font-weight:700;line-height:1.15;letter-spacing:-.02em;color:var(--text,#f4f4f6);overflow-wrap:anywhere}',
     '.gv-poll-intro-text{margin:0 auto;max-width:38ch;font-size:.95rem;line-height:1.5;color:var(--muted,#8a8a96)}',
+    '.gv-poll-peek{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:18px}',
+    '.gv-poll-peek img{display:block;width:100%;aspect-ratio:1366/635;object-fit:cover;border-radius:7px;box-shadow:0 0 0 1px var(--border-strong,rgba(255,255,255,.16))}',
     '@keyframes gvPollIn{from{opacity:0;transform:translateY(10px) scale(.98)}}',
     '@media (prefers-reduced-motion:reduce){.gv-poll-box{animation:none}.gv-poll-opt.result::before,.gv-poll-look,.gv-poll-bar span,.gv-look-screen iframe{transition:none}}'
   ].join('');
@@ -504,6 +506,15 @@
       var front = el('div', 'gv-poll-front');
       front.appendChild(el('h3', 'gv-poll-intro-title', intro.title));
       if (intro.text) front.appendChild(el('p', 'gv-poll-intro-text', intro.text));
+      var peek = el('div', 'gv-poll-peek');
+      (poll.options || []).forEach(function (name, i) {
+        if (!shot(poll, i)) return;
+        var img = el('img');
+        img.src = shot(poll, i);
+        img.alt = name;
+        peek.appendChild(img);
+      });
+      if (peek.children.length) front.appendChild(peek);
       var go = el('button', 'gv-poll-go', 'Go to the poll \u2192');
       go.type = 'button';
       go.addEventListener('click', function () {
