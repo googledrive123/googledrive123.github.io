@@ -185,6 +185,7 @@ input::placeholder{color:currentColor;opacity:.5}
   'use strict';
 
   var state = {
+    totw: 2 * 86400 + 13 * 3600 + 54 * 60 + 9,
     left: 1421
   };
 
@@ -199,9 +200,17 @@ input::placeholder{color:currentColor;opacity:.5}
     $('ring').setAttribute('stroke-dasharray', (pct * 0.4398).toFixed(2) + ' 43.98');
   }
 
+  // Track of the week: "2d 13:54:09", stops at zero.
+  function renderTotw() {
+    var t = state.totw;
+    $('totw').textContent = Math.floor(t / 86400) + 'd ' + pad(Math.floor(t / 3600) % 24) + ':' + pad(Math.floor(t / 60) % 60) + ':' + pad(t % 60);
+  }
+
   setInterval(function () {
     state.left = state.left > 0 ? state.left - 1 : 3000;
     renderTimer();
+    state.totw = Math.max(0, state.totw - 1);
+    renderTotw();
   }, 1000);
 })();
 </script>
