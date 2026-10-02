@@ -138,6 +138,16 @@
     counts.mentions = Object.keys(map).reduce(function (n, k) { return n + map[k]; }, 0);
   }
 
+  // Chat has shown one of its chats, so its @mentions are seen.
+  function seenMentions(key) {
+    if (!sb || !counts.mentioned[key]) return;
+    var rest = {};
+    Object.keys(counts.mentioned).forEach(function (k) { if (k !== key) rest[k] = counts.mentioned[k]; });
+    setMentioned(rest);
+    emit('counts', counts);
+    rpc('gv_mentions_seen', { p_key: key }).catch(function () {});
+  }
+
   function loadMe() {
     return rpc('gv_social_me').then(function (data) {
       me = data;
@@ -369,6 +379,7 @@
     setNotify: setNotify,
     notice: notice,
     markServerSeen: markServerSeen,
+    seenMentions: seenMentions,
     // What chat shows, 'server' or 'convo:<id>', or null when it is shut.
     viewing: function (key) {
       viewing = key || null;
