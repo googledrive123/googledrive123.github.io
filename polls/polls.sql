@@ -28,3 +28,15 @@ create table if not exists public.gv_polls (
   ends_at    timestamptz,
   closed     boolean not null default false
 );
+
+create table if not exists public.gv_poll_votes (
+  id         bigserial primary key,
+  poll_id    bigint not null references public.gv_polls (id) on delete cascade,
+  -- Which answer, counting from 0.
+  choice     integer not null,
+  user_id    uuid references auth.users (id) on delete set null,
+  visitor_id text not null,
+  created_at timestamptz not null default now()
+);
+
+create unique index if not exists gv_poll_votes_visitor on public.gv_poll_votes (poll_id, visitor_id);
