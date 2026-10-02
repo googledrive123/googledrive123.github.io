@@ -465,10 +465,19 @@
     coverButton('Close', hideCover);
   }
 
-  function openAsCreator(wait) {
-    var who = wait.name || 'them';
+  // The reasons a join fails, kept from here on. Once per page.
+  var watching = false;
+
+  function watchForErrors() {
+    if (watching) return;
+    watching = true;
     recordErrors();
     setInterval(noteGameMessage, 200);
+  }
+
+  function openAsCreator(wait) {
+    var who = wait.name || 'them';
+    watchForErrors();
     showCover(null, wait.solo
       ? 'Opening ' + who + '\u2019s room...'
       : 'Joining ' + who + '...');
