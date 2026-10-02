@@ -2061,17 +2061,29 @@
   function onPush(res) {
     if (!res.rows || !$('autoRefresh').checked) return;
     if (!store || loadingRange) { held.push(res); return; }
-    if (take(store, res).length) draw();
+    if (take(store, res).length) drawSoon();
   }
   push.on.push(onPush);
+  // Drawing a long range takes a while, so events coming in fast wait for
+  // each other: never more than a quarter of the time goes on drawing.
+  var drawTimer = null, drawnAt = 0, drawMs = 0;
+  function drawSoon() {
+    if (drawTimer) return;
+    drawTimer = setTimeout(draw, Math.max(0, drawnAt + drawMs * 3 - Date.now()));
+  }
   // The range's rows without scanners, and without any the window has slid
   // past since they came in.
   function draw() {
+    var t0 = Date.now();
+    clearTimeout(drawTimer);
+    drawTimer = null;
     var from = rangeBounds().from.getTime();
     state.rows = store.rows.filter(function (r) { return r.tms >= from && !store.scanner[r.visitor_id]; });
     render();
     loadNames();
     $('status').innerHTML = '<span class="dot"></span>Updated ' + new Date().toLocaleTimeString();
+    drawnAt = Date.now();
+    drawMs = drawnAt - t0;
   }
   var allTimeAt = 0;
   function loadAllTime() {
