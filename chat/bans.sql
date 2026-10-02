@@ -50,3 +50,31 @@ create or replace view public.gv_browser_links as
 
 revoke all on public.gv_browser_links from anon, authenticated;
 
+
+-- Bans an account that shares a browser with a banned one, unless it is
+-- banned already. It takes the end date of the ban it follows.
+create or replace function public.gv_ban_follow(p_user uuid)
+returns void
+language sql
+security definer
+set search_path to 'public'
+as $function$
+  insert into gv_chat_bans (user_id, reason, until, created_at, via)
+  select p_user, 'Same browser as a banned account', b.until, now(), coalesce(b.via, b.user_id)
+    from gv_browser_links mine
+    join gv_browser_links other on other.visitor_id = mine.visitor_id and other.user_id <> p_user
+    join gv_chat_bans b on b.user_id = other.user_id and (b.until is null or b.until > now())
+   where mine.user_id = p_user
+     and exists (select 1 from auth.users u where u.id = p_user)
+   order by b.until desc nulls first
+   limit 1
+  on conflict (user_id) do update
+    set reason = excluded.reason,
+        until = excluded.until,
+        created_at = excluded.created_at,
+        via = excluded.via
+    where gv_chat_bans.until is not null and gv_chat_bans.until <= now();
+$function$;
+
+revoke all on function public.gv_ban_follow(uuid) from public, anon, authenticated;
+
