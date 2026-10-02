@@ -1,9 +1,11 @@
 -- Deleting an account.
 --
--- The profile's "Delete account" button. Everything tied to the account goes
--- with it: most tables reference auth.users with on delete cascade (profiles,
--- play_sessions, starred_games, recently_played, polytrack_scores,
--- polytrack_saves, gv_saves, chat), so removing the auth row removes them.
+-- The "Delete account" button in the profile and on the settings page.
+-- Everything tied to the account goes with it: most tables reference
+-- auth.users with on delete cascade (profiles, play_sessions, starred_games,
+-- recently_played, polytrack_scores, polytrack_saves, gv_saves, chat, direct
+-- and group chats, friends, the wallet and shop items, pictures, challenge
+-- runs and badges), so removing the auth row removes them.
 -- The rest carry the id without a foreign key and are cleared here by hand.
 -- Files in Storage cannot be deleted from SQL (storage.protect_delete), so
 -- the page removes the account's own files through the Storage API first.
