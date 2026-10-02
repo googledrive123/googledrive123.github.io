@@ -114,7 +114,8 @@ as $function$
     'active_visitors', (select count(*) from v where first_act is not null),
     'scanners',  (select count(*) from s),
     'sessions',  (select count(distinct session_id) from q),
-    'users',     (select count(distinct user_id) from h where user_id is not null),
+    'users',     (select count(distinct u.user_id) from analytics_visitor_users u
+                  where not exists (select 1 from s where s.visitor_id = u.visitor_id)),
     'pageviews', (select coalesce(sum(pageviews), 0) from q),
     'plays',     (select coalesce(sum(plays), 0) from q),
     'play_secs', (select coalesce(sum(play_secs), 0) from q),
