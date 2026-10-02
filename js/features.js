@@ -39,6 +39,10 @@
     '.gv-feat-line.hot{color:var(--accent);font-weight:600}',
     '.gv-feat-new{position:absolute;top:8px;right:8px;font-family:"JetBrains Mono",monospace;font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);border:1px solid rgba(255,59,59,.45);border-radius:100px;padding:.05rem .35rem}',
     '.gv-feat-new[hidden]{display:none}',
+    // A phone gets one row that scrolls sideways, so the cards stay big
+    // enough to read and the track of the week stays near the top.
+    // contain keeps the long row from widening the page around it.
+    '@media (max-width:640px){.gv-feats{display:flex;width:100%;contain:inline-size;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding:2px 2px 6px}.gv-feats::-webkit-scrollbar{display:none}.gv-feat{flex:0 0 min(70%,240px);scroll-snap-align:start}}',
     '@media (prefers-reduced-motion:reduce){.gv-feat{transition:none}.gv-feat:hover{transform:none}}'
   ].join('');
 
