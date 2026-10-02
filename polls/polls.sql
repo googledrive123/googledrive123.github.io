@@ -18,6 +18,9 @@
 -- the same order as the answers. The pages show them as tiles that open
 -- big on a click.
 --
+-- A preview poll shows only on a local copy of the site, so a poll can be
+-- tried out before it goes to everyone.
+--
 -- Apply against project dxwjxzmlezfyursysays, after chat/bans.sql. Every
 -- statement is safe to run twice.
 
