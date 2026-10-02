@@ -113,3 +113,62 @@ $function$;
 revoke all on function public.gv_dm_open(uuid) from public, anon;
 grant execute on function public.gv_dm_open(uuid) to authenticated;
 
+
+-- A group with the signed-in account and up to 19 others. The site's first
+-- line in it is who made it, so it shows up for everyone straight away.
+create or replace function public.gv_group_create(p_name text, p_users uuid[])
+returns bigint
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+  v_name text := left(btrim(regexp_replace(coalesce(p_name, ''), '[[:space:][:cntrl:]]+', ' ', 'g')), 40);
+  v_users uuid[];
+  v_id bigint;
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'Chat only works on GameVault.';
+  end if;
+  if v_user is null then
+    raise exception 'Sign in to chat.';
+  end if;
+  if v_name = '' then
+    v_name := null;
+  end if;
+  if v_name is not null and public.gv_name_rude(v_name) then
+    raise exception 'That group name has words we do not allow here.';
+  end if;
+
+  select coalesce(array_agg(distinct u.id), '{}') into v_users
+    from auth.users u
+   where u.id = any (coalesce(p_users, '{}'))
+     and u.id <> v_user;
+  if cardinality(v_users) < 1 then
+    raise exception 'Add at least one person.';
+  end if;
+  if cardinality(v_users) > 19 then
+    raise exception 'A group can have up to 20 people.';
+  end if;
+
+  perform pg_advisory_xact_lock(hashtext('gv_convo_new'), hashtext(v_user::text));
+  if (select count(*) from gv_convos
+       where created_by = v_user and kind = 'group'
+         and created_at > now() - interval '1 hour') >= 5 then
+    raise exception 'You have made a lot of groups. Try again later.';
+  end if;
+
+  insert into gv_convos (kind, name, created_by) values ('group', v_name, v_user)
+  returning id into v_id;
+  insert into gv_convo_members (convo_id, user_id)
+  select v_id, x from unnest(array_append(v_users, v_user)) x;
+  insert into gv_convo_messages (convo_id, body)
+  values (v_id, public.gv_display_name(v_user) || ' made the group');
+  return v_id;
+end;
+$function$;
+
+revoke all on function public.gv_group_create(text, uuid[]) from public, anon;
+grant execute on function public.gv_group_create(text, uuid[]) to authenticated;
+
