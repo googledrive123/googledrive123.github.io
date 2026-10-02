@@ -1493,7 +1493,8 @@
         return '<div class="bc-item poll-item"><div class="msg"><b>' + esc(p.question) + '</b>'
           + '<div class="ranked">' + rows + '</div>'
           + '<span class="st">' + fmt(total) + (total === 1 ? ' vote' : ' votes') + ' \u00b7 ' + fmt(p.accounts) + ' from accounts \u00b7 ' + esc(when) + '</span></div>'
-          + '</div>';
+          + (p.open ? '<button class="btn" type="button" data-pollclose="' + p.id + '">Close</button>' : '')
+          + '<button class="btn" type="button" data-polldel="' + p.id + '">Delete</button></div>';
       }).join('') : '<div class="empty">No polls yet.</div>';
     }).catch(function (e) { $('pollMsg').textContent = 'Could not load polls: ' + e.message; });
   }
@@ -1507,6 +1508,18 @@
       .then(function () { resetPollForm(); $('pollMsg').textContent = 'Asked. Everyone who comes to the site gets it now.'; return loadPolls(); })
       .catch(function (e) { $('pollMsg').textContent = 'Could not ask it: ' + e.message; })
       .then(function () { $('pollCreate').disabled = false; });
+  }
+  function pollAction(e) {
+    var b = e.target.closest('button'); if (!b) return;
+    var call;
+    if (b.dataset.pollclose) {
+      if (!confirm('End this poll now? Its results stay up.')) return;
+      call = rpc('gv_poll_close', { p_secret: state.secret, p_id: +b.dataset.pollclose });
+    } else if (b.dataset.polldel) {
+      if (!confirm('Delete this poll and every vote on it?')) return;
+      call = rpc('gv_poll_delete', { p_secret: state.secret, p_id: +b.dataset.polldel });
+    }
+    if (call) call.then(loadPolls).catch(function (err) { $('pollMsg').textContent = 'Could not do that: ' + err.message; });
   }
 
   // ── giveaways ──
@@ -2291,6 +2304,7 @@
   resetPollForm();
   $('pollMore').addEventListener('click', addAnswer);
   $('pollCreate').addEventListener('click', createPoll);
+  $('pollList').addEventListener('click', pollAction);
   $('gaCreate').addEventListener('click', function () {
     var ends = $('gaEnds').value;
     $('gaCreate').disabled = true;
