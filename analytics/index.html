@@ -165,6 +165,9 @@
   body.live-on #topBar, body.live-on #dash { display: none !important; }
   .live-top h1 { display: flex; align-items: center; }
   .live-top input[type=search] { background: var(--bg); border: 1px solid var(--border-strong); color: var(--text); font: inherit; font-size: 0.8rem; padding: 7px 10px; border-radius: 8px; width: 240px; max-width: 100%; }
+  .spark { display: flex; align-items: flex-end; gap: 2px; height: 64px; }
+  .spark i { flex: 1; min-width: 0; min-height: 1px; background: var(--s1); opacity: 0.8; border-radius: 2px 2px 0 0; }
+  .spark-axis { display: flex; justify-content: space-between; margin-top: 6px; font-family: 'JetBrains Mono', monospace; font-size: 0.66rem; color: var(--muted-2); }
 </style>
 </head>
 <body>
@@ -540,6 +543,14 @@
 
   <section>
     <div class="kpis" id="liveKpis"></div>
+  </section>
+
+  <section>
+    <div class="card">
+      <h2>Events <small>last 10 minutes, 5 seconds a bar, scanners left out</small></h2>
+      <div class="spark" id="liveSpark"></div>
+      <div class="spark-axis"><span>10 min ago</span><span>5 min ago</span><span>now</span></div>
+    </div>
   </section>
 </div>
 
