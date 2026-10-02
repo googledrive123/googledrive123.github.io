@@ -844,6 +844,11 @@
       tabs.appendChild(t);
     });
     els.emojiGrid = el('div', 'gv-chat-emoji-grid');
+    els.emojiGrid.addEventListener('mousedown', function (e) { e.preventDefault(); });
+    els.emojiGrid.addEventListener('click', function (e) {
+      var b = e.target.closest('button');
+      if (b) addEmoji(b.textContent);
+    });
     els.emojis.appendChild(tabs);
     els.emojis.appendChild(els.emojiGrid);
   }
@@ -862,6 +867,18 @@
       els.emojiGrid.appendChild(b);
     });
     els.emojiGrid.scrollTop = 0;
+  }
+
+  function addEmoji(e) {
+    var input = els.input, v = input.value;
+    var from = input.selectionStart == null ? v.length : input.selectionStart;
+    var to = input.selectionEnd == null ? v.length : input.selectionEnd;
+    var next = v.slice(0, from) + e + v.slice(to);
+    if (next.length > MAX) return say('Messages can be up to ' + MAX + ' characters.', 'wait');
+    input.value = next;
+    input.setSelectionRange(from + e.length, from + e.length);
+    input.focus();
+    paintLength();
   }
 
   // ── The list ──────────────────────────────────────────────────────────
