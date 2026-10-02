@@ -33,6 +33,10 @@ begin
   delete from gv_verified where key = v_user::text;
   -- A giveaway it won stays drawn, without its name.
   update gv_giveaways set winner_name = null where winner_user = v_user;
+  -- A DM with nobody left to talk to is no use to the other person either.
+  delete from gv_convos c
+   where c.kind = 'dm'
+     and exists (select 1 from gv_convo_members m where m.convo_id = c.id and m.user_id = v_user);
 
   delete from auth.users where id = v_user;
   return true;
