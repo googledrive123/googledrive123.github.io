@@ -647,3 +647,106 @@ $function$;
 revoke all on function public.gv_convo_resolve(text, bigint) from public;
 grant execute on function public.gv_convo_resolve(text, bigint) to anon, authenticated;
 
+
+-- Called every few seconds by every signed-in page. Notes which game the
+-- account has open, and hands back what is new since the cursors: server
+-- chat after p_after_server and DM and group messages after p_after_convo.
+--
+-- A message can commit a moment after a later one, so the last ten seconds
+-- come back every time as well, and the page drops ids it already has. A
+-- null cursor returns no messages, only where the cursors stand now, so a
+-- page that has just opened does not pop up the whole backlog.
+create or replace function public.gv_social_poll(
+  p_game text default null,
+  p_after_server bigint default null,
+  p_after_convo bigint default null
+) returns json
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+  v_game text := nullif(left(btrim(coalesce(p_game, '')), 80), '');
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'Chat only works on GameVault.';
+  end if;
+  if v_user is null then
+    raise exception 'Sign in to chat.';
+  end if;
+
+  -- Written only when it would change what friends see, not on every poll.
+  insert into gv_social (user_id, game_id, seen_at) values (v_user, v_game, now())
+  on conflict (user_id) do update
+    set game_id = excluded.game_id,
+        seen_at = excluded.seen_at
+  where gv_social.seen_at is null
+     or gv_social.seen_at < now() - interval '45 seconds'
+     or gv_social.game_id is distinct from excluded.game_id;
+
+  return json_build_object(
+    'server_last', (select coalesce(max(id), 0) from gv_chat_messages),
+    'server', case when p_after_server is null then '[]'::json else coalesce((
+      select json_agg(json_build_object(
+               'id', m.id,
+               'user_id', m.user_id,
+               'username', m.username,
+               'body', m.body,
+               'created_at', m.created_at,
+               'mine', m.user_id = v_user
+             ) order by m.id)
+        from (select * from gv_chat_messages
+               where not deleted
+                 and (id > p_after_server or created_at > now() - interval '10 seconds')
+               order by id desc limit 20) m
+    ), '[]'::json) end,
+    'convo_last', (
+      select coalesce(max(m.id), 0)
+        from gv_convo_members me
+        join gv_convo_messages m on m.convo_id = me.convo_id
+       where me.user_id = v_user
+    ),
+    'convo', case when p_after_convo is null then '[]'::json else coalesce((
+      select json_agg(json_build_object(
+               'id', m.id,
+               'convo_id', m.convo_id,
+               'kind', c.kind,
+               'name', c.name,
+               'user_id', m.user_id,
+               'username', m.username,
+               'body', m.body,
+               'created_at', m.created_at,
+               'mine', m.user_id = v_user
+             ) order by m.id)
+        from (select m.*
+                from gv_convo_members me
+                join gv_convo_messages m on m.convo_id = me.convo_id
+               where me.user_id = v_user
+                 and not m.deleted
+                 and (m.id > p_after_convo or m.created_at > now() - interval '10 seconds')
+               order by m.id desc limit 20) m
+        join gv_convos c on c.id = m.convo_id
+    ), '[]'::json) end,
+    'unread', (
+      select count(*)
+        from gv_convo_members me
+        join gv_convo_messages m on m.convo_id = me.convo_id
+       where me.user_id = v_user
+         and m.id > me.last_read
+         and not m.deleted
+         and m.user_id is distinct from v_user
+    ),
+    'requests', (
+      select count(*)
+        from gv_friend_links l
+       where l.friend_id = v_user
+         and not exists (select 1 from gv_friend_links r
+                          where r.user_id = v_user and r.friend_id = l.user_id)
+    )
+  );
+end;
+$function$;
+
+revoke all on function public.gv_social_poll(text, bigint, bigint) from public, anon;
+grant execute on function public.gv_social_poll(text, bigint, bigint) to authenticated;
