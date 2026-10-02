@@ -14,6 +14,10 @@
 --
 -- Results show once you have voted, and to everyone once a poll is over.
 --
+-- An answer can have a picture: images is a list of paths on the site, in
+-- the same order as the answers. The pages show them as tiles that open
+-- big on a click.
+--
 -- Apply against project dxwjxzmlezfyursysays, after chat/bans.sql. Every
 -- statement is safe to run twice.
 
