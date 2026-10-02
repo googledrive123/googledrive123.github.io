@@ -1902,6 +1902,18 @@
     ]);
     ranked('liveGames', gamesTop);
     ranked('livePages', pages.top(10));
+
+    online.sort(function (a, b) { return (last[b] ? last[b].tms : 0) - (last[a] ? last[a].tms : 0); });
+    $('liveOnlineN').textContent = fmt(online.length);
+    $('liveOnline').innerHTML = online.length ? online.slice(0, 80).map(function (v) {
+      var r = last[v], room = rooms[v];
+      var mood = !r ? 'idle' : r.event === 'session_end' ? 'away' : (r.event === 'hidden' || now - r.tms > 60000) ? 'idle' : '';
+      var doing = playing[v] ? 'playing ' + playing[v] + (room && room.code ? ' · room ' + room.code + (room.role ? ' (' + room.role + ')' : '') : '') : r ? (r.path || '') : '';
+      var where = r ? [r.browser, r.os, r.tz].filter(Boolean).join(' · ') : '';
+      return '<div class="on-row" data-who="' + esc(v) + '"><span class="dot ' + mood + '"></span>'
+        + '<span class="nm">' + who(v) + '<span class="sub">' + esc(doing) + (where ? ' · ' + esc(where) : '') + '</span></span>'
+        + '<span class="ago">' + (r ? ago(r.tms - live.skew) : 'in PolyTrack') + '</span></div>';
+    }).join('') : '<div class="empty">Nobody right now.</div>';
   }
 
   // ── load ──
