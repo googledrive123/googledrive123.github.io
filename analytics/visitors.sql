@@ -39,13 +39,26 @@ stable
 security definer
 set search_path to 'public'
 as $function$
-  select e.visitor_id
-  from analytics_events e
-  group by e.visitor_id
-  having not bool_or(analytics_is_action(e.event))
-     and (mode() within group (order by e.tz) in ('UTC', 'Etc/Unknown')
-          or mode() within group (order by e.tz) like 'Europe/%'
-          or mode() within group (order by e.viewport) in ('1280x1024', '1024x768', '800x600'));
+  -- Each visitor's most reported time zone and window size, the smallest
+  -- first on a tie, as mode() picks them.
+  select v.visitor_id
+  from analytics_visitors v
+  left join lateral (
+    select t.value from analytics_visitor_traits t
+    where t.visitor_id = v.visitor_id and t.trait = 'tz'
+    order by t.n desc, t.value
+    limit 1
+  ) tz on true
+  left join lateral (
+    select t.value from analytics_visitor_traits t
+    where t.visitor_id = v.visitor_id and t.trait = 'viewport'
+    order by t.n desc, t.value
+    limit 1
+  ) vp on true
+  where v.first_act is null
+    and (tz.value in ('UTC', 'Etc/Unknown')
+         or tz.value like 'Europe/%'
+         or vp.value in ('1280x1024', '1024x768', '800x600'));
 $function$;
 
 revoke all on function public.analytics_scanners() from public, anon, authenticated;
