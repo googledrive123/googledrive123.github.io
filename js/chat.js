@@ -281,7 +281,10 @@
     els.side = side;
     els.main = main;
 
-    els.input.addEventListener('input', paintLength);
+    els.input.addEventListener('input', function () {
+      paintLength();
+      lookUp();
+    });
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       sendMessage();
@@ -611,6 +614,14 @@
     });
   }
 
+  // ── @mentions ─────────────────────────────────────────────────────────
+  // Typing @ and a name offers the people it fits, found the way Compose and
+  // Add friend find them (gv_user_search). In a direct message or group chat
+  // only its members are offered, since nobody else would be told. Who was
+  // picked goes with the message; chat/mentions.sql has the last word.
+
+  var suggestion = { items: [], at: 0, q: null, timer: null };
+
   function myId() {
     var u = social() && social().user();
     return u ? u.id : null;
@@ -619,6 +630,63 @@
   function mentionsMe(m) {
     var me = myId();
     return !!(me && !m.mine && (m.mentions || []).some(function (x) { return x.id === me; }));
+  }
+
+  // The @word the caret is at the end of, if any: where its @ is, and what
+  // has been typed after it.
+  function atWord() {
+    var v = els.input.value, end = els.input.selectionStart;
+    if (end == null || end !== els.input.selectionEnd) return null;
+    var hit = /(^|\s)@([^\s@]{0,30})$/.exec(v.slice(0, end));
+    return hit ? { start: end - hit[2].length - 1, q: hit[2].toLowerCase() } : null;
+  }
+
+  function lookUp() {
+    var w = atWord();
+    if (!w || !signedIn()) return hideSuggest();
+    if (w.q === suggestion.q && !els.suggest.hidden) return;
+    suggestion.q = w.q;
+    clearTimeout(suggestion.timer);
+    if (w.q.length < 2) return showSuggest([], w.q ? 'Keep typing\u2026' : 'Type a name');
+    var q = w.q;
+    suggestion.timer = setTimeout(function () {
+      social().rpc('gv_user_search', { p_q: q }).then(function (people) {
+        if (suggestion.q !== q) return;
+        people = people || [];
+        showSuggest(people, people.length ? '' : 'Nobody by that name.');
+      }, function (error) {
+        if (suggestion.q === q) showSuggest([], error.message);
+      });
+    }, 250);
+  }
+
+  function showSuggest(people, note) {
+    suggestion.items = people;
+    suggestion.at = 0;
+    els.suggest.textContent = '';
+    people.forEach(function (p, i) {
+      var b = el('button');
+      b.type = 'button';
+      b.setAttribute('role', 'option');
+      b.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
+      var face = el('span', 'gv-chat-dot');
+      if (window.GV && GV.avatars) GV.avatars.render(face, { preset: p.preset, upload: p.upload, id: p.id });
+      else face.textContent = initials(p.username);
+      b.appendChild(face);
+      b.appendChild(el('span', '', p.username));
+      if (p.verified) b.appendChild(check());
+      els.suggest.appendChild(b);
+    });
+    if (note) els.suggest.appendChild(el('p', '', note));
+    els.suggest.hidden = false;
+  }
+
+  function hideSuggest() {
+    if (!els.suggest) return;
+    clearTimeout(suggestion.timer);
+    els.suggest.hidden = true;
+    suggestion.items = [];
+    suggestion.q = null;
   }
 
   // ── The list ──────────────────────────────────────────────────────────
