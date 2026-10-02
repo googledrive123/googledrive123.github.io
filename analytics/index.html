@@ -1746,6 +1746,16 @@
       var added = take(l.st, res);
       l.skew = Date.parse(res.now) - Date.now();
       l.st.since = Date.parse(res.now);
+      // Rows the next answer may hold again keep their ids, so they are
+      // still known when they come back.
+      var cut = Math.min(liveNow() - LIVE_BACK, l.st.since - OVERLAP);
+      if (l.st.rows.length && l.st.rows[0].tms < cut) {
+        l.st.rows = l.st.rows.filter(function (r) {
+          if (r.tms >= cut) return true;
+          delete l.st.ids[r.id];
+          return false;
+        });
+      }
       liveAdd(added, !l.first);
       l.first = false;
       $('liveStatus').innerHTML = '<span class="dot"></span>Updated ' + new Date().toLocaleTimeString();
