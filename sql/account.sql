@@ -39,6 +39,11 @@ begin
   delete from gv_convos c
    where c.kind = 'dm'
      and exists (select 1 from gv_convo_members m where m.convo_id = c.id and m.user_id = v_user);
+  -- Nor is a group the account was the last one in.
+  delete from gv_convos c
+   where c.kind = 'group'
+     and exists (select 1 from gv_convo_members m where m.convo_id = c.id and m.user_id = v_user)
+     and not exists (select 1 from gv_convo_members m where m.convo_id = c.id and m.user_id <> v_user);
 
   delete from auth.users where id = v_user;
   -- The leaderboard keeps what it worked out for a minute. This makes the
