@@ -31,6 +31,8 @@ begin
   delete from analytics_events where user_id = v_user;
   delete from polytrack_presence where user_id = v_user;
   delete from gv_verified where key = v_user::text;
+  -- A giveaway it won stays drawn, without its name.
+  update gv_giveaways set winner_name = null where winner_user = v_user;
 
   delete from auth.users where id = v_user;
   return true;
