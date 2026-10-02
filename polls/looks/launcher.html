@@ -94,6 +94,15 @@
   .open .col { filter: blur(6px); opacity: .45; }
   .open .pill, .open .corner, .open .foot { opacity: 0; }
   .lib-empty { padding: 40px 0; font-size: 14px; color: var(--mu); }
+  .col, .pill, .corner, .foot { transition: filter .2s ease, opacity .2s ease; }
+  .shade { transition: opacity .2s ease, visibility 0s .2s; }
+  .lib { transform: scale(.97); transition: opacity .16s ease-in, transform .16s ease-in, visibility 0s .16s; }
+  .open .shade { transition: opacity .2s ease; }
+  .open .lib { transform: none; transition: opacity .22s ease-out, transform .22s cubic-bezier(.2, .8, .2, 1); }
+  @media (prefers-reduced-motion: reduce) {
+    .col, .pill, .corner, .foot, .shade, .open .shade, .lib, .open .lib, .tile-art, .game-art { transition-duration: .01s; transition-delay: 0s; }
+    .lib, .tile-art:hover, .game-art:hover { transform: none; }
+  }
 </style>
 </head>
 <body>
