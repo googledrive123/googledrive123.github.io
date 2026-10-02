@@ -274,3 +274,19 @@ begin
   return v_id;
 end;
 $function$;
+
+-- Ends a poll now. Its results stay up.
+create or replace function public.gv_poll_close(p_secret text, p_id bigint)
+returns boolean
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+  update gv_polls set closed = true where id = p_id;
+  return found;
+end;
+$function$;
