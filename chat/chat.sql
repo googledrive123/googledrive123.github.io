@@ -182,6 +182,7 @@ begin
   return coalesce((
     select json_agg(json_build_object(
              'id', m.id,
+             'user_id', m.user_id,
              'username', m.username,
              'body', m.body,
              'created_at', m.created_at,
