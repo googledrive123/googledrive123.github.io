@@ -1934,12 +1934,16 @@
     liveShow(el);
     return el;
   }
-  // Newest at the top, and only the latest LIVE_MAX kept on the page.
+  // Newest at the top, one that comes in late still in its place by id, and
+  // only the latest LIVE_MAX kept on the page.
   function liveAdd(rows, fresh) {
     if (!rows.length) return;
-    var listEl = $('liveList'), frag = document.createDocumentFragment();
-    for (var i = rows.length - 1; i >= 0; i--) frag.appendChild(liveEntry(rows[i], fresh));
-    listEl.insertBefore(frag, listEl.firstChild);
+    var listEl = $('liveList');
+    rows.forEach(function (r) {
+      var at = listEl.firstChild;
+      while (at && at._row.id > r.id) at = at.nextSibling;
+      listEl.insertBefore(liveEntry(r, fresh), at);
+    });
     while (listEl.children.length > LIVE_MAX) listEl.removeChild(listEl.lastChild);
     live.shown += rows.length;
     $('liveCount').textContent = fmt(live.shown) + ' since you opened this';
