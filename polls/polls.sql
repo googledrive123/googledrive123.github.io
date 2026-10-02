@@ -45,3 +45,22 @@ create unique index if not exists gv_poll_votes_user on public.gv_poll_votes (po
 alter table public.gv_polls enable row level security;
 alter table public.gv_poll_votes enable row level security;
 revoke all on table public.gv_polls, public.gv_poll_votes from anon, authenticated;
+
+
+-- The answer this account or browser gave, or null.
+create or replace function public.gv_poll_mine(p_poll bigint, p_user uuid, p_visitor text)
+returns integer
+language sql
+stable
+security definer
+set search_path to 'public'
+as $function$
+  select v.choice
+    from gv_poll_votes v
+   where v.poll_id = p_poll
+     and ((p_user is not null and v.user_id = p_user)
+          or (p_visitor is not null and v.visitor_id = p_visitor))
+   limit 1;
+$function$;
+
+revoke all on function public.gv_poll_mine(bigint, uuid, text) from public, anon, authenticated;
