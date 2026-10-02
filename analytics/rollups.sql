@@ -47,3 +47,4 @@ create table if not exists public.analytics_quarters (
   is_new boolean not null,
   primary key (bucket, visitor_id, session_id)
 );
+create index if not exists analytics_quarters_visitor_idx on public.analytics_quarters (visitor_id);
