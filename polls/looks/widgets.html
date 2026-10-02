@@ -56,6 +56,11 @@
   .jump-name { margin-top: 6px; font-size: 30px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; }
   .jump-meta { margin-top: 4px; font-size: 13px; color: var(--mu); }
   .jump-play { margin-top: 16px; align-self: flex-start; height: 40px; padding: 0 20px; }
+  .next { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
+  .next-row { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .next-row img { width: 40px; height: 30px; border-radius: 8px; object-fit: cover; flex-shrink: 0; display: block; }
+  .next-name { flex: 1; min-width: 0; font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .next-ago { font-size: 12px; color: var(--mu); white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -88,6 +93,10 @@
         <span class="jump-name">Slope 2</span>
         <span class="jump-meta">12 min ago · action</span>
         <span class="btn-red jump-play">play</span>
+        <span class="next">
+          <span class="next-row"><img src="/thumbs/drivemad.webp" alt=""><span class="next-name">Drive Mad</span><span class="next-ago">yesterday</span></span>
+          <span class="next-row"><img src="/thumbs/retro-bowl.webp" alt=""><span class="next-name">Retro Bowl</span><span class="next-ago">yesterday</span></span>
+        </span>
       </span>
     </a>
   </main>
