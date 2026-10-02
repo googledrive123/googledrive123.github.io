@@ -79,6 +79,7 @@
     '.gv-look-url{position:absolute;left:50%;transform:translateX(-50%);padding:4px 16px;border-radius:7px;background:#08080a;font-family:"JetBrains Mono",monospace;font-size:12px;color:#8a8a96}',
     '.gv-look-screen iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#0c0c0e;opacity:0;transition:opacity .25s}',
     '.gv-look-screen.ready iframe{opacity:1}',
+    '.gv-look-desc{font-size:.88rem;color:#8a8a96}',
     '@keyframes gvPollIn{from{opacity:0;transform:translateY(10px) scale(.98)}}',
     '@media (prefers-reduced-motion:reduce){.gv-poll-box{animation:none}.gv-poll-opt.result::before,.gv-poll-look,.gv-poll-bar span{transition:none}}'
   ].join('');
@@ -290,7 +291,9 @@
     var close = el('button', 'gv-look-btn gv-look-close', '\u00d7');
     close.type = 'button';
     close.setAttribute('aria-label', 'Close');
+    var desc = el('div', 'gv-look-desc');
     top.appendChild(name);
+    top.appendChild(desc);
     top.appendChild(count);
     top.appendChild(close);
     var stage = el('div', 'gv-look-stage');
@@ -351,6 +354,7 @@
       live.src = url || 'about:blank';
       live.title = p.options[at] + ', live';
       name.textContent = p.options[at];
+      desc.textContent = blurb(p, at);
       count.textContent = (at + 1) + ' of ' + n;
       shade.setAttribute('aria-label', p.options[at]);
       var bits = [];
