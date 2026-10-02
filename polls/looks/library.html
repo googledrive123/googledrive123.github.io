@@ -77,6 +77,8 @@
   .tile-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .all-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 16px; }
   .count { font-size: 14px; color: #9b9ba5; }
+  .clear { margin-left: auto; height: 36px; padding: 0 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,.14); background: transparent; color: #f2f2f4; font-family: inherit; font-size: 14px; cursor: pointer; }
+  .clear:hover { background: #151518; }
   .filters { display: flex; align-items: center; gap: 8px; margin-bottom: 24px; }
   .tab { height: 36px; padding: 0 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,.1); background: transparent; color: #9b9ba5; font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer; }
   .tab.on { border-color: #f2f2f4; background: #f2f2f4; color: #0c0c0e; }
@@ -175,6 +177,7 @@
     <div class="all-head">
       <h2 id="headA">All games</h2>
       <span class="count" id="subA">1,958</span>
+      <button class="clear" id="clearA" hidden>Clear search</button>
     </div>
     <div class="filters" id="filtersA" data-browse>
       <button class="tab on" data-cat="All" aria-pressed="true">All</button>
@@ -361,6 +364,7 @@
     browse.forEach(function (n) { n.hidden = !s.browse; });
     $('headA').textContent = s.head;
     $('subA').textContent = s.sub;
+    $('clearA').hidden = s.browse;
     $('emptyA').hidden = !s.empty;
     if (key === gridKey) return;
     gridKey = key;
@@ -372,6 +376,16 @@
     state.qa = this.value;
     paintGames();
   });
+
+  // Set the search from a button. The box is never focused then, so this never fights typing.
+  function setQuery(q) {
+    var box = $('qa');
+    state.qa = q;
+    if (document.activeElement !== box) box.value = q;
+    paintGames();
+  }
+
+  $('clearA').addEventListener('click', function () { setQuery(''); });
 })();
 </script>
 </body>
