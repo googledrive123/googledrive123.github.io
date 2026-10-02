@@ -42,12 +42,13 @@
 
   function $(id) { return document.getElementById(id); }
 
-  // Every poll, newest first.
+  // Open polls first, newest first in each.
   function load() {
     var polls = window.GV && GV.polls;
     polls.visitor().then(function (v) {
       return polls.rpc('gv_polls_list', { p_visitor: v });
     }).then(function (list) {
+      list = (list || []).slice().sort(function (a, b) { return (b.open - a.open) || (b.id - a.id); });
       $('plList').textContent = '';
       $('plMsg').hidden = !!list.length;
       $('plMsg').textContent = 'No polls yet. When there is one, it shows up here and on the home page.';
