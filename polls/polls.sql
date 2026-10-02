@@ -238,3 +238,39 @@ begin
   ), '[]'::json);
 end;
 $function$;
+
+-- Asks something. p_days is how long it runs, or null until it is closed.
+create or replace function public.gv_poll_create(p_secret text, p_question text, p_options text[], p_days integer default null)
+returns bigint
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_question text := btrim(regexp_replace(coalesce(p_question, ''), '\s+', ' ', 'g'));
+  v_options jsonb;
+  v_id bigint;
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+  if v_question = '' or char_length(v_question) > 200 then
+    raise exception 'The question needs 1 to 200 characters.';
+  end if;
+  select coalesce(jsonb_agg(o order by n), '[]'::jsonb) into v_options
+    from (select left(btrim(regexp_replace(x, '\s+', ' ', 'g')), 80) as o, n
+            from unnest(coalesce(p_options, '{}'::text[])) with ordinality as t(x, n)) a
+   where o <> '';
+  if jsonb_array_length(v_options) < 2 or jsonb_array_length(v_options) > 6 then
+    raise exception 'A poll needs 2 to 6 answers.';
+  end if;
+  if p_days is not null and p_days < 1 then
+    raise exception 'days must be at least 1';
+  end if;
+
+  insert into gv_polls (question, options, ends_at)
+  values (v_question, v_options, case when p_days is null then null else now() + make_interval(days => p_days) end)
+  returning id into v_id;
+  return v_id;
+end;
+$function$;
