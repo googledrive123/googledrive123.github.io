@@ -617,6 +617,14 @@
       });
   }
 
+  // Into a room by its code, under the cover, the way the creator goes in.
+  // For a friend whose ask to join was just answered yes.
+  function joinRoom(code, who) {
+    watchForErrors();
+    showCover(null, 'Joining ' + (who || 'the room') + '...');
+    return joinAsCreator({ ticket: null, code: code });
+  }
+
   // Once in, the room is told who arrived. Said a few times over the first
   // seconds, because a game still settling into the room can miss one.
   function announce(state) {
