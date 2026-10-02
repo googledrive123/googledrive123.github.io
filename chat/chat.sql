@@ -414,7 +414,8 @@ begin
   on conflict (user_id) do update
     set reason = excluded.reason,
         until = excluded.until,
-        created_at = excluded.created_at
+        created_at = excluded.created_at,
+        via = null
   returning * into v_row;
 
   return row_to_json(v_row);
