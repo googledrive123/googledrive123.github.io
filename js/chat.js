@@ -329,6 +329,7 @@
     });
     root.addEventListener('click', function (e) {
       if (e.target === root) close();
+      if (!els.emojis.hidden && !els.emojis.contains(e.target) && !els.emojiBtn.contains(e.target)) hideEmojis();
     });
   }
 
@@ -378,6 +379,7 @@
     root.hidden = true;
     closeSheet();
     hideSuggest();
+    hideEmojis();
     mode = null;
     if (social()) social().viewing(null);
     paintButtons();
@@ -441,6 +443,7 @@
     say('');
     closeSheet();
     hideSuggest();
+    hideEmojis();
     picked = {};
     paintHead();
     root.classList.toggle('gv-chat-in', !!enter);
@@ -645,6 +648,7 @@
       sending = false;
       els.input.value = '';
       picked = {};
+      hideEmojis();
       paintLength();
       say('');
       add(key, [m]);
@@ -1287,10 +1291,11 @@
   // page's own Escape, which would close the game.
   window.addEventListener('keydown', function (e) {
     if (e.key !== 'Escape' || !isOpen()) return;
-    if (mode === 'inline' && els.sheet.hidden && els.suggest.hidden) return;
+    if (mode === 'inline' && els.sheet.hidden && els.suggest.hidden && els.emojis.hidden) return;
     e.stopImmediatePropagation();
     e.preventDefault();
     if (!els.suggest.hidden) hideSuggest();
+    else if (!els.emojis.hidden) hideEmojis();
     else if (els.sheet && !els.sheet.hidden) closeSheet();
     else close();
   }, true);
