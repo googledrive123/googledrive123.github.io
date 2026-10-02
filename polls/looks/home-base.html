@@ -227,5 +227,26 @@ h2{margin:0;font-size:18px;font-weight:700;letter-spacing:-.015em}
     </footer>
   </main>
 </div>
+<script>
+'use strict';
+var state = {
+  left: 1421,
+};
+
+function $(id) { return document.getElementById(id); }
+function pad(n) { return String(n).padStart(2, '0'); }
+
+function drawTimer() {
+  var pct = Math.max(0, Math.min(100, (1 - state.left / 3000) * 100));
+  $('timer').textContent = pad(Math.floor(state.left / 60)) + ':' + pad(state.left % 60);
+  $('timerPct').style.width = pct.toFixed(1) + '%';
+}
+
+function tick() {
+  state.left = state.left > 0 ? state.left - 1 : 3000;
+  drawTimer();
+}
+setInterval(tick, 1000);
+</script>
 </body>
 </html>
