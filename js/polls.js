@@ -36,6 +36,8 @@
     '.gv-poll-pop{position:fixed;inset:0;z-index:2600;display:grid;place-items:center;padding:16px;background:rgba(8,8,10,.62);backdrop-filter:blur(5px)}',
     '.gv-poll-box{width:min(440px,100%);max-height:calc(100vh - 32px);overflow-y:auto;padding:22px;border-radius:16px;border:1px solid var(--border-strong,rgba(255,255,255,.16));background:var(--surface,#121216);box-shadow:0 24px 70px rgba(0,0,0,.6);animation:gvPollIn .25s cubic-bezier(.2,.8,.2,1)}',
     '.gv-poll-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-top:16px}',
+    '.gv-poll-foot a{font-size:.8rem;color:var(--muted,#8a8a96);text-decoration:underline;text-underline-offset:3px}',
+    '.gv-poll-foot a:hover{color:var(--text,#f4f4f6)}',
     '.gv-poll-later{margin-left:auto;padding:8px 16px;border-radius:100px;border:1px solid var(--border-strong,rgba(255,255,255,.16));background:none;color:var(--text,#f4f4f6);font:inherit;font-size:.82rem;font-weight:600;cursor:pointer;opacity:0;visibility:hidden;transition:opacity .3s}',
     '.gv-poll-later.on{opacity:1;visibility:visible}',
     '.gv-poll-later:hover{border-color:var(--accent,#ff3b3b)}',
@@ -201,6 +203,8 @@
     var box = el('div', 'gv-poll-box');
     box.appendChild(el('div', 'gv-poll-kicker', 'New poll'));
     var foot = el('div', 'gv-poll-foot');
+    var all = el('a', '', 'See all polls');
+    all.href = '/polls/';
     var later = el('button', 'gv-poll-later', 'Not now');
     later.type = 'button';
     later.disabled = true;
@@ -222,6 +226,7 @@
       later.classList.add('on');
       later.focus();
     }));
+    foot.appendChild(all);
     foot.appendChild(later);
     box.appendChild(foot);
     shade.appendChild(box);
