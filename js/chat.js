@@ -15,8 +15,21 @@
   ];
 
   var ICON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v10H9l-5 4z"/></svg>';
+  var SMILE = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 14a4 4 0 0 0 7 0"/><path d="M9 9.5h.01M15 9.5h.01"/></svg>';
   // The blue check from analytics/verified.sql, as the rest of the site draws it.
   var CHECK = '<svg class="gv-chat-check" viewBox="0 0 24 24" role="img" aria-label="Verified"><circle cx="12" cy="12" r="11" fill="#1d9bf0"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  // The emoji picker's pages: the tab's own emoji, then what is on it.
+  var EMOJI = [
+    ['\ud83d\ude00', '😀 😃 😄 😁 😆 😅 😂 🤣 🙂 🙃 😉 😊 😇 🥰 😍 🤩 😘 😋 😛 😜 🤪 😝 🤑 🤗 🤭 🤫 🤔 🤐 🤨 😐 😑 😶 😏 😒 🙄 😬 😌 😔 😪 🤤 😴 😷 🤒 🤕 🤢 🤮 🥵 🥶 🥴 😵 🤯 🤠 🥳 😎 🤓 🧐 😕 😟 🙁 😮 😯 😲 😳 🥺 😦 😧 😨 😰 😥 😢 😭 😱 😖 😣 😞 😓 😩 😫 🥱 😤 😡 😠 🤬 😈 👿 💀 💩 🤡 👻 👽 🤖'],
+    ['\ud83d\udc4d', '👋 🤚 ✋ 🖖 👌 🤌 🤏 ✌️ 🤞 🤟 🤘 🤙 👈 👉 👆 👇 ☝️ 👍 👎 ✊ 👊 🤛 🤜 👏 🙌 👐 🤲 🙏 💪 🫡 🫶 👀 🧠'],
+    ['\u2764\ufe0f', '❤️ 🧡 💛 💚 💙 💜 🖤 🤍 🤎 💔 ❣️ 💕 💞 💓 💗 💖 💘 💝 💯 💢 💥 💫 💦 💨 🔥 ✨ ⭐ 🌟'],
+    ['\ud83d\udc36', '🐶 🐱 🐭 🐹 🐰 🦊 🐻 🐼 🐨 🐯 🦁 🐮 🐷 🐸 🐵 🐔 🐧 🐦 🦄 🐝 🐛 🦋 🐌 🐢 🐍 🦖 🐙 🦈 🐬 🐳 🌵 🌲 🌸 🌻 🌈 ☀️ 🌙 ⚡ ❄️ ☃️'],
+    ['\ud83c\udf55', '🍎 🍊 🍋 🍌 🍉 🍇 🍓 🍒 🍑 🥭 🍍 🥥 🥝 🍅 🥑 🌽 🥕 🍞 🧀 🍗 🍖 🍔 🍟 🍕 🌭 🌮 🌯 🍿 🍩 🍪 🎂 🍰 🧁 🍫 🍬 🍭 🍦 ☕ 🧃 🥤'],
+    ['\ud83c\udfae', '🎮 🕹️ 👾 🎯 🎲 🧩 ♟️ 🏆 🥇 🥈 🥉 🏅 ⚽ 🏀 🏈 ⚾ 🎾 🏐 🏓 🎳 🏁 🚗 🏎️ 🚀 🛸 ✈️ 🎉 🎊 🎁 🎈 🎵 🎶 🎧 🎤 🎬 📺 📱 💻'],
+    ['\u2705', '✅ ❌ ❓ ❗ ‼️ ⚠️ 🚫 💤 🆗 🆒 🆕 🔝 💬 💭 👑 💎 💰 🔒 🔑 ⏰ ⌛ 📌']
+  ];
+  var RECENT_KEY = 'gv.chat.emoji';
 
   var CSS = [
     '.gv-chat{--gv-chat-side:260px;display:flex;background:var(--surface,#121216);color:var(--text,#f4f4f6);font-family:inherit;font-size:.9rem;overflow:hidden}',
@@ -72,7 +85,7 @@
     '.gv-chat-pill:disabled{opacity:.45;cursor:default}',
     '.gv-chat-pill.primary{background:var(--text,#f4f4f6);color:var(--bg,#08080a);border-color:transparent;font-weight:700}',
     '.gv-chat-pill.danger{color:var(--accent,#ff3b3b);border-color:rgba(255,59,59,.35)}',
-    '.gv-chat-form{display:flex;gap:8px;padding:10px 12px 4px;border-top:1px solid var(--border,rgba(255,255,255,.07))}',
+    '.gv-chat-form{position:relative;display:flex;align-items:center;gap:8px;padding:10px 12px 4px;border-top:1px solid var(--border,rgba(255,255,255,.07))}',
     '.gv-chat-box{position:relative;flex:1;min-width:0}',
     '.gv-chat-input{width:100%;box-sizing:border-box;padding:9px 56px 9px 12px;border-radius:10px;border:1px solid var(--border,rgba(255,255,255,.07));background:var(--surface-2,#1a1a20);color:var(--text,#f4f4f6);font:inherit;font-size:.88rem;outline:none}',
     '.gv-chat-input:focus{border-color:var(--accent,#ff3b3b)}',
@@ -90,6 +103,15 @@
     '.gv-chat-suggest button[aria-selected="true"],.gv-chat-suggest button:hover{background:rgba(255,255,255,.08)}',
     '.gv-chat-suggest .gv-chat-dot{width:24px;height:24px;font-size:.6rem}',
     '.gv-chat-suggest p{margin:0;padding:6px 8px;font-size:.78rem;color:var(--muted,#8a8a96)}',
+    '.gv-chat-emojis{position:absolute;left:12px;bottom:calc(100% + 4px);z-index:7;width:min(330px,calc(100% - 24px));height:290px;display:flex;flex-direction:column;border-radius:14px;border:1px solid var(--border-strong,rgba(255,255,255,.16));background:var(--surface-2,#1a1a20);box-shadow:0 14px 36px rgba(0,0,0,.55);overflow:hidden}',
+    '.gv-chat-emojis[hidden]{display:none}',
+    '.gv-chat-emoji-tabs{display:flex;gap:2px;padding:6px 6px 4px;border-bottom:1px solid var(--border,rgba(255,255,255,.07))}',
+    '.gv-chat-emoji-tabs button{flex:1;min-width:0;padding:4px 0;border:0;border-radius:8px;background:none;font-size:1.05rem;line-height:1.3;cursor:pointer;opacity:.55}',
+    '.gv-chat-emoji-tabs button[aria-selected="true"],.gv-chat-emoji-tabs button:hover{opacity:1;background:rgba(255,255,255,.08)}',
+    '.gv-chat-emoji-grid{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(8,1fr);align-content:start;gap:2px;padding:6px}',
+    '.gv-chat-emoji-grid button{aspect-ratio:1;display:grid;place-items:center;padding:0;border:0;border-radius:8px;background:none;font-size:1.35rem;line-height:1;cursor:pointer}',
+    '.gv-chat-emoji-grid button:hover{background:rgba(255,255,255,.1)}',
+    '.gv-chat-emoji-grid p{grid-column:1/-1;margin:0;padding:8px 4px;font-size:.78rem;color:var(--muted,#8a8a96)}',
     '.gv-chat-status{min-height:1.2rem;padding:2px 12px 8px;font-size:.76rem;color:var(--muted,#8a8a96)}',
     '.gv-chat-status.wait{color:#f0c04a}',
     '.gv-chat-status.error{color:#ff7a7a}',
@@ -245,6 +267,10 @@
 
     var form = el('form', 'gv-chat-form');
     form.autocomplete = 'off';
+    els.emojiBtn = iconButton('Emoji', SMILE, toggleEmojis);
+    els.emojiBtn.setAttribute('aria-expanded', 'false');
+    els.emojis = el('div', 'gv-chat-emojis');
+    els.emojis.hidden = true;
     var box = el('div', 'gv-chat-box');
     els.input = el('input', 'gv-chat-input');
     els.input.maxLength = MAX;
@@ -260,6 +286,8 @@
     box.appendChild(els.len);
     els.send = pill('Send', 'primary gv-chat-send');
     els.send.type = 'submit';
+    form.appendChild(els.emojis);
+    form.appendChild(els.emojiBtn);
     form.appendChild(box);
     form.appendChild(els.send);
     els.status = el('div', 'gv-chat-status');
@@ -772,6 +800,68 @@
     picked[p.username.toLowerCase()] = p.id;
     paintLength();
     els.input.focus();
+  }
+
+  // ── Emoji ─────────────────────────────────────────────────────────────
+  // Everyday emoji a page at a time, the ones used lately first. A pick goes
+  // where the caret is, and the grid stays open for the next.
+
+  var EMOJI_PAGES = ['Used lately', 'Faces', 'Hands', 'Hearts', 'Animals and nature', 'Food', 'Games and fun', 'Symbols'];
+
+  function recentEmoji() {
+    try { return (JSON.parse(localStorage.getItem(RECENT_KEY) || '[]') || []).slice(0, 24); } catch (e) { return []; }
+  }
+
+  function toggleEmojis() {
+    if (els.emojis.hidden) showEmojis();
+    else hideEmojis();
+  }
+
+  function showEmojis() {
+    hideSuggest();
+    if (!els.emojiGrid) buildEmojis();
+    emojiPage(recentEmoji().length ? -1 : 0);
+    els.emojis.hidden = false;
+    els.emojiBtn.setAttribute('aria-expanded', 'true');
+  }
+
+  function hideEmojis() {
+    if (!els.emojis) return;
+    els.emojis.hidden = true;
+    els.emojiBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  function buildEmojis() {
+    var tabs = el('div', 'gv-chat-emoji-tabs');
+    tabs.setAttribute('role', 'tablist');
+    [['\ud83d\udd52']].concat(EMOJI).forEach(function (page, i) {
+      var t = el('button', '', page[0]);
+      t.type = 'button';
+      t.setAttribute('role', 'tab');
+      t.setAttribute('aria-label', EMOJI_PAGES[i]);
+      t.title = EMOJI_PAGES[i];
+      t.addEventListener('click', function () { emojiPage(i - 1); });
+      tabs.appendChild(t);
+    });
+    els.emojiGrid = el('div', 'gv-chat-emoji-grid');
+    els.emojis.appendChild(tabs);
+    els.emojis.appendChild(els.emojiGrid);
+  }
+
+  function emojiPage(i) {
+    var list = i < 0 ? recentEmoji() : EMOJI[i][1].split(' ');
+    Array.prototype.forEach.call(els.emojis.querySelectorAll('.gv-chat-emoji-tabs button'), function (t, k) {
+      t.setAttribute('aria-selected', k === i + 1 ? 'true' : 'false');
+    });
+    els.emojiGrid.textContent = '';
+    if (!list.length) els.emojiGrid.appendChild(el('p', '', 'Emoji you use show up here.'));
+    list.forEach(function (e) {
+      var b = el('button', '', e);
+      b.type = 'button';
+      b.setAttribute('aria-label', e);
+      els.emojiGrid.appendChild(b);
+    });
+    els.emojiGrid.scrollTop = 0;
   }
 
   // ── The list ──────────────────────────────────────────────────────────
