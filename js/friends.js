@@ -268,6 +268,12 @@
     data.friends.forEach(function (f) {
       var line = !f.online ? 'Offline' : f.game_id ? 'Playing ' + gameName(f.game_id) : 'Online';
       var row = personRow(f, line, f.online, f.online && f.game_id ? 'playing' : '');
+      row.appendChild(btn('Message', '', function () {
+        social().rpc('gv_dm_open', { p_user: f.id }).then(function (id) {
+          close();
+          if (window.GV && GV.chat) GV.chat.open({ key: 'convo:' + id });
+        }, function (error) { flash(error.message); });
+      }));
       row.appendChild(btn('\u00d7', 'quiet', function () {
         if (!confirm('Remove ' + f.username + ' from your friends?')) return;
         social().rpc('gv_friend_remove', { p_user: f.id }).then(load, function (error) { flash(error.message); });
