@@ -231,7 +231,8 @@ begin
                  left join (select choice, count(*) as n from gv_poll_votes
                              where poll_id = p.id group by choice) c on c.choice = i.idx
              ),
-             'total', (select count(*) from gv_poll_votes v where v.poll_id = p.id)
+             'total', (select count(*) from gv_poll_votes v where v.poll_id = p.id),
+             'accounts', (select count(*) from gv_poll_votes v where v.poll_id = p.id and v.user_id is not null)
            ) order by p.id desc)
       from gv_polls p
   ), '[]'::json);
