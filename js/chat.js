@@ -582,14 +582,16 @@
     listTimer = setTimeout(refreshList, 500);
   }
 
-  function row(key, name, last, unread, dot) {
+  function row(key, name, last, unread, dot, verified) {
     var b = el('button', 'gv-chat-row');
     b.type = 'button';
     var on = key === current && (mode === 'full' || root.classList.contains('gv-chat-in'));
     b.setAttribute('aria-current', on ? 'true' : 'false');
     var face = el('span', 'gv-chat-dot', dot || initials(name));
     var words = el('span', 'gv-chat-row-text');
-    words.appendChild(el('span', 'gv-chat-row-name', name));
+    var title = el('span', 'gv-chat-row-name', name);
+    if (verified) title.appendChild(check());
+    words.appendChild(title);
     words.appendChild(el('span', 'gv-chat-row-last', last || ''));
     b.appendChild(face);
     b.appendChild(words);
@@ -616,7 +618,8 @@
     els.list.appendChild(row('server', 'Server', lastServer ? lastLine(lastServer) : 'Everyone on GameVault',
       social().counts().server, '#'));
     convos.forEach(function (c) {
-      els.list.appendChild(row('convo:' + c.id, convoName(c), lastLine(c.last), c.unread));
+      var other = c.kind === 'dm' && (c.members || [])[0];
+      els.list.appendChild(row('convo:' + c.id, convoName(c), lastLine(c.last), c.unread, null, !!(other && other.verified)));
     });
   }
 
