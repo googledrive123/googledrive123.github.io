@@ -9,7 +9,7 @@
 -- so a direct PostgREST request reads and writes nothing.
 --
 -- Apply against project dxwjxzmlezfyursysays, after sql/avatars.sql and
--- sql/names.sql. Every statement is safe to run twice.
+-- sql/names.sql. Every statement is safe to run twice. Applied on 1 October 2026.
 
 
 -- The name other players see for an account, by the same rule as
