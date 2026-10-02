@@ -2050,7 +2050,11 @@
     else if (b.dataset.solo) joinSolo(b.dataset.solo);
   });
   $('playingModal').addEventListener('click', function (e) { if (e.target === $('playingModal')) closePlaying(); });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePlaying(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    if (playingOpen()) closePlaying();
+    else if (live && !/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) exitLive();
+  });
   $('liveBtn').addEventListener('click', enterLive);
   $('liveExit').addEventListener('click', exitLive);
   $('liveFilter').addEventListener('input', liveFilterAll);
