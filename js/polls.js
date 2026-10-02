@@ -189,7 +189,8 @@
       meta.textContent = bits.join(' \u00b7 ');
     }
 
-    // A picture answer: the picture, with the answer under it.
+    // A picture answer: the picture, with the answer under it. A click opens
+    // it big, with a button to pick it while there is a vote to give.
     function tile(p, i, total) {
       var showing = p.counts && p.counts.length;
       var t = el('button', 'gv-poll-look' + (p.voted === i ? ' mine' : ''));
@@ -215,7 +216,7 @@
         bar.appendChild(fill);
         t.appendChild(bar);
       }
-      if (!showing) t.addEventListener('click', function () { vote(p, i); });
+      t.addEventListener('click', function () { look(p, i, showing ? null : vote); });
       return t;
     }
 
