@@ -206,6 +206,10 @@
     later.disabled = true;
     function close() {
       shade.remove();
+      document.removeEventListener('keydown', onKey);
+    }
+    function onKey(e) {
+      if (e.key === 'Escape' && !later.disabled) later.click();
     }
     later.addEventListener('click', function () {
       if (later.textContent === 'Not now') putOff(poll.id);
@@ -222,6 +226,7 @@
     box.appendChild(foot);
     shade.appendChild(box);
     document.body.appendChild(shade);
+    document.addEventListener('keydown', onKey);
     setTimeout(function () {
       later.disabled = false;
       later.classList.add('on');
