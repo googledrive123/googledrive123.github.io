@@ -688,12 +688,21 @@ as $function$
 declare
   v_user uuid := auth.uid();
   v_game text := nullif(left(btrim(coalesce(p_game, '')), 80), '');
+  v_visitor text := nullif(left(btrim(coalesce(p_visitor, '')), 64), '');
 begin
   if not public.gv_origin_allowed() then
     raise exception 'Chat only works on GameVault.';
   end if;
   if v_user is null then
     raise exception 'Sign in to chat.';
+  end if;
+
+  -- Which browser this account is on, written once an hour at most.
+  if v_visitor is not null then
+    insert into gv_account_browsers (user_id, visitor_id) values (v_user, v_visitor)
+    on conflict (user_id, visitor_id) do update
+      set last_seen = now()
+    where gv_account_browsers.last_seen < now() - interval '1 hour';
   end if;
 
   -- Written only when it would change what friends see, not on every poll.
