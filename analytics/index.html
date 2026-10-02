@@ -180,6 +180,7 @@
   <h1>Game<span>Vault</span> Analytics</h1>
   <div class="status" id="status"><span class="dot off"></span>Not connected</div>
   <div class="grow"></div>
+  <button class="btn live-btn" id="liveBtn" type="button" title="Every event as it happens"><span class="rec"></span>Live</button>
   <div class="seg" id="rangeSeg">
     <button data-range="today">Today</button>
     <button data-range="24h" class="active">24h</button>
@@ -1690,6 +1691,31 @@
     liveTimer = null;
   }
 
+  // ── live ──
+  // A page of its own with every event as it is written, a second or so
+  // later. analytics_rows is asked every second for what came in since,
+  // going back a little each time as tick() does, so none is missed.
+  var LIVE_BACK = 10 * 60000, LIVE_MAX = 1500, LIVE_BEATS = { ping: 1, hidden: 1, visible: 1 };
+  var live = null;
+  function liveOn() { return !!live; }
+  function enterLive() {
+    if (live || !state.secret) return;
+    live = { st: newStore(Date.now() - LIVE_BACK), after: null, skew: 0, timer: null, busy: false, first: true, fails: 0, paused: false, held: [], shown: 0, filter: '', presence: [], presenceAt: 0 };
+    document.body.classList.add('live-on');
+    $('live').classList.remove('hidden');
+    $('liveList').innerHTML = '';
+    $('liveStatus').innerHTML = '<span class="dot off"></span>Connecting…';
+    window.scrollTo(0, 0);
+  }
+  function exitLive() {
+    if (!live) return;
+    clearTimeout(live.timer);
+    live = null;
+    document.body.classList.remove('live-on');
+    $('live').classList.add('hidden');
+    tick();
+  }
+
   // ── load ──
   // load() reads the whole range: on opening, on a new range and on Refresh.
   // tick() then only asks for what is new, every 10 seconds. The all-time
@@ -1718,7 +1744,7 @@
     loadAllTime();
   }
   function tick() {
-    if (!state.secret || !store || loadingRange || ticking) return;
+    if (!state.secret || !store || loadingRange || ticking || liveOn()) return;
     var gen = loadGen;
     ticking = true;
     Promise.all([fetchTail(store), rpc('gv_playing_now', {}).catch(function () { return null; })]).then(function (res) {
@@ -1782,6 +1808,8 @@
   });
   $('playingModal').addEventListener('click', function (e) { if (e.target === $('playingModal')) closePlaying(); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePlaying(); });
+  $('liveBtn').addEventListener('click', enterLive);
+  $('liveExit').addEventListener('click', exitLive);
   $('verifySelect').addEventListener('change', syncVerifyBtn);
   $('verifyList').addEventListener('click', function (e) {
     var b = e.target.closest('button[data-key]'); if (!b) return;
