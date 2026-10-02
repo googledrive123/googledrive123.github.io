@@ -172,3 +172,50 @@ $function$;
 revoke all on function public.gv_group_create(text, uuid[]) from public, anon;
 grant execute on function public.gv_group_create(text, uuid[]) to authenticated;
 
+
+create or replace function public.gv_group_add(p_convo bigint, p_users uuid[])
+returns boolean
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+  v_new uuid[];
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'Chat only works on GameVault.';
+  end if;
+  if v_user is null then
+    raise exception 'Sign in to chat.';
+  end if;
+  if not exists (select 1 from gv_convos c join gv_convo_members m on m.convo_id = c.id
+                  where c.id = p_convo and c.kind = 'group' and m.user_id = v_user) then
+    raise exception 'You are not in that group.';
+  end if;
+
+  perform 1 from gv_convos where id = p_convo for update;
+
+  select coalesce(array_agg(distinct u.id), '{}') into v_new
+    from auth.users u
+   where u.id = any (coalesce(p_users, '{}'))
+     and not exists (select 1 from gv_convo_members m where m.convo_id = p_convo and m.user_id = u.id);
+  if cardinality(v_new) = 0 then
+    return false;
+  end if;
+  if (select count(*) from gv_convo_members where convo_id = p_convo) + cardinality(v_new) > 20 then
+    raise exception 'A group can have up to 20 people.';
+  end if;
+
+  insert into gv_convo_members (convo_id, user_id)
+  select p_convo, x from unnest(v_new) x;
+  insert into gv_convo_messages (convo_id, body)
+  values (p_convo, public.gv_display_name(v_user) || ' added '
+    || (select string_agg(public.gv_display_name(x), ', ') from unnest(v_new) x));
+  return true;
+end;
+$function$;
+
+revoke all on function public.gv_group_add(bigint, uuid[]) from public, anon;
+grant execute on function public.gv_group_add(bigint, uuid[]) to authenticated;
+
