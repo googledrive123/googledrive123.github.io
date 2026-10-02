@@ -6,6 +6,7 @@
 (function () {
   'use strict';
 
+  var NEW_DAYS = 14;
   var FRIENDS_MS = 60 * 1000;
 
   var FEATURES = [
@@ -35,6 +36,8 @@
     '.gv-feat-line{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:2px;font-size:.74rem;line-height:1.35;color:var(--muted)}',
     '.gv-feat-line.live{color:var(--text);font-weight:600}',
     '.gv-feat-line.hot{color:var(--accent);font-weight:600}',
+    '.gv-feat-new{position:absolute;top:8px;right:8px;font-family:"JetBrains Mono",monospace;font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);border:1px solid rgba(255,59,59,.45);border-radius:100px;padding:.05rem .35rem}',
+    '.gv-feat-new[hidden]{display:none}',
     '@media (prefers-reduced-motion:reduce){.gv-feat{transition:none}.gv-feat:hover{transform:none}}'
   ].join('');
 
@@ -57,6 +60,20 @@
   }
 
 
+  // NEW is for the newest features only, so it still means something: the
+  // ones that came out last, for two weeks after.
+  function isNew(f) {
+    var newest = FEATURES.reduce(function (top, x) { return x.added > top ? x.added : top; }, '');
+    if (f.added !== newest) return false;
+    var days = (Date.now() - Date.parse(f.added + 'T00:00:00')) / 86400000;
+    return days < NEW_DAYS;
+  }
+
+  function paintNew() {
+    FEATURES.forEach(function (f) {
+      if (cards[f.id]) cards[f.id].badge.hidden = !isNew(f);
+    });
+  }
 
   function card(f) {
     var el = document.createElement(f.href ? 'a' : 'button');
@@ -75,6 +92,10 @@
     text.appendChild(name);
     text.appendChild(line);
     el.appendChild(text);
+    var badge = document.createElement('span');
+    badge.className = 'gv-feat-new';
+    badge.textContent = 'new';
+    el.appendChild(badge);
     el.addEventListener('click', function (e) {
       // Chat and friends open right here. Without them, chat still has its
       // own page to go to.
@@ -86,6 +107,7 @@
     cards[f.id] = {
       el: el,
       line: line,
+      badge: badge
     };
     return el;
   }
@@ -149,6 +171,7 @@
     FEATURES.forEach(function (f) { grid.appendChild(card(f)); });
     container.appendChild(grid);
     paint();
+    paintNew();
     var s = social();
     if (!s) return;
     s.on('counts', paint);
