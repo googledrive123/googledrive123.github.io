@@ -66,6 +66,7 @@
     '.gv-look-close{margin-left:auto}',
     '.gv-look-pick{margin-left:auto;padding:10px 22px;border-radius:100px;border:1px solid #ff3b3b;background:#ff3b3b;color:#fff;font:inherit;font-size:.9rem;font-weight:600;cursor:pointer}',
     '.gv-look-note{font-size:.84rem;color:#8a8a96}',
+    '.gv-poll-hint{margin:-.4rem 0 1rem;font-size:.84rem;color:var(--muted,#8a8a96)}',
     '@keyframes gvPollIn{from{opacity:0;transform:translateY(10px) scale(.98)}}',
     '@media (prefers-reduced-motion:reduce){.gv-poll-box{animation:none}.gv-poll-opt.result::before{transition:none}}'
   ].join('');
@@ -152,11 +153,13 @@
     style();
     var box = el('div', 'gv-poll');
     var q = el('h3', 'gv-poll-q', poll.question);
+    var hint = el('p', 'gv-poll-hint', 'Click a picture to see it big.');
     var opts = el('div', 'gv-poll-opts');
     var meta = el('div', 'gv-poll-meta');
     var err = el('div', 'gv-poll-err');
     err.setAttribute('role', 'status');
     box.appendChild(q);
+    box.appendChild(hint);
     box.appendChild(opts);
     box.appendChild(meta);
     box.appendChild(err);
@@ -167,6 +170,7 @@
       var total = showing ? p.counts.reduce(function (a, b) { return a + b; }, 0) : 0;
       var looks = hasLooks(p);
       opts.className = looks ? 'gv-poll-looks' : 'gv-poll-opts';
+      hint.hidden = !looks || !!showing;
       (p.options || []).forEach(function (name, i) {
         if (looks) return opts.appendChild(tile(p, i, total));
         var row;
