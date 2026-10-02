@@ -75,3 +75,29 @@ alter table public.analytics_visitor_users enable row level security;
 alter table public.analytics_visitor_games enable row level security;
 revoke all on public.analytics_visitors, public.analytics_visitor_traits, public.analytics_quarters,
   public.analytics_visitor_users, public.analytics_visitor_games from anon, authenticated;
+
+
+-- Adds some events, by id, to the totals. All five tables in one statement so
+-- the events are read once. Rows go in key order so two inserts that touch
+-- the same totals wait for each other instead of deadlocking.
+create or replace function public.analytics_roll_add(p_ids bigint[])
+returns void
+language sql
+security definer
+set search_path to 'public'
+as $function$
+  with e as materialized (
+    select * from analytics_events where id = any(p_ids)
+  ),
+  visitors as (
+    insert into analytics_visitors as v (visitor_id, first_ts, last_ts, first_act)
+    select e.visitor_id, min(e.ts), max(e.ts), min(e.ts) filter (where analytics_is_action(e.event))
+    from e
+    group by 1 order by 1
+    on conflict (visitor_id) do update set
+      first_ts = least(v.first_ts, excluded.first_ts),
+      last_ts = greatest(v.last_ts, excluded.last_ts),
+      first_act = least(v.first_act, excluded.first_act)
+  )
+  select;
+$function$;
