@@ -354,3 +354,52 @@ $function$;
 revoke all on function public.gv_convo_send(bigint, text) from public, anon;
 grant execute on function public.gv_convo_send(bigint, text) to authenticated;
 
+
+-- The newest 100 messages still up, oldest first, or only those after the
+-- last one a page already has.
+create or replace function public.gv_convo_recent(p_convo bigint, p_after_id bigint default 0)
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'Chat only works on GameVault.';
+  end if;
+  if v_user is null then
+    raise exception 'Sign in to chat.';
+  end if;
+  if not exists (select 1 from gv_convo_members where convo_id = p_convo and user_id = v_user) then
+    raise exception 'You are not in that chat.';
+  end if;
+
+  return coalesce((
+    select json_agg(json_build_object(
+             'id', m.id,
+             'convo_id', m.convo_id,
+             'user_id', m.user_id,
+             'username', m.username,
+             'body', m.body,
+             'created_at', m.created_at,
+             'mine', m.user_id = v_user
+           ) order by m.id)
+      from (
+        select *
+          from gv_convo_messages
+         where convo_id = p_convo
+           and not deleted
+           and id > coalesce(p_after_id, 0)
+         order by id desc
+         limit 100
+      ) m
+  ), '[]'::json);
+end;
+$function$;
+
+revoke all on function public.gv_convo_recent(bigint, bigint) from public, anon;
+grant execute on function public.gv_convo_recent(bigint, bigint) to authenticated;
+
