@@ -672,11 +672,14 @@ grant execute on function public.gv_convo_resolve(text, bigint) to anon, authent
 -- A message can commit a moment after a later one, so the last ten seconds
 -- come back every time as well, and the page drops ids it already has. A
 -- null cursor returns no messages, only where the cursors stand now, so a
--- page that has just opened does not pop up the whole backlog.
+-- page that has just opened does not pop up the whole backlog. p_visitor is
+-- the browser's visitor id, which a ban follows (chat/bans.sql).
+drop function if exists public.gv_social_poll(text, bigint, bigint);
 create or replace function public.gv_social_poll(
   p_game text default null,
   p_after_server bigint default null,
-  p_after_convo bigint default null
+  p_after_convo bigint default null,
+  p_visitor text default null
 ) returns json
 language plpgsql
 security definer
@@ -771,5 +774,5 @@ begin
 end;
 $function$;
 
-revoke all on function public.gv_social_poll(text, bigint, bigint) from public, anon;
-grant execute on function public.gv_social_poll(text, bigint, bigint) to authenticated;
+revoke all on function public.gv_social_poll(text, bigint, bigint, text) from public, anon;
+grant execute on function public.gv_social_poll(text, bigint, bigint, text) to authenticated;
