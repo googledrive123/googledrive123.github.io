@@ -38,3 +38,19 @@ $function$;
 
 revoke all on function public.gv_display_name(uuid) from public, anon, authenticated;
 
+
+-- One row per account that has used chat or friends.
+create table if not exists public.gv_social (
+  user_id uuid primary key references auth.users (id) on delete cascade,
+  -- online: friends see you and your game, and can ask to join.
+  -- private: friends see you and your game, and cannot ask to join.
+  -- offline: friends see you as offline.
+  status  text not null default 'online' check (status in ('online', 'offline', 'private')),
+  -- The game open on the site at the last poll, if any.
+  game_id text check (char_length(game_id) <= 80),
+  seen_at timestamptz
+);
+
+alter table public.gv_social enable row level security;
+revoke all on table public.gv_social from anon, authenticated;
+
