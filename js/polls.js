@@ -144,7 +144,10 @@
       opts.textContent = '';
       var showing = p.counts && p.counts.length;
       var total = showing ? p.counts.reduce(function (a, b) { return a + b; }, 0) : 0;
+      var looks = hasLooks(p);
+      opts.className = looks ? 'gv-poll-looks' : 'gv-poll-opts';
       (p.options || []).forEach(function (name, i) {
+        if (looks) return opts.appendChild(tile(p, i, total));
         var row;
         if (showing) {
           var n = p.counts[i] || 0, pct = total ? Math.round(100 * n / total) : 0;
@@ -164,6 +167,27 @@
       var bits = [plural(p.total || 0, 'vote', 'votes'), endsLine(p)];
       if (p.voted != null && p.options[p.voted] != null) bits.push('You picked ' + p.options[p.voted]);
       meta.textContent = bits.join(' \u00b7 ');
+    }
+
+    // A picture answer: the picture, with the answer under it.
+    function tile(p, i) {
+      var showing = p.counts && p.counts.length;
+      var t = el('button', 'gv-poll-look');
+      t.type = 'button';
+      var frame = el('span', 'gv-poll-shot');
+      var src = shot(p, i);
+      if (src) {
+        var img = el('img');
+        img.src = src;
+        img.alt = '';
+        frame.appendChild(img);
+      }
+      t.appendChild(frame);
+      var row = el('span', 'gv-poll-look-row');
+      row.appendChild(el('span', 'gv-poll-name', p.options[i]));
+      t.appendChild(row);
+      if (!showing) t.addEventListener('click', function () { vote(p, i); });
+      return t;
     }
 
     function vote(p, i) {
