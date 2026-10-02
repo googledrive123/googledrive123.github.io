@@ -259,9 +259,17 @@
     var img = el('img');
     stage.appendChild(img);
     var bar = el('div', 'gv-look-bar');
+    var prev = el('button', 'gv-look-btn', '\u2190');
+    prev.type = 'button';
+    prev.setAttribute('aria-label', 'Previous');
+    var next = el('button', 'gv-look-btn', '\u2192');
+    next.type = 'button';
+    next.setAttribute('aria-label', 'Next');
     var choose = el('button', 'gv-look-pick', 'Pick this one');
     choose.type = 'button';
     choose.hidden = !pick;
+    bar.appendChild(prev);
+    bar.appendChild(next);
     bar.appendChild(choose);
     shade.appendChild(top);
     shade.appendChild(stage);
@@ -282,6 +290,8 @@
       shade.remove();
     }
     close.addEventListener('click', shut);
+    prev.addEventListener('click', function () { show(at - 1); });
+    next.addEventListener('click', function () { show(at + 1); });
     choose.addEventListener('click', function () {
       var i = at;
       shut();
