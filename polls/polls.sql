@@ -41,3 +41,7 @@ create table if not exists public.gv_poll_votes (
 
 create unique index if not exists gv_poll_votes_visitor on public.gv_poll_votes (poll_id, visitor_id);
 create unique index if not exists gv_poll_votes_user on public.gv_poll_votes (poll_id, user_id) where user_id is not null;
+
+alter table public.gv_polls enable row level security;
+alter table public.gv_poll_votes enable row level security;
+revoke all on table public.gv_polls, public.gv_poll_votes from anon, authenticated;
