@@ -62,8 +62,10 @@ revoke all on table public.gv_chat_messages, public.gv_chat_bans, public.gv_chat
 -- Sends a message as the signed-in account. Every refusal is a sentence the
 -- page shows as it is. A wait also comes back in the hint as wait=<seconds>
 -- and a ban's end as until=<time>, for the page to count down or show in
--- the reader's own time.
-create or replace function public.gv_chat_send(p_body text)
+-- the reader's own time. p_mentions is who the page says was picked after
+-- an @; chat/mentions.sql decides who the message really names.
+drop function if exists public.gv_chat_send(text);
+create or replace function public.gv_chat_send(p_body text, p_mentions uuid[] default null)
 returns json
 language plpgsql
 security definer
@@ -78,6 +80,7 @@ declare
   v_last timestamptz;
   v_wait integer;
   v_name text;
+  v_mentions jsonb;
   v_row gv_chat_messages;
 begin
   if not public.gv_origin_allowed() then
@@ -145,8 +148,9 @@ begin
     v_name := 'player ' || left(v_user::text, 4);
   end if;
 
-  insert into gv_chat_messages (user_id, username, body)
-  values (v_user, v_name, v_body)
+  v_mentions := public.gv_mention_list(v_body, p_mentions, null);
+  insert into gv_chat_messages (user_id, username, body, mentions)
+  values (v_user, v_name, v_body, v_mentions)
   returning * into v_row;
 
   return json_build_object(
@@ -160,8 +164,8 @@ begin
 end;
 $function$;
 
-revoke all on function public.gv_chat_send(text) from public, anon;
-grant execute on function public.gv_chat_send(text) to authenticated;
+revoke all on function public.gv_chat_send(text, uuid[]) from public, anon;
+grant execute on function public.gv_chat_send(text, uuid[]) to authenticated;
 
 
 -- The newest 100 messages still up, oldest first, or only those after the
