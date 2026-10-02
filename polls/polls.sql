@@ -104,6 +104,7 @@ as $function$
            'question', p.question,
            'options', p.options,
            'media', p.media,
+           'intro', p.intro,
            'preview', p.preview,
            'created_at', p.created_at,
            'ends_at', p.ends_at,
