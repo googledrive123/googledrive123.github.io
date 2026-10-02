@@ -184,6 +184,13 @@
     return (poll.options || []).some(function (name, i) { return shot(poll, i); });
   }
 
+  // A poll's intro, if it has one: a title and a line of text.
+  function introOf(poll) {
+    var t = poll.intro;
+    if (!t || typeof t.title !== 'string' || !t.title) return null;
+    return { title: t.title.slice(0, 120), text: typeof t.text === 'string' ? t.text.slice(0, 300) : '' };
+  }
+
   // One poll: the answers to pick from, or the results once there are any
   // to show. onChange hears about a vote with the poll as it is now.
   function card(poll, onChange) {
