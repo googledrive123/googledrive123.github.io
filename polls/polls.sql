@@ -206,7 +206,7 @@ begin
   end if;
 
   select * into v_poll from gv_polls where id = p_poll;
-  if not found then
+  if not found or (v_poll.preview and not public.gv_origin_local()) then
     raise exception 'That poll is gone.';
   end if;
   if v_poll.closed or v_poll.ends_at <= now() then
