@@ -39,9 +39,11 @@
     } catch (e) { return null; }
   }
 
-  // Never track from inside an iframe (games embed pages; a 404 can even nest the site itself).
+  // Never track from inside an iframe (games embed pages; a 404 can even nest the site itself),
+  // or from a copy of the site running on this computer for testing.
   var inFrame = false; try { inFrame = window.self !== window.top; } catch (e) { inFrame = true; }
-  if (inFrame || ls(true, 'gv.noanalytics') === '1') { window.GVA = { track: function(){}, disabled: true }; return; }
+  var local = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+  if (inFrame || local || ls(true, 'gv.noanalytics') === '1') { window.GVA = { track: function(){}, disabled: true }; return; }
 
   // ── Identity ──────────────────────────────────────────────────────────
   function uuid() {
