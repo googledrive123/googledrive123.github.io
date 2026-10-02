@@ -84,6 +84,12 @@
     '.gv-mention.me{background:rgba(255,59,59,.3);color:#fff;cursor:default;text-decoration:none}',
     '.gv-msg.mentioned{background:rgba(255,59,59,.07);box-shadow:inset 3px 0 0 var(--accent,#ff3b3b)}',
     '.gv-chat-at{min-width:18px;height:18px;padding:0 5px;border-radius:100px;background:var(--accent,#ff3b3b);color:#fff;font-size:.68rem;font-weight:800;display:grid;place-items:center}',
+    '.gv-chat-suggest{position:absolute;left:0;right:0;bottom:calc(100% + 6px);z-index:6;max-height:260px;overflow-y:auto;padding:4px;border-radius:12px;border:1px solid var(--border-strong,rgba(255,255,255,.16));background:var(--surface-2,#1a1a20);box-shadow:0 12px 30px rgba(0,0,0,.5)}',
+    '.gv-chat-suggest[hidden]{display:none}',
+    '.gv-chat-suggest button{width:100%;display:flex;align-items:center;gap:8px;padding:6px 8px;border:0;border-radius:8px;background:none;color:inherit;font:inherit;font-size:.85rem;text-align:left;cursor:pointer}',
+    '.gv-chat-suggest button[aria-selected="true"],.gv-chat-suggest button:hover{background:rgba(255,255,255,.08)}',
+    '.gv-chat-suggest .gv-chat-dot{width:24px;height:24px;font-size:.6rem}',
+    '.gv-chat-suggest p{margin:0;padding:6px 8px;font-size:.78rem;color:var(--muted,#8a8a96)}',
     '.gv-chat-status{min-height:1.2rem;padding:2px 12px 8px;font-size:.76rem;color:var(--muted,#8a8a96)}',
     '.gv-chat-status.wait{color:#f0c04a}',
     '.gv-chat-status.error{color:#ff7a7a}',
@@ -244,7 +250,12 @@
     els.input.maxLength = MAX;
     els.input.setAttribute('aria-label', 'Message');
     els.input.setAttribute('enterkeyhint', 'send');
+    els.input.setAttribute('aria-autocomplete', 'list');
     els.len = el('span', 'gv-chat-len', '0/' + MAX);
+    els.suggest = el('div', 'gv-chat-suggest');
+    els.suggest.hidden = true;
+    els.suggest.setAttribute('role', 'listbox');
+    box.appendChild(els.suggest);
     box.appendChild(els.input);
     box.appendChild(els.len);
     els.send = pill('Send', 'primary gv-chat-send');
