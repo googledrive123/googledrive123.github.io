@@ -98,3 +98,41 @@ $function$;
 
 revoke all on function public.gv_browser_traits(text) from public, anon, authenticated;
 
+
+-- Accounts made after p_user was banned, not banned themselves, that have
+-- been on a device that looks like one p_user used. Only a hint: the same
+-- school laptop looks the same for everyone who has one.
+create or replace function public.gv_ban_lookalikes(p_user uuid)
+returns json
+language sql
+stable
+security definer
+set search_path to 'public'
+as $function$
+  with banned as (
+    select created_at from gv_chat_bans where user_id = p_user
+  ),
+  looks as (
+    select distinct public.gv_browser_traits(visitor_id) as traits
+      from gv_browser_links where user_id = p_user
+  )
+  select coalesce(json_agg(json_build_object(
+           'user_id', m.user_id,
+           'username', public.gv_display_name(m.user_id),
+           'created_at', m.created_at
+         ) order by m.created_at), '[]'::json)
+    from (
+      select distinct on (l.user_id) l.user_id, u.created_at
+        from gv_browser_links l
+        join auth.users u on u.id = l.user_id
+       where l.user_id <> p_user
+         and u.created_at > (select created_at from banned)
+         and not exists (select 1 from gv_chat_bans x
+                          where x.user_id = l.user_id and (x.until is null or x.until > now()))
+         and public.gv_browser_traits(l.visitor_id) in (select traits from looks where traits is not null)
+       order by l.user_id
+       limit 10
+    ) m;
+$function$;
+
+revoke all on function public.gv_ban_lookalikes(uuid) from public, anon, authenticated;
