@@ -124,6 +124,7 @@
         opts.appendChild(row);
       });
       var bits = [plural(p.total || 0, 'vote', 'votes'), endsLine(p)];
+      if (p.voted != null && p.options[p.voted] != null) bits.push('You picked ' + p.options[p.voted]);
       meta.textContent = bits.join(' \u00b7 ');
     }
 
