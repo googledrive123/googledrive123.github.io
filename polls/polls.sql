@@ -70,7 +70,8 @@ $function$;
 revoke all on function public.gv_poll_mine(bigint, uuid, text) from public, anon, authenticated;
 
 
--- One poll as the pages show it.
+-- One poll as the pages show it. counts, one per answer, only come with it
+-- once the reader has voted or the poll is over.
 create or replace function public.gv_poll_json(p_poll bigint, p_user uuid, p_visitor text)
 returns json
 language sql
@@ -86,7 +87,13 @@ as $function$
            'ends_at', p.ends_at,
            'open', x.open,
            'voted', x.mine,
-           'total', (select count(*) from gv_poll_votes v where v.poll_id = p.id)
+           'total', (select count(*) from gv_poll_votes v where v.poll_id = p.id),
+           'counts', case when x.mine is not null or not x.open then (
+             select json_agg(coalesce(c.n, 0) order by i.idx)
+               from generate_series(0, jsonb_array_length(p.options) - 1) as i(idx)
+               left join (select choice, count(*) as n from gv_poll_votes
+                           where poll_id = p.id group by choice) c on c.choice = i.idx
+           ) end
          )
     from gv_polls p,
          lateral (select not p.closed and (p.ends_at is null or p.ends_at > now()) as open,
