@@ -42,12 +42,21 @@
   .ibtn { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 12px; border: 1px solid var(--ln); background: var(--s1a); color: var(--mu); cursor: pointer; padding: 0; }
   .ibtn:hover { color: oklch(0.97 0.01 25); }
   .avatar { width: 36px; height: 36px; border-radius: 12px; border: 0; background: var(--s3); color: var(--tx); font-size: 14px; font-weight: 600; cursor: pointer; padding: 0; }
+  .col { position: relative; height: 100%; display: flex; flex-direction: column; align-items: center; padding-top: 116px; }
+  .brand { display: flex; align-items: center; gap: 16px; margin: 0; font-weight: 600; }
+  .brand img { width: 48px; height: 48px; display: block; }
+  .brand span { font-size: 64px; letter-spacing: -0.045em; line-height: 1; }
+  .tagline { margin: 14px 0 0; font-size: 15px; color: var(--mu); }
 </style>
 </head>
 <body>
 <main class="scr" id="scr">
   <div class="glow"></div>
   <div class="launch" id="launch">
+    <div class="col">
+      <h1 class="brand"><img src="/favicon.svg" alt=""><span>gamevault</span></h1>
+      <p class="tagline">1,958 games. no ads.</p>
+    </div>
     <div class="pill" title="Class timer">
       <span class="pill-lbl">period 3</span>
       <span class="pill-time" id="timer">23:41</span>
