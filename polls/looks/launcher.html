@@ -47,6 +47,10 @@
   .brand img { width: 48px; height: 48px; display: block; }
   .brand span { font-size: 64px; letter-spacing: -0.045em; line-height: 1; }
   .tagline { margin: 14px 0 0; font-size: 15px; color: var(--mu); }
+  .search { margin-top: 28px; display: flex; align-items: center; gap: 12px; width: 560px; height: 52px; padding: 0 12px 0 20px; border-radius: 18px; background: var(--s1a); border: 1px solid var(--ln2); backdrop-filter: blur(18px); box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25); }
+  .search svg { flex-shrink: 0; opacity: .7; }
+  .search input { flex: 1; min-width: 0; height: 100%; border: 0; outline: none; background: transparent; color: inherit; font-family: inherit; font-size: 16px; }
+  .kbd { font-size: 12px; opacity: .6; border: 1px solid var(--ln2); border-radius: 6px; padding: 1px 7px; }
 </style>
 </head>
 <body>
@@ -56,6 +60,11 @@
     <div class="col">
       <h1 class="brand"><img src="/favicon.svg" alt=""><span>gamevault</span></h1>
       <p class="tagline">1,958 games. no ads.</p>
+      <label class="search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input id="launchQ" placeholder="search games, movies and music" aria-label="Search games, movies and music" autocomplete="off" spellcheck="false">
+        <span class="kbd" aria-hidden="true">/</span>
+      </label>
     </div>
     <div class="pill" title="Class timer">
       <span class="pill-lbl">period 3</span>
