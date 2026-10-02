@@ -175,6 +175,14 @@
   .ev { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 10px; padding: 9px 8px; border-top: 1px solid var(--border); border-left: 2px solid transparent; font-size: 0.8rem; cursor: pointer; }
   .ev:first-child { border-top-color: transparent; }
   .ev:hover { background: rgba(255,255,255,0.02); }
+  .ev.fresh { animation: fresh 1.6s ease-out; }
+  @keyframes fresh { from { background: rgba(255,59,59,0.16); } to { background: transparent; } }
+  .ev.k-game { border-left-color: var(--s3); }
+  .ev.k-page { border-left-color: var(--s1); }
+  .ev.k-media { border-left-color: var(--s2); }
+  .ev.k-error { border-left-color: var(--bad); }
+  .ev.k-beat .line { opacity: 0.6; }
+  .ev.bot { opacity: 0.5; }
   .ev .when { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; }
   .ev .when span { display: block; margin-top: 2px; font-size: 0.66rem; color: var(--muted-2); }
   .ev .body { min-width: 0; }
