@@ -15,6 +15,9 @@
     'Your visits in the site\u2019s stats'
   ];
 
+  // What this browser keeps for the account. The rest of what it stores is
+  // the browser's own, like settings and game saves.
+  var LOCAL = ['gv.username', 'gv.ptsave.user', 'gv.ptsave.at', 'gv.ptsave.dirty'];
 
   var CSS = [
     '.gv-del{position:fixed;inset:0;z-index:2600;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.6)}',
@@ -48,6 +51,12 @@
     return node;
   }
 
+  function forget(userId) {
+    LOCAL.concat(['gv.chat.server.' + userId]).forEach(function (key) {
+      try { localStorage.removeItem(key); } catch (e) {}
+    });
+    if (window.GV && GV.identity && GV.identity.setAccountName) GV.identity.setAccountName(null);
+  }
 
   // Resolves true once the account is gone, false if the dialog was closed.
   // opts: { name, userId }
@@ -163,6 +172,7 @@
       .then(function () { return sb.rpc('gv_delete_account'); })
       .then(function (res) {
         if (res.error) throw new Error(res.error.message);
+        forget(userId);
         return sb.auth.signOut({ scope: 'local' });
       });
   }
