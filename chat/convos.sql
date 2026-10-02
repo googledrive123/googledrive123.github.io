@@ -279,7 +279,6 @@ declare
   v_body text := btrim(regexp_replace(coalesce(p_body, ''), '[[:space:][:cntrl:]]+', ' ', 'g'));
   v_ban gv_chat_bans;
   v_last timestamptz;
-  v_wait integer;
   v_mentions jsonb;
   v_row gv_convo_messages;
 begin
@@ -322,19 +321,6 @@ begin
   if v_last > now() - interval '1 second' then
     raise exception 'Slow down a little.'
       using hint = 'wait=1';
-  end if;
-
-  -- The 30th message back decides when the next one is allowed.
-  select created_at into v_last
-    from gv_convo_messages
-   where user_id = v_user
-     and created_at > now() - interval '1 minute'
-   order by created_at desc
-  offset 29 limit 1;
-  if found then
-    v_wait := greatest(1, ceil(extract(epoch from v_last + interval '1 minute' - now()))::int);
-    raise exception 'That is a lot of messages. Take a short break before sending more.'
-      using hint = 'wait=' || v_wait;
   end if;
 
   if public.gv_is_rude(v_body) then
