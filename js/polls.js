@@ -49,6 +49,7 @@
     '.gv-poll-look:disabled{cursor:default;opacity:.6;transform:none}',
     '.gv-poll-look-row{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:0 2px;font-size:.9rem;font-weight:600}',
     '.gv-poll-look-row span{min-width:0;overflow-wrap:anywhere}',
+    '.gv-poll-look .gv-poll-pct{font-family:"JetBrains Mono",monospace;font-size:.74rem;font-weight:400;color:var(--muted,#8a8a96);white-space:nowrap}',
     '@keyframes gvPollIn{from{opacity:0;transform:translateY(10px) scale(.98)}}',
     '@media (prefers-reduced-motion:reduce){.gv-poll-box{animation:none}.gv-poll-opt.result::before{transition:none}}'
   ].join('');
@@ -174,7 +175,7 @@
     }
 
     // A picture answer: the picture, with the answer under it.
-    function tile(p, i) {
+    function tile(p, i, total) {
       var showing = p.counts && p.counts.length;
       var t = el('button', 'gv-poll-look');
       t.type = 'button';
@@ -190,6 +191,10 @@
       var row = el('span', 'gv-poll-look-row');
       row.appendChild(el('span', 'gv-poll-name', p.options[i]));
       t.appendChild(row);
+      if (showing) {
+        var n = p.counts[i] || 0, pct = total ? Math.round(100 * n / total) : 0;
+        row.appendChild(el('span', 'gv-poll-pct', pct + '% \u00b7 ' + n.toLocaleString()));
+      }
       if (!showing) t.addEventListener('click', function () { vote(p, i); });
       return t;
     }
