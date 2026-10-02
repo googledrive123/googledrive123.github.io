@@ -89,6 +89,7 @@
   function schedule() {
     clearTimeout(timer);
     if (!sb) return;
+    if (document.hidden) return;
     timer = setTimeout(poll, fast ? FAST_MS : POLL_MS);
   }
 
@@ -167,6 +168,11 @@
     }
   }
 
+  document.addEventListener('visibilitychange', function () {
+    if (!sb) return;
+    if (document.hidden) clearTimeout(timer);
+    else if (!busy) poll();
+  });
 
   window.GV = window.GV || {};
   window.GV.social = {
