@@ -457,3 +457,22 @@ $function$;
 revoke all on function public.gv_mute_set(text, bigint) from public, anon;
 grant execute on function public.gv_mute_set(text, bigint) to authenticated;
 
+
+-- A friend asking to join someone's PolyTrack room. The host's game picks
+-- it up on its presence beat and answers yes with the room's code, or no.
+create table if not exists public.gv_join_asks (
+  id          bigserial primary key,
+  from_user   uuid not null references auth.users (id) on delete cascade,
+  to_user     uuid not null references auth.users (id) on delete cascade,
+  created_at  timestamptz not null default now(),
+  answer      text check (answer in ('yes', 'no')),
+  code        text check (char_length(code) <= 32),
+  answered_at timestamptz
+);
+
+create index if not exists gv_join_asks_to on public.gv_join_asks (to_user, created_at desc);
+create index if not exists gv_join_asks_from on public.gv_join_asks (from_user, created_at desc);
+
+alter table public.gv_join_asks enable row level security;
+revoke all on table public.gv_join_asks from anon, authenticated;
+
