@@ -8,6 +8,8 @@
   'use strict';
 
   var POLL_MS = 8000;
+  // While chat is open a reply should show up about as fast as it is typed.
+  var FAST_MS = 4000;
 
   var sb = null;
   var user = null;
@@ -22,6 +24,7 @@
   // was there before the page was, and never pops up.
   var floors = { server: 0, convo: 0 };
   var seen = { server: {}, convo: {} };
+  var fast = false;
   // What chat has on screen, so its own messages do not pop up over it.
   var viewing = null;
 
@@ -86,7 +89,7 @@
   function schedule() {
     clearTimeout(timer);
     if (!sb) return;
-    timer = setTimeout(poll, POLL_MS);
+    timer = setTimeout(poll, fast ? FAST_MS : POLL_MS);
   }
 
   function poll() {
@@ -180,6 +183,9 @@
     // What chat shows, 'server' or 'convo:<id>', or null when it is shut.
     viewing: function (key) {
       viewing = key || null;
+      var was = fast;
+      fast = !!key;
+      if (fast && !was && sb && !busy) poll();
     },
     // Asks again now, after sending or opening something.
     poke: function () {
