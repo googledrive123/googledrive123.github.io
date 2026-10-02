@@ -623,8 +623,10 @@
     });
   }
 
-  function autoOn() { return read(AUTO_KEY) === '1'; }
-  function setAuto(on) { write(AUTO_KEY, on ? '1' : null); }
+  // On unless this browser turned it off. Hardly anyone opens /saves/, and a
+  // backup that waits to be switched on is not there when it is needed.
+  function autoOn() { return read(AUTO_KEY) !== '0'; }
+  function setAuto(on) { write(AUTO_KEY, on ? '1' : '0'); }
   function autoAt() { return read(AUTO_AT_KEY); }
 
   function whenIdle() {
@@ -634,8 +636,8 @@
     });
   }
 
-  /* Once a day, quietly, for a signed-in player who turned it on in this
-     browser. A browser that has never auto-saved may be a fresh one without
+  /* Once a day, quietly, for a signed-in player, unless this browser turned
+     it off. A browser that has never auto-saved may be a fresh one without
      the progress the account's auto slot holds, so it leaves that slot alone
      until /saves/ has offered to load it (autoOffer below). Resolves true
      only when it saved; never rejects, since nobody is watching. */
