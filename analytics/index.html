@@ -1861,8 +1861,9 @@
     var online = Object.keys(last).filter(function (v) { return now - last[v].tms < 5 * 60000; });
 
     var minute = rows.filter(function (r) { return now - r.tms < 60000; });
-    var games = counter();
+    var games = counter(), pages = counter();
     Object.keys(playing).forEach(function (v) { games.add(playing[v]); });
+    online.forEach(function (v) { if (last[v]) pages.add(last[v].path); });
     var gamesTop = games.top();
     kpiTiles('liveKpis', [
       ['On the site', fmt(online.length), fmt(online.filter(function (v) { return last[v] && now - last[v].tms < 60000; }).length) + ' in the last minute'],
@@ -1872,6 +1873,8 @@
       ['Signed in', fmt(online.filter(function (v) { return last[v] && last[v].user_id; }).length), 'on the site now'],
       ['Errors', fmt(rows.filter(function (r) { return r.event === 'error'; }).length), 'last 10 minutes']
     ]);
+    ranked('liveGames', gamesTop);
+    ranked('livePages', pages.top(10));
   }
 
   // ── load ──
