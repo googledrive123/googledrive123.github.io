@@ -182,6 +182,9 @@
     els.list = el('div', 'gv-chat-list');
     side.appendChild(sideHead);
     side.appendChild(els.list);
+    var foot = el('div', 'gv-chat-foot');
+    foot.appendChild(pill('Compose', 'primary', function () { compose('dm'); }));
+    side.appendChild(foot);
 
     var main = el('section', 'gv-chat-main');
     var head = el('div', 'gv-chat-head');
@@ -592,10 +595,87 @@
     });
   }
 
+  // ── Sheets: compose, people, mutes ────────────────────────────────────
+  // One panel over the window at a time.
 
-  function closeSheet() {
+  function sheet(title) {
+    var s = els.sheet;
+    s.textContent = '';
+    var head = el('div', 'gv-chat-head');
+    var t = el('div', 'gv-chat-title');
+    t.appendChild(el('b', '', title));
+    head.appendChild(t);
+    head.appendChild(iconButton('Close', '\u00d7', closeSheet));
+    var body = el('div', 'gv-chat-sheet-body');
+    s.appendChild(head);
+    s.appendChild(body);
+    s.hidden = false;
+    return body;
   }
 
+  function closeSheet() {
+    if (els.sheet) els.sheet.hidden = true;
+  }
+
+  // A username box and what it finds. pick(person) runs on a click.
+  function search(body, label, pick) {
+    var box = el('input', 'gv-chat-field');
+    box.placeholder = 'Type a username';
+    box.setAttribute('aria-label', label);
+    var found = el('div', 'gv-chat-people');
+    var timer = null;
+    var asked = '';
+    box.addEventListener('input', function () {
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        var q = box.value.trim();
+        asked = q;
+        if (q.length < 3) {
+          found.textContent = '';
+          if (q) found.appendChild(el('p', '', 'Keep typing\u2026'));
+          return;
+        }
+        social().rpc('gv_user_search', { p_q: q }).then(function (people) {
+          if (asked !== q) return;
+          found.textContent = '';
+          if (!people.length) found.appendChild(el('p', '', 'Nobody by that name.'));
+          people.forEach(function (p) {
+            var line = el('div', 'gv-chat-person');
+            var face = el('span', 'gv-chat-dot');
+            if (window.GV && GV.avatars) GV.avatars.render(face, { preset: p.preset, upload: p.upload, id: p.id });
+            else face.textContent = initials(p.username);
+            line.appendChild(face);
+            line.appendChild(el('span', '', p.username));
+            line.appendChild(pill(label, '', function () { pick(p, line); }));
+            found.appendChild(line);
+          });
+        }, function (error) {
+          found.textContent = '';
+          found.appendChild(el('p', '', error.message));
+        });
+      }, 250);
+    });
+    body.appendChild(box);
+    body.appendChild(found);
+    setTimeout(function () { box.focus(); });
+    return box;
+  }
+
+  function openDm(person) {
+    return social().rpc('gv_dm_open', { p_user: person.id }).then(function (id) {
+      return refreshList().then(function () { view('convo:' + id, true); });
+    });
+  }
+
+  function compose(kind) {
+    var body = sheet('New message');
+    body.appendChild(el('p', '', 'Message anyone on GameVault by their username.'));
+    var note = el('p');
+    search(body, 'Message', function (person) {
+      openDm(person).catch(function (error) { note.textContent = error.message; });
+    });
+    body.appendChild(note);
+  }
 
 
 
