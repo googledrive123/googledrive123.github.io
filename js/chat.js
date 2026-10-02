@@ -85,6 +85,11 @@
     '.gv-chat-badge{position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;padding:0 4px;box-sizing:border-box;border-radius:100px;background:var(--accent,#ff3b3b);color:#fff;font-size:.6rem;font-weight:700;line-height:16px;text-align:center}',
     '.gv-chat-badge.dot{min-width:9px;width:9px;height:9px;padding:0;top:-1px;right:-1px}',
     '.gv-chat-badge[hidden]{display:none}',
+    '.gv-chat-window{position:absolute;top:12px;right:12px;z-index:20;width:min(380px,calc(100% - 24px));height:min(520px,calc(100% - 24px));border:1px solid var(--border-strong,rgba(255,255,255,.16));border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,.6)}',
+    '.gv-chat-narrow .gv-chat-side{width:100%;border-right:0}',
+    '.gv-chat-narrow:not(.gv-chat-in) .gv-chat-main,.gv-chat-narrow.gv-chat-in .gv-chat-side{display:none}',
+    '.gv-chat-back{display:none}',
+    '.gv-chat-narrow .gv-chat-back{display:grid}',
     '@media (max-width:700px){.gv-chat-full{padding:0}.gv-chat-full>.gv-chat-frame{border-radius:0;border:0}}'
   ].join('');
 
@@ -178,6 +183,9 @@
 
     var main = el('section', 'gv-chat-main');
     var head = el('div', 'gv-chat-head');
+    var back = iconButton('All chats', '\u2190', function () { root.classList.remove('gv-chat-in'); });
+    back.classList.add('gv-chat-back');
+    head.appendChild(back);
     var title = el('div', 'gv-chat-title');
     els.title = el('b');
     els.sub = el('small');
@@ -253,8 +261,11 @@
     opts = opts || {};
     build();
     var inGame = !!(host().inGame && host().inGame());
-    mode = 'full';
-    document.body.appendChild(root);
+    mode = inGame ? 'window' : 'full';
+    var parent = mode === 'window' && host().gameArea ? host().gameArea() : document.body;
+    if (root.parentNode !== parent) parent.appendChild(root);
+    root.classList.toggle('gv-chat-window', mode === 'window');
+    root.classList.toggle('gv-chat-narrow', mode === 'window' || innerWidth <= 700);
     root.classList.toggle('gv-chat-full', mode === 'full');
     root.hidden = false;
     els.sideClose.hidden = mode !== 'window' && !root.classList.contains('gv-chat-narrow');
@@ -303,6 +314,7 @@
     say('');
     closeSheet();
     paintHead();
+    root.classList.toggle('gv-chat-in', !!enter);
     social().viewing(key);
     var t = thread(key);
     els.log.textContent = '';
