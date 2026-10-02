@@ -102,7 +102,7 @@ as $function$
            'id', p.id,
            'question', p.question,
            'options', p.options,
-           'images', p.images,
+           'media', p.media,
            'preview', p.preview,
            'created_at', p.created_at,
            'ends_at', p.ends_at,
