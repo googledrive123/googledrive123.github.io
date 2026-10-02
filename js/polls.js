@@ -9,7 +9,33 @@
   var SUPA_URL = 'https://dxwjxzmlezfyursysays.supabase.co';
   var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
 
+  var CSS = [
+    '.gv-poll{text-align:left}',
+    '.gv-poll-q{margin:.5rem 0 1rem;font-size:1.2rem;font-weight:700;line-height:1.3;letter-spacing:-.01em;color:var(--text,#f4f4f6);overflow-wrap:anywhere}',
+    '.gv-poll-opts{display:flex;flex-direction:column;gap:8px}',
+    '.gv-poll-opt{position:relative;width:100%;display:flex;align-items:center;gap:10px;padding:11px 14px;overflow:hidden;border-radius:10px;border:1px solid var(--border-strong,rgba(255,255,255,.16));background:var(--surface-2,#1a1a20);color:var(--text,#f4f4f6);font:inherit;font-size:.92rem;text-align:left;cursor:pointer;transition:border-color .15s}',
+    'button.gv-poll-opt:hover{border-color:var(--accent,#ff3b3b)}',
+    'button.gv-poll-opt:disabled{cursor:default;opacity:.6}',
+    '.gv-poll-opt span{position:relative;min-width:0;overflow-wrap:anywhere}',
+    '.gv-poll-opt .gv-poll-name{flex:1}',
+  ].join('');
+
   var client = null;
+
+  function style() {
+    if (document.getElementById('gvPollsCss')) return;
+    var st = document.createElement('style');
+    st.id = 'gvPollsCss';
+    st.textContent = CSS;
+    document.head.appendChild(st);
+  }
+
+  function el(tag, cls, text) {
+    var node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text != null) node.textContent = text;
+    return node;
+  }
 
   // A page with its own Supabase client hands it over here, so a signed-in
   // player votes as their account.
@@ -45,8 +71,33 @@
     try { return Promise.resolve(localStorage.getItem('gv.vid')); } catch (e) { return Promise.resolve(null); }
   }
 
+  // One poll and the answers to pick from.
+  function card(poll) {
+    style();
+    var box = el('div', 'gv-poll');
+    var q = el('h3', 'gv-poll-q', poll.question);
+    var opts = el('div', 'gv-poll-opts');
+    box.appendChild(q);
+    box.appendChild(opts);
+
+    function paint(p) {
+      opts.textContent = '';
+      (p.options || []).forEach(function (name, i) {
+        var row = el('button', 'gv-poll-opt');
+        row.type = 'button';
+        row.appendChild(el('span', 'gv-poll-name', name));
+        row.disabled = !p.open;
+        opts.appendChild(row);
+      });
+    }
+
+    paint(poll);
+    return box;
+  }
+
   window.GV = window.GV || {};
   window.GV.polls = {
+    card: card,
     use: use,
     rpc: rpc,
     visitor: visitor
