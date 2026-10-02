@@ -1314,8 +1314,17 @@
           + modButtons(r.deleted ? null : r.message_id, r.user_id)
           + '<button class="btn" type="button" data-resolve="' + r.report_id + '">Dismiss</button>');
       }).join('') : '<div class="empty">No open reports.</div>';
-      $('chatBans').innerHTML = d.bans.filter(function (b) { return b.active; }).map(function (b) {
-        return '<div class="bc-item"><span class="msg"><b>' + esc(b.username) + '</b> ' + esc(b.reason || '') + '</span>'
+      // A ban that follows from another (chat/bans.sql) shows under it, and
+      // goes when it is unbanned.
+      var active = d.bans.filter(function (b) { return b.active; });
+      var roots = {}, follow = {};
+      active.forEach(function (b) { roots[b.user_id] = true; });
+      active.forEach(function (b) { if (b.via && roots[b.via]) (follow[b.via] = follow[b.via] || []).push(b); });
+      $('chatBans').innerHTML = active.filter(function (b) { return !(b.via && roots[b.via]); }).map(function (b) {
+        var also = follow[b.user_id] || [];
+        return '<div class="bc-item"><span class="msg"><b>' + esc(b.username) + '</b> ' + esc(b.reason || '')
+          + (also.length ? '<br><span class="st">Also banned for sharing a browser: ' + also.map(function (x) { return esc(x.username); }).join(', ') + '</span>' : '')
+          + '</span>'
           + '<span class="st">' + (b.until ? 'until ' + esc(new Date(b.until).toLocaleString()) : 'for good') + '</span>'
           + '<button class="btn" type="button" data-unban="' + esc(b.user_id) + '">Unban</button></div>';
       }).join('') || '<div class="empty">Nobody is banned.</div>';
