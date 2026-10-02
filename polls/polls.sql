@@ -39,6 +39,11 @@ create table if not exists public.gv_polls (
 -- Pictures for the answers, in the same order, or null for a poll without.
 alter table public.gv_polls add column if not exists images jsonb;
 
+-- Extras for the answers, in the same order, or null for a poll without.
+-- Each is an object: img (a picture), page (a live page to try) and note
+-- (a line about it). Paths are on this site.
+alter table public.gv_polls add column if not exists media jsonb;
+
 -- A preview poll only shows on a local copy of the site (localhost:8000), to
 -- try it out before anyone else sees it. The dashboard shows it to everyone.
 alter table public.gv_polls add column if not exists preview boolean not null default false;
