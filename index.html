@@ -4202,7 +4202,9 @@ function openGame(g) {
 }
 function closeGame() {
   if (window._trackClose) window._trackClose();
+  const played = suggPlaySecs;
   suggAfterGame();
+  if (window._afterGame) window._afterGame(mounted, mountedFrom, played);
   if (window.GV && GV.chat) GV.chat.closeWindow();
   showMore(false);
   dropIntro();
@@ -4910,6 +4912,24 @@ function saveToast(text, yes, no, onYes, onNo) {
   document.getElementById('saveToastClose').onclick = hide;
   box.hidden = false;
 }
+
+function askToKeep(g, from, secs) {
+  // A game still on the host it came from keeps its progress over there.
+  if (currentUser || !g || secs < SUGG_PLAY_SECS || (from !== 'vault' && from !== 'main')) return;
+  let last = 0;
+  try { last = +localStorage.getItem(KEEP_ASK_KEY) || 0; } catch (e) {}
+  if (Date.now() - last < KEEP_ASK_DAYS * 86400000) return;
+  // After the suggestion popup has had its turn, so the two never show at once.
+  setTimeout(() => {
+    if (currentUser || document.querySelector('.roll-overlay.show, .game-overlay.show, .auth-overlay.show, .profile-overlay.show')) return;
+    try { localStorage.setItem(KEEP_ASK_KEY, String(Date.now())); } catch (e) {}
+    saveToast(['Your ' + g.name + ' progress is only in this browser.',
+      'Clear the history or switch computers and it starts over. With an account, GameVault backs it up every day.'],
+      'Make an account', 'Not now', () => openAuth('signup'));
+  }, 900);
+}
+// closeGame() is outside this block.
+window._afterGame = askToKeep;
 
 // ─── Load username ───
 async function loadUsername() {
