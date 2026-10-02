@@ -73,6 +73,9 @@
   // Also how long a Join from the dashboard can take to be noticed.
   var BEAT_EVERY = 5000;
 
+  // Other parts of the mod that want each beat's reply, like friends.js.
+  var beatListeners = [];
+
   function beat() {
     var gv = identity();
     var room = rooms();
@@ -85,6 +88,9 @@
       p_role: state.role
     }).then(function (reply) {
       if (reply && reply.call) hostNow().catch(function () {});
+      beatListeners.forEach(function (fn) {
+        try { fn(reply); } catch (error) { console.error('Beat listener failed:', error); }
+      });
     }).catch(function (error) { console.error('Presence beat failed:', error); });
   }
 
