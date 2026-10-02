@@ -38,9 +38,17 @@
     });
   }
 
+  // This browser's id (js/identity.js), which a guest votes as.
+  function visitor() {
+    var id = window.GV && GV.identity;
+    if (id && id.ready) return id.ready.then(function (v) { return v || id.id(); });
+    try { return Promise.resolve(localStorage.getItem('gv.vid')); } catch (e) { return Promise.resolve(null); }
+  }
+
   window.GV = window.GV || {};
   window.GV.polls = {
     use: use,
-    rpc: rpc
+    rpc: rpc,
+    visitor: visitor
   };
 }());
