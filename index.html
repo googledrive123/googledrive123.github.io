@@ -46,6 +46,7 @@
   <script src="/js/chat.js" defer></script>
   <script src="/js/friends.js" defer></script>
   <script src="/js/account.js" defer></script>
+  <script src="/js/features.js" defer></script>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -288,6 +289,16 @@
       color: var(--muted-2);
       letter-spacing: 0.2em;
       text-transform: uppercase;
+    }
+    /* A phone has no room for the bell and the name beside every button. The
+       bell is in the game bar and on the schedule page, and the picture
+       stands for the name. */
+    @media (max-width: 640px) {
+      .welcome-top { top: 1rem; left: 1rem; right: 1rem; gap: 0.5rem; }
+      .welcome-top > div { gap: 0.45rem !important; }
+      .welcome-top .bell { display: none; }
+      .welcome-top .user-btn { padding: 0.3rem; }
+      #userLabelWelcome { display: none; }
     }
     .welcome-top .brand {
       color: var(--text);
@@ -1683,7 +1694,7 @@
     .mini-nav {
       display: flex; justify-content: center; flex-wrap: wrap;
       gap: 0.4rem 0.9rem;
-      margin-top: 1.6rem;
+      margin-top: 1.1rem;
     }
     .mini-nav a {
       display: inline-flex; align-items: center; gap: 0.35rem;
@@ -1693,14 +1704,6 @@
       transition: color 0.15s;
     }
     .mini-nav a:hover { color: var(--text); }
-    .tag-new {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.55rem; letter-spacing: 0.14em; text-transform: uppercase;
-      color: var(--accent);
-      border: 1px solid rgba(255,59,59,0.45);
-      border-radius: 100px;
-      padding: 0.05rem 0.35rem;
-    }
     .home-footer {
       position: relative;
       z-index: 1;
@@ -2568,12 +2571,9 @@
       <div class="stat"><div class="num loading" id="sCats">0</div><div class="lbl">categories</div></div>
     </div>
 
+    <!-- The big features as cards, filled by js/features.js. -->
+    <div data-features></div>
     <nav class="mini-nav" aria-label="More">
-      <a href="/leaderboard/">Leaderboard <span class="tag-new">new</span></a>
-      <a href="/shop/">Shop <span class="tag-new">new</span></a>
-      <a href="/challenge/">Challenge <span class="tag-new">new</span></a>
-      <a href="/chat/">Chat <span class="tag-new">new</span></a>
-      <a href="/saves/">Saves <span class="tag-new">new</span></a>
       <a href="/schedule/">Schedule</a>
       <a href="/status/">Requests</a>
       <a href="/music/">Music</a>
@@ -3126,7 +3126,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // ───── What's new ─────
 const NEWS = [
-  {id:null, date:'2026-10-01', label:'688 more games added', status:'new', meta:'Expanded library · now 1,958 games'},
+  {id:null, date:'2026-10-02', label:'Friends', status:'new', meta:'See what friends are playing · ask to join their PolyTrack room'},
+  {id:null, date:'2026-10-02', label:'Direct messages and group chats', status:'new', meta:'Chat button in every top bar · works over games too'},
+  {id:null, date:'2026-10-02', label:'Delete your account from one dialog', status:'added', meta:'Profile or Settings · takes all of its data with it'},
+  {id:null, date:'2026-10-01', label:'688 more games added', status:'added', meta:'Expanded library · now 1,958 games'},
   {id:null, date:'2026-10-01', label:'Leaderboard', status:'added', meta:'Top levels, most play time, this week\'s leaders and every game\'s top player'},
   {id:null, date:'2026-10-01', label:'Games load from our own copies', status:'added', meta:'Harder to block · swap to the original host any time'},
   {id:null, date:'2026-10-01', label:'Shop, coins and crates', status:'added', meta:'Earn coins by playing · cosmetics only, never real money'},
@@ -4612,6 +4615,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // game bar.
   if (window.GV && GV.chat) document.querySelectorAll('[data-chat]').forEach(el => GV.chat.mount(el, { pill: el.dataset.chat === 'pill' }));
   if (window.GV && GV.friends) document.querySelectorAll('[data-friends]').forEach(el => GV.friends.mount(el));
+  if (window.GV && GV.features) document.querySelectorAll('[data-features]').forEach(el => GV.features.mount(el));
 });
 
 // Some games registered service workers for their own /games/<id>/ folder.
@@ -4823,6 +4827,7 @@ function paintCosmetics() {
   document.querySelectorAll('.user-name-text').forEach(el => C.applyName(el, worn));
   C.applyTitle(document.getElementById('profileTitle'), worn);
   C.applyTiles(document.documentElement, worn);
+  if (window.GV && GV.features) GV.features.set('shop', myWallet && myWallet.coins ? myWallet.coins.toLocaleString() + ' coins to spend' : null);
   const card = document.getElementById('coinCard');
   card.hidden = !myWallet;
   if (myWallet) {
