@@ -113,7 +113,9 @@ begin
              'id', f.id,
              'username', f.name,
              'preset', v.preset,
-             'upload', v.approved_upload
+             'upload', v.approved_upload,
+             -- The blue check from analytics/verified.sql.
+             'verified', exists (select 1 from gv_verified g where g.key = f.id::text)
            ) order by f.exact desc, f.at, f.len, lower(f.name))
       from (
         select p.id,
