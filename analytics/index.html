@@ -622,7 +622,7 @@
   var SECRET_KEY = 'gv.analytics.secret';
 
   // Events that count as user interactions ("clicks")
-  var PASSIVE = { pageview: 1, nav: 1, ping: 1, hidden: 1, visible: 1, session_end: 1, error: 1, game_load: 1, game_close: 1, movie_close: 1, tv_close: 1, _test: 1 };
+  var PASSIVE = { pageview: 1, nav: 1, ping: 1, hidden: 1, visible: 1, session_end: 1, error: 1, game_load: 1, game_close: 1, movie_close: 1, tv_close: 1, click: 1, _test: 1 };
   var NICE = { game_open: 'Opened game', game_close: 'Closed game', game_load: 'Game loaded', game_fullscreen: 'Fullscreen', game_newtab: 'Open in new tab', movie_play: 'Played movie', tv_play: 'Played TV', movie_close: 'Closed movie', tv_close: 'Closed TV', search: 'Searched', category: 'Category filter', genre: 'Genre filter', sort: 'Sort changed', roll: 'Random roll', star: 'Starred', enter: 'Entered vault', news_open: 'Opened news', movies_enter: 'Entered movies', profile_open: 'Opened profile', mode_movies: 'Tab: Movies', mode_tv: 'Tab: TV', cloak: 'Tab cloak', auth_signin: 'Signed in', pageview: 'Page view', nav: 'Navigated', ping: 'Heartbeat', hidden: 'Tab hidden', visible: 'Tab visible', session_end: 'Left site', error: 'JS error', click: 'Clicked' };
 
   var $ = function (id) { return document.getElementById(id); };
