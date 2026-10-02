@@ -19,6 +19,9 @@
 -- quarter hours off UTC, so a quarter always falls on one day wherever the
 -- dashboard is opened.
 --
+-- Deleting or changing events works the totals out again for the visitors
+-- they belonged to. TRUNCATE does not: run analytics_roll_redo(null) after it.
+--
 -- Apply against project dxwjxzmlezfyursysays, before analytics/visitors.sql.
 -- Every statement is safe to run twice.
 
@@ -196,7 +199,11 @@ as $function$
 declare
   v_visitors text[];
 begin
-  v_visitors := array(select distinct visitor_id from old_rows);
+  if tg_op = 'UPDATE' then
+    v_visitors := array(select visitor_id from old_rows union select visitor_id from new_rows);
+  else
+    v_visitors := array(select distinct visitor_id from old_rows);
+  end if;
   if cardinality(v_visitors) > 0 then
     perform analytics_roll_redo(v_visitors);
   end if;
@@ -215,4 +222,9 @@ create or replace trigger analytics_roll_insert
 create or replace trigger analytics_roll_delete
   after delete on public.analytics_events
   referencing old table as old_rows
+  for each statement execute function public.analytics_roll_changed();
+
+create or replace trigger analytics_roll_update
+  after update on public.analytics_events
+  referencing old table as old_rows new table as new_rows
   for each statement execute function public.analytics_roll_changed();
