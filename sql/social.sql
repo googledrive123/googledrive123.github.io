@@ -188,3 +188,36 @@ $function$;
 revoke all on function public.gv_friend_ask(uuid) from public, anon;
 grant execute on function public.gv_friend_ask(uuid) to authenticated;
 
+
+create or replace function public.gv_friend_answer(p_user uuid, p_yes boolean)
+returns boolean
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'Friends only work on GameVault.';
+  end if;
+  if v_user is null then
+    raise exception 'Sign in to add friends.';
+  end if;
+  if not exists (select 1 from gv_friend_links where user_id = p_user and friend_id = v_user) then
+    raise exception 'That request is gone.';
+  end if;
+
+  if p_yes then
+    insert into gv_friend_links (user_id, friend_id) values (v_user, p_user)
+    on conflict do nothing;
+  else
+    delete from gv_friend_links where user_id = p_user and friend_id = v_user;
+  end if;
+  return true;
+end;
+$function$;
+
+revoke all on function public.gv_friend_answer(uuid, boolean) from public, anon;
+grant execute on function public.gv_friend_answer(uuid, boolean) to authenticated;
+
