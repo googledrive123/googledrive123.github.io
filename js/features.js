@@ -43,6 +43,9 @@
     // enough to read and the track of the week stays near the top.
     // contain keeps the long row from widening the page around it.
     '@media (max-width:640px){.gv-feats{display:flex;width:100%;contain:inline-size;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding:2px 2px 6px}.gv-feats::-webkit-scrollbar{display:none}.gv-feat{flex:0 0 min(70%,240px);scroll-snap-align:start}}',
+    // Wide screens take all six in one row, which leaves room under them on a
+    // laptop for everything else on the welcome screen.
+    '@media (min-width:960px){.gv-feats{grid-template-columns:repeat(6,minmax(0,1fr));max-width:900px}.gv-feat{flex-direction:column;align-items:flex-start;gap:8px;padding:12px}.gv-feat-icon{width:30px;height:30px;border-radius:8px}.gv-feat-icon svg{width:17px;height:17px}}',
     '@media (prefers-reduced-motion:reduce){.gv-feat{transition:none}.gv-feat:hover{transform:none}}'
   ].join('');
 

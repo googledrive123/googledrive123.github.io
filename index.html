@@ -388,9 +388,24 @@
       margin-bottom: 2.25rem;
     }
     /* A laptop screen fits the heading, the buttons and the cards at once. */
+    /* On a laptop the whole welcome screen fits without scrolling: the
+       heading, the gaps and the counts shrink with the screen's height. */
     @media (max-height: 860px) {
-      .hero h1 { font-size: clamp(3.2rem, 8vw, 6rem); margin-bottom: 1.6rem; }
-      .stat-row { margin-top: 2rem; }
+      #welcome { padding-top: clamp(4.5rem, 11.5vh, 6rem); padding-bottom: 1rem; }
+      .hero h1 { font-size: clamp(2.8rem, min(8vw, 12.5vh), 6rem); margin-bottom: clamp(0.8rem, 2.4vh, 1.6rem); }
+      .hero .stat-row { margin-top: clamp(0.6rem, 2vh, 2rem); gap: 1.4rem; }
+      .hero .stat { display: flex; align-items: baseline; gap: 0.45rem; }
+      .hero .stat .num { font-size: 1.05rem; }
+      .hero .stat .lbl { margin-top: 0; }
+      .hero .stat-divider { height: 14px; }
+      .hero .gv-feats { margin-top: clamp(0.6rem, 2vh, 1.75rem); }
+      .hero .mini-nav { margin-top: clamp(0.5rem, 1.6vh, 1.1rem); }
+      .hero .gv-totw { margin-top: clamp(10px, 2.4vh, 28px); }
+      .hero .newest { margin-top: clamp(10px, 2.4vh, 38px); padding: 8px 14px; }
+    }
+    @media (max-height: 640px) {
+      #welcome { padding-bottom: 0.5rem; }
+      .hero .stat-row { display: none; }
     }
     .hero h1 .stroke {
       -webkit-text-stroke: 2px var(--text);
@@ -1710,6 +1725,9 @@
       transition: color 0.15s;
     }
     .mini-nav a:hover { color: var(--text); }
+    /* The welcome screen is one screen with nothing under it. The footer
+       stays under the games. */
+    body:has(#welcome:not(.hidden)) .home-footer { display: none; }
     .home-footer {
       position: relative;
       z-index: 1;
@@ -2418,6 +2436,10 @@
       animation: newestGlow 2s ease-in-out infinite;
     }
     .newest[hidden] { display: none; }
+    /* As wide as the row of six cards above them. */
+    @media (min-width: 960px) {
+      .hero .gv-totw, .newest { max-width: 900px; }
+    }
     .newest-kicker {
       flex-shrink: 0;
       display: inline-flex;
