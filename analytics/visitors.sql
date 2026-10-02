@@ -11,7 +11,9 @@
 --
 -- Apply against project dxwjxzmlezfyursysays. Every statement is safe to run
 -- twice. Applied on 1 October 2026, when localhost test rows were also
--- deleted (js/analytics.js no longer records from localhost).
+-- deleted (js/analytics.js no longer records from localhost). Since 2 October
+-- 2026 these read the running totals in analytics/rollups.sql, so apply that
+-- first.
 
 
 -- Things a person does on purpose: entering the games, opening one,
