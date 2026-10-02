@@ -302,6 +302,12 @@
     var live = el('iframe');
     live.addEventListener('load', function () {
       screen.classList.add('ready');
+      // Escape in the live page closes this too, unless the page used it.
+      try {
+        live.contentWindow.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape' && !e.defaultPrevented) shut();
+        });
+      } catch (e) {}
     });
     screen.appendChild(live);
     var chrome = el('div', 'gv-look-chrome');
