@@ -2422,6 +2422,24 @@
     .verified-toast-text { flex: 1; font-size: 13.5px; line-height: 1.5; color: var(--muted); }
     .verified-toast-text b { color: var(--text); font-weight: 600; }
 
+    /* Keeping game progress: same box, the site's own colour, and room for
+       the buttons. See askToKeep() and offerBackup(). */
+    .save-toast { align-items: center; flex-wrap: wrap; border-left-color: var(--accent); }
+    .save-toast .verified-toast-text { flex-basis: calc(100% - 40px); }
+    .save-toast-actions { display: flex; gap: 8px; margin-left: auto; }
+    .save-toast-no {
+      padding: 8px 12px;
+      font: inherit;
+      font-size: 13px;
+      color: var(--muted);
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      cursor: pointer;
+    }
+    .save-toast-no:hover { color: var(--text); background: var(--surface-2); }
+    .save-toast-no[hidden] { display: none; }
+
 
     /* ───────────── Newest strip ───────────── */
     /* Eye-catching but deliberately not a strobe: the glow cycles once every
@@ -4866,6 +4884,33 @@ function tellVerified() {
   };
 }
 
+// ─── Keeping game progress ───
+// Most games keep their progress in this browser and nowhere else, so a
+// cleared history or another computer starts them over. A signed-out player
+// who just played a while is asked to make an account, which backs it up once
+// a day (js/saves.js). A signed-in player is offered that backup in a browser
+// that has never seen it.
+const KEEP_ASK_KEY = 'gv.keepask';
+const KEEP_ASK_DAYS = 7;
+
+function saveToast(text, yes, no, onYes, onNo) {
+  const box = document.getElementById('saveToast');
+  const body = document.getElementById('saveToastText');
+  const yesBtn = document.getElementById('saveToastYes');
+  const noBtn = document.getElementById('saveToastNo');
+  const lead = document.createElement('b');
+  lead.textContent = text[0];
+  body.replaceChildren(lead, ' ' + text[1]);
+  yesBtn.textContent = yes;
+  noBtn.textContent = no || '';
+  noBtn.hidden = !no;
+  const hide = () => { box.hidden = true; };
+  yesBtn.onclick = () => { hide(); onYes(); };
+  noBtn.onclick = () => { hide(); if (onNo) onNo(); };
+  document.getElementById('saveToastClose').onclick = hide;
+  box.hidden = false;
+}
+
 // ─── Load username ───
 async function loadUsername() {
   if (!currentUser) return;
@@ -5991,6 +6036,18 @@ window.addEventListener('beforeunload', () => { if (window._trackClose) window._
   <button class="pt-notice-close" id="verifiedToastClose" type="button" aria-label="Dismiss">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
   </button>
+</div>
+
+<!-- Keeping game progress. See askToKeep() and offerBackup(). -->
+<div class="verified-toast save-toast" id="saveToast" role="status" hidden>
+  <div class="verified-toast-text" id="saveToastText"></div>
+  <button class="pt-notice-close" id="saveToastClose" type="button" aria-label="Dismiss">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+  <div class="save-toast-actions">
+    <button class="save-toast-no" id="saveToastNo" type="button"></button>
+    <button class="pt-notice-play" id="saveToastYes" type="button"></button>
+  </div>
 </div>
 
 <div class="profile-overlay" id="profileOverlay">
