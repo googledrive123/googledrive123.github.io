@@ -18,6 +18,9 @@
 -- pages show them as tiles, and a click opens the live page at the size of
 -- a school Chromebook's screen.
 --
+-- A poll can open with an intro (intro): a title, a line and one big
+-- button into the poll.
+--
 -- A preview poll shows only on a local copy of the site, so a poll can be
 -- tried out before it goes to everyone.
 --
