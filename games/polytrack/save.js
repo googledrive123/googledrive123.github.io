@@ -45,7 +45,7 @@
   var DIRTY_KEY = 'gv.ptsave.dirty';
 
   // What index.html used to load with defer, in the same order.
-  var SCRIPTS = ['main.bundle.js', 'account.js', 'rooms_ui.js', 'creator.js'];
+  var SCRIPTS = ['main.bundle.js', 'account.js', 'rooms_ui.js', 'creator.js', 'friends.js'];
 
   // How long the game is held back for the save. Past that it starts on what
   // this browser has, and the account's copy waits for the next launch.
