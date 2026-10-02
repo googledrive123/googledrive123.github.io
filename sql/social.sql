@@ -537,3 +537,56 @@ $function$;
 revoke all on function public.gv_join_ask(uuid) from public, anon;
 grant execute on function public.gv_join_ask(uuid) to authenticated;
 
+
+-- Yes with the code of the room the host is in, or no with a null code.
+-- Only the friend who was asked can answer, and only with a room that is
+-- open right now.
+create or replace function public.gv_join_answer(p_id bigint, p_code text)
+returns boolean
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+  v_ask gv_join_asks;
+  v_code text := upper(btrim(coalesce(p_code, '')));
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'Friends only work on GameVault.';
+  end if;
+  if v_user is null then
+    raise exception 'Sign in first.';
+  end if;
+
+  select * into v_ask from gv_join_asks
+   where id = p_id and to_user = v_user
+   for update;
+  if not found then
+    raise exception 'That ask is gone.';
+  end if;
+  if v_ask.answer is not null then
+    return false;
+  end if;
+
+  if v_code = '' then
+    update gv_join_asks set answer = 'no', answered_at = now() where id = p_id;
+    return true;
+  end if;
+
+  if v_ask.created_at < now() - interval '2 minutes' then
+    raise exception 'That ask has run out.';
+  end if;
+  if not exists (select 1 from polytrack_rooms
+                  where code = v_code and last_seen > now() - interval '3 minutes') then
+    raise exception 'That room is not open.';
+  end if;
+
+  update gv_join_asks set answer = 'yes', code = v_code, answered_at = now() where id = p_id;
+  return true;
+end;
+$function$;
+
+revoke all on function public.gv_join_answer(bigint, text) from public, anon;
+grant execute on function public.gv_join_answer(bigint, text) to authenticated;
+
