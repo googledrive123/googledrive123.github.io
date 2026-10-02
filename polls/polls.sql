@@ -186,6 +186,8 @@ begin
     raise exception 'Pick one of the answers.';
   end if;
 
+  -- The same person voting from two tabs at once would pass the check twice.
+  perform pg_advisory_xact_lock(hashtext('gv_poll_vote'), hashtext(p_poll::text || coalesce(v_user::text, v_visitor)));
   if public.gv_poll_mine(p_poll, v_user, v_visitor) is null then
     insert into gv_poll_votes (poll_id, choice, user_id, visitor_id)
     values (p_poll, p_option, v_user, v_visitor)
