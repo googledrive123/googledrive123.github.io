@@ -1554,6 +1554,7 @@
     .bell-game .sep { height: 10px; }
 
     .game-frame-wrap { flex: 1; min-height: 0; position: relative; overflow: hidden; }
+    .game-frame-wrap:fullscreen { background: #000; }
     #gameFrame { width: 100%; height: 100%; border: 0; display: block; }
     .game-loader {
       position: absolute; inset: 0;
@@ -4103,8 +4104,10 @@ gameFrame.addEventListener('load', () => {
   if (introEl) introEl.end();
 });
 gameBack.addEventListener('click', closeGame);
+// The frame's box rather than the frame, so chat and new-message pop-ups,
+// which sit beside the frame in it, stay on screen.
 gameFS.addEventListener('click', () => {
-  const el = gameFrame;
+  const el = gameFrame.parentElement;
   if (el.requestFullscreen) el.requestFullscreen();
   else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
 });
