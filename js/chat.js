@@ -595,14 +595,17 @@
     var text = els.input.value.trim();
     if (!text) return say('Write something first.', 'wait');
     var key = current;
+    var ids = mentionIds(text);
     sending = true;
     els.send.disabled = true;
+    hideSuggest();
     var req = key === 'server'
-      ? social().rpc('gv_chat_send', { p_body: text })
-      : social().rpc('gv_convo_send', { p_convo: Number(key.split(':')[1]), p_body: text });
+      ? social().rpc('gv_chat_send', { p_body: text, p_mentions: ids })
+      : social().rpc('gv_convo_send', { p_convo: Number(key.split(':')[1]), p_body: text, p_mentions: ids });
     req.then(function (m) {
       sending = false;
       els.input.value = '';
+      picked = {};
       paintLength();
       say('');
       add(key, [m]);
@@ -633,6 +636,15 @@
   function mentionsMe(m) {
     var me = myId();
     return !!(me && !m.mine && (m.mentions || []).some(function (x) { return x.id === me; }));
+  }
+
+  // The picked people whose @name is still in the text.
+  function mentionIds(text) {
+    var low = text.toLowerCase(), out = [];
+    Object.keys(picked).forEach(function (name) {
+      if (low.indexOf('@' + name) !== -1 && out.indexOf(picked[name]) === -1) out.push(picked[name]);
+    });
+    return out.length ? out : null;
   }
 
   // The @word the caret is at the end of, if any: where its @ is, and what
