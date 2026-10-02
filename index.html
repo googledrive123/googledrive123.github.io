@@ -3291,6 +3291,18 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeSugg('closed', 3);
 });
 
+// Straight after the game that earned it, once the game is out of the way.
+function suggAfterGame() {
+  const played = suggPlaySecs;
+  suggPlaySecs = 0;
+  if (played < SUGG_PLAY_SECS || !suggAllowed()) return;
+  setTimeout(() => {
+    if (!suggAllowed()) return;
+    if (document.querySelector('.roll-overlay.show, .game-overlay.show, .auth-overlay.show, .profile-overlay.show, .movie-overlay.open')) return;
+    openSugg();
+  }, 600);
+}
+
 (function scheduleSugg(){
   let framed = false;
   try { framed = window.self !== window.top; } catch { framed = true; }
@@ -4114,6 +4126,7 @@ function openGame(g) {
 }
 function closeGame() {
   if (window._trackClose) window._trackClose();
+  suggAfterGame();
   if (window.GV && GV.chat) GV.chat.closeWindow();
   showMore(false);
   dropIntro();
