@@ -160,11 +160,13 @@
   .rec { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin-right: 7px; }
   .rec.on { animation: rec 1.6s ease-in-out infinite; }
   @keyframes rec { 50% { opacity: 0.25; } }
+  .btn.live-btn { display: inline-flex; align-items: center; border-color: rgba(255,59,59,0.45); }
+  .btn.live-btn:hover { border-color: var(--accent); }
 </style>
 </head>
 <body>
 
-<div class="top">
+<div class="top" id="topBar">
   <h1>Game<span>Vault</span> Analytics</h1>
   <div class="status" id="status"><span class="dot off"></span>Not connected</div>
   <div class="grow"></div>
