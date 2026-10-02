@@ -390,6 +390,18 @@
     }, true);
   }
 
+  // ── Every click ───────────────────────────────────────────────────────
+  // Anything a person can click, with what it said and where it was, on top
+  // of the named events above. Never what was typed into a box.
+  var CLICKABLE = 'a, button, summary, label, select, [role="button"], [onclick], input[type="checkbox"], input[type="radio"], input[type="button"], input[type="submit"]';
+  document.addEventListener('click', function (e) {
+    var el = e.target && e.target.closest && e.target.closest(CLICKABLE);
+    if (!el) return;
+    var text = el.getAttribute('aria-label') || el.getAttribute('title') || el.textContent || '';
+    var meta = { tag: el.tagName.toLowerCase() };
+    track('click', { item_title: text.replace(/\s+/g, ' ').trim().slice(0, 80), item_id: el.dataset && (el.dataset.id || el.dataset.game) || null, meta: meta });
+  }, true);
+
   // ── Search + filters ──────────────────────────────────────────────────
   function hookSearch() {
     var input = document.getElementById('search');
