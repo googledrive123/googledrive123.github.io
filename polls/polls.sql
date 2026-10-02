@@ -323,7 +323,7 @@ begin
 end;
 $function$;
 
--- Shows a preview poll to everyone.
+-- Shows a preview poll to everyone, without the votes from trying it out.
 create or replace function public.gv_poll_publish(p_secret text, p_id bigint)
 returns boolean
 language plpgsql
@@ -335,7 +335,11 @@ begin
     raise exception 'not allowed';
   end if;
   update gv_polls set preview = false where id = p_id and preview;
-  return found;
+  if not found then
+    return false;
+  end if;
+  delete from gv_poll_votes where poll_id = p_id;
+  return true;
 end;
 $function$;
 
