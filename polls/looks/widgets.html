@@ -70,6 +70,15 @@
   .totw-foot { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
   .totw-time { font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .totw-race { height: 36px; padding: 0 16px; }
+
+  .side { display: grid; grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; min-height: 0; }
+  .card-head { display: flex; justify-content: space-between; font-size: 13px; }
+  .card-head b { font-weight: 700; }
+  .mu { color: var(--mu); }
+  .clock { display: flex; flex-direction: column; padding: 16px 18px; }
+  .timer { margin-top: auto; font-size: 40px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .bar { margin-top: 12px; height: 6px; border-radius: 3px; background: oklch(0.92 calc(0.04 * var(--c)) var(--h) / 0.12); overflow: hidden; }
+  .bar div { height: 100%; border-radius: 3px; background: var(--tx); }
 </style>
 </head>
 <body>
@@ -121,6 +130,14 @@
         </span>
       </span>
     </a>
+
+    <div class="side">
+      <div class="card clock">
+        <div class="card-head"><b>period 3</b><span class="mu">ends 10:30 am</span></div>
+        <div class="timer" id="timer">23:41</div>
+        <div class="bar"><div id="timerPct" style="width:52.6%"></div></div>
+      </div>
+    </div>
   </main>
 </div>
 </body>
