@@ -153,6 +153,7 @@
     els.tabs = el('div', 'gv-fr-tabs');
     els.tabs.setAttribute('role', 'tablist');
     [['friends', 'Friends'],
+     ['requests', 'Requests'],
     ].forEach(function (t) {
       var b = el('button', '', t[1]);
       b.type = 'button';
@@ -243,7 +244,11 @@
 
   function paint() {
     if (!isOpen() || !social().user()) return;
+    var req = els.tabs.querySelector('[data-tab="requests"]');
+    req.textContent = 'Requests';
+    if (data.incoming.length) req.appendChild(el('span', 'gv-fr-count', String(data.incoming.length)));
     if (tab === 'friends') return paintFriends();
+    if (tab === 'requests') return paintRequests();
   }
 
   function gameName(id) {
@@ -284,6 +289,34 @@
     social().setStatus(status).then(paintStatus, function (error) { flash(error.message); });
   }
 
+  function paintRequests() {
+    els.body.textContent = '';
+    var list = el('div', 'gv-fr-list');
+    if (!data.incoming.length && !data.outgoing.length) {
+      list.appendChild(el('p', 'gv-fr-empty', 'No requests right now.'));
+    }
+    data.incoming.forEach(function (p) {
+      var row = personRow(p, 'Wants to be friends');
+      row.appendChild(btn('Accept', 'primary', function () { answer(p, true); }));
+      row.appendChild(btn('Decline', '', function () { answer(p, false); }));
+      list.appendChild(row);
+    });
+    data.outgoing.forEach(function (p) {
+      var row = personRow(p, 'Request sent');
+      row.appendChild(btn('Cancel', '', function () {
+        social().rpc('gv_friend_remove', { p_user: p.id }).then(load, function (error) { flash(error.message); });
+      }));
+      list.appendChild(row);
+    });
+    els.body.appendChild(list);
+  }
+
+  function answer(person, yes) {
+    social().rpc('gv_friend_answer', { p_user: person.id, p_yes: yes }).then(function () {
+      social().poke();
+      return load();
+    }, function (error) { flash(error.message); });
+  }
 
 
 
