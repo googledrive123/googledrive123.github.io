@@ -105,6 +105,8 @@
     '.gv-chat-narrow:not(.gv-chat-in) .gv-chat-main,.gv-chat-narrow.gv-chat-in .gv-chat-side{display:none}',
     '.gv-chat-back{display:none}',
     '.gv-chat-narrow .gv-chat-back{display:grid}',
+    '.gv-chat-inline{height:clamp(420px,calc(100vh - 260px),760px);border:1px solid var(--border-strong,rgba(255,255,255,.16));border-radius:18px}',
+    '.gv-chat-inline .gv-chat-close{display:none}',
     '@media (max-width:700px){.gv-chat-full{padding:0}.gv-chat-full>.gv-chat-frame{border-radius:0;border:0}}'
   ].join('');
 
@@ -290,9 +292,15 @@
     var inGame = !!(host().inGame && host().inGame());
     mode = inGame ? 'window' : 'full';
     var parent = mode === 'window' && host().gameArea ? host().gameArea() : document.body;
+    // A page of its own for chat (/chat/) holds it in its layout instead.
+    if (opts.into) {
+      mode = 'inline';
+      parent = opts.into;
+    }
     if (root.parentNode !== parent) parent.appendChild(root);
     root.classList.toggle('gv-chat-window', mode === 'window');
-    root.classList.toggle('gv-chat-narrow', mode === 'window' || innerWidth <= 700);
+    root.classList.toggle('gv-chat-inline', mode === 'inline');
+    root.classList.toggle('gv-chat-narrow', mode === 'window' || parent.clientWidth <= 700);
     root.classList.toggle('gv-chat-full', mode === 'full');
     root.hidden = false;
     els.sideClose.hidden = mode !== 'window' && !root.classList.contains('gv-chat-narrow');
@@ -931,6 +939,7 @@
   // page's own Escape, which would close the game.
   window.addEventListener('keydown', function (e) {
     if (e.key !== 'Escape' || !isOpen()) return;
+    if (mode === 'inline' && els.sheet.hidden) return;
     e.stopImmediatePropagation();
     e.preventDefault();
     if (els.sheet && !els.sheet.hidden) closeSheet();
