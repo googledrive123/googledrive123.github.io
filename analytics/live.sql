@@ -78,3 +78,5 @@ exception when others then
   return null;
 end;
 $function$;
+
+revoke all on function public.analytics_send_live() from public, anon, authenticated;
