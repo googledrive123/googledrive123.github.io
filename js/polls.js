@@ -162,6 +162,19 @@
 
   // ── The pop-up ────────────────────────────────────────────────────────
 
+  // Not over the first-visit question, and not over a game: it waits for
+  // both to be out of the way.
+  function whenFree(fn) {
+    var tries = 0;
+    (function check() {
+      var busy = document.getElementById('gvCloakAsk')
+        || document.querySelector('#gameOverlay.show')
+        || document.querySelector('.gv-poll-pop');
+      if (!busy) return fn();
+      if (++tries < 600) setTimeout(check, 1000);
+    }());
+  }
+
   function pop(poll) {
     style();
     var shade = el('div', 'gv-poll-pop');
@@ -194,7 +207,7 @@
     }).then(function (list) {
       var open = (list || []).filter(function (p) { return p.voted == null; });
       var next = open[0];
-      if (next) pop(next);
+      if (next) whenFree(function () { pop(next); });
     }).catch(function () {});
   }
 
