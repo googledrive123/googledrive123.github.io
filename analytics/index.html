@@ -1914,6 +1914,10 @@
         + '<span class="nm">' + who(v) + '<span class="sub">' + esc(doing) + (where ? ' · ' + esc(where) : '') + '</span></span>'
         + '<span class="ago">' + (r ? ago(r.tms - live.skew) : 'in PolyTrack') + '</span></div>';
     }).join('') : '<div class="empty">Nobody right now.</div>';
+
+    Array.prototype.forEach.call($('liveList').querySelectorAll('[data-at]'), function (el, i) {
+      if (i < 200) el.textContent = ago(+el.dataset.at - live.skew);
+    });
   }
 
   // ── load ──
