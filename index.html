@@ -4080,6 +4080,7 @@ function openGame(g) {
 }
 function closeGame() {
   if (window._trackClose) window._trackClose();
+  if (window.GV && GV.chat) GV.chat.closeWindow();
   showMore(false);
   dropIntro();
   clearTimeout(stallTimer);
