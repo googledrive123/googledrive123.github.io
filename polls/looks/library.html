@@ -404,6 +404,15 @@
   $('surpriseA').addEventListener('click', function () {
     setQuery(G[Math.floor(Math.random() * G.length)][1]);
   });
+
+  // "/" jumps to the search box unless you are already typing somewhere.
+  document.addEventListener('keydown', function (e) {
+    var t = document.activeElement;
+    if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+    e.preventDefault();
+    $('qa').focus();
+  });
 })();
 </script>
 </body>
