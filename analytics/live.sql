@@ -44,6 +44,8 @@ $function$;
 -- over, with which of their visitors are scanners now. The totals triggers
 -- run first (triggers go in name order), so a new visitor is already
 -- counted.
+-- Nothing here may stop the insert, so a failure to send is dropped: the
+-- dashboards' own asking picks those events up.
 create or replace function public.analytics_send_live()
 returns trigger
 language plpgsql
@@ -64,6 +66,8 @@ begin
     'scanners', coalesce((select jsonb_agg(s.visitor_id) from analytics_scanners() s
       where s.visitor_id in (select r.visitor_id from new_rows r)), '[]'::jsonb)
   ), 'events', v_topic, false);
+  return null;
+exception when others then
   return null;
 end;
 $function$;
