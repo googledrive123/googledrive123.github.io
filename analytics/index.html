@@ -791,6 +791,9 @@
     function send(m) { m.ref = String(++push.ref); try { ws.send(JSON.stringify(m)); } catch (e) {} }
     ws.onopen = function () {
       send({ topic: 'realtime:' + push.topic, event: 'phx_join', join_ref: '1', payload: { config: { broadcast: { ack: false, self: false }, presence: { key: '' }, postgres_changes: [], private: false }, access_token: SUPA_KEY } });
+      push.beat = setInterval(function () {
+        send({ topic: 'phoenix', event: 'heartbeat', payload: {} });
+      }, 25000);
     };
     ws.onmessage = function (e) {
       var m;
