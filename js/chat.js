@@ -881,7 +881,8 @@
     if (next.length > MAX) return say('Messages can be up to ' + MAX + ' characters.', 'wait');
     input.value = next;
     input.setSelectionRange(from + e.length, from + e.length);
-    input.focus();
+    // A touch screen would bring its keyboard up over the grid.
+    if (!(window.matchMedia && matchMedia('(pointer: coarse)').matches)) input.focus();
     paintLength();
     var recent = recentEmoji().filter(function (x) { return x !== e; });
     recent.unshift(e);
