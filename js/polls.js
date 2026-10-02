@@ -65,6 +65,7 @@
     '.gv-look-btn:hover{border-color:#ff3b3b}',
     '.gv-look-close{margin-left:auto}',
     '.gv-look-pick{margin-left:auto;padding:10px 22px;border-radius:100px;border:1px solid #ff3b3b;background:#ff3b3b;color:#fff;font:inherit;font-size:.9rem;font-weight:600;cursor:pointer}',
+    '.gv-look-note{font-size:.84rem;color:#8a8a96}',
     '@keyframes gvPollIn{from{opacity:0;transform:translateY(10px) scale(.98)}}',
     '@media (prefers-reduced-motion:reduce){.gv-poll-box{animation:none}.gv-poll-opt.result::before{transition:none}}'
   ].join('');
@@ -266,11 +267,13 @@
     var next = el('button', 'gv-look-btn', '\u2192');
     next.type = 'button';
     next.setAttribute('aria-label', 'Next');
+    var note = el('div', 'gv-look-note');
     var choose = el('button', 'gv-look-pick', 'Pick this one');
     choose.type = 'button';
     choose.hidden = !pick;
     bar.appendChild(prev);
     bar.appendChild(next);
+    bar.appendChild(note);
     bar.appendChild(choose);
     shade.appendChild(top);
     shade.appendChild(stage);
@@ -286,6 +289,12 @@
       name.textContent = p.options[at];
       count.textContent = (at + 1) + ' of ' + n;
       shade.setAttribute('aria-label', p.options[at]);
+      var bits = [];
+      if (p.counts && p.counts.length) {
+        var total = p.counts.reduce(function (a, b) { return a + b; }, 0);
+        bits.push((total ? Math.round(100 * (p.counts[at] || 0) / total) : 0) + '% of the votes');
+      }
+      note.textContent = bits.join(' \u00b7 ');
     }
     function shut() {
       shade.remove();
