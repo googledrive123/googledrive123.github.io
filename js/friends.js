@@ -154,6 +154,7 @@
     els.tabs.setAttribute('role', 'tablist');
     [['friends', 'Friends'],
      ['requests', 'Requests'],
+     ['add', 'Add friends'],
     ].forEach(function (t) {
       var b = el('button', '', t[1]);
       b.type = 'button';
@@ -249,6 +250,8 @@
     if (data.incoming.length) req.appendChild(el('span', 'gv-fr-count', String(data.incoming.length)));
     if (tab === 'friends') return paintFriends();
     if (tab === 'requests') return paintRequests();
+    // Drawn once, so a refresh does not wipe what is being typed.
+    if (tab === 'add' && !els.body.querySelector('.gv-fr-field')) return paintAdd();
   }
 
   function gameName(id) {
@@ -318,6 +321,63 @@
     }, function (error) { flash(error.message); });
   }
 
+  function relation(id) {
+    function has(list) { return list.some(function (p) { return p.id === id; }); }
+    if (has(data.friends)) return 'friends';
+    if (has(data.outgoing)) return 'asked';
+    if (has(data.incoming)) return 'incoming';
+    return null;
+  }
+
+  function paintAdd() {
+    els.body.textContent = '';
+    var box = el('input', 'gv-fr-field');
+    box.placeholder = 'Search by username';
+    box.setAttribute('aria-label', 'Search by username');
+    var list = el('div', 'gv-fr-list');
+    var wait = null;
+    var asked = '';
+    box.addEventListener('input', function () {
+      clearTimeout(wait);
+      wait = setTimeout(function () {
+        var q = box.value.trim();
+        asked = q;
+        list.textContent = '';
+        if (q.length < 3) {
+          if (q) list.appendChild(el('p', 'gv-fr-empty', 'Keep typing\u2026'));
+          return;
+        }
+        social().rpc('gv_user_search', { p_q: q }).then(function (people) {
+          if (asked !== q) return;
+          list.textContent = '';
+          if (!people.length) list.appendChild(el('p', 'gv-fr-empty', 'Nobody by that name.'));
+          people.forEach(function (p) {
+            var row = personRow(p);
+            var state = relation(p.id);
+            if (state === 'friends') row.appendChild(btn('Friends', '', null)).disabled = true;
+            else if (state === 'asked') row.appendChild(btn('Requested', '', null)).disabled = true;
+            else {
+              var add = btn(state === 'incoming' ? 'Accept' : 'Add', 'primary', function () {
+                add.disabled = true;
+                social().rpc('gv_friend_ask', { p_user: p.id }).then(function (now) {
+                  add.textContent = now === 'friends' ? 'Friends' : 'Requested';
+                  load();
+                }, function (error) {
+                  add.disabled = false;
+                  flash(error.message);
+                });
+              });
+              row.appendChild(add);
+            }
+            list.appendChild(row);
+          });
+        }, function (error) { flash(error.message); });
+      }, 250);
+    });
+    els.body.appendChild(box);
+    els.body.appendChild(list);
+    setTimeout(function () { box.focus(); });
+  }
 
 
   // ── The Friends button ────────────────────────────────────────────────
