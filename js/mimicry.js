@@ -305,6 +305,7 @@ try {
     // a game on its own on purpose.
     if (location.search || location.hash) return false;
     try {
+      sessionStorage.setItem('gv.into', JSON.stringify({ path: location.pathname, at: Date.now() }));
       sessionStorage.setItem('gv.redirect', '/games/' + match[1]);
       // So index.html can send a page it has no catalog entry for back here,
       // to this exact address (it may be in any vault).
