@@ -1738,6 +1738,7 @@
     $('livePause').textContent = 'Pause';
     $('liveStatus').innerHTML = '<span class="dot off"></span>Connecting…';
     liveFilterAll();
+    try { history.replaceState(null, '', location.pathname + '#live'); } catch (e) {}
     window.scrollTo(0, 0);
     livePoll();
   }
@@ -1747,6 +1748,7 @@
     live = null;
     document.body.classList.remove('live-on');
     $('live').classList.add('hidden');
+    try { history.replaceState(null, '', location.pathname); } catch (e) {}
     tick();
   }
 
@@ -2028,7 +2030,7 @@
   }
 
   // ── auth / wiring ──
-  function showDash() { $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); load(); loadPeople(); loadBroadcasts(); loadLinks(); loadFailing(); loadChat(); loadAvatars(); loadTesting(); loadGiveaways(); fillChallengeWeeks(); loadChallenges(); loadChallengeTracks(); loadBoard(); loadMirrors(); setTimer(); }
+  function showDash() { $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); load(); loadPeople(); loadBroadcasts(); loadLinks(); loadFailing(); loadChat(); loadAvatars(); loadTesting(); loadGiveaways(); fillChallengeWeeks(); loadChallenges(); loadChallengeTracks(); loadBoard(); loadMirrors(); setTimer(); if (location.hash === '#live') enterLive(); }
   function setTimer() { clearInterval(state.timer); if ($('autoRefresh').checked) state.timer = setInterval(tick, 10000); }
   function tryLogin(secret, remember) {
     $('loginErr').textContent = '';
@@ -2174,7 +2176,7 @@
     localStorage.removeItem(SECRET_KEY);
   } catch (e) {}
   var qs = new URLSearchParams(location.search).get('key');
-  if (qs) { history.replaceState(null, '', location.pathname); tryLogin(qs, true); }
+  if (qs) { history.replaceState(null, '', location.pathname + location.hash); tryLogin(qs, true); }
   else if (saved) tryLogin(saved, false);
 })();
 </script>
