@@ -52,6 +52,11 @@ create table if not exists public.gv_convo_messages (
 alter table public.gv_convo_messages
   add column if not exists mentions jsonb not null default '[]'::jsonb;
 
+-- When the owner took it down, so chats already open can drop it too.
+alter table public.gv_convo_messages add column if not exists deleted_at timestamptz;
+create index if not exists gv_convo_messages_deleted_at
+  on public.gv_convo_messages (deleted_at) where deleted_at is not null;
+
 create index if not exists gv_convo_messages_convo on public.gv_convo_messages (convo_id, id);
 create index if not exists gv_convo_messages_user on public.gv_convo_messages (user_id, created_at desc);
 
@@ -612,7 +617,7 @@ begin
     raise exception 'not allowed';
   end if;
 
-  update gv_convo_messages set deleted = true where id = p_message_id;
+  update gv_convo_messages set deleted = true, deleted_at = now() where id = p_message_id;
   if not found then
     return false;
   end if;
