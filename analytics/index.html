@@ -643,8 +643,12 @@
   var css = getComputedStyle(document.documentElement);
   var C = { s1: css.getPropertyValue('--s1').trim(), s2: css.getPropertyValue('--s2').trim(), s3: css.getPropertyValue('--s3').trim(), s4: css.getPropertyValue('--s4').trim() };
   var baseOpts = { responsive: true, maintainAspectRatio: false, animation: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1a1a20', borderColor: 'rgba(255,255,255,0.16)', borderWidth: 1, titleColor: '#f4f4f6', bodyColor: '#c9c9d2', padding: 10 } }, scales: { x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 12 } }, y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { precision: 0 }, border: { display: false } } } };
+  // A chart already on the page takes the new numbers in place, so a refresh
+  // every few seconds does not throw away what the pointer is showing.
   function chart(id, cfg) {
-    if (charts[id]) charts[id].destroy();
+    var c = charts[id];
+    if (c && c.config.type === cfg.type) { c.data = cfg.data; c.options = cfg.options; c.update('none'); return; }
+    if (c) c.destroy();
     charts[id] = new Chart($(id).getContext('2d'), cfg);
   }
   function bar(color) { return { backgroundColor: color, borderRadius: 4, borderSkipped: 'bottom', maxBarThickness: 24 }; }
