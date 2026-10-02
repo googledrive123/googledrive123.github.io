@@ -125,19 +125,6 @@ begin
       using hint = 'wait=' || v_wait;
   end if;
 
-  -- The 20th message back decides when the next one is allowed.
-  select created_at into v_last
-    from gv_chat_messages
-   where user_id = v_user
-     and created_at > now() - interval '10 minutes'
-   order by created_at desc
-  offset 19 limit 1;
-  if found then
-    v_wait := greatest(1, ceil(extract(epoch from v_last + interval '10 minutes' - now()))::int);
-    raise exception 'That is a lot of messages. Take a short break before sending more.'
-      using hint = 'wait=' || v_wait;
-  end if;
-
   if public.gv_is_rude(v_body) then
     raise exception 'That message has words we do not allow here. Try saying it another way.';
   end if;
