@@ -53,6 +53,16 @@ button{padding:0;border:0;background:none;font:inherit;color:inherit;cursor:poin
 /* The picked game's art, blown up and blurred into a wash of its colors. */
 .art{position:absolute;left:-100px;top:-100px;width:calc(100% + 200px);height:calc(100% + 200px);object-fit:cover;filter:blur(70px) saturate(1.3);opacity:0;pointer-events:none}
 .art.on{opacity:0.6}
+.shelf{position:absolute;left:0;right:0;top:338px}
+.shelf-label{margin-bottom:14px;padding-left:48px;font-size:13px;color:var(--mu)}
+/* The row runs past the right edge. It scrolls sideways on its own, and the
+   8px of padding (taken back by the margin) leaves room for the outline. */
+.tiles{display:flex;align-items:flex-end;gap:14px;margin:-8px 0;padding:8px 48px;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;scrollbar-width:none}
+.tiles::-webkit-scrollbar{display:none}
+.tile{flex-shrink:0;width:124px;height:124px;border-radius:20px;overflow:hidden;outline:3px solid transparent;outline-offset:3px;transition:width .2s,height .2s}
+.tile:focus-visible{outline-color:oklch(0.97 calc(0.012 * var(--c)) var(--h) / 0.4)}
+.tile.on{width:152px;height:152px;outline-color:var(--tx)}
+.tile img{display:block;width:100%;height:100%;object-fit:cover}
 </style>
 </head>
 <body>
@@ -77,6 +87,18 @@ button{padding:0;border:0;background:none;font:inherit;color:inherit;cursor:poin
     <div class="acts">
       <a class="cta" id="cta" href="#" data-soon>race now</a>
       <a class="star" href="#" data-soon>add to stars</a>
+    </div>
+  </div>
+
+  <div class="shelf">
+    <div class="shelf-label">this week · jump back in · popular</div>
+    <div class="tiles" id="row">
+      <button class="tile on" type="button" title="PolyTrack" aria-pressed="true"><img src="/thumbs/polytrack.webp" alt=""></button>
+      <button class="tile" type="button" title="Slope 2" aria-pressed="false"><img src="/thumbs/slope2.webp" alt=""></button>
+      <button class="tile" type="button" title="Drive Mad" aria-pressed="false"><img src="/thumbs/drivemad.webp" alt=""></button>
+      <button class="tile" type="button" title="Retro Bowl" aria-pressed="false"><img src="/thumbs/retro-bowl.webp" alt=""></button>
+      <button class="tile" type="button" title="Geometry Dash" aria-pressed="false"><img src="/thumbs/geometrydash.webp" alt=""></button>
+      <button class="tile" type="button" title="1v1.LOL" aria-pressed="false"><img src="/thumbs/1v1lol.webp" alt=""></button>
     </div>
   </div>
 </div>
