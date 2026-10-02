@@ -464,7 +464,9 @@
 
   function markRead(key) {
     var t = thread(key);
-    if (!isOpen() || key !== current || !t.last) return;
+    if (!isOpen() || key !== current) return;
+    social().seenMentions(key);
+    if (!t.last) return;
     if (key === 'server') return social().markServerSeen(t.last);
     var c = convoFor(key);
     if (c) c.unread = 0;
