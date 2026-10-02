@@ -110,6 +110,13 @@
     return 'Ends soon';
   }
 
+  // An answer's picture, if the poll has one for it. Only pictures on this
+  // site are shown.
+  function shot(poll, i) {
+    var src = poll.images && poll.images[i];
+    return typeof src === 'string' && /^\/[^\/\\]/.test(src) ? src : null;
+  }
+
   // One poll: the answers to pick from, or the results once there are any
   // to show. onChange hears about a vote with the poll as it is now.
   function card(poll, onChange) {
