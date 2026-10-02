@@ -48,6 +48,10 @@ create table if not exists public.gv_convo_messages (
   deleted    boolean not null default false
 );
 
+-- Who the message names with @ (chat/mentions.sql), as [{id, name}].
+alter table public.gv_convo_messages
+  add column if not exists mentions jsonb not null default '[]'::jsonb;
+
 create index if not exists gv_convo_messages_convo on public.gv_convo_messages (convo_id, id);
 create index if not exists gv_convo_messages_user on public.gv_convo_messages (user_id, created_at desc);
 
