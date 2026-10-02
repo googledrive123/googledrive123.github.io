@@ -149,3 +149,26 @@ as $function$
 $function$;
 
 revoke all on function public.analytics_roll_add(bigint[]) from public, anon, authenticated;
+
+
+-- Works the totals out again from the events, for some visitors or, given
+-- null, for everyone.
+create or replace function public.analytics_roll_redo(p_visitors text[])
+returns void
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+begin
+  delete from analytics_visitors where p_visitors is null or visitor_id = any(p_visitors);
+  delete from analytics_visitor_traits where p_visitors is null or visitor_id = any(p_visitors);
+  delete from analytics_quarters where p_visitors is null or visitor_id = any(p_visitors);
+  delete from analytics_visitor_users where p_visitors is null or visitor_id = any(p_visitors);
+  delete from analytics_visitor_games where p_visitors is null or visitor_id = any(p_visitors);
+  perform analytics_roll_add(array(
+    select id from analytics_events where p_visitors is null or visitor_id = any(p_visitors)
+  ));
+end;
+$function$;
+
+revoke all on function public.analytics_roll_redo(text[]) from public, anon, authenticated;
