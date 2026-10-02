@@ -20,3 +20,21 @@ alter table public.analytics_settings
 update public.analytics_settings
   set live_topic = replace(gen_random_uuid()::text || gen_random_uuid()::text, '-', '')
   where live_topic is null;
+
+
+-- The channel's name, for the dashboard secret.
+create or replace function public.analytics_live_topic(p_secret text)
+returns text
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+
+  return (select 'analytics-' || live_topic from analytics_settings where id = 1);
+end;
+$function$;
