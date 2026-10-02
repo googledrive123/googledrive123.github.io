@@ -70,11 +70,14 @@ button{padding:0;border:0;background:none;font:inherit;color:inherit;cursor:poin
 .dock-btn:hover{background:var(--ln);color:oklch(0.97 0.01 25)}
 .dot{position:absolute;top:9px;right:9px;width:8px;height:8px;border-radius:50%;background:var(--red)}
 .dock-sep{width:1px;height:24px;margin:0 4px;background:oklch(0.92 calc(0.04 * var(--c)) var(--h) / 0.14)}
+.art{transition:opacity .35s ease}
+@media (prefers-reduced-motion:reduce){.art,.tile{transition:none}}
 </style>
 </head>
 <body>
 <div class="screen">
   <img class="art on" id="art" src="/thumbs/polytrack.webp" alt="">
+  <img class="art" id="art2" alt="">
   <div class="shade"></div>
 
   <header class="top">
@@ -138,7 +141,64 @@ button{padding:0;border:0;background:none;font:inherit;color:inherit;cursor:poin
   var state = {
     // Seconds left in period 3. The period is 50 minutes, so 0 starts over at 3000.
     left: 1421,
+    sel: 0,
   };
+
+  // The row: the track of the week, five games to jump back into, then the six
+  // most played this week. Each one carries what the hero says when picked.
+  var CONT = [
+    ['slope2', 'Slope 2', 'Action', '12 min ago'],
+    ['drivemad', 'Drive Mad', 'Racing', 'Yesterday'],
+    ['retro-bowl', 'Retro Bowl', 'Sports', 'Yesterday'],
+    ['geometrydash', 'Geometry Dash', 'Platformer', '3 days ago'],
+    ['1v1lol', '1v1.LOL', 'Action', 'Last week']
+  ];
+  var POP = [
+    ['basketball-stars', 'Basketball Stars', 'Sports'],
+    ['amazing-rope-police', 'Amazing Rope Police', 'Action'],
+    ['ice-dodo', 'Ice Dodo', 'Arcade'],
+    ['adrenalinechallenge2', 'Adrenaline Challenge 2', 'Action'],
+    ['stickman-hook', 'Stickman Hook', 'Action'],
+    ['crossyroad', 'Crossy Road', 'Arcade']
+  ];
+  var ROW = [{
+    id: 'polytrack', name: 'PolyTrack', cta: 'race now',
+    kicker: 'track of the week · ends in 2d 13:54',
+    line: 'racing · summer 3 · nova leads at 1:02.418 · 312 racers'
+  }].concat(CONT.map(function (g) {
+    return { id: g[0], name: g[1], kicker: 'jump back in · ' + g[3].toLowerCase(), line: g[2].toLowerCase(), cta: 'continue' };
+  }), POP.map(function (g, i) {
+    return { id: g[0], name: g[1], kicker: 'popular this week · #' + (i + 1), line: g[2].toLowerCase(), cta: 'play' };
+  }));
+
+  var tiles = $('row').getElementsByClassName('tile');
+  // Two art layers: the new art fades in on the hidden one as the shown one fades out.
+  var arts = [$('art'), $('art2')];
+
+  function select(i) {
+    if (i === state.sel) return;
+    tiles[state.sel].classList.remove('on');
+    tiles[state.sel].setAttribute('aria-pressed', 'false');
+    tiles[i].classList.add('on');
+    tiles[i].setAttribute('aria-pressed', 'true');
+    state.sel = i;
+
+    var g = ROW[i];
+    $('kicker').textContent = g.kicker;
+    $('name').textContent = g.name;
+    $('line').textContent = g.line;
+    $('cta').textContent = g.cta;
+
+    arts.reverse();
+    arts[0].src = '/thumbs/' + g.id + '.webp';
+    arts[0].classList.add('on');
+    arts[1].classList.remove('on');
+  }
+
+  $('row').addEventListener('click', function (e) {
+    var tile = e.target.closest('.tile');
+    if (tile) select(Array.prototype.indexOf.call(tiles, tile));
+  });
 
   function tick() {
     state.left = state.left > 0 ? state.left - 1 : 3000;
