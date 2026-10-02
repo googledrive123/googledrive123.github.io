@@ -1849,6 +1849,11 @@
     liveStats();
     $('liveStatus').innerHTML = '<span class="dot"></span>Updated ' + new Date().toLocaleTimeString();
   }
+  // Pushed events wait for the first answer, so the last 10 minutes go in
+  // underneath them in order.
+  push.on.push(function (res) {
+    if (live && !live.first && res.rows) liveTake(res);
+  });
   // PolyTrack says who is in which room, every few seconds.
   function livePresence() {
     var l = live;
