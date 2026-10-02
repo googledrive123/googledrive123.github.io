@@ -290,6 +290,7 @@
       count.textContent = (at + 1) + ' of ' + n;
       shade.setAttribute('aria-label', p.options[at]);
       var bits = [];
+      if (p.voted === at) bits.push('Your pick');
       if (p.counts && p.counts.length) {
         var total = p.counts.reduce(function (a, b) { return a + b; }, 0);
         bits.push((total ? Math.round(100 * (p.counts[at] || 0) / total) : 0) + '% of the votes');
