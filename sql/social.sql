@@ -476,3 +476,64 @@ create index if not exists gv_join_asks_from on public.gv_join_asks (from_user, 
 alter table public.gv_join_asks enable row level security;
 revoke all on table public.gv_join_asks from anon, authenticated;
 
+
+-- Returns the ask's id, for gv_join_status. Asking again while an ask is
+-- still waiting gives back the same one.
+create or replace function public.gv_join_ask(p_user uuid)
+returns bigint
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user uuid := auth.uid();
+  v_id bigint;
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'Friends only work on GameVault.';
+  end if;
+  if v_user is null then
+    raise exception 'Sign in to join friends.';
+  end if;
+  if not (exists (select 1 from gv_friend_links where user_id = v_user and friend_id = p_user)
+      and exists (select 1 from gv_friend_links where user_id = p_user and friend_id = v_user)) then
+    raise exception 'You can only ask friends to join.';
+  end if;
+  if coalesce((select status from gv_social where user_id = p_user), 'online') <> 'online' then
+    raise exception 'They are not taking asks to join right now.';
+  end if;
+  if not exists (select 1 from polytrack_presence
+                  where user_id = p_user and updated_at > now() - interval '45 seconds') then
+    raise exception 'They are not in PolyTrack right now.';
+  end if;
+
+  perform pg_advisory_xact_lock(hashtext('gv_join_ask'), hashtext(v_user::text));
+  delete from gv_join_asks where created_at < now() - interval '1 day';
+
+  select id into v_id from gv_join_asks
+   where from_user = v_user and to_user = p_user
+     and answer is null and created_at > now() - interval '60 seconds'
+   order by id desc limit 1;
+  if found then
+    return v_id;
+  end if;
+
+  if exists (select 1 from gv_join_asks
+              where from_user = v_user and to_user = p_user
+                and answer = 'no' and answered_at > now() - interval '2 minutes') then
+    raise exception 'They said no just now. Try again in a couple of minutes.';
+  end if;
+  if (select count(*) from gv_join_asks
+       where from_user = v_user and created_at > now() - interval '10 minutes') >= 10 then
+    raise exception 'That is a lot of asks. Try again in a few minutes.';
+  end if;
+
+  insert into gv_join_asks (from_user, to_user) values (v_user, p_user)
+  returning id into v_id;
+  return v_id;
+end;
+$function$;
+
+revoke all on function public.gv_join_ask(uuid) from public, anon;
+grant execute on function public.gv_join_ask(uuid) to authenticated;
+
