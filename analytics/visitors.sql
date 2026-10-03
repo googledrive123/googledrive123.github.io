@@ -88,6 +88,22 @@ as $function$
 $function$;
 
 
+-- p_tz when Postgres knows the zone, otherwise UTC.
+create or replace function public.analytics_safe_tz(p_tz text)
+returns text
+language plpgsql
+stable
+set search_path to 'public'
+as $function$
+begin
+  perform now() at time zone coalesce(p_tz, 'UTC');
+  return coalesce(p_tz, 'UTC');
+exception when others then
+  return 'UTC';
+end;
+$function$;
+
+
 -- The all-time numbers, without scanners. active_visitors are the ones that
 -- did something; scanners says how many ids were left out.
 create or replace function public.analytics_overview(p_secret text)
