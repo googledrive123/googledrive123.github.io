@@ -69,8 +69,8 @@
     '.gv-look-screen img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}',
     '.gv-look-btn{width:40px;height:40px;flex-shrink:0;display:grid;place-items:center;padding:0;border-radius:50%;border:1px solid rgba(255,255,255,.16);background:#121216;color:#f4f4f6;font:inherit;font-size:1.1rem;line-height:1;cursor:pointer}',
     '.gv-look-btn:hover{border-color:#ff3b3b}',
-    '.gv-look-pick{margin-left:auto;padding:10px 22px;border-radius:100px;border:1px solid #ff3b3b;background:#ff3b3b;color:#fff;font:inherit;font-size:.9rem;font-weight:600;cursor:pointer}',
-    '.gv-look-note{font-size:.84rem;color:#8a8a96}',
+    '.gv-look-pick{padding:10px 22px;border-radius:100px;border:1px solid #ff3b3b;background:#ff3b3b;color:#fff;font:inherit;font-size:.9rem;font-weight:600;cursor:pointer}',
+    '.gv-look-note{margin-left:auto;font-size:.84rem;color:#8a8a96}',
     '.gv-poll-hint{margin:-.4rem 0 1rem;font-size:.84rem;color:var(--muted,#8a8a96)}',
     '.gv-poll-note{display:block;padding:0 2px;overflow:hidden;font-size:.78rem;line-height:1.35;color:var(--muted,#8a8a96);white-space:nowrap;text-overflow:ellipsis}',
     '.gv-poll-try{position:absolute;right:8px;bottom:8px;padding:4px 10px;border-radius:100px;background:rgba(8,8,10,.8);color:#f4f4f6;font-size:.72rem;font-weight:600;transition:background .15s}',
@@ -96,6 +96,8 @@
     '.gv-poll-go:focus-visible{outline:2px solid rgba(255,255,255,.9);outline-offset:3px}',
     '.gv-poll-looks.many{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}',
     '.gv-poll-peek.many{grid-template-columns:repeat(4,minmax(0,1fr))}',
+    '.gv-look-full{display:flex;align-items:center;gap:7px;padding:9px 15px;border-radius:100px;border:1px solid rgba(255,255,255,.16);background:#121216;color:#f4f4f6;font:inherit;font-size:.82rem;font-weight:600;cursor:pointer}',
+    '.gv-look-full:hover{border-color:#ff3b3b}',
     '@keyframes gvPollIn{from{opacity:0;transform:translateY(10px) scale(.98)}}',
     '@media (prefers-reduced-motion:reduce){.gv-poll-box,.gv-poll-go{animation:none}.gv-poll-opt.result::before,.gv-poll-look,.gv-poll-bar span,.gv-look-screen iframe{transition:none}}'
   ].join('');
@@ -350,11 +352,15 @@
     var choose = el('button', 'gv-look-pick', 'Pick this one');
     choose.type = 'button';
     choose.hidden = !pick;
+    var full = el('button', 'gv-look-full');
+    full.type = 'button';
+    full.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span>Full screen</span>';
     bar.appendChild(prev);
     bar.appendChild(next);
     bar.appendChild(name);
     bar.appendChild(chips);
     bar.appendChild(note);
+    bar.appendChild(full);
     bar.appendChild(choose);
     bar.appendChild(close);
     shade.appendChild(stage);
@@ -399,6 +405,14 @@
       fitBox.style.height = h * s + 'px';
       frame.style.transform = 'scale(' + s + ')';
     }
+    // Full screen: the answer's page fills the whole display, with the bar
+    // floating over it.
+    function setFull(on) {
+      shade.classList.toggle('full', on);
+      full.lastChild.textContent = on ? 'Exit full screen' : 'Full screen';
+      full.setAttribute('aria-pressed', on ? 'true' : 'false');
+      fit();
+    }
     function shut() {
       shade.remove();
       window.removeEventListener('resize', fit);
@@ -415,6 +429,7 @@
       e.stopPropagation();
     }
     close.addEventListener('click', shut);
+    full.addEventListener('click', function () { setFull(!shade.classList.contains('full')); });
     prev.addEventListener('click', function () { show(at - 1); });
     next.addEventListener('click', function () { show(at + 1); });
     choose.addEventListener('click', function () {
