@@ -2,7 +2,8 @@
    answered pops up when they come to the site, and they can vote right in
    it. /polls/ shows every poll. One vote each: per account, and per browser
    for a guest. Answers can come with a picture, a live page to try and a
-   short note. A click opens the live page at a Chromebook's screen size.
+   short note. A click opens the live page as big as the screen allows, and
+   it can go full screen.
    A poll can open with an intro, and polls wait for someone's second visit.
    Public surface: window.GV.polls.ask(), .card(poll), .use(client), .rpc. */
 (function () {
@@ -59,10 +60,9 @@
     '.gv-poll-look.mine{border-color:var(--accent,#ff3b3b)}',
     '.gv-poll-look.mine .gv-poll-bar span{background:var(--accent,#ff3b3b)}',
     '.gv-poll-box.wide{width:min(880px,100%)}',
-    '.gv-look{position:fixed;inset:0;z-index:2700;display:flex;flex-direction:column;gap:12px;padding:16px;background:#08080a;color:#f4f4f6}',
-    '.gv-look-top,.gv-look-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;width:min(1366px,100%);margin:0 auto}',
-    '.gv-look-name{font-size:1.1rem;font-weight:700;overflow-wrap:anywhere}',
-    '.gv-look-count{font-family:"JetBrains Mono",monospace;font-size:.74rem;color:#8a8a96}',
+    '.gv-look{position:fixed;inset:0;z-index:2700;display:flex;flex-direction:column;gap:10px;padding:10px;background:#08080a;color:#f4f4f6}',
+    '.gv-look-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;width:min(1366px,100%);margin:0 auto}',
+    '.gv-look-name{display:none;font-size:1rem;font-weight:700;overflow-wrap:anywhere}',
     '.gv-look-stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}',
     '.gv-look-fit{position:relative;flex-shrink:0}',
     '.gv-look-frame{position:absolute;top:0;left:0;width:1366px;overflow:hidden;transform-origin:0 0;border-radius:14px;background:#0c0c0e;box-shadow:0 0 0 1px rgba(255,255,255,.16),0 30px 80px rgba(0,0,0,.6)}',
@@ -70,25 +70,20 @@
     '.gv-look-screen img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}',
     '.gv-look-btn{width:40px;height:40px;flex-shrink:0;display:grid;place-items:center;padding:0;border-radius:50%;border:1px solid rgba(255,255,255,.16);background:#121216;color:#f4f4f6;font:inherit;font-size:1.1rem;line-height:1;cursor:pointer}',
     '.gv-look-btn:hover{border-color:#ff3b3b}',
-    '.gv-look-close{margin-left:auto}',
-    '.gv-look-pick{margin-left:auto;padding:10px 22px;border-radius:100px;border:1px solid #ff3b3b;background:#ff3b3b;color:#fff;font:inherit;font-size:.9rem;font-weight:600;cursor:pointer}',
-    '.gv-look-note{font-size:.84rem;color:#8a8a96}',
+    '.gv-look-pick{padding:10px 22px;border-radius:100px;border:1px solid #ff3b3b;background:#ff3b3b;color:#fff;font:inherit;font-size:.9rem;font-weight:600;cursor:pointer}',
+    '.gv-look-note{margin-left:auto;font-size:.84rem;color:#8a8a96}',
     '.gv-poll-hint{margin:-.4rem 0 1rem;font-size:.84rem;color:var(--muted,#8a8a96)}',
     '.gv-poll-note{display:block;padding:0 2px;overflow:hidden;font-size:.78rem;line-height:1.35;color:var(--muted,#8a8a96);white-space:nowrap;text-overflow:ellipsis}',
     '.gv-poll-try{position:absolute;right:8px;bottom:8px;padding:4px 10px;border-radius:100px;background:rgba(8,8,10,.8);color:#f4f4f6;font-size:.72rem;font-weight:600;transition:background .15s}',
     '.gv-poll-try::before{content:"";display:inline-block;margin-right:6px;border-style:solid;border-width:4px 0 4px 6px;border-color:transparent transparent transparent currentColor;vertical-align:1px}',
     '.gv-poll-look:hover .gv-poll-try{background:var(--accent,#ff3b3b)}',
-    '.gv-look-chrome{position:relative;display:flex;align-items:center;gap:7px;height:34px;padding:0 14px;background:#1a1a20;border-bottom:1px solid rgba(255,255,255,.08)}',
-    '.gv-look-chrome i{width:11px;height:11px;border-radius:50%;background:rgba(255,255,255,.16)}',
-    '.gv-look-url{position:absolute;left:50%;transform:translateX(-50%);padding:4px 16px;border-radius:7px;background:#08080a;font-family:"JetBrains Mono",monospace;font-size:12px;color:#8a8a96}',
     '.gv-look-screen iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#0c0c0e;opacity:0;transition:opacity .25s}',
     '.gv-look-screen.ready iframe{opacity:1}',
-    '.gv-look-desc{font-size:.88rem;color:#8a8a96}',
     '.gv-look-chips{display:flex;flex-wrap:wrap;gap:6px}',
     '.gv-look-chip{padding:7px 13px;border-radius:100px;border:1px solid rgba(255,255,255,.16);background:none;color:#8a8a96;font:inherit;font-size:.8rem;cursor:pointer}',
     '.gv-look-chip:hover{color:#f4f4f6}',
     '.gv-look-chip.on{border-color:#f4f4f6;background:#f4f4f6;color:#08080a}',
-    '@media (max-width:760px){.gv-look-chips{display:none}}',
+    '@media (max-width:1100px){.gv-look-chips{display:none}.gv-look-name{display:block}}',
     '.gv-poll-front{text-align:center}',
     '.gv-poll-go{display:block;width:100%;margin-top:20px;padding:14px 22px;border-radius:100px;border:0;background:var(--accent,#ff3b3b);color:#fff;font:inherit;font-size:1rem;font-weight:700;cursor:pointer}',
     '.gv-poll-go:hover{filter:brightness(1.1)}',
@@ -102,8 +97,17 @@
     '.gv-poll-go:focus-visible{outline:2px solid rgba(255,255,255,.9);outline-offset:3px}',
     '.gv-poll-looks.many{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}',
     '.gv-poll-peek.many{grid-template-columns:repeat(4,minmax(0,1fr))}',
+    '.gv-look-full{display:flex;align-items:center;gap:7px;padding:9px 15px;border-radius:100px;border:1px solid rgba(255,255,255,.16);background:#121216;color:#f4f4f6;font:inherit;font-size:.82rem;font-weight:600;cursor:pointer}',
+    '.gv-look-full:hover{border-color:#ff3b3b}',
+    '.gv-look.full{padding:0}',
+    '.gv-look.full .gv-look-frame{border-radius:0;box-shadow:none}',
+    '.gv-look.full .gv-look-bar{position:absolute;left:50%;bottom:14px;z-index:1;width:auto;max-width:calc(100% - 28px);padding:6px;border-radius:100px;background:rgba(8,8,10,.88);box-shadow:0 10px 30px rgba(0,0,0,.5);transform:translateX(-50%);transition:opacity .3s}',
+    '.gv-look.full .gv-look-chips{display:none}',
+    '.gv-look.full .gv-look-name{display:block;padding:0 6px}',
+    '.gv-look.full .gv-look-note{margin-left:0}',
+    '.gv-look.full.idle .gv-look-bar{opacity:0;pointer-events:none}',
     '@keyframes gvPollIn{from{opacity:0;transform:translateY(10px) scale(.98)}}',
-    '@media (prefers-reduced-motion:reduce){.gv-poll-box,.gv-poll-go{animation:none}.gv-poll-opt.result::before,.gv-poll-look,.gv-poll-bar span,.gv-look-screen iframe{transition:none}}'
+    '@media (prefers-reduced-motion:reduce){.gv-poll-box,.gv-poll-go{animation:none}.gv-poll-opt.result::before,.gv-poll-look,.gv-poll-bar span,.gv-look-screen iframe,.gv-look-bar{transition:none}}'
   ].join('');
 
   var client = null;
@@ -314,17 +318,10 @@
     var shade = el('div', 'gv-look');
     shade.setAttribute('role', 'dialog');
     shade.setAttribute('aria-modal', 'true');
-    var top = el('div', 'gv-look-top');
     var name = el('div', 'gv-look-name');
-    var count = el('div', 'gv-look-count');
     var close = el('button', 'gv-look-btn gv-look-close', '\u00d7');
     close.type = 'button';
     close.setAttribute('aria-label', 'Close');
-    var desc = el('div', 'gv-look-desc');
-    top.appendChild(name);
-    top.appendChild(desc);
-    top.appendChild(count);
-    top.appendChild(close);
     var stage = el('div', 'gv-look-stage');
     var fitBox = el('div', 'gv-look-fit');
     var frame = el('div', 'gv-look-frame');
@@ -337,17 +334,13 @@
       // Escape in the live page closes this too, unless the page used it.
       try {
         live.contentWindow.addEventListener('keydown', function (e) {
-          if (e.key === 'Escape' && !e.defaultPrevented) shut();
+          if (e.key === 'Escape' && !e.defaultPrevented) onKey(e);
         });
+        live.contentWindow.addEventListener('pointermove', wake);
+        live.contentWindow.addEventListener('pointerdown', wake);
       } catch (e) {}
     });
     screen.appendChild(live);
-    var chrome = el('div', 'gv-look-chrome');
-    chrome.appendChild(el('i'));
-    chrome.appendChild(el('i'));
-    chrome.appendChild(el('i'));
-    chrome.appendChild(el('span', 'gv-look-url', location.host || 'GameVault'));
-    frame.appendChild(chrome);
     frame.appendChild(screen);
     fitBox.appendChild(frame);
     stage.appendChild(fitBox);
@@ -369,12 +362,17 @@
     var choose = el('button', 'gv-look-pick', 'Pick this one');
     choose.type = 'button';
     choose.hidden = !pick;
+    var full = el('button', 'gv-look-full');
+    full.type = 'button';
+    full.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span>Full screen</span>';
     bar.appendChild(prev);
     bar.appendChild(next);
+    bar.appendChild(name);
     bar.appendChild(chips);
     bar.appendChild(note);
+    bar.appendChild(full);
     bar.appendChild(choose);
-    shade.appendChild(top);
+    bar.appendChild(close);
     shade.appendChild(stage);
     shade.appendChild(bar);
 
@@ -391,12 +389,11 @@
       live.src = url || 'about:blank';
       live.title = p.options[at] + ', live';
       name.textContent = p.options[at];
-      desc.textContent = blurb(p, at);
+      name.title = blurb(p, at);
       Array.prototype.forEach.call(chips.children, function (c, j) {
         c.classList.toggle('on', j === at);
         c.setAttribute('aria-pressed', j === at ? 'true' : 'false');
       });
-      count.textContent = (at + 1) + ' of ' + n;
       shade.setAttribute('aria-label', p.options[at]);
       var bits = [];
       if (p.voted === at) bits.push('Your pick');
@@ -406,30 +403,71 @@
       }
       note.textContent = bits.join(' \u00b7 ');
     }
-    // The screen is a school Chromebook's, 1366 by 635, shrunk to fit.
+    // The screen is a school Chromebook's: 1366 wide, and 635 tall like a
+    // browser window or up to 768 like the whole screen when there is room,
+    // scaled to fill the space there is.
     function fit() {
-      var w = frame.offsetWidth, h = frame.offsetHeight;
-      var s = Math.min(stage.clientWidth / w, stage.clientHeight / h, 1);
+      var w = frame.offsetWidth;
+      var s = Math.min(stage.clientWidth / w, stage.clientHeight / 635, 2);
+      var h = Math.max(635, Math.min(768, stage.clientHeight / s));
+      screen.style.height = h + 'px';
       fitBox.style.width = w * s + 'px';
       fitBox.style.height = h * s + 'px';
       frame.style.transform = 'scale(' + s + ')';
     }
+    // In full screen the bar fades away while the mouse rests.
+    var idle = 0;
+    function wake() {
+      shade.classList.remove('idle');
+      clearTimeout(idle);
+      idle = setTimeout(function () { shade.classList.add('idle'); }, 2500);
+    }
+    // Full screen: the answer's page fills the whole display, with the bar
+    // floating over it.
+    function setFull(on) {
+      shade.classList.toggle('full', on);
+      full.lastChild.textContent = on ? 'Exit full screen' : 'Full screen';
+      full.setAttribute('aria-pressed', on ? 'true' : 'false');
+      if (on) wake();
+      fit();
+    }
+    function onFullChange() {
+      setFull(document.fullscreenElement === shade);
+    }
     function shut() {
+      document.removeEventListener('fullscreenchange', onFullChange);
+      if (document.fullscreenElement === shade) document.exitFullscreen();
       shade.remove();
+      clearTimeout(idle);
       window.removeEventListener('resize', fit);
       window.removeEventListener('keydown', onKey, true);
       if (back && back.focus) back.focus();
     }
     // Ahead of the pop-up's own keys, so Escape closes only this.
     function onKey(e) {
-      if (e.key === 'Escape') shut();
-      else if (e.key === 'ArrowLeft') show(at - 1);
+      wake();
+      if (e.key === 'Escape') {
+        // In the browser's full screen, its own Escape gets out of it first.
+        if (document.fullscreenElement) return;
+        if (shade.classList.contains('full')) setFull(false);
+        else shut();
+      } else if (e.key === 'ArrowLeft') show(at - 1);
       else if (e.key === 'ArrowRight') show(at + 1);
       else return;
       e.preventDefault();
       e.stopPropagation();
     }
+    shade.addEventListener('pointermove', wake);
+    shade.addEventListener('pointerdown', wake);
     close.addEventListener('click', shut);
+    full.addEventListener('click', function () {
+      var on = !shade.classList.contains('full');
+      if (!shade.requestFullscreen) setFull(on);
+      else if (on) shade.requestFullscreen().catch(function () { setFull(true); });
+      else if (document.fullscreenElement) document.exitFullscreen();
+      else setFull(false);
+    });
+    document.addEventListener('fullscreenchange', onFullChange);
     prev.addEventListener('click', function () { show(at - 1); });
     next.addEventListener('click', function () { show(at + 1); });
     choose.addEventListener('click', function () {
@@ -438,7 +476,7 @@
       pick(p, i);
     });
     shade.addEventListener('click', function (e) {
-      if (e.target === shade || e.target === stage) shut();
+      if ((e.target === shade || e.target === stage) && !shade.classList.contains('full')) shut();
     });
     show(start);
     document.body.appendChild(shade);
