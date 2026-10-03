@@ -194,3 +194,22 @@ begin
   return true;
 end;
 $function$;
+
+
+-- Names an address, like the school it belongs to. An empty name clears it.
+create or replace function public.analytics_network_name(p_secret text, p_ip text, p_label text)
+returns boolean
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+  insert into analytics_networks (ip, label)
+  values (p_ip::inet, left(nullif(btrim(p_label), ''), 80))
+  on conflict (ip) do update set label = excluded.label;
+  return true;
+end;
+$function$;
