@@ -53,6 +53,11 @@
   .period-time { font-variant-numeric: tabular-nums; color: var(--tx); }
   .period-bar { display: block; width: 44px; height: 4px; border-radius: 2px; background: oklch(var(--ring) / 0.16); overflow: hidden; }
   .period-fill { display: block; height: 100%; background: var(--tx); }
+
+  .search { margin-top: 28px; display: flex; align-items: center; gap: 12px; width: 520px; height: 52px; padding: 0 12px 0 20px; border-radius: 20px; background: oklch(var(--ink) / 0.05); box-shadow: 0 0 0 1px oklch(var(--ring) / 0.15), 0 16px 32px rgba(0, 0, 0, 0.14); }
+  .search svg { flex-shrink: 0; opacity: .7; }
+  .search input { flex: 1; min-width: 0; height: 100%; border: 0; outline: none; background: transparent; color: inherit; font-family: inherit; font-size: 15px; }
+  .kbd { font-size: 12px; opacity: .6; border-radius: 7px; padding: 2px 8px; box-shadow: 0 0 0 1px oklch(var(--ring) / 0.2); }
 </style>
 </head>
 <body>
@@ -76,6 +81,11 @@
     <div class="hero">
       <h1 class="brand">gamevault</h1>
       <p class="period">period 3 ends in <span class="period-time" id="timer">23:41</span><span class="period-bar"><span class="period-fill" id="timerBar" style="width:52.6%"></span></span></p>
+      <label class="search">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input id="homeQ" placeholder="search 1,958 games" aria-label="Search games" autocomplete="off" spellcheck="false">
+        <span class="kbd" aria-hidden="true">/</span>
+      </label>
     </div>
   </div>
 </main>
