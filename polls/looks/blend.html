@@ -99,6 +99,7 @@
   .lt .gt-name b { display: block; font-size: 16px; font-weight: 600; line-height: 1.2; }
   .lt .gt-name span { display: block; margin-top: 2px; font-size: 12px; opacity: .75; }
   .open .home { filter: blur(4px) brightness(0.7); }
+  .lib-empty { padding: 40px 0; text-align: center; font-size: 14px; color: var(--mu); }
 </style>
 </head>
 <body>
@@ -205,6 +206,7 @@
         <a class="gt lt" href="#" data-soon data-id="1on1soccer"><img src="/thumbs/1on1soccer.webp" alt="" loading="lazy"><span class="gt-name"><b>1 on 1 Soccer</b><span>sports</span></span></a>
         <a class="gt lt" href="#" data-soon data-id="slime-rancher"><img src="/thumbs/slime-rancher.webp" alt="" loading="lazy"><span class="gt-name"><b>Slime Rancher</b><span>simulation</span></span></a>
       </div>
+      <div class="lib-empty" id="libEmpty" hidden>nothing found. try something shorter.</div>
     </div>
   </div>
 </main>
@@ -214,6 +216,8 @@
 var state = {
   left: 1421,
   open: false,
+  q4a: '',
+  c4a: 'All',
 };
 
 function $(id) { return document.getElementById(id); }
@@ -226,6 +230,79 @@ function tick() {
   $('timerBar').style.width = pct.toFixed(1) + '%';
 }
 setInterval(tick, 1000);
+
+var G = [
+  ['polytrack', 'PolyTrack', ['Racing']],
+  ['basketball-stars', 'Basketball Stars', ['Sports']],
+  ['amazing-rope-police', 'Amazing Rope Police', ['Action']],
+  ['ice-dodo', 'Ice Dodo', ['Arcade', 'Skill']],
+  ['adrenalinechallenge2', 'Adrenaline Challenge 2', ['Action', 'Driving']],
+  ['stickman-hook', 'Stickman Hook', ['Action', 'Skill']],
+  ['crossyroad', 'Crossy Road', ['Arcade']],
+  ['retrobowlcollege', 'Retro Bowl College', ['Sports']],
+  ['basket-bros', 'Basket Bros', ['Sports']],
+  ['rocketleague', 'Rocket League', ['Sports']],
+  ['2048', '2048', ['Puzzle']],
+  ['retro-bowl', 'Retro Bowl', ['Sports']],
+  ['bit-planes', 'Bit Planes', ['Action', 'Shooter']],
+  ['drifthunters', 'Drift Hunters', ['Racing', 'Driving']],
+  ['angry-sharks', 'Angry Sharks', ['Arcade', 'Action']],
+  ['wordle', 'Wordle', ['Puzzle']],
+  ['aquapark-slides', 'Aquapark Slides', ['Arcade', 'Racing']],
+  ['fnaf', "Five Nights at Freddy's", ['Horror']],
+  ['subway-surfers', 'Subway Surfers', ['Action', 'Arcade']],
+  ['grand-theft-auto-vice-city', 'Grand Theft Auto Vice City', ['Action']],
+  ['backrooms', 'The Backrooms', ['Horror']],
+  ['slope2', 'Slope 2', ['Action', 'Skill']],
+  ['cluster-rush', 'Cluster Rush', ['Action', 'Skill']],
+  ['motox3m-spooky', 'Moto X3M Spooky Land', ['Racing', 'Driving']],
+  ['big-neon-tower', 'Big Neon Tower', ['Platformer']],
+  ['drivemad', 'Drive Mad', ['Racing', 'Driving']],
+  ['bitlife', 'BitLife', ['Simulation']],
+  ['a-difficult-game-about-climbing', 'A Difficult Game About Climbing', ['Platformer']],
+  ['madalincars', 'Madalin Cars', ['Racing', 'Driving']],
+  ['snowrider3d', 'Snow Rider 3D', ['Action', 'Driving']],
+  ['badtimesimulator', 'Bad Time Simulator', ['Action', 'Skill']],
+  ['2drocketleague', '2D Rocket League', ['Sports']],
+  ['cuphead', 'Cuphead', ['Action']],
+  ['flappyplane', 'Flappy Plane', ['Arcade', 'Skill']],
+  ['adventure-capitalist', 'Adventure Capitalist', ['Idle']],
+  ['1v1lol', '1v1.LOL', ['Action', 'Shooter']],
+  ['awesometanks2', 'Awesome Tanks 2', ['Action', 'Shooter']],
+  ['vex7', 'Vex 7', ['Platformer']],
+  ['minesweeper', 'Minesweeper', ['Puzzle']],
+  ['timeshooter2', 'Time Shooter 2', ['Action', 'Shooter']],
+  ['8ball', '8 Ball Pool', ['Sports']],
+  ['draw-the-hill', 'Draw the Hill', ['Puzzle', 'Driving']],
+  ['geometrydash', 'Geometry Dash', ['Platformer', 'Skill']],
+  ['hollow-knight-silksong', 'Hollow Knight Silksong', ['RPG']],
+  ['1on1soccer', '1 on 1 Soccer', ['Sports']],
+  ['slime-rancher', 'Slime Rancher', ['Simulation']]
+];
+var tiles = G.map(function (g) { return $('libGrid').querySelector('[data-id="' + g[0] + '"]'); });
+
+function renderLib() {
+  var q = state.q4a.trim().toLowerCase();
+  var cat = q ? 'All' : state.c4a;
+  var found = 0;
+  G.forEach(function (g, i) {
+    var show = (cat === 'All' || g[2].indexOf(cat) >= 0) && (!q || g[1].toLowerCase().indexOf(q) >= 0);
+    tiles[i].hidden = !show;
+    if (show) found++;
+  });
+  $('libEmpty').hidden = found > 0;
+  $('libBody').scrollTop = 0;
+}
+
+// The home box and the library box share one query, as in the design.
+// Only the other box is written to, so the one being typed in is never reset.
+['homeQ', 'libQ'].forEach(function (id) {
+  $(id).addEventListener('input', function () {
+    state.q4a = $(id).value;
+    $(id === 'homeQ' ? 'libQ' : 'homeQ').value = state.q4a;
+    renderLib();
+  });
+});
 
 function openLib() {
   state.open = true;
