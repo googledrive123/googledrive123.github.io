@@ -98,6 +98,12 @@
     '.gv-poll-peek.many{grid-template-columns:repeat(4,minmax(0,1fr))}',
     '.gv-look-full{display:flex;align-items:center;gap:7px;padding:9px 15px;border-radius:100px;border:1px solid rgba(255,255,255,.16);background:#121216;color:#f4f4f6;font:inherit;font-size:.82rem;font-weight:600;cursor:pointer}',
     '.gv-look-full:hover{border-color:#ff3b3b}',
+    '.gv-look.full{padding:0}',
+    '.gv-look.full .gv-look-frame{border-radius:0;box-shadow:none}',
+    '.gv-look.full .gv-look-bar{position:absolute;left:50%;bottom:14px;z-index:1;width:auto;max-width:calc(100% - 28px);padding:6px;border-radius:100px;background:rgba(8,8,10,.88);box-shadow:0 10px 30px rgba(0,0,0,.5);transform:translateX(-50%);transition:opacity .3s}',
+    '.gv-look.full .gv-look-chips{display:none}',
+    '.gv-look.full .gv-look-name{display:block;padding:0 6px}',
+    '.gv-look.full .gv-look-note{margin-left:0}',
     '@keyframes gvPollIn{from{opacity:0;transform:translateY(10px) scale(.98)}}',
     '@media (prefers-reduced-motion:reduce){.gv-poll-box,.gv-poll-go{animation:none}.gv-poll-opt.result::before,.gv-poll-look,.gv-poll-bar span,.gv-look-screen iframe{transition:none}}'
   ].join('');
