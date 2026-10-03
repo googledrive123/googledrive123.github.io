@@ -1516,7 +1516,7 @@
           + '<span class="st">' + fmt(total) + (total === 1 ? ' vote' : ' votes') + ' \u00b7 ' + fmt(p.accounts) + ' from accounts \u00b7 ' + esc(when) + '</span>'
           + (votersOpen[p.id] ? '<div class="poll-voters" id="pollVoters' + p.id + '"><div class="empty">Loading voters\u2026</div></div>' : '')
           + '</div>'
-          + (total ? '<button class="btn" type="button" data-pollvoters="' + p.id + '">Who voted</button>' : '')
+          + (total ? '<button class="btn" type="button" data-pollvoters="' + p.id + '">' + (votersOpen[p.id] ? 'Hide voters' : 'Who voted') + '</button>' : '')
           + (p.preview ? '<button class="btn" type="button" data-pollpublish="' + p.id + '">Show to everyone</button>' : '')
           + (p.open ? '<button class="btn" type="button" data-pollclose="' + p.id + '">Close</button>' : '')
           + '<button class="btn" type="button" data-polldel="' + p.id + '">Delete</button></div>';
