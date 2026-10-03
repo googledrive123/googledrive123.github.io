@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
 <title>GameVault Analytics</title>
+<link rel="icon" href="/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -68,6 +69,7 @@
   /* charts */
   .chart-wrap { position: relative; height: 260px; }
   .chart-wrap.short { height: 190px; }
+  .chart-wrap.daily { height: 150px; margin-bottom: 14px; }
   .chart-wrap.growth { height: 300px; }
   /* Sideways drags scrub the chart; up and down still scroll the page. */
   .chart-wrap.growth canvas { touch-action: pan-y; cursor: crosshair; }
@@ -584,8 +586,12 @@
       </div>
       <div class="card span-8">
         <h2>Daily history</h2>
-        <div class="legend"><span><i style="background:var(--s1)"></i>Events</span><span><i style="background:var(--s2)"></i>Visitors</span><span><i style="background:var(--s3)"></i>Plays</span></div>
-        <div class="chart-wrap"><canvas id="chAllDaily"></canvas></div>
+        <div class="legend"><span><i style="background:var(--s1)"></i>Events</span></div>
+        <div class="chart-wrap daily"><canvas id="chAllDaily"></canvas></div>
+        <div class="legend"><span><i style="background:var(--s2)"></i>Visitors</span></div>
+        <div class="chart-wrap daily"><canvas id="chDailyVisitors"></canvas></div>
+        <div class="legend"><span><i style="background:var(--s3)"></i>Plays</span></div>
+        <div class="chart-wrap daily"><canvas id="chDailyPlays"></canvas></div>
       </div>
       <div class="card span-4">
         <h2>All-time top games</h2>
@@ -1231,10 +1237,15 @@
       var p = String(s).slice(0, 10).split('-');
       return new Date(+p[0], p[1] - 1, +p[2]).toLocaleDateString([], { month: 'short', day: 'numeric' });
     }
-    chart('chAllDaily', { type: 'bar', data: { labels: daily.map(function (d) { return dayLabel(d.day); }), datasets: [
-      Object.assign({ label: 'Events', data: daily.map(function (d) { return d.events; }) }, bar(C.s1)),
-      Object.assign({ label: 'Visitors', data: daily.map(function (d) { return d.visitors; }), type: 'line' }, line(C.s2)),
-      Object.assign({ label: 'Plays', data: daily.map(function (d) { return d.plays; }), type: 'line' }, line(C.s3))
+    var days = daily.map(function (d) { return dayLabel(d.day); });
+    chart('chAllDaily', { type: 'bar', data: { labels: days, datasets: [
+      Object.assign({ label: 'Events', data: daily.map(function (d) { return d.events; }) }, bar(C.s1))
+    ] }, options: baseOpts });
+    chart('chDailyVisitors', { type: 'bar', data: { labels: days, datasets: [
+      Object.assign({ label: 'Visitors', data: daily.map(function (d) { return d.visitors; }) }, bar(C.s2))
+    ] }, options: baseOpts });
+    chart('chDailyPlays', { type: 'bar', data: { labels: days, datasets: [
+      Object.assign({ label: 'Plays', data: daily.map(function (d) { return d.plays; }) }, bar(C.s3))
     ] }, options: baseOpts });
     ranked('rkAllGames', (o.top_games || []).filter(function (g) { return g.plays; }).slice(0, 15).map(function (g) { return [g.name || g.game_id, g.plays, g.players + ' players · ' + dur(g.secs)]; }), { share: false });
   }
