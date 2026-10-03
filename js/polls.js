@@ -406,10 +406,11 @@
       }
       note.textContent = bits.join(' \u00b7 ');
     }
-    // The screen is a school Chromebook's, 1366 by 635, shrunk to fit.
+    // The screen is a school Chromebook's, 1366 by 635, scaled to fill the
+    // room there is.
     function fit() {
       var w = frame.offsetWidth, h = frame.offsetHeight;
-      var s = Math.min(stage.clientWidth / w, stage.clientHeight / h, 1);
+      var s = Math.min(stage.clientWidth / w, stage.clientHeight / h, 2);
       fitBox.style.width = w * s + 'px';
       fitBox.style.height = h * s + 'px';
       frame.style.transform = 'scale(' + s + ')';
