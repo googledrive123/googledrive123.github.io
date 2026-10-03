@@ -66,6 +66,12 @@
   .gt-name { position: absolute; color: #fff; text-align: left; opacity: 0; transform: translateY(10px); }
   .rt { width: 126px; height: 84px; border-radius: 16px; box-shadow: 0 0 0 1px oklch(var(--ring) / 0.1); }
   .rt .gt-name { left: 10px; right: 10px; bottom: 8px; font-size: 12px; font-weight: 600; line-height: 1.2; }
+  .gt { transition: transform .2s; }
+  .gt img { transition: filter .2s; }
+  .gt-name { transition: opacity .2s, transform .2s; }
+  .gt:hover, .gt:focus-visible { transform: scale(1.04); }
+  .gt:hover img, .gt:focus-visible img { filter: brightness(0.45) blur(2px); }
+  .gt:hover .gt-name, .gt:focus-visible .gt-name { opacity: 1; transform: none; }
 </style>
 </head>
 <body>
