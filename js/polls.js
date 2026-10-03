@@ -475,7 +475,7 @@
       pick(p, i);
     });
     shade.addEventListener('click', function (e) {
-      if (e.target === shade || e.target === stage) shut();
+      if ((e.target === shade || e.target === stage) && !shade.classList.contains('full')) shut();
     });
     show(start);
     document.body.appendChild(shade);
