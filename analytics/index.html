@@ -1225,7 +1225,13 @@
       ['Signed-in users', fmt(o.users), '']
     ]);
     var daily = o.daily || [];
-    chart('chAllDaily', { type: 'bar', data: { labels: daily.map(function (d) { return new Date(d.day).toLocaleDateString([], { month: 'short', day: 'numeric' }); }), datasets: [
+    // A day comes as YYYY-MM-DD. Read as a date it would be UTC midnight,
+    // which shows as the day before anywhere west of London.
+    function dayLabel(s) {
+      var p = String(s).slice(0, 10).split('-');
+      return new Date(+p[0], p[1] - 1, +p[2]).toLocaleDateString([], { month: 'short', day: 'numeric' });
+    }
+    chart('chAllDaily', { type: 'bar', data: { labels: daily.map(function (d) { return dayLabel(d.day); }), datasets: [
       Object.assign({ label: 'Events', data: daily.map(function (d) { return d.events; }) }, bar(C.s1)),
       Object.assign({ label: 'Visitors', data: daily.map(function (d) { return d.visitors; }), type: 'line' }, line(C.s2)),
       Object.assign({ label: 'Plays', data: daily.map(function (d) { return d.plays; }), type: 'line' }, line(C.s3))
@@ -1253,9 +1259,12 @@
     ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
     ctx.beginPath(); ctx.moveTo(x, area.top); ctx.lineTo(x, area.bottom); ctx.stroke(); ctx.restore();
   } };
+  // This browser's time zone, so days and hours on the charts are local ones.
+  function viewerTz() {
+    try { return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; } catch (e) { return 'UTC'; }
+  }
   function loadGrowth() {
-    var tz = 'UTC';
-    try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; } catch (e) {}
+    var tz = viewerTz();
     return rpc('analytics_visitor_growth', { p_secret: state.secret, p_tz: tz }).then(function (list) {
       growth = list || [];
       var tip = Object.assign({}, baseOpts.plugins.tooltip, { callbacks: {
@@ -2323,7 +2332,7 @@
   var allTimeAt = 0;
   function loadAllTime() {
     allTimeAt = Date.now();
-    rpc('analytics_overview', { p_secret: state.secret }).then(function (o) {
+    rpc('analytics_overview', { p_secret: state.secret, p_tz: viewerTz() }).then(function (o) {
       state.overview = o;
       renderOverview(o);
     }).catch(function (e) { $('allTimeSince').textContent = 'Could not load: ' + e.message; });
