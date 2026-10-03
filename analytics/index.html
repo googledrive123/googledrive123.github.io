@@ -2437,6 +2437,9 @@
   $('netList').addEventListener('click', function (e) {
     var b = e.target.closest('button[data-netsave]'); if (b) saveNetwork(b.dataset.netsave);
   });
+  $('netList').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && e.target.dataset.netip) saveNetwork(e.target.dataset.netip);
+  });
   $('gaCreate').addEventListener('click', function () {
     var ends = $('gaEnds').value;
     $('gaCreate').disabled = true;
