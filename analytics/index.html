@@ -1582,6 +1582,34 @@
     if (call) call.then(loadPolls).catch(function (err) { $('pollMsg').textContent = 'Could not do that: ' + err.message; });
   }
 
+  // ── schools ──
+  // analytics/networks.sql. People by the network they play from. A school's
+  // computers share its address, so every address several visitors share is
+  // listed and can be named after its school. Anyone never seen on one of
+  // those plays from home or a phone.
+  function loadNetworks() {
+    return rpc('analytics_networks_list', { p_secret: state.secret, p_days: 30, p_min: 3 }).then(function (d) {
+      d = d || {};
+      var people = d.people || 0;
+      function share(n) { return people ? Math.round(100 * n / people) : 0; }
+      var rows = (d.named || []).map(function (x) { return [x.label, x.people]; });
+      if (d.unnamed) rows.push(['Shared networks without a name yet', d.unnamed]);
+      if (d.only_home) rows.push(['Home, phones and other networks', d.only_home]);
+      $('netSummary').innerHTML = people ? rows.map(function (r, i) {
+        return '<div class="row"><div class="rk">' + (i + 1) + '</div><div class="nm" style="--w:' + share(r[1]) + '%"><span>' + esc(r[0]) + '</span></div>'
+          + '<div class="val"><b>' + fmt(r[1]) + '</b> <span>' + share(r[1]) + '%</span></div></div>';
+      }).join('') : '<div class="empty">No networks yet. They are recorded from now on, so give it a school day.</div>';
+      var nets = d.networks || [];
+      $('netList').innerHTML = nets.map(function (n) {
+        var where = [n.city, n.region].filter(Boolean).join(', ');
+        var who = [n.owner, where, n.provider && n.provider !== n.owner ? n.provider : ''].filter(Boolean).join(' \u00b7 ');
+        return '<div class="bc-item net-item"><span class="when mono">' + esc(n.ip) + '</span>'
+          + '<span class="msg">' + esc(who || 'Not looked up yet') + '</span>'
+          + '<span class="st">' + fmt(n.people) + ' people \u00b7 ' + share(n.people) + '%</span></div>';
+      }).join('');
+    }).catch(function (e) { $('netMsg').textContent = 'Could not load networks: ' + e.message; });
+  }
+
   // ── giveaways ──
   function loadGiveaways() {
     return rpc('gv_giveaway_list', { p_secret: state.secret }).then(function (list) {
@@ -2270,7 +2298,7 @@
   }
 
   // ── auth / wiring ──
-  function showDash() { $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); load(); loadPeople(); loadBroadcasts(); loadLinks(); loadFailing(); loadChat(); loadAvatars(); loadTesting(); loadGiveaways(); fillChallengeWeeks(); loadChallenges(); loadChallengeTracks(); loadBoard(); loadMirrors(); loadPolls(); setInterval(loadPolls, 30000); setTimer(); startPush(); if (location.hash === '#live') enterLive(); }
+  function showDash() { $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); load(); loadPeople(); loadBroadcasts(); loadLinks(); loadFailing(); loadChat(); loadAvatars(); loadTesting(); loadGiveaways(); fillChallengeWeeks(); loadChallenges(); loadChallengeTracks(); loadBoard(); loadMirrors(); loadPolls(); setInterval(loadPolls, 30000); loadNetworks(); setTimer(); startPush(); if (location.hash === '#live') enterLive(); }
   function setTimer() { clearInterval(state.timer); if ($('autoRefresh').checked) state.timer = setInterval(tick, 5000); }
   function tryLogin(secret, remember) {
     $('loginErr').textContent = '';
