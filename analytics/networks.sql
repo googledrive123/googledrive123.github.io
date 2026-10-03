@@ -168,3 +168,29 @@ begin
   );
 end;
 $function$;
+
+
+-- Keeps what the dashboard looked up about an address.
+create or replace function public.analytics_network_found(p_secret text, p_ip text, p_owner text, p_provider text, p_city text, p_region text)
+returns boolean
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+  insert into analytics_networks (ip, owner, provider, city, region, looked_up)
+  values (p_ip::inet,
+          left(nullif(btrim(p_owner), ''), 120),
+          left(nullif(btrim(p_provider), ''), 120),
+          left(nullif(btrim(p_city), ''), 80),
+          left(nullif(btrim(p_region), ''), 80),
+          now())
+  on conflict (ip) do update
+    set owner = excluded.owner, provider = excluded.provider,
+        city = excluded.city, region = excluded.region, looked_up = now();
+  return true;
+end;
+$function$;
