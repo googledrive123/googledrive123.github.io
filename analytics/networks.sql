@@ -28,6 +28,24 @@ alter table public.analytics_visitor_ips enable row level security;
 revoke all on table public.analytics_visitor_ips from anon, authenticated;
 
 
+-- What the dashboard found out about a shared address, and what the owner
+-- calls it.
+create table if not exists public.analytics_networks (
+  ip        inet primary key,
+  -- Who the address is registered to, like a school district.
+  owner     text,
+  -- The network it is on, like an internet provider.
+  provider  text,
+  city      text,
+  region    text,
+  looked_up timestamptz,
+  label     text
+);
+
+alter table public.analytics_networks enable row level security;
+revoke all on table public.analytics_networks from anon, authenticated;
+
+
 -- The address a request came from: Cloudflare's own header, or the first
 -- hop of x-forwarded-for.
 create or replace function public.analytics_request_ip()
