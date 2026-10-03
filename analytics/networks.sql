@@ -98,3 +98,73 @@ create trigger analytics_note_ip
   after insert on public.analytics_events
   referencing new table as new_rows
   for each statement execute function public.analytics_note_ip();
+
+
+-- People by network over the last p_days days, scanners left out:
+--   people     everyone seen on any address
+--   named      each name the owner gave, with how many people use it
+--   unnamed    people on shared addresses that have no name yet
+--   only_home  people never seen on a shared address (home, phones)
+--   networks   every address at least p_min visitors share, busiest first
+--   your_ip    the address this request came from, to mark the owner's own
+create or replace function public.analytics_networks_list(p_secret text, p_days integer default 30, p_min integer default 3)
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+
+  return (
+    with s as materialized (select visitor_id from analytics_scanners()),
+    seen as materialized (
+      select a.visitor_id, a.ip
+        from analytics_visitor_ips a
+       where a.last_ts >= now() - make_interval(days => greatest(coalesce(p_days, 30), 1))
+         and not exists (select 1 from s where s.visitor_id = a.visitor_id)
+    ),
+    shared as materialized (
+      select ip, count(distinct visitor_id) as people
+        from seen
+       group by ip
+      having count(distinct visitor_id) >= greatest(coalesce(p_min, 3), 2)
+    ),
+    tagged as materialized (
+      select se.visitor_id, sh.ip is not null as on_shared, nullif(btrim(n.label), '') as label
+        from seen se
+        left join shared sh on sh.ip = se.ip
+        left join analytics_networks n on n.ip = sh.ip
+    )
+    select json_build_object(
+      'people', (select count(distinct visitor_id) from seen),
+      'named', coalesce((
+        select json_agg(json_build_object('label', x.label, 'people', x.people) order by x.people desc)
+          from (select label, count(distinct visitor_id) as people
+                  from tagged where on_shared and label is not null group by label) x
+      ), '[]'::json),
+      'unnamed', (select count(distinct visitor_id) from tagged where on_shared and label is null),
+      'only_home', (select count(*) from (select visitor_id from tagged group by visitor_id
+                                           having not bool_or(on_shared)) h),
+      'networks', coalesce((
+        select json_agg(json_build_object(
+                 'ip', host(sh.ip),
+                 'people', sh.people,
+                 'owner', n.owner,
+                 'provider', n.provider,
+                 'city', n.city,
+                 'region', n.region,
+                 'label', n.label,
+                 'looked_up', n.looked_up is not null
+               ) order by sh.people desc, sh.ip)
+          from shared sh
+          left join analytics_networks n on n.ip = sh.ip
+      ), '[]'::json),
+      'your_ip', host(public.analytics_request_ip())
+    )
+  );
+end;
+$function$;
