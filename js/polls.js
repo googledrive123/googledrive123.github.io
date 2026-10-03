@@ -332,7 +332,7 @@
       // Escape in the live page closes this too, unless the page used it.
       try {
         live.contentWindow.addEventListener('keydown', function (e) {
-          if (e.key === 'Escape' && !e.defaultPrevented) shut();
+          if (e.key === 'Escape' && !e.defaultPrevented) onKey(e);
         });
       } catch (e) {}
     });
@@ -432,8 +432,12 @@
     }
     // Ahead of the pop-up's own keys, so Escape closes only this.
     function onKey(e) {
-      if (e.key === 'Escape') shut();
-      else if (e.key === 'ArrowLeft') show(at - 1);
+      if (e.key === 'Escape') {
+        // In the browser's full screen, its own Escape gets out of it first.
+        if (document.fullscreenElement) return;
+        if (shade.classList.contains('full')) setFull(false);
+        else shut();
+      } else if (e.key === 'ArrowLeft') show(at - 1);
       else if (e.key === 'ArrowRight') show(at + 1);
       else return;
       e.preventDefault();
