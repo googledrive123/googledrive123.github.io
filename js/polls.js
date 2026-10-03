@@ -60,9 +60,8 @@
     '.gv-poll-look.mine .gv-poll-bar span{background:var(--accent,#ff3b3b)}',
     '.gv-poll-box.wide{width:min(880px,100%)}',
     '.gv-look{position:fixed;inset:0;z-index:2700;display:flex;flex-direction:column;gap:10px;padding:10px;background:#08080a;color:#f4f4f6}',
-    '.gv-look-top,.gv-look-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;width:min(1366px,100%);margin:0 auto}',
+    '.gv-look-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;width:min(1366px,100%);margin:0 auto}',
     '.gv-look-name{font-size:1.1rem;font-weight:700;overflow-wrap:anywhere}',
-    '.gv-look-count{font-family:"JetBrains Mono",monospace;font-size:.74rem;color:#8a8a96}',
     '.gv-look-stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}',
     '.gv-look-fit{position:relative;flex-shrink:0}',
     '.gv-look-frame{position:absolute;top:0;left:0;width:1366px;overflow:hidden;transform-origin:0 0;border-radius:14px;background:#0c0c0e;box-shadow:0 0 0 1px rgba(255,255,255,.16),0 30px 80px rgba(0,0,0,.6)}',
@@ -79,7 +78,6 @@
     '.gv-poll-look:hover .gv-poll-try{background:var(--accent,#ff3b3b)}',
     '.gv-look-screen iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#0c0c0e;opacity:0;transition:opacity .25s}',
     '.gv-look-screen.ready iframe{opacity:1}',
-    '.gv-look-desc{font-size:.88rem;color:#8a8a96}',
     '.gv-look-chips{display:flex;flex-wrap:wrap;gap:6px}',
     '.gv-look-chip{padding:7px 13px;border-radius:100px;border:1px solid rgba(255,255,255,.16);background:none;color:#8a8a96;font:inherit;font-size:.8rem;cursor:pointer}',
     '.gv-look-chip:hover{color:#f4f4f6}',
@@ -310,15 +308,10 @@
     var shade = el('div', 'gv-look');
     shade.setAttribute('role', 'dialog');
     shade.setAttribute('aria-modal', 'true');
-    var top = el('div', 'gv-look-top');
     var name = el('div', 'gv-look-name');
-    var count = el('div', 'gv-look-count');
     var close = el('button', 'gv-look-btn gv-look-close', '\u00d7');
     close.type = 'button';
     close.setAttribute('aria-label', 'Close');
-    var desc = el('div', 'gv-look-desc');
-    top.appendChild(desc);
-    top.appendChild(count);
     var stage = el('div', 'gv-look-stage');
     var fitBox = el('div', 'gv-look-fit');
     var frame = el('div', 'gv-look-frame');
@@ -364,7 +357,6 @@
     bar.appendChild(note);
     bar.appendChild(choose);
     bar.appendChild(close);
-    shade.appendChild(top);
     shade.appendChild(stage);
     shade.appendChild(bar);
 
@@ -381,12 +373,11 @@
       live.src = url || 'about:blank';
       live.title = p.options[at] + ', live';
       name.textContent = p.options[at];
-      desc.textContent = blurb(p, at);
+      name.title = blurb(p, at);
       Array.prototype.forEach.call(chips.children, function (c, j) {
         c.classList.toggle('on', j === at);
         c.setAttribute('aria-pressed', j === at ? 'true' : 'false');
       });
-      count.textContent = (at + 1) + ' of ' + n;
       shade.setAttribute('aria-label', p.options[at]);
       var bits = [];
       if (p.voted === at) bits.push('Your pick');
