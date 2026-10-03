@@ -1513,7 +1513,9 @@
         if (p.preview) when = 'preview, only on localhost:8000 \u00b7 ' + when;
         return '<div class="bc-item poll-item"><div class="msg"><b>' + esc(p.question) + '</b>'
           + '<div class="ranked">' + rows + '</div>'
-          + '<span class="st">' + fmt(total) + (total === 1 ? ' vote' : ' votes') + ' \u00b7 ' + fmt(p.accounts) + ' from accounts \u00b7 ' + esc(when) + '</span></div>'
+          + '<span class="st">' + fmt(total) + (total === 1 ? ' vote' : ' votes') + ' \u00b7 ' + fmt(p.accounts) + ' from accounts \u00b7 ' + esc(when) + '</span>'
+          + (votersOpen[p.id] ? '<div class="poll-voters" id="pollVoters' + p.id + '"><div class="empty">Loading voters\u2026</div></div>' : '')
+          + '</div>'
           + (total ? '<button class="btn" type="button" data-pollvoters="' + p.id + '">Who voted</button>' : '')
           + (p.preview ? '<button class="btn" type="button" data-pollpublish="' + p.id + '">Show to everyone</button>' : '')
           + (p.open ? '<button class="btn" type="button" data-pollclose="' + p.id + '">Close</button>' : '')
