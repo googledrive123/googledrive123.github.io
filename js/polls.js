@@ -397,11 +397,14 @@
       }
       note.textContent = bits.join(' \u00b7 ');
     }
-    // The screen is a school Chromebook's, 1366 by 635, scaled to fill the
-    // room there is.
+    // The screen is a school Chromebook's: 1366 wide, and 635 tall like a
+    // browser window or up to 768 like the whole screen when there is room,
+    // scaled to fill the space there is.
     function fit() {
-      var w = frame.offsetWidth, h = frame.offsetHeight;
-      var s = Math.min(stage.clientWidth / w, stage.clientHeight / h, 2);
+      var w = frame.offsetWidth;
+      var s = Math.min(stage.clientWidth / w, stage.clientHeight / 635, 2);
+      var h = Math.max(635, Math.min(768, stage.clientHeight / s));
+      screen.style.height = h + 'px';
       fitBox.style.width = w * s + 'px';
       fitBox.style.height = h * s + 'px';
       frame.style.transform = 'scale(' + s + ')';
