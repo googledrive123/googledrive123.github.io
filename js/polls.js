@@ -317,7 +317,6 @@
     close.type = 'button';
     close.setAttribute('aria-label', 'Close');
     var desc = el('div', 'gv-look-desc');
-    top.appendChild(name);
     top.appendChild(desc);
     top.appendChild(count);
     var stage = el('div', 'gv-look-stage');
@@ -360,6 +359,7 @@
     choose.hidden = !pick;
     bar.appendChild(prev);
     bar.appendChild(next);
+    bar.appendChild(name);
     bar.appendChild(chips);
     bar.appendChild(note);
     bar.appendChild(choose);
