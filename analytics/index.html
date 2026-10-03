@@ -2247,7 +2247,7 @@
   var allTimeAt = 0;
   function loadAllTime() {
     allTimeAt = Date.now();
-    rpc('analytics_overview', { p_secret: state.secret }).then(function (o) {
+    rpc('analytics_overview', { p_secret: state.secret, p_tz: viewerTz() }).then(function (o) {
       state.overview = o;
       renderOverview(o);
     }).catch(function (e) { $('allTimeSince').textContent = 'Could not load: ' + e.message; });
