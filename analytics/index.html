@@ -1532,7 +1532,7 @@
     return rpc('gv_poll_voters', { p_secret: state.secret, p_id: id }).then(function (list) {
       var box = $('pollVoters' + id); if (!box) return;
       box.innerHTML = votersShown[id] = (list || []).length ? list.map(function (v) {
-        return '<div class="pv"><b>' + esc(v.name || (v.account ? 'an account' : 'a guest')) + '</b>'
+        return '<div class="pv"><b>' + esc(v.name || (v.account ? 'an account' : 'guest ' + String(v.visitor || '').slice(0, 6))) + '</b>'
           + '<span class="kind">' + (v.account ? 'account' : 'guest') + '</span>'
           + '<span class="pick">' + esc(options[v.choice] != null ? options[v.choice] : 'answer ' + (v.choice + 1)) + '</span>'
           + '<span class="when">' + esc(new Date(v.at).toLocaleString()) + '</span></div>';
