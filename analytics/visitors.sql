@@ -105,8 +105,11 @@ $function$;
 
 
 -- The all-time numbers, without scanners. active_visitors are the ones that
--- did something; scanners says how many ids were left out.
-create or replace function public.analytics_overview(p_secret text)
+-- did something; scanners says how many ids were left out. daily counts
+-- whole days in p_tz, the dashboard's own time zone, so a day is the one
+-- people lived through and not midnight to midnight in UTC.
+drop function if exists public.analytics_overview(text);
+create or replace function public.analytics_overview(p_secret text, p_tz text default 'UTC')
 returns json
 language sql
 stable
@@ -114,6 +117,7 @@ security definer
 set search_path to 'public'
 as $function$
   with s as materialized (select visitor_id from analytics_scanners()),
+  z as materialized (select analytics_safe_tz(p_tz) as tz),
   v as materialized (
     select x.* from analytics_visitors x
     where not exists (select 1 from s where s.visitor_id = x.visitor_id)
@@ -136,14 +140,14 @@ as $function$
     'first_ts',  (select min(first_ts) from v),
     'last_ts',   (select max(last_ts) from v),
     'daily', (select coalesce(json_agg(d order by d.day), '[]'::json) from (
-        select date_trunc('day', bucket) as day,
+        select (q.bucket at time zone z.tz)::date as day,
                sum(events) as events,
                count(distinct visitor_id) as visitors,
                count(distinct session_id) as sessions,
                sum(pageviews) as pageviews,
                sum(plays) as plays,
                count(distinct visitor_id) filter (where is_new) as new_visitors
-        from q group by 1) d),
+        from q cross join z group by 1) d),
     'top_games', (select coalesce(json_agg(g), '[]'::json) from (
         select game_id,
                max(name) as name,
