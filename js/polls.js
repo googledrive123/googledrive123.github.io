@@ -70,7 +70,6 @@
     '.gv-look-screen img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}',
     '.gv-look-btn{width:40px;height:40px;flex-shrink:0;display:grid;place-items:center;padding:0;border-radius:50%;border:1px solid rgba(255,255,255,.16);background:#121216;color:#f4f4f6;font:inherit;font-size:1.1rem;line-height:1;cursor:pointer}',
     '.gv-look-btn:hover{border-color:#ff3b3b}',
-    '.gv-look-close{margin-left:auto}',
     '.gv-look-pick{margin-left:auto;padding:10px 22px;border-radius:100px;border:1px solid #ff3b3b;background:#ff3b3b;color:#fff;font:inherit;font-size:.9rem;font-weight:600;cursor:pointer}',
     '.gv-look-note{font-size:.84rem;color:#8a8a96}',
     '.gv-poll-hint{margin:-.4rem 0 1rem;font-size:.84rem;color:var(--muted,#8a8a96)}',
@@ -321,7 +320,6 @@
     top.appendChild(name);
     top.appendChild(desc);
     top.appendChild(count);
-    top.appendChild(close);
     var stage = el('div', 'gv-look-stage');
     var fitBox = el('div', 'gv-look-fit');
     var frame = el('div', 'gv-look-frame');
@@ -365,6 +363,7 @@
     bar.appendChild(chips);
     bar.appendChild(note);
     bar.appendChild(choose);
+    bar.appendChild(close);
     shade.appendChild(top);
     shade.appendChild(stage);
     shade.appendChild(bar);
