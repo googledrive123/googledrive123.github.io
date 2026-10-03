@@ -587,6 +587,7 @@
         <h2>Daily history</h2>
         <div class="legend"><span><i style="background:var(--s1)"></i>Events</span><span><i style="background:var(--s2)"></i>Visitors</span><span><i style="background:var(--s3)"></i>Plays</span></div>
         <div class="chart-wrap"><canvas id="chAllDaily"></canvas></div>
+        <div class="chart-wrap"><canvas id="chDailyVisitors"></canvas></div>
       </div>
       <div class="card span-4">
         <h2>All-time top games</h2>
@@ -1235,8 +1236,10 @@
     var days = daily.map(function (d) { return dayLabel(d.day); });
     chart('chAllDaily', { type: 'bar', data: { labels: days, datasets: [
       Object.assign({ label: 'Events', data: daily.map(function (d) { return d.events; }) }, bar(C.s1)),
-      Object.assign({ label: 'Visitors', data: daily.map(function (d) { return d.visitors; }), type: 'line' }, line(C.s2)),
       Object.assign({ label: 'Plays', data: daily.map(function (d) { return d.plays; }), type: 'line' }, line(C.s3))
+    ] }, options: baseOpts });
+    chart('chDailyVisitors', { type: 'bar', data: { labels: days, datasets: [
+      Object.assign({ label: 'Visitors', data: daily.map(function (d) { return d.visitors; }) }, bar(C.s2))
     ] }, options: baseOpts });
     ranked('rkAllGames', (o.top_games || []).filter(function (g) { return g.plays; }).slice(0, 15).map(function (g) { return [g.name || g.game_id, g.plays, g.players + ' players · ' + dur(g.secs)]; }), { share: false });
   }
