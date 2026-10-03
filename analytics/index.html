@@ -1521,7 +1521,21 @@
           + (p.open ? '<button class="btn" type="button" data-pollclose="' + p.id + '">Close</button>' : '')
           + '<button class="btn" type="button" data-polldel="' + p.id + '">Delete</button></div>';
       }).join('') : '<div class="empty">No polls yet.</div>';
+      (list || []).forEach(function (p) { if (votersOpen[p.id]) loadVoters(p.id, p.options); });
     }).catch(function (e) { $('pollMsg').textContent = 'Could not load polls: ' + e.message; });
+  }
+  // Fills a poll's open voter list: who, account or guest, what they picked
+  // and when, newest first.
+  function loadVoters(id, options) {
+    return rpc('gv_poll_voters', { p_secret: state.secret, p_id: id }).then(function (list) {
+      var box = $('pollVoters' + id); if (!box) return;
+      box.innerHTML = (list || []).length ? list.map(function (v) {
+        return '<div class="pv"><b>' + esc(v.name || (v.account ? 'an account' : 'a guest')) + '</b>'
+          + '<span class="kind">' + (v.account ? 'account' : 'guest') + '</span>'
+          + '<span class="pick">' + esc(options[v.choice] != null ? options[v.choice] : 'answer ' + (v.choice + 1)) + '</span>'
+          + '<span class="when">' + esc(new Date(v.at).toLocaleString()) + '</span></div>';
+      }).join('') : '<div class="empty">No votes yet.</div>';
+    }).catch(function (e) { $('pollMsg').textContent = 'Could not load who voted: ' + e.message; });
   }
   function createPoll() {
     var question = $('pollQ').value.trim();
