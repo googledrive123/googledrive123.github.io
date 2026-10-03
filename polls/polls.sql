@@ -284,6 +284,38 @@ begin
 end;
 $function$;
 
+-- Who voted on a poll and for what, newest first: an account by its
+-- username, a guest by the name they race PolyTrack under, if any.
+create or replace function public.gv_poll_voters(p_secret text, p_id bigint)
+returns json
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+begin
+  if not public.analytics_check(p_secret) then
+    raise exception 'not allowed';
+  end if;
+
+  return coalesce((
+    select json_agg(json_build_object(
+             'at', v.created_at,
+             'choice', v.choice,
+             'account', v.user_id is not null,
+             'name', coalesce(nullif(btrim(pr.username), ''),
+                              (select s.nickname from polytrack_scores s
+                                where s.user_id is null and s.player_key = 'guest:' || v.visitor_id
+                                order by s.updated_at desc limit 1)),
+             'visitor', v.visitor_id
+           ) order by v.created_at desc)
+      from gv_poll_votes v
+      left join profiles pr on pr.id = v.user_id
+     where v.poll_id = p_id
+  ), '[]'::json);
+end;
+$function$;
+
 -- Asks something. p_days is how long it runs, or null until it is closed.
 create or replace function public.gv_poll_create(p_secret text, p_question text, p_options text[], p_days integer default null)
 returns bigint

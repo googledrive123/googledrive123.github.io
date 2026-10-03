@@ -127,6 +127,12 @@
   .bc-item { display: flex; gap: 10px; align-items: baseline; padding: 7px 0; border-top: 1px solid var(--border); font-size: 0.8rem; width: 100%; }
   .bc-item.poll-item { align-items: flex-start; padding: 10px 0; }
   .poll-item .ranked { margin: 8px 0 6px; }
+  .poll-voters { max-height: 280px; margin: 8px 0 2px; overflow-y: auto; }
+  .poll-voters .pv { display: flex; gap: 10px; align-items: baseline; padding: 6px 0; border-top: 1px solid var(--border); font-size: 0.78rem; }
+  .poll-voters .pv b { font-weight: 600; overflow-wrap: anywhere; }
+  .poll-voters .pv .kind { font-size: 0.64rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+  .poll-voters .pv .pick { margin-left: auto; text-align: right; }
+  .poll-voters .pv .when { color: var(--muted); font-size: 0.7rem; white-space: nowrap; }
   #pollAnswers input { flex: 1 1 160px; }
   .verify-bar select#pollDays { flex: 1 1 140px; }
   .bc-item .when { color: var(--muted); font-size: 0.7rem; white-space: nowrap; }
@@ -1492,6 +1498,10 @@
     addAnswer();
     addAnswer();
   }
+  // Polls whose voter list is open, so it stays open when the list reloads.
+  var votersOpen = {};
+  // The last list shown for each poll, put back while a reload fetches it again.
+  var votersShown = {};
   function loadPolls() {
     return rpc('gv_polls_admin', { p_secret: state.secret }).then(function (list) {
       $('pollList').innerHTML = (list || []).length ? list.map(function (p) {
@@ -1505,12 +1515,30 @@
         if (p.preview) when = 'preview, only on localhost:8000 \u00b7 ' + when;
         return '<div class="bc-item poll-item"><div class="msg"><b>' + esc(p.question) + '</b>'
           + '<div class="ranked">' + rows + '</div>'
-          + '<span class="st">' + fmt(total) + (total === 1 ? ' vote' : ' votes') + ' \u00b7 ' + fmt(p.accounts) + ' from accounts \u00b7 ' + esc(when) + '</span></div>'
+          + '<span class="st">' + fmt(total) + (total === 1 ? ' vote' : ' votes') + ' \u00b7 ' + fmt(p.accounts) + ' from accounts \u00b7 ' + esc(when) + '</span>'
+          + (votersOpen[p.id] ? '<div class="poll-voters" id="pollVoters' + p.id + '">' + (votersShown[p.id] || '<div class="empty">Loading voters\u2026</div>') + '</div>' : '')
+          + '</div>'
+          + (total ? '<button class="btn" type="button" data-pollvoters="' + p.id + '">' + (votersOpen[p.id] ? 'Hide voters' : 'Who voted') + '</button>' : '')
           + (p.preview ? '<button class="btn" type="button" data-pollpublish="' + p.id + '">Show to everyone</button>' : '')
           + (p.open ? '<button class="btn" type="button" data-pollclose="' + p.id + '">Close</button>' : '')
           + '<button class="btn" type="button" data-polldel="' + p.id + '">Delete</button></div>';
       }).join('') : '<div class="empty">No polls yet.</div>';
+      (list || []).forEach(function (p) { if (votersOpen[p.id]) loadVoters(p.id, p.options); });
     }).catch(function (e) { $('pollMsg').textContent = 'Could not load polls: ' + e.message; });
+  }
+  // Fills a poll's open voter list: who, account or guest, what they picked
+  // and when, newest first.
+  function loadVoters(id, options) {
+    return rpc('gv_poll_voters', { p_secret: state.secret, p_id: id }).then(function (list) {
+      var box = $('pollVoters' + id); if (!box) return;
+      box.innerHTML = votersShown[id] = (list || []).length ? '<div class="st">' + fmt(list.filter(function (v) { return v.account; }).length) + ' signed in \u00b7 '
+        + fmt(list.filter(function (v) { return !v.account; }).length) + ' guests</div>' + list.map(function (v) {
+        return '<div class="pv"><b>' + esc(v.name || (v.account ? 'an account' : 'guest ' + String(v.visitor || '').slice(0, 6))) + '</b>'
+          + '<span class="kind">' + (v.account ? 'account' : 'guest') + '</span>'
+          + '<span class="pick">' + esc(options[v.choice] != null ? options[v.choice] : 'answer ' + (v.choice + 1)) + '</span>'
+          + '<span class="when">' + esc(new Date(v.at).toLocaleString()) + '</span></div>';
+      }).join('') : '<div class="empty">No votes yet.</div>';
+    }).catch(function (e) { $('pollMsg').textContent = 'Could not load who voted: ' + e.message; });
   }
   function createPoll() {
     var question = $('pollQ').value.trim();
@@ -1526,6 +1554,11 @@
   function pollAction(e) {
     var b = e.target.closest('button'); if (!b) return;
     var call;
+    if (b.dataset.pollvoters) {
+      votersOpen[b.dataset.pollvoters] = !votersOpen[b.dataset.pollvoters];
+      loadPolls();
+      return;
+    }
     if (b.dataset.pollclose) {
       if (!confirm('End this poll now? Its results stay up.')) return;
       call = rpc('gv_poll_close', { p_secret: state.secret, p_id: +b.dataset.pollclose });
