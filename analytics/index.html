@@ -127,6 +127,12 @@
   .bc-item { display: flex; gap: 10px; align-items: baseline; padding: 7px 0; border-top: 1px solid var(--border); font-size: 0.8rem; width: 100%; }
   .bc-item.poll-item { align-items: flex-start; padding: 10px 0; }
   .poll-item .ranked { margin: 8px 0 6px; }
+  .poll-voters { max-height: 280px; margin: 8px 0 2px; overflow-y: auto; }
+  .poll-voters .pv { display: flex; gap: 10px; align-items: baseline; padding: 6px 0; border-top: 1px solid var(--border); font-size: 0.78rem; }
+  .poll-voters .pv b { font-weight: 600; overflow-wrap: anywhere; }
+  .poll-voters .pv .kind { font-size: 0.64rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+  .poll-voters .pv .pick { margin-left: auto; text-align: right; }
+  .poll-voters .pv .when { color: var(--muted); font-size: 0.7rem; white-space: nowrap; }
   #pollAnswers input { flex: 1 1 160px; }
   .verify-bar select#pollDays { flex: 1 1 140px; }
   .bc-item .when { color: var(--muted); font-size: 0.7rem; white-space: nowrap; }
