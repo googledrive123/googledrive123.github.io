@@ -100,6 +100,16 @@
   .lt .gt-name span { display: block; margin-top: 2px; font-size: 12px; opacity: .75; }
   .open .home { filter: blur(4px) brightness(0.7); }
   .lib-empty { padding: 40px 0; text-align: center; font-size: 14px; color: var(--mu); }
+
+  .home { transition: filter .3s; }
+  .shade { transition: opacity .2s ease, visibility 0s .2s; }
+  .lib { transform: scale(.97); transition: opacity .16s ease-in, transform .16s ease-in, visibility 0s .16s; }
+  .open .shade { transition: opacity .2s ease; }
+  .open .lib { transform: none; transition: opacity .22s ease-out, transform .22s cubic-bezier(.2, .8, .2, 1); }
+  @media (prefers-reduced-motion: reduce) {
+    .home, .shade, .open .shade, .lib, .open .lib, .gt, .gt img, .gt-name { transition-duration: .01s; transition-delay: 0s; }
+    .lib, .gt:hover, .gt:focus-visible { transform: none; }
+  }
 </style>
 </head>
 <body>
