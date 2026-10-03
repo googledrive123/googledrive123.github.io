@@ -45,6 +45,14 @@
   .bar-icon { width: 42px; height: 42px; display: grid; place-items: center; border: 0; border-radius: 15px; padding: 0; background: transparent; color: oklch(var(--ink) / 0.75); cursor: pointer; }
   .bar-icon:hover { background: var(--hv); }
   .bar-avatar { width: 34px; height: 34px; margin: 0 4px 0 2px; display: grid; place-items: center; border: 0; border-radius: 50%; padding: 0; background: var(--s2); font-size: 13px; font-weight: 600; cursor: pointer; }
+
+  .home { position: absolute; inset: 0; }
+  .hero { position: absolute; left: 50%; top: 104px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .brand { margin: 0; font-size: 78px; font-weight: 600; letter-spacing: -0.045em; line-height: 1.05; background: linear-gradient(180deg, oklch(0.98 calc(0.01 * var(--c)) var(--h)) 30%, oklch(0.8 0.1 var(--ah))); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .period { margin: 10px 0 0; display: flex; align-items: center; gap: 10px; font-size: 15px; color: var(--mu); }
+  .period-time { font-variant-numeric: tabular-nums; color: var(--tx); }
+  .period-bar { display: block; width: 44px; height: 4px; border-radius: 2px; background: oklch(var(--ring) / 0.16); overflow: hidden; }
+  .period-fill { display: block; height: 100%; background: var(--tx); }
 </style>
 </head>
 <body>
@@ -64,6 +72,12 @@
     <button class="bar-icon" type="button" title="Settings" aria-label="Settings" data-soon><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"></path></svg></button>
     <button class="bar-avatar" type="button" title="Profile" data-soon>M</button>
   </nav>
+  <div class="home" id="home">
+    <div class="hero">
+      <h1 class="brand">gamevault</h1>
+      <p class="period">period 3 ends in <span class="period-time" id="timer">23:41</span><span class="period-bar"><span class="period-fill" id="timerBar" style="width:52.6%"></span></span></p>
+    </div>
+  </div>
 </main>
 </body>
 </html>
