@@ -284,7 +284,8 @@ begin
 end;
 $function$;
 
--- Who voted on a poll and for what, newest first.
+-- Who voted on a poll and for what, newest first: an account by its
+-- username, a guest by the name they race PolyTrack under, if any.
 create or replace function public.gv_poll_voters(p_secret text, p_id bigint)
 returns json
 language plpgsql
@@ -302,7 +303,10 @@ begin
              'at', v.created_at,
              'choice', v.choice,
              'account', v.user_id is not null,
-             'name', nullif(btrim(pr.username), ''),
+             'name', coalesce(nullif(btrim(pr.username), ''),
+                              (select s.nickname from polytrack_scores s
+                                where s.user_id is null and s.player_key = 'guest:' || v.visitor_id
+                                order by s.updated_at desc limit 1)),
              'visitor', v.visitor_id
            ) order by v.created_at desc)
       from gv_poll_votes v
