@@ -25,3 +25,24 @@ create index if not exists analytics_visitor_ips_recent on public.analytics_visi
 
 alter table public.analytics_visitor_ips enable row level security;
 revoke all on table public.analytics_visitor_ips from anon, authenticated;
+
+
+-- The address a request came from: Cloudflare's own header, or the first
+-- hop of x-forwarded-for.
+create or replace function public.analytics_request_ip()
+returns inet
+language plpgsql
+stable
+set search_path to 'public', 'pg_temp'
+as $function$
+declare
+  h json := nullif(current_setting('request.headers', true), '')::json;
+begin
+  return coalesce(nullif(h ->> 'cf-connecting-ip', ''),
+                  nullif(btrim(split_part(h ->> 'x-forwarded-for', ',', 1)), ''))::inet;
+exception when others then
+  return null;
+end;
+$function$;
+
+revoke all on function public.analytics_request_ip() from public, anon, authenticated;
