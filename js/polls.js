@@ -100,6 +100,8 @@
     '.gv-poll-go{box-shadow:0 0 22px rgba(255,59,59,.5);animation:gvPollGlow 1.6s ease-in-out infinite}',
     '@keyframes gvPollGlow{0%,100%{box-shadow:0 0 0 0 rgba(255,59,59,.55),0 0 22px rgba(255,59,59,.45)}50%{box-shadow:0 0 0 9px rgba(255,59,59,0),0 0 40px rgba(255,59,59,.8)}}',
     '.gv-poll-go:focus-visible{outline:2px solid rgba(255,255,255,.9);outline-offset:3px}',
+    '.gv-poll-looks.many{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}',
+    '.gv-poll-peek.many{grid-template-columns:repeat(4,minmax(0,1fr))}',
     '@keyframes gvPollIn{from{opacity:0;transform:translateY(10px) scale(.98)}}',
     '@media (prefers-reduced-motion:reduce){.gv-poll-box,.gv-poll-go{animation:none}.gv-poll-opt.result::before,.gv-poll-look,.gv-poll-bar span,.gv-look-screen iframe{transition:none}}'
   ].join('');
@@ -226,7 +228,7 @@
       var showing = p.counts && p.counts.length;
       var total = showing ? p.counts.reduce(function (a, b) { return a + b; }, 0) : 0;
       var looks = hasLooks(p);
-      opts.className = looks ? 'gv-poll-looks' : 'gv-poll-opts';
+      opts.className = looks ? 'gv-poll-looks' + (p.options.length > 6 ? ' many' : '') : 'gv-poll-opts';
       hint.hidden = !looks || !!showing;
       (p.options || []).forEach(function (name, i) {
         if (looks) return opts.appendChild(tile(p, i, total));
@@ -522,6 +524,7 @@
         img.alt = name;
         peek.appendChild(img);
       });
+      if (peek.children.length > 6) peek.classList.add('many');
       if (peek.children.length) front.appendChild(peek);
       var go = el('button', 'gv-poll-go', 'Go to the poll \u2192');
       go.type = 'button';

@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Blend · GameVault preview</title>
+<link rel="icon" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400..700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --h: 25; --c: 1; --ah: 25;
+    --ink: 0.97 calc(0.015 * var(--c)) var(--h);
+    --ring: 0.95 calc(0.03 * var(--c)) var(--h);
+    --bg: oklch(0.15 calc(0.04 * var(--c)) var(--h));
+    --tx: oklch(var(--ink));
+    --mu: oklch(var(--ink) / 0.6);
+    --s1: oklch(0.24 calc(0.06 * var(--c)) var(--h));
+    --s2: oklch(0.3 calc(0.07 * var(--c)) var(--h));
+    --on: oklch(0.3 calc(0.07 * var(--c)) var(--h) / 0.75);
+    --hv: oklch(0.3 calc(0.07 * var(--c)) var(--h) / 0.6);
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--tx); font-family: 'Onest', system-ui, sans-serif; }
+  a { color: inherit; }
+  button { font: inherit; color: inherit; }
+  input::placeholder { color: currentColor; opacity: .5; }
+
+  .scr { position: relative; height: 100vh; min-height: 635px; overflow: hidden; background: var(--bg); }
+  .fog-a, .fog-b { position: absolute; border-radius: 50%; filter: blur(40px); pointer-events: none; }
+  .fog-a { left: -180px; top: 240px; width: 620px; height: 620px; background: radial-gradient(circle, oklch(0.5 calc(0.16 * var(--c)) var(--h) / 0.45), transparent 65%); }
+  .fog-b { right: -140px; top: -220px; width: 600px; height: 600px; background: radial-gradient(circle, oklch(0.46 calc(0.14 * var(--c)) calc(var(--h) + 30) / 0.42), transparent 65%); }
+  .fog-grid { position: absolute; inset: 0; pointer-events: none; background-image: linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px); background-size: 22px 22px; -webkit-mask-image: radial-gradient(circle at center, black 10%, transparent 70%); mask-image: radial-gradient(circle at center, black 10%, transparent 70%); }
+
+  .bar { position: absolute; z-index: 3; left: 50%; top: 14px; transform: translateX(-50%); display: flex; align-items: center; gap: 2px; height: 52px; padding: 0 5px; border-radius: 20px; background: oklch(0.2 calc(0.05 * var(--c)) var(--h) / 0.4); border: 1px solid oklch(var(--ring) / 0.12); backdrop-filter: blur(12px); white-space: nowrap; }
+  .bar-home { width: 42px; height: 42px; display: grid; place-items: center; border: 0; border-radius: 15px; padding: 0; background: var(--on); cursor: pointer; }
+  .bar-home img { width: 24px; height: 24px; display: block; }
+  .bar-sep { width: 2px; height: 22px; margin: 0 4px; border-radius: 1px; background: oklch(var(--ring) / 0.14); }
+  .bar-link { height: 42px; padding: 0 14px 0 11px; display: flex; align-items: center; gap: 8px; border: 0; border-radius: 15px; background: transparent; color: oklch(var(--ink) / 0.75); font-size: 14px; font-weight: 500; text-decoration: none; cursor: pointer; }
+  .bar-link[data-soon]:hover { background: var(--hv); color: var(--tx); }
+  .bar-games { color: var(--tx); }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: oklch(0.72 0.17 var(--ah)); }
+  .bar-icon { width: 42px; height: 42px; display: grid; place-items: center; border: 0; border-radius: 15px; padding: 0; background: transparent; color: oklch(var(--ink) / 0.75); cursor: pointer; }
+  .bar-icon:hover { background: var(--hv); }
+  .bar-avatar { width: 34px; height: 34px; margin: 0 4px 0 2px; display: grid; place-items: center; border: 0; border-radius: 50%; padding: 0; background: var(--s2); font-size: 13px; font-weight: 600; cursor: pointer; }
+
+  .home { position: absolute; inset: 0; }
+  .hero { position: absolute; left: 50%; top: 104px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .brand { margin: 0; font-size: 78px; font-weight: 600; letter-spacing: -0.045em; line-height: 1.05; background: linear-gradient(180deg, oklch(0.98 calc(0.01 * var(--c)) var(--h)) 30%, oklch(0.8 0.1 var(--ah))); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .period { margin: 10px 0 0; display: flex; align-items: center; gap: 10px; font-size: 15px; color: var(--mu); }
+  .period-time { font-variant-numeric: tabular-nums; color: var(--tx); }
+  .period-bar { display: block; width: 44px; height: 4px; border-radius: 2px; background: oklch(var(--ring) / 0.16); overflow: hidden; }
+  .period-fill { display: block; height: 100%; background: var(--tx); }
+
+  .search { margin-top: 28px; display: flex; align-items: center; gap: 12px; width: 520px; height: 52px; padding: 0 12px 0 20px; border-radius: 20px; background: oklch(var(--ink) / 0.05); box-shadow: 0 0 0 1px oklch(var(--ring) / 0.15), 0 16px 32px rgba(0, 0, 0, 0.14); }
+  .search svg { flex-shrink: 0; opacity: .7; }
+  .search input { flex: 1; min-width: 0; height: 100%; border: 0; outline: none; background: transparent; color: inherit; font-family: inherit; font-size: 15px; }
+  .kbd { font-size: 12px; opacity: .6; border-radius: 7px; padding: 2px 8px; box-shadow: 0 0 0 1px oklch(var(--ring) / 0.2); }
+
+  .jump-lbl { margin-top: 40px; font-size: 13px; color: var(--mu); }
+  .row { margin-top: 12px; display: flex; gap: 12px; }
+  .gt { position: relative; display: block; overflow: hidden; background: var(--s1); text-decoration: none; cursor: pointer; }
+  .gt img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .gt-name { position: absolute; color: #fff; text-align: left; opacity: 0; transform: translateY(10px); }
+  .rt { width: 126px; height: 84px; border-radius: 16px; box-shadow: 0 0 0 1px oklch(var(--ring) / 0.1); }
+  .rt .gt-name { left: 10px; right: 10px; bottom: 8px; font-size: 12px; font-weight: 600; line-height: 1.2; }
+  .gt { transition: transform .2s; }
+  .gt img { transition: filter .2s; }
+  .gt-name { transition: opacity .2s, transform .2s; }
+  .gt:hover, .gt:focus-visible { transform: scale(1.04); }
+  .gt:hover img, .gt:focus-visible img { filter: brightness(0.45) blur(2px); }
+  .gt:hover .gt-name, .gt:focus-visible .gt-name { opacity: 1; transform: none; }
+
+  .foot { position: absolute; left: 0; right: 0; bottom: 20px; text-align: center; font-size: 13px; color: var(--mu); }
+  .foot a { text-decoration: none; }
+  .foot b { font-weight: 600; color: var(--tx); }
+
+  .shade { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.25); }
+  .lib { position: absolute; left: calc(50% - 530px); top: 80px; bottom: 22px; width: 1060px; display: flex; flex-direction: column; border-radius: 26px; overflow: hidden; background: oklch(0.2 calc(0.05 * var(--c)) var(--h) / 0.62); box-shadow: 0 0 0 1px oklch(var(--ring) / 0.15), 0 24px 60px rgba(0, 0, 0, 0.35); backdrop-filter: blur(16px); }
+  .shade, .lib { visibility: hidden; opacity: 0; pointer-events: none; }
+  .open .shade, .open .lib { visibility: visible; opacity: 1; pointer-events: auto; }
+  .open .bar-home { background: transparent; }
+  .open .bar-games { background: var(--on); }
+  .lib-head { display: flex; align-items: center; gap: 6px; padding: 16px 16px 14px; }
+  .lib-search { display: flex; align-items: center; gap: 10px; width: 280px; height: 40px; padding: 0 14px; margin-right: 8px; border-radius: 15px; background: var(--s1); }
+  .lib-search svg { flex-shrink: 0; opacity: .7; }
+  .lib-search input { flex: 1; min-width: 0; height: 100%; border: 0; outline: none; background: transparent; color: inherit; font-family: inherit; font-size: 14px; }
+  .tab { height: 36px; padding: 0 13px; border: 0; border-radius: 13px; box-shadow: 0 0 0 1px oklch(var(--ring) / 0.14); background: transparent; color: oklch(var(--ink) / 0.65); font-size: 14px; cursor: pointer; }
+  .tab.on { box-shadow: 0 0 0 1px transparent; background: var(--on); color: var(--tx); }
+  .lib-x { margin-left: auto; width: 38px; height: 38px; display: grid; place-items: center; border: 0; border-radius: 13px; padding: 0; background: var(--s1); cursor: pointer; }
+  .lib-x:hover { background: var(--s2); }
+  .lib-body { flex: 1; min-height: 0; overflow: auto; padding: 4px 16px 16px; }
+  .lib-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; }
+  .lt { aspect-ratio: 1 / 1; border-radius: 22px; }
+  .lt[hidden] { display: none; }
+  .lt .gt-name { left: 16px; right: 16px; bottom: 14px; }
+  .lt .gt-name b { display: block; font-size: 16px; font-weight: 600; line-height: 1.2; }
+  .lt .gt-name span { display: block; margin-top: 2px; font-size: 12px; opacity: .75; }
+  .open .home { filter: blur(4px) brightness(0.7); }
+  .lib-empty { padding: 40px 0; text-align: center; font-size: 14px; color: var(--mu); }
+
+  .home { transition: filter .3s; }
+  .shade { transition: opacity .2s ease, visibility 0s .2s; }
+  .lib { transform: scale(.97); transition: opacity .16s ease-in, transform .16s ease-in, visibility 0s .16s; }
+  .open .shade { transition: opacity .2s ease; }
+  .open .lib { transform: none; transition: opacity .22s ease-out, transform .22s cubic-bezier(.2, .8, .2, 1); }
+  @media (prefers-reduced-motion: reduce) {
+    .home, .shade, .open .shade, .lib, .open .lib, .gt, .gt img, .gt-name { transition-duration: .01s; transition-delay: 0s; }
+    .lib, .gt:hover, .gt:focus-visible { transform: none; }
+  }
+
+  .pv-toast{position:fixed;left:50%;bottom:24px;z-index:100;transform:translate(-50%,8px);padding:10px 16px;border-radius:12px;background:rgba(20,20,24,.92);color:#f4f4f6;font-size:13px;font-weight:500;line-height:1.3;box-shadow:0 10px 30px rgba(0,0,0,.35);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
+  .pv-toast.on{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<main class="scr" id="scr">
+  <div class="fog-a"></div>
+  <div class="fog-b"></div>
+  <div class="fog-grid"></div>
+  <nav class="bar" aria-label="Main">
+    <button class="bar-home" id="goHome" type="button" title="Home" aria-label="Home"><img src="/favicon.svg" alt=""></button>
+    <span class="bar-sep"></span>
+    <button class="bar-link bar-games" id="openGames" type="button" aria-haspopup="dialog"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="11" rx="4"></rect><path d="M8 11v3M6.5 12.5h3"></path><circle cx="15.5" cy="12" r="1"></circle><circle cx="17.5" cy="14" r="1"></circle></svg>games</button>
+    <a class="bar-link" href="#" data-soon><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M10 9l5 3-5 3z"></path></svg>movies</a>
+    <a class="bar-link" href="#" data-soon><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l10-2v12"></path><circle cx="6.5" cy="18" r="2.5"></circle><circle cx="16.5" cy="16" r="2.5"></circle></svg>music</a>
+    <a class="bar-link" href="#" data-soon><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v10H9l-5 4z"></path></svg>chat<span class="dot"></span></a>
+    <a class="bar-link" href="#" data-soon><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="5" r="2"></circle><circle cx="12" cy="5" r="2"></circle><circle cx="19" cy="5" r="2"></circle><circle cx="5" cy="12" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle><circle cx="5" cy="19" r="2"></circle><circle cx="12" cy="19" r="2"></circle><circle cx="19" cy="19" r="2"></circle></svg>more</a>
+    <span class="bar-sep"></span>
+    <button class="bar-icon" type="button" title="Settings" aria-label="Settings" data-soon><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"></path></svg></button>
+    <button class="bar-avatar" type="button" title="Profile" data-soon>M</button>
+  </nav>
+  <div class="home" id="home">
+    <div class="hero">
+      <h1 class="brand">gamevault</h1>
+      <p class="period">period 3 ends in <span class="period-time" id="timer">23:41</span><span class="period-bar"><span class="period-fill" id="timerBar" style="width:52.6%"></span></span></p>
+      <label class="search">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input id="homeQ" placeholder="search 1,958 games" aria-label="Search games" autocomplete="off" spellcheck="false">
+        <span class="kbd" aria-hidden="true">/</span>
+      </label>
+      <div class="jump-lbl">jump back in</div>
+      <div class="row">
+        <a class="gt rt" href="#" data-soon><img src="/thumbs/slope2.webp" alt=""><span class="gt-name">Slope 2</span></a>
+        <a class="gt rt" href="#" data-soon><img src="/thumbs/drivemad.webp" alt=""><span class="gt-name">Drive Mad</span></a>
+        <a class="gt rt" href="#" data-soon><img src="/thumbs/retro-bowl.webp" alt=""><span class="gt-name">Retro Bowl</span></a>
+        <a class="gt rt" href="#" data-soon><img src="/thumbs/geometrydash.webp" alt=""><span class="gt-name">Geometry Dash</span></a>
+        <a class="gt rt" href="#" data-soon><img src="/thumbs/1v1lol.webp" alt=""><span class="gt-name">1v1.LOL</span></a>
+        <a class="gt rt" href="#" data-soon><img src="/thumbs/cuphead.webp" alt=""><span class="gt-name">Cuphead</span></a>
+      </div>
+    </div>
+    <div class="foot"><a href="#" data-soon><b>142</b> playing right now</a></div>
+  </div>
+  <div class="shade" id="shade"></div>
+  <div class="lib" id="lib" role="dialog" aria-modal="true" aria-label="Games library">
+    <div class="lib-head">
+      <label class="lib-search">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input id="libQ" placeholder="search 1,958 games" aria-label="Search games" autocomplete="off" spellcheck="false">
+      </label>
+      <button class="tab on" type="button" data-cat="All" aria-pressed="true">all</button>
+      <button class="tab" type="button" data-cat="Action" aria-pressed="false">action</button>
+      <button class="tab" type="button" data-cat="Arcade" aria-pressed="false">arcade</button>
+      <button class="tab" type="button" data-cat="Driving" aria-pressed="false">driving</button>
+      <button class="tab" type="button" data-cat="Platformer" aria-pressed="false">platformer</button>
+      <button class="tab" type="button" data-cat="Puzzle" aria-pressed="false">puzzle</button>
+      <button class="tab" type="button" data-cat="Racing" aria-pressed="false">racing</button>
+      <button class="tab" type="button" data-cat="Sports" aria-pressed="false">sports</button>
+      <button class="lib-x" id="libClose" type="button" title="Close" aria-label="Close"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+    </div>
+    <div class="lib-body" id="libBody">
+      <div class="lib-grid" id="libGrid">
+        <a class="gt lt" href="#" data-soon data-id="polytrack"><img src="/thumbs/polytrack.webp" alt="" loading="lazy"><span class="gt-name"><b>PolyTrack</b><span>racing</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="basketball-stars"><img src="/thumbs/basketball-stars.webp" alt="" loading="lazy"><span class="gt-name"><b>Basketball Stars</b><span>sports</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="amazing-rope-police"><img src="/thumbs/amazing-rope-police.webp" alt="" loading="lazy"><span class="gt-name"><b>Amazing Rope Police</b><span>action</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="ice-dodo"><img src="/thumbs/ice-dodo.webp" alt="" loading="lazy"><span class="gt-name"><b>Ice Dodo</b><span>arcade</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="adrenalinechallenge2"><img src="/thumbs/adrenalinechallenge2.webp" alt="" loading="lazy"><span class="gt-name"><b>Adrenaline Challenge 2</b><span>action</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="stickman-hook"><img src="/thumbs/stickman-hook.webp" alt="" loading="lazy"><span class="gt-name"><b>Stickman Hook</b><span>action</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="crossyroad"><img src="/thumbs/crossyroad.webp" alt="" loading="lazy"><span class="gt-name"><b>Crossy Road</b><span>arcade</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="retrobowlcollege"><img src="/thumbs/retrobowlcollege.webp" alt="" loading="lazy"><span class="gt-name"><b>Retro Bowl College</b><span>sports</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="basket-bros"><img src="/thumbs/basket-bros.webp" alt="" loading="lazy"><span class="gt-name"><b>Basket Bros</b><span>sports</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="rocketleague"><img src="/thumbs/rocketleague.webp" alt="" loading="lazy"><span class="gt-name"><b>Rocket League</b><span>sports</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="2048"><img src="/thumbs/2048.webp" alt="" loading="lazy"><span class="gt-name"><b>2048</b><span>puzzle</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="retro-bowl"><img src="/thumbs/retro-bowl.webp" alt="" loading="lazy"><span class="gt-name"><b>Retro Bowl</b><span>sports</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="bit-planes"><img src="/thumbs/bit-planes.webp" alt="" loading="lazy"><span class="gt-name"><b>Bit Planes</b><span>action</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="drifthunters"><img src="/thumbs/drifthunters.webp" alt="" loading="lazy"><span class="gt-name"><b>Drift Hunters</b><span>racing</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="angry-sharks"><img src="/thumbs/angry-sharks.webp" alt="" loading="lazy"><span class="gt-name"><b>Angry Sharks</b><span>arcade</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="wordle"><img src="/thumbs/wordle.webp" alt="" loading="lazy"><span class="gt-name"><b>Wordle</b><span>puzzle</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="aquapark-slides"><img src="/thumbs/aquapark-slides.webp" alt="" loading="lazy"><span class="gt-name"><b>Aquapark Slides</b><span>arcade</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="fnaf"><img src="/thumbs/fnaf.webp" alt="" loading="lazy"><span class="gt-name"><b>Five Nights at Freddy's</b><span>horror</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="subway-surfers"><img src="/thumbs/subway-surfers.webp" alt="" loading="lazy"><span class="gt-name"><b>Subway Surfers</b><span>action</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="grand-theft-auto-vice-city"><img src="/thumbs/grand-theft-auto-vice-city.webp" alt="" loading="lazy"><span class="gt-name"><b>Grand Theft Auto Vice City</b><span>action</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="backrooms"><img src="/thumbs/backrooms.webp" alt="" loading="lazy"><span class="gt-name"><b>The Backrooms</b><span>horror</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="slope2"><img src="/thumbs/slope2.webp" alt="" loading="lazy"><span class="gt-name"><b>Slope 2</b><span>action</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="cluster-rush"><img src="/thumbs/cluster-rush.webp" alt="" loading="lazy"><span class="gt-name"><b>Cluster Rush</b><span>action</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="motox3m-spooky"><img src="/thumbs/motox3m-spooky.webp" alt="" loading="lazy"><span class="gt-name"><b>Moto X3M Spooky Land</b><span>racing</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="big-neon-tower"><img src="/thumbs/big-neon-tower.webp" alt="" loading="lazy"><span class="gt-name"><b>Big Neon Tower</b><span>platformer</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="drivemad"><img src="/thumbs/drivemad.webp" alt="" loading="lazy"><span class="gt-name"><b>Drive Mad</b><span>racing</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="bitlife"><img src="/thumbs/bitlife.webp" alt="" loading="lazy"><span class="gt-name"><b>BitLife</b><span>simulation</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="a-difficult-game-about-climbing"><img src="/thumbs/a-difficult-game-about-climbing.webp" alt="" loading="lazy"><span class="gt-name"><b>A Difficult Game About Climbing</b><span>platformer</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="madalincars"><img src="/thumbs/madalincars.webp" alt="" loading="lazy"><span class="gt-name"><b>Madalin Cars</b><span>racing</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="snowrider3d"><img src="/thumbs/snowrider3d.webp" alt="" loading="lazy"><span class="gt-name"><b>Snow Rider 3D</b><span>action</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="badtimesimulator"><img src="/thumbs/badtimesimulator.webp" alt="" loading="lazy"><span class="gt-name"><b>Bad Time Simulator</b><span>action</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="2drocketleague"><img src="/thumbs/2drocketleague.webp" alt="" loading="lazy"><span class="gt-name"><b>2D Rocket League</b><span>sports</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="cuphead"><img src="/thumbs/cuphead.webp" alt="" loading="lazy"><span class="gt-name"><b>Cuphead</b><span>action</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="flappyplane"><img src="/thumbs/flappyplane.webp" alt="" loading="lazy"><span class="gt-name"><b>Flappy Plane</b><span>arcade</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="adventure-capitalist"><img src="/thumbs/adventure-capitalist.webp" alt="" loading="lazy"><span class="gt-name"><b>Adventure Capitalist</b><span>idle</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="1v1lol"><img src="/thumbs/1v1lol.webp" alt="" loading="lazy"><span class="gt-name"><b>1v1.LOL</b><span>action</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="awesometanks2"><img src="/thumbs/awesometanks2.webp" alt="" loading="lazy"><span class="gt-name"><b>Awesome Tanks 2</b><span>action</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="vex7"><img src="/thumbs/vex7.webp" alt="" loading="lazy"><span class="gt-name"><b>Vex 7</b><span>platformer</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="minesweeper"><img src="/thumbs/minesweeper.webp" alt="" loading="lazy"><span class="gt-name"><b>Minesweeper</b><span>puzzle</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="timeshooter2"><img src="/thumbs/timeshooter2.webp" alt="" loading="lazy"><span class="gt-name"><b>Time Shooter 2</b><span>action</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="8ball"><img src="/thumbs/8ball.webp" alt="" loading="lazy"><span class="gt-name"><b>8 Ball Pool</b><span>sports</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="draw-the-hill"><img src="/thumbs/draw-the-hill.webp" alt="" loading="lazy"><span class="gt-name"><b>Draw the Hill</b><span>puzzle</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="geometrydash"><img src="/thumbs/geometrydash.webp" alt="" loading="lazy"><span class="gt-name"><b>Geometry Dash</b><span>platformer</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="hollow-knight-silksong"><img src="/thumbs/hollow-knight-silksong.webp" alt="" loading="lazy"><span class="gt-name"><b>Hollow Knight Silksong</b><span>rpg</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="1on1soccer"><img src="/thumbs/1on1soccer.webp" alt="" loading="lazy"><span class="gt-name"><b>1 on 1 Soccer</b><span>sports</span></span></a>
+        <a class="gt lt" href="#" data-soon data-id="slime-rancher"><img src="/thumbs/slime-rancher.webp" alt="" loading="lazy"><span class="gt-name"><b>Slime Rancher</b><span>simulation</span></span></a>
+      </div>
+      <div class="lib-empty" id="libEmpty" hidden>nothing found. try something shorter.</div>
+    </div>
+  </div>
+</main>
+<div class="pv-toast" id="pvToast" role="status">Just a preview of the home page</div>
+<script>
+'use strict';
+
+var state = {
+  left: 1421,
+  open: false,
+  q4a: '',
+  c4a: 'All',
+};
+
+function $(id) { return document.getElementById(id); }
+function pad(n) { return String(n).padStart(2, '0'); }
+
+function tick() {
+  state.left = state.left > 0 ? state.left - 1 : 3000;
+  var pct = Math.max(0, Math.min(100, (1 - state.left / 3000) * 100));
+  $('timer').textContent = pad(Math.floor(state.left / 60)) + ':' + pad(state.left % 60);
+  $('timerBar').style.width = pct.toFixed(1) + '%';
+}
+setInterval(tick, 1000);
+
+var G = [
+  ['polytrack', 'PolyTrack', ['Racing']],
+  ['basketball-stars', 'Basketball Stars', ['Sports']],
+  ['amazing-rope-police', 'Amazing Rope Police', ['Action']],
+  ['ice-dodo', 'Ice Dodo', ['Arcade', 'Skill']],
+  ['adrenalinechallenge2', 'Adrenaline Challenge 2', ['Action', 'Driving']],
+  ['stickman-hook', 'Stickman Hook', ['Action', 'Skill']],
+  ['crossyroad', 'Crossy Road', ['Arcade']],
+  ['retrobowlcollege', 'Retro Bowl College', ['Sports']],
+  ['basket-bros', 'Basket Bros', ['Sports']],
+  ['rocketleague', 'Rocket League', ['Sports']],
+  ['2048', '2048', ['Puzzle']],
+  ['retro-bowl', 'Retro Bowl', ['Sports']],
+  ['bit-planes', 'Bit Planes', ['Action', 'Shooter']],
+  ['drifthunters', 'Drift Hunters', ['Racing', 'Driving']],
+  ['angry-sharks', 'Angry Sharks', ['Arcade', 'Action']],
+  ['wordle', 'Wordle', ['Puzzle']],
+  ['aquapark-slides', 'Aquapark Slides', ['Arcade', 'Racing']],
+  ['fnaf', "Five Nights at Freddy's", ['Horror']],
+  ['subway-surfers', 'Subway Surfers', ['Action', 'Arcade']],
+  ['grand-theft-auto-vice-city', 'Grand Theft Auto Vice City', ['Action']],
+  ['backrooms', 'The Backrooms', ['Horror']],
+  ['slope2', 'Slope 2', ['Action', 'Skill']],
+  ['cluster-rush', 'Cluster Rush', ['Action', 'Skill']],
+  ['motox3m-spooky', 'Moto X3M Spooky Land', ['Racing', 'Driving']],
+  ['big-neon-tower', 'Big Neon Tower', ['Platformer']],
+  ['drivemad', 'Drive Mad', ['Racing', 'Driving']],
+  ['bitlife', 'BitLife', ['Simulation']],
+  ['a-difficult-game-about-climbing', 'A Difficult Game About Climbing', ['Platformer']],
+  ['madalincars', 'Madalin Cars', ['Racing', 'Driving']],
+  ['snowrider3d', 'Snow Rider 3D', ['Action', 'Driving']],
+  ['badtimesimulator', 'Bad Time Simulator', ['Action', 'Skill']],
+  ['2drocketleague', '2D Rocket League', ['Sports']],
+  ['cuphead', 'Cuphead', ['Action']],
+  ['flappyplane', 'Flappy Plane', ['Arcade', 'Skill']],
+  ['adventure-capitalist', 'Adventure Capitalist', ['Idle']],
+  ['1v1lol', '1v1.LOL', ['Action', 'Shooter']],
+  ['awesometanks2', 'Awesome Tanks 2', ['Action', 'Shooter']],
+  ['vex7', 'Vex 7', ['Platformer']],
+  ['minesweeper', 'Minesweeper', ['Puzzle']],
+  ['timeshooter2', 'Time Shooter 2', ['Action', 'Shooter']],
+  ['8ball', '8 Ball Pool', ['Sports']],
+  ['draw-the-hill', 'Draw the Hill', ['Puzzle', 'Driving']],
+  ['geometrydash', 'Geometry Dash', ['Platformer', 'Skill']],
+  ['hollow-knight-silksong', 'Hollow Knight Silksong', ['RPG']],
+  ['1on1soccer', '1 on 1 Soccer', ['Sports']],
+  ['slime-rancher', 'Slime Rancher', ['Simulation']]
+];
+var tiles = G.map(function (g) { return $('libGrid').querySelector('[data-id="' + g[0] + '"]'); });
+var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+
+function renderLib() {
+  var q = state.q4a.trim().toLowerCase();
+  var cat = q ? 'All' : state.c4a;
+  var found = 0;
+  G.forEach(function (g, i) {
+    var show = (cat === 'All' || g[2].indexOf(cat) >= 0) && (!q || g[1].toLowerCase().indexOf(q) >= 0);
+    tiles[i].hidden = !show;
+    if (show) found++;
+  });
+  $('libEmpty').hidden = found > 0;
+  tabs.forEach(function (t) {
+    var on = t.dataset.cat === state.c4a;
+    t.classList.toggle('on', on);
+    t.setAttribute('aria-pressed', on);
+  });
+  $('libBody').scrollTop = 0;
+}
+
+// The home box and the library box share one query, as in the design.
+// Only the other box is written to, so the one being typed in is never reset.
+['homeQ', 'libQ'].forEach(function (id) {
+  $(id).addEventListener('input', function () {
+    state.q4a = $(id).value;
+    $(id === 'homeQ' ? 'libQ' : 'homeQ').value = state.q4a;
+    renderLib();
+  });
+});
+
+tabs.forEach(function (t) {
+  t.addEventListener('click', function () {
+    state.c4a = t.dataset.cat;
+    renderLib();
+  });
+});
+
+function openLib() {
+  state.open = true;
+  $('scr').classList.add('open');
+  $('home').inert = true;
+  var n = $('libQ').value.length;
+  $('libQ').focus();
+  $('libQ').setSelectionRange(n, n);
+}
+
+function closeLib() {
+  if (!state.open) return;
+  state.open = false;
+  $('scr').classList.remove('open');
+  $('home').inert = false;
+  $('openGames').focus();
+}
+
+$('openGames').addEventListener('click', openLib);
+$('goHome').addEventListener('click', closeLib);
+$('libClose').addEventListener('click', closeLib);
+$('shade').addEventListener('click', closeLib);
+
+$('homeQ').addEventListener('focus', openLib);
+
+// Only a panel close claims Escape; with the panel shut the poll viewer gets it.
+document.addEventListener('keydown', function (e) {
+  if (e.key !== 'Escape' || !state.open) return;
+  e.preventDefault();
+  closeLib();
+});
+
+document.addEventListener('keydown', function (e) {
+  if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey) return;
+  var t = e.target;
+  if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable) return;
+  e.preventDefault();
+  $(state.open ? 'libQ' : 'homeQ').focus();
+});
+
+var toastTimer;
+document.addEventListener('click', function (e) {
+  if (!e.target.closest('[data-soon]')) return;
+  e.preventDefault();
+  $('pvToast').classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function () { $('pvToast').classList.remove('on'); }, 1600);
+});
+</script>
+</body>
+</html>
