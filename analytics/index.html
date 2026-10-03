@@ -1635,10 +1635,20 @@
         var who = [n.owner, where, n.provider && n.provider !== n.owner ? n.provider : ''].filter(Boolean).join(' \u00b7 ');
         return '<div class="bc-item net-item"><span class="when mono">' + esc(n.ip) + '</span>'
           + '<span class="msg">' + esc(who || 'Looking it up\u2026') + '</span>'
-          + '<span class="st">' + fmt(n.people) + ' people \u00b7 ' + share(n.people) + '%</span></div>';
+          + '<span class="st">' + fmt(n.people) + ' people \u00b7 ' + share(n.people) + '%</span>'
+          + '<input type="text" maxlength="80" placeholder="Name this school" value="' + esc(n.label || '') + '" data-netip="' + esc(n.ip) + '" aria-label="Name for ' + esc(n.ip) + '">'
+          + '<button class="btn" type="button" data-netsave="' + esc(n.ip) + '">Save</button></div>';
       }).join('');
       lookUpNetworks(nets);
     }).catch(function (e) { $('netMsg').textContent = 'Could not load networks: ' + e.message; });
+  }
+
+  // Names an address after its school, or clears the name when empty.
+  function saveNetwork(ip) {
+    var input = $('netList').querySelector('input[data-netip="' + ip + '"]');
+    rpc('analytics_network_name', { p_secret: state.secret, p_ip: ip, p_label: input ? input.value : '' })
+      .then(function () { $('netMsg').textContent = input && input.value.trim() ? 'Saved ' + input.value.trim() + '.' : 'Name cleared.'; return loadNetworks(); })
+      .catch(function (err) { $('netMsg').textContent = 'Could not save that: ' + err.message; });
   }
 
   // ── giveaways ──
@@ -2424,6 +2434,9 @@
   $('pollMore').addEventListener('click', addAnswer);
   $('pollCreate').addEventListener('click', createPoll);
   $('pollList').addEventListener('click', pollAction);
+  $('netList').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-netsave]'); if (b) saveNetwork(b.dataset.netsave);
+  });
   $('gaCreate').addEventListener('click', function () {
     var ends = $('gaEnds').value;
     $('gaCreate').disabled = true;
