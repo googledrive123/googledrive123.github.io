@@ -280,6 +280,7 @@ var G = [
   ['slime-rancher', 'Slime Rancher', ['Simulation']]
 ];
 var tiles = G.map(function (g) { return $('libGrid').querySelector('[data-id="' + g[0] + '"]'); });
+var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
 
 function renderLib() {
   var q = state.q4a.trim().toLowerCase();
@@ -291,6 +292,11 @@ function renderLib() {
     if (show) found++;
   });
   $('libEmpty').hidden = found > 0;
+  tabs.forEach(function (t) {
+    var on = t.dataset.cat === state.c4a;
+    t.classList.toggle('on', on);
+    t.setAttribute('aria-pressed', on);
+  });
   $('libBody').scrollTop = 0;
 }
 
@@ -300,6 +306,13 @@ function renderLib() {
   $(id).addEventListener('input', function () {
     state.q4a = $(id).value;
     $(id === 'homeQ' ? 'libQ' : 'homeQ').value = state.q4a;
+    renderLib();
+  });
+});
+
+tabs.forEach(function (t) {
+  t.addEventListener('click', function () {
+    state.c4a = t.dataset.cat;
     renderLib();
   });
 });
