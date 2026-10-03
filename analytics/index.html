@@ -1500,6 +1500,8 @@
   }
   // Polls whose voter list is open, so it stays open when the list reloads.
   var votersOpen = {};
+  // The last list shown for each poll, put back while a reload fetches it again.
+  var votersShown = {};
   function loadPolls() {
     return rpc('gv_polls_admin', { p_secret: state.secret }).then(function (list) {
       $('pollList').innerHTML = (list || []).length ? list.map(function (p) {
@@ -1514,7 +1516,7 @@
         return '<div class="bc-item poll-item"><div class="msg"><b>' + esc(p.question) + '</b>'
           + '<div class="ranked">' + rows + '</div>'
           + '<span class="st">' + fmt(total) + (total === 1 ? ' vote' : ' votes') + ' \u00b7 ' + fmt(p.accounts) + ' from accounts \u00b7 ' + esc(when) + '</span>'
-          + (votersOpen[p.id] ? '<div class="poll-voters" id="pollVoters' + p.id + '"><div class="empty">Loading voters\u2026</div></div>' : '')
+          + (votersOpen[p.id] ? '<div class="poll-voters" id="pollVoters' + p.id + '">' + (votersShown[p.id] || '<div class="empty">Loading voters\u2026</div>') + '</div>' : '')
           + '</div>'
           + (total ? '<button class="btn" type="button" data-pollvoters="' + p.id + '">' + (votersOpen[p.id] ? 'Hide voters' : 'Who voted') + '</button>' : '')
           + (p.preview ? '<button class="btn" type="button" data-pollpublish="' + p.id + '">Show to everyone</button>' : '')
@@ -1529,7 +1531,7 @@
   function loadVoters(id, options) {
     return rpc('gv_poll_voters', { p_secret: state.secret, p_id: id }).then(function (list) {
       var box = $('pollVoters' + id); if (!box) return;
-      box.innerHTML = (list || []).length ? list.map(function (v) {
+      box.innerHTML = votersShown[id] = (list || []).length ? list.map(function (v) {
         return '<div class="pv"><b>' + esc(v.name || (v.account ? 'an account' : 'a guest')) + '</b>'
           + '<span class="kind">' + (v.account ? 'account' : 'guest') + '</span>'
           + '<span class="pick">' + esc(options[v.choice] != null ? options[v.choice] : 'answer ' + (v.choice + 1)) + '</span>'
