@@ -340,6 +340,13 @@ $('libClose').addEventListener('click', closeLib);
 $('shade').addEventListener('click', closeLib);
 
 $('homeQ').addEventListener('focus', openLib);
+
+// Only a panel close claims Escape; with the panel shut the poll viewer gets it.
+document.addEventListener('keydown', function (e) {
+  if (e.key !== 'Escape' || !state.open) return;
+  e.preventDefault();
+  closeLib();
+});
 </script>
 </body>
 </html>
