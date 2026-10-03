@@ -1232,7 +1232,8 @@
       var p = String(s).slice(0, 10).split('-');
       return new Date(+p[0], p[1] - 1, +p[2]).toLocaleDateString([], { month: 'short', day: 'numeric' });
     }
-    chart('chAllDaily', { type: 'bar', data: { labels: daily.map(function (d) { return dayLabel(d.day); }), datasets: [
+    var days = daily.map(function (d) { return dayLabel(d.day); });
+    chart('chAllDaily', { type: 'bar', data: { labels: days, datasets: [
       Object.assign({ label: 'Events', data: daily.map(function (d) { return d.events; }) }, bar(C.s1)),
       Object.assign({ label: 'Visitors', data: daily.map(function (d) { return d.visitors; }), type: 'line' }, line(C.s2)),
       Object.assign({ label: 'Plays', data: daily.map(function (d) { return d.plays; }), type: 'line' }, line(C.s3))
