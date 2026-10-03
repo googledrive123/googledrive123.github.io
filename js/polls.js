@@ -104,6 +104,7 @@
     '.gv-look.full .gv-look-chips{display:none}',
     '.gv-look.full .gv-look-name{display:block;padding:0 6px}',
     '.gv-look.full .gv-look-note{margin-left:0}',
+    '.gv-look.full.idle .gv-look-bar{opacity:0;pointer-events:none}',
     '@keyframes gvPollIn{from{opacity:0;transform:translateY(10px) scale(.98)}}',
     '@media (prefers-reduced-motion:reduce){.gv-poll-box,.gv-poll-go{animation:none}.gv-poll-opt.result::before,.gv-poll-look,.gv-poll-bar span,.gv-look-screen iframe{transition:none}}'
   ].join('');
@@ -334,6 +335,8 @@
         live.contentWindow.addEventListener('keydown', function (e) {
           if (e.key === 'Escape' && !e.defaultPrevented) onKey(e);
         });
+        live.contentWindow.addEventListener('pointermove', wake);
+        live.contentWindow.addEventListener('pointerdown', wake);
       } catch (e) {}
     });
     screen.appendChild(live);
@@ -411,12 +414,20 @@
       fitBox.style.height = h * s + 'px';
       frame.style.transform = 'scale(' + s + ')';
     }
+    // In full screen the bar fades away while the mouse rests.
+    var idle = 0;
+    function wake() {
+      shade.classList.remove('idle');
+      clearTimeout(idle);
+      idle = setTimeout(function () { shade.classList.add('idle'); }, 2500);
+    }
     // Full screen: the answer's page fills the whole display, with the bar
     // floating over it.
     function setFull(on) {
       shade.classList.toggle('full', on);
       full.lastChild.textContent = on ? 'Exit full screen' : 'Full screen';
       full.setAttribute('aria-pressed', on ? 'true' : 'false');
+      if (on) wake();
       fit();
     }
     function onFullChange() {
@@ -426,12 +437,14 @@
       document.removeEventListener('fullscreenchange', onFullChange);
       if (document.fullscreenElement === shade) document.exitFullscreen();
       shade.remove();
+      clearTimeout(idle);
       window.removeEventListener('resize', fit);
       window.removeEventListener('keydown', onKey, true);
       if (back && back.focus) back.focus();
     }
     // Ahead of the pop-up's own keys, so Escape closes only this.
     function onKey(e) {
+      wake();
       if (e.key === 'Escape') {
         // In the browser's full screen, its own Escape gets out of it first.
         if (document.fullscreenElement) return;
@@ -443,6 +456,8 @@
       e.preventDefault();
       e.stopPropagation();
     }
+    shade.addEventListener('pointermove', wake);
+    shade.addEventListener('pointerdown', wake);
     close.addEventListener('click', shut);
     full.addEventListener('click', function () {
       var on = !shade.classList.contains('full');
