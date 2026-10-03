@@ -1243,9 +1243,12 @@
     ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
     ctx.beginPath(); ctx.moveTo(x, area.top); ctx.lineTo(x, area.bottom); ctx.stroke(); ctx.restore();
   } };
+  // This browser's time zone, so days and hours on the charts are local ones.
+  function viewerTz() {
+    try { return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; } catch (e) { return 'UTC'; }
+  }
   function loadGrowth() {
-    var tz = 'UTC';
-    try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; } catch (e) {}
+    var tz = viewerTz();
     return rpc('analytics_visitor_growth', { p_secret: state.secret, p_tz: tz }).then(function (list) {
       growth = list || [];
       var tip = Object.assign({}, baseOpts.plugins.tooltip, { callbacks: {
