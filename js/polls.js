@@ -419,7 +419,12 @@
       full.setAttribute('aria-pressed', on ? 'true' : 'false');
       fit();
     }
+    function onFullChange() {
+      setFull(document.fullscreenElement === shade);
+    }
     function shut() {
+      document.removeEventListener('fullscreenchange', onFullChange);
+      if (document.fullscreenElement === shade) document.exitFullscreen();
       shade.remove();
       window.removeEventListener('resize', fit);
       window.removeEventListener('keydown', onKey, true);
@@ -435,7 +440,14 @@
       e.stopPropagation();
     }
     close.addEventListener('click', shut);
-    full.addEventListener('click', function () { setFull(!shade.classList.contains('full')); });
+    full.addEventListener('click', function () {
+      var on = !shade.classList.contains('full');
+      if (!shade.requestFullscreen) setFull(on);
+      else if (on) shade.requestFullscreen().catch(function () { setFull(true); });
+      else if (document.fullscreenElement) document.exitFullscreen();
+      else setFull(false);
+    });
+    document.addEventListener('fullscreenchange', onFullChange);
     prev.addEventListener('click', function () { show(at - 1); });
     next.addEventListener('click', function () { show(at + 1); });
     choose.addEventListener('click', function () {
