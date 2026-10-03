@@ -6,6 +6,7 @@
 --
 -- Only the owner's secret reads any of this. The dashboard lists an address
 -- only once at least 3 visitors share it, so nobody's home address is shown.
+-- Addresses not seen for 90 days are forgotten.
 --
 -- Apply against project dxwjxzmlezfyursysays, after analytics/rollups.sql.
 -- Every statement is safe to run twice.
@@ -63,6 +64,10 @@ begin
     insert into analytics_visitor_ips as a (visitor_id, ip)
     select distinct n.visitor_id, v_ip from new_rows n where n.visitor_id is not null
     on conflict (visitor_id, ip) do update set last_ts = now(), hits = a.hits + 1;
+    -- Now and then, forget the addresses not seen for 90 days.
+    if random() < 0.01 then
+      delete from analytics_visitor_ips where last_ts < now() - interval '90 days';
+    end if;
   end if;
   return null;
 exception when others then
