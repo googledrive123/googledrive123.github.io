@@ -46,3 +46,32 @@ end;
 $function$;
 
 revoke all on function public.analytics_request_ip() from public, anon, authenticated;
+
+
+-- Notes the address of every visitor in an insert. It never stops the
+-- insert: losing an address is fine, losing events is not.
+create or replace function public.analytics_note_ip()
+returns trigger
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_ip inet := public.analytics_request_ip();
+begin
+  if v_ip is not null then
+    insert into analytics_visitor_ips as a (visitor_id, ip)
+    select distinct n.visitor_id, v_ip from new_rows n where n.visitor_id is not null
+    on conflict (visitor_id, ip) do update set last_ts = now(), hits = a.hits + 1;
+  end if;
+  return null;
+exception when others then
+  return null;
+end;
+$function$;
+
+drop trigger if exists analytics_note_ip on public.analytics_events;
+create trigger analytics_note_ip
+  after insert on public.analytics_events
+  referencing new table as new_rows
+  for each statement execute function public.analytics_note_ip();
