@@ -61,7 +61,11 @@
   <p>GameVault counts usage so the owner can tell which games are worth keeping. This runs
   first-party, in <code>js/analytics.js</code>, writing to the same Supabase project. It records:</p>
   <ul>
-    <li>A random visitor and session identifier. Not your name, not your IP address.</li>
+    <li>A random visitor and session identifier. Not your name.</li>
+    <li>The network address your visits come from, kept for 90 days. It is only used to
+    count how many people play from each school's network. Addresses that many visitors
+    share, like a school's, are looked up in public internet registries to see who owns
+    them. Nobody's address is ever shown publicly.</li>
     <li>Page views, route changes and which games, movies or shows were opened.</li>
     <li>Searches typed into the site, including ones that returned nothing.</li>
     <li>Browser, operating system, device type, screen and window size, language, time zone.</li>
@@ -103,7 +107,7 @@
 
   <h2>8. Changes</h2>
   <p>If this policy changes, the date below changes with it.</p>
-  <p class="panel-note">Last updated: 1 October 2026</p>
+  <p class="panel-note">Last updated: 3 October 2026</p>
 </main>
 </body>
 </html>
