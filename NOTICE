@@ -1,0 +1,67 @@
+GameVault
+Copyright (C) 2025-2026 googledrive123
+https://googledrive123.github.io
+
+
+WHAT THIS COVERS
+
+The GameVault site itself: the HTML, CSS and JavaScript in this repository,
+its page copy, layout, design and structure. That is the work written by the
+copyright holder.
+
+It is free software: you can redistribute it and/or modify it under the terms
+of the GNU Affero General Public License, version 3 only, as published by the
+Free Software Foundation. The full text is in LICENSE.
+
+It is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE. See the GNU Affero General Public License for details.
+
+In short: you can use, change and host this work, as long as you credit
+GameVault, keep it under the same licence, and give the people who use your
+copy its source code.
+
+
+CREDIT (additional term under section 7(b) of the licence)
+
+If you convey this work or any part of it, modified or not, or run a modified
+version that people use over a network:
+
+  - keep the copyright line above and this NOTICE file in the source, and
+  - show this credit, with the link working, in the Appropriate Legal Notices
+    of every page or interface that uses it:
+
+        Based on GameVault by googledrive123
+        https://googledrive123.github.io
+
+You may not remove or hide this credit.
+
+
+THIRD-PARTY CONTENT
+
+This repository also contains work belonging to other people. That work is
+not the copyright holder's to license, is not covered by the licence above,
+and stays subject to whatever terms its own owners set.
+
+  - The games under games/ are the property of their respective authors and
+    publishers.
+
+  - PolyTrack is copyright Kodub.com. It is included here as an unofficial
+    reupload under section 4 of the PolyTrack Terms of Service,
+    https://www.kodub.com/terms/polytrack. See games/polytrack/README.md for
+    the conditions that copy is kept in compliance with.
+
+Nothing in this file grants any right to that content, and nothing in this
+file is a claim of ownership over it.
+
+
+PREVIOUS LICENCES
+
+  - Up to 19 September 2026: GNU General Public License v3.0.
+  - 19 September 2026 to 3 October 2026: all rights reserved.
+  - From 3 October 2026: GNU Affero General Public License v3.0 only, with the
+    credit term above.
+
+A licence grant cannot be taken back for the versions it was made for. Anyone
+who obtained a copy while GPL-3.0 applied keeps every right it gave them for
+that copy.
