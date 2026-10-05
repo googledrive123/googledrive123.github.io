@@ -771,6 +771,16 @@
     shown.insertAdjacentHTML('afterend', CHECK_SVG);
   }
 
+  // After the check, or the name when there is none.
+  function badgeRow(row) {
+    var shown = row.querySelector('.name');
+    var key = owners[positionOf(row)];
+    if (!shown || !key || !window.GV || !window.GV.badges) return;
+    var check = shown.nextElementSibling;
+    var after = check && check.classList.contains('gv-check') ? check : shown;
+    after.parentNode.insertBefore(window.GV.badges.beside(key, 26), after.nextSibling);
+  }
+
   // A time with no replay cannot be watched or raced, and picking one makes
   // the game fail the whole selection with "Failed to load recordings". The
   // row says so and does not take the pick. The player's own row is left
@@ -801,6 +811,7 @@
     row.dataset.gvLabelled = '1';
     nameSelfRow(row);
     checkRow(row);
+    badgeRow(row);
     markReplay(row);
 
     var verified = state.classList.contains('verified');
