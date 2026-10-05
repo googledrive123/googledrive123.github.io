@@ -120,7 +120,10 @@
     })();
   }
 
+  var waited = 0;
   var wait = setInterval(function () {
+    waited += POLL_MS;
+    if (waited > GIVE_UP_MS) clearInterval(wait);
     if (!gameUp()) return;
     clearInterval(wait);
     var id = take();
