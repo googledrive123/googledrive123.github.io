@@ -7,6 +7,7 @@
   // loading, short enough that an old ask never takes over a later visit.
   var FRESH_MS = 2 * 60 * 1000;
   var POLL_MS = 250;
+  var SETTLE_MS = 700;
 
   function shown(el) {
     return !!el && !el.classList.contains('hidden') && el.getClientRects().length > 0;
@@ -97,7 +98,7 @@
       var result = 'wait';
       try { result = step(track); } catch (e) { console.error('[race]', e); }
       if (result === 'done') return;
-      setTimeout(next, POLL_MS);
+      setTimeout(next, result === 'clicked' ? SETTLE_MS : POLL_MS);
     })();
   }
 })();
