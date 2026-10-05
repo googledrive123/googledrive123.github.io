@@ -6,6 +6,7 @@
   // Long enough to get through the bounce into the player and the game
   // loading, short enough that an old ask never takes over a later visit.
   var FRESH_MS = 2 * 60 * 1000;
+  // The game itself can take a while to load on a school laptop.
   var GIVE_UP_MS = 60 * 1000;
   var POLL_MS = 250;
   // Each screen animates in, and a click before it has settled can be lost.
