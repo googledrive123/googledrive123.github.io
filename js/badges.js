@@ -180,11 +180,13 @@
     var finish = place(badge);
     var rim = RIMS[finish - 1];
     var shape = SHAPES[d.shape];
-    // The place shows in the rim and the ring inside it.
+    // The place shows in the rim and the ring inside it. Third is darker all
+    // over too, or bronze is hard to tell from gold on the warm colours.
     return '<svg class="gv-badge" width="' + size + '" height="' + size + '" viewBox="0 0 32 32"'
       + ' role="img" aria-label="' + esc(label(badge)) + '">'
       + '<title>' + esc(label(badge)) + '</title>'
       + '<path d="' + shape + '" fill="' + d.color + '" stroke="' + rim + '" stroke-width="2.2" stroke-linejoin="round"/>'
+      + (finish === 3 ? '<path d="' + shape + '" fill="#2a1206" fill-opacity=".34"/>' : '')
       + '<path d="' + shape + '" fill="none" stroke="' + rim + '" stroke-opacity=".9" stroke-width="1.3"'
       + ' stroke-linejoin="round" transform="translate(16 16) scale(.8) translate(-16 -16)"/>'
       + EMBLEMS[d.emblem](d.color)
