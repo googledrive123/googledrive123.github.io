@@ -20,6 +20,11 @@ begin
 
   select id into v_id from profiles where username = v_name;
   if v_id is null then
+    select min(id::text)::uuid into v_id from profiles
+     where lower(username) = lower(v_name)
+    having count(*) = 1;
+  end if;
+  if v_id is null then
     return null;
   end if;
 
