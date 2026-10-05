@@ -5256,7 +5256,8 @@ window.switchAuthTab = function(tab) {
 };
 
 async function signInEmails(typed) {
-  const emails = [typed.toLowerCase() + '@gamevault.app'];
+  const own = typed.toLowerCase().replace(/[^a-z0-9_]/g, '');
+  const emails = own ? [own + '@gamevault.app'] : [];
   return emails;
 }
 
