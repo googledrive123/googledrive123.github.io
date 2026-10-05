@@ -119,6 +119,10 @@ create table if not exists public.gv_badges (
   primary key (player_key, badge, starts)
 );
 
+-- 1, 2 or 3 on the week's board. Second and third share challenge-top3, and
+-- this tells their badges apart: silver for second, bronze for third.
+alter table public.gv_badges add column if not exists place smallint check (place between 1 and 3);
+
 -- Everything goes through the functions below, so there is no policy to
 -- write and a direct PostgREST request reads and writes nothing.
 alter table public.gv_challenges enable row level security;
