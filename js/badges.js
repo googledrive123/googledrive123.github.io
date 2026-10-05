@@ -144,8 +144,6 @@
     return { name: type.name, shape: type.shape, emblem: type.emblem, color: COLORS[mod(week, COLORS.length)] };
   }
 
-  function winner(badge) { return badge.badge === 'challenge-winner'; }
-
   // Where the badge's owner finished. A badge with no place on it is first
   // if it is the winner's, and second otherwise.
   function place(badge) {
@@ -169,13 +167,14 @@
   // What someone pointing at a badge reads.
   function label(badge) {
     var d = design(badge.starts);
-    var place = winner(badge) ? 'Won' : 'Top 3 on';
+    var finish = ['Won', '2nd on', '3rd on'][place(badge) - 1];
     var track = badge.title ? ' ' + badge.title : ' the Track of the Week';
     var week = weekName(badge.starts);
-    return d.name + ' badge: ' + place + track + (week ? ', ' + week : '');
+    return d.name + ' badge: ' + finish + track + (week ? ', ' + week : '');
   }
 
-  // badge: {badge: 'challenge-winner' or 'challenge-top3', starts, title}.
+  // badge: {badge: 'challenge-winner' or 'challenge-top3', starts, title,
+  // place}.
   function svg(badge, size) {
     var d = design(badge.starts);
     var rim = RIMS[place(badge) - 1];
