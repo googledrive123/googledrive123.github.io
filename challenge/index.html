@@ -49,6 +49,13 @@
     .page .ch-head p.ch-note { margin-top: 0.6rem; font-size: 0.9rem; color: var(--text); max-width: 62ch; }
     .page .ch-head p.ch-empty { margin-top: 0.45rem; font-size: 0.88rem; }
 
+    /* What the week is raced for. */
+    .ch-prize { display: flex; align-items: center; gap: 0.9rem; margin-top: 0.95rem; }
+    .ch-prize-art { display: flex; align-items: flex-end; gap: 0.3rem; flex-shrink: 0; }
+    .ch-prize-art svg { display: block; }
+    .ch-prize-name { font-size: 0.95rem; font-weight: 600; color: var(--text); }
+    .ch-prize-note { margin-top: 0.15rem; font-size: 0.8rem; color: var(--muted); max-width: 52ch; }
+
     .ch-foot {
       display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between;
       gap: 1rem 1.5rem;
@@ -189,6 +196,14 @@
         <span class="badge" id="chEnv" hidden></span>
       </div>
       <div class="ch-track" id="chTrack" hidden></div>
+      <div class="ch-prize" id="chPrize" hidden>
+        <span class="ch-prize-art" id="chPrizeArt"></span>
+        <div>
+          <div class="ch-prize-name" id="chPrizeName"></div>
+          <div class="ch-prize-note">Every week has its own badge. Gold for first, silver for second
+          and third, and it stays next to your name in chat and on the PolyTrack leaderboard.</div>
+        </div>
+      </div>
       <p class="ch-note" id="chNote" hidden></p>
       <p class="ch-empty" id="chEmpty" hidden>No track is set for this week yet. Check back soon,
       and keep racing: every PolyTrack time still goes on the leaderboard.</p>
