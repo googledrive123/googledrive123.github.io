@@ -65,6 +65,11 @@ begin
       raise exception 'That username is not allowed. Try another.';
     end if;
   end if;
+  if not (tg_op = 'INSERT' and not exists (select 1 from public.profiles where id = new.id))
+     and exists (select 1 from public.profiles
+                  where lower(username) = lower(new.username) and id <> new.id) then
+    raise exception 'That username is taken. Try another.';
+  end if;
   return new;
 end;
 $function$;
