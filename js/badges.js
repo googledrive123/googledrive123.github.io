@@ -2,8 +2,8 @@
    take home, and the row of them drawn beside a player's name.
    Every week has its own badge. Its design comes from the week itself, so
    nothing is drawn by hand when a new week starts and no two weeks in a row
-   look alike. First place gets it with a gold rim, second and third with a
-   silver one (challenge/challenge.sql hands them out).
+   look alike. First place gets it with a gold rim, second with silver and
+   third with bronze (challenge/challenge.sql hands them out).
    Used by chat (js/chat.js), the PolyTrack leaderboard
    (games/polytrack/leaderboard.js) and /challenge/.
    Public surface: window.GV.badges. */
@@ -22,8 +22,8 @@
   // Beside a name. More than this and the row says how many more.
   var MAX_SHOWN = 4;
 
-  var GOLD = '#f5c84c';
-  var SILVER = '#d4dbe5';
+  // The rim for first, second and third.
+  var RIMS = ['#f5c84c', '#d4dbe5', '#cd7f45'];
   // Seven colours against twelve designs: the same pair comes round again
   // only after 84 weeks.
   var COLORS = ['#e5484d', '#0090ff', '#30a46c', '#8e4ec6', '#f76b15', '#12a594', '#d6409f'];
@@ -144,7 +144,12 @@
     return { name: type.name, shape: type.shape, emblem: type.emblem, color: COLORS[mod(week, COLORS.length)] };
   }
 
-  function winner(badge) { return badge.badge === 'challenge-winner'; }
+  // Where the badge's owner finished. A badge with no place on it is first
+  // if it is the winner's, and second otherwise.
+  function place(badge) {
+    if (badge.place >= 1 && badge.place <= 3) return badge.place;
+    return badge.badge === 'challenge-winner' ? 1 : 2;
+  }
 
   function esc(s) {
     return String(s).replace(/[&<>"]/g, function (c) {
@@ -162,22 +167,27 @@
   // What someone pointing at a badge reads.
   function label(badge) {
     var d = design(badge.starts);
-    var place = winner(badge) ? 'Won' : 'Top 3 on';
+    var finish = ['Won', '2nd on', '3rd on'][place(badge) - 1];
     var track = badge.title ? ' ' + badge.title : ' the Track of the Week';
     var week = weekName(badge.starts);
-    return d.name + ' badge: ' + place + track + (week ? ', ' + week : '');
+    return d.name + ' badge: ' + finish + track + (week ? ', ' + week : '');
   }
 
-  // badge: {badge: 'challenge-winner' or 'challenge-top3', starts, title}.
+  // badge: {badge: 'challenge-winner' or 'challenge-top3', starts, title,
+  // place}.
   function svg(badge, size) {
     var d = design(badge.starts);
-    var rim = winner(badge) ? GOLD : SILVER;
+    var finish = place(badge);
+    var rim = RIMS[finish - 1];
     var shape = SHAPES[d.shape];
+    // The place shows in the rim and the ring inside it. Third is darker all
+    // over too, or bronze is hard to tell from gold on the warm colours.
     return '<svg class="gv-badge" width="' + size + '" height="' + size + '" viewBox="0 0 32 32"'
       + ' role="img" aria-label="' + esc(label(badge)) + '">'
       + '<title>' + esc(label(badge)) + '</title>'
       + '<path d="' + shape + '" fill="' + d.color + '" stroke="' + rim + '" stroke-width="2.2" stroke-linejoin="round"/>'
-      + '<path d="' + shape + '" fill="none" stroke="#fff" stroke-opacity=".28" stroke-width="1.2"'
+      + (finish === 3 ? '<path d="' + shape + '" fill="#2a1206" fill-opacity=".34"/>' : '')
+      + '<path d="' + shape + '" fill="none" stroke="' + rim + '" stroke-opacity=".9" stroke-width="1.3"'
       + ' stroke-linejoin="round" transform="translate(16 16) scale(.8) translate(-16 -16)"/>'
       + EMBLEMS[d.emblem](d.color)
       + '</svg>';

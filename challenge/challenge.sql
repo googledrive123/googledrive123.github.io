@@ -4,7 +4,8 @@
 -- once the track is up counts, straight from the site's PolyTrack leaderboard
 -- (games/polytrack/leaderboard.sql), and once the week is over the owner
 -- closes it from the analytics dashboard: first place gets the
--- challenge-winner badge, second and third get challenge-top3. The badge is
+-- challenge-winner badge, second and third get challenge-top3, and each keeps
+-- its place so the three look different (gold, silver, bronze). The badge is
 -- the whole prize. /challenge/ shows the week, /winner/ shows its winner.
 --
 -- A week runs Monday to Sunday and ends at midnight UTC on Sunday night, so
@@ -118,6 +119,10 @@ create table if not exists public.gv_badges (
   created_at timestamptz not null default now(),
   primary key (player_key, badge, starts)
 );
+
+-- 1, 2 or 3 on the week's board. Second and third share challenge-top3, and
+-- this tells their badges apart: silver for second, bronze for third.
+alter table public.gv_badges add column if not exists place smallint check (place between 1 and 3);
 
 -- Everything goes through the functions below, so there is no policy to
 -- write and a direct PostgREST request reads and writes nothing.
@@ -441,8 +446,9 @@ grant execute on function public.gv_challenge_history() to anon, authenticated;
 
 -- Badges for the players on a board, by player key, for drawing beside their
 -- names: {"<key>": [{"badge": "challenge-winner", "starts": "2026-09-28",
--- "title": "Summer 3"}]}. Each week's badge looks different (js/badges.js
--- draws it from starts), and title names the track it was won on.
+-- "title": "Summer 3", "place": 1}]}. Each week's badge looks different
+-- (js/badges.js draws it from starts), title names the track it was won on,
+-- and place is where its owner finished.
 -- Keys with no badges are left out.
 create or replace function public.gv_badges_for(p_keys text[])
 returns json
@@ -467,7 +473,8 @@ begin
     select json_object_agg(k.player_key, k.badges)
     from (
       select b.player_key,
-             json_agg(json_build_object('badge', b.badge, 'starts', b.starts, 'title', c.title)
+             json_agg(json_build_object('badge', b.badge, 'starts', b.starts, 'title', c.title,
+                                        'place', b.place)
                       order by b.starts desc, b.badge) as badges
       from gv_badges b
       left join gv_challenges c on c.starts = b.starts
@@ -625,9 +632,9 @@ end;
 $function$;
 
 -- Hands out the badges for a challenge that has ended: challenge-winner to
--- first place, challenge-top3 to second and third. Closing again, say after
--- taking out a suspicious time, hands them out afresh from the board as it
--- now is.
+-- first place, challenge-top3 to second and third, each with its place.
+-- Closing again, say after taking out a suspicious time, hands them out
+-- afresh from the board as it now is.
 create or replace function public.gv_challenge_close(p_secret text, p_starts date)
 returns json
 language plpgsql
@@ -653,11 +660,12 @@ begin
    where starts = p_starts
      and badge in ('challenge-winner', 'challenge-top3');
 
-  insert into gv_badges (player_key, badge, starts, user_id)
+  insert into gv_badges (player_key, badge, starts, user_id, place)
   select r.player_key,
          case when r.rank = 1 then 'challenge-winner' else 'challenge-top3' end,
          p_starts,
-         r.user_id
+         r.user_id,
+         r.rank
   from gv_challenge_ranked(p_starts) r
   where r.rank <= 3;
 
@@ -670,7 +678,8 @@ begin
              'user_id', r.user_id,
              'nickname', r.nickname,
              'time', gv_challenge_time(r.frames),
-             'badge', case when r.rank = 1 then 'challenge-winner' else 'challenge-top3' end
+             'badge', case when r.rank = 1 then 'challenge-winner' else 'challenge-top3' end,
+             'place', r.rank
            ) order by r.rank)
     from gv_challenge_ranked(p_starts) r
     where r.rank <= 3
@@ -781,3 +790,15 @@ where c.starts = '2026-09-01'
   and c.closed_at is null
   and not exists (select 1 from public.gv_challenge_runs r where r.starts = c.starts)
 on conflict (starts, player_key) do nothing;
+
+-- Badges handed out before they kept their place get it from their week's
+-- board, which no longer changes once the week is closed.
+update public.gv_badges b
+   set place = r.rank
+  from public.gv_challenges c
+ cross join lateral public.gv_challenge_ranked(c.starts) r
+ where c.closed_at is not null
+   and b.starts = c.starts
+   and b.player_key = r.player_key
+   and r.rank <= 3
+   and b.place is null;
