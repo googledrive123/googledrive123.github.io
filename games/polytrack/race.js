@@ -6,6 +6,7 @@
   // Long enough to get through the bounce into the player and the game
   // loading, short enough that an old ask never takes over a later visit.
   var FRESH_MS = 2 * 60 * 1000;
+  var POLL_MS = 250;
 
   function shown(el) {
     return !!el && !el.classList.contains('hidden') && el.getClientRects().length > 0;
@@ -89,5 +90,14 @@
     if (!play) return 'wait';
     play.click();
     return 'clicked';
+  }
+
+  function drive(track) {
+    (function next() {
+      var result = 'wait';
+      try { result = step(track); } catch (e) { console.error('[race]', e); }
+      if (result === 'done') return;
+      setTimeout(next, POLL_MS);
+    })();
   }
 })();
