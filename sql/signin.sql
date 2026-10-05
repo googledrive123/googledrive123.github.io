@@ -8,6 +8,9 @@
 -- The sign-in form asks this for the login of the account that has the typed
 -- name now, and tries it before the name as typed. The name an account signed
 -- up with still works after that.
+--
+-- Apply against project dxwjxzmlezfyursysays. Every statement is safe to run
+-- twice. Applied on 5 October 2026.
 
 create or replace function public.gv_login_email(p_name text)
 returns text
