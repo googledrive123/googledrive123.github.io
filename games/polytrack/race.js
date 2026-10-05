@@ -9,6 +9,11 @@
 // them the way a person would: Play on the menu, the track's card in the
 // picker, then Play on the track's page. A first visit opens straight on the
 // tutorial's track instead, and is taken back out with Exit first.
+//
+// The server knows a track only by its id, and the picker shows only names
+// and thumbnails. The game's own list of tracks pairs the two, so the id is
+// looked up in main.bundle.js. A track that is not in there, such as one a
+// player imported, leaves the game on its menu as before.
 (function () {
   'use strict';
 
