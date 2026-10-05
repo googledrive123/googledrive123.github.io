@@ -589,6 +589,12 @@
     });
   }
 
+  document.querySelector('.ch-race').addEventListener('click', function () {
+    var c = data && data.challenge;
+    if (!c) return;
+    try { sessionStorage.setItem('gv.race', JSON.stringify({ track: c.track_id, at: Date.now() })); } catch (e) {}
+  });
+
   // Signing in or out on the home page in another tab shows here too.
   window.addEventListener('storage', function (e) {
     if (e.key === TOKEN_KEY) location.reload();
