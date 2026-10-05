@@ -138,13 +138,30 @@
     });
   }
 
+  function weekName(starts) {
+    var p = String(starts || '').split('-');
+    var d = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2]));
+    if (isNaN(d.getTime())) return '';
+    return 'week of ' + d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', timeZone: 'UTC' });
+  }
+
+  // What someone pointing at a badge reads.
+  function label(badge) {
+    var d = design(badge.starts);
+    var place = winner(badge) ? 'Won' : 'Top 3 on';
+    var track = badge.title ? ' ' + badge.title : ' the Track of the Week';
+    var week = weekName(badge.starts);
+    return d.name + ' badge: ' + place + track + (week ? ', ' + week : '');
+  }
+
   // badge: {badge: 'challenge-winner' or 'challenge-top3', starts, title}.
   function svg(badge, size) {
     var d = design(badge.starts);
     var rim = winner(badge) ? GOLD : SILVER;
     var shape = SHAPES[d.shape];
     return '<svg class="gv-badge" width="' + size + '" height="' + size + '" viewBox="0 0 32 32"'
-      + ' role="img" aria-label="' + esc(d.name + ' badge') + '">'
+      + ' role="img" aria-label="' + esc(label(badge)) + '">'
+      + '<title>' + esc(label(badge)) + '</title>'
       + '<path d="' + shape + '" fill="' + d.color + '" stroke="' + rim + '" stroke-width="2.2" stroke-linejoin="round"/>'
       + '<path d="' + shape + '" fill="none" stroke="#fff" stroke-opacity=".28" stroke-width="1.2"'
       + ' stroke-linejoin="round" transform="translate(16 16) scale(.8) translate(-16 -16)"/>'
@@ -155,6 +172,7 @@
   window.GV = window.GV || {};
   window.GV.badges = {
     design: design,
+    label: label,
     svg: svg
   };
 })();
