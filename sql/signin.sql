@@ -4,6 +4,10 @@
 -- <name>@gamevault.app. Renaming in the profile changes profiles.username,
 -- the name everyone sees, but not the login, so a renamed player who typed
 -- their new name was told the password was wrong.
+--
+-- The sign-in form asks this for the login of the account that has the typed
+-- name now, and tries it before the name as typed. The name an account signed
+-- up with still works after that.
 
 create or replace function public.gv_login_email(p_name text)
 returns text
