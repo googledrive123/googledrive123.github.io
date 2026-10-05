@@ -53,10 +53,13 @@
   function step(track) {
     var page = onScreen('.track-info-ui');
     if (page) {
-      var button = page.querySelector('button.play');
+      var picked = page.querySelector('.side-panel .thumbnail img');
+      var button = picked && picked.getAttribute('src') === track.thumbnail
+        ? page.querySelector('button.play')
+        : page.querySelector('button.back');
       if (!button) return 'wait';
       button.click();
-      return 'done';
+      return button.classList.contains('play') ? 'done' : 'clicked';
     }
 
     var picker = onScreen('.track-selection-ui');
