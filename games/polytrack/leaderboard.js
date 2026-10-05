@@ -703,6 +703,8 @@
       // The right margin gives that back so it does not land on the check.
       '.leaderboard-ui .gv-check {',
       '  width: 24px; height: 24px; flex-shrink: 0; margin: 0 14px 0 -4px; }',
+      '.leaderboard-ui .gv-badges { margin: 0 20px 0 -4px; }',
+      '.leaderboard-ui .gv-check + .gv-badges { margin-left: -8px; }',
       '.leaderboard-ui > .container > button.main.gv-no-replay { cursor: default; }',
       '.leaderboard-ui > .container > button.main.gv-no-replay > .image-container { opacity: 0.4; }',
       '.leaderboard-ui > .container > button.main > .right > p.gv-replay-tag {',
