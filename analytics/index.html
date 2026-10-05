@@ -804,7 +804,9 @@
       function next() {
         if (!slices.length) return null;
         var lo = slices.shift();
-        return rpc('analytics_rows', { p_secret: state.secret, p_from: p_from, p_lo: lo, p_hi: Math.min(lo + SLICE - 1, span.max_id) }).then(function (res) {
+        return patient(function () {
+          return rpc('analytics_rows', { p_secret: state.secret, p_from: p_from, p_lo: lo, p_hi: Math.min(lo + SLICE - 1, span.max_id) });
+        }, 2).then(function (res) {
           take(st, res);
           if (onSlice) onSlice(++done, done + slices.length);
           return next();
