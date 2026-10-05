@@ -24,6 +24,9 @@
     return null;
   }
 
+  // The game's menus, or a race, are up. Read no earlier: a page opened on
+  // its own is sent into the player by /js/mimicry.js, and that page must
+  // leave the ask for the one inside the player.
   function gameUp() {
     return !!document.querySelector('#ui > .menu-ui, #ui > .game-ui');
   }
