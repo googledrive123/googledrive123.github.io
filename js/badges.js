@@ -146,6 +146,13 @@
 
   function winner(badge) { return badge.badge === 'challenge-winner'; }
 
+  // Where the badge's owner finished. A badge with no place on it is first
+  // if it is the winner's, and second otherwise.
+  function place(badge) {
+    if (badge.place >= 1 && badge.place <= 3) return badge.place;
+    return badge.badge === 'challenge-winner' ? 1 : 2;
+  }
+
   function esc(s) {
     return String(s).replace(/[&<>"]/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
