@@ -5255,6 +5255,10 @@ window.switchAuthTab = function(tab) {
   document.getElementById('authError').textContent = '';
 };
 
+// A login is the username the account signed up with, and a rename in the
+// profile does not change it. So the account that has the typed name now is
+// tried first (sql/signin.sql), then the name as typed, which keeps the
+// sign-up name working too.
 async function signInEmails(typed) {
   const own = typed.toLowerCase().replace(/[^a-z0-9_]/g, '');
   const emails = own ? [own + '@gamevault.app'] : [];
