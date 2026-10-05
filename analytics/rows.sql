@@ -29,10 +29,12 @@ begin
     raise exception 'not allowed';
   end if;
 
-  return (
-    select json_build_object('now', now(), 'min_id', min(id), 'max_id', max(id), 'rows', count(*))
-    from analytics_events
-    where ts >= p_from
+  return json_build_object(
+    'now', now(),
+    'min_id', (select min(f.id) from (
+                 select id from analytics_events where ts >= p_from order by ts limit 1000
+               ) f),
+    'max_id', (select max(id) from analytics_events)
   );
 end;
 $function$;
