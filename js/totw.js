@@ -203,6 +203,11 @@
     style();
     container.classList.add('gv-totw');
     container.hidden = true;
+    container.addEventListener('click', function (e) {
+      var c = data && data.challenge;
+      if (!c || !e.target.closest('.gv-totw-race')) return;
+      try { sessionStorage.setItem('gv.race', JSON.stringify({ track: c.track_id, at: Date.now() })); } catch (err) {}
+    });
     boxes.push(container);
     if (data) paint();
     else refresh(true);
