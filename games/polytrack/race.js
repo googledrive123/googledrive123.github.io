@@ -51,6 +51,14 @@
   }
 
   function step(track) {
+    var page = onScreen('.track-info-ui');
+    if (page) {
+      var button = page.querySelector('button.play');
+      if (!button) return 'wait';
+      button.click();
+      return 'done';
+    }
+
     var picker = onScreen('.track-selection-ui');
     if (picker) {
       // Every tab's cards are built up front, so a card behind another tab
