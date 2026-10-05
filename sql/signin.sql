@@ -1,4 +1,9 @@
 -- Signing in with the username an account has now.
+--
+-- An account's login is the username it signed up with, as
+-- <name>@gamevault.app. Renaming in the profile changes profiles.username,
+-- the name everyone sees, but not the login, so a renamed player who typed
+-- their new name was told the password was wrong.
 
 create or replace function public.gv_login_email(p_name text)
 returns text
