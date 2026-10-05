@@ -7,6 +7,8 @@
   // The first weekly challenge. Each week after it is one design further on.
   var FIRST_WEEK = Date.UTC(2026, 8, 28);
   var WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+  // Beside a name. More than this and the row says how many more.
+  var MAX_SHOWN = 4;
 
   var GOLD = '#f5c84c';
   var SILVER = '#d4dbe5';
@@ -190,11 +192,19 @@
     style();
     var box = document.createElement('span');
     box.className = 'gv-badges';
-    var shown = list || [];
+    var shown = (list || []).slice(0, MAX_SHOWN);
     box.innerHTML = shown.map(function (b) { return svg(b, size); }).join('');
     Array.prototype.forEach.call(box.children, function (el, i) {
       if (i) el.style.marginLeft = -Math.round(size * 0.3) + 'px';
     });
+    var more = (list || []).length - shown.length;
+    if (more > 0) {
+      var tag = document.createElement('span');
+      tag.className = 'gv-badges-more';
+      tag.textContent = '+' + more;
+      tag.title = list.slice(MAX_SHOWN).map(label).join('\n');
+      box.appendChild(tag);
+    }
     return box;
   }
 
