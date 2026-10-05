@@ -65,6 +65,8 @@ begin
       raise exception 'That username is not allowed. Try another.';
     end if;
   end if;
+  -- Players sign in with their username (sql/signin.sql), so a rename may
+  -- not take one that differs from someone else's only in case.
   if not (tg_op = 'INSERT' and not exists (select 1 from public.profiles where id = new.id))
      and exists (select 1 from public.profiles
                   where lower(username) = lower(new.username) and id <> new.id) then
