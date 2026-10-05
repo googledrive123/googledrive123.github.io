@@ -4,6 +4,11 @@
 // card, leave the week's track id in sessionStorage under gv.race on their
 // way here. Without this the game opens on its menu, and the player still
 // has to find the track themselves.
+//
+// The game has no way in to a track but its own menus, so this walks through
+// them the way a person would: Play on the menu, the track's card in the
+// picker, then Play on the track's page. A first visit opens straight on the
+// tutorial's track instead, and is taken back out with Exit first.
 (function () {
   'use strict';
 
