@@ -47,6 +47,8 @@ sits beside it and stands in front of a browser API instead:
   browser. It starts the game once the account's copy is in.
 - `physics.js` - holds a room join until the game's physics check is done,
   and fetches fresh models when stale cached ones fail that check.
+- `race.js` - takes the player straight onto the weekly challenge's track
+  when they come from its Race it or Race now button, ready to drive.
 - `leaderboard.sql`, `rooms.sql`, `save.sql` - the Supabase side of these.
 
 No request reaches vps.kodub.com.
