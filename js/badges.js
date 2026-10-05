@@ -22,8 +22,8 @@
   // Beside a name. More than this and the row says how many more.
   var MAX_SHOWN = 4;
 
-  var GOLD = '#f5c84c';
-  var SILVER = '#d4dbe5';
+  // The rim for first, second and third.
+  var RIMS = ['#f5c84c', '#d4dbe5', '#cd7f45'];
   // Seven colours against twelve designs: the same pair comes round again
   // only after 84 weeks.
   var COLORS = ['#e5484d', '#0090ff', '#30a46c', '#8e4ec6', '#f76b15', '#12a594', '#d6409f'];
@@ -178,7 +178,7 @@
   // badge: {badge: 'challenge-winner' or 'challenge-top3', starts, title}.
   function svg(badge, size) {
     var d = design(badge.starts);
-    var rim = winner(badge) ? GOLD : SILVER;
+    var rim = RIMS[place(badge) - 1];
     var shape = SHAPES[d.shape];
     return '<svg class="gv-badge" width="' + size + '" height="' + size + '" viewBox="0 0 32 32"'
       + ' role="img" aria-label="' + esc(label(badge)) + '">'
