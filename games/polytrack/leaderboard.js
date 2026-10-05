@@ -705,6 +705,7 @@
       '  width: 24px; height: 24px; flex-shrink: 0; margin: 0 14px 0 -4px; }',
       '.leaderboard-ui .gv-badges { margin: 0 20px 0 -4px; }',
       '.leaderboard-ui .gv-check + .gv-badges { margin-left: -8px; }',
+      '.gv-dialog .gv-badge { vertical-align: -5px; }',
       '.leaderboard-ui > .container > button.main.gv-no-replay { cursor: default; }',
       '.leaderboard-ui > .container > button.main.gv-no-replay > .image-container { opacity: 0.4; }',
       '.leaderboard-ui > .container > button.main > .right > p.gv-replay-tag {',
@@ -826,6 +827,14 @@
       : 'Guest - set without signing in';
   }
 
+  // This week's badge, in gold, for the info box.
+  function badgeSample() {
+    var badges = window.GV && window.GV.badges;
+    var day = new Date();
+    day.setUTCDate(day.getUTCDate() - (day.getUTCDay() + 6) % 7);
+    return badges ? badges.svg({ badge: 'challenge-winner', starts: day.toISOString().slice(0, 10) }, 22) : '';
+  }
+
   function showInfo() {
     var panel = document.querySelector('.leaderboard-ui');
     if (!panel || panel.querySelector('.gv-dialog')) return;
@@ -842,6 +851,8 @@
       'Sign in before racing to have your times count as signed in.<br><br>' +
       CHECK_SVG + ' A blue check next to a name means GameVault has picked that ' +
       'player out as one of its top racers.<br><br>' +
+      badgeSample() + ' Badges next to a name are Track of the Week wins. ' +
+      'Every week has its own badge: gold for first, silver for second and third.<br><br>' +
       'No replay means the time was set before replays were saved, so it cannot ' +
       'be watched or raced. It gets one the next time that player beats it.';
     var ok = document.createElement('button');
