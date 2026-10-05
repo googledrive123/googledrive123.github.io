@@ -119,4 +119,14 @@
       setTimeout(next, result === 'clicked' ? SETTLE_MS : POLL_MS);
     })();
   }
+
+  var wait = setInterval(function () {
+    if (!gameUp()) return;
+    clearInterval(wait);
+    var id = take();
+    if (!id) return;
+    lookUp(id).then(function (track) {
+      if (track) drive(track);
+    }).catch(function (err) { console.error('[race]', err); });
+  }, POLL_MS);
 })();
