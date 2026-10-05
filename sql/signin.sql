@@ -23,3 +23,5 @@ begin
            where id = v_id);
 end;
 $function$;
+
+grant execute on function public.gv_login_email(text) to anon, authenticated;
