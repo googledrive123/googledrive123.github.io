@@ -7,6 +7,7 @@
   // loading, short enough that an old ask never takes over a later visit.
   var FRESH_MS = 2 * 60 * 1000;
   var POLL_MS = 250;
+  // Each screen animates in, and a click before it has settled can be lost.
   var SETTLE_MS = 700;
 
   function shown(el) {
