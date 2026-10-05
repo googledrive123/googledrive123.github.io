@@ -94,6 +94,23 @@
     }
   };
 
+  // Each week's design, in order. The names are what a badge is called when
+  // someone points at it.
+  var TYPES = [
+    { name: 'Checkered Shield', shape: 'shield', emblem: 'flag' },
+    { name: 'Volt', shape: 'hexagon', emblem: 'bolt' },
+    { name: 'Star Medal', shape: 'circle', emblem: 'star' },
+    { name: 'Blaze', shape: 'diamond', emblem: 'flame' },
+    { name: 'Crown', shape: 'octagon', emblem: 'crown' },
+    { name: 'Wheelspin', shape: 'rosette', emblem: 'wheel' },
+    { name: 'Turbo', shape: 'square', emblem: 'chevrons' },
+    { name: 'Podium', shape: 'pentagon', emblem: 'trophy' },
+    { name: 'Comet', shape: 'banner', emblem: 'comet' },
+    { name: 'Summit', shape: 'star', emblem: 'peak' },
+    { name: 'Gem', shape: 'flathex', emblem: 'gem' },
+    { name: 'Lap Record', shape: 'crest', emblem: 'stopwatch' }
+  ];
+
   // The week a challenge starting on this day ('2026-10-05') is, counted from
   // the first weekly one.
   function weekOf(starts) {
