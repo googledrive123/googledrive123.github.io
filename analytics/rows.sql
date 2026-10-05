@@ -17,6 +17,12 @@
 
 
 -- How far back from p_from the ids go, and the database's own clock.
+--
+-- Found through the indexes. Counting the range read the whole table, which
+-- took up to two seconds once the site was busy, and the dashboard stopped
+-- with a timeout whenever it passed 3. The first id is the lowest among the
+-- range's first thousand events by time: ts is the server's clock at insert,
+-- so ids and times only ever disagree by the few seconds an insert takes.
 create or replace function public.analytics_span(p_secret text, p_from timestamptz)
 returns json
 language plpgsql
@@ -29,10 +35,12 @@ begin
     raise exception 'not allowed';
   end if;
 
-  return (
-    select json_build_object('now', now(), 'min_id', min(id), 'max_id', max(id), 'rows', count(*))
-    from analytics_events
-    where ts >= p_from
+  return json_build_object(
+    'now', now(),
+    'min_id', (select min(f.id) from (
+                 select id from analytics_events where ts >= p_from order by ts limit 1000
+               ) f),
+    'max_id', (select max(id) from analytics_events)
   );
 end;
 $function$;

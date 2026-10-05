@@ -788,17 +788,31 @@
   // past 3 seconds is stopped, and one at a time took most of a minute for a
   // month. Each slice is at most the 5000 rows analytics_rows hands over.
   var SLICE = 5000, AT_ONCE = 4;
+  // A busy moment on the database can still stop one request at 3 seconds,
+  // and one failure used to throw the whole range away. So a request that
+  // timed out or never arrived is asked again, twice, a moment later.
+  function patient(ask, tries) {
+    return ask().catch(function (e) {
+      if (!tries || !/timeout|fetch|network|HTTP 5/i.test(e.message || '')) throw e;
+      return new Promise(function (done) { setTimeout(done, 800); }).then(function () { return patient(ask, tries - 1); });
+    });
+  }
   function fetchRange(from, onSlice) {
     var st = newStore(from), p_from = new Date(from).toISOString();
-    return rpc('analytics_span', { p_secret: state.secret, p_from: p_from }).then(function (span) {
+    return patient(function () {
+      return rpc('analytics_span', { p_secret: state.secret, p_from: p_from });
+    }, 2).then(function (span) {
       var slices = [], done = 0;
       if (span.min_id != null) for (var lo = span.min_id; lo <= span.max_id; lo += SLICE) slices.push(lo);
+      var total = slices.length;
       function next() {
         if (!slices.length) return null;
         var lo = slices.shift();
-        return rpc('analytics_rows', { p_secret: state.secret, p_from: p_from, p_lo: lo, p_hi: Math.min(lo + SLICE - 1, span.max_id) }).then(function (res) {
+        return patient(function () {
+          return rpc('analytics_rows', { p_secret: state.secret, p_from: p_from, p_lo: lo, p_hi: Math.min(lo + SLICE - 1, span.max_id) });
+        }, 2).then(function (res) {
           take(st, res);
-          if (onSlice) onSlice(++done, done + slices.length);
+          if (onSlice) onSlice(++done, total);
           return next();
         });
       }
