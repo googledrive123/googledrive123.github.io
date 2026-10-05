@@ -657,11 +657,12 @@ begin
    where starts = p_starts
      and badge in ('challenge-winner', 'challenge-top3');
 
-  insert into gv_badges (player_key, badge, starts, user_id)
+  insert into gv_badges (player_key, badge, starts, user_id, place)
   select r.player_key,
          case when r.rank = 1 then 'challenge-winner' else 'challenge-top3' end,
          p_starts,
-         r.user_id
+         r.user_id,
+         r.rank
   from gv_challenge_ranked(p_starts) r
   where r.rank <= 3;
 
@@ -674,7 +675,8 @@ begin
              'user_id', r.user_id,
              'nickname', r.nickname,
              'time', gv_challenge_time(r.frames),
-             'badge', case when r.rank = 1 then 'challenge-winner' else 'challenge-top3' end
+             'badge', case when r.rank = 1 then 'challenge-winner' else 'challenge-top3' end,
+             'place', r.rank
            ) order by r.rank)
     from gv_challenge_ranked(p_starts) r
     where r.rank <= 3
