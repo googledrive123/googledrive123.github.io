@@ -53,6 +53,7 @@ grant execute on function public.gv_name_ok(text) to anon, authenticated;
 create or replace function public.gv_profiles_name_guard()
 returns trigger
 language plpgsql
+security definer
 set search_path to 'public'
 as $function$
 begin
