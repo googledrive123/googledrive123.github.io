@@ -205,7 +205,8 @@
       if (typeof entry.position === 'number') {
         checked[entry.position] = entry.gvVerified === true;
         replays[entry.position] = entry.gvReplay === true;
-        owners[entry.position] = entry.userId;
+        // Badges would say who an Anonymous row is.
+        owners[entry.position] = entry.nickname === 'Anonymous' ? null : entry.userId;
       }
       delete entry.gvVerified;
       delete entry.gvReplay;
