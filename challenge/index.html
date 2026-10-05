@@ -382,14 +382,15 @@
     paintClock();
   }
 
-  // This week's badge, as first place and as second or third get it.
+  // This week's badge, as first, second and third get it.
   function paintPrize(c) {
     var badges = window.GV && window.GV.badges;
     $('chPrize').hidden = !badges;
     if (!badges) return;
     $('chPrizeArt').innerHTML =
-      badges.svg({ badge: 'challenge-winner', starts: c.starts, title: c.title }, 52) +
-      badges.svg({ badge: 'challenge-top3', starts: c.starts, title: c.title }, 34);
+      badges.svg({ badge: 'challenge-winner', starts: c.starts, title: c.title, place: 1 }, 52) +
+      badges.svg({ badge: 'challenge-top3', starts: c.starts, title: c.title, place: 2 }, 34) +
+      badges.svg({ badge: 'challenge-top3', starts: c.starts, title: c.title, place: 3 }, 34);
     $('chPrizeName').textContent = "This week's badge: " + badges.design(c.starts).name;
   }
 
