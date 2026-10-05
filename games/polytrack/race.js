@@ -51,6 +51,14 @@
   }
 
   function step(track) {
+    var picker = onScreen('.track-selection-ui');
+    if (picker) {
+      var image = picker.querySelector('.track .thumbnail[src="' + track.thumbnail + '"]');
+      if (!image) return 'wait';
+      image.closest('.track').querySelector('button').click();
+      return 'clicked';
+    }
+
     var play = buttonWithIcon(onScreen('.main-buttons-container'), 'play.svg');
     if (!play) return 'wait';
     play.click();
