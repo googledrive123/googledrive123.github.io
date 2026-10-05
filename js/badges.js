@@ -68,6 +68,29 @@
       return '<circle ' + LINE + ' stroke-width="2.4" cx="16" cy="16" r="7.4"/>'
         + '<circle ' + W + ' cx="16" cy="16" r="2.2"/>'
         + '<path ' + LINE + ' stroke-width="1.8" d="M16 13.8V9M14.1 17.1 9.9 19.5M17.9 17.1l4.2 2.4"/>';
+    },
+    chevrons: function () {
+      return '<path ' + LINE + ' stroke-width="3" d="M9 9.5l6 6.5-6 6.5M16.5 9.5l6 6.5-6 6.5"/>';
+    },
+    trophy: function () {
+      return '<path ' + W + ' d="M11 8h10v4.5a5 5 0 0 1-10 0ZM15 17.2h2v3.6h-2ZM11.5 21h9v2.6h-9Z"/>'
+        + '<path ' + LINE + ' stroke-width="1.6" d="M11 9.6H8.6v1.2a3 3 0 0 0 3 3M21 9.6h2.4v1.2a3 3 0 0 1-3 3"/>';
+    },
+    comet: function () {
+      return '<circle ' + W + ' cx="19.5" cy="12.5" r="4"/>'
+        + '<path ' + LINE + ' stroke-width="2" d="M16.2 15.8 8.5 23.5M14.6 12.6 10 17.2M19.4 17.4 14.8 22"/>';
+    },
+    peak: function () {
+      return '<path ' + W + ' d="M6 23 13 10.5l4.2 6.4 2.4-3.4L26 23Z"/>';
+    },
+    gem: function (color) {
+      return '<path ' + W + ' d="M11 9h10l4 5-9 10.5L7 14Z"/>'
+        + '<path fill="none" stroke="' + color + '" stroke-width="1.1" stroke-linejoin="round" d="M7.4 14h17.2M13 9l-1.6 5L16 24l4.6-10L19 9"/>';
+    },
+    stopwatch: function () {
+      return '<circle ' + LINE + ' stroke-width="2.4" cx="16" cy="17.6" r="7"/>'
+        + '<path ' + W + ' d="M14.4 6.6h3.2v2.6h-3.2z"/>'
+        + '<path ' + LINE + ' stroke-width="2.2" d="M16 17.6v-4.2"/>';
     }
   };
 
