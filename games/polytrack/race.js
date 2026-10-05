@@ -7,6 +7,10 @@
   // loading, short enough that an old ask never takes over a later visit.
   var FRESH_MS = 2 * 60 * 1000;
 
+  function shown(el) {
+    return !!el && !el.classList.contains('hidden') && el.getClientRects().length > 0;
+  }
+
   function take() {
     try {
       var ask = JSON.parse(sessionStorage.getItem(KEY) || 'null');
