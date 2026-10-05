@@ -11,6 +11,14 @@
     return !!el && !el.classList.contains('hidden') && el.getClientRects().length > 0;
   }
 
+  // The game keeps some screens in the document while they are put away,
+  // and two track pickers, one for Play and one for hosting a room.
+  function onScreen(selector) {
+    var all = document.querySelectorAll(selector);
+    for (var i = 0; i < all.length; i++) if (shown(all[i])) return all[i];
+    return null;
+  }
+
   function take() {
     try {
       var ask = JSON.parse(sessionStorage.getItem(KEY) || 'null');
