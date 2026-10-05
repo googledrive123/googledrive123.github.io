@@ -4,7 +4,8 @@
 -- once the track is up counts, straight from the site's PolyTrack leaderboard
 -- (games/polytrack/leaderboard.sql), and once the week is over the owner
 -- closes it from the analytics dashboard: first place gets the
--- challenge-winner badge, second and third get challenge-top3. The badge is
+-- challenge-winner badge, second and third get challenge-top3, and each keeps
+-- its place so the three look different (gold, silver, bronze). The badge is
 -- the whole prize. /challenge/ shows the week, /winner/ shows its winner.
 --
 -- A week runs Monday to Sunday and ends at midnight UTC on Sunday night, so
