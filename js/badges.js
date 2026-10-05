@@ -184,10 +184,25 @@
     (document.head || document.documentElement).appendChild(el);
   }
 
+  // A player's badges as one row, newest first, each tucked a little under
+  // the one before it.
+  function stack(list, size) {
+    style();
+    var box = document.createElement('span');
+    box.className = 'gv-badges';
+    var shown = list || [];
+    box.innerHTML = shown.map(function (b) { return svg(b, size); }).join('');
+    Array.prototype.forEach.call(box.children, function (el, i) {
+      if (i) el.style.marginLeft = -Math.round(size * 0.3) + 'px';
+    });
+    return box;
+  }
+
   window.GV = window.GV || {};
   window.GV.badges = {
     design: design,
     label: label,
-    svg: svg
+    svg: svg,
+    stack: stack
   };
 })();
