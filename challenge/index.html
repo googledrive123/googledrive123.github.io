@@ -156,6 +156,7 @@
     .ch-past-win { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.6rem; }
     .ch-past-time { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--muted); }
     .ch-past-win .ch-crown svg { width: 16px; height: 16px; }
+    .ch-past-win .gv-badge { display: block; }
     .ch-past-win.pending .ch-name { color: var(--muted); }
     .ch-past-none { font-size: 0.8rem; color: var(--muted-2); }
     .page .ch-past p.ch-past-empty { font-size: 0.86rem; }
@@ -576,7 +577,11 @@
         if (m.closed) {
           var crown = document.createElement('span');
           crown.className = 'ch-crown';
-          crown.innerHTML = CROWN_SVG;
+          // The badge that week was won for, or the plain crown without it.
+          var badges = window.GV && window.GV.badges;
+          crown.innerHTML = badges
+            ? badges.svg({ badge: 'challenge-winner', starts: m.starts, title: m.title }, 22)
+            : CROWN_SVG;
           right.appendChild(crown);
         } else {
           var tag = document.createElement('span');
