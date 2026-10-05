@@ -5258,6 +5258,8 @@ window.switchAuthTab = function(tab) {
 async function signInEmails(typed) {
   const own = typed.toLowerCase().replace(/[^a-z0-9_]/g, '');
   const emails = own ? [own + '@gamevault.app'] : [];
+  const { data } = await sb.rpc('gv_login_email', { p_name: typed });
+  if (data && !emails.includes(data)) emails.unshift(data);
   return emails;
 }
 
