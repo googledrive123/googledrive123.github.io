@@ -50,6 +50,9 @@
     return image ? image.closest('button') : null;
   }
 
+  // One look at the screen, and one click towards the track: 'done' once
+  // the player is on it, 'clicked' when the screen should be about to change,
+  // and 'wait' while the game is busy.
   function step(track) {
     var page = onScreen('.track-info-ui');
     if (page) {
