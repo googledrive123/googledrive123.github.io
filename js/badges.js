@@ -169,6 +169,21 @@
       + '</svg>';
   }
 
+  var CSS =
+    '.gv-badges{display:inline-flex;align-items:center;vertical-align:middle;flex-shrink:0;line-height:1}' +
+    '.gv-badges:empty{display:none}' +
+    '.gv-badges>.gv-badge{flex:none;filter:drop-shadow(-1px 0 1px rgba(0,0,0,.55))}' +
+    '.gv-badges>.gv-badge:first-child{filter:none}' +
+    '.gv-badges-more{margin-left:4px;font-size:.75em;font-weight:700;opacity:.7}';
+
+  function style() {
+    if (document.getElementById('gv-badges-css')) return;
+    var el = document.createElement('style');
+    el.id = 'gv-badges-css';
+    el.textContent = CSS;
+    (document.head || document.documentElement).appendChild(el);
+  }
+
   window.GV = window.GV || {};
   window.GV.badges = {
     design: design,
