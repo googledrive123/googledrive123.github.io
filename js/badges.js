@@ -4,6 +4,8 @@
    nothing is drawn by hand when a new week starts and no two weeks in a row
    look alike. First place gets it with a gold rim, second and third with a
    silver one (challenge/challenge.sql hands them out).
+   Used by chat (js/chat.js), the PolyTrack leaderboard
+   (games/polytrack/leaderboard.js) and /challenge/.
    Public surface: window.GV.badges. */
 (function () {
   'use strict';
