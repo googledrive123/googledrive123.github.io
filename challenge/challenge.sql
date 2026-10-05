@@ -787,3 +787,15 @@ where c.starts = '2026-09-01'
   and c.closed_at is null
   and not exists (select 1 from public.gv_challenge_runs r where r.starts = c.starts)
 on conflict (starts, player_key) do nothing;
+
+-- Badges handed out before they kept their place get it from their week's
+-- board, which no longer changes once the week is closed.
+update public.gv_badges b
+   set place = r.rank
+  from public.gv_challenges c
+ cross join lateral public.gv_challenge_ranked(c.starts) r
+ where c.closed_at is not null
+   and b.starts = c.starts
+   and b.player_key = r.player_key
+   and r.rank <= 3
+   and b.place is null;
