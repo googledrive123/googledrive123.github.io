@@ -93,6 +93,10 @@
     '.gv-chat-send{min-width:64px}',
     '.gv-chat-check{width:14px;height:14px;flex-shrink:0;margin-left:4px;vertical-align:-2px}',
     '.gv-msg-head>.gv-badges{align-self:center;margin-left:-3px}',
+    '.gv-chat-wins{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}',
+    '.gv-chat-wins:empty{display:none}',
+    '.gv-chat-win{display:flex;align-items:center;gap:10px;font-size:.82rem;color:var(--muted,#8a8a96)}',
+    '.gv-chat-win>svg{flex-shrink:0}',
     '.gv-mention{display:inline;padding:0 3px;border:0;border-radius:4px;background:rgba(57,135,229,.18);color:#8ab8f2;font:inherit;font-weight:600;cursor:pointer}',
     '.gv-mention:hover{text-decoration:underline}',
     '.gv-mention.me{background:rgba(255,59,59,.3);color:#fff;cursor:default;text-decoration:none}',
@@ -1221,6 +1225,7 @@
 
   function personSheet(id, name) {
     var body = sheet(name);
+    body.appendChild(wins(id));
     var note = el('p');
     var row = el('div', 'gv-chat-actions');
     row.appendChild(pill('Message', 'primary', function () {
@@ -1241,6 +1246,22 @@
     row.appendChild(add);
     body.appendChild(row);
     body.appendChild(note);
+  }
+
+  // Every Track of the Week badge the person has won, each with what it was for.
+  function wins(id) {
+    var list = el('div', 'gv-chat-wins');
+    var badges = window.GV.badges;
+    if (!badges) return list;
+    badges.of(id).then(function (all) {
+      all.forEach(function (b) {
+        var line = el('div', 'gv-chat-win');
+        line.innerHTML = badges.svg(b, 28);
+        line.appendChild(el('span', '', badges.label(b)));
+        list.appendChild(line);
+      });
+    });
+    return list;
   }
 
   // ── Reports ───────────────────────────────────────────────────────────
