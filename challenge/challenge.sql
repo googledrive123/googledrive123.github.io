@@ -440,7 +440,9 @@ grant execute on function public.gv_challenge_history() to anon, authenticated;
 
 
 -- Badges for the players on a board, by player key, for drawing beside their
--- names: {"<key>": [{"badge": "challenge-winner", "starts": "2026-09-28"}]}.
+-- names: {"<key>": [{"badge": "challenge-winner", "starts": "2026-09-28",
+-- "title": "Summer 3"}]}. Each week's badge looks different (js/badges.js
+-- draws it from starts), and title names the track it was won on.
 -- Keys with no badges are left out.
 create or replace function public.gv_badges_for(p_keys text[])
 returns json
