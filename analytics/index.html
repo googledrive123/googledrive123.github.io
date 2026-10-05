@@ -804,6 +804,7 @@
     }, 2).then(function (span) {
       var slices = [], done = 0;
       if (span.min_id != null) for (var lo = span.min_id; lo <= span.max_id; lo += SLICE) slices.push(lo);
+      var total = slices.length;
       function next() {
         if (!slices.length) return null;
         var lo = slices.shift();
@@ -811,7 +812,7 @@
           return rpc('analytics_rows', { p_secret: state.secret, p_from: p_from, p_lo: lo, p_hi: Math.min(lo + SLICE - 1, span.max_id) });
         }, 2).then(function (res) {
           take(st, res);
-          if (onSlice) onSlice(++done, done + slices.length);
+          if (onSlice) onSlice(++done, total);
           return next();
         });
       }
