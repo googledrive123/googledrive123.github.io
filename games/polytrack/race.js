@@ -16,6 +16,8 @@
     return null;
   }
 
+  // The track's name and thumbnail, from the game's list of tracks, where
+  // each one reads {id:"…",trackMetadata:{name:"…",…},…,thumbnail:"…"}.
   function lookUp(id) {
     return fetch('main.bundle.js', { cache: 'force-cache' })
       .then(function (res) { return res.text(); })
