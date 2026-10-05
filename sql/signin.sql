@@ -19,6 +19,7 @@ begin
   end if;
 
   select id into v_id from profiles where username = v_name;
+  -- Typed in another case. Only when that leaves no doubt which account.
   if v_id is null then
     select min(id::text)::uuid into v_id from profiles
      where lower(username) = lower(v_name)
