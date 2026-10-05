@@ -6,6 +6,10 @@
 
   var SUPA_URL = 'https://dxwjxzmlezfyursysays.supabase.co';
   var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
+  // Badges only change when the owner closes a week.
+  var CACHE_MS = 5 * 60 * 1000;
+  // gv_badges_for takes at most this many players at once.
+  var BATCH = 200;
   // The first weekly challenge. Each week after it is one design further on.
   var FIRST_WEEK = Date.UTC(2026, 8, 28);
   var WEEK_MS = 7 * 24 * 60 * 60 * 1000;
@@ -210,6 +214,14 @@
     return box;
   }
 
+  // ── Who has which ─────────────────────────────────────────────────────
+  // Asked for in batches: a chat window or a leaderboard page draws many
+  // names at once, and they all go up in one request.
+
+  var cache = {};
+  var waiting = {};
+  var timer = null;
+
   function rpc(name, args) {
     return fetch(SUPA_URL + '/rest/v1/rpc/' + name, {
       method: 'POST',
@@ -221,11 +233,44 @@
     });
   }
 
+  function ask(keys, batch) {
+    rpc('gv_badges_for', { p_keys: keys }).then(function (map) {
+      keys.forEach(function (key) {
+        var list = (map && map[key]) || [];
+        cache[key] = { at: Date.now(), list: list };
+        batch[key].forEach(function (done) { done(list); });
+      });
+    }, function (err) {
+      console.error('[badges]', err);
+      keys.forEach(function (key) { batch[key].forEach(function (done) { done([]); }); });
+    });
+  }
+
+  function flush() {
+    timer = null;
+    var batch = waiting;
+    waiting = {};
+    var keys = Object.keys(batch);
+    for (var i = 0; i < keys.length; i += BATCH) ask(keys.slice(i, i + BATCH), batch);
+  }
+
+  // key: an account's user id, or a guest's 'guest:' key from the board.
+  function of(key) {
+    if (!key) return Promise.resolve([]);
+    var hit = cache[key];
+    if (hit && Date.now() - hit.at < CACHE_MS) return Promise.resolve(hit.list);
+    return new Promise(function (done) {
+      (waiting[key] = waiting[key] || []).push(done);
+      if (!timer) timer = setTimeout(flush, 30);
+    });
+  }
+
   window.GV = window.GV || {};
   window.GV.badges = {
     design: design,
     label: label,
     svg: svg,
-    stack: stack
+    stack: stack,
+    of: of
   };
 })();
