@@ -4,6 +4,8 @@
 (function () {
   'use strict';
 
+  var SUPA_URL = 'https://dxwjxzmlezfyursysays.supabase.co';
+  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d2p4em1sZXpmeXVyc3lzYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTM1MzAsImV4cCI6MjA5NDI4OTUzMH0.BQZdvlRD1ykfSV0bhlxt77Nb90DzvcX4NI2LrMK4n_0';
   // The first weekly challenge. Each week after it is one design further on.
   var FIRST_WEEK = Date.UTC(2026, 8, 28);
   var WEEK_MS = 7 * 24 * 60 * 60 * 1000;
@@ -206,6 +208,17 @@
       box.appendChild(tag);
     }
     return box;
+  }
+
+  function rpc(name, args) {
+    return fetch(SUPA_URL + '/rest/v1/rpc/' + name, {
+      method: 'POST',
+      headers: { apikey: SUPA_KEY, Authorization: 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify(args)
+    }).then(function (res) {
+      if (!res.ok) throw new Error(name + ' ' + res.status);
+      return res.json();
+    });
   }
 
   window.GV = window.GV || {};
