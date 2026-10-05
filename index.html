@@ -5261,11 +5261,15 @@ async function signInEmails(typed) {
 }
 
 document.getElementById('siSubmit').addEventListener('click', async () => {
-  const username = document.getElementById('siUsername').value.trim().toLowerCase();
+  const username = document.getElementById('siUsername').value.trim();
   const pw = document.getElementById('siPassword').value;
   const errEl = document.getElementById('authError');
   if (!username || !pw) { errEl.textContent = 'Fill in all fields.'; return; }
-  const { error } = await sb.auth.signInWithPassword({ email: username + '@gamevault.app', password: pw });
+  let error = { message: 'no such username' };
+  for (const email of await signInEmails(username)) {
+    ({ error } = await sb.auth.signInWithPassword({ email, password: pw }));
+    if (!error) break;
+  }
   if (error) { errEl.textContent = 'Invalid username or password.'; } else { closeAuth(); }
 });
 
