@@ -788,6 +788,9 @@
   // past 3 seconds is stopped, and one at a time took most of a minute for a
   // month. Each slice is at most the 5000 rows analytics_rows hands over.
   var SLICE = 5000, AT_ONCE = 4;
+  // A busy moment on the database can still stop one request at 3 seconds,
+  // and one failure used to throw the whole range away. So a request that
+  // timed out or never arrived is asked again, twice, a moment later.
   function patient(ask, tries) {
     return ask().catch(function (e) {
       if (!tries || !/timeout|fetch|network|HTTP 5/i.test(e.message || '')) throw e;
