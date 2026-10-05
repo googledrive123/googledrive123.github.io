@@ -1,0 +1,25 @@
+-- Signing in with the username an account has now.
+
+create or replace function public.gv_login_email(p_name text)
+returns text
+language plpgsql
+stable
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_id uuid;
+begin
+  if not public.gv_origin_allowed() then
+    raise exception 'not from this origin';
+  end if;
+
+  select id into v_id from profiles where username = p_name;
+  if v_id is null then
+    return null;
+  end if;
+
+  return (select email from auth.users
+           where id = v_id);
+end;
+$function$;
