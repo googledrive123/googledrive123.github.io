@@ -1,5 +1,9 @@
 /* GameVault Track of the Week badges: the one each week's winner and top 3
    take home, and the row of them drawn beside a player's name.
+   Every week has its own badge. Its design comes from the week itself, so
+   nothing is drawn by hand when a new week starts and no two weeks in a row
+   look alike. First place gets it with a gold rim, second and third with a
+   silver one (challenge/challenge.sql hands them out).
    Public surface: window.GV.badges. */
 (function () {
   'use strict';
