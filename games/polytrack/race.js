@@ -49,4 +49,11 @@
     var image = root && root.querySelector('img[src="images/' + icon + '"]');
     return image ? image.closest('button') : null;
   }
+
+  function step(track) {
+    var play = buttonWithIcon(onScreen('.main-buttons-container'), 'play.svg');
+    if (!play) return 'wait';
+    play.click();
+    return 'clicked';
+  }
 })();
