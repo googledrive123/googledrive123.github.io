@@ -53,6 +53,8 @@
   function step(track) {
     var picker = onScreen('.track-selection-ui');
     if (picker) {
+      // Every tab's cards are built up front, so a card behind another tab
+      // opens just the same.
       var image = picker.querySelector('.track .thumbnail[src="' + track.thumbnail + '"]');
       if (!image) return 'wait';
       image.closest('.track').querySelector('button').click();
