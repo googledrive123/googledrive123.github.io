@@ -5255,12 +5255,28 @@ window.switchAuthTab = function(tab) {
   document.getElementById('authError').textContent = '';
 };
 
+// A login is the username the account signed up with, and a rename in the
+// profile does not change it. So the account that has the typed name now is
+// tried first (sql/signin.sql), then the name as typed, which keeps the
+// sign-up name working too.
+async function signInEmails(typed) {
+  const own = typed.toLowerCase().replace(/[^a-z0-9_]/g, '');
+  const emails = own ? [own + '@gamevault.app'] : [];
+  const { data } = await sb.rpc('gv_login_email', { p_name: typed });
+  if (data && !emails.includes(data)) emails.unshift(data);
+  return emails;
+}
+
 document.getElementById('siSubmit').addEventListener('click', async () => {
-  const username = document.getElementById('siUsername').value.trim().toLowerCase();
+  const username = document.getElementById('siUsername').value.trim();
   const pw = document.getElementById('siPassword').value;
   const errEl = document.getElementById('authError');
   if (!username || !pw) { errEl.textContent = 'Fill in all fields.'; return; }
-  const { error } = await sb.auth.signInWithPassword({ email: username + '@gamevault.app', password: pw });
+  let error = { message: 'no such username' };
+  for (const email of await signInEmails(username)) {
+    ({ error } = await sb.auth.signInWithPassword({ email, password: pw }));
+    if (!error) break;
+  }
   if (error) { errEl.textContent = 'Invalid username or password.'; } else { closeAuth(); }
 });
 
@@ -5273,6 +5289,9 @@ document.getElementById('suSubmit').addEventListener('click', async () => {
   const nameOk = await sb.rpc('gv_name_ok', { p_name: username });
   if (nameOk.data === false) { errEl.textContent = 'That username is not allowed. Try another.'; return; }
   if (pw.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; return; }
+  // Someone may have renamed to this name, and they sign in with it now.
+  const owner = await sb.rpc('gv_login_email', { p_name: username });
+  if (owner.data) { errEl.textContent = 'Username already taken.'; return; }
   const { data, error } = await sb.auth.signUp({ email: username + '@gamevault.app', password: pw });
   if (error) { errEl.textContent = error.message.includes('already') ? 'Username already taken.' : error.message; return; }
   if (data.user) {
@@ -5414,7 +5433,9 @@ document.getElementById('profileSaveBtn').addEventListener('click', async () => 
     if (nameOk.data === false) { msgEl.textContent = 'That username is not allowed. Try another.'; return; }
     const { error } = await sb.from('profiles').upsert({ id: currentUser.id, username });
     if (error) {
-      msgEl.textContent = /not allowed/.test(error.message) ? 'That username is not allowed. Try another.' : 'Error saving username.';
+      msgEl.textContent = /not allowed/.test(error.message) ? 'That username is not allowed. Try another.'
+        : error.code === '23505' || /taken/.test(error.message) ? 'That username is taken. Try another.'
+        : 'Error saving username.';
       return;
     }
     currentUser._username = username;

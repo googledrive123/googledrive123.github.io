@@ -50,9 +50,12 @@ grant execute on function public.gv_name_ok(text) to anon, authenticated;
 -- New profiles: swap a rude name for a neutral one rather than fail sign-up.
 -- Renames: refuse. Only fires when the name actually changes, so saving
 -- anything else on an old profile never trips it.
+-- Security definer because a player can only read their own profile, and
+-- the taken check has to see everyone's.
 create or replace function public.gv_profiles_name_guard()
 returns trigger
 language plpgsql
+security definer
 set search_path to 'public'
 as $function$
 begin
@@ -64,6 +67,13 @@ begin
     else
       raise exception 'That username is not allowed. Try another.';
     end if;
+  end if;
+  -- Players sign in with their username (sql/signin.sql), so a rename may
+  -- not take one that differs from someone else's only in case.
+  if not (tg_op = 'INSERT' and not exists (select 1 from public.profiles where id = new.id))
+     and exists (select 1 from public.profiles
+                  where lower(username) = lower(new.username) and id <> new.id) then
+    raise exception 'That username is taken. Try another.';
   end if;
   return new;
 end;
