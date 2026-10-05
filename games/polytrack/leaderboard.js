@@ -190,18 +190,22 @@
   var checked = {};
   // Which rows have a replay to watch or race, noted the same way.
   var replays = {};
+  // Whose each row is, for their Track of the Week badges (js/badges.js).
+  var owners = {};
 
   function noteChecks(trackId, entries) {
     if (trackId !== checkedTrack) {
       checkedTrack = trackId;
       checked = {};
       replays = {};
+      owners = {};
     }
     for (var i = 0; i < entries.length; i++) {
       var entry = entries[i];
       if (typeof entry.position === 'number') {
         checked[entry.position] = entry.gvVerified === true;
         replays[entry.position] = entry.gvReplay === true;
+        owners[entry.position] = entry.userId;
       }
       delete entry.gvVerified;
       delete entry.gvReplay;
