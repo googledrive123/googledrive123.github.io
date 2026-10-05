@@ -72,6 +72,14 @@
       return 'clicked';
     }
 
+    var toolbar = onScreen('.game-toolbar-ui.visible');
+    if (toolbar) {
+      var exit = buttonWithIcon(toolbar, 'quit.svg');
+      if (!exit) return 'wait';
+      exit.click();
+      return 'clicked';
+    }
+
     var play = buttonWithIcon(onScreen('.main-buttons-container'), 'play.svg');
     if (!play) return 'wait';
     play.click();
