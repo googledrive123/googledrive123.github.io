@@ -23,7 +23,10 @@
         var at = text.indexOf('id:"' + id + '"');
         if (at < 0) return null;
         var end = text.indexOf('{id:"', at + 1);
-        return text.slice(at, end < 0 ? at + 1000 : end);
+        var entry = text.slice(at, end < 0 ? at + 1000 : end);
+        var name = /trackMetadata:\{name:("(?:[^"\\]|\\.)*")/.exec(entry);
+        if (!name) return null;
+        return { name: JSON.parse(name[1]) };
       });
   }
 })();
