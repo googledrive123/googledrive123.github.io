@@ -852,7 +852,7 @@
       CHECK_SVG + ' A blue check next to a name means GameVault has picked that ' +
       'player out as one of its top racers.<br><br>' +
       badgeSample() + ' Badges next to a name are Track of the Week wins. ' +
-      'Every week has its own badge: gold for first, silver for second and third.<br><br>' +
+      'Every week has its own badge: gold for first, silver for second, bronze for third.<br><br>' +
       'No replay means the time was set before replays were saved, so it cannot ' +
       'be watched or raced. It gets one the next time that player beats it.';
     var ok = document.createElement('button');
