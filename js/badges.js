@@ -2,8 +2,8 @@
    take home, and the row of them drawn beside a player's name.
    Every week has its own badge. Its design comes from the week itself, so
    nothing is drawn by hand when a new week starts and no two weeks in a row
-   look alike. First place gets it with a gold rim, second and third with a
-   silver one (challenge/challenge.sql hands them out).
+   look alike. First place gets it with a gold rim, second with silver and
+   third with bronze (challenge/challenge.sql hands them out).
    Used by chat (js/chat.js), the PolyTrack leaderboard
    (games/polytrack/leaderboard.js) and /challenge/.
    Public surface: window.GV.badges. */
