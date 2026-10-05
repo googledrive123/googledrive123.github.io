@@ -5255,6 +5255,11 @@ window.switchAuthTab = function(tab) {
   document.getElementById('authError').textContent = '';
 };
 
+async function signInEmails(typed) {
+  const emails = [typed.toLowerCase() + '@gamevault.app'];
+  return emails;
+}
+
 document.getElementById('siSubmit').addEventListener('click', async () => {
   const username = document.getElementById('siUsername').value.trim().toLowerCase();
   const pw = document.getElementById('siPassword').value;
