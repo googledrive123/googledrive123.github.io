@@ -92,6 +92,7 @@
     '.gv-chat-len{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-family:"JetBrains Mono",monospace;font-size:.62rem;color:var(--muted-2,#54545e);pointer-events:none}',
     '.gv-chat-send{min-width:64px}',
     '.gv-chat-check{width:14px;height:14px;flex-shrink:0;margin-left:4px;vertical-align:-2px}',
+    '.gv-msg-head>.gv-badges{align-self:center;margin-left:-3px}',
     '.gv-mention{display:inline;padding:0 3px;border:0;border-radius:4px;background:rgba(57,135,229,.18);color:#8ab8f2;font:inherit;font-weight:600;cursor:pointer}',
     '.gv-mention:hover{text-decoration:underline}',
     '.gv-mention.me{background:rgba(255,59,59,.3);color:#fff;cursor:default;text-decoration:none}',
@@ -566,6 +567,7 @@
     time.dateTime = m.created_at;
     head.appendChild(name);
     if (m.verified) head.appendChild(check());
+    if (window.GV.badges) head.appendChild(window.GV.badges.beside(m.user_id, 16));
     head.appendChild(time);
     if (!m.mine) {
       var flag = el('button', 'gv-msg-report', 'Report');
