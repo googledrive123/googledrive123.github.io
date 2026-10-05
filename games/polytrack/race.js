@@ -44,4 +44,9 @@
         return { name: JSON.parse(name[1]), thumbnail: thumbnail[1] };
       });
   }
+
+  function buttonWithIcon(root, icon) {
+    var image = root && root.querySelector('img[src="images/' + icon + '"]');
+    return image ? image.closest('button') : null;
+  }
 })();
