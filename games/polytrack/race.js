@@ -8,7 +8,7 @@
     try {
       var ask = JSON.parse(sessionStorage.getItem(KEY) || 'null');
       sessionStorage.removeItem(KEY);
-      if (ask) return ask.track;
+      if (ask && /^[0-9a-f]{64}$/.test(ask.track)) return ask.track;
     } catch (e) {}
     return null;
   }
