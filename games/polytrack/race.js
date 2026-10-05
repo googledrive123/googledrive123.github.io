@@ -96,6 +96,8 @@
     return 'clicked';
   }
 
+  // Keys pressed now should drive the car, not stay with the page around
+  // the game, which still has them from the click that led here.
   function focusGame() {
     try { window.focus(); } catch (e) {}
   }
