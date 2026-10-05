@@ -1,4 +1,9 @@
 // Puts the player on the track a link sent them to, ready to drive.
+//
+// The weekly challenge's Race it button, and Race now on the home page's
+// card, leave the week's track id in sessionStorage under gv.race on their
+// way here. Without this the game opens on its menu, and the player still
+// has to find the track themselves.
 (function () {
   'use strict';
 
