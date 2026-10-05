@@ -24,6 +24,10 @@
     return null;
   }
 
+  function gameUp() {
+    return !!document.querySelector('#ui > .menu-ui, #ui > .game-ui');
+  }
+
   function take() {
     try {
       var ask = JSON.parse(sessionStorage.getItem(KEY) || 'null');
