@@ -12,6 +12,19 @@
   // only after 84 weeks.
   var COLORS = ['#e5484d', '#0090ff', '#30a46c', '#8e4ec6', '#f76b15', '#12a594', '#d6409f'];
 
+  // ── Shapes ────────────────────────────────────────────────────────────
+  // Drawn on a 32 by 32 grid. A regular polygon or star, as a path.
+  function polygon(points, outer, inner, cy, turn) {
+    var d = '';
+    var count = inner ? points * 2 : points;
+    for (var i = 0; i < count; i++) {
+      var r = inner && i % 2 ? inner : outer;
+      var a = (turn || 0) + (i / count) * Math.PI * 2 - Math.PI / 2;
+      d += (i ? 'L' : 'M') + (16 + r * Math.cos(a)).toFixed(2) + ' ' + ((cy || 16) + r * Math.sin(a)).toFixed(2);
+    }
+    return d + 'Z';
+  }
+
   // The week a challenge starting on this day ('2026-10-05') is, counted from
   // the first weekly one.
   function weekOf(starts) {
