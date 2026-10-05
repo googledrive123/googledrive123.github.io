@@ -40,6 +40,37 @@
     crest: 'M5 4.5Q16 9 27 4.5V16c0 7-4.8 11.4-11 13.5C9.8 27.4 5 23 5 16Z'
   };
 
+  // ── Emblems ───────────────────────────────────────────────────────────
+  // White on the badge's colour. Each is a function of that colour, for the
+  // few that cut lines back into themselves.
+  var W = 'fill="#fff"';
+  var LINE = 'fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"';
+
+  var EMBLEMS = {
+    flag: function () {
+      return '<path ' + W + ' d="M10 8h1.8v16H10z"/>'
+        + '<path ' + LINE + ' stroke-width="1.2" d="M11.8 8.6h10v7.2h-10"/>'
+        + '<path ' + W + ' d="M11.8 8.6h2.5v3.6h-2.5zM16.8 8.6h2.5v3.6h-2.5zM14.3 12.2h2.5v3.6h-2.5zM19.3 12.2h2.5v3.6h-2.5z"/>';
+    },
+    bolt: function () {
+      return '<path ' + W + ' d="M18.5 6 10 18h5.5L13.5 26 22 14h-5.5Z"/>';
+    },
+    star: function () {
+      return '<path ' + W + ' d="' + polygon(5, 8, 3.5, 16.6) + '"/>';
+    },
+    flame: function () {
+      return '<path ' + W + ' d="M16 6c1 4 6 6 6 11.5a6 6 0 0 1-12 0c0-3 1.6-4.8 3-6 .2 2 1 3 2 3.5C14.5 12 15 9 16 6Z"/>';
+    },
+    crown: function () {
+      return '<path ' + W + ' d="M8.5 20.5 7.5 11.5l4.8 4L16 9l3.7 6.5 4.8-4-1 9ZM9 22h14v2.4H9Z"/>';
+    },
+    wheel: function () {
+      return '<circle ' + LINE + ' stroke-width="2.4" cx="16" cy="16" r="7.4"/>'
+        + '<circle ' + W + ' cx="16" cy="16" r="2.2"/>'
+        + '<path ' + LINE + ' stroke-width="1.8" d="M16 13.8V9M14.1 17.1 9.9 19.5M17.9 17.1l4.2 2.4"/>';
+    }
+  };
+
   // The week a challenge starting on this day ('2026-10-05') is, counted from
   // the first weekly one.
   function weekOf(starts) {
