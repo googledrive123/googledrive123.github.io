@@ -29,8 +29,9 @@ begin
     return null;
   end if;
 
+  -- Only the site's own logins, which are just the sign-up username.
   return (select email from auth.users
-           where id = v_id);
+           where id = v_id and email like '%@gamevault.app');
 end;
 $function$;
 
