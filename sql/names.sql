@@ -50,6 +50,8 @@ grant execute on function public.gv_name_ok(text) to anon, authenticated;
 -- New profiles: swap a rude name for a neutral one rather than fail sign-up.
 -- Renames: refuse. Only fires when the name actually changes, so saving
 -- anything else on an old profile never trips it.
+-- Security definer because a player can only read their own profile, and
+-- the taken check has to see everyone's.
 create or replace function public.gv_profiles_name_guard()
 returns trigger
 language plpgsql
