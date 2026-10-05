@@ -14,6 +14,9 @@ begin
   if not public.gv_origin_allowed() then
     raise exception 'not from this origin';
   end if;
+  if v_name = '' then
+    return null;
+  end if;
 
   select id into v_id from profiles where username = v_name;
   if v_id is null then
