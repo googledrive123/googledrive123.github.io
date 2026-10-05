@@ -96,13 +96,20 @@
     return 'clicked';
   }
 
+  function focusGame() {
+    try { window.focus(); } catch (e) {}
+  }
+
   function drive(track) {
     var until = Date.now() + GIVE_UP_MS;
     (function next() {
       if (Date.now() > until) return;
       var result = 'wait';
       try { result = step(track); } catch (e) { console.error('[race]', e); }
-      if (result === 'done') return;
+      if (result === 'done') {
+        focusGame();
+        return;
+      }
       setTimeout(next, result === 'clicked' ? SETTLE_MS : POLL_MS);
     })();
   }
