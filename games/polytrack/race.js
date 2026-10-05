@@ -25,8 +25,9 @@
         var end = text.indexOf('{id:"', at + 1);
         var entry = text.slice(at, end < 0 ? at + 1000 : end);
         var name = /trackMetadata:\{name:("(?:[^"\\]|\\.)*")/.exec(entry);
-        if (!name) return null;
-        return { name: JSON.parse(name[1]) };
+        var thumbnail = /thumbnail:"([^"]+)"/.exec(entry);
+        if (!name || !thumbnail) return null;
+        return { name: JSON.parse(name[1]), thumbnail: thumbnail[1] };
       });
   }
 })();
