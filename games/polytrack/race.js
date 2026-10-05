@@ -3,6 +3,8 @@
   'use strict';
 
   var KEY = 'gv.race';
+  // Long enough to get through the bounce into the player and the game
+  // loading, short enough that an old ask never takes over a later visit.
   var FRESH_MS = 2 * 60 * 1000;
 
   function take() {
