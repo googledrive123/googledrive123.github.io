@@ -35,6 +35,7 @@
     '.gv-totw-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);' +
       'animation:gvTotwDot 1.6s ease-in-out infinite}' +
     '.gv-totw-title{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-top:6px}' +
+    '.gv-totw-prize{display:flex;flex-shrink:0}' +
     '.gv-totw-name{font-size:clamp(1.5rem,5vw,2rem);font-weight:700;letter-spacing:-.02em;line-height:1.1;' +
       'color:var(--text);overflow-wrap:anywhere}' +
     '.gv-totw-env{font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;' +
@@ -134,6 +135,11 @@
       box.hidden = !c;
       if (!c) return;
       var kind = /^(Summer|Winter|Desert)\b/.exec(c.title);
+      // What first place takes home this week (js/badges.js).
+      var badges = window.GV && window.GV.badges;
+      var prize = badges
+        ? '<span class="gv-totw-prize">' + badges.svg({ badge: 'challenge-winner', starts: c.starts, title: c.title }, 30) + '</span>'
+        : '';
       var lead = (data.top || [])[0];
       var you = data.you;
       box.innerHTML =
@@ -141,7 +147,7 @@
         '<div class="gv-totw-body">' +
           '<div class="gv-totw-main">' +
             '<div class="gv-totw-kicker"><span class="gv-totw-dot"></span>Track of the week · PolyTrack</div>' +
-            '<div class="gv-totw-title"><span class="gv-totw-name">' + esc(c.title) + '</span>' +
+            '<div class="gv-totw-title">' + prize + '<span class="gv-totw-name">' + esc(c.title) + '</span>' +
               (kind ? '<span class="gv-totw-env ' + kind[1].toLowerCase() + '">' + kind[1] + '</span>' : '') + '</div>' +
             '<div class="gv-totw-meta">' +
               (lead

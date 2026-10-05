@@ -190,18 +190,23 @@
   var checked = {};
   // Which rows have a replay to watch or race, noted the same way.
   var replays = {};
+  // Whose each row is, for their Track of the Week badges (js/badges.js).
+  var owners = {};
 
   function noteChecks(trackId, entries) {
     if (trackId !== checkedTrack) {
       checkedTrack = trackId;
       checked = {};
       replays = {};
+      owners = {};
     }
     for (var i = 0; i < entries.length; i++) {
       var entry = entries[i];
       if (typeof entry.position === 'number') {
         checked[entry.position] = entry.gvVerified === true;
         replays[entry.position] = entry.gvReplay === true;
+        // Badges would say who an Anonymous row is.
+        owners[entry.position] = entry.nickname === 'Anonymous' ? null : entry.userId;
       }
       delete entry.gvVerified;
       delete entry.gvReplay;
@@ -698,6 +703,9 @@
       // The right margin gives that back so it does not land on the check.
       '.leaderboard-ui .gv-check {',
       '  width: 24px; height: 24px; flex-shrink: 0; margin: 0 14px 0 -4px; }',
+      '.leaderboard-ui .gv-badges { margin: 0 20px 0 -4px; }',
+      '.leaderboard-ui .gv-check + .gv-badges { margin-left: -8px; }',
+      '.gv-dialog .gv-badge { vertical-align: -5px; }',
       '.leaderboard-ui > .container > button.main.gv-no-replay { cursor: default; }',
       '.leaderboard-ui > .container > button.main.gv-no-replay > .image-container { opacity: 0.4; }',
       '.leaderboard-ui > .container > button.main > .right > p.gv-replay-tag {',
@@ -766,6 +774,16 @@
     shown.insertAdjacentHTML('afterend', CHECK_SVG);
   }
 
+  // After the check, or the name when there is none.
+  function badgeRow(row) {
+    var shown = row.querySelector('.name');
+    var key = owners[positionOf(row)];
+    if (!shown || !key || !window.GV || !window.GV.badges) return;
+    var check = shown.nextElementSibling;
+    var after = check && check.classList.contains('gv-check') ? check : shown;
+    after.parentNode.insertBefore(window.GV.badges.beside(key, 26), after.nextSibling);
+  }
+
   // A time with no replay cannot be watched or raced, and picking one makes
   // the game fail the whole selection with "Failed to load recordings". The
   // row says so and does not take the pick. The player's own row is left
@@ -796,6 +814,7 @@
     row.dataset.gvLabelled = '1';
     nameSelfRow(row);
     checkRow(row);
+    badgeRow(row);
     markReplay(row);
 
     var verified = state.classList.contains('verified');
@@ -806,6 +825,14 @@
     state.title = verified
       ? 'Signed in - set while signed in to GameVault'
       : 'Guest - set without signing in';
+  }
+
+  // This week's badge, in gold, for the info box.
+  function badgeSample() {
+    var badges = window.GV && window.GV.badges;
+    var day = new Date();
+    day.setUTCDate(day.getUTCDate() - (day.getUTCDay() + 6) % 7);
+    return badges ? badges.svg({ badge: 'challenge-winner', starts: day.toISOString().slice(0, 10) }, 22) : '';
   }
 
   function showInfo() {
@@ -824,6 +851,8 @@
       'Sign in before racing to have your times count as signed in.<br><br>' +
       CHECK_SVG + ' A blue check next to a name means GameVault has picked that ' +
       'player out as one of its top racers.<br><br>' +
+      badgeSample() + ' Badges next to a name are Track of the Week wins. ' +
+      'Every week has its own badge: gold for first, silver for second and third.<br><br>' +
       'No replay means the time was set before replays were saved, so it cannot ' +
       'be watched or raced. It gets one the next time that player beats it.';
     var ok = document.createElement('button');

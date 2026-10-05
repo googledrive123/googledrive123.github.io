@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Challenge · GameVault</title>
-  <meta name="description" content="One PolyTrack track a week. Set the fastest time on it before the week ends on Sunday and win the Challenge winner badge.">
+  <meta name="description" content="One PolyTrack track a week. Set the fastest time on it before the week ends on Sunday and win that week's badge.">
   <link rel="icon" href="/favicon.svg">
   <!-- Blocking on purpose: the cloak has to land before the first paint. -->
   <script src="/js/mimicry.js"></script>
@@ -17,6 +17,7 @@
   <script src="/js/analytics.js" defer></script>
   <script src="/js/site.js" defer></script>
   <script src="/js/player.js" defer></script>
+  <script src="/js/badges.js" defer></script>
   <style>
     /* Buttons, rows and the clock all set their own display, which would
        otherwise beat the hidden attribute. */
@@ -47,6 +48,13 @@
     .ch-track { margin-top: 0.45rem; font-size: 0.85rem; color: var(--muted); }
     .page .ch-head p.ch-note { margin-top: 0.6rem; font-size: 0.9rem; color: var(--text); max-width: 62ch; }
     .page .ch-head p.ch-empty { margin-top: 0.45rem; font-size: 0.88rem; }
+
+    /* What the week is raced for. */
+    .ch-prize { display: flex; align-items: center; gap: 0.9rem; margin-top: 0.95rem; }
+    .ch-prize-art { display: flex; align-items: flex-end; gap: 0.3rem; flex-shrink: 0; }
+    .ch-prize-art svg { display: block; }
+    .ch-prize-name { font-size: 0.95rem; font-weight: 600; color: var(--text); }
+    .ch-prize-note { margin-top: 0.15rem; font-size: 0.8rem; color: var(--muted); max-width: 52ch; }
 
     .ch-foot {
       display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between;
@@ -148,6 +156,7 @@
     .ch-past-win { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.6rem; }
     .ch-past-time { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--muted); }
     .ch-past-win .ch-crown svg { width: 16px; height: 16px; }
+    .ch-past-win .gv-badge { display: block; }
     .ch-past-win.pending .ch-name { color: var(--muted); }
     .ch-past-none { font-size: 0.8rem; color: var(--muted-2); }
     .page .ch-past p.ch-past-empty { font-size: 0.86rem; }
@@ -178,7 +187,7 @@
   <div class="page-kicker">challenge</div>
   <h1>Weekly challenge</h1>
   <p class="lede">One PolyTrack track a week. Set the fastest time on it before the week ends on
-  Sunday and the Challenge winner badge is yours.</p>
+  Sunday and that week's badge is yours.</p>
 
   <div class="panel ch-card" id="chCard" data-state="loading">
     <div class="ch-head">
@@ -188,6 +197,14 @@
         <span class="badge" id="chEnv" hidden></span>
       </div>
       <div class="ch-track" id="chTrack" hidden></div>
+      <div class="ch-prize" id="chPrize" hidden>
+        <span class="ch-prize-art" id="chPrizeArt"></span>
+        <div>
+          <div class="ch-prize-name" id="chPrizeName"></div>
+          <div class="ch-prize-note">Every week has its own badge. Gold for first, silver for second
+          and third, and it stays next to your name in chat and on the PolyTrack leaderboard.</div>
+        </div>
+      </div>
       <p class="ch-note" id="chNote" hidden></p>
       <p class="ch-empty" id="chEmpty" hidden>No track is set for this week yet. Check back soon,
       and keep racing: every PolyTrack time still goes on the leaderboard.</p>
@@ -232,9 +249,9 @@
   <div class="panel">
     <div class="panel-label">Rules</div>
     <ul class="ch-rules">
-      <li><strong>The prize is a badge.</strong> First place gets the Challenge winner badge,
-      second and third get the Top 3 badge. Never money, gift cards, game currency, or anything
-      sent to your home.</li>
+      <li><strong>The prize is a badge.</strong> Each week has its own. First place gets it in
+      gold, second and third get it in silver, and every badge you win stacks up next to your
+      name. Never money, gift cards, game currency, or anything sent to your home.</li>
       <li><strong>Times come from the PolyTrack leaderboard.</strong> Race the week's track in
       PolyTrack here on GameVault, and your best time set during the week counts. Times from
       before the week started do not.</li>
@@ -331,6 +348,7 @@
     $('chTitle').textContent = 'No track yet';
     $('chEnv').hidden = true;
     $('chTrack').hidden = true;
+    $('chPrize').hidden = true;
     $('chNote').hidden = true;
     $('chEmpty').hidden = false;
     $('chFoot').hidden = true;
@@ -356,11 +374,23 @@
     else if (name === c.title) track.textContent = 'An official PolyTrack track';
     else track.textContent = 'Official track: ' + name;
 
+    paintPrize(c);
     $('chNote').hidden = !c.note;
     $('chNote').textContent = c.note || '';
     $('chMeta').textContent = 'Ends ' + when(c.ends_at) + ' · ' + plural(c.runners, 'racer', 'racers');
     $('chFoot').hidden = false;
     paintClock();
+  }
+
+  // This week's badge, as first place and as second or third get it.
+  function paintPrize(c) {
+    var badges = window.GV && window.GV.badges;
+    $('chPrize').hidden = !badges;
+    if (!badges) return;
+    $('chPrizeArt').innerHTML =
+      badges.svg({ badge: 'challenge-winner', starts: c.starts, title: c.title }, 52) +
+      badges.svg({ badge: 'challenge-top3', starts: c.starts, title: c.title }, 34);
+    $('chPrizeName').textContent = "This week's badge: " + badges.design(c.starts).name;
   }
 
   var CHECK_SVG = '<svg class="ch-check" viewBox="0 0 24 24" role="img" aria-label="Verified"><circle cx="12" cy="12" r="11" fill="#1d9bf0"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -547,7 +577,11 @@
         if (m.closed) {
           var crown = document.createElement('span');
           crown.className = 'ch-crown';
-          crown.innerHTML = CROWN_SVG;
+          // The badge that week was won for, or the plain crown without it.
+          var badges = window.GV && window.GV.badges;
+          crown.innerHTML = badges
+            ? badges.svg({ badge: 'challenge-winner', starts: m.starts, title: m.title }, 22)
+            : CROWN_SVG;
           right.appendChild(crown);
         } else {
           var tag = document.createElement('span');
