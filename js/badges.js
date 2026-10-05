@@ -25,6 +25,21 @@
     return d + 'Z';
   }
 
+  var SHAPES = {
+    shield: 'M16 2.5 27.5 6.5V15c0 7-4.8 12.2-11.5 14.5C9.3 27.2 4.5 22 4.5 15V6.5Z',
+    hexagon: polygon(6, 14),
+    circle: 'M16 2.5a13.5 13.5 0 1 1 0 27 13.5 13.5 0 0 1 0-27Z',
+    diamond: 'M16 1.8 30.2 16 16 30.2 1.8 16Z',
+    octagon: polygon(8, 14.2, 0, 16, Math.PI / 8),
+    rosette: polygon(12, 14.6, 12.4),
+    square: 'M9 3.5h14a5.5 5.5 0 0 1 5.5 5.5v14a5.5 5.5 0 0 1-5.5 5.5H9A5.5 5.5 0 0 1 3.5 23V9A5.5 5.5 0 0 1 9 3.5Z',
+    pentagon: polygon(5, 14.6, 0, 17),
+    banner: 'M4.5 3.5h23v17L16 29 4.5 20.5Z',
+    star: polygon(8, 14.8, 10.8),
+    flathex: polygon(6, 14, 0, 16, Math.PI / 6),
+    crest: 'M5 4.5Q16 9 27 4.5V16c0 7-4.8 11.4-11 13.5C9.8 27.4 5 23 5 16Z'
+  };
+
   // The week a challenge starting on this day ('2026-10-05') is, counted from
   // the first weekly one.
   function weekOf(starts) {
