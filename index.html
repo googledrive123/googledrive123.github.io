@@ -5433,7 +5433,9 @@ document.getElementById('profileSaveBtn').addEventListener('click', async () => 
     if (nameOk.data === false) { msgEl.textContent = 'That username is not allowed. Try another.'; return; }
     const { error } = await sb.from('profiles').upsert({ id: currentUser.id, username });
     if (error) {
-      msgEl.textContent = /not allowed/.test(error.message) ? 'That username is not allowed. Try another.' : 'Error saving username.';
+      msgEl.textContent = /not allowed/.test(error.message) ? 'That username is not allowed. Try another.'
+        : error.code === '23505' || /taken/.test(error.message) ? 'That username is taken. Try another.'
+        : 'Error saving username.';
       return;
     }
     currentUser._username = username;
