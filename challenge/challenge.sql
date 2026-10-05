@@ -465,9 +465,10 @@ begin
     select json_object_agg(k.player_key, k.badges)
     from (
       select b.player_key,
-             json_agg(json_build_object('badge', b.badge, 'starts', b.starts)
+             json_agg(json_build_object('badge', b.badge, 'starts', b.starts, 'title', c.title)
                       order by b.starts desc, b.badge) as badges
       from gv_badges b
+      left join gv_challenges c on c.starts = b.starts
       where b.player_key = any (p_keys)
       group by b.player_key
     ) k
