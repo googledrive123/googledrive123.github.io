@@ -629,9 +629,9 @@ end;
 $function$;
 
 -- Hands out the badges for a challenge that has ended: challenge-winner to
--- first place, challenge-top3 to second and third. Closing again, say after
--- taking out a suspicious time, hands them out afresh from the board as it
--- now is.
+-- first place, challenge-top3 to second and third, each with its place.
+-- Closing again, say after taking out a suspicious time, hands them out
+-- afresh from the board as it now is.
 create or replace function public.gv_challenge_close(p_secret text, p_starts date)
 returns json
 language plpgsql
