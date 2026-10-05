@@ -74,6 +74,8 @@
 
     var toolbar = onScreen('.game-toolbar-ui.visible');
     if (toolbar) {
+      var on = toolbar.querySelector('.track-name');
+      if (on && on.textContent.trim() === track.name) return 'done';
       var exit = buttonWithIcon(toolbar, 'quit.svg');
       if (!exit) return 'wait';
       exit.click();
