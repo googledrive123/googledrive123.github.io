@@ -132,8 +132,29 @@
 
   function winner(badge) { return badge.badge === 'challenge-winner'; }
 
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+
+  // badge: {badge: 'challenge-winner' or 'challenge-top3', starts, title}.
+  function svg(badge, size) {
+    var d = design(badge.starts);
+    var rim = winner(badge) ? GOLD : SILVER;
+    var shape = SHAPES[d.shape];
+    return '<svg class="gv-badge" width="' + size + '" height="' + size + '" viewBox="0 0 32 32"'
+      + ' role="img" aria-label="' + esc(d.name + ' badge') + '">'
+      + '<path d="' + shape + '" fill="' + d.color + '" stroke="' + rim + '" stroke-width="2.2" stroke-linejoin="round"/>'
+      + '<path d="' + shape + '" fill="none" stroke="#fff" stroke-opacity=".28" stroke-width="1.2"'
+      + ' stroke-linejoin="round" transform="translate(16 16) scale(.8) translate(-16 -16)"/>'
+      + EMBLEMS[d.emblem](d.color)
+      + '</svg>';
+  }
+
   window.GV = window.GV || {};
   window.GV.badges = {
-    design: design
+    design: design,
+    svg: svg
   };
 })();
