@@ -265,12 +265,27 @@
     });
   }
 
+  // A place beside a name that fills in with the player's badges once they
+  // are known, and stays empty for a player who has none.
+  function beside(key, size) {
+    style();
+    var box = document.createElement('span');
+    box.className = 'gv-badges';
+    of(key).then(function (list) {
+      if (!list.length) return;
+      var row = stack(list, size);
+      while (row.firstChild) box.appendChild(row.firstChild);
+    });
+    return box;
+  }
+
   window.GV = window.GV || {};
   window.GV.badges = {
     design: design,
     label: label,
     svg: svg,
     stack: stack,
-    of: of
+    of: of,
+    beside: beside
   };
 })();
