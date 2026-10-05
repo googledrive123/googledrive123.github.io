@@ -796,7 +796,9 @@
   }
   function fetchRange(from, onSlice) {
     var st = newStore(from), p_from = new Date(from).toISOString();
-    return rpc('analytics_span', { p_secret: state.secret, p_from: p_from }).then(function (span) {
+    return patient(function () {
+      return rpc('analytics_span', { p_secret: state.secret, p_from: p_from });
+    }, 2).then(function (span) {
       var slices = [], done = 0;
       if (span.min_id != null) for (var lo = span.min_id; lo <= span.max_id; lo += SLICE) slices.push(lo);
       function next() {
