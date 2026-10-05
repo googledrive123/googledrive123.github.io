@@ -6,6 +6,7 @@
   // Long enough to get through the bounce into the player and the game
   // loading, short enough that an old ask never takes over a later visit.
   var FRESH_MS = 2 * 60 * 1000;
+  var GIVE_UP_MS = 60 * 1000;
   var POLL_MS = 250;
   // Each screen animates in, and a click before it has settled can be lost.
   var SETTLE_MS = 700;
@@ -95,7 +96,9 @@
   }
 
   function drive(track) {
+    var until = Date.now() + GIVE_UP_MS;
     (function next() {
+      if (Date.now() > until) return;
       var result = 'wait';
       try { result = step(track); } catch (e) { console.error('[race]', e); }
       if (result === 'done') return;
