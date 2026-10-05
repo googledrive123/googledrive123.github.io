@@ -121,6 +121,15 @@
 
   function mod(n, m) { return ((n % m) + m) % m; }
 
+  // What the badge for a week looks like.
+  function design(starts) {
+    var week = weekOf(starts);
+    var type = TYPES[mod(week, TYPES.length)];
+    return { name: type.name, shape: type.shape, emblem: type.emblem, color: COLORS[mod(week, COLORS.length)] };
+  }
+
   window.GV = window.GV || {};
-  window.GV.badges = {};
+  window.GV.badges = {
+    design: design
+  };
 })();
