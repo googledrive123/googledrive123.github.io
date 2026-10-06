@@ -133,6 +133,10 @@ begin
   if public.gv_is_rude(v_body) then
     raise exception 'That message has words we do not allow here. Try saying it another way.';
   end if;
+  -- Links, and anything else the owner has stopped (chat/blocked.sql).
+  if public.gv_chat_blocked(v_body) is not null then
+    raise exception '%', public.gv_chat_blocked(v_body);
+  end if;
 
   -- The profile name, or the name the account signed up with. A rude one is
   -- not put in front of everyone; the owner still sees the account.
