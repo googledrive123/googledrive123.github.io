@@ -21,7 +21,7 @@ try {
 
   var CLOAK_KEY = 'gv.cloak.v1';
   var DECISION_KEY = 'gv.cloak.asked.v1';
-  var GA_MEASUREMENT_ID = 'G-KRH3X9QS3M';
+  var GA_MEASUREMENT_ID = 'G-2HD2HVDM0Z';
 
   var DEFAULT_TITLE = 'GameVault';
   var DEFAULT_ICON = '/favicon.svg';
