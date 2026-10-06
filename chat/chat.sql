@@ -6,8 +6,9 @@
 -- to the site owner, who deletes messages and mutes accounts from the
 -- analytics dashboard.
 --
--- Apply against project dxwjxzmlezfyursysays, after sql/rude.sql. Every
--- statement is safe to run twice. Applied on 30 September 2026.
+-- Apply against project dxwjxzmlezfyursysays, after sql/rude.sql and
+-- chat/blocked.sql. Every statement is safe to run twice. Applied on 30
+-- September 2026.
 
 
 create table if not exists public.gv_chat_messages (
@@ -132,6 +133,10 @@ begin
 
   if public.gv_is_rude(v_body) then
     raise exception 'That message has words we do not allow here. Try saying it another way.';
+  end if;
+  -- Links, and anything else the owner has stopped (chat/blocked.sql).
+  if public.gv_chat_blocked(v_body) is not null then
+    raise exception '%', public.gv_chat_blocked(v_body);
   end if;
 
   -- The profile name, or the name the account signed up with. A rude one is
