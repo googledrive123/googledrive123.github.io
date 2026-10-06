@@ -6,8 +6,9 @@
 -- to the site owner, who deletes messages and mutes accounts from the
 -- analytics dashboard.
 --
--- Apply against project dxwjxzmlezfyursysays, after sql/rude.sql. Every
--- statement is safe to run twice. Applied on 30 September 2026.
+-- Apply against project dxwjxzmlezfyursysays, after sql/rude.sql and
+-- chat/blocked.sql. Every statement is safe to run twice. Applied on 30
+-- September 2026.
 
 
 create table if not exists public.gv_chat_messages (
