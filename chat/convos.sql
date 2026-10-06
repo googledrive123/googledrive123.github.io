@@ -331,6 +331,10 @@ begin
   if public.gv_is_rude(v_body) then
     raise exception 'That message has words we do not allow here. Try saying it another way.';
   end if;
+  -- Links, and anything else the owner has stopped (chat/blocked.sql).
+  if public.gv_chat_blocked(v_body) is not null then
+    raise exception '%', public.gv_chat_blocked(v_body);
+  end if;
 
   v_mentions := public.gv_mention_list(v_body, p_mentions, p_convo);
   insert into gv_convo_messages (convo_id, user_id, username, body, mentions)
