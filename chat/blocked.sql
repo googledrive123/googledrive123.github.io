@@ -1,5 +1,21 @@
 -- Things that may not be said in chat at all, whatever words are around them:
 -- links of any kind, and anything else the owner names.
+--
+-- Kept apart from sql/rude.sql, which also checks usernames, submissions and
+-- the rest: a username like player3000 is fine, a chat message with 3000 in
+-- it is not. Both the server room (chat/chat.sql) and direct and group chats
+-- (chat/convos.sql) refuse a message this matches.
+--
+-- The list itself lives only in the database, in gv_chat_blocklist. Writing
+-- it here would put the links it stops on GitHub for anyone to copy. Each row
+-- is a regular expression, matched against the message in lower case, with
+-- what the sender is told when it matches. A 'words' row is matched against
+-- the letters only, with everything else turned into single spaces, so
+-- "three-thousand" and "THREE  thousand" read the same.
+--
+-- Apply against project dxwjxzmlezfyursysays, before chat/chat.sql and
+-- chat/convos.sql. Every statement is safe to run twice. Applied on 6 October
+-- 2026.
 
 create table if not exists public.gv_chat_blocklist (
   id         bigserial primary key,
